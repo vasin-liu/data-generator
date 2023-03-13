@@ -84,6 +84,14 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
+        writer4:
+          url: jdbc:postgresql://172.25.21.18:25308/pd_dts_gz
+          username: pd_dts_gz
+          password: suntek@123
+          driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
         pd_dicmanage:
           url: jdbc:mysql://172.25.21.29:3306/pd_dicmanage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
           username: videoweb

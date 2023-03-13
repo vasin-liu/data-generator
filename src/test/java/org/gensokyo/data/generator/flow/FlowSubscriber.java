@@ -6,7 +6,9 @@
 package org.gensokyo.data.generator.flow;
 
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.Objects;
 import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 
@@ -19,14 +21,24 @@ import java.util.function.Consumer;
  */
 public class FlowSubscriber<T> implements Flow.Subscriber<T> {
 
+    private ThreadPoolTaskExecutor executor;
     private final Consumer<T> consumer;
     private Flow.Subscription subscription;
     private boolean completed = false;
     private long requestCount;
-    private static final long REQUEST_COUNT = 3;
+    private final long REQUEST_COUNT;
 
     public FlowSubscriber(@NonNull Consumer<T> consumer) {
-        this.consumer = consumer;
+        this.consumer = Objects.requireNonNull(consumer);
+        this.REQUEST_COUNT = 10;
+    }
+
+    public FlowSubscriber(@NonNull Consumer<T> consumer, long requestCount) {
+        this.consumer = Objects.requireNonNull(consumer);
+        if (requestCount < 1) {
+            throw new IllegalArgumentException("订阅数量不能小于1");
+        }
+        this.REQUEST_COUNT = requestCount;
     }
 
     @Override

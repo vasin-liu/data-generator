@@ -125,7 +125,7 @@ public class TableProcessor implements Processor<List<FieldPO>, Map<String, Obje
     private Object preScript(FieldPO fpo, Object result) {
         try {
             var script = preScriptCache.get(fpo.getName());
-            if (Objects.isNull(script)) {
+            if (Objects.isNull(script) && Objects.nonNull(fpo.getPreScript())) {
                 script = scriptFactory.newInstance(fpo.getPreScript(), ctx);
             }
             if (Objects.nonNull(script)) {
@@ -133,7 +133,8 @@ public class TableProcessor implements Processor<List<FieldPO>, Map<String, Obje
                 return script.eval(result);
             }
         } catch (Exception e) {
-            log.error(String.format("字段 [%s] 执行前置脚本 [%s] 出现异常", fpo.getName(), fpo.getPreScript().getContent()), e);
+            log.error(String.format("字段 [%s] 执行前置脚本 [%s] 出现异常", fpo.getName(),
+                    Objects.nonNull(fpo.getPreScript()) ? fpo.getPreScript().getContent() : "null"), e);
             throw new DataGeneratorException(e);
         }
         //转换为数据集再选取一个?
@@ -143,7 +144,7 @@ public class TableProcessor implements Processor<List<FieldPO>, Map<String, Obje
     private Object postScript(FieldPO fpo, Object result) {
         try {
             var script = postScriptCache.get(fpo.getName());
-            if (Objects.isNull(script)) {
+            if (Objects.isNull(script) && Objects.nonNull(fpo.getPostScript())) {
                 script = scriptFactory.newInstance(fpo.getPostScript(), ctx);
             }
             if (Objects.nonNull(script)) {
@@ -151,7 +152,8 @@ public class TableProcessor implements Processor<List<FieldPO>, Map<String, Obje
                 return script.eval(result);
             }
         } catch (Exception e) {
-            log.error(String.format("字段 [%s] 执行后置脚本 [%s] 出现异常", fpo.getName(), fpo.getPostScript().getContent()), e);
+            log.error(String.format("字段 [%s] 执行后置脚本 [%s] 出现异常", fpo.getName(),
+                    Objects.nonNull(fpo.getPostScript()) ? fpo.getPostScript().getContent() : "null"), e);
             throw new DataGeneratorException(e);
         }
         return result;

@@ -88,11 +88,6 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
         this.fieldProcessor = new FieldProcessor(executor, readerFactory, scriptFactory, ctx);
         //表处理器
         this.tableProcessor = new TableProcessor(Objects.requireNonNull(converterFactory), scriptFactory, ctx, fieldDataset);
-        //加载全局数据集
-        loadGlobalDataset();
-        //加载表字段数据集
-        loadTableDataset();
-        //发布启动完成事件
     }
 
     private List<FieldPO> sortFields() {
@@ -104,8 +99,13 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
             if (CollectKit.isNotEmpty(field.getDependsOn())) {
                 for (var fn : field.getDependsOn()) {
                     var df = fieldMap.get(fn);
-                    dag.addVertex(df);
-                    dag.addEdge(df, field);
+                    if (Objects.nonNull(df)) {
+                        dag.addVertex(df);
+                        dag.addEdge(df, field);
+                    } else {
+                        log.error("当前字段 [{}] 依赖的字段 [{}] 未在当前模板 [{}] 的配置表中找到，请检查配置是否正确",
+                                field.getName(), fn, template.getName());
+                    }
                 }
             }
         }
@@ -116,6 +116,7 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
     }
 
     private void loadGlobalDataset() {
+        log.info("开始加载任务全局数据");
         if (CollectKit.isEmpty(template.getGlobal().getReaders())) {
             //全局数据准备就绪
             dataReady.countDown();
@@ -123,49 +124,29 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
         }
         var stopWatch = new StopWatch();
         stopWatch.start();
-        var futures = new ArrayList<CompletableFuture<Dataset>>();
         for (var rpo : template.getGlobal().getReaders()) {
-            var future = supplyAsync(() -> readerFactory.newInstance(rpo, scriptFactory).read(ctx), executor)
-                    //将数据集设置在上下文对象中
-                    .whenComplete((r, ex) -> ctx.global(rpo.getDataSetId(), r.fetch()));
-            futures.add(future);
+            var dataset = readerFactory.newInstance(rpo, scriptFactory).read(ctx);
+            ctx.global(rpo.getDataSetId(), dataset.fetch());
         }
-        allOf(futures.toArray(new CompletableFuture[]{}))
-                .whenComplete((unused, ex) -> {
-                    //全局数据准备就绪
-                    dataReady.countDown();
-                    if (Objects.nonNull(ex)) {
-                        log.error("全局数据集加载异常：", ex);
-                    }
-                })
-                .join();
+        dataReady.countDown();
         stopWatch.stop();
         log.info("当前任务全局数据加载完成，总计耗时：{} ", DatetimeKit.humanized(stopWatch.getTotalTimeMillis()));
     }
 
     private void loadTableDataset() {
+        log.info("开始加载任务表字段数据集");
         var stopWatch = new StopWatch();
         stopWatch.start();
-        List<CompletableFuture<Dataset>> futures = new ArrayList<>();
         for (var field : orderedFields) {
             if (CollectKit.isNotEmpty(field.getDependsOn())) {
                 //依赖类型字段不需要进行数据读取，直接使用其依赖字段的选取结果
                 fieldDataset.put(field.getName(), ReadableDataset.lazy());
             } else {
                 //其他非依赖型字段，通过读取器读取数据
-                var cf = supplyAsync(() -> fieldDataset.put(field.getName(), fieldProcessor.handle(field)), executor);
-                futures.add(cf);
+                fieldDataset.put(field.getName(), fieldProcessor.handle(field));
             }
         }
-        allOf(futures.toArray(new CompletableFuture[]{}))
-                .whenComplete((unused, ex) -> {
-                    //表数据准备就绪
-                    dataReady.countDown();
-                    if (Objects.nonNull(ex)) {
-                        log.error("表字段数据集加载异常：", ex);
-                    }
-                })
-                .join();
+        dataReady.countDown();
         stopWatch.stop();
         log.info("当前任务表字段数据集加载完成，总计耗时：{} ", DatetimeKit.humanized(stopWatch.getTotalTimeMillis()));
     }
@@ -179,7 +160,12 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
     @Override
     public Boolean call() throws Exception {
         //等待数据就绪
-        log.info("等待数据就绪……");
+        log.info("等待任务全局和表字段数据就绪……");
+        //加载全局数据集
+        loadGlobalDataset();
+        //加载表字段数据集
+        loadTableDataset();
+        //发布启动完成事件
         dataReady.await();
         listener.onReady();
         log.info("数据准备完毕，开始执行数据生成任务");

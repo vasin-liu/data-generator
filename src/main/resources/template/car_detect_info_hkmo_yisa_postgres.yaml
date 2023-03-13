@@ -1,9 +1,9 @@
 # 数据集名称，各个文件中唯一
-name: car_detect_info_yisa_postgres
+name: car_detect_info_hkmo_yisa_postgres
 #生成数量
-amount: 10000
+amount: 1000
 #批次数量
-batchSize: 1000
+batchSize: 100
 #全局配置
 global:
   #线程池配置
@@ -26,7 +26,7 @@ table:
         - dataSetId: virtual_filed_ds
           type: CONSTANT
           # 1 普通小车；2 普通大车；3 香港车；4 澳门车；5 教练车；6 警车；7 挂车；
-          dataSet: [ 1,2,3,4,5,6,7 ]
+          dataSet: [ 3,4 ]
     - #字段名 信息主键编号
       name: INFO_ID
       converter: org.gensokyo.data.generator.converter.LongConverter
@@ -992,7 +992,7 @@ table:
     #数据源编号
     dataSourceId: 'writer4'
     # 表名/索引名/主题名
-    target: 'car_detect_info_yisa'
+    target: 'car_detect_info_hkmo_yisa'
     #数据写入模板
     template: >-
       HPZL,CLLX,CSYS,ILLEGAL,INFO_ID,DEVICE_ID,JGSK,HPHM,HPYS,CAR_YEAR,PILOT_SUNVISOR,COPILOT_SUNVISOR,PENDANTS,
