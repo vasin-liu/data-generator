@@ -1,0 +1,598 @@
+# 数据集名称，各个文件中唯一
+name: non_motor_vehicle_info_clickhouse
+#生成数量
+amount: 100000
+#批次数量
+batchSize: 10000
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  # 字段配置列表
+  fields:
+    #字段配置
+    - #字段名 信息主键编号
+      name: INFO_ID
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: INFO_ID
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.snowflake.next"
+    - #字段名 经过日期
+      name: JGRQ
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: JGRQ
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','yyMMdd'}")
+    - #字段名 经过时间
+      name: JGSJ
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: JGSJ
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','HHmmss'}")
+    - #字段名 抓拍时间
+      name: JGSK
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: JGSK
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}")
+    - #字段名 设备编号
+      name: DEVICE_ID
+      postScript:
+        content: "#dataset.SXJSBBM"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: DEVICE_ID
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'omof'
+          #数据集
+          dataSet: >-
+            SELECT OVBI.KKBH,OVBI.KKMC,OVBI.KKDZ,OVBI.KKMC,OVBI.XZQH,OVBI.JSDW,OVBI.FXMS,OVBI.ZPFXLX,
+            OVBI.DLMC,OVBI.JD,OVBI.WD,OLI.SXJSBBM,OLI.CDBH,OLI.CDLX 
+            FROM OMOF_VEHICLE_BARRIER_INFO OVBI INNER JOIN OMOF_LANE_INFO OLI ON OVBI.KKBH = OLI.KKBH
+    - #字段名 原始设备编号
+      name: ORIGINAL_DEVICE_ID
+      #数据集列表
+      dependsOn:
+        - DEVICE_ID
+      postScript:
+        content: "#dataset.SXJSBBM"
+    - #字段名 号牌归属,所属省份代码
+      name: HPGS
+      readers:
+        - dataSetId: HPGS
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 号牌归属市,所属省份和城市代码
+      name: HPGSS
+      #数据集列表
+      readers:
+        - dataSetId: HPGSS
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 号牌号码（二次识别）
+      name: HPHM
+      readers:
+        - dataSetId: HPHM
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 号牌种类（二次识别）
+      name: HPZL
+      readers:
+        - dataSetId: HPHM
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 号牌颜色（二次识别）
+      name: HPYS
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      readers:
+        - dataSetId: HPHM
+          type: CONSTANT
+          dataSet: [  ]
+    - #字段名 车身区域
+      name: CAR_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: CAR_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 车牌区域
+      name: PLATE_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: PLATE_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 车伞区域
+      name: UMBRELLA_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: UMBRELLA_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 挡泥板区域
+      name: FENDER_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: FENDER_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 后备箱区域
+      name: TRUNK_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: TRUNK_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 广告牌区域
+      name: AD_BOARD_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: AD_BOARD_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 车灯区域
+      name: LAMP_RECT
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: LAMP_RECT
+          type: CONSTANT
+          #数据集
+          dataSet: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+    - #字段名 是否有遮阳伞
+      name: HAS_UMBRELLA
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: HAS_UMBRELLA
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 车伞颜色
+      name: UMBRELLA_COLOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: UMBRELLA_COLOR
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 人脸图片URL
+      name: FACE_IMAGE_URL
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: FACE_IMAGE_URL
+          type: CONSTANT
+          #数据集
+          dataSet:
+            - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
+    - #字段名 驾驶员上衣颜色
+      name: COAT_COLOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: COAT_COLOR
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 是否有头盔
+      name: HAS_HELMET
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: HAS_HELMET
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 驾驶员头盔颜色
+      name: HELMET_COLOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: HELMET_COLOR
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 性别代码
+      name: GENDER_CODE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: GENDER_CODE
+          type: CONSTANT
+          dataSet: [ 0,1,2,9 ]
+    - #字段名 年龄段
+      name: AGE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: AGE
+          type: CONSTANT
+          dataSet: [ 0,1,2,3,4 ]
+    - #字段名 正侧面
+      name: ANGLE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: ANGLE
+          type: CONSTANT
+          dataSet: [ 0,1,2,3 ]
+    - #字段名 是否有背包
+      name: BACKPACK
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: BACKPACK
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 是否有挂牌
+      name: HAS_PLATE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: HAS_PLATE
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 是否戴眼镜
+      name: WITH_GLASSES
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: WITH_GLASSES
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 是否有手提包
+      name: CARRY_BAG
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: CARRY_BAG
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 驾驶员是否打伞
+      name: RIDER_UMBRELLA
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: RIDER_UMBRELLA
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 上衣长度
+      name: COAT_LENGTH
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: COAT_LENGTH
+          type: CONSTANT
+          dataSet: [ 1,2,3 ]
+    - #字段名 是否戴口罩
+      name: WITH_RESPIRATOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: WITH_RESPIRATOR
+          type: CONSTANT
+          dataSet: [ 0,1,2 ]
+    - #字段名 上衣图案
+      name: COAT_PATTERN
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: COAT_PATTERN
+          type: CONSTANT
+          dataSet: [ 0,1,2,3,4,5 ]
+    - #字段名 挡泥板颜色
+      name: FENDER_COLOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: FENDER_COLOR
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 后备箱颜色
+      name: TRUNK_COLOR
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: TRUNK_COLOR
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 车灯类型
+      name: LAMP_TYPE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: LAMP_TYPE
+          type: CONSTANT
+          dataSet: [ 0 ]
+    - #字段名 人员数量
+      name: PERSON_NUM
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: PERSON_NUM
+          type: CONSTANT
+          dataSet: [ -1,1,2,3,4,5 ]
+    - #字段名 人员信息
+      name: PERSON_INFO
+      #数据集列表
+      readers:
+        - dataSetId: PERSON_INFO
+          type: CONSTANT
+          dataSet: [  ]
+    - #字段名 车辆类型（二次识别）
+      name: CLLX
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: f_ds_1
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 40'
+    - #字段名 车灯形状
+      name: LAMP_SHAPE
+      #数据集列表
+      readers:
+        - dataSetId: PERSON_NUM
+          type: CONSTANT
+          dataSet: [ '999','00','01','02','03','04' ]
+    - #字段名 车身颜色（前端识别）
+      name: CSYS
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.CODE"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: CSYS
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'pd_dicmanage'
+          #数据集
+          dataSet: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+    - #字段名 车速
+      name: SPEED
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: SPEED
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.number.numberBetween(10,60)"
+    - #字段名 全景图URL
+      name: PIC_ABBREVIATE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: PIC_ABBREVIATE
+          type: CONSTANT
+          #数据集
+          dataSet:
+            - "http://172.25.21.133:8088/g1/M00/00031003/20210610/rBkVhWDB2GWIEZx-AAdwNGUSeOwAAAAWgAAAAAAB3BM397.jpg"
+            - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn7GIHz71AADogyvcEjMAAAADAA4xEEAAOib567.jpg"
+            - "http://172.25.21.133:8088/simulation/pic/motorvehicle_20200225_16_44050100000034010001_cimya9.Jpeg"
+            - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn6WISyHPAAB_niC42DUAAAADAA4RIsAAH-2098.jpg"
+            - "http://172.25.21.133:8088/simulation/pic/motorvehicle_20200225_16_44050100000031020002_5646rg.Jpeg"
+    - #字段名 驾驶人抓拍图
+      name: PIC_DRIVER
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: PIC_DRIVER
+          type: CONSTANT
+          #数据集
+          dataSet:
+            - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
+    - #字段名 行政区划代码
+      name: ORG_CODE
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      dependsOn:
+        - DEVICE_ID
+      postScript:
+        content: "#dataset.XZQH"
+    - #字段名 厂商名称
+      name: VENDOR
+      #数据集列表
+      readers:
+        - dataSetId: VENDOR
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 数据来源
+      name: DATA_SRC
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: DATA_SRC
+          type: CONSTANT
+          #数据集 1 抓拍卡口 2 微卡口 3 结构化 4 人脸门禁 5 离线结构化 6 停车场 7 驾驶人脸  8 旅业人脸  9 网吧人脸 10 娱乐场所
+          dataSet: [ 1,2,3,4,5,6,7,9,10 ]
+    - #字段名 创建时间
+      name: CREATE_TIME
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      dependsOn:
+        - CJSJ
+      postScript:
+        content: "#dataset"
+    - #字段名 采集时间
+      name: CJSJ
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          dataSetId: CJSJ
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}")
+    - #字段名 第三方数据标识
+      name: THIRD_ID
+      #数据集列表
+      readers:
+        - dataSetId: THIRD_ID
+          type: CONSTANT
+          dataSet: [ '' ]
+    - #字段名 第三方来源系统
+      name: THIRD_SRC
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: THIRD_SRC
+          type: CONSTANT
+          dataSet: [ 0 ]
+    - #字段名 车辆抓拍视图库标识
+      name: VIID_OBJECT_ID
+      #数据集列表
+      dependsOn:
+        - DEVICE_ID
+        - JGSK
+      preScript:
+        content: "{ #dataset['DEVICE_ID'],#dataset['JGSK'] }"
+      postScript:
+        content: "#faker.snowflake.viid(#dataset[0].SXJSBBM,'02',#dataset[1],'02')"
+    - #字段名 是否有特征属性
+      name: RLTZ
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: RLTZ
+          type: CONSTANT
+          dataSet: [ 0,1,99 ]
+    - #字段名 是否抱东西/遮蓬
+      name: IS_HOLD_THINGS
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: IS_HOLD_THINGS
+          type: CONSTANT
+          dataSet: [ 0,1,99 ]
+    - #字段名 斗内是否载人
+      name: IS_CARRY_PASSENGER
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        - dataSetId: IS_CARRY_PASSENGER
+          type: CONSTANT
+          dataSet: [ 0,1,99 ]
+  writer:
+    #目标数据集类型
+    type: CLICKHOUSE
+    #数据源编号
+    dataSourceId: 'clickhouse'
+    # 表名/索引名/主题名
+    target: 'pd_dts_vehicle.NON_MOTOR_VEHICLE_INFO'
+    #数据写入模板
+    template: >-
+      INFO_ID,JGRQ,JGSJ,JGSK,DEVICE_ID,ORIGINAL_DEVICE_ID,HPGS,HPGSS,HPHM,HPZL,HPYS,CAR_RECT,PLATE_RECT,UMBRELLA_RECT,   
+      FENDER_RECT,TRUNK_RECT,AD_BOARD_RECT,LAMP_RECT,HAS_UMBRELLA,UMBRELLA_COLOR,FACE_IMAGE_URL,COAT_COLOR,HAS_HELMET,      
+      HELMET_COLOR,GENDER_CODE,AGE,ANGLE,BACKPACK,HAS_PLATE,WITH_GLASSES,CARRY_BAG,RIDER_UMBRELLA,COAT_LENGTH,
+      WITH_RESPIRATOR,COAT_PATTERN,FENDER_COLOR,TRUNK_COLOR,LAMP_TYPE,PERSON_NUM,PERSON_INFO,CLLX,LAMP_SHAPE,CSYS,            
+      SPEED,PIC_ABBREVIATE,PIC_DRIVER,ORG_CODE,VENDOR,DATA_SRC,CREATE_TIME,CJSJ,THIRD_ID,THIRD_SRC,VIID_OBJECT_ID,RLTZ,
+      IS_HOLD_THINGS,IS_CARRY_PASSENGER
