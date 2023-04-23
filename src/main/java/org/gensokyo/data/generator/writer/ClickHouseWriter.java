@@ -7,9 +7,9 @@ package org.gensokyo.data.generator.writer;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.clickhouse.client.ClickHouseResponse;
-import com.clickhouse.data.ClickHouseFormat;
 import com.clickhouse.jdbc.ClickHouseStatement;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.generator.constant.Const;
 import org.gensokyo.data.generator.domain.WriterPO;
 import org.gensokyo.data.generator.exception.DataGeneratorException;
 import org.gensokyo.data.generator.util.DatasetKit;
@@ -32,6 +32,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class ClickHouseWriter extends AbstractWriter {
+    private static final String SQL_TEMPLATE = "INSERT INTO %s (%s) FORMAT CSV ";
+
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -59,11 +61,15 @@ public class ClickHouseWriter extends AbstractWriter {
             if (stmt.isWrapperFor(ClickHouseStatement.class)) {
                 ClickHouseStatement chs = stmt.unwrap(ClickHouseStatement.class);
                 ClickHouseResponse resp = chs.write()
-                        .format(ClickHouseFormat.CSV)
-                        .data(DatasetKit.buildBulkData(wpo, data))
-                        .table(wpo.getTarget())
+                        //.format(ClickHouseFormat.CSV)
+                        //.use("pd_dts")
+                        .query(String.format(SQL_TEMPLATE, wpo.getTarget(), wpo.getTemplate()))
+                        .set("format_csv_delimiter", Const.VERTICAL)
+                        .data(DatasetKit.buildBulkData(wpo, data, Const.VERTICAL, "\"\""))
+                        //.table(wpo.getTarget())
                         .executeAndWait();
-                return resp.getSummary().getWrittenRows();
+                //return resp.getSummary().getWrittenRows();
+                return data.size();
             }
         } catch (Exception e) {
             log.error("写入数据库出现异常：", e);

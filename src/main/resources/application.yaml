@@ -5,13 +5,13 @@ spring:
       path: /h2
   elasticsearch:
     multiple:
-      primary: es1
+      primary: es2
       clusters:
-        es1:
-          uris:
-            - https://localhost:9200
-          username: elastic
-          password: PCI@suntek#123
+#        es1:
+#          uris:
+#            - https://localhost:9200
+#          username: elastic
+#          password: PCI@suntek#123
         es2:
           uris:
             - 172.25.22.60:9401
@@ -21,17 +21,17 @@ spring:
           password: Suntek123
   kafka:
     multiple:
-      primary: kafka1
+      primary: kafka2
       clusters:
-        kafka1:
-          bootstrap-servers:
-            - localhost:9092
+#        kafka1:
+#          bootstrap-servers:
+#            - localhost:9092
         kafka2:
           bootstrap-servers:
             - 172.25.21.29:9092
   datasource:
     dynamic:
-      primary: reader
+      primary: data-generator
       datasource:
         data-generator:
           url: jdbc:h2:mem:data-generator
@@ -52,43 +52,51 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
-        reader:
-          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: root
-          password: PCI@suntek#123
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer:
-          url: jdbc:mysql://localhost:3306/writer?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: root
-          password: PCI@suntek#123
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer2:
-          url: jdbc:postgresql://localhost:5432/pd_dts
-          username: jiadu
-          password: PCI@suntek#123
-          driver-class-name: org.postgresql.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer3:
-          url: jdbc:clickhouse://localhost:8123/default
-          username: default
-          password: PCI@suntek#123
-          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
+#        reader:
+#          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: PCI@suntek#123
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer:
+#          url: jdbc:mysql://localhost:3306/writer?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: PCI@suntek#123
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer2:
+#          url: jdbc:postgresql://localhost:5432/pd_dts
+#          username: jiadu
+#          password: PCI@suntek#123
+#          driver-class-name: org.postgresql.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer3:
+#          url: jdbc:clickhouse://localhost:8123/default
+#          username: default
+#          password: PCI@suntek#123
+#          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
         writer4:
           url: jdbc:postgresql://172.25.21.18:25308/pd_dts_gz
           username: pd_dts_gz
           password: suntek@123
           driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        clickhouse:
+          url: jdbc:clickhouse://172.25.23.17:8123/pd_dts_vehicle
+          username: default
+          password: Suntek@123
+          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j

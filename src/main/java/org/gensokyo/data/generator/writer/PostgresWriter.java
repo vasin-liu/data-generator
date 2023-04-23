@@ -7,7 +7,6 @@ package org.gensokyo.data.generator.writer;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.collections.api.factory.Lists;
 import org.gensokyo.data.generator.constant.Const;
 import org.gensokyo.data.generator.domain.WriterPO;
 import org.gensokyo.data.generator.exception.DataGeneratorException;

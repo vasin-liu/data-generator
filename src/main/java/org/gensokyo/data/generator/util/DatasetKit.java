@@ -7,6 +7,7 @@ package org.gensokyo.data.generator.util;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.generator.constant.Const;
 import org.gensokyo.data.generator.domain.WriterPO;
 import org.gensokyo.kit.character.StrKit;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  * @version 1.0.0
  * @since 2023/1/6 , Version 1.0.0
  */
+@Slf4j
 public class DatasetKit {
     private DatasetKit() {
         throw new UnsupportedOperationException();
@@ -51,19 +53,45 @@ public class DatasetKit {
     }
 
     public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data) {
+        return buildBulkData(wpo, data, Const.VERTICAL, Const.LF, Const.NULL);
+    }
+
+    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data, String columnDelimiter) {
+        return buildBulkData(wpo, data, columnDelimiter, Const.LF, Const.NULL);
+    }
+
+    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data, String columnDelimiter,
+                                            String nullValue) {
+        return buildBulkData(wpo, data, columnDelimiter, Const.LF, nullValue);
+    }
+
+    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data,
+                                            String columnDelimiter, String rowDelimiter, String nullValue) {
+        return buildBulkData(wpo, data, columnDelimiter, rowDelimiter, nullValue, false);
+    }
+
+    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data,
+                                                    String columnDelimiter, String rowDelimiter, String nullValue,
+                                                    boolean withColumnNames) {
+        if (StrKit.isBlank(columnDelimiter)) {
+            columnDelimiter = Const.VERTICAL;
+        }
         StringBuilder sb = new StringBuilder();
         List<String> cols = Splitter.on(Const.COMMA).trimResults().splitToList(wpo.getTemplate());
+        if (withColumnNames) {
+            sb.append(String.join(columnDelimiter, cols)).append(rowDelimiter);
+        }
         for (Map<String, Object> m : data) {
             var row = cols.stream().map(col -> {
                 var v = m.get(col);
                 if (Objects.isNull(v) || StrKit.isBlank(Objects.toString(v))) {
-                    v = Const.NULL;
+                    v = nullValue;
                 }
                 return Objects.toString(v);
-            }).collect(Collectors.joining(Const.VERTICAL));
-            sb.append(row);
-            sb.append("\n");
+            }).collect(Collectors.joining(columnDelimiter));
+            sb.append(row).append(rowDelimiter);
         }
+        log.debug("Dataset ===> {}", sb);
         return new ByteArrayInputStream(sb.toString().getBytes());
     }
 }

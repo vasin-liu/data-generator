@@ -122,7 +122,7 @@
         <dependency>
             <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.4</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
