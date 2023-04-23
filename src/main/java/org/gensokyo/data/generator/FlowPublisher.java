@@ -3,14 +3,13 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.generator.flow;
+package org.gensokyo.data.generator;
 
+import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.lang.NonNull;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
@@ -22,52 +21,28 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 2023/1/31 , Version 1.0.0
  */
+@Slf4j
 public class FlowPublisher<T> implements Flow.Publisher<T>, Flow.Subscription {
-    private ThreadPoolTaskExecutor executor;
-    private final BlockingQueue<T> queue;
     private final Supplier<T> supplier;
     private Flow.Subscriber<? super T> subscriber;
-    private boolean completed = false;
-    private boolean canceled = false;
-    //已生产数量
-    private final LongAdder produceQuantity = new LongAdder();
+    private volatile boolean completed = false;
+    private volatile boolean canceled = false;
     //已消费数量
     private final LongAdder consumeQuantity = new LongAdder();
     //预计生产总数量
     private final long total;
 
+    public FlowPublisher(@NonNull Supplier<T> supplier) {
+        this.supplier = Objects.requireNonNull(supplier);
+        this.total = 10000;
+    }
+
     public FlowPublisher(@NonNull Supplier<T> supplier, long total) {
-        this.supplier = supplier;
-        this.total = total;
-        this.queue = new ArrayBlockingQueue<>(100000);
-    }
-
-    public FlowPublisher(@NonNull Supplier<T> supplier, long total, int queueQuantity) {
-        this.supplier = supplier;
-        this.total = total;
-        this.queue = new ArrayBlockingQueue<>(queueQuantity);
-    }
-
-    public FlowPublisher(@NonNull Supplier<T> supplier, long total, BlockingQueue<T> queue) {
-        this.supplier = supplier;
-        this.total = total;
-        this.queue = Objects.requireNonNull(queue);
-    }
-
-    public FlowPublisher<T> parallel(int quantity) {
-        if (quantity < 1) {
-            throw new IllegalArgumentException("并发数量不能小于1");
+        this.supplier = Objects.requireNonNull(supplier);
+        if (total < 1) {
+            throw new IllegalArgumentException("生成总数量不能小于1");
         }
-        for (int i = 0; i < quantity; i++) {
-            executor.execute(() -> {
-                while (produceQuantity.sum() < total) {
-                    if (queue.add(supplier.get())) {
-                        produceQuantity.increment();
-                    }
-                }
-            });
-        }
-        return this;
+        this.total = total;
     }
 
     @Override
@@ -93,8 +68,10 @@ public class FlowPublisher<T> implements Flow.Publisher<T>, Flow.Subscription {
         var rn = total - cn;
         //下发数据消息
         for (var i = Math.min(n, rn); i > 0; i--) {
-            T t = queue.poll();
+            T t = supplier.get();
+            log.trace("Publisher => {}", JsonKit.write(t));
             subscriber.onNext(t);
+            consumeQuantity.increment();
         }
     }
 
@@ -105,7 +82,5 @@ public class FlowPublisher<T> implements Flow.Publisher<T>, Flow.Subscription {
         if (!completed) {
             subscriber.onComplete();
         }
-        //清除队列中的数据
-        queue.clear();
     }
 }

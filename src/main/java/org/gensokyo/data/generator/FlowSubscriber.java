@@ -3,8 +3,10 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.generator.flow;
+package org.gensokyo.data.generator;
 
+import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -19,6 +21,7 @@ import java.util.function.Consumer;
  * @version 1.0.0
  * @since 2023/1/31 , Version 1.0.0
  */
+@Slf4j
 public class FlowSubscriber<T> implements Flow.Subscriber<T> {
 
     private ThreadPoolTaskExecutor executor;
@@ -26,11 +29,11 @@ public class FlowSubscriber<T> implements Flow.Subscriber<T> {
     private Flow.Subscription subscription;
     private boolean completed = false;
     private long requestCount;
-    private final long REQUEST_COUNT;
+    private final long quantity;
 
     public FlowSubscriber(@NonNull Consumer<T> consumer) {
         this.consumer = Objects.requireNonNull(consumer);
-        this.REQUEST_COUNT = 10;
+        this.quantity = 10;
     }
 
     public FlowSubscriber(@NonNull Consumer<T> consumer, long requestCount) {
@@ -38,12 +41,12 @@ public class FlowSubscriber<T> implements Flow.Subscriber<T> {
         if (requestCount < 1) {
             throw new IllegalArgumentException("订阅数量不能小于1");
         }
-        this.REQUEST_COUNT = requestCount;
+        this.quantity = requestCount;
     }
 
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
-        requestCount = REQUEST_COUNT;
+        requestCount = quantity;
         this.subscription = subscription;
         this.subscription.request(requestCount);
     }
@@ -51,9 +54,10 @@ public class FlowSubscriber<T> implements Flow.Subscriber<T> {
     @Override
     public void onNext(T item) {
         requestCount--;
+        log.trace("Subscriber => {}", JsonKit.write(item));
         consumer.accept(item);
         if (requestCount == 0 && !completed) {
-            requestCount = REQUEST_COUNT;
+            requestCount = quantity;
             subscription.request(requestCount);
         }
     }
