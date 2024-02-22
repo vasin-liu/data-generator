@@ -10,6 +10,7 @@ import com.esotericsoftware.yamlbeans.YamlReader;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.generator.config.DataGeneratorProperties;
 import org.gensokyo.data.generator.constant.FieldType;
@@ -89,6 +90,7 @@ public class TemplateCache implements InitializingBean {
         reloadAll();
     }
 
+    @SneakyThrows
     private void readToCache(Resource r) {
         try {
             var reader = new YamlReader(new FileReader(r.getFile()), config);
@@ -97,7 +99,7 @@ public class TemplateCache implements InitializingBean {
                 cache.put(meta.getName(), meta);
             }
         } catch (IOException e) {
-            throw new DataGeneratorException(e);
+            throw new DataGeneratorException("文件 [ " + r.getURL() + " ] 解析出现异常", e);
         }
     }
 

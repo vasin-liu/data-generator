@@ -13,22 +13,20 @@ import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.generator.DefaultDataGenerator;
 import org.gensokyo.data.generator.cache.TemplateCache;
 import org.gensokyo.data.generator.constant.TaskStatus;
+import org.gensokyo.data.generator.controller.req.BatchTaskQo;
 import org.gensokyo.data.generator.domain.TaskPO;
 import org.gensokyo.data.generator.domain.TemplatePO;
 import org.gensokyo.data.generator.factory.*;
 import org.gensokyo.data.generator.listener.GeneratorListener;
 import org.gensokyo.data.generator.repository.TaskRepository;
 import org.gensokyo.data.generator.util.RandomKit;
+import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.Future;
 
 /**
  * 任务控制器
@@ -72,6 +70,23 @@ public class TaskController {
         } else {
             return String.format("模板 '%s' 不存在", templateName);
         }
+    }
+
+    @DS(DATA_GENERATOR_DS)
+    @GetMapping("/run/batch")
+    public String runBatchTask(@NotNull @RequestBody BatchTaskQo qo) {
+        if (CollectKit.isNotEmpty(qo.getTemplateNames())) {
+            qo.getTemplateNames().stream()
+                    .map(cache::get)
+                    .filter(Objects::nonNull)
+                    .forEach(template -> {
+                        var dg = new DefaultDataGenerator(executorFactory, readerFactory, writerFactory,
+                                converterFactory, scriptFactory, template);
+                        executor.submit(dg);
+                    });
+            return "批量任务启动成功";
+        }
+        return "当前没有任何任务启动";
     }
 
     @DS(DATA_GENERATOR_DS)

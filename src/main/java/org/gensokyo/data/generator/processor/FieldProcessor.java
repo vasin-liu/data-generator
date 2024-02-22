@@ -6,7 +6,6 @@
 package org.gensokyo.data.generator.processor;
 
 import com.google.common.collect.Maps;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.generator.Destroyable;
 import org.gensokyo.data.generator.dataset.Dataset;
@@ -56,8 +55,9 @@ public class FieldProcessor implements Processor<FieldPO, Dataset>, Destroyable 
         var readerDataset = new ConcurrentHashMap<String, Dataset>();
         var futures = new ArrayList<CompletableFuture<Dataset>>();
         for (var rpo : fpo.getReaders()) {
+            var dataSetId = Objects.nonNull(rpo.getDataSetId()) ? rpo.getDataSetId() : fpo.getName();
             var cf = supplyAsync(() -> readerFactory.newInstance(rpo, scriptFactory).read(ctx), executor)
-                    .whenComplete((r, ex) -> readerDataset.put(rpo.getDataSetId(), r))
+                    .whenComplete((r, ex) -> readerDataset.put(dataSetId, r))
                     .exceptionally(ex -> {
                         log.error("字段 [{}] 的Reader [{}] 处理字段数据集出现异常：", fpo.getName(), rpo.getDataSetId());
                         throw new DataGeneratorException("处理字段数据集出现异常", ex);

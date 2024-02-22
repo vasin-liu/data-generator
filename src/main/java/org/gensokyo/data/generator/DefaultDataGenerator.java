@@ -159,6 +159,21 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
 
     @Override
     public Boolean call() throws Exception {
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        final var writeType = template.getTable().getWriter().getType();
+        final var writeTarget = template.getTable().getWriter().getTarget();
+        final var writeTemplate = template.getTable().getWriter().getTemplate();
+        var tn = template.getName();
+        var summary = """
+                开始执行模板 [{}] 的数据生成任务：
+                     模板名称：{}
+                     生成数量：{}
+                     批次数量：{}
+                目标数据源类型：{}
+                目标数据表名称：{}
+                目标数据表字段：{}
+                """;
+        log.info(summary, tn, tn, template.getAmount(), template.getBatchSize(), writeType, writeTarget, writeTemplate);
         //等待数据就绪
         log.info("等待任务全局和表字段数据就绪……");
         //加载全局数据集
@@ -182,15 +197,15 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
                                 counter.add(r);
                                 listener.onProcessing(r);
                                 if (Objects.nonNull(ex)) {
-                                    log.error(String.format("第 [%s] 批任务执行异常：", index), ex);
+                                    log.error(String.format("目标源 [%s] 数据生成的第 [%s] 批任务执行异常：", writeTarget, index), ex);
                                 } else {
-                                    log.info("第 [{}] 批任务执行完成, 总计写入 [{}] 条数据", index, r);
+                                    log.info("目标源 [{}] 数据生成的第 [{}] 批任务执行完成, 总计写入 [{}] 条数据", writeTarget, index, r);
                                 }
                             }))
                     .collect();
             allOf(futures.toArray(new CompletableFuture[]{})).join();
             stopWatch.stop();
-            log.info("当前任务数据生成完成，共计生成 [{}] 条数据，总计耗时：{}",
+            log.info("当前目标源 [{}] 数据生成任务完成，共计生成 [{}] 条数据，总计耗时：{}", writeTarget,
                     counter.sum(), DatetimeKit.humanized(stopWatch.getTotalTimeMillis()));
         } catch (Exception ex) {
             //发布失败事件
@@ -203,6 +218,7 @@ public class DefaultDataGenerator implements Generator<Boolean>, Destroyable {
             listener.onComplete(counter.sum());
             destroy();
         }
+        log.info("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         return true;
     }
 
