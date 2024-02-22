@@ -1,0 +1,190 @@
+# 数据集名称，各个文件中唯一
+name: dtem_coach
+#生成数量
+amount: 1000
+#批次数量
+batchSize: 100
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  # 字段配置列表
+  fields:
+    #字段配置
+    - #字段名
+      name: ID
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.snowflake.next"
+    - #字段名
+      name: SCHOOL_ID
+      converter: org.gensokyo.data.generator.converter.LongConverter
+      #后置脚本处理
+      postScript:
+        content: "#dataset.ID"
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: JDBC
+          #数据源编号
+          dataSourceId: 'tocc_driving_school'
+          #数据集
+          dataSet: "SELECT ID FROM DTEM_DRIVING_SCHOOL WHERE STATUS = 'S0A'"
+    - #字段名
+      name: NAME
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.name.fullName"
+    - #字段名
+      name: ID_NUMBER
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.idNumber.validZhCNSsn"
+    - #字段名
+      name: GENDER
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [0,1,2]
+    - #字段名
+      name: TELEPHONE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.phoneNumber.cellPhone"
+    - #字段名
+      name: ADDRESS
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: "#faker.address.streetAddress"
+    - #字段名
+      name: DRIVER_LICENSE
+      dependsOn:
+        - ID_NUMBER
+      postScript:
+        content: "#dataset"
+    - #字段名
+      name: DRIVING_TYPE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ "A1","A2","A3","B1","B2","C1","C2","C3","C4","D","E","F","M","N","P","C5" ]
+    - #字段名
+      name: ISSUE_DATE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+    - #字段名
+      name: STATION
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ 1,2,3,4 ]
+    - #字段名
+      name: JOINED_DATE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: DIRECT_SPEL
+          #数据集
+          dataSet: >-
+            #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+    - #字段名
+      name: REGION_CODE
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ "440103","440104","440105","440106","440111","440112","440113","440114","440115","440117","440118" ]
+    - #字段名
+      name: DUTY_STATUS
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ 1,2,3 ]
+    - #字段名
+      name: STATUS
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ "S0A" ]
+    - #字段名
+      name: CREATE_BY
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ "admin" ]
+    - #字段名
+      name: UPDATE_BY
+      #数据集列表
+      readers:
+        #单个数据集读取配置
+        - #数据集类型
+          type: CONSTANT
+          #数据集
+          dataSet: [ "admin" ]
+  writer:
+    #目标数据集类型
+    type: JDBC
+    #数据源编号
+    dataSourceId: 'tocc_driving_school'
+    # 表名/索引名/主题名
+    target: 'dtem_coach'
+    #数据写入模板
+    template: "ID,SCHOOL_ID,NAME,ID_NUMBER,GENDER,TELEPHONE,ADDRESS,DRIVER_LICENSE,DRIVING_TYPE,ISSUE_DATE,STATION,JOINED_DATE,REGION_CODE,DUTY_STATUS,STATUS,CREATE_BY,UPDATE_BY"
