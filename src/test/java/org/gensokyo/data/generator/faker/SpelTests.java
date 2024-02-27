@@ -6,7 +6,8 @@
 package org.gensokyo.data.generator.faker;
 
 import net.datafaker.Faker;
-import org.gensokyo.data.generator.constant.Const;
+import org.gensokyo.data.constant.Const;
+import org.gensokyo.kit.json.JsonKit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -14,6 +15,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,5 +100,16 @@ class SpelTests {
         String str = parser.parseExpression(exp).getValue(context, String.class);
         Assertions.assertNotNull(str);
         System.out.println("date ===> " + str);
+    }
+
+    @Test
+    void case6() {
+        AtomicInteger idx = new AtomicInteger(0);
+        List<Object> objects =
+                faker.<Object>collection(
+                                idx::getAndIncrement)
+                        .maxLen(5)
+                        .generate();
+        System.out.println(JsonKit.write(objects));
     }
 }

@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.pcitech.com/schemas/data-generator/stage-schema.json",
+  "title": "数据生成模板-V2.1.0",
+  "description": "数据生成模板-V2.1.0",
+  "type": "object",
+  "$defs": {
+    "stage": {
+      "$id": "#stage",
+      "type": "object",
+      "description": "阶段处理配置",
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "阶段类型",
+          "enum": [
+            "READ",
+            "SELECT",
+            "SCRIPT",
+            "CONVERT",
+            "MAPPING",
+            "WRITE",
+            "LOG"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "READ"
+            }
+          },
+          "$ref": "#readStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SELECT"
+            }
+          },
+          "$ref": "#selectStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SCRIPT"
+            }
+          },
+          "$ref": "#scriptStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CONVERT"
+            }
+          },
+          "$ref": "#convertStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "MAPPING"
+            }
+          },
+          "$ref": "#mappingStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "WRITE"
+            }
+          },
+          "$ref": "writer-schema.json/#/$defs/writer"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "LOG"
+            }
+          },
+          "$ref": "#logStage"
+        }
+      ]
+    },
+    "readStage": {
+      "$id": "#readStage",
+      "type": "object",
+      "description": "数据读取阶段配置",
+      "properties": {
+        "dataSetId": {
+          "type": "string",
+          "description": "数据集编号，全模板唯一"
+        },
+        "inMemory": {
+          "type": "boolean",
+          "description": "数据是否驻留内存",
+          "default": false
+        },
+        "params": {
+          "$defs": {
+            "param": {
+              "$id": "#param",
+              "type": "object",
+              "description": "参数配置",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "参数名称"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "参数类型",
+                  "default": "SPEL",
+                  "enum": [
+                    "JAVASCRIPT",
+                    "SPEL",
+                    "CONSTANT"
+                  ]
+                },
+                "content": {
+                  "type": [
+                    "string",
+                    "integer",
+                    "number",
+                    "boolean",
+                    "null",
+                    "array"
+                  ],
+                  "description": "参数值"
+                }
+              },
+              "required": [
+                "name",
+                "content"
+              ]
+            }
+          },
+          "type": "array",
+          "description": "参数集合",
+          "minItems": 0,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#param"
+          }
+        },
+        "strategyType": {
+          "type": "string",
+          "description": "选择策略",
+          "default": "EQUAL",
+          "enum": [
+            "EQUAL",
+            "WEIGHT"
+          ]
+        },
+        "readers": {
+          "type": "array",
+          "minLength": 1,
+          "description": "读取器列表",
+          "items": {
+            "$ref": "reader-schema.json/#/$defs/reader"
+          }
+        },
+        "required": [
+          "readers"
+        ]
+      }
+    },
+    "selectStage": {
+      "$id": "#selectStage",
+      "type": "object",
+      "description": "数据选择阶段配置",
+      "properties": {
+        "strategyType": {
+          "type": "string",
+          "minLength": 1,
+          "description": "选择策略",
+          "enum": [
+            "REPEAT_RANDOM",
+            "REPEAT_ORDER",
+            "ONCE_RANDOM",
+            "ONCE_ORDER",
+            "MULTIPLE_ORDER"
+          ]
+        },
+        "selectNum": {
+          "type": "integer",
+          "description": "选择数量"
+        },
+        "minTimes": {
+          "type": "integer",
+          "description": "最少选择次数",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "maxTimes": {
+          "type": "integer",
+          "description": "最多选择次数",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "scriptStage": {
+      "$id": "#scriptStage",
+      "type": "object",
+      "description": "数据脚本处理阶段配置",
+      "properties": {
+        "scriptType": {
+          "type": "string",
+          "description": "脚本类型",
+          "enum": [
+            "JAVASCRIPT",
+            "SPEL"
+          ]
+        },
+        "content": {
+          "type": "string",
+          "description": "脚本内容"
+        }
+      }
+    },
+    "convertStage": {
+      "$id": "#convertStage",
+      "type": "object",
+      "description": "数据转换处理阶段配置",
+      "properties": {
+        "converterType": {
+          "type": "string",
+          "description": "转换器类型（Class的全路径）"
+        }
+      }
+    },
+    "mappingStage": {
+      "$id": "#mappingStage",
+      "type": "object",
+      "description": "数据映射处理阶段配置",
+      "properties": {
+        "defaultValue": {
+          "type": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "null",
+            "array"
+          ],
+          "description": "未匹配时默认值"
+        },
+        "mapping": {
+          "type": "object",
+          "description": "字段映射配置"
+        }
+      }
+    },
+    "logStage": {
+      "$id": "#logStage",
+      "type": "object",
+      "description": "日志记录阶段配置",
+      "properties": {
+      }
+    }
+  }
+}
