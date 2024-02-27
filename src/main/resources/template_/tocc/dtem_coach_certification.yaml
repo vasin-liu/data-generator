@@ -1,5 +1,5 @@
 # 数据集名称，各个文件中唯一
-name: dtem_coach
+name: dtem_coach_certification
 #生成数量
 amount: 1000
 #批次数量
@@ -31,7 +31,7 @@ table:
           #数据集
           dataSet: "#faker.snowflake.next"
     - #字段名
-      name: SCHOOL_ID
+      name: COACH_ID
       converter: org.gensokyo.data.converter.LongConverter
       #后置脚本处理
       postScript:
@@ -44,58 +44,7 @@ table:
           #数据源编号
           dataSourceId: 'tocc_driving_school'
           #数据集
-          dataSet: "SELECT ID FROM DTEM_DRIVING_SCHOOL WHERE STATUS = 'S0A'"
-    - #字段名
-      name: NAME
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: DIRECT_SPEL
-          #数据集
-          dataSet: "#faker.name.fullName"
-    - #字段名
-      name: ID_NUMBER
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: DIRECT_SPEL
-          #数据集
-          dataSet: "#faker.idNumber.validZhCNSsn"
-    - #字段名
-      name: GENDER
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: CONSTANT
-          #数据集
-          dataSet: [0,1,2]
-    - #字段名
-      name: TELEPHONE
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: DIRECT_SPEL
-          #数据集
-          dataSet: "#faker.phoneNumber.cellPhone"
-    - #字段名
-      name: ADDRESS
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: DIRECT_SPEL
-          #数据集
-          dataSet: "#faker.address.streetAddress"
-    - #字段名
-      name: DRIVER_LICENSE
-      dependsOn:
-        - ID_NUMBER
-      postScript:
-        content: "#dataset"
+          dataSet: "SELECT ID FROM DTEM_COACH WHERE STATUS = 'S0A'"
     - #字段名
       name: DRIVING_TYPE
       #数据集列表
@@ -116,16 +65,7 @@ table:
           dataSet: >-
             #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
     - #字段名
-      name: STATION
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: CONSTANT
-          #数据集
-          dataSet: [ 1,2,3,4 ]
-    - #字段名
-      name: JOINED_DATE
+      name: VALIDITY_DATE
       #数据集列表
       readers:
         #单个数据集读取配置
@@ -133,18 +73,9 @@ table:
           type: DIRECT_SPEL
           #数据集
           dataSet: >-
-            #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+            #faker.expression("#{date.future '100','DAYS','yyyy-MM-dd HH:mm:ss'}")
     - #字段名
-      name: REGION_CODE
-      #数据集列表
-      readers:
-        #单个数据集读取配置
-        - #数据集类型
-          type: CONSTANT
-          #数据集
-          dataSet: [ "440103","440104","440105","440106","440111","440112","440113","440114","440115","440117","440118" ]
-    - #字段名
-      name: DUTY_STATUS
+      name: LEVEL
       #数据集列表
       readers:
         #单个数据集读取配置
@@ -179,12 +110,12 @@ table:
           type: CONSTANT
           #数据集
           dataSet: [ "admin" ]
-  writers:
-    - #目标数据集类型
-      type: CONSOLE
-      #数据源编号
-      dataSourceId: 'tocc_driving_school'
-      # 表名/索引名/主题名
-      target: 'dtem_coach'
-      #数据写入模板
-      template: "ID,SCHOOL_ID,NAME,ID_NUMBER,GENDER,TELEPHONE,ADDRESS,DRIVER_LICENSE,DRIVING_TYPE,ISSUE_DATE,STATION,JOINED_DATE,REGION_CODE,DUTY_STATUS,STATUS,CREATE_BY,UPDATE_BY"
+  writer:
+    #目标数据集类型
+    type: JDBC
+    #数据源编号
+    dataSourceId: 'tocc_driving_school'
+    # 表名/索引名/主题名
+    target: 'dtem_coach_certification'
+    #数据写入模板
+    template: "ID,COACH_ID,DRIVING_TYPE,ISSUE_DATE,VALIDITY_DATE,LEVEL,STATUS,CREATE_BY,UPDATE_BY"

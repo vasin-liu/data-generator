@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.generator.graph;
 
-import org.gensokyo.data.generator.domain.FieldPO;
+import org.gensokyo.data.po.FieldPO;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedAcyclicGraph;

@@ -6,7 +6,7 @@
 package org.gensokyo.data.generator.faker;
 
 import net.datafaker.Faker;
-import org.gensokyo.data.generator.constant.Const;
+import org.gensokyo.data.constant.Const;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;

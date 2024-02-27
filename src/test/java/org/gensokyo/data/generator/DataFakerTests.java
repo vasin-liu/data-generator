@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.generator;
 
-import org.gensokyo.data.generator.faker.DataFaker;
+import org.gensokyo.data.faker.DataFaker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

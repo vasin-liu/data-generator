@@ -179,12 +179,12 @@ table:
           type: CONSTANT
           #数据集
           dataSet: [ "admin" ]
-  writers:
-    - #目标数据集类型
-      type: CONSOLE
-      #数据源编号
-      dataSourceId: 'tocc_driving_school'
-      # 表名/索引名/主题名
-      target: 'dtem_coach'
-      #数据写入模板
-      template: "ID,SCHOOL_ID,NAME,ID_NUMBER,GENDER,TELEPHONE,ADDRESS,DRIVER_LICENSE,DRIVING_TYPE,ISSUE_DATE,STATION,JOINED_DATE,REGION_CODE,DUTY_STATUS,STATUS,CREATE_BY,UPDATE_BY"
+  writer:
+    #目标数据集类型
+    type: JDBC
+    #数据源编号
+    dataSourceId: 'tocc_driving_school'
+    # 表名/索引名/主题名
+    target: 'dtem_coach'
+    #数据写入模板
+    template: "ID,SCHOOL_ID,NAME,ID_NUMBER,GENDER,TELEPHONE,ADDRESS,DRIVER_LICENSE,DRIVING_TYPE,ISSUE_DATE,STATION,JOINED_DATE,REGION_CODE,DUTY_STATUS,STATUS,CREATE_BY,UPDATE_BY"
