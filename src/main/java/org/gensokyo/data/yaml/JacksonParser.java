@@ -6,12 +6,15 @@
 package org.gensokyo.data.yaml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.gensokyo.data.exception.DataGeneratorException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+
+import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
 
 /**
  * Jackson解析器
@@ -24,8 +27,12 @@ public class JacksonParser implements YamlParser {
     private final ObjectMapper mapper;
 
     public JacksonParser() {
-        mapper = new ObjectMapper(new YAMLFactory());
-        mapper.findAndRegisterModules();
+        mapper = JsonMapper.builder(new YAMLFactory())
+                //忽略枚举大小写
+                .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
+                //添加Jackson模块
+                .findAndAddModules()
+                .build();
     }
 
     @Override

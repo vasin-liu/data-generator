@@ -19,6 +19,7 @@ import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
+import org.gensokyo.kit.json.JsonKit;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -48,35 +49,71 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         var orderedFields = sort(ctx.template());
         var fieldDatasets = fieldDatasets(ctx);
         var r = new MapValue(16);
+        var dmv = getDependedFields(orderedFields);
         for (FieldPO field : orderedFields) {
-            //生成数据
-            var pipeline = new DefaultFieldPipeline();
-            var scriptStage = new ScriptStage(scriptFactory, field.getPostScript());
+            Value result;
             if (CollectKit.isEmpty(field.getDependsOn())) {
-                //非依赖字段
-                var ds = fieldDatasets.get(field.getName());
-                if (Objects.nonNull(ds) && !ds.isNullOrEmpty()) {
-                    var result = pipeline
-                            .next(new SelectStage())
-                            .next(scriptStage)
-                            .execute(ds);
-                    //单个字段生成结果
-                    r.put(field.getName(), result);
-                } else {
-                    log.error("当前字段 [{}] 未在当前数据集中找到，请检查配置是否正确", field.getName());
-                }
+                var fds = fieldDatasets.get(field.getName());
+                result = nonDependency(field, fds, dmv);
             } else {
-                var dds = ListValue.fromValueList(field.getDependsOn().stream().map(r::get).toList());
                 //依赖其他字段结果的字段
-                var result = pipeline
-                        .next(new SelectStage())
-                        .next(scriptStage)
-                        .execute(dds);
-                //依赖字段最终生成结果
-                r.put(field.getName(), result);
+                result = dependency(field, dmv);
             }
+            r.put(field.getName(), result);
         }
         return r;
+    }
+
+    private MapValue getDependedFields(List<FieldPO> orderedFields) {
+        var dmv = new MapValue(16);
+        orderedFields.forEach(f -> {
+            if (CollectKit.isNotEmpty(f.getDependsOn())) {
+                f.getDependsOn().forEach(name -> dmv.put(name, Value.EMPTY));
+            }
+        });
+        return dmv;
+    }
+
+    private Value nonDependency(FieldPO field, Value fds, MapValue dmv) {
+        //非依赖字段
+        var pipeline = new DefaultFieldPipeline();
+        var scriptStage = new ScriptStage(scriptFactory, field.getPostScript());
+        if (Objects.nonNull(fds) && !fds.isNullOrEmpty()) {
+            var selectStage = new SelectStage();
+            //该字段被其他字段依赖
+            if (dmv.containsKey(field.getName())) {
+                //选择后的结果
+                selectStage.onDone(output -> {
+                    dmv.put(field.getName(), output);
+                    log.debug("当前字段 [{}] 选择后的结果为 [{}]", field.getName(), JsonKit.write(output));
+                });
+            }
+            return pipeline
+                    .next(selectStage)
+                    .next(scriptStage)
+                    .execute(fds);
+        } else {
+            log.error("当前字段 [{}] 未在当前数据集中找到，请检查配置是否正确", field.getName());
+        }
+        return Value.EMPTY;
+    }
+
+    private Value dependency(FieldPO field, MapValue dmv) {
+        //生成数据
+        var pipeline = new DefaultFieldPipeline();
+        var scriptStage = new ScriptStage(scriptFactory, field.getPostScript());
+        var dds = ListValue.fromValueList(field.getDependsOn().stream().map(dmv::get).toList());
+        if (dds.isNullOrEmpty()) {
+            var msg = String.format("当前字段 [%s] 依赖的字段 [%s] 未在当前数据集中找到，请检查配置是否正确", field.getName(), field.getDependsOn());
+            throw new DataGeneratorException(msg);
+        }
+        //依赖其他字段结果的字段
+        var selectStage = new SelectStage();
+        selectStage.onDone(output -> log.debug("当前字段 [{}] 选择后的结果为 [{}]", field.getName(), JsonKit.write(output)));
+        return pipeline
+                .next(scriptStage)
+                .next(scriptStage)
+                .execute(dds);
     }
 
     private MapValue fieldDatasets(final Context ctx) {
@@ -85,7 +122,8 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         if (fds instanceof MapValue mv) {
             return mv;
         } else {
-            throw new DataGeneratorException("无效字段数据集类型，字段数据集类型必需为 MapValue 类型");
+            var msg = String.format("无效字段数据集类型，字段数据集类型必需为 MapValue 类型，当前类型为 [%s]", fds.getClass().getName());
+            throw new DataGeneratorException(msg);
         }
     }
 
@@ -109,8 +147,9 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                         dag.addVertex(df);
                         dag.addEdge(df, field);
                     } else {
-                        log.error("当前字段 [{}] 依赖的字段 [{}] 未在当前模板 [{}] 的配置表中找到，请检查配置是否正确",
+                        var msg = String.format("当前字段 [%s] 依赖的字段 [%s] 未在当前模板 [%s] 的配置表中找到，请检查配置是否正确",
                                 field.getName(), fn, template.getName());
+                        throw new DataGeneratorException(msg);
                     }
                 }
             }

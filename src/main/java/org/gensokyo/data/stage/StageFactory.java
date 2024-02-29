@@ -30,6 +30,12 @@ public class StageFactory {
 
     private final AutowireCapableBeanFactory beanFactory;
 
+    /**
+     * 根据脚本类型创建脚本实例
+     *
+     * @param spo 脚本对象
+     * @return 脚本实例
+     */
     @SuppressWarnings("resource")
     public @Nullable Script newInstance(ScriptPO spo) {
         if (Objects.isNull(spo) || Objects.isNull(spo.getType()) || StrKit.isBlank(spo.getContent())) {

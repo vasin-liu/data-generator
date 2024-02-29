@@ -3,16 +3,19 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.constant;
+package org.gensokyo.data.po;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 阶段类型
+ * 数据写入阶段配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2024/2/27 , Version 1.0.0
+ * @since 2024/2/28 , Version 1.0.0
  */
-public enum StageType {
-
-    READ, SELECT, SCRIPT, CONVERT, WRITE
+@Getter
+@Setter
+public class WriteStagePO extends StagePO {
 }

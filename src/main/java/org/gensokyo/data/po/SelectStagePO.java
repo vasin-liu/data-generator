@@ -7,20 +7,20 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.gensokyo.data.constant.StageType;
-
-import java.io.Serializable;
 
 /**
- * 步骤配置类
+ * 选择阶段配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2024/2/26 , Version 1.0.0
+ * @since 2024/2/28 , Version 1.0.0
  */
 @Getter
 @Setter
-public class StagePo implements Serializable {
+public class SelectStagePO extends StagePO {
 
-    private StageType type;
+    /**
+     * 选择策略
+     */
+    private String strategy;
 }

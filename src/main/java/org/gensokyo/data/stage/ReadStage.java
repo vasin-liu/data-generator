@@ -18,12 +18,12 @@ import org.gensokyo.data.value.Value;
  * @since 2024/2/23 , Version 1.0.0
  */
 @RequiredArgsConstructor
-public class ReadStage implements Stage {
+public class ReadStage extends AbstractStage {
     private final Context ctx;
     private final Reader reader;
 
     @Override
-    public Value execute(Value input) {
+    public Value internalExecute(Value input) {
         return reader.read(ctx);
     }
 }

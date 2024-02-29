@@ -55,6 +55,7 @@ public class ConfigCache implements InitializingBean {
                 .flatMap(location -> Stream.of(getResources(location)))
                 //忽略特定开头的文件
                 .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("___"))
+                .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("!"))
                 .forEach(this::readToCache);
         log.info("已加载元数据信息总计 [{}] 个", cache.size());
         return true;

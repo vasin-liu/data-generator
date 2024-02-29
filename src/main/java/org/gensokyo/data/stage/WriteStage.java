@@ -26,20 +26,20 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class WriteStage implements Stage {
+public class WriteStage extends AbstractStage {
     private final WriterPO wpo;
     private final Writer writer;
 
     @SuppressWarnings("unchecked")
     @Override
-    public Value execute(Value input) {
+    public Value internalExecute(Value input) {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
             return Value.EMPTY;
         }
         if (input instanceof ListValue lv) {
             Value el = lv.first();
             if (el instanceof MapValue) {
-                List<Map<String, Object>> data =(List<Map<String, Object>>) lv.get();
+                List<Map<String, Object>> data = (List<Map<String, Object>>) lv.get();
                 long rows = writer.write(data);
                 log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。", wpo.getDataSourceId(), wpo.getTarget(), rows);
             }

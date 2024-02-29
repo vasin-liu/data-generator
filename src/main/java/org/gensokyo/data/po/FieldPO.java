@@ -32,6 +32,7 @@ public class FieldPO implements Serializable {
     private List<ReaderPO> readers;
     private List<String> dependsOn;
     private ResultMapperPO resultMapper;
+    private List<StagePO> stages;
 
     public FieldPO() {
     }

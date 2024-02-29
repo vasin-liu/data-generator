@@ -20,9 +20,9 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-public class SelectStage implements Stage {
+public class SelectStage extends AbstractStage {
     @Override
-    public Value execute(Value input) {
+    public Value internalExecute(Value input) {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
             return Value.EMPTY;
         }

@@ -23,12 +23,12 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ScriptStage implements Stage {
+public class ScriptStage extends AbstractStage {
     private final ScriptFactory scriptFactory;
     private final ScriptPO spo;
 
     @Override
-    public Value execute(Value input) {
+    public Value internalExecute(Value input) {
         try (var script = scriptFactory.newInstance(spo)) {
             if (Objects.nonNull(script)) {
                 return script.eval(input);

@@ -3,16 +3,17 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.constant;
+package org.gensokyo.data.event;
 
 /**
- * 阶段类型
+ * 异常事件
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2024/2/27 , Version 1.0.0
+ * @since 2024/2/28 , Version 1.0.0
  */
-public enum StageType {
+@FunctionalInterface
+public interface OnExceptionListener {
 
-    READ, SELECT, SCRIPT, CONVERT, WRITE
+    void onException(Exception e);
 }

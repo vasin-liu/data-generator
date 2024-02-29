@@ -5,6 +5,16 @@
  */
 package org.gensokyo.data.cache;
 
+import org.gensokyo.data.value.ListValue;
+import org.gensokyo.data.value.MapValue;
+import org.gensokyo.data.value.SingleValue;
+import org.gensokyo.data.value.Value;
+import org.gensokyo.kit.character.StrKit;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 数据缓存
  *
@@ -13,4 +23,53 @@ package org.gensokyo.data.cache;
  * @since 2024/2/26 , Version 1.0.0
  */
 public class DataCache {
+
+    private final Map<String, TableDataCache> cacheMap = new ConcurrentHashMap<>(16);
+
+    public TableDataCache get(String tableName) {
+        return cacheMap.get(tableName);
+    }
+
+    public void set(String tableName, TableDataCache tableDataCache) {
+        cacheMap.put(Objects.requireNonNull(tableName), Objects.requireNonNull(tableDataCache));
+    }
+
+    public static final class TableDataCache {
+        private final Map<String, Value> dataMap = new ConcurrentHashMap<>(16);
+
+        public TableDataCache set(String key, Value value) {
+            dataMap.put(Objects.requireNonNull(key), Objects.requireNonNull(value));
+            return this;
+        }
+
+        public Value get(String key) {
+            return dataMap.get(key);
+        }
+
+        public TableDataCache remove(String key) {
+            if (StrKit.isNotEmpty(key)) {
+                dataMap.remove(key);
+            }
+            return this;
+        }
+
+        public TableDataCache remove(String key, Value value) {
+            if (Objects.isNull(value)) {
+                return remove(key);
+            }
+            Value oldValue = dataMap.get(key);
+            if (oldValue instanceof ListValue lv) {
+                // 列表类型
+                if (value instanceof ListValue lvr) {
+                    lv.removeAll(lvr);
+                } else {
+                    lv.remove(value);
+                }
+            } else {
+                dataMap.remove(key);
+            }
+            return this;
+        }
+
+    }
 }

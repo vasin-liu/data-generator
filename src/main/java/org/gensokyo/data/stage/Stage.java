@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.stage;
 
+import org.gensokyo.data.event.OnDoneListener;
+import org.gensokyo.data.event.OnExceptionListener;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -18,10 +20,38 @@ import org.gensokyo.data.value.Value;
 public interface Stage {
 
     /**
-     * 执行处理阶段
+     * 执行处理阶段（供外部调用方法）
      *
      * @param input 输入值
      * @return 输出值
      */
-    Value execute(Value input);
+    default Value execute(Value input) {
+        return internalExecute(input);
+    }
+
+    /**
+     * 执行处理阶段（实际内部处理方法）
+     *
+     * @param input 输入值
+     * @return 输出值
+     */
+    Value internalExecute(Value input);
+
+    /**
+     * 注册处理完成监听器
+     *
+     * @param listener 监听器
+     */
+    default Stage onDone(OnDoneListener listener) {
+        return this;
+    }
+
+    /**
+     * 注册处理异常监听器
+     *
+     * @param listener 监听器
+     */
+    default Stage onError(OnExceptionListener listener) {
+        return this;
+    }
 }

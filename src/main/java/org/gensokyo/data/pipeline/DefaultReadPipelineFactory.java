@@ -75,13 +75,16 @@ public class DefaultReadPipelineFactory implements PipelineFactory {
     private Value readDataset(final ReaderPO rpo, final Context ctx) {
         var pipeline = new DefaultReadPipeline();
         var reader = readerFactory.newInstance(rpo);
-        var readStage = new ReadStage(new Context(ctx.template(), Value.EMPTY), reader);
-        var scriptStage = new ScriptStage(scriptFactory, rpo.getPostScript());
+        var readStage = new ReadStage(new Context(ctx.template(), Value.EMPTY), reader)
+                .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据读取完成 ", rpo.getDataSourceId(), rpo.getDataSetId()));
+        var scriptStage = new ScriptStage(scriptFactory, rpo.getPostScript())
+                .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据处理完成", rpo.getDataSourceId(), rpo.getDataSetId()));
         return pipeline
                 //读取阶段
                 .next(readStage)
                 //脚本处理接口
                 .next(scriptStage)
+                .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据读取流水线执行完成", rpo.getDataSourceId(), rpo.getDataSetId()))
                 //执行，数据读取一般情况下无需输入其他数据，因此传入空数据集
                 .execute(Value.EMPTY);
     }

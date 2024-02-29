@@ -45,6 +45,15 @@ table:
           dataSourceId: 'tocc_driving_school'
           #数据集
           dataSet: "SELECT ID FROM DTEM_DRIVING_SCHOOL WHERE STATUS = 'S0A'"
+      stages:
+        - #
+          type: read
+        - #
+          type: select
+          strategy: ROUND_ROBIN
+        - #
+          type: script
+          scriptType: spel
     - #字段名
       name: NAME
       #数据集列表
