@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.strategy;
 
+import org.gensokyo.data.value.Value;
+
 /**
  * 选择策略接口
  *
@@ -13,13 +15,13 @@ package org.gensokyo.data.strategy;
  * @since 2023/10/26 , Version 1.0.0
  */
 @FunctionalInterface
-public interface SelectStrategy<T, R> {
+public interface SelectStrategy {
 
     /**
      * 数据选择策略
      *
-     * @param data 给定数据集
+     * @param input 给定数据集
      * @return 选择结果
      */
-    R select(T data);
+    Value select(Value input);
 }

@@ -5,8 +5,7 @@
  */
 package org.gensokyo.data.read;
 
-import org.gensokyo.data.Context;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
@@ -22,12 +21,12 @@ import java.util.Objects;
  */
 public class ConstantReader extends AbstractReader {
 
-    public ConstantReader(final ReaderPO rpo) {
+    public ConstantReader(final ReadStagePO.ReaderPO rpo) {
         super(Objects.requireNonNull(rpo));
     }
 
     @Override
-    public Value read(final Context ctx) {
+    public Value read(final Value input) {
         return ListValue.fromObjectList(DatasetKit.toList(rpo.getDataSet()));
     }
 }

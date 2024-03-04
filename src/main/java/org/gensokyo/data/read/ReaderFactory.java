@@ -6,12 +6,10 @@
 package org.gensokyo.data.read;
 
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-
-import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
 
 /**
  * 数据读取器工厂类
@@ -25,7 +23,7 @@ public class ReaderFactory {
 
     private final AutowireCapableBeanFactory beanFactory;
 
-    public @NonNull Reader newInstance(final ReaderPO rpo) {
+    public @NonNull Reader newInstance(final ReadStagePO.ReaderPO rpo) {
         var reader = switch (rpo.getType()) {
             case JDBC -> new JdbcReader(rpo);
             case SPEL -> new SpelReader(rpo);

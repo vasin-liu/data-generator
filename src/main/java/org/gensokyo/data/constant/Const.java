@@ -25,9 +25,7 @@ public final class Const {
     public static final String VERTICAL = "|";
     public static final String NULL = "\\N";
     public static final String LF = "\n";
-    public static final String CRLF = "\r\n";
 
-    public static final String SCRIPT_VAR_CTX = "ctx";
     public static final String SCRIPT_VAR_FAKER = "faker";
     public static final String SCRIPT_VAR_DATASET = "dataset";
 }

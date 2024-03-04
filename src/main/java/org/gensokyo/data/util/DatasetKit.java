@@ -9,7 +9,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.kit.character.StrKit;
 
 import java.io.ByteArrayInputStream;
@@ -52,25 +52,25 @@ public class DatasetKit {
         return results;
     }
 
-    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data) {
+    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data) {
         return buildBulkData(wpo, data, Const.VERTICAL, Const.LF, Const.NULL);
     }
 
-    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data, String columnDelimiter) {
+    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data, String columnDelimiter) {
         return buildBulkData(wpo, data, columnDelimiter, Const.LF, Const.NULL);
     }
 
-    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data, String columnDelimiter,
+    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data, String columnDelimiter,
                                             String nullValue) {
         return buildBulkData(wpo, data, columnDelimiter, Const.LF, nullValue);
     }
 
-    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data,
+    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data,
                                             String columnDelimiter, String rowDelimiter, String nullValue) {
         return buildBulkData(wpo, data, columnDelimiter, rowDelimiter, nullValue, false);
     }
 
-    public static InputStream buildBulkData(WriterPO wpo, List<Map<String, Object>> data,
+    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data,
                                             String columnDelimiter, String rowDelimiter, String nullValue,
                                             boolean withColumnNames) {
         if (StrKit.isBlank(columnDelimiter)) {

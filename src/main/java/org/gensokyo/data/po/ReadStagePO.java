@@ -7,6 +7,10 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gensokyo.data.constant.ReaderType;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 数据读取阶段配置
@@ -18,4 +22,43 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReadStagePO extends StagePO {
+
+    /**
+     * 缓存数据在内存中
+     */
+    private boolean inMemory = true;
+
+    /**
+     * 数据读取器列表
+     */
+    private List<ReaderPO> readers;
+
+    @Getter
+    @Setter
+    public static class ReaderPO implements Serializable {
+        /**
+         * 数据集ID，唯一标识
+         */
+        private String dataSetId;
+
+        /**
+         * 数据集读取类型
+         */
+        private ReaderType type;
+
+        /**
+         * 数据源ID，数据集所在数据源的唯一标识
+         */
+        private String dataSourceId;
+
+        /**
+         * 数据集
+         */
+        private Object dataSet;
+
+        /**
+         * 数据集执行阶段列表
+         */
+        private List<StagePO> stages;
+    }
 }

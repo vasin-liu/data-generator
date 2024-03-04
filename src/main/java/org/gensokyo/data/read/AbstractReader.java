@@ -5,8 +5,7 @@
  */
 package org.gensokyo.data.read;
 
-import org.gensokyo.data.Context;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.value.Value;
 
 import java.util.Objects;
@@ -20,14 +19,14 @@ import java.util.Objects;
  */
 public class AbstractReader implements Reader {
 
-    protected final ReaderPO rpo;
+    protected final ReadStagePO.ReaderPO rpo;
 
-    protected AbstractReader(final ReaderPO rpo) {
+    protected AbstractReader(final ReadStagePO.ReaderPO rpo) {
         this.rpo = Objects.requireNonNull(rpo);
     }
 
     @Override
-    public Value read(Context ctx) {
+    public Value read(final Value input) {
         return null;
     }
 }

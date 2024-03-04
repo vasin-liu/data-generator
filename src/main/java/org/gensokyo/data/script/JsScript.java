@@ -8,7 +8,7 @@ package org.gensokyo.data.script;
 import com.oracle.truffle.js.runtime.JSContextOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.ScriptPO;
+import org.gensokyo.data.po.ScriptStagePO;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.ListValue;
 import org.graalvm.polyglot.Engine;
@@ -33,12 +33,12 @@ import java.util.Objects;
 @Slf4j
 public class JsScript implements Script {
     private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-    private ScriptPO script;
+    private ScriptStagePO spo;
     private org.graalvm.polyglot.Context jsCtx;
     private static final String LANGUAGE = "js";
 
-    public JsScript(final ScriptPO script) {
-        this.script = Objects.requireNonNull(script);
+    public JsScript(final ScriptStagePO spo) {
+        this.spo = Objects.requireNonNull(spo);
         System.setProperty("polyglot.js.nashorn-compat", "true");
         var engine = Engine.newBuilder()
                 //允许从远程加载脚本文件
@@ -58,9 +58,9 @@ public class JsScript implements Script {
     @SuppressWarnings("unchecked")
     @Override
     public org.gensokyo.data.value.Value eval(org.gensokyo.data.value.Value dataset, Object... args) {
-        if (StringUtils.hasText(script.getContent())) {
+        if (StringUtils.hasText(spo.getContent())) {
             try {
-                Source js = createScriptSource(script.getContent());
+                Source js = createScriptSource(spo.getContent());
                 Value value = jsCtx.eval(js);
                 if (value.canExecute()) {
                     var result = value.execute(dataset.get(), args).as(List.class);
@@ -68,11 +68,11 @@ public class JsScript implements Script {
                         return new ListValue(result);
                     }
                 } else {
-                    log.error("当前脚本无法执行：{}", script);
+                    log.error("当前脚本无法执行：{}", spo);
                     throw new DataGeneratorException("当前脚本无法执行");
                 }
             } catch (Exception e) {
-                log.error(String.format("执行脚本 [%s] 出现异常：", script), e);
+                log.error(String.format("执行脚本 [%s] 出现异常：", spo), e);
                 throw new DataGeneratorException("执行脚本出现异常", e);
             }
         }
@@ -111,7 +111,7 @@ public class JsScript implements Script {
         jsCtx.close();
         //set null
         this.resolver = null;
-        this.script = null;
+        this.spo = null;
         this.jsCtx = null;
     }
 }

@@ -25,6 +25,12 @@ public abstract class AbstractStage implements Stage {
     private OnDoneListener onDoneListener;
     private OnExceptionListener onExceptionListener;
 
+    protected final StageContext ctx;
+
+    protected AbstractStage(StageContext ctx) {
+        this.ctx = ctx;
+    }
+
     @Override
     public Value execute(Value input) {
         Value output = Value.EMPTY;

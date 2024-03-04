@@ -21,4 +21,6 @@ import org.gensokyo.data.constant.ScriptType;
 public class ScriptStagePO extends StagePO {
 
     private ScriptType scriptType = ScriptType.SPEL;
+
+    private String content;
 }

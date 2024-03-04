@@ -7,7 +7,6 @@ package org.gensokyo.data.cache;
 
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
-import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.character.StrKit;
 
@@ -24,17 +23,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataCache {
 
-    private final Map<String, TableDataCache> cacheMap = new ConcurrentHashMap<>(16);
+    private DataCache() {
 
-    public TableDataCache get(String tableName) {
-        return cacheMap.get(tableName);
     }
 
-    public void set(String tableName, TableDataCache tableDataCache) {
-        cacheMap.put(Objects.requireNonNull(tableName), Objects.requireNonNull(tableDataCache));
+    private static final Map<String, TableDataCache> CACHE_MAP = new ConcurrentHashMap<>(16);
+
+    public static TableDataCache get(String tableName) {
+        return CACHE_MAP.get(tableName);
+    }
+
+    public static void set(String tableName, TableDataCache tableDataCache) {
+        CACHE_MAP.put(Objects.requireNonNull(tableName), Objects.requireNonNull(tableDataCache));
     }
 
     public static final class TableDataCache {
+
         private final Map<String, Value> dataMap = new ConcurrentHashMap<>(16);
 
         public TableDataCache set(String key, Value value) {
@@ -71,5 +75,8 @@ public class DataCache {
             return this;
         }
 
+        public MapValue toMapValue() {
+            return new MapValue(dataMap);
+        }
     }
 }

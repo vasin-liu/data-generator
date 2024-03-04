@@ -5,10 +5,9 @@
  */
 package org.gensokyo.data.script;
 
-import org.gensokyo.data.Context;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.po.ScriptPO;
+import org.gensokyo.data.po.ScriptStagePO;
 import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.character.StrKit;
@@ -29,10 +28,10 @@ public class SpelScript implements Script {
 
     private SpelExpressionParser parser;
     private StandardEvaluationContext sec;
-    private ScriptPO script;
+    private ScriptStagePO spo;
 
-    public SpelScript(final ScriptPO script) {
-        this.script = Objects.requireNonNull(script);
+    public SpelScript(final ScriptStagePO spo) {
+        this.spo = Objects.requireNonNull(spo);
         this.parser = new SpelExpressionParser();
         this.sec = new StandardEvaluationContext();
         this.sec.addPropertyAccessor(new MapAccessor());
@@ -43,16 +42,11 @@ public class SpelScript implements Script {
         return this;
     }
 
-    public SpelScript context(Context context) {
-        this.sec.setVariable(Const.SCRIPT_VAR_CTX, context);
-        return this;
-    }
-
     @Override
     public Value eval(Value dataset, Object... args) {
-        if (StrKit.isNotBlank(script.getContent())) {
+        if (StrKit.isNotBlank(spo.getContent())) {
             this.sec.setVariable(Const.SCRIPT_VAR_DATASET, dataset.get());
-            Object result = parser.parseExpression(script.getContent()).getValue(this.sec);
+            Object result = parser.parseExpression(spo.getContent()).getValue(this.sec);
             if (Objects.nonNull(result)) {
                 return SingleValue.of(result);
             }
@@ -63,11 +57,10 @@ public class SpelScript implements Script {
     @Override
     public void close() throws Exception {
         this.sec.setVariable(Const.SCRIPT_VAR_FAKER, null);
-        this.sec.setVariable(Const.SCRIPT_VAR_CTX, null);
         this.sec.setVariable(Const.SCRIPT_VAR_DATASET, null);
         //set null
         this.sec = null;
-        this.script = null;
+        this.spo = null;
         this.parser = null;
     }
 }

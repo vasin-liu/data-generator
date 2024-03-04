@@ -23,10 +23,5 @@ import java.util.List;
 public class TablePO implements Serializable {
     private String type;
     private List<FieldPO> fields;
-    private List<WriterPO> writers;
-    /**
-     * @deprecated 已废弃，请使用writers
-     */
-    @Deprecated(forRemoval = true)
-    private WriterPO writer;
+    private List<WriteStagePO> writers;
 }

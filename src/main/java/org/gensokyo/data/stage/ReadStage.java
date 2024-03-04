@@ -5,10 +5,12 @@
  */
 package org.gensokyo.data.stage;
 
-import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.Context;
-import org.gensokyo.data.read.Reader;
+import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.read.ReaderFactory;
+import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 数据读取阶段
@@ -17,13 +19,34 @@ import org.gensokyo.data.value.Value;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-@RequiredArgsConstructor
 public class ReadStage extends AbstractStage {
-    private final Context ctx;
-    private final Reader reader;
+    private ReaderFactory readerFactory;
+
+    @Autowired
+    public void setReaderFactory(ReaderFactory readerFactory) {
+        this.readerFactory = readerFactory;
+    }
+
+    public ReadStage(StageContext ctx) {
+        super(ctx);
+    }
 
     @Override
     public Value internalExecute(Value input) {
-        return reader.read(ctx);
+        if (ctx.stage() instanceof ReadStagePO rpo) {
+            var result = new MapValue();
+            for (ReadStagePO.ReaderPO po : rpo.getReaders()) {
+                var ds = readerFactory.newInstance(po).read(input);
+                result.put(po.getDataSetId(), ds);
+            }
+            //只有一个数据源的情况，返回数据集
+            if (result.size() == 1) {
+                return result.values().stream().findFirst().orElse(Value.EMPTY);
+            }
+            return result;
+        }
+
+        throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
+                ReadStagePO.class.getName(), ctx.stage().getClass().getName()));
     }
 }

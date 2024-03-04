@@ -21,6 +21,11 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 public class SelectStage extends AbstractStage {
+
+    public SelectStage(StageContext ctx) {
+        super(ctx);
+    }
+
     @Override
     public Value internalExecute(Value input) {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {

@@ -6,7 +6,7 @@
 package org.gensokyo.data.write;
 
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.po.WriteStagePO;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
@@ -24,8 +24,8 @@ import java.util.Objects;
 public class WriterFactory {
     private final AutowireCapableBeanFactory beanFactory;
 
-    public @NonNull Writer newInstance(WriterPO wpo) {
-        var writer = switch (Objects.requireNonNull(wpo).getType()) {
+    public @NonNull Writer newInstance(WriteStagePO wpo) {
+        var writer = switch (Objects.requireNonNull(wpo).getWriterType()) {
             case CONSOLE -> new ConsoleWriter(wpo);
             case JDBC -> new JdbcWriter(wpo);
             default -> null;

@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 全局定义
@@ -22,8 +21,9 @@ import java.util.List;
 @Getter
 public class GlobalPO implements Serializable {
 
+    /**
+     * 线程池配置
+     */
     private ExecutorPO executor;
-
-    private List<ReaderPO> readers;
 
 }

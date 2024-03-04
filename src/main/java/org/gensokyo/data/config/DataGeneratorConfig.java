@@ -13,6 +13,7 @@ import org.gensokyo.data.pipeline.DefaultRowPipelineFactory;
 import org.gensokyo.data.pipeline.DefaultWritePipelineFactory;
 import org.gensokyo.data.read.ReaderFactory;
 import org.gensokyo.data.script.ScriptFactory;
+import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.write.WriterFactory;
 import org.gensokyo.data.yaml.JacksonParser;
 import org.gensokyo.data.yaml.YamlParser;
@@ -73,21 +74,27 @@ public class DataGeneratorConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(StageFactory.class)
+    public StageFactory stageFactory(AutowireCapableBeanFactory beanFactory) {
+        return new StageFactory(beanFactory);
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DefaultReadPipelineFactory.class)
-    public DefaultReadPipelineFactory defaultReadPipelineFactory(ReaderFactory readerFactory, ScriptFactory scriptFactory) {
-        return new DefaultReadPipelineFactory(readerFactory, scriptFactory);
+    public DefaultReadPipelineFactory defaultReadPipelineFactory(StageFactory stageFactory) {
+        return new DefaultReadPipelineFactory(stageFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean(DefaultWritePipelineFactory.class)
-    public DefaultWritePipelineFactory defaultWritePipelineFactory(WriterFactory writerFactory) {
-        return new DefaultWritePipelineFactory(writerFactory);
+    public DefaultWritePipelineFactory defaultWritePipelineFactory(StageFactory stageFactory) {
+        return new DefaultWritePipelineFactory(stageFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean(DefaultRowPipelineFactory.class)
-    public DefaultRowPipelineFactory defaultRowPipelineFactory(ScriptFactory scriptFactory) {
-        return new DefaultRowPipelineFactory(scriptFactory);
+    public DefaultRowPipelineFactory defaultRowPipelineFactory(StageFactory stageFactory) {
+        return new DefaultRowPipelineFactory(stageFactory);
     }
 
     @Bean(name = "dataGeneratorTaskExecutor")
@@ -112,13 +119,12 @@ public class DataGeneratorConfig {
     @Bean
     @ConditionalOnMissingBean(DefaultDataPipelineFactory.class)
     public DefaultDataPipelineFactory defaultDataPipelineFactory(
-            DefaultReadPipelineFactory defaultReadPipelineFactory,
             DefaultWritePipelineFactory defaultWritePipelineFactory,
             DefaultRowPipelineFactory defaultRowPipelineFactory,
             @Qualifier(value = "dataGeneratorTaskExecutor")
             ThreadPoolTaskExecutor threadPoolTaskExecutor
     ) {
-        return new DefaultDataPipelineFactory(defaultReadPipelineFactory, defaultWritePipelineFactory,
+        return new DefaultDataPipelineFactory(defaultWritePipelineFactory,
                 defaultRowPipelineFactory, threadPoolTaskExecutor);
     }
 }

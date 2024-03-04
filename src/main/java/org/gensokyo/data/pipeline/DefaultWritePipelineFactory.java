@@ -8,10 +8,10 @@ package org.gensokyo.data.pipeline;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.Context;
-import org.gensokyo.data.po.WriterPO;
-import org.gensokyo.data.stage.WriteStage;
+import org.gensokyo.data.po.WriteStagePO;
+import org.gensokyo.data.stage.StageContext;
+import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.value.Value;
-import org.gensokyo.data.write.WriterFactory;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
 
@@ -25,7 +25,7 @@ import org.gensokyo.kit.collect.CollectKit;
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultWritePipelineFactory implements PipelineFactory {
-    private final WriterFactory writerFactory;
+    private final StageFactory stageFactory;
 
     @Override
     public Value startup(final Context ctx) {
@@ -33,18 +33,17 @@ public class DefaultWritePipelineFactory implements PipelineFactory {
         Assert.notNull(ctx.template().getTable(), "数据生成模板表配置不能为空");
         Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getTable().getWriters()), "数据生成配置的表配置中必须至少配置一个写入器");
         var writers = ctx.template().getTable().getWriters();
-        for (WriterPO wpo : writers) {
+        for (WriteStagePO wpo : writers) {
             write(wpo, ctx.dataset());
         }
         //无需返回数据集
         return null;
     }
 
-    private void write(final WriterPO wpo, final Value dataset) {
+    private void write(final WriteStagePO wpo, final Value dataset) {
         var pipeline = new DefaultWritePipeline();
-        var writer = writerFactory.newInstance(wpo);
-        var writeStage = new WriteStage(wpo, writer);
-        pipeline.next(writeStage).execute(dataset);
+        var stage = stageFactory.newInstance(new StageContext(wpo));
+        pipeline.next(stage).execute(dataset);
     }
 
     @Override

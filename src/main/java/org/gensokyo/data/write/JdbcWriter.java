@@ -10,7 +10,7 @@ import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.po.WriteStagePO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +37,7 @@ public class JdbcWriter extends AbstractWriter {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    protected JdbcWriter(WriterPO wpo) {
+    protected JdbcWriter(WriteStagePO wpo) {
         super(wpo);
     }
 

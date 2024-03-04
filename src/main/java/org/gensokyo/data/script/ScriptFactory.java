@@ -7,7 +7,7 @@ package org.gensokyo.data.script;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.po.ScriptPO;
+import org.gensokyo.data.po.ScriptStagePO;
 import org.gensokyo.kit.character.StrKit;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.Nullable;
@@ -28,11 +28,11 @@ public class ScriptFactory {
     private final AutowireCapableBeanFactory beanFactory;
 
     @SuppressWarnings("resource")
-    public @Nullable Script newInstance(ScriptPO spo) {
-        if (Objects.isNull(spo) || Objects.isNull(spo.getType()) || StrKit.isBlank(spo.getContent())) {
+    public @Nullable Script newInstance(ScriptStagePO spo) {
+        if (Objects.isNull(spo) || Objects.isNull(spo.getScriptType()) || StrKit.isBlank(spo.getContent())) {
             return null;
         }
-        var script = switch (spo.getType()) {
+        var script = switch (spo.getScriptType()) {
             case JAVASCRIPT -> new JsScript(spo);
             case SPEL -> new SpelScript(spo);
         };

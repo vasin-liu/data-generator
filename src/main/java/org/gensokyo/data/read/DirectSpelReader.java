@@ -6,11 +6,10 @@
 package org.gensokyo.data.read;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,20 +40,19 @@ public class DirectSpelReader extends AbstractReader implements InitializingBean
         this.dataFaker = dataFaker;
     }
 
-    public DirectSpelReader(final ReaderPO rpo) {
+    public DirectSpelReader(final ReadStagePO.ReaderPO rpo) {
         super(Objects.requireNonNull(rpo));
         this.parser = new SpelExpressionParser();
         this.sec = new StandardEvaluationContext();
     }
 
     @Override
-    public Value read(final Context ctx) {
+    public Value read(final Value input) {
         final String rightBrace1 = "{";
         final String rightBrace2 = "#{";
         final String leftBrace = "}";
         if (rpo.getDataSet() instanceof String dataset) {
             try {
-                this.sec.setVariable(Const.SCRIPT_VAR_CTX, ctx);
                 if (!dataset.startsWith(rightBrace1) && !dataset.startsWith(rightBrace2)) {
                     dataset = rightBrace1.concat(dataset);
                 }

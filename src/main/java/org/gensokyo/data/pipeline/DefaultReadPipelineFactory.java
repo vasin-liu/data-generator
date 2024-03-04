@@ -8,12 +8,13 @@ package org.gensokyo.data.pipeline;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.Context;
+import org.gensokyo.data.constant.StageType;
+import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.FieldPO;
-import org.gensokyo.data.po.ReaderPO;
-import org.gensokyo.data.read.ReaderFactory;
-import org.gensokyo.data.script.ScriptFactory;
-import org.gensokyo.data.stage.ReadStage;
-import org.gensokyo.data.stage.ScriptStage;
+import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.po.StagePO;
+import org.gensokyo.data.stage.StageContext;
+import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.util.DatetimeKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
@@ -22,6 +23,7 @@ import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.util.StopWatch;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -35,19 +37,18 @@ import java.util.concurrent.CountDownLatch;
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultReadPipelineFactory implements PipelineFactory {
-    private final ReaderFactory readerFactory;
-    private final ScriptFactory scriptFactory;
+    private final StageFactory stageFactory;
 
     @Override
     public Value startup(final Context ctx) {
         Assert.notNull(ctx.template(), "数据生成模板配置不能为空");
         Assert.notNull(ctx.template().getTable(), "数据生成模板表配置不能为空");
         Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getTable().getFields()), "数据生成模板表字段配置不能为空");
-        return loadTableDataset(ctx.template().getTable().getFields(), ctx);
+        return loadTableDataset(ctx.template().getTable().getFields());
     }
 
 
-    private Value loadTableDataset(final List<FieldPO> fields, final Context ctx) {
+    private Value loadTableDataset(final List<FieldPO> fields) {
         log.info("开始加载任务表字段数据集");
         var dataReady = new CountDownLatch(1);
         var stopWatch = new StopWatch();
@@ -59,10 +60,11 @@ public class DefaultReadPipelineFactory implements PipelineFactory {
                 fieldDataset.put(field.getName(), Value.EMPTY);
             } else {
                 //其他非依赖型字段，通过读取器读取数据
-                if (CollectKit.isNotEmpty(field.getReaders())) {
-                    var ds = field.getReaders().stream().map(rpo -> readDataset(rpo, ctx)).toList();
+                var readers = getReaders(field);
+                if (CollectKit.isNotEmpty(readers)) {
+                    var ds = readers.stream().map(this::read).toList();
                     //合并数据集
-                    fieldDataset.put(field.getName(), mergedDs(ds));
+                    fieldDataset.put(field.getName(), merged(ds));
                 }
             }
         }
@@ -72,24 +74,32 @@ public class DefaultReadPipelineFactory implements PipelineFactory {
         return fieldDataset;
     }
 
-    private Value readDataset(final ReaderPO rpo, final Context ctx) {
+    private List<ReadStagePO.ReaderPO> getReaders(FieldPO field) {
+        var stages = field.getStages();
+        if (CollectKit.isEmpty(stages)
+                || stages.stream().noneMatch(stage -> StageType.READ.equals(stage.getType()))) {
+            throw new DataGeneratorException(String.format("字段 [%s] 至少需要配置一个数据读取阶段", field.getName()));
+        }
+        return stages.stream()
+                .filter(stage -> StageType.READ.equals(stage.getType()))
+                .map(stage -> ((ReadStagePO) stage).getReaders())
+                .flatMap(Collection::stream)
+                .toList();
+    }
+
+    private Value read(final ReadStagePO.ReaderPO rpo) {
         var pipeline = new DefaultReadPipeline();
-        var reader = readerFactory.newInstance(rpo);
-        var readStage = new ReadStage(new Context(ctx.template(), Value.EMPTY), reader)
-                .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据读取完成 ", rpo.getDataSourceId(), rpo.getDataSetId()));
-        var scriptStage = new ScriptStage(scriptFactory, rpo.getPostScript())
-                .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据处理完成", rpo.getDataSourceId(), rpo.getDataSetId()));
+        for (StagePO spo : rpo.getStages()) {
+            var ctx = new StageContext(spo);
+            pipeline.next(stageFactory.newInstance(ctx));
+        }
         return pipeline
-                //读取阶段
-                .next(readStage)
-                //脚本处理接口
-                .next(scriptStage)
                 .onDone(output -> log.debug("数据源编号为：{}，数据集编号为：{} ，数据读取流水线执行完成", rpo.getDataSourceId(), rpo.getDataSetId()))
                 //执行，数据读取一般情况下无需输入其他数据，因此传入空数据集
                 .execute(Value.EMPTY);
     }
 
-    private Value mergedDs(final List<Value> ds) {
+    private Value merged(final List<Value> ds) {
         var mergedDs = new ListValue(16);
         for (Value d : ds) {
             if (d instanceof ListValue lv) {

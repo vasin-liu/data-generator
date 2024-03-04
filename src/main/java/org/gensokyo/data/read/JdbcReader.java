@@ -7,9 +7,8 @@ package org.gensokyo.data.read;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +32,12 @@ public class JdbcReader extends AbstractReader {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    protected JdbcReader(ReaderPO rpo) {
+    protected JdbcReader(ReadStagePO.ReaderPO rpo) {
         super(rpo);
     }
 
     @Override
-    public Value read(final Context ctx) {
+    public Value read(final Value input) {
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(rpo.getDataSourceId()));
             var re = jdbcTemplate.queryForList((String) Objects.requireNonNull(rpo.getDataSet()));

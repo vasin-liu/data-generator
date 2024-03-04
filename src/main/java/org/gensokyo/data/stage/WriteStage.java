@@ -5,13 +5,14 @@
  */
 package org.gensokyo.data.stage;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
-import org.gensokyo.data.write.Writer;
+import org.gensokyo.data.write.WriterFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -25,10 +26,17 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 @Slf4j
-@RequiredArgsConstructor
 public class WriteStage extends AbstractStage {
-    private final WriterPO wpo;
-    private final Writer writer;
+    private WriterFactory writerFactory;
+
+    public WriteStage(StageContext ctx) {
+        super(ctx);
+    }
+
+    @Autowired
+    public void setWriterFactory(WriterFactory writerFactory) {
+        this.writerFactory = writerFactory;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -36,15 +44,33 @@ public class WriteStage extends AbstractStage {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
             return Value.EMPTY;
         }
-        if (input instanceof ListValue lv) {
-            Value el = lv.first();
-            if (el instanceof MapValue) {
-                List<Map<String, Object>> data = (List<Map<String, Object>>) lv.get();
-                long rows = writer.write(data);
-                log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。", wpo.getDataSourceId(), wpo.getTarget(), rows);
-            }
+        var data = convert(input);
+        if (ctx.stage() instanceof WriteStagePO wpo) {
+            long rows = writerFactory.newInstance(wpo).write(data);
+            log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。",
+                    wpo.getDataSourceId(), wpo.getTarget(), rows);
+        } else {
+            throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
+                    WriteStagePO.class.getName(), ctx.stage().getClass().getName()));
         }
+
 
         return input;
     }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> convert(Value input) {
+        if (input instanceof ListValue lv) {
+            Value el = lv.first();
+            if (el instanceof MapValue) {
+                return (List<Map<String, Object>>) lv.get();
+            } else {
+                throw new DataGeneratorException(String.format("不支持的元素类型：%s", el.getClass().getName()));
+            }
+        } else {
+            throw new DataGeneratorException(String.format("当前阶段要求的输入值类型为：[%s] ，实际的输入值类型为：[%s]",
+                    ListValue.class.getName(), input.getClass().getName()));
+        }
+    }
+
 }

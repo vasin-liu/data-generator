@@ -34,7 +34,6 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultDataPipelineFactory implements PipelineFactory {
-    private final DefaultReadPipelineFactory defaultReadPipelineFactory;
     private final DefaultWritePipelineFactory defaultWritePipelineFactory;
     private final DefaultRowPipelineFactory defaultRowPipelineFactory;
     private final ThreadPoolTaskExecutor executor;
@@ -44,12 +43,10 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         Assert.notNull(ctx, "数据生成上下文不能为空");
         Assert.notNull(ctx.template(), "数据生成模板配置不能为空");
         var template = ctx.template();
-        //从数据源中读取，该数据集的数据内容为 MapValue Map<String,Value> 即 Map<字段名, 数据集>
-        var dataset = defaultReadPipelineFactory.startup(ctx);
         //分批次生成数据
-        doBatch(template.getBatchSize(), template.getAmount(), new Context(template, dataset));
+        doBatch(template.getBatchSize(), template.getAmount(), ctx);
         //无需返回数据
-        return null;
+        return Value.EMPTY;
     }
 
     private void doBatch(int pageSize, int total, final Context ctx) {
@@ -70,9 +67,10 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
 
     private void doJob(int index, int size, final Context ctx) {
         final List<Value> data = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < size; i++) {
-            try {
-                List<CompletableFuture<Value>> futures = new ArrayList<>();
+        try {
+            List<CompletableFuture<Value>> futures = new ArrayList<>();
+
+            for (int i = 0; i < size; i++) {
                 //生成一行数据
                 final int ii = i;
                 var rowCtx = new Context(ctx.template(), ctx.dataset());
@@ -86,19 +84,18 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                             }
                         });
                 futures.add(future);
-                allOf(futures.toArray(new CompletableFuture[]{})).join();
-            } catch (Exception e) {
-                log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
             }
+            allOf(futures.toArray(new CompletableFuture[]{})).join();
+            //写入数据
+            defaultWritePipelineFactory.startup(new Context(ctx.template(), ListValue.fromValueList(data)));
+        } catch (Exception e) {
+            log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
         }
-        //写入数据
-        defaultWritePipelineFactory.startup(new Context(ctx.template(), ListValue.fromValueList(data)));
     }
 
     @Override
     public void shutdown() {
         executor.shutdown();
-        defaultReadPipelineFactory.shutdown();
         defaultWritePipelineFactory.shutdown();
     }
 }

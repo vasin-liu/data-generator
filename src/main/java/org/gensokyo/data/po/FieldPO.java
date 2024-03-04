@@ -7,8 +7,6 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.gensokyo.data.constant.FieldType;
-import org.springframework.core.convert.converter.Converter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,15 +21,19 @@ import java.util.List;
 @Setter
 @Getter
 public class FieldPO implements Serializable {
+    /**
+     * 字段名称，唯一标识
+     */
     private String name;
-    private FieldType type;
 
-    private Class<? extends Converter<Object, ?>> converter;
-    private ScriptPO preScript;
-    private ScriptPO postScript;
-    private List<ReaderPO> readers;
+    /**
+     * 字段依赖的字段
+     */
     private List<String> dependsOn;
-    private ResultMapperPO resultMapper;
+
+    /**
+     * 字段处理阶段
+     */
     private List<StagePO> stages;
 
     public FieldPO() {

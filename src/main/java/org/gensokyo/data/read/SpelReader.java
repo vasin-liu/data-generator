@@ -6,11 +6,10 @@
 package org.gensokyo.data.read;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.po.ReaderPO;
+import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
 import org.springframework.beans.factory.InitializingBean;
@@ -45,7 +44,7 @@ public class SpelReader extends AbstractReader implements InitializingBean {
         this.dataFaker = dataFaker;
     }
 
-    protected SpelReader(ReaderPO rpo) {
+    protected SpelReader(ReadStagePO.ReaderPO rpo) {
         super(rpo);
         this.parser = new SpelExpressionParser();
         this.sec = new StandardEvaluationContext();
@@ -54,10 +53,9 @@ public class SpelReader extends AbstractReader implements InitializingBean {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Value read(final Context ctx) {
+    public Value read(final Value input) {
         if (rpo.getDataSet() instanceof String dataset) {
             try {
-                this.sec.setVariable(Const.SCRIPT_VAR_CTX, ctx);
                 Matcher m = p.matcher(dataset);
                 if (m.find()) {
                     var num = m.group(2);

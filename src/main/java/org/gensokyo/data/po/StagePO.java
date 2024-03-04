@@ -25,14 +25,17 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
-        visible = true
+        visible = true,
+        // 反序列化时，如果没有匹配到子类，则使用默认实现类，即WriteStageP，
+        // 除了WriteStagePO，其他子类都需要在配置时指定type属性
+        defaultImpl = WriteStagePO.class
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ReadStagePO.class, names = {"READ", "read"}),
         @JsonSubTypes.Type(value = SelectStagePO.class, names = {"SELECT", "select"}),
         @JsonSubTypes.Type(value = ScriptStagePO.class, names = {"SCRIPT", "script"}),
         @JsonSubTypes.Type(value = ConvertStagePO.class, names = {"CONVERT", "convert"}),
-        @JsonSubTypes.Type(value = WriteStagePO.class, names = {"WRITE", "write"}),
+        @JsonSubTypes.Type(value = WriteStagePO.class, names = {"WRITE", "write"})
 })
 public class StagePO implements Serializable {
 

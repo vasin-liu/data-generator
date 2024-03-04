@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.write;
 
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.po.WriteStagePO;
 
 import java.util.List;
 import java.util.Map;
@@ -19,9 +19,9 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 public class AbstractWriter implements Writer {
-    protected final WriterPO wpo;
+    protected final WriteStagePO wpo;
 
-    protected AbstractWriter(final WriterPO wpo) {
+    protected AbstractWriter(final WriteStagePO wpo) {
         this.wpo = Objects.requireNonNull(wpo);
     }
 

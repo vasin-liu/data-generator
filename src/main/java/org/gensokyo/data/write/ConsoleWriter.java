@@ -7,7 +7,7 @@ package org.gensokyo.data.write;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.WriterPO;
+import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.kit.json.JsonKit;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ import java.util.Objects;
 @Slf4j
 public class ConsoleWriter extends AbstractWriter {
 
-    protected ConsoleWriter(WriterPO wpo) {
+    protected ConsoleWriter(WriteStagePO wpo) {
         super(wpo);
     }
 

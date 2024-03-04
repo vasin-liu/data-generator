@@ -5,7 +5,6 @@
  */
 package org.gensokyo.data.read;
 
-import org.gensokyo.data.Context;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -17,5 +16,5 @@ import org.gensokyo.data.value.Value;
  */
 public interface Reader {
 
-    Value read(final Context ctx);
+    Value read(final Value input);
 }
