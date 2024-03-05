@@ -14,9 +14,7 @@ import org.gensokyo.data.value.Value;
 import org.gensokyo.data.write.WriterFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 数据写入阶段类
@@ -38,13 +36,12 @@ public class WriteStage extends AbstractStage {
         this.writerFactory = writerFactory;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Value internalExecute(Value input) {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
             return Value.EMPTY;
         }
-        var data = convert(input);
+        var data = extract(input);
         if (ctx.stage() instanceof WriteStagePO wpo) {
             long rows = writerFactory.newInstance(wpo).write(data);
             log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。",
@@ -54,23 +51,40 @@ public class WriteStage extends AbstractStage {
                     WriteStagePO.class.getName(), ctx.stage().getClass().getName()));
         }
 
-
         return input;
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> convert(Value input) {
+    private List<Map<String, Object>> extract(Value input) {
         if (input instanceof ListValue lv) {
-            Value el = lv.first();
-            if (el instanceof MapValue) {
-                return (List<Map<String, Object>>) lv.get();
-            } else {
-                throw new DataGeneratorException(String.format("不支持的元素类型：%s", el.getClass().getName()));
-            }
-        } else {
-            throw new DataGeneratorException(String.format("当前阶段要求的输入值类型为：[%s] ，实际的输入值类型为：[%s]",
-                    ListValue.class.getName(), input.getClass().getName()));
+            return extractList(lv);
         }
+        throw new DataGeneratorException(String.format("当前阶段要求的输入值类型为：[%s] ，实际的输入值类型为：[%s]",
+                ListValue.class.getName(), input.getClass().getName()));
     }
 
+    private List<Map<String,Object>> extractList(ListValue lv) {
+        List<Map<String, Object>> rows = new ArrayList<>(64);
+        for (Value value : lv) {
+            if (value instanceof MapValue mv) {
+                rows.add(extractMap(mv));
+            } else {
+                throw new DataGeneratorException(String.format("不支持的元素类型：%s", value.getClass().getName()));
+            }
+        }
+        return rows;
+    }
+
+    private Map<String, Object> extractMap(MapValue mv) {
+        Map<String, Object> row = new HashMap<>(128);
+        for (Map.Entry<String, Value> entry : mv.entrySet()) {
+            var v = entry.getValue().get();
+            if (v instanceof List<?> l && l.size() == 1) {
+                //延迟计算的表达式结果只有一个值也是返回列表，因此默认不需要选择就直接取第一个值
+                row.put(entry.getKey(), l.get(0));
+            } else {
+                row.put(entry.getKey(), v);
+            }
+        }
+        return row;
+    }
 }

@@ -30,7 +30,7 @@ table:
               type: DIRECT_SPEL
               #数据集
               dataSet: "#faker.snowflake.next"
-        - type: select
+#        - type: select
     - #字段名
       name: SCHOOL_ID
       stages:
