@@ -30,6 +30,11 @@ public interface Value {
         public boolean isNullOrEmpty() {
             return true;
         }
+
+        @Override
+        public int size() {
+            return 0;
+        }
     };
 
     Object get();
@@ -37,4 +42,6 @@ public interface Value {
     ValueType type();
 
     boolean isNullOrEmpty();
+
+    int size();
 }

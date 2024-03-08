@@ -47,7 +47,7 @@ public abstract class AbstractPipeline implements Pipeline {
         try {
             Value prev = input;
             for (Stage stage : stages) {
-                prev = stage.internalExecute(prev);
+                prev = stage.execute(prev);
             }
             result = prev;
         } catch (Exception e) {

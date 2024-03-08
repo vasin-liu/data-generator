@@ -5,12 +5,14 @@
  */
 package org.gensokyo.data.stage;
 
-import org.gensokyo.data.util.RandomKit;
+import org.gensokyo.data.context.StageContext;
+import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.select.strategy.SelectStrategyFactory;
 import org.gensokyo.data.value.ListValue;
-import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -21,6 +23,12 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 public class SelectStage extends AbstractStage {
+    private SelectStrategyFactory selectStrategyFactory;
+
+    @Autowired
+    public void setSelectStrategyFactory(SelectStrategyFactory selectStrategyFactory) {
+        this.selectStrategyFactory = selectStrategyFactory;
+    }
 
     public SelectStage(StageContext ctx) {
         super(ctx);
@@ -31,16 +39,15 @@ public class SelectStage extends AbstractStage {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
             return Value.EMPTY;
         }
-        var value = input;
-        if (input instanceof ListValue lv) {
-            value = RandomKit.choiceOne(lv);
+        if (ctx.stage() instanceof SelectStagePO spo) {
+            var value = input;
+            if (input instanceof ListValue lv) {
+                var strategy = selectStrategyFactory.newInstance(spo);
+                value = lv.select(strategy, spo.getNum());
+            }
+            return value;
         }
-        //部分数据可能为Supplier类型，需要执行Supplier获取真实数据
-        Object r = value.get();
-        if (r instanceof Collection<?> c) {
-            return SingleValue.of(RandomKit.choiceOne(c));
-        } else {
-            return SingleValue.of(r);
-        }
+        throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
+                SelectStagePO.class.getName(), ctx.stage().getClass().getName()));
     }
 }

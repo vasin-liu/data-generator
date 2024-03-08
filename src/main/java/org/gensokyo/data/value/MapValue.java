@@ -9,6 +9,7 @@ import org.gensokyo.data.constant.ValueType;
 import org.gensokyo.kit.collect.MapKit;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Map值对象
@@ -17,7 +18,7 @@ import java.util.*;
  * @version 1.0.0
  * @since 2024/2/27 , Version 1.0.0
  */
-public class MapValue extends HashMap<String, Value> implements Value {
+public class MapValue extends ConcurrentHashMap<String, Value> implements Value {
 
     public MapValue() {
         super();

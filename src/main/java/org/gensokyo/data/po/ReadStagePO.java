@@ -24,6 +24,11 @@ import java.util.List;
 public class ReadStagePO extends StagePO {
 
     /**
+     * 数据集ID，唯一标识
+     */
+    private String dataSetId;
+
+    /**
      * 缓存数据在内存中
      */
     private boolean inMemory = true;

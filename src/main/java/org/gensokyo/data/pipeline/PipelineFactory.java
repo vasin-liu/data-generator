@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.pipeline;
 
-import org.gensokyo.data.Context;
+import org.gensokyo.data.context.Context;
 import org.gensokyo.data.value.Value;
 
 /**

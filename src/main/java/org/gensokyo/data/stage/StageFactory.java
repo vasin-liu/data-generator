@@ -6,6 +6,7 @@
 package org.gensokyo.data.stage;
 
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.context.StageContext;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
@@ -27,7 +28,6 @@ public class StageFactory {
             case READ -> new ReadStage(ctx);
             case SELECT -> new SelectStage(ctx);
             case SCRIPT -> new ScriptStage(ctx);
-//            case CONVERT -> new ConvertStage(ctx);
             case WRITE -> new WriteStage(ctx);
             default -> null;
         };

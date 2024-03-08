@@ -7,6 +7,7 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gensokyo.data.constant.SelectStrategyType;
 
 /**
  * 选择阶段配置
@@ -22,5 +23,10 @@ public class SelectStagePO extends StagePO {
     /**
      * 选择策略
      */
-    private String strategy;
+    private SelectStrategyType strategyType = SelectStrategyType.REPEAT_RANDOM;
+
+    /**
+     * 选择数量
+     */
+    private int num = 1;
 }

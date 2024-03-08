@@ -6,9 +6,9 @@
 package org.gensokyo.data.stage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.ScriptStagePO;
-import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.data.script.ScriptFactory;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.json.JsonKit;

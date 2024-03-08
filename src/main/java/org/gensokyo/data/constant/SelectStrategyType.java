@@ -1,18 +1,18 @@
 /*
- * Copyright © 2021 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
 package org.gensokyo.data.constant;
 
 /**
- * 数据读取模式
+ * 选择策略类型
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2023/1/11 , Version 1.0.0
+ * @since 2023/10/26 , Version 1.0.0
  */
-public enum ReadMode {
+public enum SelectStrategyType {
 
-    CACHE_IN_MEMORY, DIRECT_READ
+    REPEAT_RANDOM, REPEAT_ORDER, ONCE_RANDOM, ONCE_ORDER
 }

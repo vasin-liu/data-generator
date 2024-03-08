@@ -7,7 +7,8 @@ package org.gensokyo.data.pipeline;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
+import org.gensokyo.data.cache.DataCache;
+import org.gensokyo.data.context.Context;
 import org.gensokyo.data.util.DatetimeKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.concurrent.CompletableFuture.allOf;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -37,6 +39,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
     private final DefaultWritePipelineFactory defaultWritePipelineFactory;
     private final DefaultRowPipelineFactory defaultRowPipelineFactory;
     private final ThreadPoolTaskExecutor executor;
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
     public Value startup(final Context ctx) {
@@ -74,16 +77,21 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                 //生成一行数据
                 final int ii = i;
                 var rowCtx = new Context(ctx.template(), ctx.dataset());
-                CompletableFuture<Value> future = supplyAsync(() -> defaultRowPipelineFactory.startup(rowCtx), executor)
-                        .whenComplete((r, e) -> {
-                            //r 类型为 MapValue Map<String,Value> 即 Map<字段名, 数据集>
-                            if (Objects.isNull(e)) {
-                                data.add(r);
-                            } else {
-                                log.error(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", index, ii), e);
-                            }
-                        });
-                futures.add(future);
+                if (initialized.get()) {
+                    CompletableFuture<Value> future = supplyAsync(() -> defaultRowPipelineFactory.startup(rowCtx), executor)
+                            .whenComplete((r, e) -> {
+                                //r 类型为 MapValue Map<String,Value> 即 Map<字段名, 数据集>
+                                if (Objects.isNull(e)) {
+                                    data.add(r);
+                                } else {
+                                    log.error(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", index, ii), e);
+                                }
+                            });
+                    futures.add(future);
+                } else {
+                    //第一次执行，先加载缓存数据
+                    data.add(loadDataToMemory(rowCtx));
+                }
             }
             allOf(futures.toArray(new CompletableFuture[]{})).join();
             //写入数据
@@ -91,6 +99,20 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         } catch (Exception e) {
             log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
         }
+    }
+
+    private Value loadDataToMemory(final Context ctx) {
+        //先执行一行记录生成缓存数据
+        var result = Value.EMPTY;
+        var tdc = DataCache.getOrCreate(ctx.template().getName());
+        if (tdc.isEmpty()) {
+            var rowCtx = new Context(ctx.template(), ctx.dataset());
+            result = defaultRowPipelineFactory.startup(rowCtx);
+            //初始化完成
+            initialized.compareAndSet(false, true);
+            log.info("模板 [{}] 所需的缓存数据已加载完毕", ctx.template().getName());
+        }
+        return result;
     }
 
     @Override

@@ -8,7 +8,7 @@ package org.gensokyo.data.controller;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.Context;
+import org.gensokyo.data.context.Context;
 import org.gensokyo.data.cache.ConfigCache;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.po.TemplatePO;
@@ -31,10 +31,10 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 @RestController
-@RequestMapping("/v2/task")
+@RequestMapping("/task")
 @Validated
 @RequiredArgsConstructor
-public class TaskControllerV2 {
+public class TaskController {
 
     private final DefaultDataPipelineFactory defaultDataPipelineFactory;
     private final ConfigCache cache;

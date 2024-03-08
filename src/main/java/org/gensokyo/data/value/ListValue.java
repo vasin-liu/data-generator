@@ -6,12 +6,17 @@
 package org.gensokyo.data.value;
 
 import org.gensokyo.data.constant.ValueType;
+import org.gensokyo.data.select.Select;
+import org.gensokyo.data.select.strategy.SelectStrategy;
 import org.gensokyo.kit.collect.CollectKit;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 集合值
@@ -20,15 +25,15 @@ import java.util.Map;
  * @version 1.0.0
  * @since 2024/2/27 , Version 1.0.0
  */
-public class ListValue extends ArrayList<Value> implements Value {
+public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Select {
+    private final AtomicInteger index = new AtomicInteger(0);
+
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     public ListValue() {
         super();
     }
 
-    public ListValue(int initialCapacity) {
-        super(initialCapacity);
-    }
 
     public ListValue(Collection<? extends Value> coll) {
         super(coll);
@@ -92,4 +97,52 @@ public class ListValue extends ArrayList<Value> implements Value {
         return result;
     }
 
+    public static Value extract(Value input) {
+        if (Objects.isNull(input)) {
+            return null;
+        }
+        if (input instanceof ListValue lv && (lv.size() == 1)) {
+            return lv.get(0);
+        }
+        return input;
+    }
+
+    @Override
+    public Value select(SelectStrategy strategy, int num) {
+        try {
+            rwLock.writeLock().lock();
+            if (Objects.isNull(strategy)) {
+                return this;
+            }
+            return strategy.select(index, num, this);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ListValue values)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        if (values.index.get() != index.get()) {
+            return false;
+        }
+        return rwLock.equals(values.rwLock);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + index.hashCode();
+        result = 31 * result + rwLock.hashCode();
+        return result;
+    }
 }

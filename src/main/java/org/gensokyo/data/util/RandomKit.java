@@ -5,6 +5,10 @@
  */
 package org.gensokyo.data.util;
 
+import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.value.ListValue;
+import org.gensokyo.data.value.Value;
+
 import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.Collection;
@@ -36,6 +40,34 @@ public final class RandomKit {
 
     private RandomKit() {
         throw new UnsupportedOperationException();
+    }
+
+    public static Value choiceOne(Value value) {
+        return choice(value, 1);
+    }
+
+    public static Value choice(Value value, int num) {
+        if (Objects.isNull(value) || value.isNullOrEmpty()) {
+            return null;
+        }
+        if (num < 1) {
+            throw new DataGeneratorException("选择元素数量不能小于1");
+        }
+        if (value instanceof ListValue lv) {
+            if (num == 1) {
+                int idx = random.nextInt(lv.size());
+                return lv.get(idx);
+            } else {
+                var nlv = new ListValue();
+                //数量大于数据集合的长度时，返回全部数据？
+                for (int i = 0; i < num; ++i) {
+                    int idx = random.nextInt(lv.size());
+                    nlv.add(lv.get(idx));
+                }
+                return nlv;
+            }
+        }
+        return value;
     }
 
     @Nullable

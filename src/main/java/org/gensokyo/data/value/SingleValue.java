@@ -51,4 +51,9 @@ public class SingleValue implements Value {
     public boolean isNullOrEmpty() {
         return Objects.isNull(value);
     }
+
+    @Override
+    public int size() {
+        return 1;
+    }
 }

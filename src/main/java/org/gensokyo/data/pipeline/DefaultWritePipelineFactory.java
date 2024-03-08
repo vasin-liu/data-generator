@@ -7,9 +7,9 @@ package org.gensokyo.data.pipeline;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
+import org.gensokyo.data.context.Context;
 import org.gensokyo.data.po.WriteStagePO;
-import org.gensokyo.data.stage.StageContext;
+import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
@@ -34,15 +34,16 @@ public class DefaultWritePipelineFactory implements PipelineFactory {
         Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getTable().getWriters()), "数据生成配置的表配置中必须至少配置一个写入器");
         var writers = ctx.template().getTable().getWriters();
         for (WriteStagePO wpo : writers) {
-            write(wpo, ctx.dataset());
+            var stageCtx = new StageContext(ctx.template(), null, wpo);
+            write(stageCtx, ctx.dataset());
         }
         //无需返回数据集
         return null;
     }
 
-    private void write(final WriteStagePO wpo, final Value dataset) {
+    private void write(final StageContext ctx, final Value dataset) {
         var pipeline = new DefaultWritePipeline();
-        var stage = stageFactory.newInstance(new StageContext(wpo));
+        var stage = stageFactory.newInstance(ctx);
         pipeline.next(stage).execute(dataset);
     }
 

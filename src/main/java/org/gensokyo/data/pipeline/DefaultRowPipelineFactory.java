@@ -7,21 +7,23 @@ package org.gensokyo.data.pipeline;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.Context;
+import org.gensokyo.data.context.Context;
+import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.constant.StageType;
+import org.gensokyo.data.context.FieldContext;
+import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.FieldPO;
 import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.po.StagePO;
 import org.gensokyo.data.po.TemplatePO;
-import org.gensokyo.data.stage.SelectStage;
-import org.gensokyo.data.stage.Stage;
-import org.gensokyo.data.stage.StageContext;
-import org.gensokyo.data.stage.StageFactory;
+import org.gensokyo.data.stage.*;
+import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
+import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.json.JsonKit;
 import org.jgrapht.graph.DefaultEdge;
@@ -61,12 +63,13 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
             checkRequired(field);
 
             final Value val;
+            final var stageCtx = new FieldContext(ctx.template(), field);
             if (CollectKit.isEmpty(field.getDependsOn())) {
                 //非依赖字段数据生成
-                val = nonDependencyProduce(field, dmv);
+                val = nonDependencyProduce(stageCtx, dmv);
             } else {
                 //依赖其他字段结果的字段生成
-                val = dependencyProduce(field, dmv);
+                val = dependencyProduce(stageCtx, dmv);
             }
             result.put(field.getName(), val);
         }
@@ -75,20 +78,37 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
 
     private void checkRequired(FieldPO field) {
         var stages = field.getStages();
-        if (CollectKit.isEmpty(stages)
-                || stages.stream().noneMatch(stage -> StageType.READ.equals(stage.getType()))) {
-            throw new DataGeneratorException(String.format("字段 [%s] 至少需要配置一个数据读取阶段", field.getName()));
+        if (CollectKit.isEmpty(field.getDependsOn()) && (
+                CollectKit.isEmpty(stages)
+                        || stages.stream().noneMatch(stage -> StageType.READ.equals(stage.getType()))
+        )) {
+            throw new DataGeneratorException(String.format("非依赖字段字段 [%s] 至少需要配置一个数据读取阶段", field.getName()));
         }
 
-        stages.stream()
+        var readStages = stages.stream()
                 .filter(spo -> StageType.READ.equals(spo.getType()))
-                .map(ReadStagePO.class::cast)
-                .forEach(rpo -> {
-                    var readers = rpo.getReaders();
-                    if (CollectKit.isEmpty(readers)) {
-                        throw new DataGeneratorException(String.format("字段 [%s] 数据读取阶段至少需要配置一个数据读取器", field.getName()));
-                    }
-                });
+                .map(ReadStagePO.class::cast).toList();
+
+        if (readStages.stream().filter(r -> StrKit.isEmpty(r.getDataSetId())).count() > 1) {
+            throw new DataGeneratorException(String.format("字段 [%s] 数据有多个读取阶段时，必需指定唯一的数据集ID [dataSetId]，请检查配置是否正确", field.getName()));
+        }
+
+        readStages.forEach(rpo -> {
+            if (StrKit.isEmpty(rpo.getDataSetId())) {
+                //没有设置数据集ID，则设置为当前字段名称
+                rpo.setDataSetId(field.getName());
+            }
+            var readers = rpo.getReaders();
+            if (CollectKit.isEmpty(readers)) {
+                if (CollectKit.isEmpty(field.getDependsOn())) {
+                    throw new DataGeneratorException(String.format("非依赖字段 [%s] 数据读取阶段至少需要配置一个数据读取器", field.getName()));
+                }
+            } else {
+                if (readers.stream().filter(r -> StrKit.isEmpty(r.getDataSetId())).count() > 1) {
+                    throw new DataGeneratorException(String.format("字段 [%s] 数据读取阶段配置多个数据读取器时，必需指定唯一的数据集ID [dataSetId]，请检查配置是否正确", field.getName()));
+                }
+            }
+        });
     }
 
     private MapValue getDependedFields(List<FieldPO> orderedFields) {
@@ -101,19 +121,21 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         return dmv;
     }
 
-    private Value nonDependencyProduce(FieldPO field, MapValue dmv) {
+    private Value nonDependencyProduce(FieldContext ctx, MapValue dmv) {
         //非依赖字段
         var pipeline = new DefaultFieldPipeline();
-        for (StagePO spo : field.getStages()) {
-            var stage = stageFactory.newInstance(new StageContext(spo));
-            addListener(field, stage, dmv);
+        for (StagePO spo : ctx.field().getStages()) {
+            var stageCtx = new StageContext(ctx.template(), ctx.field(), spo);
+            var stage = stageFactory.newInstance(stageCtx);
+            addListener(stageCtx, stage, dmv);
             pipeline.next(stage);
         }
         return pipeline.execute(Value.EMPTY);
     }
 
-    private Value dependencyProduce(FieldPO field, MapValue dmv) {
+    private Value dependencyProduce(FieldContext ctx, MapValue dmv) {
         //生成数据
+        var field = ctx.field();
         var pipeline = new DefaultFieldPipeline();
         var dds = ListValue.fromValueList(field.getDependsOn().stream().map(dmv::get).toList());
         if (dds.isNullOrEmpty()) {
@@ -122,19 +144,32 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                             field.getName(), field.getDependsOn())
             );
         }
+        if (dds.size() == 1) {
+            dds = RandomKit.choiceOne(dds);
+        }
         //依赖其他字段结果的字段
         for (StagePO spo : field.getStages()) {
-            pipeline.next(stageFactory.newInstance(new StageContext(spo)));
+            pipeline.next(stageFactory.newInstance(new StageContext(ctx.template(), ctx.field(), spo)));
         }
         return pipeline.execute(dds);
     }
 
-    private void addListener(FieldPO field, Stage stage, MapValue dmv) {
-        if (stage instanceof SelectStage selectStage && (dmv.containsKey(field.getName()))) {
+    private void addListener(StageContext ctx, Stage stage, MapValue dmv) {
+        var fn = ctx.field().getName();
+        if (stage instanceof SelectStage selectStage && (dmv.containsKey(fn))) {
             //选择后的结果
             selectStage.onDone(output -> {
-                dmv.put(field.getName(), output);
-                log.debug("当前字段 [{}] 选择后的结果为 [{}]", field.getName(), JsonKit.write(output));
+                dmv.put(fn, output);
+                log.debug("当前字段 [{}] 选择后的结果为 [{}]", fn, JsonKit.write(output));
+            });
+        }
+
+        if (stage instanceof ReadStage readStage && ctx.stage() instanceof ReadStagePO rpo && rpo.isInMemory()) {
+            readStage.onDone(output -> {
+                //将读取到的数据缓存至内存中
+                var tdc = DataCache.getOrCreate(ctx.template().getName());
+                tdc.set(rpo.getDataSetId(), output);
+                log.debug("当前字段 [{}] 读取到的数据缓存至内存中", fn);
             });
         }
     }

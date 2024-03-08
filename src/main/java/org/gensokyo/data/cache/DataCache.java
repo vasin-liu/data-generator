@@ -29,8 +29,8 @@ public class DataCache {
 
     private static final Map<String, TableDataCache> CACHE_MAP = new ConcurrentHashMap<>(16);
 
-    public static TableDataCache get(String tableName) {
-        return CACHE_MAP.get(tableName);
+    public static TableDataCache getOrCreate(String tableName) {
+        return CACHE_MAP.computeIfAbsent(tableName, k -> new TableDataCache());
     }
 
     public static void set(String tableName, TableDataCache tableDataCache) {
@@ -73,6 +73,10 @@ public class DataCache {
                 dataMap.remove(key);
             }
             return this;
+        }
+
+        public boolean isEmpty() {
+            return dataMap.isEmpty();
         }
 
         public MapValue toMapValue() {
