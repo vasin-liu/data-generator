@@ -6,6 +6,7 @@
 package org.gensokyo.data.context;
 
 import org.gensokyo.data.po.FieldPO;
+import org.gensokyo.data.po.TablePO;
 import org.gensokyo.data.po.TemplatePO;
 
 import java.io.Serializable;
@@ -15,8 +16,12 @@ import java.io.Serializable;
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2023/1/4 , Version 1.0.0
+ * @since 2024/2/23 , Version 1.0.0
  */
-public record FieldContext(TemplatePO template, FieldPO field) implements Serializable {
+public record FieldContext(TemplatePO template,
+                           FieldPO field) implements Serializable {
 
+    public static FieldContext from(TemplateContext ctx, FieldPO field) {
+        return new FieldContext(ctx.template(), field);
+    }
 }

@@ -7,10 +7,12 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gensokyo.data.constant.ReaderSelectStrategyType;
 import org.gensokyo.data.constant.ReaderType;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据读取阶段配置
@@ -34,6 +36,17 @@ public class ReadStagePO extends StagePO {
     private boolean inMemory = true;
 
     /**
+     * 参数配置（当前只对SQL生效）
+     * key参数变量名，值为通过脚本运行取值（常量不需要使用参数，直接写死在SQL中即可）
+     */
+    private Map<String, ScriptStagePO> params;
+
+    /**
+     * 读取器选择策略，默认使用等值选择策略
+     */
+    private ReaderSelectStrategyType strategyType = ReaderSelectStrategyType.EQUAL;
+
+    /**
      * 数据读取器列表
      */
     private List<ReaderPO> readers;
@@ -41,10 +54,11 @@ public class ReadStagePO extends StagePO {
     @Getter
     @Setter
     public static class ReaderPO implements Serializable {
+
         /**
-         * 数据集ID，唯一标识
+         * 读取器权重，用于权重选择策略
          */
-        private String dataSetId;
+        private int weight = 100;
 
         /**
          * 数据集读取类型
@@ -60,10 +74,5 @@ public class ReadStagePO extends StagePO {
          * 数据集
          */
         private Object dataSet;
-
-        /**
-         * 数据集执行阶段列表
-         */
-        private List<StagePO> stages;
     }
 }

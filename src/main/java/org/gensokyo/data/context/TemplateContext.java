@@ -17,6 +17,6 @@ import java.io.Serializable;
  * @version 1.0.0
  * @since 2023/1/4 , Version 1.0.0
  */
-public record Context(TemplatePO template, Value dataset) implements Serializable {
+public record TemplateContext(TemplatePO template, Value dataset) implements Serializable {
 
 }

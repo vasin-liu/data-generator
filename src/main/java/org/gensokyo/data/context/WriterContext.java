@@ -8,13 +8,17 @@ package org.gensokyo.data.context;
 import org.gensokyo.data.po.*;
 
 /**
- * 阶段上下文
+ * 写入器上下文
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-public record StageContext<T extends StagePO>(TemplatePO template,
-                                              FieldPO field,
-                                              T stage) {
+public record WriterContext(TemplatePO template,
+                            FieldPO field,
+                            WriteStagePO writer) {
+
+    public static WriterContext from(StageContext<WriteStagePO> ctx, WriteStagePO writer) {
+        return new WriterContext(ctx.template(), ctx.field(), writer);
+    }
 }

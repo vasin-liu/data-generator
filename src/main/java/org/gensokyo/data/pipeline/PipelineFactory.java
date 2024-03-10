@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.pipeline;
 
-import org.gensokyo.data.context.Context;
+import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -20,7 +20,7 @@ public interface PipelineFactory {
     /**
      * 启动流水线
      */
-    Value startup(final Context ctx);
+    Value startup(final TemplateContext ctx);
 
     /**
      * 关闭流水线

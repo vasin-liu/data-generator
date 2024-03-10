@@ -57,7 +57,7 @@ public class ConfigCache implements InitializingBean {
                 .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("___"))
                 .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("!"))
                 .forEach(this::readToCache);
-        log.info("已加载元数据信息总计 [{}] 个", cache.size());
+        log.info("已加载元数据信息总计 {} 个", cache.size());
         return true;
     }
 
@@ -69,7 +69,7 @@ public class ConfigCache implements InitializingBean {
                 .flatMap(location -> Stream.of(getResources(location)))
                 .filter(r -> Objects.equals(r.getFilename(), templateName))
                 .forEach(this::readToCache);
-        log.info("已重新加载模板文件： [{}] ", templateName);
+        log.info("已重新加载模板文件： {} ", templateName);
         return true;
     }
 
@@ -87,9 +87,9 @@ public class ConfigCache implements InitializingBean {
         TemplatePO meta = yamlParser.parse(r.getFile(), TemplatePO.class);
         if (Objects.nonNull(meta)) {
             cache.put(meta.getName(), meta);
-            log.info("已加载模板文件： [{}] ", r.getFilename());
+            log.info("已加载模板文件： {} ", r.getFilename());
         } else {
-            log.error("加载模板文件失败： [{}] ", r.getFilename());
+            log.error("加载模板文件失败： {} ", r.getFilename());
         }
     }
 

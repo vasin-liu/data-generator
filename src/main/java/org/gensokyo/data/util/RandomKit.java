@@ -35,8 +35,8 @@ public final class RandomKit {
     private static final char[] ALPHA_CHAR = ALPHA.toCharArray();
     private static final String ALPHA_NUMERIC = ALPHA_UPPER + ALPHA_LOWER + DIGITS;
     private static final char[] ALPHA_NUMERIC_CHAR = ALPHA_NUMERIC.toCharArray();
-    private static final SecureRandom random = new SecureRandom();
-    private static final SnowFlake snowFlake = new SnowFlake(1, 1);
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final SnowFlake SNOW_FLAKE = new SnowFlake(1, 1);
 
     private RandomKit() {
         throw new UnsupportedOperationException();
@@ -55,13 +55,13 @@ public final class RandomKit {
         }
         if (value instanceof ListValue lv) {
             if (num == 1) {
-                int idx = random.nextInt(lv.size());
+                int idx = RANDOM.nextInt(lv.size());
                 return lv.get(idx);
             } else {
                 var nlv = new ListValue();
                 //数量大于数据集合的长度时，返回全部数据？
                 for (int i = 0; i < num; ++i) {
-                    int idx = random.nextInt(lv.size());
+                    int idx = RANDOM.nextInt(lv.size());
                     nlv.add(lv.get(idx));
                 }
                 return nlv;
@@ -76,7 +76,7 @@ public final class RandomKit {
             return null;
         }
         List<T> list = List.copyOf(data);
-        int idx = random.nextInt(list.size());
+        int idx = RANDOM.nextInt(list.size());
         return list.get(idx);
     }
 
@@ -93,7 +93,7 @@ public final class RandomKit {
         }
         char[] buf = new char[length];
         for (int idx = 0; idx < length; ++idx) {
-            buf[idx] = symbols[random.nextInt(symbols.length)];
+            buf[idx] = symbols[RANDOM.nextInt(symbols.length)];
         }
         return new String(buf);
     }
@@ -119,10 +119,14 @@ public final class RandomKit {
     }
 
     public static String numeric(int origin, int bound) {
-        return String.valueOf(random.nextInt(origin, bound));
+        return String.valueOf(RANDOM.nextInt(origin, bound));
     }
 
     public static long id() {
-        return snowFlake.nextId();
+        return SNOW_FLAKE.nextId();
+    }
+
+    public static int nextInt(int origin, int bound) {
+        return RANDOM.nextInt(origin, bound);
     }
 }

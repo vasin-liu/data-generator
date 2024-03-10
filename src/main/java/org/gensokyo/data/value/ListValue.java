@@ -6,8 +6,9 @@
 package org.gensokyo.data.value;
 
 import org.gensokyo.data.constant.ValueType;
+import org.gensokyo.data.po.SelectStagePO;
 import org.gensokyo.data.select.Select;
-import org.gensokyo.data.select.strategy.SelectStrategy;
+import org.gensokyo.data.select.strategy.ValueSelectStrategy;
 import org.gensokyo.kit.collect.CollectKit;
 
 import java.util.Collection;
@@ -26,7 +27,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @since 2024/2/27 , Version 1.0.0
  */
 public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Select {
+    /**
+     * 当前选择的索引下标
+     */
     private final AtomicInteger index = new AtomicInteger(0);
+    /**
+     * 已选择的元素次数
+     */
+    private final AtomicInteger selectedCount = new AtomicInteger(0);
 
     private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
@@ -61,8 +69,20 @@ public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Sel
         return isEmpty() ? EMPTY : get(0);
     }
 
+    public ListValue addValue(Value value) {
+        if (Objects.isNull(value) || value.isNullOrEmpty()) {
+            return this;
+        }
+        if (value instanceof ListValue lv) {
+            this.addAll(lv);
+        } else {
+            this.add(value);
+        }
+        return this;
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static Value fromObjectList(List<Object> values) {
+    public static Value fromObjectCollection(Collection<Object> values) {
         if (CollectKit.isEmpty(values)) {
             return EMPTY;
         }
@@ -71,7 +91,7 @@ public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Sel
             if (v instanceof Value v1) {
                 result.add(v1);
             } else if (v instanceof Collection<?> c) {
-                result.add(fromObjectList(List.copyOf(c)));
+                result.add(fromObjectCollection(List.copyOf(c)));
             } else if (v instanceof Map m) {
                 result.add(MapValue.fromMap(m));
             } else {
@@ -81,14 +101,14 @@ public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Sel
         return result;
     }
 
-    public static Value fromValueList(List<Value> values) {
+    public static Value fromValueCollection(Collection<Value> values) {
         if (CollectKit.isEmpty(values)) {
             return EMPTY;
         }
         return new ListValue(values);
     }
 
-    public static Value fromMapList(List<Map<String, Object>> values) {
+    public static Value fromMapCollection(Collection<Map<String, Object>> values) {
         if (CollectKit.isEmpty(values)) {
             return EMPTY;
         }
@@ -97,24 +117,14 @@ public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Sel
         return result;
     }
 
-    public static Value extract(Value input) {
-        if (Objects.isNull(input)) {
-            return null;
-        }
-        if (input instanceof ListValue lv && (lv.size() == 1)) {
-            return lv.get(0);
-        }
-        return input;
-    }
-
     @Override
-    public Value select(SelectStrategy strategy, int num) {
+    public Value select(ValueSelectStrategy strategy, SelectStagePO spo) {
         try {
             rwLock.writeLock().lock();
             if (Objects.isNull(strategy)) {
                 return this;
             }
-            return strategy.select(index, num, this);
+            return strategy.select(index, selectedCount, spo, this);
         } finally {
             rwLock.writeLock().unlock();
         }

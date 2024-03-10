@@ -26,7 +26,6 @@ table:
           readers:
             - type: DIRECT_SPEL
               dataSet: "#faker.snowflake.next"
-#        - type: select
     - name: SCHOOL_ID
       stages:
         - type: read
@@ -34,7 +33,7 @@ table:
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
-              dataSet: "SELECT ID,NAME FROM DTEM_DRIVING_SCHOOL WHERE STATUS = 'S0A'"
+              dataSet: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
         - type: select
         - type: script
           scriptType: SPEL
@@ -46,6 +45,23 @@ table:
         - type: script
           scriptType: SPEL
           content: "#dataset.NAME"
+    - name: CERT_NO
+      dependsOn:
+        - SCHOOL_ID
+      stages:
+        - type: read
+          params:
+            schoolId:
+              type: script
+              content: "#dataset.ID"
+          readers:
+            - type: JDBC
+              dataSourceId: 'tocc_driving_school'
+              dataSet: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
+        - type: select
+        - type: script
+          scriptType: SPEL
+          content: "#dataset.RECORD_NO"
     - name: SEQ_NO
       stages:
         - type: read
@@ -54,13 +70,6 @@ table:
             - type: CONSTANT
               dataSet: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         - type: select
-          strategyType: ONCE_RANDOM
+          strategyType: ONCE_ORDER
   writers:
-    - #目标数据集类型
-      writerType: CONSOLE
-      #数据源编号
-      dataSourceId: 'tocc_driving_school'
-      # 表名/索引名/主题名
-      target: 'dtem_coach'
-      #数据写入模板
-      template: "ID,SCHOOL_ID"
+    - writerType: CONSOLE

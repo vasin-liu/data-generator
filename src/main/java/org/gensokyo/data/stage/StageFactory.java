@@ -7,6 +7,7 @@ package org.gensokyo.data.stage;
 
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.context.StageContext;
+import org.gensokyo.data.po.*;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
@@ -23,12 +24,13 @@ public class StageFactory {
 
     private final AutowireCapableBeanFactory beanFactory;
 
-    public @NonNull Stage newInstance(final StageContext ctx) {
+    @SuppressWarnings("unchecked")
+    public @NonNull <T extends StagePO> Stage newInstance(final StageContext<T> ctx) {
         var stage = switch (ctx.stage().getType()) {
-            case READ -> new ReadStage(ctx);
-            case SELECT -> new SelectStage(ctx);
-            case SCRIPT -> new ScriptStage(ctx);
-            case WRITE -> new WriteStage(ctx);
+            case READ -> new ReadStage((StageContext<ReadStagePO>) ctx);
+            case SELECT -> new SelectStage((StageContext<SelectStagePO>) ctx);
+            case SCRIPT -> new ScriptStage((StageContext<ScriptStagePO>) ctx);
+            case WRITE -> new WriteStage((StageContext<WriteStagePO>) ctx);
             default -> null;
         };
         Assert.notNull(stage, "未找到类型为 " + ctx.stage().getType() + " 的数据处理器类");

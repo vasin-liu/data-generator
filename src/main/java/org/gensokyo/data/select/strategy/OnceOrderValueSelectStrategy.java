@@ -6,6 +6,8 @@
 package org.gensokyo.data.select.strategy;
 
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
 
@@ -18,17 +20,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0.0
  * @since 2023/10/26 , Version 1.0.0
  */
-public class OnceOrderSelectStrategy implements SelectStrategy {
+public class OnceOrderValueSelectStrategy implements ValueSelectStrategy {
     @Override
-    public Value select(AtomicInteger index, int num, Value input) {
+    public Value select(final AtomicInteger index, final AtomicInteger selectedCount,
+                        final SelectStagePO spo, final Value input) {
+        var num = spo.getSelectNum();
         if (input.size() < num) {
-            throw new DataGeneratorException(String.format("当前数据集的数据 [%s] 数量小于需要的数量 [%s]",
+            throw new DataGeneratorException(String.format("当前数据集的数据 %s 数量小于需要的数量 %s",
                     input.size(), num));
         }
         var result = input;
         if (input instanceof ListValue lv) {
             var subList = lv.subList(0, num);
-            result = ListValue.extract(ListValue.fromValueList(subList));
+            result = DatasetKit.extractValue(ListValue.fromValueCollection(subList));
             lv.removeAll(subList);
         }
         return result;

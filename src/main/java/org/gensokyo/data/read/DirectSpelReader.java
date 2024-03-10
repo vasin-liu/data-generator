@@ -5,15 +5,14 @@
  */
 package org.gensokyo.data.read;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
+import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -29,29 +28,20 @@ import java.util.function.Supplier;
  * @since 2024/2/26 , Version 1.0.0
  */
 @Slf4j
-public class DirectSpelReader extends AbstractReader implements InitializingBean {
-    private final SpelExpressionParser parser;
-    private final StandardEvaluationContext sec;
+@RequiredArgsConstructor
+public class DirectSpelReader implements Reader {
 
-    private DataFaker dataFaker;
-
-    @Autowired
-    public void setDataFaker(DataFaker dataFaker) {
-        this.dataFaker = dataFaker;
-    }
-
-    public DirectSpelReader(final ReadStagePO.ReaderPO rpo) {
-        super(Objects.requireNonNull(rpo));
-        this.parser = new SpelExpressionParser();
-        this.sec = new StandardEvaluationContext();
-    }
+    private final DataFaker dataFaker;
 
     @Override
-    public Value read(final Value input) {
+    public Value read(final ReaderContext ctx, final Value input) {
+        var parser = new SpelExpressionParser();
+        var sec = new StandardEvaluationContext();
+        sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
         final String rightBrace1 = "{";
         final String rightBrace2 = "#{";
         final String leftBrace = "}";
-        if (rpo.getDataSet() instanceof String dataset) {
+        if (ctx.reader().getDataSet() instanceof String dataset) {
             try {
                 if (!dataset.startsWith(rightBrace1) && !dataset.startsWith(rightBrace2)) {
                     dataset = rightBrace1.concat(dataset);
@@ -63,16 +53,11 @@ public class DirectSpelReader extends AbstractReader implements InitializingBean
                 Supplier<Object> evalResult = () -> parser.parseExpression(script).getValue(sec, List.class);
                 return SingleValue.of(evalResult);
             } catch (Exception e) {
-                log.error("Reader [{}] 在执行表达式 [{}] 出现异常：", rpo.getDataSetId(), dataset);
-                throw new DataGeneratorException("执行表达式出现异常", e);
+                throw new DataGeneratorException(String.format("字段 %s 在执行 %s 类型表达式 %s 出现异常：",
+                        ctx.field().getName(), ctx.reader().getType(), ctx.reader().getDataSet()), e);
             }
         }
         return Value.EMPTY;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        this.sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
     }
 }
 

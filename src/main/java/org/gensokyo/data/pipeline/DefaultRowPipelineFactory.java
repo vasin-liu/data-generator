@@ -7,7 +7,7 @@ package org.gensokyo.data.pipeline;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.context.Context;
+import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.constant.StageType;
 import org.gensokyo.data.context.FieldContext;
@@ -48,7 +48,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
     private final StageFactory stageFactory;
 
     @Override
-    public Value startup(Context ctx) {
+    public Value startup(TemplateContext ctx) {
         Assert.notNull(ctx.template(), "数据生成模板配置不能为空");
         Assert.notNull(ctx.template().getTable(), "数据生成模板表配置不能为空");
         Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getTable().getFields()), "数据生成模板表字段配置不能为空");
@@ -63,7 +63,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
             checkRequired(field);
 
             final Value val;
-            final var stageCtx = new FieldContext(ctx.template(), field);
+            final var stageCtx = FieldContext.from(ctx, field);
             if (CollectKit.isEmpty(field.getDependsOn())) {
                 //非依赖字段数据生成
                 val = nonDependencyProduce(stageCtx, dmv);
@@ -82,7 +82,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                 CollectKit.isEmpty(stages)
                         || stages.stream().noneMatch(stage -> StageType.READ.equals(stage.getType()))
         )) {
-            throw new DataGeneratorException(String.format("非依赖字段字段 [%s] 至少需要配置一个数据读取阶段", field.getName()));
+            throw new DataGeneratorException(String.format("非依赖字段字段 %s 至少需要配置一个数据读取阶段", field.getName()));
         }
 
         var readStages = stages.stream()
@@ -90,23 +90,13 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                 .map(ReadStagePO.class::cast).toList();
 
         if (readStages.stream().filter(r -> StrKit.isEmpty(r.getDataSetId())).count() > 1) {
-            throw new DataGeneratorException(String.format("字段 [%s] 数据有多个读取阶段时，必需指定唯一的数据集ID [dataSetId]，请检查配置是否正确", field.getName()));
+            throw new DataGeneratorException(String.format("字段 %s 数据有多个读取阶段时，必需指定唯一的数据集ID [dataSetId]，请检查配置是否正确", field.getName()));
         }
 
         readStages.forEach(rpo -> {
             if (StrKit.isEmpty(rpo.getDataSetId())) {
                 //没有设置数据集ID，则设置为当前字段名称
                 rpo.setDataSetId(field.getName());
-            }
-            var readers = rpo.getReaders();
-            if (CollectKit.isEmpty(readers)) {
-                if (CollectKit.isEmpty(field.getDependsOn())) {
-                    throw new DataGeneratorException(String.format("非依赖字段 [%s] 数据读取阶段至少需要配置一个数据读取器", field.getName()));
-                }
-            } else {
-                if (readers.stream().filter(r -> StrKit.isEmpty(r.getDataSetId())).count() > 1) {
-                    throw new DataGeneratorException(String.format("字段 [%s] 数据读取阶段配置多个数据读取器时，必需指定唯一的数据集ID [dataSetId]，请检查配置是否正确", field.getName()));
-                }
             }
         });
     }
@@ -125,7 +115,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         //非依赖字段
         var pipeline = new DefaultFieldPipeline();
         for (StagePO spo : ctx.field().getStages()) {
-            var stageCtx = new StageContext(ctx.template(), ctx.field(), spo);
+            var stageCtx = new StageContext<>(ctx.template(), ctx.field(), spo);
             var stage = stageFactory.newInstance(stageCtx);
             addListener(stageCtx, stage, dmv);
             pipeline.next(stage);
@@ -137,10 +127,10 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         //生成数据
         var field = ctx.field();
         var pipeline = new DefaultFieldPipeline();
-        var dds = ListValue.fromValueList(field.getDependsOn().stream().map(dmv::get).toList());
+        var dds = ListValue.fromValueCollection(field.getDependsOn().stream().map(dmv::get).toList());
         if (dds.isNullOrEmpty()) {
             throw new DataGeneratorException(
-                    String.format("当前字段 [%s] 依赖的字段 [%s] 未在当前数据集中找到，请检查配置是否正确",
+                    String.format("当前字段 %s 依赖的字段 %s 未在当前数据集中找到，请检查配置是否正确",
                             field.getName(), field.getDependsOn())
             );
         }
@@ -149,18 +139,18 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         }
         //依赖其他字段结果的字段
         for (StagePO spo : field.getStages()) {
-            pipeline.next(stageFactory.newInstance(new StageContext(ctx.template(), ctx.field(), spo)));
+            pipeline.next(stageFactory.newInstance(new StageContext<>(ctx.template(), ctx.field(), spo)));
         }
         return pipeline.execute(dds);
     }
 
-    private void addListener(StageContext ctx, Stage stage, MapValue dmv) {
+    private void addListener(StageContext<?> ctx, Stage stage, MapValue dmv) {
         var fn = ctx.field().getName();
         if (stage instanceof SelectStage selectStage && (dmv.containsKey(fn))) {
             //选择后的结果
             selectStage.onDone(output -> {
                 dmv.put(fn, output);
-                log.debug("当前字段 [{}] 选择后的结果为 [{}]", fn, JsonKit.write(output));
+                log.debug("当前字段 {} 选择后的结果为 {}", fn, JsonKit.write(output));
             });
         }
 
@@ -169,7 +159,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                 //将读取到的数据缓存至内存中
                 var tdc = DataCache.getOrCreate(ctx.template().getName());
                 tdc.set(rpo.getDataSetId(), output);
-                log.debug("当前字段 [{}] 读取到的数据缓存至内存中", fn);
+                log.debug("当前字段 {} 读取到的数据缓存至内存中", fn);
             });
         }
     }
@@ -195,7 +185,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                         dag.addEdge(df, field);
                     } else {
                         throw new DataGeneratorException(
-                                String.format("当前字段 [%s] 依赖的字段 [%s] 未在当前模板 [%s] 的配置表中找到，请检查配置是否正确",
+                                String.format("当前字段 %s 依赖的字段 %s 未在当前模板 %s 的配置表中找到，请检查配置是否正确",
                                         field.getName(), fn, template.getName())
                         );
                     }

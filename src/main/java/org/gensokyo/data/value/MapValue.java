@@ -66,7 +66,7 @@ public class MapValue extends ConcurrentHashMap<String, Value> implements Value 
             if (v instanceof Value v1) {
                 result.put(k, v1);
             } else if (v instanceof Collection<?> c) {
-                result.put(k, ListValue.fromObjectList(List.copyOf(c)));
+                result.put(k, ListValue.fromObjectCollection(List.copyOf(c)));
             } else if (v instanceof Map m) {
                 result.put(k, fromMap(m));
             } else {

@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.script;
 
+import org.gensokyo.data.po.ScriptStagePO;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -14,11 +15,7 @@ import org.gensokyo.data.value.Value;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-public interface Script extends AutoCloseable {
+public interface Script {
 
-    default Value eval(String script, Value dataset, Object... args) {
-        return eval(dataset, args);
-    }
-
-    Value eval(Value dataset, Object... args);
+    Value eval(final ScriptStagePO spo, final Value dataset, Object... args);
 }

@@ -26,13 +26,15 @@ public class WriterFactory {
 
     public @NonNull Writer newInstance(WriteStagePO wpo) {
         var writer = switch (Objects.requireNonNull(wpo).getWriterType()) {
-            case CONSOLE -> new ConsoleWriter(wpo);
-            case JDBC -> new JdbcWriter(wpo);
-            default -> null;
+            case CONSOLE -> beanFactory.getBean(ConsoleWriter.class);
+            case JDBC -> beanFactory.getBean(JdbcWriter.class);
+            case KAFKA -> beanFactory.getBean(KafkaWriter.class);
+            case MYSQL -> beanFactory.getBean(MySQLWriter.class);
+            case POSTGRES -> beanFactory.getBean(PostgresWriter.class);
+            case ELASTICSEARCH -> beanFactory.getBean(ElasticsearchWriter.class);
+            case CLICKHOUSE -> beanFactory.getBean(ClickHouseWriter.class);
         };
         Assert.notNull(writer, "未找到类型为 " + wpo.getType() + " 的数据写入器类");
-        beanFactory.autowireBean(writer);
-        beanFactory.initializeBean(writer, writer.getClass().getSimpleName());
         return writer;
     }
 }

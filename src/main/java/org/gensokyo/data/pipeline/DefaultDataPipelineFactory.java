@@ -8,7 +8,8 @@ package org.gensokyo.data.pipeline;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataCache;
-import org.gensokyo.data.context.Context;
+import org.gensokyo.data.context.TemplateContext;
+import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.util.DatetimeKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
@@ -42,7 +43,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
-    public Value startup(final Context ctx) {
+    public Value startup(final TemplateContext ctx) {
         Assert.notNull(ctx, "数据生成上下文不能为空");
         Assert.notNull(ctx.template(), "数据生成模板配置不能为空");
         var template = ctx.template();
@@ -52,7 +53,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         return Value.EMPTY;
     }
 
-    private void doBatch(int pageSize, int total, final Context ctx) {
+    private void doBatch(int pageSize, int total, final TemplateContext ctx) {
         var stopWatch = new StopWatch();
         stopWatch.start();
         int pages = (total + pageSize - 1) / pageSize;
@@ -68,7 +69,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         log.info("当前批量任务执行完成，总计耗时：{} ", DatetimeKit.humanized(stopWatch.getTotalTimeMillis()));
     }
 
-    private void doJob(int index, int size, final Context ctx) {
+    private void doJob(int index, int size, final TemplateContext ctx) {
         final List<Value> data = new CopyOnWriteArrayList<>();
         try {
             List<CompletableFuture<Value>> futures = new ArrayList<>();
@@ -76,7 +77,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
             for (int i = 0; i < size; i++) {
                 //生成一行数据
                 final int ii = i;
-                var rowCtx = new Context(ctx.template(), ctx.dataset());
+                var rowCtx = new TemplateContext(ctx.template(), ctx.dataset());
                 if (initialized.get()) {
                     CompletableFuture<Value> future = supplyAsync(() -> defaultRowPipelineFactory.startup(rowCtx), executor)
                             .whenComplete((r, e) -> {
@@ -84,7 +85,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                                 if (Objects.isNull(e)) {
                                     data.add(r);
                                 } else {
-                                    log.error(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", index, ii), e);
+                                    throw new DataGeneratorException(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", index, ii), e);
                                 }
                             });
                     futures.add(future);
@@ -93,24 +94,24 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                     data.add(loadDataToMemory(rowCtx));
                 }
             }
-            allOf(futures.toArray(new CompletableFuture[]{})).join();
+            allOf(futures.toArray(new CompletableFuture[]{})).get();
             //写入数据
-            defaultWritePipelineFactory.startup(new Context(ctx.template(), ListValue.fromValueList(data)));
+            defaultWritePipelineFactory.startup(new TemplateContext(ctx.template(), ListValue.fromValueCollection(data)));
         } catch (Exception e) {
             log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
         }
     }
 
-    private Value loadDataToMemory(final Context ctx) {
+    private Value loadDataToMemory(final TemplateContext ctx) {
         //先执行一行记录生成缓存数据
         var result = Value.EMPTY;
         var tdc = DataCache.getOrCreate(ctx.template().getName());
         if (tdc.isEmpty()) {
-            var rowCtx = new Context(ctx.template(), ctx.dataset());
+            var rowCtx = new TemplateContext(ctx.template(), ctx.dataset());
             result = defaultRowPipelineFactory.startup(rowCtx);
             //初始化完成
             initialized.compareAndSet(false, true);
-            log.info("模板 [{}] 所需的缓存数据已加载完毕", ctx.template().getName());
+            log.info("模板 {} 所需的缓存数据已加载完毕", ctx.template().getName());
         }
         return result;
     }

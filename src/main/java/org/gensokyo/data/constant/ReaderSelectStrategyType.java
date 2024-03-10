@@ -12,7 +12,7 @@ package org.gensokyo.data.constant;
  * @version 1.0.0
  * @since 2023/10/26 , Version 1.0.0
  */
-public enum SelectStrategyType {
+public enum ReaderSelectStrategyType {
 
-    REPEAT_RANDOM, REPEAT_ORDER, ONCE_RANDOM, ONCE_ORDER
+    EQUAL, WEIGHT
 }

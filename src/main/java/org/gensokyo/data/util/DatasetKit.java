@@ -10,14 +10,17 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.po.WriteStagePO;
+import org.gensokyo.data.value.ListValue;
+import org.gensokyo.data.value.MapValue;
+import org.gensokyo.data.value.SingleValue;
+import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.character.StrKit;
+import org.gensokyo.kit.collect.CollectKit;
+import org.springframework.util.CollectionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +34,65 @@ import java.util.stream.Collectors;
 public class DatasetKit {
     private DatasetKit() {
         throw new UnsupportedOperationException();
+    }
+
+    public static Value extractValue(Value input) {
+        if (Objects.isNull(input)) {
+            return Value.EMPTY;
+        }
+
+        if (input instanceof ListValue lv) {
+            if (lv.isNullOrEmpty() || lv.size() > 1) {
+                return lv;
+            }
+            return lv.first();
+        }
+
+        return input;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Value toValue(Object dataset) {
+        if (Objects.isNull(dataset)) {
+            return Value.EMPTY;
+        }
+
+        if (dataset instanceof Value val) {
+            return extractValue(val);
+        }
+
+        if (dataset instanceof Collection<?> coll) {
+            return extractCollection(coll);
+        }
+
+        if (dataset instanceof Map map) {
+            return MapValue.fromMap(map);
+        }
+
+        return SingleValue.of(dataset);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Value extractCollection(Collection<?> coll) {
+        if (CollectKit.isEmpty(coll)) {
+            return Value.EMPTY;
+        }
+        int size = coll.size();
+
+        Class<?> type = CollectionUtils.findCommonElementType(coll);
+        if (Objects.nonNull(type) && Value.class.isAssignableFrom(type)) {
+            if (size > 1) {
+                return ListValue.fromValueCollection(new ArrayList<>((Collection<? extends Value>) coll));
+            } else {
+                return SingleValue.of(coll.stream().findFirst().orElse(null));
+            }
+        }
+
+        if (size > 1) {
+            return ListValue.fromObjectCollection(new ArrayList<>(coll));
+        } else {
+            return SingleValue.of(coll.stream().findFirst().orElse(null));
+        }
     }
 
     public static List<Object> toList(Object dataset) {

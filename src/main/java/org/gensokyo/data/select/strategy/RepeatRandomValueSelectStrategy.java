@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.select.strategy;
 
+import org.gensokyo.data.po.SelectStagePO;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
 
@@ -17,9 +18,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0.0
  * @since 2023/10/26 , Version 1.0.0
  */
-public class RepeatRandomSelectStrategy implements SelectStrategy {
+public class RepeatRandomValueSelectStrategy implements ValueSelectStrategy {
     @Override
-    public Value select(AtomicInteger index, int num, Value input) {
+    public Value select(final AtomicInteger index, final AtomicInteger selectedCount,
+                        final SelectStagePO spo, final Value input) {
+        var num = spo.getSelectNum();
         return RandomKit.choice(input, num);
     }
 }

@@ -5,10 +5,13 @@
  */
 package org.gensokyo.data.script;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
+import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
 import org.gensokyo.data.po.ScriptStagePO;
-import org.gensokyo.data.value.SingleValue;
+import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.character.StrKit;
 import org.springframework.context.expression.MapAccessor;
@@ -24,43 +27,30 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
+@Slf4j
+@RequiredArgsConstructor
 public class SpelScript implements Script {
 
-    private SpelExpressionParser parser;
-    private StandardEvaluationContext sec;
-    private ScriptStagePO spo;
+    private final SpelExpressionParser parser = new SpelExpressionParser();
 
-    public SpelScript(final ScriptStagePO spo) {
-        this.spo = Objects.requireNonNull(spo);
-        this.parser = new SpelExpressionParser();
-        this.sec = new StandardEvaluationContext();
-        this.sec.addPropertyAccessor(new MapAccessor());
-    }
-
-    public SpelScript dataFaker(DataFaker dataFaker) {
-        this.sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
-        return this;
-    }
+    private final DataFaker dataFaker;
 
     @Override
-    public Value eval(Value dataset, Object... args) {
+    public Value eval(final ScriptStagePO spo, final Value dataset, Object... args) {
         if (StrKit.isNotBlank(spo.getContent())) {
-            this.sec.setVariable(Const.SCRIPT_VAR_DATASET, dataset.get());
-            Object result = parser.parseExpression(spo.getContent()).getValue(this.sec);
-            if (Objects.nonNull(result)) {
-                return SingleValue.of(result);
+            var dv = dataset.get();
+            try {
+                var sec = new StandardEvaluationContext();
+                sec.addPropertyAccessor(new MapAccessor());
+                sec.setVariable(Const.SCRIPT_VAR_DATASET, dv);
+                sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
+                Object result = parser.parseExpression(spo.getContent()).getValue(sec);
+                return DatasetKit.toValue(result);
+            } catch (Exception e) {
+                throw new DataGeneratorException(String.format("执行脚本出现异常，脚本类型：%s，脚本内容：%s，执行对象值为：%s",
+                        spo.getScriptType(), spo.getContent(), dv));
             }
         }
         return dataset;
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.sec.setVariable(Const.SCRIPT_VAR_FAKER, null);
-        this.sec.setVariable(Const.SCRIPT_VAR_DATASET, null);
-        //set null
-        this.sec = null;
-        this.spo = null;
-        this.parser = null;
     }
 }

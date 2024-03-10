@@ -10,6 +10,7 @@ import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.event.OnDoneListener;
 import org.gensokyo.data.event.OnExceptionListener;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.StagePO;
 import org.gensokyo.data.value.Value;
 
 import java.util.Objects;
@@ -22,13 +23,13 @@ import java.util.Objects;
  * @since 2024/2/28 , Version 1.0.0
  */
 @Slf4j
-public abstract class AbstractStage implements Stage {
+public abstract class AbstractStage<T extends StagePO> implements Stage {
     private OnDoneListener onDoneListener;
     private OnExceptionListener onExceptionListener;
 
-    protected final StageContext ctx;
+    protected final StageContext<T> ctx;
 
-    protected AbstractStage(StageContext ctx) {
+    protected AbstractStage(StageContext<T> ctx) {
         this.ctx = ctx;
     }
 

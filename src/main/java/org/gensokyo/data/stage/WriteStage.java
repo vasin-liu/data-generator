@@ -7,12 +7,14 @@ package org.gensokyo.data.stage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
+import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.data.write.WriterFactory;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -25,10 +27,10 @@ import java.util.*;
  * @since 2024/2/23 , Version 1.0.0
  */
 @Slf4j
-public class WriteStage extends AbstractStage {
+public class WriteStage extends AbstractStage<WriteStagePO> {
     private WriterFactory writerFactory;
 
-    public WriteStage(StageContext ctx) {
+    public WriteStage(StageContext<WriteStagePO> ctx) {
         super(ctx);
     }
 
@@ -43,13 +45,15 @@ public class WriteStage extends AbstractStage {
             return Value.EMPTY;
         }
         var data = extract(input);
-        if (ctx.stage() instanceof WriteStagePO wpo) {
-            long rows = writerFactory.newInstance(wpo).write(data);
+        var wpo = ctx.stage();
+        try {
+            var writerCtx = WriterContext.from(ctx, wpo);
+            long rows = writerFactory.newInstance(wpo).write(writerCtx, data);
             log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。",
                     wpo.getDataSourceId(), wpo.getTarget(), rows);
-        } else {
-            throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
-                    WriteStagePO.class.getName(), ctx.stage().getClass().getName()));
+        } catch (Exception e) {
+            throw new DataGeneratorException(String.format("字段 %s 的执行数据写入阶段失败，写入类型为：%s ，目标数据源编号为：%s ，写入模板为：%s ，输入值为：%s。",
+                    ctx.field().getName(), wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTemplate(), JsonKit.write(input.get())), e);
         }
 
         return input;
@@ -59,17 +63,18 @@ public class WriteStage extends AbstractStage {
         if (input instanceof ListValue lv) {
             return extractList(lv);
         }
-        throw new DataGeneratorException(String.format("当前阶段要求的输入值类型为：[%s] ，实际的输入值类型为：[%s]",
+        throw new DataGeneratorException(String.format("当前阶段要求的输入值类型为：%s ，实际的输入值类型为：%s",
                 ListValue.class.getName(), input.getClass().getName()));
     }
 
-    private List<Map<String,Object>> extractList(ListValue lv) {
+    private List<Map<String, Object>> extractList(ListValue lv) {
         List<Map<String, Object>> rows = new ArrayList<>(64);
         for (Value value : lv) {
             if (value instanceof MapValue mv) {
                 rows.add(extractMap(mv));
             } else {
-                throw new DataGeneratorException(String.format("不支持的元素类型：%s", value.getClass().getName()));
+                throw new DataGeneratorException(String.format("写入阶段要求的结果集的元素类型为：%s ，实际的元素类型为：%s",
+                        MapValue.class.getName(), value.getClass().getName()));
             }
         }
         return rows;

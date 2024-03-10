@@ -25,15 +25,13 @@ public class ReaderFactory {
 
     public @NonNull Reader newInstance(final ReadStagePO.ReaderPO rpo) {
         var reader = switch (rpo.getType()) {
-            case JDBC -> new JdbcReader(rpo);
-            case SPEL -> new SpelReader(rpo);
-            case DIRECT_SPEL -> new DirectSpelReader(rpo);
-            case CONSTANT -> new ConstantReader(rpo);
+            case JDBC -> beanFactory.getBean(JdbcReader.class);
+            case SPEL -> beanFactory.getBean(SpelReader.class);
+            case DIRECT_SPEL -> beanFactory.getBean(DirectSpelReader.class);
+            case CONSTANT -> beanFactory.getBean(ConstantReader.class);
             default -> null;
         };
         Assert.notNull(reader, "未找到类型为 " + rpo.getType() + " 的数据读取器类");
-        beanFactory.autowireBean(reader);
-        beanFactory.initializeBean(reader, reader.getClass().getSimpleName());
         return reader;
     }
 }

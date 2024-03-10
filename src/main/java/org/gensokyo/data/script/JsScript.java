@@ -9,8 +9,10 @@ import com.oracle.truffle.js.runtime.JSContextOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.ScriptStagePO;
+import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.util.RandomKit;
-import org.gensokyo.data.value.ListValue;
+import org.gensokyo.kit.character.StrKit;
+import org.gensokyo.kit.collect.CollectKit;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
@@ -32,13 +34,11 @@ import java.util.Objects;
  */
 @Slf4j
 public class JsScript implements Script {
-    private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-    private ScriptStagePO spo;
-    private org.graalvm.polyglot.Context jsCtx;
+    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    private final org.graalvm.polyglot.Context jsCtx;
     private static final String LANGUAGE = "js";
 
-    public JsScript(final ScriptStagePO spo) {
-        this.spo = Objects.requireNonNull(spo);
+    public JsScript() {
         System.setProperty("polyglot.js.nashorn-compat", "true");
         var engine = Engine.newBuilder()
                 //允许从远程加载脚本文件
@@ -57,23 +57,26 @@ public class JsScript implements Script {
 
     @SuppressWarnings("unchecked")
     @Override
-    public org.gensokyo.data.value.Value eval(org.gensokyo.data.value.Value dataset, Object... args) {
-        if (StringUtils.hasText(spo.getContent())) {
+    public org.gensokyo.data.value.Value eval(final ScriptStagePO spo,
+                                              final org.gensokyo.data.value.Value dataset,
+                                              Object... args) {
+        if (StrKit.isNotBlank(spo.getContent())) {
+            var dv = dataset.get();
             try {
                 Source js = createScriptSource(spo.getContent());
                 Value value = jsCtx.eval(js);
                 if (value.canExecute()) {
-                    var result = value.execute(dataset.get(), args).as(List.class);
-                    if (Objects.nonNull(result)) {
-                        return new ListValue(result);
+                    var result = value.execute(dv, args).as(List.class);
+                    if (CollectKit.isNotEmpty(result)) {
+                        return DatasetKit.extractCollection(result);
                     }
                 } else {
-                    log.error("当前脚本无法执行：{}", spo);
-                    throw new DataGeneratorException("当前脚本无法执行");
+                    throw new DataGeneratorException(String.format("当前脚本无法执行，脚本类型：%s，脚本内容：%s，执行对象值为：%s",
+                            spo.getScriptType(), spo.getContent(), dv));
                 }
             } catch (Exception e) {
-                log.error(String.format("执行脚本 [%s] 出现异常：", spo), e);
-                throw new DataGeneratorException("执行脚本出现异常", e);
+                throw new DataGeneratorException(String.format("执行脚本出现异常，脚本类型：%s，脚本内容：%s，执行对象值为：%s",
+                        spo.getScriptType(), spo.getContent(), dv), e);
             }
         }
 
@@ -93,7 +96,7 @@ public class JsScript implements Script {
             if (Objects.requireNonNull(resource).exists()) {
                 source = Source.newBuilder(LANGUAGE, resource.getFile()).build();
             } else {
-                log.error("指定的脚本文件不存在：[{}]", script);
+                log.error("指定的脚本文件不存在：{}", script);
                 throw new DataGeneratorException("指定的脚本文件不存在");
             }
         }
@@ -102,16 +105,7 @@ public class JsScript implements Script {
             source = Source.newBuilder(LANGUAGE, script, RandomKit.alpha(5)).build();
         }
 
-        return Objects.requireNonNull(source, "无法解析给定的脚本内容，请检查配置是否正确");
-    }
-
-
-    @Override
-    public void close() throws Exception {
-        jsCtx.close();
-        //set null
-        this.resolver = null;
-        this.spo = null;
-        this.jsCtx = null;
+        return Objects.requireNonNull(source,
+                String.format("无法解析给定的脚本内容，脚本类型：JAVASCRIPT，脚本内容：%s，请检查配置是否正确", script));
     }
 }

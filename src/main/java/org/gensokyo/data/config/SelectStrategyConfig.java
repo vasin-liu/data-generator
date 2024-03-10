@@ -5,10 +5,9 @@
  */
 package org.gensokyo.data.config;
 
-import org.gensokyo.data.select.strategy.OnceOrderSelectStrategy;
-import org.gensokyo.data.select.strategy.OnceRandomSelectStrategy;
-import org.gensokyo.data.select.strategy.RepeatOrderSelectStrategy;
-import org.gensokyo.data.select.strategy.RepeatRandomSelectStrategy;
+import org.gensokyo.data.read.strategy.EqualReaderSelectStrategy;
+import org.gensokyo.data.read.strategy.WeightReaderSelectStrategy;
+import org.gensokyo.data.select.strategy.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,26 +23,45 @@ import org.springframework.context.annotation.Configuration;
 public class SelectStrategyConfig {
 
     @Bean
-    @ConditionalOnMissingBean(RepeatRandomSelectStrategy.class)
-    public RepeatRandomSelectStrategy repeatRandomSelectStrategy() {
-        return new RepeatRandomSelectStrategy();
+    @ConditionalOnMissingBean(RepeatRandomValueSelectStrategy.class)
+    public RepeatRandomValueSelectStrategy repeatRandomSelectStrategy() {
+        return new RepeatRandomValueSelectStrategy();
     }
 
     @Bean
-    @ConditionalOnMissingBean(OnceRandomSelectStrategy.class)
-    public OnceRandomSelectStrategy onceRandomSelectStrategy() {
-        return new OnceRandomSelectStrategy();
+    @ConditionalOnMissingBean(OnceRandomValueSelectStrategy.class)
+    public OnceRandomValueSelectStrategy onceRandomSelectStrategy() {
+        return new OnceRandomValueSelectStrategy();
     }
 
     @Bean
-    @ConditionalOnMissingBean(RepeatOrderSelectStrategy.class)
-    public RepeatOrderSelectStrategy repeatOrderSelectStrategy() {
-        return new RepeatOrderSelectStrategy();
+    @ConditionalOnMissingBean(RepeatOrderValueSelectStrategy.class)
+    public RepeatOrderValueSelectStrategy repeatOrderSelectStrategy() {
+        return new RepeatOrderValueSelectStrategy();
     }
 
     @Bean
-    @ConditionalOnMissingBean(OnceOrderSelectStrategy.class)
-    public OnceOrderSelectStrategy onceOrderSelectStrategy() {
-        return new OnceOrderSelectStrategy();
+    @ConditionalOnMissingBean(MultipleOrderValueSelectStrategy.class)
+    public MultipleOrderValueSelectStrategy multipleOrderValueSelectStrategy() {
+        return new MultipleOrderValueSelectStrategy();
     }
+
+    @Bean
+    @ConditionalOnMissingBean(OnceOrderValueSelectStrategy.class)
+    public OnceOrderValueSelectStrategy onceOrderSelectStrategy() {
+        return new OnceOrderValueSelectStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(EqualReaderSelectStrategy.class)
+    public EqualReaderSelectStrategy equalSelectStrategy() {
+        return new EqualReaderSelectStrategy();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(WeightReaderSelectStrategy.class)
+    public WeightReaderSelectStrategy weightSelectStrategy() {
+        return new WeightReaderSelectStrategy();
+    }
+
 }

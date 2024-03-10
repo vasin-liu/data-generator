@@ -5,7 +5,8 @@
  */
 package org.gensokyo.data.select;
 
-import org.gensokyo.data.select.strategy.SelectStrategy;
+import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.select.strategy.ValueSelectStrategy;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -22,8 +23,8 @@ public interface Select {
      * 选择值
      *
      * @param strategy 选择策略
-     * @param num      选择数量
+     * @param spo      选择阶段信息
      * @return 选择的Value值
      */
-    Value select(SelectStrategy strategy, int num);
+    Value select(final ValueSelectStrategy strategy, final SelectStagePO spo);
 }

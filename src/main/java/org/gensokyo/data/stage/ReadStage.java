@@ -7,13 +7,16 @@ package org.gensokyo.data.stage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataCache;
+import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.ReadStagePO;
 import org.gensokyo.data.read.ReaderFactory;
-import org.gensokyo.data.value.MapValue;
+import org.gensokyo.data.read.strategy.ReaderSelectStrategyFactory;
+import org.gensokyo.data.util.DatasetKit;
+import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
-import org.gensokyo.kit.character.StrKit;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
@@ -26,45 +29,54 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 @Slf4j
-public class ReadStage extends AbstractStage {
+public class ReadStage extends AbstractStage<ReadStagePO> {
     private ReaderFactory readerFactory;
+    private ReaderSelectStrategyFactory readerSelectStrategyFactory;
 
     @Autowired
     public void setReaderFactory(ReaderFactory readerFactory) {
         this.readerFactory = readerFactory;
     }
 
-    public ReadStage(StageContext ctx) {
+    @Autowired
+    public void setReaderSelectStrategyFactory(ReaderSelectStrategyFactory readerSelectStrategyFactory) {
+        this.readerSelectStrategyFactory = readerSelectStrategyFactory;
+    }
+
+    public ReadStage(StageContext<ReadStagePO> ctx) {
         super(ctx);
     }
 
     @Override
     public Value internalExecute(Value input) {
-        if (ctx.stage() instanceof ReadStagePO rpo) {
-            //如果数据集已经缓存，直接返回缓存数据集
-            if (rpo.isInMemory()) {
-                var tdc = DataCache.getOrCreate(ctx.template().getName());
-                var ds = tdc.get(rpo.getDataSetId());
-                if (Objects.nonNull(ds) && !ds.isNullOrEmpty()) {
-                    log.debug("数据集 [{}] 已缓存，直接返回缓存数据集", rpo.getDataSetId());
-                    return ds;
-                }
+        var rpo = ctx.stage();
+        //如果数据集已经缓存，直接返回缓存数据集
+        if (rpo.isInMemory()) {
+            var tdc = DataCache.getOrCreate(ctx.template().getName());
+            var ds = tdc.get(rpo.getDataSetId());
+            if (Objects.nonNull(ds) && !ds.isNullOrEmpty()) {
+                log.debug("字段 {} 的数据集 {} 已缓存，直接返回缓存数据集", ctx.field().getName(), rpo.getDataSetId());
+                return ds;
             }
-            //重新读取数据集
-            var result = new MapValue();
-            for (ReadStagePO.ReaderPO po : rpo.getReaders()) {
-                var ds = readerFactory.newInstance(po).read(input);
-                var dsId = StrKit.isEmpty(po.getDataSetId()) ? rpo.getDataSetId() : po.getDataSetId();
-                result.put(dsId, ds);
-            }
-            //只有一个数据源的情况，返回数据集
-            if (result.size() == 1) {
-                return result.values().stream().findFirst().orElse(Value.EMPTY);
-            }
-            return result;
         }
 
-        throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
-                ReadStagePO.class.getName(), ctx.stage().getClass().getName()));
+        return tryReadFromDataSource(rpo, input);
+    }
+
+    private Value tryReadFromDataSource(ReadStagePO rpo, Value input) {
+        //重新读取数据集
+        var result = new ListValue();
+        var readerPo = readerSelectStrategyFactory.newInstance(rpo).select(rpo);
+        try {
+            var readerCtx = ReaderContext.from(ctx, readerPo);
+            var ds = readerFactory.newInstance(readerPo).read(readerCtx, input);
+            if (Objects.nonNull(ds) && !ds.isNullOrEmpty()) {
+                result.addValue(ds);
+            }
+        } catch (Exception e) {
+            throw new DataGeneratorException(String.format("字段 %s 的执行数据读取阶段失败，数据集读取类型为：%s ，数据源编号为：%s ，输入值为：%s。",
+                    ctx.field().getName(), readerPo.getType(), readerPo.getDataSourceId(), JsonKit.write(input.get())), e);
+        }
+        return DatasetKit.extractValue(result);
     }
 }

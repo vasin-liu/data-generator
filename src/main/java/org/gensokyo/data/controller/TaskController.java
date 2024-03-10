@@ -8,7 +8,7 @@ package org.gensokyo.data.controller;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.context.Context;
+import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.cache.ConfigCache;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.po.TemplatePO;
@@ -45,7 +45,7 @@ public class TaskController {
         TemplatePO template = cache.get(templateName);
         if (Objects.nonNull(template)) {
             long id = RandomKit.id();
-            defaultDataPipelineFactory.startup(new Context(template, Value.EMPTY));
+            defaultDataPipelineFactory.startup(new TemplateContext(template, Value.EMPTY));
             return String.valueOf(id);
         } else {
             return String.format("模板 '%s' 不存在", templateName);

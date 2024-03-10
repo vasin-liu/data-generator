@@ -24,10 +24,10 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 @Slf4j
-public class ScriptStage extends AbstractStage {
+public class ScriptStage extends AbstractStage<ScriptStagePO> {
     private ScriptFactory scriptFactory;
 
-    public ScriptStage(StageContext ctx) {
+    public ScriptStage(StageContext<ScriptStagePO> ctx) {
         super(ctx);
     }
 
@@ -38,17 +38,16 @@ public class ScriptStage extends AbstractStage {
 
     @Override
     public Value internalExecute(Value input) {
-        if (ctx.stage() instanceof ScriptStagePO spo) {
-            try (var script = scriptFactory.newInstance(spo)) {
-                if (Objects.nonNull(script)) {
-                    return script.eval(input);
-                }
-            } catch (Exception e) {
-                log.error(String.format("执行脚本[%s]出现异常：", JsonKit.write(ctx.stage())), e);
+        var spo = ctx.stage();
+        try {
+            var script = scriptFactory.newInstance(spo);
+            if (Objects.nonNull(script)) {
+                return script.eval(spo, input);
             }
             return input;
+        } catch (Exception e) {
+            throw new DataGeneratorException(String.format("字段 %s 的执行脚本阶段失败，脚本类型为：%s ，脚本内容为：%s ，输入值为：%s。",
+                    ctx.field().getName(), spo.getScriptType(), spo.getContent(), JsonKit.write(input.get())), e);
         }
-        throw new DataGeneratorException(String.format("当前阶段要求的配置值类型为：[%s] ，实际的配置值类型为：[%s]",
-                ScriptStagePO.class.getName(), ctx.stage().getClass().getName()));
     }
 }

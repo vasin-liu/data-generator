@@ -9,8 +9,9 @@ import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.pipeline.DefaultRowPipelineFactory;
 import org.gensokyo.data.pipeline.DefaultWritePipelineFactory;
 import org.gensokyo.data.read.ReaderFactory;
+import org.gensokyo.data.read.strategy.ReaderSelectStrategyFactory;
 import org.gensokyo.data.script.ScriptFactory;
-import org.gensokyo.data.select.strategy.SelectStrategyFactory;
+import org.gensokyo.data.select.strategy.ValueSelectStrategyFactory;
 import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.write.WriterFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,9 +56,15 @@ public class FactoryConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(SelectStrategyFactory.class)
-    public SelectStrategyFactory selectStrategyFactory(AutowireCapableBeanFactory beanFactory) {
-        return new SelectStrategyFactory(beanFactory);
+    @ConditionalOnMissingBean(ValueSelectStrategyFactory.class)
+    public ValueSelectStrategyFactory valueSelectStrategyFactory(AutowireCapableBeanFactory beanFactory) {
+        return new ValueSelectStrategyFactory(beanFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(ReaderSelectStrategyFactory.class)
+    public ReaderSelectStrategyFactory readerSelectStrategyFactory(AutowireCapableBeanFactory beanFactory) {
+        return new ReaderSelectStrategyFactory(beanFactory);
     }
 
     @Bean

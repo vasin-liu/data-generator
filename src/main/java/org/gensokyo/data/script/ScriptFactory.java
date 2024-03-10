@@ -27,17 +27,13 @@ public class ScriptFactory {
 
     private final AutowireCapableBeanFactory beanFactory;
 
-    @SuppressWarnings("resource")
     public @Nullable Script newInstance(ScriptStagePO spo) {
         if (Objects.isNull(spo) || Objects.isNull(spo.getScriptType()) || StrKit.isBlank(spo.getContent())) {
             return null;
         }
-        var script = switch (spo.getScriptType()) {
-            case JAVASCRIPT -> new JsScript(spo);
-            case SPEL -> new SpelScript(spo);
+        return switch (spo.getScriptType()) {
+            case JAVASCRIPT -> beanFactory.getBean(JsScript.class);
+            case SPEL -> beanFactory.getBean(SpelScript.class);
         };
-        beanFactory.autowireBean(script);
-        beanFactory.initializeBean(script, script.getClass().getSimpleName());
-        return script;
     }
 }
