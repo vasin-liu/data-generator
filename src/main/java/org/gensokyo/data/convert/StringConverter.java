@@ -14,6 +14,7 @@ import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.json.JsonKit;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -30,10 +31,10 @@ public class StringConverter implements Converter {
             return SingleValue.of("");
         }
         if (input instanceof ListValue lv) {
-            return SingleValue.of(Joiner.on(Const.COMMA).join(lv));
+            return SingleValue.of(Joiner.on(Const.COMMA).join((List<?>) lv.get()));
         }
         if (input instanceof MapValue mv) {
-            return SingleValue.of(JsonKit.write(mv));
+            return SingleValue.of(mv.get());
         }
         return SingleValue.of(Objects.toString(input.get()));
     }

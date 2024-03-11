@@ -8,6 +8,7 @@ package org.gensokyo.data.po;
 import lombok.Getter;
 import lombok.Setter;
 import org.gensokyo.data.convert.Converter;
+import org.gensokyo.data.convert.StringConverter;
 
 /**
  * 数据转换阶段配置
@@ -20,5 +21,5 @@ import org.gensokyo.data.convert.Converter;
 @Setter
 public class ConvertStagePO extends StagePO {
 
-    private Class<? extends Converter> converterType;
+    private Class<? extends Converter> converterType = StringConverter.class;
 }

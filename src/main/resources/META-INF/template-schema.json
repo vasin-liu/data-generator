@@ -172,12 +172,35 @@
     "convertStage": {
       "$id": "#convertStage",
       "type": "object",
-      "description": "数据转换处理阶段配置"
+      "description": "数据转换处理阶段配置",
+      "properties": {
+        "converterType": {
+          "type": "string",
+          "description": "转换器类型（Class的全路径）"
+        }
+      }
     },
     "mappingStage": {
       "$id": "#mappingStage",
       "type": "object",
-      "description": "数据映射处理阶段配置"
+      "description": "数据映射处理阶段配置",
+      "properties": {
+        "defaultValue": {
+          "type": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "null",
+            "array"
+          ],
+          "description": "未匹配时默认值"
+        },
+        "mapping": {
+          "type": "object",
+          "description": "字段映射配置"
+        }
+      }
     },
     "reader": {
       "$id": "#reader",
