@@ -7,7 +7,6 @@ package org.gensokyo.data.config;
 
 import org.gensokyo.data.convert.StringConverter;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.script.JsScript;
 import org.gensokyo.data.script.SpelScript;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
