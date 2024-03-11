@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.util;
 
+import org.gensokyo.data.constant.Chinese;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
@@ -15,6 +16,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 /**
  * 随机工具类
@@ -128,5 +131,31 @@ public final class RandomKit {
 
     public static int nextInt(int origin, int bound) {
         return RANDOM.nextInt(origin, bound);
+    }
+
+    public static String text(int minLength, int maxLength) {
+        int length = RANDOM.nextInt(minLength, maxLength);
+        int size = Chinese.WORD.length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append(Chinese.WORD[RANDOM.nextInt(size)]);
+        }
+
+        return sb.toString();
+    }
+
+    public static List<Integer> seq(int start, int end) {
+        return seq(start, end, 1);
+    }
+
+    public static List<Integer> seq(int start, int end, int step) {
+        if (start > end) {
+            throw new IllegalArgumentException("start must be less than or equal to end");
+        }
+        AtomicInteger idx = new AtomicInteger(start);
+        return IntStream.range(start, end + 1)
+                .map(i -> idx.getAndAdd(step))
+                .boxed()
+                .toList();
     }
 }

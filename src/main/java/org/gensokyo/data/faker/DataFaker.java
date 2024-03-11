@@ -58,4 +58,8 @@ public class DataFaker extends Faker {
     public SnowflakeProvider snowflake() {
         return getProvider(SnowflakeProvider.class, SnowflakeProvider::new, this);
     }
+
+    public CommonProvider common() {
+        return getProvider(CommonProvider.class, CommonProvider::new, this);
+    }
 }

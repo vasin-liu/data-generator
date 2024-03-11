@@ -207,7 +207,8 @@
         "dataSet": {
           "type": [
             "array",
-            "string"
+            "string",
+            "integer"
           ],
           "description": "数据集，CONSTANT模式下必须为array类型值，其余模式则为字符串你类型值"
         }
