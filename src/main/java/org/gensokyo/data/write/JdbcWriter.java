@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.write;
 
+import com.baomidou.dynamic.datasource.annotation.DSTransactional;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.google.common.base.Splitter;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -31,10 +31,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JdbcWriter implements Writer {
     private static final String SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES(%s)";
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 
-    @Transactional(rollbackFor = Exception.class)
+    @DSTransactional
+    // 使用spring的事务注解会导致数据源切换失败
+    // @Transactional(rollbackFor = Exception.class)
     @Override
     public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
         var wpo = ctx.writer();
@@ -42,7 +44,7 @@ public class JdbcWriter implements Writer {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(wpo.getDataSourceId()));
             var template = wpo.getTemplate();
             var sql = String.format(SQL_TEMPLATE, wpo.getTarget(), template, toPreparedStatement(template));
-            int[] rows = jdbcTemplate.batchUpdate(sql, batchValues(Objects.requireNonNull(dataset)));
+            int[] rows = namedParameterJdbcTemplate.batchUpdate(sql, batchValues(Objects.requireNonNull(dataset)));
             return rows.length;
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",

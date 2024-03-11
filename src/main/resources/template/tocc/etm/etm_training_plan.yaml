@@ -130,3 +130,7 @@ table:
               dataSet: 'admin'
   writers:
     - writerType: CONSOLE
+    - writerType: JDBC
+      dataSourceId: 'tocc_training'
+      target: 'etm_training_plan_2'
+      template: "ID,PLAN_NAME,PLAN_YEAR,DISTRICT_CODE,DISTRICT_NAME,ENTERPRISE_TYPE,TRAINING_GOAL,TRAINING_PURPOSE,START_TIME,END_TIME,PLAN_STATUS,CREATE_TIME,CREATE_BY,CREATE_BY_NAME,UPDATE_TIME,UPDATE_BY"
