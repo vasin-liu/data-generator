@@ -7,10 +7,11 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.gensokyo.data.convert.Converter;
+
+import java.util.Map;
 
 /**
- * 数据转换阶段配置
+ * 数据映射阶段配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -18,7 +19,15 @@ import org.gensokyo.data.convert.Converter;
  */
 @Getter
 @Setter
-public class ConvertStagePO extends StagePO {
+public class MappingStagePO extends StagePO {
 
-    private Class<? extends Converter> converterType;
+    /**
+     * 默认值
+     */
+    private Object defaultValue;
+
+    /**
+     * 映射关系
+     */
+    private Map<String, Object> mapping;
 }

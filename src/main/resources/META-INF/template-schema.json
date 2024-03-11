@@ -1,18 +1,162 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://www.pcitech.com/schemas/data-generator",
-  "title": "数据生成模板-V1.0.0",
-  "description": "数据生成模板-V1.0.0",
+  "title": "数据生成模板-V2.0.0",
+  "description": "数据生成模板-V2.0.0",
   "type": "object",
   "definitions": {
-    "preScript": {
-      "$id": "#script",
+    "stage": {
+      "$id": "#stage",
       "type": "object",
-      "description": "脚本处理器",
+      "description": "阶段处理",
       "properties": {
         "type": {
           "type": "string",
-          "default": "SPEL",
+          "minLength": 1,
+          "description": "阶段类型",
+          "enum": [
+            "READ",
+            "SELECT",
+            "SCRIPT",
+            "CONVERT",
+            "MAPPING",
+            "WRITE"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "READ"
+            }
+          },
+          "$ref": "#readStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SELECT"
+            }
+          },
+          "$ref": "#selectStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SCRIPT"
+            }
+          },
+          "$ref": "#scriptStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CONVERT"
+            }
+          },
+          "$ref": "#convertStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "MAPPING"
+            }
+          },
+          "$ref": "#mappingStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "WRITE"
+            }
+          },
+          "$ref": "#writer"
+        }
+      ]
+    },
+    "readStage": {
+      "$id": "#readStage",
+      "type": "object",
+      "description": "数据读取阶段配置",
+      "properties": {
+        "dataSetId": {
+          "type": "boolean",
+          "description": "数据集编号，全模板唯一"
+        },
+        "inMemory": {
+          "type": "boolean",
+          "description": "数据是否驻留内存"
+        },
+        "params": {
+          "type": "object",
+          "description": "参数集合"
+        },
+        "strategyType": {
+          "type": "object",
+          "minLength": 1,
+          "description": "选择策略",
+          "enum": [
+            "EQUAL",
+            "WEIGHT"
+          ]
+        },
+        "readers": {
+          "type": "array",
+          "minLength": 1,
+          "description": "读取器列表",
+          "items": {
+            "$ref": "#reader"
+          }
+        },
+        "required": [
+          "readers"
+        ]
+      }
+    },
+    "selectStage": {
+      "$id": "#selectStage",
+      "type": "object",
+      "description": "数据选择阶段配置",
+      "properties": {
+        "strategyType": {
+          "type": "string",
+          "minLength": 1,
+          "description": "选择策略",
+          "enum": [
+            "REPEAT_RANDOM",
+            "REPEAT_ORDER",
+            "ONCE_RANDOM",
+            "ONCE_ORDER",
+            "MULTIPLE_ORDER"
+          ]
+        },
+        "selectNum": {
+          "type": "integer",
+          "description": "选择数量"
+        },
+        "minTimes": {
+          "type": "integer",
+          "description": "最少选择次数"
+        },
+        "maxTimes": {
+          "type": "integer",
+          "minLength": 1,
+          "description": "最多选择次数"
+        }
+      }
+    },
+    "scriptStage": {
+      "$id": "#scriptStage",
+      "type": "object",
+      "description": "数据脚本处理阶段配置",
+      "properties": {
+        "scriptType": {
+          "type": "string",
+          "minLength": 1,
           "description": "脚本类型",
           "enum": [
             "JAVASCRIPT",
@@ -21,19 +165,28 @@
         },
         "content": {
           "type": "string",
-          "description": "数据集处理脚本（必须是立即执行的脚本），允许的值有四种：（1）远程http/https的js脚本文件；（2）数据生成服务器上以.js结尾的本地文件；（3）内联js脚本字符串；（4）SPEL表达式。"
+          "description": "脚本内容"
         }
       }
+    },
+    "convertStage": {
+      "$id": "#convertStage",
+      "type": "object",
+      "description": "数据转换处理阶段配置"
+    },
+    "mappingStage": {
+      "$id": "#mappingStage",
+      "type": "object",
+      "description": "数据映射处理阶段配置"
     },
     "reader": {
       "$id": "#reader",
       "type": "object",
       "description": "数据读取器配置",
       "properties": {
-        "dataSetId": {
-          "type": "string",
-          "minLength": 1,
-          "description": "数据集编号，全模板唯一"
+        "weight": {
+          "type": "integer",
+          "description": "权重值"
         },
         "type": {
           "type": "string",
@@ -57,13 +210,9 @@
             "string"
           ],
           "description": "数据集，CONSTANT模式下必须为array类型值，其余模式则为字符串你类型值"
-        },
-        "postScript": {
-          "$ref": "#script"
         }
       },
       "required": [
-        "dataSetId",
         "type",
         "dataSet"
       ]
@@ -74,7 +223,7 @@
       "type": "object",
       "properties": {
         "type": {
-          "type": "string",
+          "writerType": "string",
           "description": "写入器数据源类型",
           "enum": [
             "JDBC",
@@ -100,9 +249,7 @@
         }
       },
       "required": [
-        "type",
-        "dataSourceId",
-        "template"
+        "writerType"
       ]
     },
     "field": {
@@ -120,61 +267,13 @@
           "type": "array",
           "description": "依赖字段列表"
         },
-        "converter": {
-          "type": "string",
-          "default": "org.gensokyo.data.generator.converter.StringConverter",
-          "description": "字段值类型转换器（全路径类名）"
-        },
-        "preScript": {
-          "$ref": "#script"
-        },
-        "postScript": {
-          "$ref": "#script"
-        },
-        "resultMapper": {
-          "type": "object",
-          "description": "postScript后，converter之前，对结果进行映射处理，即对结果进行分支选择",
-          "properties": {
-            "defaultDataset": {
-              "type": "array",
-              "description": "默认数据集，在所有分支不匹配时使用的默认数据集，必填"
-            },
-            "mappers": {
-              "type": "array",
-              "description": "分支映射集合",
-              "minItems": 1,
-              "uniqueItems": true,
-              "items": {
-                "type": "object",
-                "description": "分支映射对象",
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "description": "映射键值，集合中唯一，不可重复"
-                  },
-                  "dataset": {
-                    "type": "array",
-                    "description": "映射对应的数据集"
-                  }
-                },
-                "required": [
-                  "key",
-                  "dataset"
-                ]
-              }
-            }
-          },
-          "required": [
-            "defaultDataset"
-          ]
-        },
-        "readers": {
+        "stages": {
           "type": "array",
-          "description": "字段数据集读取器列表",
+          "description": "字段的处理阶段列表",
           "minItems": 1,
-          "uniqueItems": true,
+          "uniqueItems": false,
           "items": {
-            "$ref": "#reader"
+            "$ref": "#stage"
           }
         }
       },
@@ -202,45 +301,6 @@
       "minimum": 1,
       "maximum": 10000
     },
-    "global": {
-      "type": "object",
-      "description": "全局配置",
-      "properties": {
-        "executor": {
-          "type": "object",
-          "description": "数据读取器线程池配置",
-          "properties": {
-            "coreSize": {
-              "type": "integer",
-              "description": "核心线程数",
-              "minimum": 1,
-              "maximum": 50
-            },
-            "maxSize": {
-              "type": "integer",
-              "description": "最大线程数",
-              "minimum": 1,
-              "maximum": 50
-            },
-            "queueCapacity": {
-              "type": "integer",
-              "description": "队列大小",
-              "minimum": 1,
-              "maximum": 50
-            }
-          }
-        },
-        "readers": {
-          "type": "array",
-          "description": "全局数据集配置",
-          "minItems": 0,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#reader"
-          }
-        }
-      }
-    },
     "table": {
       "type": "object",
       "description": "数据集（表）元数据配置",
@@ -254,8 +314,14 @@
             "$ref": "#field"
           }
         },
-        "writer": {
-          "$ref": "#writer"
+        "writers": {
+          "type": "array",
+          "description": "数据写入器列表",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#writer"
+          }
         }
       }
     }

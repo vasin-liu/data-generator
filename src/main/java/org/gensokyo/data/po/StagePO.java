@@ -35,6 +35,7 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = SelectStagePO.class, names = {"SELECT", "select"}),
         @JsonSubTypes.Type(value = ScriptStagePO.class, names = {"SCRIPT", "script"}),
         @JsonSubTypes.Type(value = ConvertStagePO.class, names = {"CONVERT", "convert"}),
+        @JsonSubTypes.Type(value = MappingStagePO.class, names = {"MAPPING", "mapping"}),
         @JsonSubTypes.Type(value = WriteStagePO.class, names = {"WRITE", "write"})
 })
 public class StagePO implements Serializable {

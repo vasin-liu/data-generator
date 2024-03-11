@@ -22,34 +22,34 @@ table:
     #字段配置
     - name: ID
       stages:
-        - type: read
+        - type: READ
           readers:
             - type: DIRECT_SPEL
               dataSet: "#faker.snowflake.next"
     - name: SCHOOL_ID
       stages:
-        - type: read
+        - type: READ
           inMemory: true
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
               dataSet: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
-        - type: select
-        - type: script
+        - type: SELECT
+        - type: SCRIPT
           scriptType: SPEL
           content: "#dataset.ID"
     - name: SCHOOL_NAME
       dependsOn:
         - SCHOOL_ID
       stages:
-        - type: script
+        - type: SCRIPT
           scriptType: SPEL
           content: "#dataset.NAME"
     - name: CERT_NO
       dependsOn:
         - SCHOOL_ID
       stages:
-        - type: read
+        - type: READ
           params:
             schoolId:
               type: script
@@ -58,18 +58,18 @@ table:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
               dataSet: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
-        - type: select
-        - type: script
+        - type: SELECT
+        - type: SCRIPT
           scriptType: SPEL
           content: "#dataset.RECORD_NO"
     - name: SEQ_NO
       stages:
-        - type: read
+        - type: READ
           inMemory: true
           readers:
             - type: CONSTANT
               dataSet: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        - type: select
+        - type: SELECT
           strategyType: ONCE_ORDER
   writers:
     - writerType: CONSOLE

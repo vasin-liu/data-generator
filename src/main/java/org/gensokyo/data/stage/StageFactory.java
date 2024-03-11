@@ -31,7 +31,8 @@ public class StageFactory {
             case SELECT -> new SelectStage((StageContext<SelectStagePO>) ctx);
             case SCRIPT -> new ScriptStage((StageContext<ScriptStagePO>) ctx);
             case WRITE -> new WriteStage((StageContext<WriteStagePO>) ctx);
-            default -> null;
+            case CONVERT -> new ConvertStage((StageContext<ConvertStagePO>) ctx);
+            case MAPPING -> new MappingStage((StageContext<MappingStagePO>) ctx);
         };
         Assert.notNull(stage, "未找到类型为 " + ctx.stage().getType() + " 的数据处理器类");
         beanFactory.autowireBean(stage);
