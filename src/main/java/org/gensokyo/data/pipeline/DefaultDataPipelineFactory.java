@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.exception.NotEnoughElementException;
 import org.gensokyo.data.util.DatetimeKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
@@ -85,7 +86,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                                 if (Objects.isNull(e)) {
                                     data.add(r);
                                 } else {
-                                    throw new DataGeneratorException(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", index, ii), e);
+                                    checkException(index, ii, e);
                                 }
                             });
                     futures.add(future);
@@ -97,8 +98,18 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
             allOf(futures.toArray(new CompletableFuture[]{})).get();
             //写入数据
             defaultWritePipelineFactory.startup(new TemplateContext(ctx.template(), ListValue.fromValueCollection(data)));
+        } catch (NotEnoughElementException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
+        }
+    }
+
+    private void checkException(int pageIndex, int rowIndex, Throwable e) {
+        if (e instanceof NotEnoughElementException ne) {
+            throw ne;
+        } else {
+            throw new DataGeneratorException(String.format("分批次生成数据出现异常，当前第 %s 页，第 %s 条数据，异常信息：", pageIndex, rowIndex), e);
         }
     }
 
