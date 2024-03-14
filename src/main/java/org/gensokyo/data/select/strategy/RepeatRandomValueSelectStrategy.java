@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.select.strategy;
 
-import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.po.stage.SelectStagePO;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
 

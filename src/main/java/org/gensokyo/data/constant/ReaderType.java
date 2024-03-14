@@ -14,5 +14,5 @@ package org.gensokyo.data.constant;
  */
 public enum ReaderType {
 
-    JDBC, ELASTICSEARCH, KAFKA, CONSTANT, SPEL, DIRECT_SPEL
+    JDBC, ELASTICSEARCH, KAFKA, CONSTANT, SPEL
 }

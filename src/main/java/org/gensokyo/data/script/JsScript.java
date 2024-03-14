@@ -8,7 +8,7 @@ package org.gensokyo.data.script;
 import com.oracle.truffle.js.runtime.JSContextOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.ScriptStagePO;
+import org.gensokyo.data.po.stage.ScriptStagePO;
 import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.kit.character.StrKit;

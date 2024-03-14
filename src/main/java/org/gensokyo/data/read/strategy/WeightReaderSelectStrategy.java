@@ -5,7 +5,8 @@
  */
 package org.gensokyo.data.read.strategy;
 
-import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.po.stage.ReadStagePO;
+import org.gensokyo.data.po.reader.ReaderPO;
 import org.gensokyo.kit.collect.CollectKit;
 
 import java.security.SecureRandom;
@@ -18,7 +19,7 @@ import java.util.List;
  * @version 1.0.0
  * @since 2023/10/26 , Version 1.0.0
  */
-public class WeightReaderSelectStrategy implements ReaderSelectStrategy {
+public class WeightReaderSelectStrategy<T extends ReaderPO> implements ReaderSelectStrategy<T> {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -28,12 +29,13 @@ public class WeightReaderSelectStrategy implements ReaderSelectStrategy {
      * @param rpo 读取阶段信息
      * @return 选择结果
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public ReadStagePO.ReaderPO select(final ReadStagePO rpo) {
+    public T select(final ReadStagePO rpo) {
         if (CollectKit.isEmpty(rpo.getReaders())) {
             return null;
         }
-        List<Integer> weights = rpo.getReaders().stream().map(ReadStagePO.ReaderPO::getWeight).toList();
+        List<Integer> weights = rpo.getReaders().stream().map(ReaderPO::getWeight).toList();
         int totalWeight = weights.stream().mapToInt(Integer::intValue).sum();
         int randomNum = RANDOM.nextInt(totalWeight) + 1;
         int cumulativeWeight = 0;
@@ -44,6 +46,6 @@ public class WeightReaderSelectStrategy implements ReaderSelectStrategy {
             index++;
         }
 
-        return rpo.getReaders().get(index - 1);
+        return (T) rpo.getReaders().get(index - 1);
     }
 }

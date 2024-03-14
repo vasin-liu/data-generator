@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.pcitech.com/schemas/data-generator/reader-schema.json",
+  "title": "数据生成模板-V2.1.0",
+  "description": "数据生成模板-V2.1.0",
+  "type": "object",
+  "$defs": {
+    "reader": {
+      "$id": "#reader",
+      "type": "object",
+      "description": "数据读取器配置",
+      "properties": {
+        "weight": {
+          "type": "integer",
+          "description": "权重值",
+          "default": 100
+        },
+        "type": {
+          "type": "string",
+          "description": "数据集类型",
+          "enum": [
+            "JDBC",
+            "ELASTICSEARCH",
+            "KAFKA",
+            "CONSTANT",
+            "SPEL"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "JDBC"
+            }
+          },
+          "$ref": "#jdbcReader"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SPEL"
+            }
+          },
+          "$ref": "#spelReader"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CONSTANT"
+            }
+          },
+          "$ref": "#constantReader"
+        }
+      ],
+      "required": [
+        "type"
+      ]
+    },
+    "jdbcReader": {
+      "$id": "#jdbcReader",
+      "type": "object",
+      "description": "JDBC数据读取器配置",
+      "properties": {
+        "dataSourceId": {
+          "type": "string",
+          "description": "数据源ID"
+        },
+        "sql": {
+          "type": "string",
+          "description": "SQL语句"
+        }
+      }
+    },
+    "spelReader": {
+      "$id": "#spelReader",
+      "type": "object",
+      "description": "SPEL数据读取器配置",
+      "properties": {
+        "exp": {
+          "type": "string",
+          "description": "表达式字符串"
+        },
+        "times": {
+          "type": "integer",
+          "description": "表达式执行次数",
+          "default": 1
+        }
+      },
+      "required": [
+        "exp"
+      ]
+    },
+    "constantReader": {
+      "$id": "#constantReader",
+      "type": "object",
+      "description": "常量数据读取器配置",
+      "properties": {
+        "data": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null",
+            "array",
+            "object"
+          ],
+          "description": "常量数据"
+        }
+      }
+    }
+  }
+}

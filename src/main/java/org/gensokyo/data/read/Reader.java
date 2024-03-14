@@ -6,6 +6,7 @@
 package org.gensokyo.data.read;
 
 import org.gensokyo.data.context.ReaderContext;
+import org.gensokyo.data.po.reader.ReaderPO;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -15,7 +16,7 @@ import org.gensokyo.data.value.Value;
  * @version 1.0.0
  * @since 2023/10/27 , Version 1.0.0
  */
-public interface Reader {
+public interface Reader<T extends ReaderPO> {
 
-    Value read(final ReaderContext ctx, final Value input);
+    Value read(final ReaderContext<T> ctx, final Value input);
 }

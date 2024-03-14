@@ -23,9 +23,14 @@ table:
     - name: ID
       stages:
         - type: READ
+          strategyType: WEIGHT
           readers:
-            - type: DIRECT_SPEL
-              dataSet: "#faker.snowflake.next"
+            - type: SPEL
+              weight: 100
+              exp: "#faker.snowflake.next"
+            - type: SPEL
+              weight: 100
+              exp: "#faker.common.text(9,10)"
     - name: SCHOOL_ID
       stages:
         - type: READ
@@ -33,7 +38,7 @@ table:
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
-              dataSet: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
+              sql: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
@@ -52,12 +57,11 @@ table:
         - type: READ
           params:
             schoolId:
-              type: script
               content: "#dataset.ID"
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
-              dataSet: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
+              sql: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
@@ -68,7 +72,7 @@ table:
           inMemory: true
           readers:
             - type: CONSTANT
-              dataSet: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         - type: SELECT
           strategyType: ONCE_ORDER
     - name: JOIN_NO
@@ -77,7 +81,7 @@ table:
           inMemory: true
           readers:
             - type: CONSTANT
-              dataSet: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         - type: CONVERT
           converterType: org.gensokyo.data.convert.StringConverter
     - name: MAP_NO
@@ -86,7 +90,7 @@ table:
           inMemory: true
           readers:
             - type: CONSTANT
-              dataSet: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         - type: SELECT
         - type: MAPPING
           defaultValue: 100
@@ -101,5 +105,8 @@ table:
             8: 108
             9: 109
             10: 110
+
+# 数据输出配置
+output:
   writers:
     - writerType: CONSOLE

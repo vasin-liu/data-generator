@@ -3,14 +3,15 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.po;
+package org.gensokyo.data.po.stage;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.gensokyo.data.constant.ScriptType;
+import org.gensokyo.data.convert.Converter;
+import org.gensokyo.data.convert.StringConverter;
 
 /**
- * 脚本阶段配置
+ * 数据转换阶段配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -18,9 +19,7 @@ import org.gensokyo.data.constant.ScriptType;
  */
 @Getter
 @Setter
-public class ScriptStagePO extends StagePO {
+public class ConvertStagePO extends StagePO {
 
-    private ScriptType scriptType = ScriptType.SPEL;
-
-    private String content;
+    private Class<? extends Converter> converterType = StringConverter.class;
 }

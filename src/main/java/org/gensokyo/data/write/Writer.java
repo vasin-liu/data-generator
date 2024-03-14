@@ -6,6 +6,7 @@
 package org.gensokyo.data.write;
 
 import org.gensokyo.data.context.WriterContext;
+import org.gensokyo.data.po.writer.WriterPO;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.Map;
  * @version 1.0.0
  * @since 2023/10/27 , Version 1.0.0
  */
-public interface Writer {
+public interface Writer<T extends WriterPO> {
 
-    long write(final WriterContext ctx, final List<Map<String, Object>> dataset);
+    long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset);
 }

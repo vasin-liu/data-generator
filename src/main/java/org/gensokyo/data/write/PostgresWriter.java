@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.PostgresWriterPO;
 import org.gensokyo.data.util.DatasetKit;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -31,7 +32,7 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class PostgresWriter implements Writer {
+public class PostgresWriter<T extends PostgresWriterPO> implements Writer<T> {
 
     private static final String SQL_TEMPLATE = "COPY %s (%s) FROM STDIN WITH (FORMAT TEXT, ENCODING 'UTF-8', DELIMITER '"
             + Const.VERTICAL + "',NULL '" + Const.NULL + "', HEADER false)";
@@ -39,7 +40,7 @@ public class PostgresWriter implements Writer {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         Connection conn = null;
         var wpo = ctx.writer();
         try {
@@ -54,7 +55,7 @@ public class PostgresWriter implements Writer {
                 BaseConnection bc = conn.unwrap(BaseConnection.class);
                 CopyManager copyManager = new CopyManager(bc);
                 var sql = String.format(SQL_TEMPLATE, wpo.getTarget(), wpo.getTemplate());
-                return copyManager.copyIn(sql, DatasetKit.buildBulkData(wpo, dataset));
+                return copyManager.copyIn(sql, DatasetKit.buildBulkData(wpo.getTemplate(), dataset));
             }
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",

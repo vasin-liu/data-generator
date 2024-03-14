@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
-import org.gensokyo.data.po.ScriptStagePO;
+import org.gensokyo.data.po.stage.ScriptStagePO;
 import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.character.StrKit;

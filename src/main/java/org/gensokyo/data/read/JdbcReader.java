@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.reader.JdbcReaderPO;
 import org.gensokyo.data.script.ScriptFactory;
 import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.Value;
@@ -30,20 +31,20 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class JdbcReader implements Reader {
+public class JdbcReader<T extends JdbcReaderPO> implements Reader<T> {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final ScriptFactory scriptFactory;
 
     @SuppressWarnings("SqlSourceToSinkFlow")
     @Override
-    public Value read(final ReaderContext ctx, final Value input) {
+    public Value read(final ReaderContext<T> ctx, final Value input) {
         try {
             var rpo = ctx.reader();
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(rpo.getDataSourceId()));
-            var re = namedParameterJdbcTemplate.queryForList((String) Objects.requireNonNull(rpo.getDataSet()),
+            var re = namedParameterJdbcTemplate.queryForList(Objects.requireNonNull(rpo.getSql()),
                     toSqlParams(ctx, input));
             Assert.notEmpty(re, "字段 %s 的数据读取器查询数据源编号 %s 的数据库查询结果为空，查询语句为：%s",
-                    ctx.field().getName(), ctx.reader().getDataSourceId(), ctx.reader().getDataSet());
+                    ctx.field().getName(), ctx.reader().getDataSourceId(), ctx.reader().getSql());
             return DatasetKit.extractCollection(re);
         } catch (Exception e) {
             throw new DataGeneratorException("读取数据库数据出现异常", e);
@@ -59,7 +60,7 @@ public class JdbcReader implements Reader {
      * @param input 输入值
      * @return SQL参数
      */
-    private Map<String, Object> toSqlParams(final ReaderContext ctx, final Value input) {
+    private Map<String, Object> toSqlParams(final ReaderContext<T> ctx, final Value input) {
         var params = new HashMap<String, Object>();
         var rpo = ctx.stage();
         if (MapKit.isNotEmpty(rpo.getParams())) {

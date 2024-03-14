@@ -5,7 +5,8 @@
  */
 package org.gensokyo.data.read.strategy;
 
-import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.po.stage.ReadStagePO;
+import org.gensokyo.data.po.reader.ReaderPO;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.kit.collect.CollectKit;
 
@@ -16,7 +17,7 @@ import org.gensokyo.kit.collect.CollectKit;
  * @version 1.0.0
  * @since 2023/10/26 , Version 1.0.0
  */
-public class EqualReaderSelectStrategy implements ReaderSelectStrategy {
+public class EqualReaderSelectStrategy<T extends ReaderPO> implements ReaderSelectStrategy<T> {
 
     /**
      * 数据选择策略
@@ -24,11 +25,12 @@ public class EqualReaderSelectStrategy implements ReaderSelectStrategy {
      * @param rpo 读取阶段信息
      * @return 选择结果
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public ReadStagePO.ReaderPO select(final ReadStagePO rpo) {
+    public T select(final ReadStagePO rpo) {
         if (CollectKit.isEmpty(rpo.getReaders())) {
             return null;
         }
-        return RandomKit.choiceOne(rpo.getReaders());
+        return (T) RandomKit.choiceOne(rpo.getReaders());
     }
 }

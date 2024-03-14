@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.KafkaWriterPO;
 import org.gensokyo.data.util.TemplateKit;
-import org.gensokyo.kit.json.JsonKit;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.List;
@@ -27,12 +27,12 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class KafkaWriter implements Writer {
+public class KafkaWriter<T extends KafkaWriterPO> implements Writer<T> {
 
     private final MultipleKafkaTemplate multipleKafkaTemplate;
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         var wpo = ctx.writer();
         try {
             KafkaTemplate<String, String> kt = multipleKafkaTemplate.template(wpo.getDataSourceId());

@@ -3,14 +3,13 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.po;
+package org.gensokyo.data.po.stage;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.gensokyo.data.constant.ReaderSelectStrategyType;
-import org.gensokyo.data.constant.ReaderType;
+import org.gensokyo.data.po.reader.ReaderPO;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +30,9 @@ public class ReadStagePO extends StagePO {
     private String dataSetId;
 
     /**
-     * 缓存数据在内存中
+     * 缓存数据在内存中，默认为false
      */
-    private boolean inMemory = true;
+    private boolean inMemory = false;
 
     /**
      * 参数配置（当前只对SQL生效）
@@ -50,29 +49,4 @@ public class ReadStagePO extends StagePO {
      * 数据读取器列表
      */
     private List<ReaderPO> readers;
-
-    @Getter
-    @Setter
-    public static class ReaderPO implements Serializable {
-
-        /**
-         * 读取器权重，用于权重选择策略
-         */
-        private int weight = 100;
-
-        /**
-         * 数据集读取类型
-         */
-        private ReaderType type;
-
-        /**
-         * 数据源ID，数据集所在数据源的唯一标识
-         */
-        private String dataSourceId;
-
-        /**
-         * 数据集
-         */
-        private Object dataSet;
-    }
 }

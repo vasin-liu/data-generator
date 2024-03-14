@@ -9,7 +9,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
-import org.gensokyo.data.po.WriteStagePO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.SingleValue;
@@ -114,32 +113,32 @@ public class DatasetKit {
         return results;
     }
 
-    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data) {
-        return buildBulkData(wpo, data, Const.VERTICAL, Const.LF, Const.NULL);
+    public static InputStream buildBulkData(String template, List<Map<String, Object>> data) {
+        return buildBulkData(template, data, Const.VERTICAL, Const.LF, Const.NULL);
     }
 
-    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data, String columnDelimiter) {
-        return buildBulkData(wpo, data, columnDelimiter, Const.LF, Const.NULL);
+    public static InputStream buildBulkData(String template, List<Map<String, Object>> data, String columnDelimiter) {
+        return buildBulkData(template, data, columnDelimiter, Const.LF, Const.NULL);
     }
 
-    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data, String columnDelimiter,
+    public static InputStream buildBulkData(String template, List<Map<String, Object>> data, String columnDelimiter,
                                             String nullValue) {
-        return buildBulkData(wpo, data, columnDelimiter, Const.LF, nullValue);
+        return buildBulkData(template, data, columnDelimiter, Const.LF, nullValue);
     }
 
-    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data,
+    public static InputStream buildBulkData(String template, List<Map<String, Object>> data,
                                             String columnDelimiter, String rowDelimiter, String nullValue) {
-        return buildBulkData(wpo, data, columnDelimiter, rowDelimiter, nullValue, false);
+        return buildBulkData(template, data, columnDelimiter, rowDelimiter, nullValue, false);
     }
 
-    public static InputStream buildBulkData(WriteStagePO wpo, List<Map<String, Object>> data,
+    public static InputStream buildBulkData(String template, List<Map<String, Object>> data,
                                             String columnDelimiter, String rowDelimiter, String nullValue,
                                             boolean withColumnNames) {
         if (StrKit.isBlank(columnDelimiter)) {
             columnDelimiter = Const.VERTICAL;
         }
         StringBuilder sb = new StringBuilder();
-        List<String> cols = Splitter.on(Const.COMMA).trimResults().splitToList(wpo.getTemplate());
+        List<String> cols = Splitter.on(Const.COMMA).trimResults().splitToList(template);
         if (withColumnNames) {
             sb.append(String.join(columnDelimiter, cols)).append(rowDelimiter);
         }

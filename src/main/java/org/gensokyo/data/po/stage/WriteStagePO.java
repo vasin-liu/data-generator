@@ -3,12 +3,14 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.po;
+package org.gensokyo.data.po.stage;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.gensokyo.data.constant.StageType;
-import org.gensokyo.data.constant.WriterType;
+import org.gensokyo.data.po.writer.WriterPO;
+
+import java.util.List;
 
 /**
  * 数据写入阶段配置
@@ -20,22 +22,8 @@ import org.gensokyo.data.constant.WriterType;
 @Getter
 @Setter
 public class WriteStagePO extends StagePO {
-    /**
-     * 写入器类型
-     */
-    private WriterType writerType;
-    /**
-     * 数据源编号
-     */
-    private String dataSourceId;
-    /**
-     * 写入目标对象
-     */
-    private String target;
-    /**
-     * 写入模板
-     */
-    private String template;
+
+    private List<WriterPO> writers;
 
     @Override
     public StageType getType() {

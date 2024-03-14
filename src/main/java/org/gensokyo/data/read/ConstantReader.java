@@ -6,8 +6,8 @@
 package org.gensokyo.data.read;
 
 import org.gensokyo.data.context.ReaderContext;
+import org.gensokyo.data.po.reader.ConstantReaderPO;
 import org.gensokyo.data.util.DatasetKit;
-import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
 
 /**
@@ -17,12 +17,12 @@ import org.gensokyo.data.value.Value;
  * @version 1.0.0
  * @since 2024/2/26 , Version 1.0.0
  */
-public class ConstantReader implements Reader {
+public class ConstantReader<T extends ConstantReaderPO> implements Reader<T> {
 
     @Override
-    public Value read(final ReaderContext ctx, final Value input) {
+    public Value read(final ReaderContext<T> ctx, final Value input) {
         var rpo = ctx.reader();
-        return DatasetKit.toValue(rpo.getDataSet());
+        return DatasetKit.toValue(rpo.getData());
     }
 }
 

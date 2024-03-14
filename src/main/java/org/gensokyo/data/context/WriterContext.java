@@ -6,6 +6,8 @@
 package org.gensokyo.data.context;
 
 import org.gensokyo.data.po.*;
+import org.gensokyo.data.po.stage.WriteStagePO;
+import org.gensokyo.data.po.writer.WriterPO;
 
 /**
  * 写入器上下文
@@ -14,11 +16,11 @@ import org.gensokyo.data.po.*;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-public record WriterContext(TemplatePO template,
-                            FieldPO field,
-                            WriteStagePO writer) {
+public record WriterContext<T extends WriterPO>(TemplatePO template,
+                                                FieldPO field,
+                                                T writer) {
 
-    public static WriterContext from(StageContext<WriteStagePO> ctx, WriteStagePO writer) {
-        return new WriterContext(ctx.template(), ctx.field(), writer);
+    public static <T extends WriterPO> WriterContext<T> from(StageContext<WriteStagePO> ctx, T writer) {
+        return new WriterContext<>(ctx.template(), ctx.field(), writer);
     }
 }

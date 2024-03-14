@@ -6,6 +6,8 @@
 package org.gensokyo.data.context;
 
 import org.gensokyo.data.po.*;
+import org.gensokyo.data.po.reader.ReaderPO;
+import org.gensokyo.data.po.stage.ReadStagePO;
 
 /**
  * 读取器上下文
@@ -14,13 +16,13 @@ import org.gensokyo.data.po.*;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
-public record ReaderContext(TemplatePO template,
-                            FieldPO field,
-                            ReadStagePO stage,
-                            ReadStagePO.ReaderPO reader) {
+public record ReaderContext<T extends ReaderPO>(TemplatePO template,
+                                                FieldPO field,
+                                                ReadStagePO stage,
+                                                T reader) {
 
-    public static ReaderContext from(StageContext<ReadStagePO> ctx, ReadStagePO.ReaderPO reader) {
-        return new ReaderContext(ctx.template(), ctx.field(), ctx.stage(), reader);
+    public static <T extends ReaderPO> ReaderContext<T> from(StageContext<ReadStagePO> ctx, T reader) {
+        return new ReaderContext<>(ctx.template(), ctx.field(), ctx.stage(), reader);
     }
 
 }

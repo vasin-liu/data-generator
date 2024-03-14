@@ -7,7 +7,7 @@ package org.gensokyo.data.script;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.po.ScriptStagePO;
+import org.gensokyo.data.po.stage.ScriptStagePO;
 import org.gensokyo.kit.character.StrKit;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.Nullable;

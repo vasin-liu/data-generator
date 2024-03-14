@@ -5,7 +5,8 @@
  */
 package org.gensokyo.data.read.strategy;
 
-import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.po.stage.ReadStagePO;
+import org.gensokyo.data.po.reader.ReaderPO;
 
 /**
  * 读取器选择策略接口
@@ -15,7 +16,7 @@ import org.gensokyo.data.po.ReadStagePO;
  * @since 2023/10/26 , Version 1.0.0
  */
 @FunctionalInterface
-public interface ReaderSelectStrategy {
+public interface ReaderSelectStrategy<T extends ReaderPO> {
 
     /**
      * 数据选择策略
@@ -23,5 +24,5 @@ public interface ReaderSelectStrategy {
      * @param rpo 读取阶段信息
      * @return 选择结果
      */
-    ReadStagePO.ReaderPO select(final ReadStagePO rpo);
+    T select(final ReadStagePO rpo);
 }

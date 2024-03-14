@@ -3,19 +3,20 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.script;
+package org.gensokyo.data.po.writer;
 
-import org.gensokyo.data.po.stage.ScriptStagePO;
-import org.gensokyo.data.value.Value;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 脚本接口
+ * 控制台数据写入器配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2024/2/23 , Version 1.0.0
+ * @since 2024/2/28 , Version 1.0.0
  */
-public interface Script {
+@Getter
+@Setter
+public class ConsoleWriterPO extends WriterPO {
 
-    Value eval(final ScriptStagePO spo, final Value dataset, Object... args);
 }

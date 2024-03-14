@@ -21,7 +21,8 @@ import java.util.List;
 @Setter
 @Getter
 public class TablePO implements Serializable {
-    private String type;
+    /**
+     * 表字段配置
+     */
     private List<FieldPO> fields;
-    private List<WriteStagePO> writers;
 }

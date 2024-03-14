@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.ConsoleWriterPO;
 import org.gensokyo.kit.json.JsonKit;
 
 import java.util.List;
@@ -23,18 +24,18 @@ import java.util.Objects;
  * @since 2024/2/23 , Version 1.0.0
  */
 @Slf4j
-public class ConsoleWriter implements Writer {
+public class ConsoleWriter<T extends ConsoleWriterPO> implements Writer<T> {
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         var wpo = ctx.writer();
         try {
             log.info("开始写入控制台数据：\n" + JsonKit.write(dataset));
             log.info("写入控制台数据成功！");
             return Objects.nonNull(dataset) ? dataset.size() : 0;
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
-                    wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTarget(), wpo.getTemplate()), e);
+            throw new DataGeneratorException(String.format("写入数据集出现异常，写入类型为：%s。",
+                    wpo.getWriterType()), e);
         }
     }
 

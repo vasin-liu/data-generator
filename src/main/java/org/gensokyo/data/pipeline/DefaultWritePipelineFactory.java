@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.context.TemplateContext;
-import org.gensokyo.data.po.WriteStagePO;
+import org.gensokyo.data.po.stage.WriteStagePO;
 import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
@@ -30,13 +30,10 @@ public class DefaultWritePipelineFactory implements PipelineFactory {
     @Override
     public Value startup(final TemplateContext ctx) {
         Assert.notNull(ctx.template(), "数据生成模板配置不能为空");
-        Assert.notNull(ctx.template().getTable(), "数据生成模板表配置不能为空");
-        Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getTable().getWriters()), "数据生成配置的表配置中必须至少配置一个写入器");
-        var writers = ctx.template().getTable().getWriters();
-        for (WriteStagePO wpo : writers) {
-            var stageCtx = new StageContext<>(ctx.template(), null, wpo);
-            write(stageCtx, ctx.dataset());
-        }
+        Assert.notNull(ctx.template().getOutput(), "数据生成模板输出配置不能为空");
+        Assert.isTrue(CollectKit.isNotEmpty(ctx.template().getOutput().getWriters()), "数据生成配置的中输出配置必须至少配置一个写入器");
+        var stageCtx = new StageContext<>(ctx.template(), null, ctx.template().getOutput());
+        write(stageCtx, ctx.dataset());
         //无需返回数据集
         return null;
     }

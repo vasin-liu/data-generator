@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.ClickHouseWriterPO;
 import org.gensokyo.data.util.DatasetKit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -32,14 +33,14 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ClickHouseWriter implements Writer {
+public class ClickHouseWriter<T extends ClickHouseWriterPO> implements Writer<T> {
 
     private static final String SQL_TEMPLATE = "INSERT INTO %s (%s) FORMAT CSV ";
 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         Connection conn = null;
         var wpo = ctx.writer();
         try {
@@ -53,15 +54,14 @@ public class ClickHouseWriter implements Writer {
             Statement stmt = conn.createStatement();
             if (stmt.isWrapperFor(ClickHouseStatement.class)) {
                 ClickHouseStatement chs = stmt.unwrap(ClickHouseStatement.class);
-                ClickHouseResponse resp = chs.write()
+                chs.write()
                         //.format(ClickHouseFormat.CSV)
                         //.use("pd_dts")
                         .query(String.format(SQL_TEMPLATE, wpo.getTarget(), wpo.getTemplate()))
                         .set("format_csv_delimiter", Const.VERTICAL)
-                        .data(DatasetKit.buildBulkData(wpo, dataset, Const.VERTICAL, "\"\""))
+                        .data(DatasetKit.buildBulkData(wpo.getTemplate(), dataset, Const.VERTICAL, "\"\""))
                         //.table(wpo.getTarget())
                         .executeAndWait();
-                //return resp.getSummary().getWrittenRows();
                 return dataset.size();
             }
         } catch (Exception e) {

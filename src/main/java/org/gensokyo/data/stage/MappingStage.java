@@ -7,7 +7,7 @@ package org.gensokyo.data.stage;
 
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.MappingStagePO;
+import org.gensokyo.data.po.stage.MappingStagePO;
 import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;

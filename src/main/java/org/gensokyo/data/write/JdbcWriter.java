@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.JdbcWriterPO;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class JdbcWriter implements Writer {
+public class JdbcWriter<T extends JdbcWriterPO> implements Writer<T> {
     private static final String SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES(%s)";
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -38,7 +39,7 @@ public class JdbcWriter implements Writer {
     // 使用spring的事务注解会导致数据源切换失败
     // @Transactional(rollbackFor = Exception.class)
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         var wpo = ctx.writer();
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(wpo.getDataSourceId()));

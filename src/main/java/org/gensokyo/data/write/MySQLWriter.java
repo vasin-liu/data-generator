@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.MySQLWriterPO;
 import org.gensokyo.data.util.DatasetKit;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -29,7 +30,7 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class MySQLWriter implements Writer {
+public class MySQLWriter<T extends MySQLWriterPO> implements Writer<T> {
     private static final String SQL_TEMPLATE = """
             LOAD DATA LOCAL INFILE 'data.csv' INTO TABLE %s 
             CHARACTER SET UTF8 FIELDS TERMINATED BY ',' 
@@ -39,7 +40,7 @@ public class MySQLWriter implements Writer {
 
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         Connection conn = null;
         var wpo = ctx.writer();
         try {
@@ -55,7 +56,7 @@ public class MySQLWriter implements Writer {
             PreparedStatement ps = conn.prepareStatement(sql);
             if (ps.isWrapperFor(com.mysql.cj.jdbc.JdbcStatement.class)) {
                 com.mysql.cj.jdbc.JdbcPreparedStatement jps = ps.unwrap(com.mysql.cj.jdbc.JdbcPreparedStatement.class);
-                jps.setLocalInfileInputStream(DatasetKit.buildBulkData(wpo, dataset));
+                jps.setLocalInfileInputStream(DatasetKit.buildBulkData(wpo.getTemplate(), dataset));
                 return jps.executeUpdate();
             }
         } catch (Exception e) {

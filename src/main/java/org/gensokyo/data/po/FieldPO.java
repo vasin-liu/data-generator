@@ -7,6 +7,7 @@ package org.gensokyo.data.po;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gensokyo.data.po.stage.StagePO;
 
 import java.io.Serializable;
 import java.util.List;

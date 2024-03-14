@@ -10,7 +10,7 @@ import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.event.OnDoneListener;
 import org.gensokyo.data.event.OnExceptionListener;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.StagePO;
+import org.gensokyo.data.po.stage.StagePO;
 import org.gensokyo.data.value.Value;
 
 import java.util.Objects;

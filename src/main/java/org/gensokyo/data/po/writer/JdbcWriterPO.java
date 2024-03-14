@@ -3,15 +3,13 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.po;
+package org.gensokyo.data.po.writer;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.gensokyo.data.convert.Converter;
-import org.gensokyo.data.convert.StringConverter;
 
 /**
- * 数据转换阶段配置
+ * JDBC数据写入器配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -19,7 +17,6 @@ import org.gensokyo.data.convert.StringConverter;
  */
 @Getter
 @Setter
-public class ConvertStagePO extends StagePO {
+public class JdbcWriterPO extends WriterPO {
 
-    private Class<? extends Converter> converterType = StringConverter.class;
 }

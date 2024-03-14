@@ -10,7 +10,7 @@ import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.ReadStagePO;
+import org.gensokyo.data.po.stage.ReadStagePO;
 import org.gensokyo.data.read.ReaderFactory;
 import org.gensokyo.data.read.strategy.ReaderSelectStrategyFactory;
 import org.gensokyo.data.util.DatasetKit;
@@ -74,8 +74,8 @@ public class ReadStage extends AbstractStage<ReadStagePO> {
                 result.addValue(ds);
             }
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("字段 %s 的执行数据读取阶段失败，数据集读取类型为：%s ，数据源编号为：%s ，输入值为：%s。",
-                    ctx.field().getName(), readerPo.getType(), readerPo.getDataSourceId(), JsonKit.write(input.get())), e);
+            throw new DataGeneratorException(String.format("字段 %s 的执行数据读取阶段失败，数据集读取类型为：%s ，输入值为：%s， 读取器配置为：%s。",
+                    ctx.field().getName(), readerPo.getType(), JsonKit.write(input.get()), JsonKit.write(readerPo)), e);
         }
         return DatasetKit.extractValue(result);
     }

@@ -6,7 +6,7 @@
 package org.gensokyo.data.select.strategy;
 
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.po.stage.SelectStagePO;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;

@@ -8,7 +8,7 @@ package org.gensokyo.data.stage;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.convert.Converter;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.ConvertStagePO;
+import org.gensokyo.data.po.stage.ConvertStagePO;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.factory.annotation.Autowired;

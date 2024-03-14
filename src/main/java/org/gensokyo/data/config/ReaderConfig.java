@@ -6,8 +6,10 @@
 package org.gensokyo.data.config;
 
 import org.gensokyo.data.faker.DataFaker;
+import org.gensokyo.data.po.reader.ConstantReaderPO;
+import org.gensokyo.data.po.reader.JdbcReaderPO;
+import org.gensokyo.data.po.reader.SpelReaderPO;
 import org.gensokyo.data.read.ConstantReader;
-import org.gensokyo.data.read.DirectSpelReader;
 import org.gensokyo.data.read.JdbcReader;
 import org.gensokyo.data.read.SpelReader;
 import org.gensokyo.data.script.ScriptFactory;
@@ -28,26 +30,20 @@ public class ReaderConfig {
 
     @Bean
     @ConditionalOnMissingBean(ConstantReader.class)
-    public ConstantReader constantReader() {
-        return new ConstantReader();
+    public ConstantReader<ConstantReaderPO> constantReader() {
+        return new ConstantReader<>();
     }
 
     @Bean
     @ConditionalOnMissingBean(JdbcReader.class)
-    public JdbcReader jdbcReader(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
-                                 ScriptFactory scriptFactory) {
-        return new JdbcReader(namedParameterJdbcTemplate, scriptFactory);
+    public JdbcReader<JdbcReaderPO> jdbcReader(NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+                                               ScriptFactory scriptFactory) {
+        return new JdbcReader<>(namedParameterJdbcTemplate, scriptFactory);
     }
 
     @Bean
     @ConditionalOnMissingBean(SpelReader.class)
-    public SpelReader spelReader(DataFaker dataFaker) {
-        return new SpelReader(dataFaker);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(DirectSpelReader.class)
-    public DirectSpelReader directSpelReader(DataFaker dataFaker) {
-        return new DirectSpelReader(dataFaker);
+    public SpelReader<SpelReaderPO> spelReader(DataFaker dataFaker) {
+        return new SpelReader<>(dataFaker);
     }
 }

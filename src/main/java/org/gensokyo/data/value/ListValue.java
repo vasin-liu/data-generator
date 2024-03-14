@@ -6,7 +6,7 @@
 package org.gensokyo.data.value;
 
 import org.gensokyo.data.constant.ValueType;
-import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.po.stage.SelectStagePO;
 import org.gensokyo.data.select.Select;
 import org.gensokyo.data.select.strategy.ValueSelectStrategy;
 import org.gensokyo.kit.collect.CollectKit;

@@ -7,7 +7,7 @@ package org.gensokyo.data.stage;
 
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.SelectStagePO;
+import org.gensokyo.data.po.stage.SelectStagePO;
 import org.gensokyo.data.select.strategy.ValueSelectStrategyFactory;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;

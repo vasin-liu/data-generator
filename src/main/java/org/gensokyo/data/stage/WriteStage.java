@@ -9,11 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.po.WriteStagePO;
+import org.gensokyo.data.po.stage.WriteStagePO;
+import org.gensokyo.data.po.writer.WriterPO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.data.write.WriterFactory;
+import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,15 +47,20 @@ public class WriteStage extends AbstractStage<WriteStagePO> {
             return Value.EMPTY;
         }
         var data = extract(input);
-        var wpo = ctx.stage();
-        try {
-            var writerCtx = WriterContext.from(ctx, wpo);
-            long rows = writerFactory.newInstance(wpo).write(writerCtx, data);
-            log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。",
-                    wpo.getDataSourceId(), wpo.getTarget(), rows);
-        } catch (Exception e) {
-            throw new DataGeneratorException(String.format("模板 %s 执行数据写入阶段失败，写入类型为：%s ，目标数据源编号为：%s ，写入模板为：%s ，输入值为：%s。",
-                    ctx.template().getName(), wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTemplate(), JsonKit.write(input.get())), e);
+        var stage = ctx.stage();
+        if (CollectKit.isEmpty(stage.getWriters())) {
+            throw new DataGeneratorException("写入阶段至少要配置一个写入器");
+        }
+        for (WriterPO wpo : stage.getWriters()) {
+            try {
+                var writerCtx = WriterContext.from(ctx, wpo);
+                long rows = writerFactory.newInstance(wpo).write(writerCtx, data);
+                log.info("数据写入完成，数据源ID为：{}，目标表为：{}，写入行数：{}。",
+                        wpo.getDataSourceId(), wpo.getTarget(), rows);
+            } catch (Exception e) {
+                throw new DataGeneratorException(String.format("模板 %s 执行数据写入阶段失败，写入类型为：%s ，目标数据源编号为：%s ，写入模板为：%s ，输入值为：%s。",
+                        ctx.template().getName(), wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTemplate(), JsonKit.write(input.get())), e);
+            }
         }
 
         return input;

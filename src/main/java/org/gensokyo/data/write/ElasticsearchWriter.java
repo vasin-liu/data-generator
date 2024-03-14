@@ -15,6 +15,7 @@ import org.elasticsearch.rest.RestStatus;
 import org.gensokyo.boot.elasticsearch.support.MultipleElasticsearchRestClient;
 import org.gensokyo.data.context.WriterContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.po.writer.ElasticsearchWriterPO;
 import org.gensokyo.data.util.TemplateKit;
 
 import java.util.Arrays;
@@ -31,12 +32,12 @@ import java.util.Objects;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ElasticsearchWriter implements Writer {
+public class ElasticsearchWriter<T extends ElasticsearchWriterPO> implements Writer<T> {
 
     private final MultipleElasticsearchRestClient restClient;
 
     @Override
-    public long write(final WriterContext ctx, final List<Map<String, Object>> dataset) {
+    public long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset) {
         var wpo = ctx.writer();
         try {
             RestHighLevelClient rhlc = restClient.hlc(wpo.getDataSourceId());

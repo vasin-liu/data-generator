@@ -11,6 +11,7 @@ import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.faker.DataFaker;
+import org.gensokyo.data.po.reader.SpelReaderPO;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.Value;
 import org.springframework.context.expression.MapAccessor;
@@ -20,8 +21,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Supplier;
 
 /**
  * Spring 表达式引擎读取器
@@ -32,47 +32,39 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class SpelReader implements Reader {
-    private final Pattern p = Pattern.compile("^\\{.+\\}$|^((?!\\{).+(?!\\}))\\[(\\d+)\\]$");
+public class SpelReader<T extends SpelReaderPO> implements Reader<T> {
 
     private final DataFaker dataFaker;
 
-
-    @SuppressWarnings("unchecked")
     @Override
-    public Value read(final ReaderContext ctx, final Value input) {
+    public Value read(final ReaderContext<T> ctx, final Value input) {
         var parser = new SpelExpressionParser();
         var sec = new StandardEvaluationContext();
         sec.addPropertyAccessor(new MapAccessor());
         sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
+        final String rightBrace1 = "{";
+        final String rightBrace2 = "#{";
+        final String leftBrace = "}";
         var rpo = ctx.reader();
-        if (rpo.getDataSet() instanceof String dataset) {
-            try {
-                Matcher m = p.matcher(dataset);
-                if (m.find()) {
-                    var num = m.group(2);
-                    if (Objects.isNull(num)) {
-                        //原生SPEL表达式
-                        var el = m.group(0);
-                        var evalResult = parser.parseExpression(el).getValue(sec, List.class);
-                        return ListValue.fromObjectCollection(evalResult);
-                    } else {
-                        //自定义SPEL表达式
-                        var list = new ArrayList<>();
-                        var el = m.group(1);
-                        for (int i = 0; i < Integer.parseInt(num); i++) {
-                            list.add(parser.parseExpression(el).getValue(sec));
-                        }
-                        return ListValue.fromObjectCollection(list);
-                    }
-                }
-                throw new DataGeneratorException(String.format("字段 %s 所配置的类型为：%s 的表达式 %s 目前暂时不支持",
-                        ctx.field().getName(), rpo.getType(), rpo.getDataSet()));
-            } catch (Exception e) {
-                throw new DataGeneratorException(String.format("字段 %s 在执行 %s 类型表达式 %s 出现异常：",
-                        ctx.field().getName(), rpo.getType(), rpo.getDataSet()), e);
+        var exp = rpo.getExp();
+        try {
+            if (!exp.startsWith(rightBrace1) && !exp.startsWith(rightBrace2)) {
+                exp = rightBrace1.concat(exp);
             }
+            if (!exp.endsWith(leftBrace)) {
+                exp = exp.concat(leftBrace);
+            }
+            final String script = exp;
+            var list = new ArrayList<>();
+            var times = Math.max(rpo.getTimes(), 1);
+            for (int i = 0; i < times; i++) {
+                Supplier<Object> evalResult = () -> parser.parseExpression(script).getValue(sec, List.class);
+                list.add(evalResult);
+            }
+            return ListValue.fromObjectCollection(list);
+        } catch (Exception e) {
+            throw new DataGeneratorException(String.format("字段 %s 在执行 %s 类型表达式 %s 出现异常：",
+                    ctx.field().getName(), rpo.getType(), exp), e);
         }
-        return Value.EMPTY;
     }
 }

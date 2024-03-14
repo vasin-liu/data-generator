@@ -8,6 +8,7 @@ package org.gensokyo.data.po;
 import lombok.Getter;
 import lombok.Setter;
 import org.gensokyo.data.constant.Const;
+import org.gensokyo.data.po.stage.WriteStagePO;
 
 import java.io.Serializable;
 
@@ -22,9 +23,33 @@ import java.io.Serializable;
 @Getter
 public class TemplatePO implements Serializable {
 
+    /**
+     * 模板名称
+     */
     private String name;
+
+    /**
+     * 数据量
+     */
     private Integer amount = 0;
+
+    /**
+     * 批次大小
+     */
     private Integer batchSize = Const.BATCH_SIZE;
+
+    /**
+     * 全局配置
+     */
     private GlobalPO global;
+
+    /**
+     * 表配置
+     */
     private TablePO table;
+
+    /**
+     * 输出阶段配置
+     */
+    private WriteStagePO output;
 }
