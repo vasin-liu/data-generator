@@ -15,7 +15,16 @@ import org.gensokyo.data.value.Value;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
+@FunctionalInterface
 public interface Script {
 
+    /**
+     * 执行脚本
+     *
+     * @param spo     脚本阶段配置
+     * @param dataset 输入数据集
+     * @param args    输入参数列表
+     * @return 脚本执行结果
+     */
     Value eval(final ScriptStagePO spo, final Value dataset, Object... args);
 }

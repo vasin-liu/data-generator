@@ -6,6 +6,7 @@
 package org.gensokyo.data.stage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.stage.ScriptStagePO;
@@ -42,7 +43,7 @@ public class ScriptStage extends AbstractStage<ScriptStagePO> {
         try {
             var script = scriptFactory.newInstance(spo);
             if (Objects.nonNull(script)) {
-                return script.eval(spo, input);
+                return script.eval(spo, input, DataCache.getOrCreate(ctx.template().getName()));
             }
             return input;
         } catch (Exception e) {

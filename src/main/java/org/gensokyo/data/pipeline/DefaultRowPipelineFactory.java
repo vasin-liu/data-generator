@@ -7,17 +7,18 @@ package org.gensokyo.data.pipeline;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.context.TemplateContext;
-import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.constant.StageType;
 import org.gensokyo.data.context.FieldContext;
 import org.gensokyo.data.context.StageContext;
+import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.FieldPO;
+import org.gensokyo.data.po.TemplatePO;
 import org.gensokyo.data.po.stage.ReadStagePO;
 import org.gensokyo.data.po.stage.StagePO;
-import org.gensokyo.data.po.TemplatePO;
-import org.gensokyo.data.stage.*;
+import org.gensokyo.data.stage.SelectStage;
+import org.gensokyo.data.stage.Stage;
+import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
@@ -151,15 +152,6 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
             selectStage.onDone(output -> {
                 dmv.put(fn, output);
                 log.debug("当前字段 {} 选择后的结果为 {}", fn, JsonKit.write(output));
-            });
-        }
-
-        if (stage instanceof ReadStage readStage && ctx.stage() instanceof ReadStagePO rpo && rpo.isInMemory()) {
-            readStage.onDone(output -> {
-                //将读取到的数据缓存至内存中
-                var tdc = DataCache.getOrCreate(ctx.template().getName());
-                tdc.set(rpo.getDataSetId(), output);
-                log.debug("当前字段 {} 读取到的数据缓存至内存中", fn);
             });
         }
     }

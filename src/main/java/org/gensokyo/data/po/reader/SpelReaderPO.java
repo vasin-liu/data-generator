@@ -21,7 +21,7 @@ public class SpelReaderPO extends ReaderPO {
     /**
      * 表达式
      */
-    private String exp;
+    private String content;
     /**
      * 表达式执行次数
      */

@@ -20,7 +20,8 @@
             "SCRIPT",
             "CONVERT",
             "MAPPING",
-            "WRITE"
+            "WRITE",
+            "LOG"
           ]
         }
       },
@@ -75,6 +76,14 @@
             }
           },
           "$ref": "writer-schema.json/#/$defs/writer"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "LOG"
+            }
+          },
+          "$ref": "#logStage"
         }
       ]
     },
@@ -93,44 +102,52 @@
           "default": false
         },
         "params": {
-          "type": "object",
-          "description": "参数集合",
-          "properties": {
-            "key": {
-              "type": "string",
-              "description": "参数名称"
-            },
-            "value": {
+          "$defs": {
+            "param": {
+              "$id": "#param",
               "type": "object",
-              "description": "参数值",
+              "description": "参数配置",
               "properties": {
-                "type": {
-                  "const": "SCRIPT"
-                },
-                "scriptType": {
+                "name": {
                   "type": "string",
-                  "description": "脚本类型",
+                  "description": "参数名称"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "参数类型",
+                  "default": "SPEL",
                   "enum": [
                     "JAVASCRIPT",
-                    "SPEL"
+                    "SPEL",
+                    "CONSTANT"
                   ]
                 },
                 "content": {
-                  "type": "string",
-                  "description": "脚本内容"
+                  "type": [
+                    "string",
+                    "integer",
+                    "number",
+                    "boolean",
+                    "null",
+                    "array"
+                  ],
+                  "description": "参数值"
                 }
               },
               "required": [
+                "name",
                 "type",
-                "scriptType",
                 "content"
               ]
             }
           },
-          "required": [
-            "key",
-            "value"
-          ]
+          "type": "array",
+          "description": "参数集合",
+          "minItems": 0,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#param"
+          }
         },
         "strategyType": {
           "type": "string",
@@ -177,12 +194,16 @@
         },
         "minTimes": {
           "type": "integer",
-          "description": "最少选择次数"
+          "description": "最少选择次数",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 1000000
         },
         "maxTimes": {
           "type": "integer",
-          "minLength": 1,
-          "description": "最多选择次数"
+          "description": "最多选择次数",
+          "minimum": 1,
+          "maximum": 1000000
         }
       }
     },
@@ -236,6 +257,13 @@
           "type": "object",
           "description": "字段映射配置"
         }
+      }
+    },
+    "logStage": {
+      "$id": "#logStage",
+      "type": "object",
+      "description": "日志记录阶段配置",
+      "properties": {
       }
     }
   }

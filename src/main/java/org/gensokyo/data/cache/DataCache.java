@@ -50,6 +50,11 @@ public class DataCache {
             return dataMap.get(key);
         }
 
+        public Object getData(String key) {
+            var val = get(key);
+            return Objects.nonNull(val) ? val.get() : null;
+        }
+
         public TableDataCache remove(String key) {
             if (StrKit.isNotEmpty(key)) {
                 dataMap.remove(key);

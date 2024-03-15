@@ -3,13 +3,16 @@
  * Site: http://www.pcitech.com/
  * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
-package org.gensokyo.data.po.reader;
+package org.gensokyo.data.po.stage;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.gensokyo.data.constant.ParamType;
+
+import java.io.Serializable;
 
 /**
- * JDBC数据读取配置
+ * 参数配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -17,15 +20,20 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class JdbcReaderPO extends ReaderPO {
+public class ParamPO implements Serializable {
 
     /**
-     * 数据源ID，数据集所在数据源的唯一标识
+     * 参数名称
      */
-    private String dataSourceId;
+    private String name;
 
     /**
-     * 数据集
+     * 参数类型
      */
-    private String content;
+    private ParamType type = ParamType.SPEL;
+
+    /**
+     * 参数值
+     */
+    private Object content;
 }

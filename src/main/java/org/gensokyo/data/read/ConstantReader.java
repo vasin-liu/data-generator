@@ -22,7 +22,7 @@ public class ConstantReader<T extends ConstantReaderPO> implements Reader<T> {
     @Override
     public Value read(final ReaderContext<T> ctx, final Value input) {
         var rpo = ctx.reader();
-        return DatasetKit.toValue(rpo.getData());
+        return DatasetKit.toValue(rpo.getContent());
     }
 }
 

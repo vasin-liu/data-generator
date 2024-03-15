@@ -7,6 +7,7 @@ package org.gensokyo.data.read;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -41,12 +42,14 @@ public class SpelReader<T extends SpelReaderPO> implements Reader<T> {
         var parser = new SpelExpressionParser();
         var sec = new StandardEvaluationContext();
         sec.addPropertyAccessor(new MapAccessor());
+        sec.setVariable(Const.SCRIPT_VAR_DATASET, input.get());
         sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
+        sec.setVariable(Const.SCRIPT_VAR_ARGS, new Object[]{DataCache.getOrCreate(ctx.template().getName())});
         final String rightBrace1 = "{";
         final String rightBrace2 = "#{";
         final String leftBrace = "}";
         var rpo = ctx.reader();
-        var exp = rpo.getExp();
+        var exp = rpo.getContent();
         try {
             if (!exp.startsWith(rightBrace1) && !exp.startsWith(rightBrace2)) {
                 exp = rightBrace1.concat(exp);

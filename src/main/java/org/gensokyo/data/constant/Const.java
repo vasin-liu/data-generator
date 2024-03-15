@@ -28,4 +28,5 @@ public final class Const {
 
     public static final String SCRIPT_VAR_FAKER = "faker";
     public static final String SCRIPT_VAR_DATASET = "dataset";
+    public static final String SCRIPT_VAR_ARGS = "args";
 }

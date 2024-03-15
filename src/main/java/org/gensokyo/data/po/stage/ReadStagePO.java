@@ -11,7 +11,6 @@ import org.gensokyo.data.constant.ReaderSelectStrategyType;
 import org.gensokyo.data.po.reader.ReaderPO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 数据读取阶段配置
@@ -36,9 +35,8 @@ public class ReadStagePO extends StagePO {
 
     /**
      * 参数配置（当前只对SQL生效）
-     * key参数变量名，值为通过脚本运行取值（常量不需要使用参数，直接写死在SQL中即可）
      */
-    private Map<String, ScriptStagePO> params;
+    private List<ParamPO> params;
 
     /**
      * 读取器选择策略，默认使用等值选择策略

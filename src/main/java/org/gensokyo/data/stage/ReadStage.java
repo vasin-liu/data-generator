@@ -77,6 +77,17 @@ public class ReadStage extends AbstractStage<ReadStagePO> {
             throw new DataGeneratorException(String.format("字段 %s 的执行数据读取阶段失败，数据集读取类型为：%s ，输入值为：%s， 读取器配置为：%s。",
                     ctx.field().getName(), readerPo.getType(), JsonKit.write(input.get()), JsonKit.write(readerPo)), e);
         }
-        return DatasetKit.extractValue(result);
+        Value val = DatasetKit.extractValue(result);
+        //缓存数据集
+        if (rpo.isInMemory()) {
+            var tdc = DataCache.getOrCreate(ctx.template().getName());
+            var cacheVal = tdc.get(rpo.getDataSetId());
+            if (Objects.nonNull(cacheVal) && !cacheVal.isNullOrEmpty()) {
+                throw new DataGeneratorException(String.format("当前字段 %s 读取到的数据集 %s 已存在于内存缓存中，请检查配置是否正确",
+                        ctx.field().getName(), rpo.getDataSetId()));
+            }
+            tdc.set(rpo.getDataSetId(), val);
+        }
+        return val;
     }
 }

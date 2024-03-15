@@ -44,6 +44,7 @@ public class SpelScript implements Script {
                 sec.addPropertyAccessor(new MapAccessor());
                 sec.setVariable(Const.SCRIPT_VAR_DATASET, dv);
                 sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
+                sec.setVariable(Const.SCRIPT_VAR_ARGS, args);
                 Object result = parser.parseExpression(spo.getContent()).getValue(sec);
                 return DatasetKit.toValue(result);
             } catch (Exception e) {

@@ -33,6 +33,7 @@ public class StageFactory {
             case WRITE -> new WriteStage((StageContext<WriteStagePO>) ctx);
             case CONVERT -> new ConvertStage((StageContext<ConvertStagePO>) ctx);
             case MAPPING -> new MappingStage((StageContext<MappingStagePO>) ctx);
+            case LOG -> new LogStage((StageContext<LogStagePO>) ctx);
         };
         Assert.notNull(stage, "未找到类型为 " + ctx.stage().getType() + " 的数据处理器类");
         beanFactory.autowireBean(stage);

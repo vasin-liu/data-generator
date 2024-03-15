@@ -66,29 +66,35 @@
           "type": "string",
           "description": "数据源ID"
         },
-        "sql": {
+        "content": {
           "type": "string",
           "description": "SQL语句"
         }
-      }
+      },
+      "required": [
+        "dataSourceId",
+        "content"
+      ]
     },
     "spelReader": {
       "$id": "#spelReader",
       "type": "object",
       "description": "SPEL数据读取器配置",
       "properties": {
-        "exp": {
+        "content": {
           "type": "string",
           "description": "表达式字符串"
         },
         "times": {
           "type": "integer",
           "description": "表达式执行次数",
-          "default": 1
+          "default": 1,
+          "minimum": 1,
+          "maximum": 1000000
         }
       },
       "required": [
-        "exp"
+        "content"
       ]
     },
     "constantReader": {
@@ -96,7 +102,7 @@
       "type": "object",
       "description": "常量数据读取器配置",
       "properties": {
-        "data": {
+        "content": {
           "type": [
             "string",
             "number",
@@ -107,7 +113,10 @@
           ],
           "description": "常量数据"
         }
-      }
+      },
+      "required": [
+        "content"
+      ]
     }
   }
 }

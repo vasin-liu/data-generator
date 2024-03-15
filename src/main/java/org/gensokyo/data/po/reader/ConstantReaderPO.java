@@ -21,5 +21,5 @@ public class ConstantReaderPO extends ReaderPO {
     /**
      * 数据集
      */
-    private Object data;
+    private Object content;
 }

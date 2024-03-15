@@ -1,5 +1,5 @@
 # 数据集名称，各个文件中唯一
-name: dtem_coach
+name: demo_1
 #生成数量
 amount: 10
 #批次数量
@@ -27,10 +27,10 @@ table:
           readers:
             - type: SPEL
               weight: 100
-              exp: "#faker.snowflake.next"
+              content: "#faker.snowflake.next"
             - type: SPEL
               weight: 100
-              exp: "#faker.common.text(9,10)"
+              content: "#faker.common.text(9,10)"
     - name: SCHOOL_ID
       stages:
         - type: READ
@@ -38,7 +38,7 @@ table:
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
-              sql: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
+              content: "SELECT T1.ID,T1.NAME FROM DTEM_DRIVING_SCHOOL T1 INNER JOIN DTEM_DRIVING_SCHOOL_LICENSE T2 ON T1.ID = T2.SCHOOL_ID WHERE T1.STATUS = 'S0A' LIMIT 10"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
@@ -56,12 +56,12 @@ table:
       stages:
         - type: READ
           params:
-            schoolId:
+            - name: schoolId
               content: "#dataset.ID"
           readers:
             - type: JDBC
               dataSourceId: 'tocc_driving_school'
-              sql: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
+              content: "SELECT RECORD_NO FROM DTEM_DRIVING_SCHOOL_LICENSE WHERE STATUS = 'S0A' AND SCHOOL_ID = :schoolId"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
@@ -72,7 +72,7 @@ table:
           inMemory: true
           readers:
             - type: CONSTANT
-              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         - type: SELECT
           strategyType: ONCE_ORDER
     - name: JOIN_NO
@@ -81,16 +81,25 @@ table:
           inMemory: true
           readers:
             - type: CONSTANT
-              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         - type: CONVERT
           converterType: org.gensokyo.data.convert.StringConverter
+    - name: JOIN_NO_GET
+      dependsOn:
+        - JOIN_NO
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#args[0].getData('JOIN_NO')"
+        - type: SELECT
     - name: MAP_NO
       stages:
         - type: READ
           inMemory: true
           readers:
             - type: CONSTANT
-              data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+              content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         - type: SELECT
         - type: MAPPING
           defaultValue: 100
