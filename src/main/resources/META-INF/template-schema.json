@@ -1,110 +1,10 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://www.pcitech.com/schemas/data-generator",
-  "title": "数据生成模板-V1.0.0",
-  "description": "数据生成模板-V1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://www.pcitech.com/schemas/data-generator/template-schema.json",
+  "title": "数据生成模板-V2.1.0",
+  "description": "数据生成模板-V2.1.0",
   "type": "object",
-  "definitions": {
-    "preScript": {
-      "$id": "#script",
-      "type": "object",
-      "description": "脚本处理器",
-      "properties": {
-        "type": {
-          "type": "string",
-          "default": "SPEL",
-          "description": "脚本类型",
-          "enum": [
-            "JAVASCRIPT",
-            "SPEL"
-          ]
-        },
-        "content": {
-          "type": "string",
-          "description": "数据集处理脚本（必须是立即执行的脚本），允许的值有四种：（1）远程http/https的js脚本文件；（2）数据生成服务器上以.js结尾的本地文件；（3）内联js脚本字符串；（4）SPEL表达式。"
-        }
-      }
-    },
-    "reader": {
-      "$id": "#reader",
-      "type": "object",
-      "description": "数据读取器配置",
-      "properties": {
-        "dataSetId": {
-          "type": "string",
-          "minLength": 1,
-          "description": "数据集编号，全模板唯一"
-        },
-        "type": {
-          "type": "string",
-          "description": "数据集类型",
-          "enum": [
-            "JDBC",
-            "ELASTICSEARCH",
-            "KAFKA",
-            "CONSTANT",
-            "SPEL",
-            "DIRECT_SPEL"
-          ]
-        },
-        "dataSourceId": {
-          "type": "string",
-          "description": "数据源编号：JDBC/ELASTICSEARCH/KAFKA这三种模式下不能为空，并且与对应初始化的数据源编号一一对应"
-        },
-        "dataSet": {
-          "type": [
-            "array",
-            "string"
-          ],
-          "description": "数据集，CONSTANT模式下必须为array类型值，其余模式则为字符串你类型值"
-        },
-        "postScript": {
-          "$ref": "#script"
-        }
-      },
-      "required": [
-        "dataSetId",
-        "type",
-        "dataSet"
-      ]
-    },
-    "writer": {
-      "$id": "#writer",
-      "description": "数据写入器配置",
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "写入器数据源类型",
-          "enum": [
-            "JDBC",
-            "MYSQL",
-            "POSTGRES",
-            "CLICKHOUSE",
-            "ELASTICSEARCH",
-            "KAFKA"
-          ]
-        },
-        "dataSourceId": {
-          "type": "string",
-          "description": "数据源编号：JDBC/ELASTICSEARCH/KAFKA这三种模式下不能为空，并且与对应初始化的数据源编号一一对应"
-        },
-        "target": {
-          "type": "string",
-          "description": "数据源表名/索引名/主题名"
-        },
-        "template": {
-          "type": "string",
-          "minLength": 1,
-          "description": "数据写入模板：（1）JDBC->通常是insert into语句；（2）ElasticSearch/Kafka->通常是json语句；"
-        }
-      },
-      "required": [
-        "type",
-        "dataSourceId",
-        "template"
-      ]
-    },
+  "$defs": {
     "field": {
       "$id": "#field",
       "description": "字段配置",
@@ -120,61 +20,13 @@
           "type": "array",
           "description": "依赖字段列表"
         },
-        "converter": {
-          "type": "string",
-          "default": "org.gensokyo.data.generator.converter.StringConverter",
-          "description": "字段值类型转换器（全路径类名）"
-        },
-        "preScript": {
-          "$ref": "#script"
-        },
-        "postScript": {
-          "$ref": "#script"
-        },
-        "resultMapper": {
-          "type": "object",
-          "description": "postScript后，converter之前，对结果进行映射处理，即对结果进行分支选择",
-          "properties": {
-            "defaultDataset": {
-              "type": "array",
-              "description": "默认数据集，在所有分支不匹配时使用的默认数据集，必填"
-            },
-            "mappers": {
-              "type": "array",
-              "description": "分支映射集合",
-              "minItems": 1,
-              "uniqueItems": true,
-              "items": {
-                "type": "object",
-                "description": "分支映射对象",
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "description": "映射键值，集合中唯一，不可重复"
-                  },
-                  "dataset": {
-                    "type": "array",
-                    "description": "映射对应的数据集"
-                  }
-                },
-                "required": [
-                  "key",
-                  "dataset"
-                ]
-              }
-            }
-          },
-          "required": [
-            "defaultDataset"
-          ]
-        },
-        "readers": {
+        "stages": {
           "type": "array",
-          "description": "字段数据集读取器列表",
+          "description": "字段的处理阶段列表",
           "minItems": 1,
-          "uniqueItems": true,
+          "uniqueItems": false,
           "items": {
-            "$ref": "#reader"
+            "$ref": "stage-schema.json/#/$defs/stage"
           }
         }
       },
@@ -202,45 +54,6 @@
       "minimum": 1,
       "maximum": 10000
     },
-    "global": {
-      "type": "object",
-      "description": "全局配置",
-      "properties": {
-        "executor": {
-          "type": "object",
-          "description": "数据读取器线程池配置",
-          "properties": {
-            "coreSize": {
-              "type": "integer",
-              "description": "核心线程数",
-              "minimum": 1,
-              "maximum": 50
-            },
-            "maxSize": {
-              "type": "integer",
-              "description": "最大线程数",
-              "minimum": 1,
-              "maximum": 50
-            },
-            "queueCapacity": {
-              "type": "integer",
-              "description": "队列大小",
-              "minimum": 1,
-              "maximum": 50
-            }
-          }
-        },
-        "readers": {
-          "type": "array",
-          "description": "全局数据集配置",
-          "minItems": 0,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#reader"
-          }
-        }
-      }
-    },
     "table": {
       "type": "object",
       "description": "数据集（表）元数据配置",
@@ -253,9 +66,21 @@
           "items": {
             "$ref": "#field"
           }
-        },
-        "writer": {
-          "$ref": "#writer"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "description": "输出配置",
+      "properties": {
+        "writers": {
+          "type": "array",
+          "description": "数据写入器列表",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "writer-schema.json/#/$defs/writer"
+          }
         }
       }
     }
@@ -264,6 +89,7 @@
     "name",
     "amount",
     "batchSize",
-    "table"
+    "table",
+    "output"
   ]
 }
