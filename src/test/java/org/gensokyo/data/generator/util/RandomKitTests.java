@@ -6,6 +6,7 @@
 package org.gensokyo.data.generator.util;
 
 import net.datafaker.Faker;
+import org.gensokyo.data.util.RandomKit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
