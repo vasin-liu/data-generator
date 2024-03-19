@@ -6,7 +6,6 @@
 package org.gensokyo.data.write;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
-import com.clickhouse.client.ClickHouseResponse;
 import com.clickhouse.jdbc.ClickHouseStatement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +65,7 @@ public class ClickHouseWriter<T extends ClickHouseWriterPO> implements Writer<T>
             }
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
-                    wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTarget(), wpo.getTemplate()), e);
+                    wpo.getType(), wpo.getDataSourceId(), wpo.getTarget(), wpo.getTemplate()), e);
         } finally {
             DataSourceUtils.releaseConnection(conn, jdbcTemplate.getDataSource());
             DynamicDataSourceContextHolder.clear();

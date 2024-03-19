@@ -54,8 +54,20 @@ public class ConfigCache implements InitializingBean {
         Stream.of(Optional.ofNullable(props.getMetaFolders()).orElse(new String[0]))
                 .flatMap(location -> Stream.of(getResources(location)))
                 //忽略特定开头的文件
-                .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("___"))
-                .filter(r -> !Objects.requireNonNull(r.getFilename()).startsWith("!"))
+                .filter(r -> {
+                    if (Objects.requireNonNull(r.getFilename()).startsWith("___")) {
+                        log.warn("已忽略模板文件： {} ", r.getFilename());
+                        return false;
+                    }
+                    return true;
+                })
+                .filter(r -> {
+                    if (Objects.requireNonNull(r.getFilename()).startsWith("!")) {
+                        log.warn("已忽略模板文件： {} ", r.getFilename());
+                        return false;
+                    }
+                    return true;
+                })
                 .forEach(this::readToCache);
         log.info("已加载元数据信息总计 {} 个", cache.size());
         return true;

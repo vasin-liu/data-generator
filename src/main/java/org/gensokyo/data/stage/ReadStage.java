@@ -10,6 +10,7 @@ import org.gensokyo.data.cache.DataCache;
 import org.gensokyo.data.context.ReaderContext;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.exception.NotEnoughElementException;
 import org.gensokyo.data.po.stage.ReadStagePO;
 import org.gensokyo.data.read.ReaderFactory;
 import org.gensokyo.data.read.strategy.ReaderSelectStrategyFactory;
@@ -54,10 +55,19 @@ public class ReadStage extends AbstractStage<ReadStagePO> {
         if (rpo.isInMemory()) {
             var tdc = DataCache.getOrCreate(ctx.template().getName());
             var ds = tdc.get(rpo.getDataSetId());
-            if (Objects.nonNull(ds) && !ds.isNullOrEmpty()) {
-                log.debug("字段 {} 的数据集 {} 已缓存，直接返回缓存数据集", ctx.field().getName(), rpo.getDataSetId());
-                return ds;
+            if (Objects.isNull(ds)) {
+                //缓存数据集为空，尝试从数据源读取数据集
+                return tryReadFromDataSource(rpo, input);
             }
+            //缓存数据集为空，抛出数据集为空异常
+            if (ds.isNullOrEmpty()) {
+                throw new NotEnoughElementException(String.format("字段 %s 的数据集 %s 已无足够可供选取的数据，请检查配置是否正确",
+                        ctx.field().getName(), rpo.getDataSetId()));
+
+            }
+            log.debug("字段 {} 的数据集 {} 已缓存，直接返回缓存数据集", ctx.field().getName(), rpo.getDataSetId());
+            //缓存数据集不为空，直接返回缓存数据集
+            return ds;
         }
 
         return tryReadFromDataSource(rpo, input);

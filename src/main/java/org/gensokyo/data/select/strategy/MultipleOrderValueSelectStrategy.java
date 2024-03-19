@@ -25,24 +25,38 @@ public class MultipleOrderValueSelectStrategy implements ValueSelectStrategy {
     @Override
     public Value select(final AtomicInteger index, final AtomicInteger selectedCount,
                         final SelectStagePO spo, final Value input) {
-        var min = spo.getMinTimes();
-        var max = spo.getMaxTimes();
+        var min = spo.getMinTimes() > 0 ? spo.getMinTimes() : 1;
+        var max = spo.getMaxTimes() > 0 ? spo.getMaxTimes() : 1;
+        var num = spo.getSelectNum() > 0 ? spo.getSelectNum() : 1;
         if (input.size() < min) {
             throw new DataGeneratorException(String.format("当前数据集的数据 %s 数量小于最小需要的数量 %s",
                     input.size(), min));
         }
         if (selectedCount.get() == 0) {
             //第一次，初始化一个给定范围内的随机数
-            selectedCount.compareAndSet(0, RandomKit.nextInt(min, max));
+            var count = min == max ? min : RandomKit.nextInt(min, max);
+            selectedCount.compareAndSet(0, count);
         }
+
         var result = input;
         if (input instanceof ListValue lv) {
+            var subList = lv.subList(0, num);
             if (index.getAndIncrement() < selectedCount.get()) {
-                result = DatasetKit.extractValue(lv.get(0));
-            } else {
-                lv.remove(0);
+                result = DatasetKit.extractValue(ListValue.fromValueCollection(subList));
             }
+            if (index.get() >= selectedCount.get()) {
+                lv.removeAll(subList);
+            }
+            resetIndex(index, selectedCount);
         }
         return result;
+    }
+
+    private void resetIndex(final AtomicInteger index, final AtomicInteger selectedCount) {
+        if (index.get() >= selectedCount.get()) {
+            //重置计数器
+            index.compareAndSet(index.get(), 0);
+            selectedCount.compareAndSet(selectedCount.get(), 0);
+        }
     }
 }

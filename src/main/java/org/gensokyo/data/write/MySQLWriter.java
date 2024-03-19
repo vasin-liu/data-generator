@@ -61,7 +61,7 @@ public class MySQLWriter<T extends MySQLWriterPO> implements Writer<T> {
             }
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
-                    wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTarget(), wpo.getTemplate()), e);
+                    wpo.getType(), wpo.getDataSourceId(), wpo.getTarget(), wpo.getTemplate()), e);
         } finally {
             DataSourceUtils.releaseConnection(conn, jdbcTemplate.getDataSource());
             DynamicDataSourceContextHolder.clear();

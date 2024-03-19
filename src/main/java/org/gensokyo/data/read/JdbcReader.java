@@ -21,6 +21,7 @@ import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.collect.MapKit;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.util.Map;
@@ -45,10 +46,10 @@ public class JdbcReader<T extends JdbcReaderPO> implements Reader<T> {
         try {
             var rpo = ctx.reader();
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(rpo.getDataSourceId()));
-            var re = namedParameterJdbcTemplate.queryForList(Objects.requireNonNull(rpo.getContent()),
-                    toSqlParams(ctx, input));
-            Assert.notEmpty(re, "字段 %s 的数据读取器查询数据源编号 %s 的数据库查询结果为空，查询语句为：%s",
-                    ctx.field().getName(), ctx.reader().getDataSourceId(), ctx.reader().getContent());
+            var params = toSqlParams(ctx, input);
+            var re = namedParameterJdbcTemplate.queryForList(Objects.requireNonNull(rpo.getContent()), params);
+            Assert.notEmpty(re, "字段 %s 的数据读取器查询数据源编号 %s 的数据库查询结果为空，查询语句为：%s，查询参数为：%s",
+                    ctx.field().getName(), ctx.reader().getDataSourceId(), ctx.reader().getContent(), JsonKit.write(params));
             return DatasetKit.extractCollection(re);
         } catch (Exception e) {
             throw new DataGeneratorException("读取数据库数据出现异常", e);

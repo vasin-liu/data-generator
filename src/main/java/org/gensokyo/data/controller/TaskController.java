@@ -8,17 +8,13 @@ package org.gensokyo.data.controller;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.cache.ConfigCache;
+import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.po.TemplatePO;
-import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -41,12 +37,16 @@ public class TaskController {
 
     @DS("data-generator")
     @GetMapping("/run/{templateName}")
-    public String runTask(@NotBlank @PathVariable String templateName) {
+    public String runTask(@NotBlank @PathVariable String templateName,
+                          @RequestParam("cleanup") Boolean cleanup) {
         TemplatePO template = cache.get(templateName);
         if (Objects.nonNull(template)) {
-            long id = RandomKit.id();
-            defaultDataPipelineFactory.startup(new TemplateContext(template, Value.EMPTY));
-            return String.valueOf(id);
+            var ctx = new TemplateContext(template, Value.EMPTY);
+            if (Boolean.TRUE.equals(cleanup)) {
+                defaultDataPipelineFactory.cleanup(ctx);
+            }
+            defaultDataPipelineFactory.startup(ctx);
+            return String.format("任务 '%s' 已启动", templateName);
         } else {
             return String.format("模板 '%s' 不存在", templateName);
         }

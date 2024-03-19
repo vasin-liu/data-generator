@@ -35,7 +35,7 @@ public class ConsoleWriter<T extends ConsoleWriterPO> implements Writer<T> {
             return Objects.nonNull(dataset) ? dataset.size() : 0;
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("写入数据集出现异常，写入类型为：%s。",
-                    wpo.getWriterType()), e);
+                    wpo.getType()), e);
         }
     }
 

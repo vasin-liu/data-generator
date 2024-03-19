@@ -38,6 +38,11 @@ public class DefaultWritePipelineFactory implements PipelineFactory {
         return null;
     }
 
+    @Override
+    public void cleanup(TemplateContext ctx) {
+        //nothing to do
+    }
+
     private void write(final StageContext<WriteStagePO> ctx, final Value dataset) {
         var pipeline = new DefaultWritePipeline();
         var stage = stageFactory.newInstance(ctx);
@@ -45,7 +50,7 @@ public class DefaultWritePipelineFactory implements PipelineFactory {
     }
 
     @Override
-    public void shutdown() {
-        //nothing to do
+    public void shutdown(final TemplateContext ctx) {
+        this.cleanup(ctx);
     }
 }

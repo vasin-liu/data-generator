@@ -49,7 +49,7 @@ public class SpelScript implements Script {
                 return DatasetKit.toValue(result);
             } catch (Exception e) {
                 throw new DataGeneratorException(String.format("执行脚本出现异常，脚本类型：%s，脚本内容：%s，执行对象值为：%s",
-                        spo.getScriptType(), spo.getContent(), dv));
+                        spo.getScriptType(), spo.getContent(), dv), e);
             }
         }
         return dataset;

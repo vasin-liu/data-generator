@@ -25,7 +25,7 @@ public class WriterFactory {
     private final AutowireCapableBeanFactory beanFactory;
 
     public @NonNull <T extends WriterPO> Writer<T> newInstance(T wpo) {
-        Writer<T> writer = switch (Objects.requireNonNull(wpo).getWriterType()) {
+        Writer<T> writer = switch (Objects.requireNonNull(wpo).getType()) {
             case CONSOLE -> beanFactory.getBean(ConsoleWriter.class);
             case JDBC -> beanFactory.getBean(JdbcWriter.class);
             case KAFKA -> beanFactory.getBean(KafkaWriter.class);
@@ -34,7 +34,7 @@ public class WriterFactory {
             case ELASTICSEARCH -> beanFactory.getBean(ElasticsearchWriter.class);
             case CLICKHOUSE -> beanFactory.getBean(ClickHouseWriter.class);
         };
-        Assert.notNull(writer, "未找到类型为 " + wpo.getWriterType() + " 的数据写入器类");
+        Assert.notNull(writer, "未找到类型为 " + wpo.getType() + " 的数据写入器类");
         return writer;
     }
 }

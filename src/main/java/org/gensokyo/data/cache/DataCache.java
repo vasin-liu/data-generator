@@ -37,6 +37,10 @@ public class DataCache {
         CACHE_MAP.put(Objects.requireNonNull(tableName), Objects.requireNonNull(tableDataCache));
     }
 
+    public static void remove(String tableName) {
+        CACHE_MAP.remove(tableName);
+    }
+
     public static final class TableDataCache {
 
         private final Map<String, Value> dataMap = new ConcurrentHashMap<>(16);

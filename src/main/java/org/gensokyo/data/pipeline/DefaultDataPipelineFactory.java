@@ -54,6 +54,14 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         return Value.EMPTY;
     }
 
+    @Override
+    public void cleanup(final TemplateContext ctx) {
+        initialized.compareAndSet(true, false);
+        DataCache.remove(ctx.template().getName());
+        defaultRowPipelineFactory.cleanup(ctx);
+        defaultWritePipelineFactory.cleanup(ctx);
+    }
+
     private void doBatch(int pageSize, int total, final TemplateContext ctx) {
         var stopWatch = new StopWatch();
         stopWatch.start();
@@ -128,8 +136,10 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
     }
 
     @Override
-    public void shutdown() {
+    public void shutdown(final TemplateContext ctx) {
+        this.cleanup(ctx);
         executor.shutdown();
-        defaultWritePipelineFactory.shutdown();
+        defaultRowPipelineFactory.shutdown(ctx);
+        defaultWritePipelineFactory.shutdown(ctx);
     }
 }

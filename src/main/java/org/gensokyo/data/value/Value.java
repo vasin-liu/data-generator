@@ -37,11 +37,31 @@ public interface Value {
         }
     };
 
+    /**
+     * 获取值
+     *
+     * @return 值
+     */
     Object get();
 
+    /**
+     * 获取值类型
+     *
+     * @return 值类型
+     */
     ValueType type();
 
+    /**
+     * 值是否为NULL或者为空
+     *
+     * @return 是否为NULL或者为空
+     */
     boolean isNullOrEmpty();
 
+    /**
+     * 获取值长度大小
+     *
+     * @return 值长度大小
+     */
     int size();
 }

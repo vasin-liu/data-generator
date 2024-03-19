@@ -41,8 +41,9 @@ public class RepeatOrderValueSelectStrategy implements ValueSelectStrategy {
     }
 
     private void resetIndex(AtomicInteger index, int size) {
-        if (index.get() > size) {
-            index.compareAndSet(size - 1, 0);
+        if (index.get() >= size) {
+            // 重置索引
+            index.compareAndSet(index.get(), 0);
         }
     }
 }

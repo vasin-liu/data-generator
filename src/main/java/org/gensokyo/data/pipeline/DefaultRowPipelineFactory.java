@@ -15,6 +15,7 @@ import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.FieldPO;
 import org.gensokyo.data.po.TemplatePO;
 import org.gensokyo.data.po.stage.ReadStagePO;
+import org.gensokyo.data.po.stage.SelectStagePO;
 import org.gensokyo.data.po.stage.StagePO;
 import org.gensokyo.data.stage.SelectStage;
 import org.gensokyo.data.stage.Stage;
@@ -58,7 +59,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
         //最终生成结果行
         var result = new MapValue(16);
         //获取依赖字段集合
-        var dmv = getDependedFields(orderedFields);
+        var cache = getDependedFields(orderedFields);
         for (FieldPO field : orderedFields) {
             //检查字段是否配置正确
             checkRequired(field);
@@ -67,14 +68,19 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
             final var stageCtx = FieldContext.from(ctx, field);
             if (CollectKit.isEmpty(field.getDependsOn())) {
                 //非依赖字段数据生成
-                val = nonDependencyProduce(stageCtx, dmv);
+                val = independentFieldProcessing(stageCtx, cache);
             } else {
                 //依赖其他字段结果的字段生成
-                val = dependencyProduce(stageCtx, dmv);
+                val = dependentFieldProcessing(stageCtx, cache);
             }
             result.put(field.getName(), val);
         }
         return result;
+    }
+
+    @Override
+    public void cleanup(TemplateContext ctx) {
+        // nothing to do
     }
 
     private void checkRequired(FieldPO field) {
@@ -100,35 +106,34 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
                 rpo.setDataSetId(field.getName());
             }
         });
+
+        //检查字段是否包含数据选择阶段，如果没有，则添加一个默认的选择阶段，并且打印告警日志
+        if (stages.stream().noneMatch(stage -> StageType.SELECT.equals(stage.getType()))) {
+            log.warn("字段 {} 没有配置数据选择阶段，已自动添加默认的选择阶段", field.getName());
+            var stage = new SelectStagePO();
+            stage.setType(StageType.SELECT);
+            field.getStages().add(stage);
+        }
     }
 
     private MapValue getDependedFields(List<FieldPO> orderedFields) {
-        var dmv = new MapValue(16);
+        var cache = new MapValue(16);
         orderedFields.forEach(f -> {
             if (CollectKit.isNotEmpty(f.getDependsOn())) {
-                f.getDependsOn().forEach(name -> dmv.put(name, Value.EMPTY));
+                f.getDependsOn().forEach(name -> cache.put(name, Value.EMPTY));
             }
         });
-        return dmv;
+        return cache;
     }
 
-    private Value nonDependencyProduce(FieldContext ctx, MapValue dmv) {
-        //非依赖字段
-        var pipeline = new DefaultFieldPipeline();
-        for (StagePO spo : ctx.field().getStages()) {
-            var stageCtx = new StageContext<>(ctx.template(), ctx.field(), spo);
-            var stage = stageFactory.newInstance(stageCtx);
-            addListener(stageCtx, stage, dmv);
-            pipeline.next(stage);
-        }
-        return pipeline.execute(Value.EMPTY);
+    private Value independentFieldProcessing(FieldContext ctx, MapValue cache) {
+        return createPipelineAndExecute(ctx, cache, Value.EMPTY);
     }
 
-    private Value dependencyProduce(FieldContext ctx, MapValue dmv) {
-        //生成数据
+    private Value dependentFieldProcessing(FieldContext ctx, MapValue cache) {
+        //生成数据 依赖字段处理
         var field = ctx.field();
-        var pipeline = new DefaultFieldPipeline();
-        var dds = ListValue.fromValueCollection(field.getDependsOn().stream().map(dmv::get).toList());
+        var dds = ListValue.fromValueCollection(field.getDependsOn().stream().map(cache::get).toList());
         if (dds.isNullOrEmpty()) {
             throw new DataGeneratorException(
                     String.format("当前字段 %s 依赖的字段 %s 未在当前数据集中找到，请检查配置是否正确",
@@ -139,18 +144,26 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
             dds = RandomKit.choiceOne(dds);
         }
         //依赖其他字段结果的字段
-        for (StagePO spo : field.getStages()) {
-            pipeline.next(stageFactory.newInstance(new StageContext<>(ctx.template(), ctx.field(), spo)));
-        }
-        return pipeline.execute(dds);
+        return createPipelineAndExecute(ctx, cache, dds);
     }
 
-    private void addListener(StageContext<?> ctx, Stage stage, MapValue dmv) {
+    private Value createPipelineAndExecute(FieldContext ctx, MapValue cache, Value input) {
+        var pipeline = new DefaultFieldPipeline();
+        for (StagePO spo : ctx.field().getStages()) {
+            var stageCtx = new StageContext<>(ctx.template(), ctx.field(), spo);
+            var stage = stageFactory.newInstance(stageCtx);
+            addListener(stageCtx, stage, cache);
+            pipeline.next(stage);
+        }
+        return pipeline.execute(input);
+    }
+
+    private void addListener(StageContext<?> ctx, Stage stage, MapValue cache) {
         var fn = ctx.field().getName();
-        if (stage instanceof SelectStage selectStage && (dmv.containsKey(fn))) {
+        if (stage instanceof SelectStage selectStage && (cache.containsKey(fn))) {
             //选择后的结果
             selectStage.onDone(output -> {
-                dmv.put(fn, output);
+                cache.put(fn, output);
                 log.debug("当前字段 {} 选择后的结果为 {}", fn, JsonKit.write(output));
             });
         }
@@ -191,7 +204,7 @@ public class DefaultRowPipelineFactory implements PipelineFactory {
 
 
     @Override
-    public void shutdown() {
-        // nothing to do
+    public void shutdown(final TemplateContext ctx) {
+        this.cleanup(ctx);
     }
 }

@@ -59,7 +59,7 @@ public class WriteStage extends AbstractStage<WriteStagePO> {
                         wpo.getDataSourceId(), wpo.getTarget(), rows);
             } catch (Exception e) {
                 throw new DataGeneratorException(String.format("模板 %s 执行数据写入阶段失败，写入类型为：%s ，目标数据源编号为：%s ，写入模板为：%s ，输入值为：%s。",
-                        ctx.template().getName(), wpo.getWriterType(), wpo.getDataSourceId(), wpo.getTemplate(), JsonKit.write(input.get())), e);
+                        ctx.template().getName(), wpo.getType(), wpo.getDataSourceId(), wpo.getTemplate(), JsonKit.write(input.get())), e);
             }
         }
 

@@ -1,5 +1,5 @@
 # 数据集名称，各个文件中唯一
-name: demo_1
+name: demo_99
 #生成数量
 amount: 10
 #批次数量
@@ -17,9 +17,7 @@ global:
 
 # 数据集元数据配置
 table:
-  # 字段配置列表
   fields:
-    #字段配置
     - name: ID
       stages:
         - type: READ
@@ -114,8 +112,34 @@ table:
             8: 108
             9: 109
             10: 110
+    - name: AREA_NAME
+      stages:
+        - type: READ
+          dataSetId: AREA_NAME_DS_1
+          inMemory: true
+          readers:
+            - type: JDBC
+              dataSourceId: 'system_manage'
+              content: "SELECT AREA_CODE,AREA_NAME,DISTRICT_CODE,DISTRICT_NAME FROM SM_AREA WHERE PARENT_CODE = '4409' LIMIT 10"
+        - type: SELECT
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.DISTRICT_CODE"
+        - type: READ
+          dataSetId: AREA_NAME_DS_2
+          params:
+            - name: districtCode
+              content: "#dataset"
+          readers:
+            - type: JDBC
+              dataSourceId: 'system_manage'
+              content: "SELECT CODE,NAME,PARENT_CODE FROM PC_DISTRICT WHERE CODE = :districtCode LIMIT 10"
+        - type: SELECT
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.NAME"
 
 # 数据输出配置
 output:
   writers:
-    - writerType: CONSOLE
+    - type: CONSOLE

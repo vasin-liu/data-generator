@@ -18,7 +18,15 @@ import java.util.Map;
  * @version 1.0.0
  * @since 2023/10/27 , Version 1.0.0
  */
+@FunctionalInterface
 public interface Writer<T extends WriterPO> {
 
+    /**
+     * 写入数据集
+     *
+     * @param ctx     写入上下文
+     * @param dataset 数据集
+     * @return 写入数据量
+     */
     long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset);
 }

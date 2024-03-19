@@ -19,11 +19,22 @@ public interface PipelineFactory {
 
     /**
      * 启动流水线
+     *
+     * @param ctx 模板上下文
      */
     Value startup(final TemplateContext ctx);
 
     /**
-     * 关闭流水线
+     * 清理流水线资源
+     *
+     * @param ctx 模板上下文
      */
-    void shutdown();
+    void cleanup(final TemplateContext ctx);
+
+    /**
+     * 关闭流水线
+     *
+     * @param ctx 模板上下文
+     */
+    void shutdown(final TemplateContext ctx);
 }

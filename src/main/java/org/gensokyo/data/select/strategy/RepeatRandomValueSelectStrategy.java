@@ -22,7 +22,7 @@ public class RepeatRandomValueSelectStrategy implements ValueSelectStrategy {
     @Override
     public Value select(final AtomicInteger index, final AtomicInteger selectedCount,
                         final SelectStagePO spo, final Value input) {
-        var num = spo.getSelectNum();
+        var num = spo.getSelectNum() > 0 ? spo.getSelectNum() : 1;
         return RandomKit.choice(input, num);
     }
 }

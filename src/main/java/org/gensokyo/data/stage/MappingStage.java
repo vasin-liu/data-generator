@@ -40,7 +40,8 @@ public class MappingStage extends AbstractStage<MappingStagePO> {
                 var val = Objects.toString(sv.get());
                 return DatasetKit.toValue(mpo.getMapping().get(val));
             }
-            return DatasetKit.toValue(mpo.getDefaultValue());
+            // 如果没有配置映射，则返回默认值，默认值如果为空，则返回输入值
+            return Objects.isNull(mpo.getDefaultValue()) ? input : DatasetKit.toValue(mpo.getDefaultValue());
         } catch (Exception e) {
             throw new DataGeneratorException(String.format("字段 %s 的执行元素值映射阶段失败 ，输入值为：%s。",
                     ctx.field().getName(), JsonKit.write(input.get())), e);

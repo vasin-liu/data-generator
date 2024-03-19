@@ -42,7 +42,7 @@ public class WriterPO implements Serializable {
     /**
      * 写入器类型
      */
-    private WriterType writerType = WriterType.CONSOLE;
+    private WriterType type;
 
     /**
      * 数据源编号

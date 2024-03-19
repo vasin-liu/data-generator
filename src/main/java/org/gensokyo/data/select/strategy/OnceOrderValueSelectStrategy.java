@@ -24,7 +24,7 @@ public class OnceOrderValueSelectStrategy implements ValueSelectStrategy {
     @Override
     public Value select(final AtomicInteger index, final AtomicInteger selectedCount,
                         final SelectStagePO spo, final Value input) {
-        var num = spo.getSelectNum();
+        var num = spo.getSelectNum() > 0 ? spo.getSelectNum() : 1;
         if (input.size() < num) {
             throw new DataGeneratorException(String.format("当前数据集的数据 %s 数量小于需要的数量 %s",
                     input.size(), num));

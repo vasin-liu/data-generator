@@ -11,9 +11,10 @@
       "type": "object",
       "properties": {
         "type": {
-          "writerType": "string",
+          "type": "string",
           "description": "写入器数据源类型",
           "enum": [
+            "CONSOLE",
             "JDBC",
             "MYSQL",
             "POSTGRES",
@@ -37,7 +38,7 @@
         }
       },
       "required": [
-        "writerType"
+        "type"
       ]
     }
   }

@@ -14,7 +14,16 @@ import java.io.File;
  * @version 1.0.0
  * @since 2024/2/27 , Version 1.0.0
  */
+@FunctionalInterface
 public interface YamlParser {
 
+    /**
+     * 解析yaml文件
+     *
+     * @param file  yaml文件
+     * @param clazz 解析的类
+     * @param <T>   解析的对象类型
+     * @return 解析后的对象
+     */
     <T> T parse(File file, Class<T> clazz);
 }
