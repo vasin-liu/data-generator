@@ -17,7 +17,7 @@ import org.gensokyo.data.value.Value;
  * @since 2023/10/26 , Version 1.0.0
  */
 @FunctionalInterface
-public interface Select {
+public interface Selector {
 
     /**
      * 选择值

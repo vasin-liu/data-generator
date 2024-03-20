@@ -7,7 +7,7 @@ package org.gensokyo.data.value;
 
 import org.gensokyo.data.constant.ValueType;
 import org.gensokyo.data.po.stage.SelectStagePO;
-import org.gensokyo.data.select.Select;
+import org.gensokyo.data.select.Selector;
 import org.gensokyo.data.select.strategy.ValueSelectStrategy;
 import org.gensokyo.kit.collect.CollectKit;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @version 1.0.0
  * @since 2024/2/27 , Version 1.0.0
  */
-public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Select {
+public class ListValue extends CopyOnWriteArrayList<Value> implements Value, Selector {
     /**
      * 当前选择的索引下标
      */
