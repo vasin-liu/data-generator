@@ -18,6 +18,8 @@
     <properties>
         <java.version>17</java.version>
         <graal.js.version>22.3.0</graal.js.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <scm>

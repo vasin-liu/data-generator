@@ -1,9 +1,9 @@
 # 数据集名称，各个文件中唯一
 name: car_detect_info
 #生成数量
-amount: 10000000
+amount: 10000
 #批次数量
-batchSize: 10000
+batchSize: 1000
 #全局配置
 global:
   #线程池配置
