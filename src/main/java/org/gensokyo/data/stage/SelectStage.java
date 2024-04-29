@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.po.stage.SelectStagePO;
@@ -23,6 +24,7 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 2024/2/23 , Version 1.0.0
  */
+@Slf4j
 public class SelectStage extends AbstractStage<SelectStagePO> {
     private ValueSelectStrategyFactory valueSelectStrategyFactory;
 
@@ -38,8 +40,8 @@ public class SelectStage extends AbstractStage<SelectStagePO> {
     @Override
     public Value internalExecute(Value input) {
         if (Objects.isNull(input) || input.isNullOrEmpty()) {
-            throw new DataGeneratorException(String.format("字段 %s 的输入值为 NULL 或者 空集合，无法执行选择元素阶段。",
-                    ctx.field().getName()));
+            log.debug("字段 {} 的输入值为 NULL 或者 空集合，忽略执行选择元素阶段。", ctx.field().getName());
+            return input;
         }
         var spo = ctx.stage();
         try {

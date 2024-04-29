@@ -13,6 +13,7 @@ import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.po.TemplatePO;
 import org.gensokyo.data.value.Value;
+import org.gensokyo.data.vo.R;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,8 +38,8 @@ public class TaskController {
 
     @DS("data-generator")
     @GetMapping("/run/{templateName}")
-    public String runTask(@NotBlank @PathVariable String templateName,
-                          @RequestParam("cleanup") Boolean cleanup) {
+    public R<String> runTask(@NotBlank @PathVariable String templateName,
+                             @RequestParam("cleanup") Boolean cleanup) {
         TemplatePO template = cache.get(templateName);
         if (Objects.nonNull(template)) {
             var ctx = new TemplateContext(template, Value.EMPTY);
@@ -46,9 +47,9 @@ public class TaskController {
                 defaultDataPipelineFactory.cleanup(ctx);
             }
             defaultDataPipelineFactory.startup(ctx);
-            return String.format("任务 '%s' 已启动", templateName);
+            return R.ok(String.format("任务 '%s' 已启动", templateName));
         } else {
-            return String.format("模板 '%s' 不存在", templateName);
+            return R.fail(String.format("模板 '%s' 不存在", templateName));
         }
     }
 }

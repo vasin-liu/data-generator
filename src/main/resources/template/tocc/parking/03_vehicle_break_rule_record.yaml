@@ -1,0 +1,115 @@
+# 数据集名称，各个文件中唯一
+name: vehicle_break_rule_record
+#生成数量
+amount: 20
+#批次数量
+batchSize: 20
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  fields:
+    - name: ID
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.snowflake.next"
+        - type: SELECT
+    - name: VEHICLE_ID
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: JDBC
+              dataSourceId: 'tocc_parking'
+              content: "SELECT VEHICLE_ID,PLATE_NUMBER,PLATE_COLOR,PLATE_TYPE,VEHICLE_COLOR FROM TOCC_PARKING_LOT.ARCHIVE_VEHICLE_INFO WHERE STATUS = 'S0A' LIMIT 20"
+        - type: SELECT
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.PLATE_NUMBER"
+    - name: PLATE_NUMBER
+      dependsOn:
+        - VEHICLE_ID
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.PLATE_NUMBER"
+    - name: VEHICLE_COLOR
+      dependsOn:
+        - VEHICLE_ID
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.VEHICLE_COLOR"
+    - name: TYPE
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 1,2,3 ]
+    - name: STATUS
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 'S0A' ]
+    - name: CREATE_TIME
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: >-
+                #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+    - name: UPDATE_TIME
+      dependsOn:
+        - CREATE_TIME
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset"
+    - name: PARKING_LOT_ID
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: JDBC
+              dataSourceId: 'tocc_parking'
+              content: "SELECT ID FROM TOCC_PARKING_LOT.PARKING_LOT_BASE WHERE STATUS = 'S0A' LIMIT 20"
+        - type: SELECT
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.ID"
+    - name: RESERVE_ID
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: JDBC
+              dataSourceId: 'tocc_parking'
+              content: "SELECT ID FROM TOCC_PARKING_LOT.PARKING_SPACE_RESERVE WHERE STATUS = 'S0A' LIMIT 20"
+        - type: SELECT
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset.ID"
+
+# 数据输出配置
+output:
+  writers:
+    #    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'VEHICLE_BREAK_RULE_RECORD'
+      template: >-
+        ID,VEHICLE_ID,PLATE_NUMBER,VEHICLE_COLOR,TYPE,STATUS,CREATE_TIME,UPDATE_TIME,PARKING_LOT_ID,RESERVE_ID

@@ -62,4 +62,8 @@ public class DataFaker extends Faker {
     public CommonProvider common() {
         return getProvider(CommonProvider.class, CommonProvider::new, this);
     }
+
+    public DateTimeProvider datetime() {
+        return getProvider(DateTimeProvider.class, DateTimeProvider::new, this);
+    }
 }

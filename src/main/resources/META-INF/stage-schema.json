@@ -21,7 +21,8 @@
             "CONVERT",
             "MAPPING",
             "WRITE",
-            "LOG"
+            "LOG",
+            "CONDITION"
           ]
         }
       },
@@ -84,6 +85,14 @@
             }
           },
           "$ref": "#logStage"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CONDITION"
+            }
+          },
+          "$ref": "#conditionStage"
         }
       ]
     },
@@ -263,6 +272,63 @@
       "type": "object",
       "description": "日志记录阶段配置",
       "properties": {
+      }
+    },
+    "conditionStage": {
+      "$id": "#conditionStage",
+      "type": "object",
+      "description": "条件判断阶段配置",
+      "$defs": {
+        "$id": "#script",
+        "type": "object",
+        "properties": {
+          "scriptType": {
+            "type": "string",
+            "description": "脚本类型",
+            "enum": [
+              "JAVASCRIPT",
+              "SPEL",
+              "PLAIN"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "description": "脚本内容"
+          }
+        }
+      },
+      "properties": {
+        "choose": {
+          "type": "array",
+          "description": "条件列表",
+          "items": {
+            "type": "object",
+            "description": "条件配置",
+            "properties": {
+              "when": {
+                "type": "string",
+                "description": "条件脚本",
+                "$ref": "#script"
+              },
+              "then": {
+                "type": "Object",
+                "description": "内容脚本",
+                "$ref": "#script"
+              }
+            }
+          }
+        },
+        "otherwise": {
+          "type": "Object",
+          "description": "其他条件",
+          "properties": {
+            "then": {
+              "type": "Object",
+              "description": "内容脚本",
+              "$ref": "#script"
+            }
+          }
+        }
       }
     }
   }

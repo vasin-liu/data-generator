@@ -8,7 +8,6 @@ package org.gensokyo.data.script;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.po.stage.ScriptStagePO;
-import org.gensokyo.kit.character.StrKit;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.lang.Nullable;
 
@@ -28,12 +27,13 @@ public class ScriptFactory {
     private final AutowireCapableBeanFactory beanFactory;
 
     public @Nullable Script newInstance(ScriptStagePO spo) {
-        if (Objects.isNull(spo) || Objects.isNull(spo.getScriptType()) || StrKit.isBlank(spo.getContent())) {
+        if (Objects.isNull(spo) || Objects.isNull(spo.getScriptType())) {
             return null;
         }
         return switch (spo.getScriptType()) {
             case JAVASCRIPT -> beanFactory.getBean(JsScript.class);
             case SPEL -> beanFactory.getBean(SpelScript.class);
+            case PLAIN -> beanFactory.getBean(PlainScript.class);
         };
     }
 }
