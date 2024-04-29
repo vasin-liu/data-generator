@@ -38,6 +38,7 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = MappingStagePO.class, names = {"MAPPING", "mapping"}),
         @JsonSubTypes.Type(value = WriteStagePO.class, names = {"WRITE", "write"}),
         @JsonSubTypes.Type(value = LogStagePO.class, names = {"LOG", "log"}),
+        @JsonSubTypes.Type(value = ConditionStagePO.class, names = {"CONDITION", "condition"}),
 })
 public class StagePO implements Serializable {
 

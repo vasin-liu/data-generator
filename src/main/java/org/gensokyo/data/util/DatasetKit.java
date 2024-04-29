@@ -41,10 +41,13 @@ public class DatasetKit {
         }
 
         if (input instanceof ListValue lv) {
-            if (lv.isNullOrEmpty() || lv.size() > 1) {
-                return lv;
+            if (lv.isNullOrEmpty()) {
+                return Value.EMPTY;
             }
-            return lv.first();
+            if (lv.size() == 1) {
+                return lv.first();
+            }
+            return lv;
         }
 
         return input;

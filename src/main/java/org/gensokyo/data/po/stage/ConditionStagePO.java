@@ -5,26 +5,31 @@
  */
 package org.gensokyo.data.po.stage;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.gensokyo.data.constant.ScriptType;
+import org.gensokyo.data.po.condition.Otherwise;
+import org.gensokyo.data.po.condition.WhenPO;
+
+import java.util.List;
 
 /**
- * 脚本阶段配置
+ * 条件分支阶段配置
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
- * @since 2024/2/28 , Version 1.0.0
+ * @since 2024/4/27 , Version 1.0.0
  */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ScriptStagePO extends StagePO {
+public class ConditionStagePO extends StagePO {
 
-    private ScriptType scriptType = ScriptType.SPEL;
+    /**
+     * 条件分支列表
+     */
+    private List<WhenPO> choose;
 
-    private String content;
+    /**
+     * 其他条件
+     */
+    private Otherwise otherwise;
 }

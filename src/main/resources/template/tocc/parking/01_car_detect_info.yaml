@@ -1,9 +1,9 @@
 # 数据集名称，各个文件中唯一
 name: car_detect_info
 #生成数量
-amount: 10000
+amount: 100
 #批次数量
-batchSize: 1000
+batchSize: 100
 #全局配置
 global:
   #线程池配置
@@ -53,24 +53,24 @@ table:
           inMemory: true
           readers:
             - type: JDBC
-              dataSourceId: 'pd_dicmanage'
-              content: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 40'
+              dataSourceId: 'system_manage_dev'
+              content: "SELECT DICT_VALUE FROM SYSTEM_MANAGE_DEV.PC_DICT WHERE DICT_TYPE = 'VEHICLE_TYPE'"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
-          content: "#dataset.CODE"
+          content: "#dataset.DICT_VALUE"
     - name: CSYS
       stages:
         - type: READ
           inMemory: true
           readers:
             - type: JDBC
-              dataSourceId: 'pd_dicmanage'
-              content: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+              dataSourceId: 'system_manage_dev'
+              content: "SELECT DICT_VALUE FROM SYSTEM_MANAGE_DEV.PC_DICT WHERE DICT_TYPE = 'VEHICLE_COLOR'"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
-          content: "#dataset.CODE"
+          content: "#dataset.DICT_VALUE"
     - name: ILLEGAL
       stages:
         - type: READ
@@ -85,15 +85,21 @@ table:
           inMemory: true
           readers:
             - type: JDBC
-              dataSourceId: 'omof'
+              dataSourceId: 'pd_sysmanage'
               content: >-
                 SELECT OVBI.KKBH,OVBI.KKMC,OVBI.KKDZ,OVBI.KKMC,OVBI.XZQH,OVBI.JSDW,OVBI.FXMS,OVBI.ZPFXLX,
                 OVBI.DLMC,OVBI.JD,OVBI.WD,OLI.SXJSBBM,OLI.CDBH,OLI.CDLX
-                FROM OMOF_VEHICLE_BARRIER_INFO OVBI INNER JOIN OMOF_LANE_INFO OLI ON OVBI.KKBH = OLI.KKBH
+                FROM RES_OMOF_VEHICLE_BARRIER_INFO OVBI LEFT JOIN RES_OMOF_LANE_INFO OLI ON OVBI.KKBH = OLI.KKBH
         - type: SELECT
-        - type: SCRIPT
-          scriptType: SPEL
-          content: "#dataset.SXJSBBM"
+        - type: CONDITION
+          choose:
+            - when:
+                content: "#dataset.SXJSBBM==null"
+              then:
+                content: "#dataset.KKBH + '00'"
+          otherwise:
+            then:
+              content: "#dataset.SXJSBBM"
     - name: JGSK
       stages:
         - type: READ
@@ -282,9 +288,15 @@ table:
       dependsOn:
         - DEVICE_ID
       stages:
-        - type: SCRIPT
-          scriptType: SPEL
-          content: "#dataset.SXJSBBM"
+        - type: CONDITION
+          choose:
+            - when:
+                content: "#dataset.SXJSBBM==null"
+              then:
+                content: "#dataset.KKBH + '00'"
+          otherwise:
+            then:
+              content: "#dataset.SXJSBBM"
     - name: DEVICE_ADDR
       dependsOn:
         - DEVICE_ID
@@ -607,7 +619,7 @@ table:
       stages:
         - type: SCRIPT
           scriptType: SPEL
-          content: "#faker.snowflake.viid(#dataset[0].SXJSBBM,'02',#dataset[1],'02')"
+          content: "#faker.snowflake.viid(#dataset[0].SXJSBBM!=null?#dataset[0].SXJSBBM:#dataset[0].KKBH+'00','02',#dataset[1],'02')"
     - name: COMPOSITE_URL
       stages:
         - type: READ
@@ -684,12 +696,12 @@ table:
           inMemory: true
           readers:
             - type: JDBC
-              dataSourceId: 'pd_dicmanage'
-              content: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 40'
+              dataSourceId: 'system_manage_dev'
+              content: "SELECT DICT_VALUE FROM SYSTEM_MANAGE_DEV.PC_DICT WHERE DICT_TYPE = 'VEHICLE_TYPE'"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
-          content: "#dataset.CODE"
+          content: "#dataset.DICT_VALUE"
     - name: PRE_CAR_LOGO
       stages:
         - type: READ
@@ -703,12 +715,12 @@ table:
           inMemory: true
           readers:
             - type: JDBC
-              dataSourceId: 'pd_dicmanage'
-              content: 'SELECT CODE FROM SYS_DICT WHERE PARENT_ID = 95'
+              dataSourceId: 'system_manage_dev'
+              content: "SELECT DICT_VALUE FROM SYSTEM_MANAGE_DEV.PC_DICT WHERE DICT_TYPE = 'VEHICLE_COLOR'"
         - type: SELECT
         - type: SCRIPT
           scriptType: SPEL
-          content: "#dataset.CODE"
+          content: "#dataset.DICT_VALUE"
     - name: PRE_HPHM
       dependsOn:
         - virtual_filed

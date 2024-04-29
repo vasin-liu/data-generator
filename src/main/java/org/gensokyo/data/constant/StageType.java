@@ -14,5 +14,5 @@ package org.gensokyo.data.constant;
  */
 public enum StageType {
 
-    READ, SELECT, SCRIPT, CONVERT, MAPPING, WRITE, LOG
+    READ, SELECT, SCRIPT, CONVERT, MAPPING, WRITE, LOG, CONDITION
 }

@@ -13,5 +13,5 @@ package org.gensokyo.data.constant;
  * @since 2023/1/12 , Version 1.0.0
  */
 public enum ScriptType {
-    JAVASCRIPT, SPEL
+    JAVASCRIPT, SPEL, PLAIN
 }

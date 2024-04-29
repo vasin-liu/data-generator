@@ -10,8 +10,6 @@ import net.datafaker.providers.base.BaseProviders;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.kit.time.DateTime;
 
-import java.util.List;
-
 /**
  * 时间数据提供者
  *
@@ -25,20 +23,8 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
         super(faker);
     }
 
-    public String text(int min, int max) {
-        return RandomKit.text(min, max);
-    }
-
-    public List<Integer> seq(int end) {
-        return seq(1, end);
-    }
-
-    public List<Integer> seq(int start, int end) {
-        return seq(start, end, 1);
-    }
-
-    public List<Integer> seq(int start, int end, int step) {
-        return RandomKit.seq(start, end, step);
+    public String beforeDays(String date, int min, int max) {
+        return DateTime.of(date).minusDays(RandomKit.nextInt(min, max)).toString();
     }
 
     public String beforeHours(String date, int min, int max) {
@@ -53,6 +39,10 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
         return DateTime.of(date).minusSeconds(RandomKit.nextInt(min, max)).toString();
     }
 
+    public String afterDays(String date, int min, int max) {
+        return DateTime.of(date).plusDays(RandomKit.nextInt(min, max)).toString();
+    }
+
     public String afterHours(String date, int min, int max) {
         return DateTime.of(date).plusHours(RandomKit.nextInt(min, max)).toString();
     }
@@ -63,5 +53,37 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
 
     public String afterSeconds(String date, int min, int max) {
         return DateTime.of(date).plusSeconds(RandomKit.nextInt(min, max)).toString();
+    }
+
+    public String plusDays(String date,int amount) {
+        return DateTime.of(date).plusDays(amount).toString();
+    }
+
+    public String plusHours(String date,int amount) {
+        return DateTime.of(date).plusHours(amount).toString();
+    }
+
+    public String plusMinutes(String date,int amount) {
+        return DateTime.of(date).plusMinutes(amount).toString();
+    }
+
+    public String plusSeconds(String date,int amount) {
+        return DateTime.of(date).plusSeconds(amount).toString();
+    }
+
+    public String minusDays(String date,int amount) {
+        return DateTime.of(date).minusDays(amount).toString();
+    }
+
+    public String minusHours(String date,int amount) {
+        return DateTime.of(date).minusHours(amount).toString();
+    }
+
+    public String minusMinutes(String date,int amount) {
+        return DateTime.of(date).minusMinutes(amount).toString();
+    }
+
+    public String minusSeconds(String date,int amount) {
+        return DateTime.of(date).minusSeconds(amount).toString();
     }
 }

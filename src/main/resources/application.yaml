@@ -76,6 +76,14 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
+        system_manage_dev:
+          url: jdbc:dm://dm.tocc:5236?schema=SYSTEM_MANAGE_DEV
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
 #        reader:
 #          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
 #          username: root
@@ -132,9 +140,9 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
-        omof:
-          url: jdbc:mysql://172.25.20.175:3306/omof_gzsj?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: videoweb
+        pd_sysmanage:
+          url: jdbc:mysql://172.25.20.196:3306/pd_sysmanage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+          username: root
           password: suntek
           driver-class-name: com.mysql.cj.jdbc.Driver
           type: com.alibaba.druid.pool.DruidDataSource
