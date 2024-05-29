@@ -28,9 +28,9 @@ public class MultipleOrderValueSelectStrategy implements ValueSelectStrategy {
         var min = spo.getMinTimes() > 0 ? spo.getMinTimes() : 1;
         var max = spo.getMaxTimes() > 0 ? spo.getMaxTimes() : 1;
         var num = spo.getSelectNum() > 0 ? spo.getSelectNum() : 1;
-        if (input.size() < min) {
+        if (input.size() < num) {
             throw new DataGeneratorException(String.format("当前数据集的数据 %s 数量小于最小需要的数量 %s",
-                    input.size(), min));
+                    input.size(), num));
         }
         if (selectedCount.get() == 0) {
             //第一次，初始化一个给定范围内的随机数
