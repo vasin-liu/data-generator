@@ -1,0 +1,103 @@
+# 数据集名称，各个文件中唯一
+name: tourist_num_day_hour_stat
+#生成数量
+amount: 100
+#批次数量
+batchSize: 100
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  fields:
+    - name: SEQ_NO_DAYS
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        - type: SELECT
+          # 最少N次最多M次选取并且顺序选取
+          minTimes: 10
+          maxTimes: 10
+          strategyType: MULTIPLE_ORDER
+    - name: SEQ_NO_HOURS
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        - type: SELECT
+          # 按顺序且可重复读取
+          strategyType: REPEAT_ORDER
+    - name: ID
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.snowflake.next"
+        - type: SELECT
+    - name: STAT_DAY
+      dependsOn:
+        - SEQ_NO_DAYS
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.datetime.minusDays(#dataset)"
+    - name: STAT_HOUR
+      dependsOn:
+        - STAT_DAY
+        - SEQ_NO_HOURS
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.datetime.minusHours(#dataset[0],#dataset[1])"
+    - name: TOUTIST_NUM
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.number.numberBetween(0,1000)"
+    - name: TOURIST_TYPE
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 1,2 ]
+    - name: CREATE_TIME
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.datetime.now()"
+    - name: UPDATE_TIME
+      dependsOn:
+        - CREATE_TIME
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'TOURIST_NUM_DAY_HOUR_STAT'
+      template: >-
+        ID,STAT_DAY,STAT_HOUR,TOUTIST_NUM,TOURIST_TYPE,CREATE_TIME,UPDATE_TIME

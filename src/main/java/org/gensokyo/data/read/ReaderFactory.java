@@ -28,6 +28,7 @@ public class ReaderFactory {
             case JDBC -> beanFactory.getBean(JdbcReader.class);
             case SPEL -> beanFactory.getBean(SpelReader.class);
             case CONSTANT -> beanFactory.getBean(ConstantReader.class);
+            case AI -> beanFactory.getBean(AiReader.class);
             default -> null;
         };
         Assert.notNull(reader, "未找到类型为 " + rpo.getType() + " 的数据读取器类");

@@ -33,6 +33,7 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = ConstantReaderPO.class, names = {"CONSTANT", "constant"}),
         @JsonSubTypes.Type(value = SpelReaderPO.class, names = {"SPEL", "spel"}),
         @JsonSubTypes.Type(value = JdbcReaderPO.class, names = {"JDBC", "jdbc"}),
+        @JsonSubTypes.Type(value = AiReaderPO.class, names = {"AI", "ai"}),
 })
 public class ReaderPO implements Serializable {
 

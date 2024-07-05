@@ -22,6 +22,11 @@ import java.io.Serializable;
 public class GlobalPO implements Serializable {
 
     /**
+     * 异步生成
+     */
+    private boolean async = true;
+
+    /**
      * 线程池配置
      */
     private ExecutorPO executor;

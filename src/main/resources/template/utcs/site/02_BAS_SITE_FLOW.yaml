@@ -1,0 +1,85 @@
+# 数据集名称，各个文件中唯一
+name: bas_site_flow
+#生成数量
+amount: 1200
+#批次数量
+batchSize: 200
+#全局配置
+global:
+  async: false
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  fields:
+    - name: site_id
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 'GZSCATS_7931' ]
+    - name: detector_id
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 1,2,3,4,5,6 ]
+        - type: SELECT
+          # 最少N次最多M次选取并且顺序选取
+          minTimes: 200
+          maxTimes: 200
+          strategyType: MULTIPLE_ORDER
+    - name: detector_count
+      stages:
+        - type: READ
+          strategyType: WEIGHT
+          readers:
+            - type: SPEL
+              weight: 500
+              content: "#faker.number.numberBetween(0,65533)"
+            - type: CONSTANT
+              weight: 100
+              content: [65534,65535]
+    - name: create_time
+      dependsOn:
+        - detector_id
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: >-
+                #faker.datetime.intervalMinutes('2024-07-05 00:03:00',5,#dataset)
+    - name: statistic_time
+      dependsOn:
+        - create_time
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset"
+    - name: zone_name
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 'GZSCATS' ]
+
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tc_pg'
+      target: 'bas_site_flow'
+      template: >-
+        site_id, detector_id, detector_count, create_time, statistic_time, zone_name

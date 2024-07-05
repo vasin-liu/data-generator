@@ -72,13 +72,17 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
                 size = total - (i - 1) * pageSize;
             }
             //执行当前批次任务
-            doJob(i, size, ctx);
+            if (ctx.template().getGlobal().isAsync()) {
+                doAsyncJob(i, size, ctx);
+            } else {
+                doSyncJob(i, size, ctx);
+            }
         }
         stopWatch.stop();
         log.info("当前批量任务执行完成，总计耗时：{} ", DatetimeKit.humanized(stopWatch.getTotalTimeMillis()));
     }
 
-    private void doJob(int index, int size, final TemplateContext ctx) {
+    private void doAsyncJob(int index, int size, final TemplateContext ctx) {
         final List<Value> data = new CopyOnWriteArrayList<>();
         try {
             List<CompletableFuture<Value>> futures = new ArrayList<>();
@@ -112,6 +116,24 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
             log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
         }
     }
+
+    private void doSyncJob(int index, int size, final TemplateContext ctx) {
+        final List<Value> data = new CopyOnWriteArrayList<>();
+        try {
+            for (int i = 0; i < size; i++) {
+                var rowCtx = new TemplateContext(ctx.template(), ctx.dataset());
+                var r = defaultRowPipelineFactory.startup(rowCtx);
+                data.add(r);
+            }
+            //写入数据
+            defaultWritePipelineFactory.startup(new TemplateContext(ctx.template(), ListValue.fromValueCollection(data)));
+        } catch (NotEnoughElementException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            log.error(String.format("分批次生成数据出现异常，当前第 %s 页，每页 %s 条数据，异常信息：", index, size), e);
+        }
+    }
+
 
     private void checkException(int pageIndex, int rowIndex, Throwable e) {
         if (e instanceof NotEnoughElementException ne) {

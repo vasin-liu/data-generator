@@ -1,0 +1,33 @@
+# 数据集名称，各个文件中唯一
+name: demo_16
+#生成数量
+amount: 10
+#批次数量
+batchSize: 5
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  fields:
+    - name: TRAINING_PLAN_TITLE
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: AI
+              subject: "列出5个项目培训计划标题"
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

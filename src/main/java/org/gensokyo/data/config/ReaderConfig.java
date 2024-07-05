@@ -6,13 +6,16 @@
 package org.gensokyo.data.config;
 
 import org.gensokyo.data.faker.DataFaker;
+import org.gensokyo.data.po.reader.AiReaderPO;
 import org.gensokyo.data.po.reader.ConstantReaderPO;
 import org.gensokyo.data.po.reader.JdbcReaderPO;
 import org.gensokyo.data.po.reader.SpelReaderPO;
+import org.gensokyo.data.read.AiReader;
 import org.gensokyo.data.read.ConstantReader;
 import org.gensokyo.data.read.JdbcReader;
 import org.gensokyo.data.read.SpelReader;
 import org.gensokyo.data.script.ScriptFactory;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,5 +48,11 @@ public class ReaderConfig {
     @ConditionalOnMissingBean(SpelReader.class)
     public SpelReader<SpelReaderPO> spelReader(DataFaker dataFaker) {
         return new SpelReader<>(dataFaker);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AiReader.class)
+    public AiReader<AiReaderPO> aiReader(AutowireCapableBeanFactory beanFactory) {
+        return new AiReader<>(beanFactory);
     }
 }

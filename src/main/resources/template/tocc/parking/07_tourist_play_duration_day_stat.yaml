@@ -1,0 +1,75 @@
+# 数据集名称，各个文件中唯一
+name: tourist_play_duration_day_stat
+#生成数量
+amount: 10
+#批次数量
+batchSize: 10
+#全局配置
+global:
+  #线程池配置
+  executor:
+    #核心线程数
+    coreSize: 8
+    #最大线程数
+    maxSize: 16
+    #队列大小
+    queueCapacity: 16
+
+# 数据集元数据配置
+table:
+  fields:
+    - name: SEQ_NO
+      stages:
+        - type: READ
+          inMemory: true
+          readers:
+            - type: CONSTANT
+              content: [ 0,1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        - type: SELECT
+          # 按顺序且只取一次
+          strategyType: ONCE_ORDER
+    - name: ID
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.snowflake.next"
+        - type: SELECT
+    - name: STAT_DAY
+      dependsOn:
+        - SEQ_NO
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.datetime.minusDays(#dataset)"
+    - name: PLAY_DURATION
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.number.numberBetween(3000,5000)"
+    - name: CREATE_TIME
+      stages:
+        - type: READ
+          readers:
+            - type: SPEL
+              content: "#faker.datetime.now()"
+    - name: UPDATE_TIME
+      dependsOn:
+        - CREATE_TIME
+      stages:
+        - type: SCRIPT
+          scriptType: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'TOURIST_PLAY_DURATION_DAY_STAT'
+      template: >-
+        ID,STAT_DAY,PLAY_DURATION,CREATE_TIME,UPDATE_TIME

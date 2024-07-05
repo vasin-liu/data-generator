@@ -84,6 +84,30 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
+        utcs_dm:
+          url: jdbc:dm://dm.tocc:5236?schema=UTCS
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        utcs_pg:
+          url: jdbc:postgresql://192.168.200.242:5432/UTCS
+          username: postgres
+          password: its312
+          driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        tc_pg:
+          url: jdbc:postgresql://192.168.200.242:5432/TC
+          username: postgres
+          password: its312
+          driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
 #        reader:
 #          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
 #          username: root
@@ -158,3 +182,9 @@ spring:
 #            filters: stat,slf4j
       druid:
         filters: stat,slf4j
+
+ai:
+  enabled: true
+  provider: "ollama"
+  model: "llama3"
+  temperature: 0.7

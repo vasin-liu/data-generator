@@ -23,7 +23,8 @@
             "ELASTICSEARCH",
             "KAFKA",
             "CONSTANT",
-            "SPEL"
+            "SPEL",
+            "AI"
           ]
         }
       },
@@ -51,6 +52,14 @@
             }
           },
           "$ref": "#constantReader"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "AI"
+            }
+          },
+          "$ref": "#aiReader"
         }
       ],
       "required": [
@@ -116,7 +125,40 @@
       },
       "required": [
         "content"
-      ]
+      ],
+      "constantReader": {
+        "$id": "#aiReader",
+        "type": "object",
+        "description": "AI数据生成器配置",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "AI提供商枚举",
+            "enum": [
+              "OLLAMA"
+            ]
+          },
+          "model": {
+            "type": "string",
+            "description": "模型名称"
+          },
+          "template": {
+            "type": "string",
+            "description": "提示词模板"
+          },
+          "parser": {
+            "type": "string",
+            "description": "响应结果解析类"
+          },
+          "subject": {
+            "type": "string",
+            "description": "问题主题"
+          }
+        },
+        "required": [
+          "subject"
+        ]
+      }
     }
   }
 }
