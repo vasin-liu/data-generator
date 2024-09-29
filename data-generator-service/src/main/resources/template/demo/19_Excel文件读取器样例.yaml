@@ -1,0 +1,33 @@
+# 数据集名称，各个文件中唯一
+name: demo_19
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 3
+# 生成器配置
+generator:
+  type: ASYNC
+#  type: SYNC
+  batchSize: 10
+#  executor:
+#    coreSize: 8
+#    maxSize: 16
+#    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        #inMemory: true
+        readers:
+          - type: EXCEL
+            sheets:
+              - name: Sheet1
+                endRow: 11
+            path: "E:\\Desktop\\temp\\1-测试数据\\路内_辖区.xlsx"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

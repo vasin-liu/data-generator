@@ -1,0 +1,36 @@
+/*
+ * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: http://www.pcitech.com/
+ * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ */
+package org.gensokyo.data.writer;
+
+import com.google.auto.service.AutoService;
+import lombok.Getter;
+import lombok.Setter;
+import org.gensokyo.data.json.JsonSubType;
+import org.gensokyo.data.model.vo.writer.WriterVO;
+
+import java.util.List;
+
+/**
+ * Excel文件写入器配置
+ *
+ * @author Gensokyo V.L.
+ * @version 1.0.0
+ * @since 2024/9/19 , Version 1.0.0
+ */
+@Getter
+@Setter
+@AutoService(WriterVO.class)
+@JsonSubType(value = "EXCEL")
+public class ExcelWriterVO extends WriterVO {
+    /**
+     * Excel的Sheet名
+     */
+    private String name = "Sheet1";
+    /**
+     * Excel的列名集合
+     */
+    private List<List<String>> headers;
+}

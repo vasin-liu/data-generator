@@ -1,0 +1,65 @@
+# 数据集名称，各个文件中唯一
+name: demo_16
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: TITLE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: AI
+            api: http://172.25.20.12:11434
+            provider:
+              type: OLLAMA
+              options:
+                # shenzhi-wang/Llama3-8B-Chinese-Chat
+                model: qwen2
+                #temperature: 0.8f
+                #repeat_penalty: 1.5f
+                #stop:
+                #  - \n
+            prompt: >-
+              你是一个数据生成助手，列出10个项目培训计划标题，响应以中文返回并以符号`,`分隔的值列表，例如：
+              """
+              培训计划1,培训计划2,培训计划3
+              """
+            parser: org.gensokyo.data.ai.parser.ListOutputParser
+  - name: LOCATION
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: AI
+            api: http://172.25.20.12:11434
+            provider:
+              type: OLLAMA
+              options:
+                # shenzhi-wang/Llama3-8B-Chinese-Chat
+                model: qwen2
+                #temperature: 0.8f
+                #repeat_penalty: 1.5f
+                #stop:
+                #  - \n
+            prompt: >-
+              你是一个数据生成助手，列出10条广州市的车辆GPS轨迹，每条轨迹的点位数量不低于20个，以`GEOJSON`数组的方式返回`RFC8259`兼容的JSON
+            parser: org.gensokyo.data.ai.parser.ListOutputParser
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

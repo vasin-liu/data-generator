@@ -1,0 +1,31 @@
+# 数据集名称，各个文件中唯一
+name: demo_23
+# 迭代器配置
+iterator:
+  type: EXCEL
+  path: "E:\\Desktop\\temp\\1-测试数据\\路内_辖区.xlsx"
+  sheets:
+    - name: Sheet1
+      endRow: 2
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset['2']"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

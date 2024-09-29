@@ -1,0 +1,74 @@
+# 数据集名称，各个文件中唯一
+name: demo_10
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+  - name: AREA_NAME
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: JDBC
+            dataSourceId: 'system_manage'
+            content: "SELECT AREA_CODE,AREA_NAME,DISTRICT_CODE,DISTRICT_NAME FROM SM_AREA WHERE PARENT_CODE = '4409' LIMIT 10"
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.AREA_NAME"
+  - name: DISTRICT_NAME
+    dependsOn:
+      - AREA_NAME
+    stages:
+      - type: READ
+        params:
+          - name: districtCode
+            language:
+              content: "#dataset.DISTRICT_CODE"
+        readers:
+          - type: JDBC
+            dataSourceId: 'system_manage'
+            content: "SELECT CODE,NAME,PARENT_CODE FROM PC_DISTRICT WHERE CODE = :districtCode LIMIT 10"
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          content: "#dataset.NAME"
+  - name: AREA_DISTRICT_NAME
+    dependsOn:
+      - AREA_NAME
+    stages:
+      - type: SCRIPT
+        language:
+          content: "#dataset.DISTRICT_NAME"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_driving_school'
+      target: 'SM_TEST'
+      template: "ID,AREA_NAME,DISTRICT_NAME,AREA_DISTRICT_NAME"
+    - type: JDBC
+      dataSourceId: 'tocc_training'
+      target: 'SM_TEST'
+      template: "ID,AREA_NAME,DISTRICT_NAME,AREA_DISTRICT_NAME"

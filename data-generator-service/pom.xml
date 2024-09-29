@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.gensokyo.data.generator</groupId>
+        <artifactId>data-generator</artifactId>
+        <version>${revision}</version>
+<!--        <relativePath>../pom.xml</relativePath>-->
+    </parent>
+
+    <artifactId>data-generator-service</artifactId>
+
+    <properties>
+        <mainClass>org.gensokyo.data.DataGeneratorApplication</mainClass>
+    </properties>
+
+    <dependencies>
+        <!-- data-generator modules -->
+        <!-- core -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-core</artifactId>
+        </dependency>
+
+        <!-- iterator -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-number</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-datetime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-json</artifactId>
+        </dependency>
+
+        <!-- generator -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-generator-async</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-generator-sync</artifactId>
+        </dependency>
+
+        <!-- stage -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-stage</artifactId>
+        </dependency>
+
+        <!-- reader -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-spel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-ai</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-csv</artifactId>
+        </dependency>
+
+        <!-- scripter -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-scripter-spel</artifactId>
+        </dependency>
+
+        <!-- writer -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+        </dependency>
+
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <!-- validator -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- yaml & json -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-generator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.victools</groupId>
+            <artifactId>jsonschema-module-jackson</artifactId>
+        </dependency>
+
+        <!-- jdbc driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>dm-jdbc</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>com.google.auto.service</groupId>
+                            <artifactId>auto-service</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>${mainClass}</mainClass>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <!-- 跳过 repackage goal, 由assembly插件打包，避免重复打包，节约打包时间 -->
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${project.name}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId> <!-- 包名不含assemblyId -->
+                    <descriptors>
+                        <descriptor>${project.basedir}/assembly.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                    <!-- 子POM的属性完全覆盖父POM的 <descriptors combine.self="override"/> -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id><!-- ID 标识，命名随意 -->
+                        <phase>package</phase> <!--绑定到package生命周期阶段上 -->
+                        <goals>
+                            <goal>single</goal><!-- 在 PACKAGE 生命周期阶段仅执行一次 -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

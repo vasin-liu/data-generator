@@ -1,0 +1,94 @@
+# 数据集名称，各个文件中唯一
+name: parking_user_vehicle
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: PHONE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: SPEL
+            content: "#faker.phoneNumber.cellPhone"
+  - name: PLATE_NUMBER
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: JDBC
+            dataSourceId: 'tocc_parking'
+            content: "SELECT PLATE_NUMBER,PLATE_COLOR,PLATE_TYPE FROM TOCC_PARKING_LOT.ARCHIVE_VEHICLE_INFO WHERE STATUS = 'S0A' LIMIT 20"
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_NUMBER"
+  - name: PLATE_COLOR
+    dependsOn:
+      - PLATE_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_COLOR"
+  - name: PLATE_TYPE
+    dependsOn:
+      - PLATE_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_TYPE"
+  - name: STATUS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'S0A' ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'PARKING_USER_VEHICLE'
+      template: >-
+        ID,PHONE,PLATE_NUMBER,PLATE_COLOR,PLATE_TYPE,STATUS,CREATE_TIME,UPDATE_TIME

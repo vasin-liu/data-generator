@@ -2,29 +2,80 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
 
     <groupId>org.gensokyo.data.generator</groupId>
     <artifactId>data-generator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>data-generator</name>
-    <description>data-generator</description>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <properties>
+        <!-- project -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
-        <graal.js.version>22.3.0</graal.js.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <jsonschema.version>4.35.0</jsonschema.version>
+        <lombok.version>1.18.24</lombok.version>
+
+        <!-- gensokyo -->
+        <revision>3.0.0-SNAPSHOT</revision>
+        <data-generator.version>3.0.0-SNAPSHOT</data-generator.version>
+        <gensokyo.version>2.7.0</gensokyo.version>
+        <!--<data-generator.version>3.0.0-SNAPSHOT</data-generator.version>-->
+
+        <!-- thirdpart -->
+        <!-- ******************************************** -->
+        <spring-boot.version>3.0.1</spring-boot.version>
+        <vaadin.version>24.4.0.beta3</vaadin.version>
+        <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
+        <graal.js.version>23.0.4</graal.js.version>
         <stringtemplate.version>4.0.2</stringtemplate.version>
         <antlr.version>4.13.1</antlr.version>
+        <eclipse-collections.version>12.0.0.M3</eclipse-collections.version>
+        <datafaker.version>2.2.2</datafaker.version>
+        <jgrapht.version>1.5.2</jgrapht.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <guava.version>33.2.0-jre</guava.version>
+        <elasticsearch.version>7.17.8</elasticsearch.version>
+        <reactor.version>3.5.1</reactor.version>
+        <auto-service.version>1.1.1</auto-service.version>
+        <caffeine.version>3.1.8</caffeine.version>
+        <easyexcel.version>4.0.2</easyexcel.version>
+        <commons-csv.version>1.11.0</commons-csv.version>
+
+        <!-- yaml && json -->
+        <jackson.version>2.14.1</jackson.version>
+        <jsonschema.version>4.35.0</jsonschema.version>
+        <yamlbeans.version>1.17</yamlbeans.version>
+
+        <!-- database -->
+        <dynamic-datasource.version>3.6.1</dynamic-datasource.version>
+        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <mybatis-flex.version>1.9.5</mybatis-flex.version>
+        <druid.version>1.2.23</druid.version>
+        <dm.version>1.8</dm.version>
+        <clickhouse.version>0.6.2</clickhouse.version>
+        <mysql.version>8.0.31</mysql.version>
+        <postgresql.version>42.5.1</postgresql.version>
+        <h2.version>2.2.224</h2.version>
+        <!-- ******************************************** -->
     </properties>
+
+    <modules>
+        <module>data-generator-dependencies</module>
+        <module>data-generator-common</module>
+        <module>data-generator-datasource</module>
+        <module>data-generator-service</module>
+        <module>data-generator-stage</module>
+        <module>data-generator-faker</module>
+        <module>data-generator-iterator</module>
+        <module>data-generator-generator</module>
+        <module>data-generator-reader</module>
+        <module>data-generator-scripter</module>
+        <module>data-generator-writer</module>
+        <module>data-generator-converter</module>
+    </modules>
 
     <scm>
         <connection>http://172.25.21.141/gensokyo/data-generator.git</connection>
@@ -57,180 +108,279 @@
         </developer>
     </developers>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- bom -->
+            <!-- dap 依赖定义导入 -->
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.0.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-dependencies</artifactId>
+                <version>${mybatis-flex.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!--<dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>${vaadin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>-->
+
+
+            <!--<dependency>
+                <groupId>cn.dynamictp</groupId>
+                <artifactId>dynamic-tp-spring-boot-starter-common</artifactId>
+                <version>1.0.9</version>
+            </dependency>-->
+
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graal.js.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graal.js.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.truffle</groupId>
+                <artifactId>truffle-api</artifactId>
+                <version>${graal.js.version}</version>
+            </dependency>
+
+            <!-- database -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+                <version>${dynamic-datasource.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!--<dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-spring-boot3-starter</artifactId>
+                <version>${mybatis-flex.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-processor</artifactId>
+                <version>${mybatis-flex.version}</version>
+                <scope>provided</scope>
+            </dependency>-->
+            <!-- jdbc driver -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.clickhouse</groupId>
+                <artifactId>clickhouse-jdbc</artifactId>
+                <version>${clickhouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>dm-jdbc</artifactId>
+                <version>${dm.version}</version>
+            </dependency>
+
+            <!-- datafaker -->
+            <dependency>
+                <groupId>net.datafaker</groupId>
+                <artifactId>datafaker</artifactId>
+                <version>${datafaker.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jgrapht</groupId>
+                <artifactId>jgrapht-core</artifactId>
+                <version>${jgrapht.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${commons-csv.version}</version>
+            </dependency>
+
+            <!-- validator -->
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
+
+            <!-- yaml & json -->
+            <!--<dependency>
+                <groupId>com.esotericsoftware.yamlbeans</groupId>
+                <artifactId>yamlbeans</artifactId>
+                <version>${yamlbeans.version}</version>
+                <scope>provided</scope>
+            </dependency>-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!--<dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jsonSchema</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>-->
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-generator</artifactId>
+                <version>${jsonschema.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-jackson</artifactId>
+                <version>${jsonschema.version}</version>
+            </dependency>
+
+            <!-- tool -->
+            <!--<dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>-->
+            <!--<dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>checker-qual</artifactId>
+                        <groupId>org.checkerframework</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.collections</groupId>
+                <artifactId>eclipse-collections-api</artifactId>
+                <version>${eclipse-collections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.collections</groupId>
+                <artifactId>eclipse-collections</artifactId>
+                <version>${eclipse-collections.version}</version>
+            </dependency>-->
+
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>stringtemplate</artifactId>
+                <version>${stringtemplate.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>${auto-service.version}</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+                <!--<exclusions>
+                    <exclusion>
+                        <artifactId>guava</artifactId>
+                        <groupId>com.google.guava</groupId>
+                    </exclusion>
+                </exclusions>-->
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>2.3</version>
+            </dependency>
+
+            <!-- AI -->
+            <!--<dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+                <version>${spring-ai.version}</version>
+            </dependency>-->
+
+            <!-- Vaadin -->
+            <!--<dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-spring-boot-starter</artifactId>
+                <version>${vaadin.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-validation</artifactId>
+            </dependency>-->
+
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!--<dependency>
-            <groupId>cn.dynamictp</groupId>
-            <artifactId>dynamic-tp-spring-boot-starter-common</artifactId>
-            <version>1.0.9</version>
-        </dependency>-->
-
-        <dependency>
-            <groupId>org.gensokyo.boot</groupId>
-            <artifactId>kafka-spring-boot-starter</artifactId>
-            <version>2.7.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.gensokyo.boot</groupId>
-            <artifactId>es-spring-boot-starter</artifactId>
-            <version>2.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>7.17.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-            <version>${graal.js.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-            <version>${graal.js.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.truffle</groupId>
-            <artifactId>truffle-api</artifactId>
-            <version>${graal.js.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-            <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.31</version>
-        </dependency>
-        <dependency>
-            <groupId>com.clickhouse</groupId>
-            <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.4.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>2.1.214</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dameng</groupId>
-            <artifactId>dm-jdbc</artifactId>
-            <version>1.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.datafaker</groupId>
-            <artifactId>datafaker</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-core</artifactId>
-            <version>1.5.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>8.0.0.Final</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.2.15</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.esotericsoftware.yamlbeans</groupId>
-            <artifactId>yamlbeans</artifactId>
-            <version>1.15</version>
+            <artifactId>spring-boot-starter-logging</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.14.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.14.1</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.collections</groupId>
-            <artifactId>eclipse-collections-api</artifactId>
-            <version>11.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.collections</groupId>
-            <artifactId>eclipse-collections</artifactId>
-            <version>11.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-            <version>3.6.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-generator</artifactId>
-            <version>${jsonschema.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-module-jackson</artifactId>
-            <version>${jsonschema.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>stringtemplate</artifactId>
-            <version>${stringtemplate.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>${antlr.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -239,38 +389,121 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>4.8.154</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>3.3.2</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>com.google.auto.service</groupId>
+                                <artifactId>auto-service</artifactId>
+                                <version>${auto-service.version}</version>
+                            </path>
+                            <path>
+                                <groupId>com.mybatis-flex</groupId>
+                                <artifactId>mybatis-flex-processor</artifactId>
+                                <version>${mybatis-flex.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>

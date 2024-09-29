@@ -1,0 +1,173 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$ref" : "#/$defs/TemplateVO",
+  "$defs" : {
+    "FieldVO" : {
+      "type" : "object",
+      "properties" : {
+        "dependsOn" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "stages" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/StageVO"
+          }
+        }
+      }
+    },
+    "GeneratorVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "GeneratorVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "IteratorVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "batchSize" : {
+            "type" : "integer"
+          },
+          "stages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/StageVO"
+            }
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "IteratorVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "StageType" : {
+      "type" : "string",
+      "enum" : [ "READ", "SELECT", "SCRIPT", "CONVERT", "MAPPING", "WRITE", "LOG", "CONDITION" ]
+    },
+    "StageVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/$defs/StageType"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "StageVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "TemplateVO" : {
+      "type" : "object",
+      "properties" : {
+        "fields" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/FieldVO"
+          }
+        },
+        "generator" : {
+          "$ref" : "#/$defs/GeneratorVO"
+        },
+        "id" : {
+          "type" : "integer"
+        },
+        "iterator" : {
+          "$ref" : "#/$defs/IteratorVO"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "output" : {
+          "$ref" : "#/$defs/WriteStageVO"
+        }
+      }
+    },
+    "WriteStageVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "$ref" : "#/$defs/StageType"
+          },
+          "writers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/WriterVO"
+            }
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "WriteStageVO"
+          }
+        }
+      } ]
+    },
+    "WriterType" : {
+      "type" : "string",
+      "enum" : [ "CONSOLE", "JDBC", "MYSQL", "POSTGRES", "CLICKHOUSE", "ELASTICSEARCH", "KAFKA" ]
+    },
+    "WriterVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "dataSourceId" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          },
+          "template" : {
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/$defs/WriterType"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "WriterVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    }
+  }
+}

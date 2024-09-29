@@ -1,0 +1,41 @@
+# 数据集名称，各个文件中唯一
+name: demo_25
+# 迭代器配置
+iterator:
+  type: CSV
+  path: "E:\\Desktop\\temp\\1-测试数据\\路内_辖区.csv"
+  endRow: 2
+  custom:
+    skipHeaderRecord: true
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset['ID']"
+  - name: NAME
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset['停车场名称']"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CSV
+      target: "E:\\Desktop\\temp\\1-测试数据\\路内_辖区_output.csv"
+      custom:
+        headers: ["ID","NAME"]
