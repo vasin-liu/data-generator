@@ -26,6 +26,9 @@
       "allOf" : [ {
         "type" : "object",
         "properties" : {
+          "batchSize" : {
+            "type" : "integer"
+          },
           "type" : {
             "type" : "string"
           }
@@ -44,8 +47,14 @@
       "allOf" : [ {
         "type" : "object",
         "properties" : {
-          "batchSize" : {
-            "type" : "integer"
+          "choose" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/WhenVO"
+            }
+          },
+          "otherwise" : {
+            "$ref" : "#/$defs/OtherwiseVO"
           },
           "stages" : {
             "type" : "array",
@@ -67,16 +76,41 @@
         "required" : [ "type" ]
       } ]
     },
-    "StageType" : {
-      "type" : "string",
-      "enum" : [ "READ", "SELECT", "SCRIPT", "CONVERT", "MAPPING", "WRITE", "LOG", "CONDITION" ]
+    "OtherwiseVO" : {
+      "type" : "object",
+      "properties" : {
+        "then" : {
+          "$ref" : "#/$defs/ScriptVO"
+        }
+      }
+    },
+    "ScriptVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "ScriptVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
     },
     "StageVO" : {
       "allOf" : [ {
         "type" : "object",
         "properties" : {
           "type" : {
-            "$ref" : "#/$defs/StageType"
+            "type" : "string"
           }
         }
       }, {
@@ -115,12 +149,23 @@
         }
       }
     },
+    "WhenVO" : {
+      "type" : "object",
+      "properties" : {
+        "then" : {
+          "$ref" : "#/$defs/ScriptVO"
+        },
+        "when" : {
+          "$ref" : "#/$defs/ScriptVO"
+        }
+      }
+    },
     "WriteStageVO" : {
       "allOf" : [ {
         "type" : "object",
         "properties" : {
           "type" : {
-            "$ref" : "#/$defs/StageType"
+            "type" : "string"
           },
           "writers" : {
             "type" : "array",
@@ -135,12 +180,9 @@
           "type" : {
             "const" : "WriteStageVO"
           }
-        }
+        },
+        "required" : [ "type" ]
       } ]
-    },
-    "WriterType" : {
-      "type" : "string",
-      "enum" : [ "CONSOLE", "JDBC", "MYSQL", "POSTGRES", "CLICKHOUSE", "ELASTICSEARCH", "KAFKA" ]
     },
     "WriterVO" : {
       "allOf" : [ {
@@ -156,7 +198,7 @@
             "type" : "string"
           },
           "type" : {
-            "$ref" : "#/$defs/WriterType"
+            "type" : "string"
           }
         }
       }, {

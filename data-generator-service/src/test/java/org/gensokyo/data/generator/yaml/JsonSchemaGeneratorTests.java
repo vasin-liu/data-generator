@@ -12,6 +12,7 @@ import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.TemplateVO;
+import org.gensokyo.data.model.vo.iterator.IteratorVO;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
