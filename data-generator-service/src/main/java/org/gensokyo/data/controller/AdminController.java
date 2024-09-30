@@ -7,23 +7,35 @@ package org.gensokyo.data.controller;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.cache.Templates;
+import org.gensokyo.data.constant.Status;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.qo.UpdateTemplateQO;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.model.vo.TemplateVO;
+import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.util.RandomKit;
+import org.gensokyo.data.yaml.YamlParser;
+import org.gensokyo.kit.character.StrKit;
+import org.gensokyo.kit.io.FileKit;
+import org.gensokyo.kit.io.IOKit;
+import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
+import java.util.Objects;
 
 /**
  * 管理接口
@@ -38,7 +50,9 @@ import java.sql.DriverManager;
 @Validated
 @RequiredArgsConstructor
 public class AdminController {
-
+    private final TemplateRepository repository;
+    private final YamlParser yamlParser;
+    private final Templates templates;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
 
     @Value("${gensokyo.drivers.directory:./uploaded-drivers}")
@@ -66,6 +80,56 @@ public class AdminController {
             throw new DataGeneratorException("添加数据库数据源失败", e);
         }
         return R.ok("添加数据库数据源成功");
+    }
+
+    @PostMapping("/updateById")
+    public R<String> updateById(@Validated @RequestBody UpdateTemplateQO qo) {
+        var po = repository.findById(qo.getId()).orElse(null);
+        if (Objects.isNull(po)) {
+            return R.fail(String.format("模板 '%s' 不存在", qo.getId()));
+        }
+        var vo = yamlParser.parse(qo.getYaml(), TemplateVO.class);
+        po.setName(vo.getName());
+        if (StrKit.isNotBlank(qo.getFileName())) {
+            var fn = FileKit.getNameWithoutExtension(qo.getFileName());
+            var fe = FileKit.getExtension(qo.getFileName());
+            po.setFileName(fn);
+            if (StrKit.isNotBlank(fe)) {
+                po.setFileExt(fe);
+            }
+        }
+        vo.setId(po.getId());
+        po.setJsonContent(JsonKit.write(vo));
+        po.setYamlContent(qo.getYaml());
+        repository.save(po);
+        return R.ok(String.format("模板 '%s' 已更新", qo.getId()));
+    }
+
+    @PostMapping("/reloadAllFromFile")
+    public R<String> reloadFromFile() {
+        var list = repository.saveAll(templates.reloadAll());
+        return R.ok(String.format("所有模板重新加载完成，总共 %s 个文件", list.size()));
+    }
+
+    @PostMapping("/uploadTemplate")
+    public R<String> uploadTemplate(@NotNull @RequestParam("file") MultipartFile file,
+                                    @RequestParam(value = "persistent", required = false, defaultValue = "false") boolean persistent) {
+        try (var is = file.getInputStream()) {
+            var content = IOKit.toString(is, StandardCharsets.UTF_8);
+            var vo = yamlParser.parse(content, TemplateVO.class);
+            var po = new TemplatePO();
+            po.setId(RandomKit.snowFlake().nextId());
+            po.setName(vo.getName());
+            po.setFileExt(FileKit.getExtension(file.getName()));
+            po.setFileName(file.getName());
+            po.setYamlContent(content);
+            po.setJsonContent(JsonKit.write(vo));
+            po.setStatus(Status.S0A);
+            repository.save(po);
+            return R.ok("文件上传成功");
+        } catch (Exception e) {
+            throw new DataGeneratorException("模板文件上传失败", e);
+        }
     }
 
     private File uploadDriverFile(MultipartFile driverFile) throws IOException {

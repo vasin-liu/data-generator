@@ -6,34 +6,21 @@
 package org.gensokyo.data.controller;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.constant.Const;
-import org.gensokyo.data.constant.Status;
 import org.gensokyo.data.context.TemplateContext;
-import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.dto.TemplateDTO;
-import org.gensokyo.data.model.po.TemplatePO;
-import org.gensokyo.data.model.qo.UpdateTemplateQO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.repository.TemplateRepository;
-import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
-import org.gensokyo.data.yaml.YamlParser;
-import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
-import org.gensokyo.kit.io.FileKit;
-import org.gensokyo.kit.io.IOKit;
 import org.gensokyo.kit.json.JsonKit;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,8 +41,6 @@ import java.util.stream.Collectors;
 public class TaskController {
     private final DefaultDataPipelineFactory defaultDataPipelineFactory;
     private final TemplateRepository repository;
-    private final YamlParser yamlParser;
-    private final Templates templates;
 
     @GetMapping("/list")
     public R<List<TemplateDTO>> list() {
@@ -115,56 +100,6 @@ public class TaskController {
         var template = JsonKit.read(result.getJsonContent(), TemplateVO.class);
         run(template, cleanup);
         return R.ok(String.format("模板 '%s' 已启动数据生成任务", templateId));
-    }
-
-    @PostMapping("/updateById")
-    public R<String> updateById(@Validated @RequestBody UpdateTemplateQO qo) {
-        var po = repository.findById(qo.getId()).orElse(null);
-        if (Objects.isNull(po)) {
-            return R.fail(String.format("模板 '%s' 不存在", qo.getId()));
-        }
-        var vo = yamlParser.parse(qo.getYaml(), TemplateVO.class);
-        po.setName(vo.getName());
-        if (StrKit.isNotBlank(qo.getFileName())) {
-            var fn = FileKit.getNameWithoutExtension(qo.getFileName());
-            var fe = FileKit.getExtension(qo.getFileName());
-            po.setFileName(fn);
-            if (StrKit.isNotBlank(fe)) {
-                po.setFileExt(fe);
-            }
-        }
-        vo.setId(po.getId());
-        po.setJsonContent(JsonKit.write(vo));
-        po.setYamlContent(qo.getYaml());
-        repository.save(po);
-        return R.ok(String.format("模板 '%s' 已更新", qo.getId()));
-    }
-
-    @PostMapping("/reloadAllFromFile")
-    public R<String> reloadFromFile() {
-        var list = repository.saveAll(templates.reloadAll());
-        return R.ok(String.format("所有模板重新加载完成，总共 %s 个文件", list.size()));
-    }
-
-    @PostMapping("/uploadTemplate")
-    public R<String> uploadTemplate(@NotNull @RequestParam("file") MultipartFile file,
-                                    @RequestParam(value = "persistent", required = false, defaultValue = "false") boolean persistent) {
-        try (var is = file.getInputStream()) {
-            var content = IOKit.toString(is, StandardCharsets.UTF_8);
-            var vo = yamlParser.parse(content, TemplateVO.class);
-            var po = new TemplatePO();
-            po.setId(RandomKit.snowFlake().nextId());
-            po.setName(vo.getName());
-            po.setFileExt(FileKit.getExtension(file.getName()));
-            po.setFileName(file.getName());
-            po.setYamlContent(content);
-            po.setJsonContent(JsonKit.write(vo));
-            po.setStatus(Status.S0A);
-            repository.save(po);
-            return R.ok("文件上传成功");
-        } catch (Exception e) {
-            throw new DataGeneratorException("模板文件上传失败", e);
-        }
     }
 
     private void run(final TemplateVO template, final boolean cleanup) {
