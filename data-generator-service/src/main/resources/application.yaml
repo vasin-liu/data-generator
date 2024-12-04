@@ -68,6 +68,14 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
+        TOCC_BUS_MANAGEMENT:
+          url: jdbc:dm://172.25.20.85:5237?schema=TOCC_BUS_MANAGEMENT
+          username: SYSDBA
+          password: SYSDBA
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
         system_manage:
           url: jdbc:mysql://172.25.22.135:3306/system_manage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
           username: root

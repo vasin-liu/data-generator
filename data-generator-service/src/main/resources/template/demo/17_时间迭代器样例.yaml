@@ -3,27 +3,44 @@ name: demo_17
 # 迭代器配置
 iterator:
   type: datetime
-  from: 2024-07-30 15:12:50
-  to: 2024-08-01 15:13:50
-  stages:
-    - type: LOG
+  from: 2024-08-01 00:00:00
+  to: 2024-08-03 00:00:00
+#  stages:
+#    - type: LOG
+#    - type: SELECT
+#    - type: SCRIPT
+#      language:
+#        type: SPEL
+#        content: "#dataset.plusMinutes(5)"
+#    - type: LOG
+#  choose:
+#    - when:
+#        type: SPEL
+#        content: "#dataset.isBefore(T(java.time.LocalDateTime).of(2024,8,2,00,05))"
+#      then:
+#        type: SPEL
+#        content: "true"
+#  otherwise:
+#    then:
+#      type: SPEL
+#      content: "#dataset"
   iterator:
     type: NUMBER
     from: 1
     to: 3
-    stages:
-      - type: LOG
-    choose:
-      - when:
-          type: SPEL
-          content: "#dataset==2"
-        then:
-          type: SPEL
-          content: "true"
-    otherwise:
-      then:
-        type: SPEL
-        content: "#dataset"
+#    stages:
+#      - type: LOG
+#    choose:
+#      - when:
+#          type: SPEL
+#          content: "#dataset==2"
+#        then:
+#          type: SPEL
+#          content: "true"
+#    otherwise:
+#      then:
+#        type: SPEL
+#        content: "#dataset"
 # 生成器配置
 generator:
   type: ASYNC
@@ -34,29 +51,33 @@ generator:
     queueCapacity: 8
 # 数据集元数据配置
 fields:
-  - name: ID
+  - name: IT_DATETIME
     stages:
-      - type: READ
-        # 读取器选择类型，可选值：EQUAL,WEIGHT
-        strategy:
-          type: WEIGHT
-        # 内存驻留需设置为 false，默认为 false
-        # inMemory: false
-        readers:
-          - type: SPEL
-            weight: 100
-            content: "#faker.snowflake.next"
-          - type: SPEL
-            weight: 100
-            content: "#faker.common.text(9,10)"
-  - name: STATUS
-    stages:
-      - type: READ
-        inMemory: true
-        readers:
-          - type: CONSTANT
-            content: [ 'S0A', 'S0X' ,'S0D', 'S0H' ]
       - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset[0].get(),'yyyy-MM-dd HH:mm:ss')
+      - type: SELECT
+  - name: IT_NUMBER
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[1]"
+      - type: SELECT
+  - name: CONCAT
+    dependsOn:
+      - IT_DATETIME
+      - IT_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset[0],'yyyyMMddHHmmss') + '-' + #dataset[1]
   - name: CREATE_TIME
     stages:
       - type: READ

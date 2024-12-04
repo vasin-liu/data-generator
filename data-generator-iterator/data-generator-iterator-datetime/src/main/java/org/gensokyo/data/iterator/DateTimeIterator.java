@@ -10,6 +10,7 @@ import org.gensokyo.data.context.IteratorContext;
 import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
+import org.gensokyo.kit.time.DateTime;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -39,31 +40,31 @@ public class DateTimeIterator<T extends DateTimeIteratorVO> extends AbstractIter
 
         var it = ctx.iterator();
         var from = it.getFrom();
-        var to = Objects.isNull(it.getTo()) ? LocalDateTime.now() : it.getTo();
+        var lto = Objects.isNull(it.getTo()) ? LocalDateTime.now() : it.getTo();
         var step = it.getStep();
         this.unit = Objects.isNull(it.getUnit()) ? ChronoUnit.DAYS : it.getUnit();
 
         Assert.isTrue(from.atZone(ZoneId.of(Const.DEFAULT_ZONE_ID)).toInstant().isAfter(Instant.EPOCH),
                 "时间迭代器配置的起始值必需大于'1970-01-01 00:00:00'");
-        Assert.isTrue(from.isBefore(to), "迭代器配置的起始值必须小于或等于结束值");
+        Assert.isTrue(from.isBefore(lto), "迭代器配置的起始值必须小于或等于结束值");
         Assert.isTrue(step > 0 && step < Integer.MAX_VALUE, "时间迭代器配置的迭代间隔值必须大于0");
         this.counter = new AtomicReference<>(from);
-        this.to = to;
+        this.to = lto;
     }
 
     @Override
     public boolean hasNext() {
-        return counter.get().isBefore(to);
+        return DateTime.of(counter.get()).isBeforeOrEqual(to);
     }
 
     @Override
     public Value next() {
         var it = ctx.iterator();
         var prev = counter.get();
-        if (prev.isBefore(to)) {
+        if (DateTime.of(prev).isBeforeOrEqual(to)) {
             var next = prev.plus(it.getStep(), this.unit);
             counter.compareAndSet(prev, next);
-            return SingleValue.of(next);
+            return SingleValue.of(prev);
         }
 
         throw new IllegalStateException("迭代器已经到达最大值");

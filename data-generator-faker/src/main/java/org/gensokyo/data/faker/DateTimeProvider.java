@@ -13,6 +13,7 @@ import org.gensokyo.kit.security.Md5Kit;
 import org.gensokyo.kit.time.DateTime;
 import org.gensokyo.kit.time.Patterns;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -31,6 +32,14 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
 
     public String format(String date, String pattern) {
         return DateTime.of(date, Patterns.DATETIME_STANDARD).toString(pattern);
+    }
+
+    public String format(Date date, String pattern) {
+        return DateTime.of(date).toString(pattern);
+    }
+
+    public String format(LocalDateTime date, String pattern) {
+        return DateTime.of(date).toString(pattern);
     }
 
     public String now() {

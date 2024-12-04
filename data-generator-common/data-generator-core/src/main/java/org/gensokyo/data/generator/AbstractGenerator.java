@@ -27,6 +27,7 @@ import org.gensokyo.data.script.Script;
 import org.gensokyo.data.script.ScriptFactory;
 import org.gensokyo.data.stage.StageFactory;
 import org.gensokyo.data.value.ListValue;
+import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
@@ -149,7 +150,8 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
                     //递归循环
                     doIteration(ivo.getIterator(), finalValues);
                 } else {
-                    var input = ListValue.fromValueArray(finalValues);
+                    //var input = ListValue.fromValueArray(finalValues);
+                    var input = SingleValue.of(finalValues);
                     if (!initialized.get()) {
                         if (log.isDebugEnabled()) {
                             log.debug("预加载内存驻留数据集");
@@ -307,8 +309,8 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      */
     protected void produce(final Value input) {
         try {
-            var nv = createPipelineAndExecute(ctx, input);
-            var rowVal = defaultRowPipelineFactory.startup(new TemplateContext(ctx.template(), nv));
+            //var nv = createPipelineAndExecute(ctx, input);
+            var rowVal = defaultRowPipelineFactory.startup(new TemplateContext(ctx.template(), input));
             queue.put(rowVal);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
