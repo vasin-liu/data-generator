@@ -129,8 +129,9 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      * @param ivo          迭代配置对象
      * @param parentValues 迭代输入值
      */
+    @SuppressWarnings("t")
     protected void doIteration(IteratorVO ivo, Value... parentValues) {
-        try (var it = iteratorFactory.newInstance(new IteratorContext<>(ctx.template(), ivo))) {
+        try (var it = iteratorFactory.newInstance(new IteratorContext<>(ctx.template(), ivo, parentValues))) {
             while (it.hasNext()) {
                 var currentValue = it.next();
                 //条件判断脚本
@@ -140,8 +141,9 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
                 } else {
                     currentValue = p.getRight();
                 }
+
                 //迭代值流水线处理
-                var currentNewValue = createPipelineAndExecute(ctx, currentValue);
+                var currentNewValue = createPipelineAndExecute(ctx, ivo, currentValue);
                 var finalValues = new Value[parentValues.length + 1];
                 System.arraycopy(parentValues, 0, finalValues, 0, parentValues.length);
                 //当前所有嵌套迭代的值
@@ -158,13 +160,16 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
                         }
                         preloading(input);
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("输入值长度：{}", input.size());
-                        }
                         doJob(input);
                     }
                 }
+                //是否需要暂停
+                if (Objects.nonNull(ivo.getPause()) && ivo.getPause() > 0) {
+                    Thread.sleep(ivo.getPause() * 1000);
+                }
             }
+        } catch (NotEnoughElementException e) {
+            log.error("===> 当前已无足够的数据可供选取，无法继续生产数据，终止任务 <===");
         } catch (Exception e) {
             throw new DataGeneratorException(e);
         }
@@ -177,7 +182,7 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      *
      * @param input 输入值
      */
-    protected void preloading(final Value input) {
+    protected void preloading(final Value input) throws InterruptedException {
         //先执行一行记录生成缓存数据
         var tdc = DataSet.getOrCreate(ctx.template().getId());
         if (tdc.isEmpty()) {
@@ -289,12 +294,13 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      * {@code input} 值为条件判断表达式的执行结果值
      *
      * @param ctx   生成器上下文
+     * @param ivo   迭代器配置对象
      * @param input 输入值
      * @return 输出值
      */
-    protected Value createPipelineAndExecute(final GeneratorContext<G> ctx, final Value input) {
+    protected Value createPipelineAndExecute(final GeneratorContext<G> ctx, final IteratorVO ivo, final Value input) {
         var pipeline = new DefaultRowPipeline();
-        for (var svo : ctx.template().getIterator().getStages()) {
+        for (var svo : ivo.getStages()) {
             var stageCtx = new StageContext<>(ctx.template(), null, svo);
             var stage = stageFactory.newInstance(stageCtx);
             pipeline.next(stage);
@@ -307,20 +313,15 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      *
      * @param input 输入值
      */
-    protected void produce(final Value input) {
+    protected void produce(final Value input) throws InterruptedException {
         try {
             //var nv = createPipelineAndExecute(ctx, input);
             var rowVal = defaultRowPipelineFactory.startup(new TemplateContext(ctx.template(), input));
             queue.put(rowVal);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (DataGeneratorException e) {
-            log.error("生成数据发生异常，上下文信息为：{}", JsonKit.write(ctx), e);
         } catch (NotEnoughElementException e) {
-            log.error("当前已无足够的数据可供选取，无法继续生产数据，终止任务，上下文信息为：{}", JsonKit.write(ctx), e);
-            while (queue.isEmpty() || Thread.currentThread().isInterrupted()) {
-                shutdown();
-            }
+            throw e;
+        } catch (Exception e) {
+            log.error("生成数据发生异常，上下文信息为：{}", JsonKit.write(ctx), e);
         }
     }
 
@@ -414,5 +415,6 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
         if (!consumerExecutor.getThreadPoolExecutor().isShutdown()) {
             consumerExecutor.shutdown();
         }
+        log.info("===> 模板 {} 的数据生成器已关闭 <===", tctx.template().getName());
     }
 }

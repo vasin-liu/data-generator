@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.event.*;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.exception.NotEnoughElementException;
 import org.gensokyo.data.model.vo.stage.StageVO;
 import org.gensokyo.data.value.Value;
 
@@ -37,6 +38,8 @@ public abstract class AbstractStage<T extends StageVO> implements Stage<T>, Even
         Value output;
         try {
             output = internalExecute(input);
+        } catch (NotEnoughElementException e) {
+            throw e;
         } catch (Exception e) {
             fireEvent(new ExceptionEvent(e));
             throw new DataGeneratorException(e);

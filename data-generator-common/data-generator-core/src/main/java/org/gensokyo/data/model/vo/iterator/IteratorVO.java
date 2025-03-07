@@ -59,4 +59,9 @@ public class IteratorVO implements Serializable {
      * 其他条件
      */
     private OtherwiseVO otherwise;
+
+    /**
+     * 每次迭代暂停时间，单位：秒，默认为0
+     */
+    private Integer pause = 0;
 }

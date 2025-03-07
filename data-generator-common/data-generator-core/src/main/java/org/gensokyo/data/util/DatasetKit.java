@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 数据集转换工具
@@ -117,6 +118,17 @@ public class DatasetKit {
             results.add(dataset);
         }
         return results;
+    }
+
+    public static Object toObject(Value... values) {
+        if (Objects.isNull(values)) {
+            return null;
+        }
+        Object[] array = Stream.of(values).map(DatasetKit::extractValue).map(Value::get).toArray();
+        if (array.length == 1) {
+            return array[0];
+        }
+        return array;
     }
 
     public static InputStream buildBulkData(String template, List<Map<String, Object>> data) {

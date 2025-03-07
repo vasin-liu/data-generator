@@ -43,6 +43,7 @@ fields:
         params:
           - name: districtCode
             language:
+              type: SPEL
               content: "#dataset.DISTRICT_CODE"
         readers:
           - type: JDBC

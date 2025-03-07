@@ -17,6 +17,7 @@ import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.vo.stage.ScriptStageVO;
 import org.gensokyo.data.script.ScriptFactory;
 import org.gensokyo.data.util.DatasetKit;
+import org.gensokyo.data.value.SingleValue;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
@@ -186,7 +187,8 @@ public class DatabaseIterator<T extends DatabaseIteratorVO> extends AbstractIter
                 var spo = sctx.stage().getLanguage();
                 var script = scriptFactory.newInstance(spo);
                 if (Objects.nonNull(script)) {
-                    var v = script.eval(sctx, spo, Value.EMPTY, DataSet.getOrCreate(ctx.template().getId())).get();
+                    Value input = SingleValue.of(DatasetKit.toObject(ctx.dataset()));
+                    var v = script.eval(sctx, spo, input, DataSet.getOrCreate(ctx.template().getId())).get();
                     params.put(p.getName(), v);
                 }
 

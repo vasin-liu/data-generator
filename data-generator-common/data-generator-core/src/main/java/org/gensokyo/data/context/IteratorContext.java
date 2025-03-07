@@ -7,6 +7,7 @@ package org.gensokyo.data.context;
 
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.model.vo.iterator.IteratorVO;
+import org.gensokyo.data.value.Value;
 
 /**
  * 迭代器上下文
@@ -16,5 +17,6 @@ import org.gensokyo.data.model.vo.iterator.IteratorVO;
  * @since 2024/7/18 , Version 1.0.0
  */
 public record IteratorContext<T extends IteratorVO>(TemplateVO template,
-                                                    T iterator) {
+                                                    T iterator,
+                                                    Value... dataset) {
 }

@@ -7,6 +7,7 @@ package org.gensokyo.data.pipeline;
 
 import org.gensokyo.data.event.*;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.exception.NotEnoughElementException;
 import org.gensokyo.data.stage.Stage;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.collect.CollectKit;
@@ -46,6 +47,8 @@ public abstract class AbstractPipeline implements Pipeline, EventSource {
                 prev = stage.execute(prev);
             }
             result = prev;
+        } catch (NotEnoughElementException e) {
+            throw e;
         } catch (Exception e) {
             fireEvent(new ExceptionEvent(e));
             throw new DataGeneratorException(e);
