@@ -19,6 +19,8 @@ import java.util.List;
  */
 public interface TemplateRepository extends JpaRepository<TemplatePO, Long> {
 
+    List<TemplatePO> findByName(String name);
+
     List<TemplatePO> findByNameContaining(String name);
 
     List<TemplatePO> findByNameLike(String name);

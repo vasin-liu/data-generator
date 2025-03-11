@@ -6,6 +6,7 @@
 package org.gensokyo.data.controller;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.constant.Const;
@@ -71,7 +72,7 @@ public class TaskController {
     @GetMapping("/runByName/{templateName}")
     public R<String> runByName(@NotBlank @PathVariable String templateName,
                                @RequestParam(value = "cleanup", required = false, defaultValue = "true") Boolean cleanup) {
-        var result = repository.findByNameContaining(templateName);
+        var result = repository.findByName(templateName);
         if (CollectKit.isEmpty(result)) {
             return R.fail(String.format("模板 '%s' 不存在", templateName));
         }
@@ -89,7 +90,7 @@ public class TaskController {
     }
 
     @GetMapping("/runById/{templateId}")
-    public R<String> runById(@NotBlank @PathVariable Long templateId,
+    public R<String> runById(@NotNull @PathVariable Long templateId,
                              @RequestParam(value = "cleanup", required = false, defaultValue = "true") Boolean cleanup) {
         var result = repository.findById(templateId).orElse(null);
 

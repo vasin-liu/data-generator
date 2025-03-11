@@ -28,7 +28,7 @@ spring:
 #            - localhost:9092
         kafka2:
           bootstrap-servers:
-            - 172.25.21.29:9092
+            - 172.25.20.125:9092
   datasource:
     dynamic:
       primary: data-generator
@@ -62,6 +62,14 @@ spring:
 #            filters: stat,slf4j
         tocc_parking:
           url: jdbc:dm://dm.tocc:5236?schema=TOCC_PARKING_LOT
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        tocc_parking_22_2:
+          url: jdbc:dm://172.25.22.2:30236?schema=TOCC_PARKING_LOT
           username: SYSDBA
           password: Suntek123
           driver-class-name: dm.jdbc.driver.DmDriver
@@ -108,14 +116,14 @@ spring:
 #          type: com.alibaba.druid.pool.DruidDataSource
 #          druid:
 #            filters: stat,slf4j
-#        tc_pg:
-#          url: jdbc:postgresql://192.168.200.242:5432/TC
-#          username: postgres
-#          password: its312
-#          driver-class-name: org.postgresql.Driver
-#          type: com.alibaba.druid.pool.DruidDataSource
-#          druid:
-#            filters: stat,slf4j
+        tc_pg:
+          url: jdbc:postgresql://172.25.61.116:5432/TC
+          username: postgres
+          password: its312
+          driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
 #        reader:
 #          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
 #          username: root

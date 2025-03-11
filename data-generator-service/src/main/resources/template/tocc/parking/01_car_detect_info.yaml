@@ -790,7 +790,7 @@ output:
   writers:
 #    - type: CONSOLE
     - type: JDBC
-      dataSourceId: 'tocc_parking'
+      dataSourceId: 'tocc_parking_22_2'
       target: 'CAR_DETECT_INFO'
       template: >-
         HPZL,CLLX,CSYS,ILLEGAL,INFO_ID,DEVICE_ID,JGSK,HPHM,HPYS,CAR_YEAR,PILOT_SUNVISOR,COPILOT_SUNVISOR,PENDANTS,
