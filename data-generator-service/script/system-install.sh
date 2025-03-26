@@ -5,7 +5,7 @@
 #----------------------------------------------------------
 base_dir=`cd $(dirname $0); pwd`
 
-SERVICE_NAME="tocc-parking-lot"
+SERVICE_NAME="data-generator-service"
 #----------------------------------------------------------
 
 if [ -r "/etc/systemd/system/$SERVICE_NAME.service" ]; then

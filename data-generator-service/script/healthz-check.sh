@@ -3,7 +3,7 @@ baseDir=$(cd `dirname $0` && pwd)
 cd $baseDir
 
 # 健康检查脚本会在服务部署的目标机器上执行，因此ip地址可以直接指定为localhost
-url="http://localhost:23167/healthz"
+url="http://localhost:9876/healthz"
 rc=`curl -I -m 5 -o /dev/null -s -w %{http_code} ${url}`
 result=`curl -s  $url`
 great=`echo $result | sed 's/,/\n/g' | sed 's/"//g' | grep -i opcode | awk -F':' '{print $2}'`
