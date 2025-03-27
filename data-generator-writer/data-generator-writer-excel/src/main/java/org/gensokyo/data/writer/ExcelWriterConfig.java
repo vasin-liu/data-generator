@@ -22,7 +22,7 @@ public class ExcelWriterConfig {
 
     @Bean
     @ConditionalOnMissingBean(ExcelWriter.class)
-    public <S extends WriteStageVO, T extends ExcelWriterVO> ExcelWriter<S, T> csvWriter() {
+    public <S extends WriteStageVO, T extends ExcelWriterVO> ExcelWriter<S, T> excelWriter() {
         return new ExcelWriter<>();
     }
 }
