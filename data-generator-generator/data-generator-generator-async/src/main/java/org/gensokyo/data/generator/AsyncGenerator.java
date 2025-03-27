@@ -52,7 +52,9 @@ public class AsyncGenerator<G extends AsyncGeneratorVO> extends AbstractGenerato
         //活跃时间
         executor.setKeepAliveSeconds(p.getKeepAliveSeconds());
         //线程名字前缀
-        executor.setThreadNamePrefix("DG-PRODUCER-" + ctx.template().getId() + "-" + ctx.template().getName() + "-");
+        var namePrefix = String.format("DG-PRODUCER-%s-%s-%s-",
+                ctx.template().getId(), ctx.template().getName(), ctx.template().getInstanceId());
+        executor.setThreadNamePrefix(namePrefix);
         // 设置线程池关闭的时候等待所有任务都完成再继续销毁其他的Bean
         executor.setWaitForTasksToCompleteOnShutdown(p.isWaitForJobsToCompleteOnShutdown());
         executor.setAwaitTerminationSeconds(p.getAwaitTerminationSeconds());
