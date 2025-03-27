@@ -30,8 +30,16 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
         super(faker);
     }
 
+    public Date parse(String date) {
+        return DateTime.of(date).toDate();
+    }
+
     public String format(String date, String pattern) {
         return DateTime.of(date, Patterns.DATETIME_STANDARD).toString(pattern);
+    }
+
+    public String format(Date date) {
+        return DateTime.of(date).toString(Patterns.DATETIME_STANDARD);
     }
 
     public String format(Date date, String pattern) {
