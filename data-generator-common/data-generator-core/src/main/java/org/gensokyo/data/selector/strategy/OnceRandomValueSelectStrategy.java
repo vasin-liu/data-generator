@@ -7,6 +7,7 @@ package org.gensokyo.data.selector.strategy;
 
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.exception.NotEnoughElementException;
 import org.gensokyo.data.model.vo.selector.value.OnceRandomValueSelectStrategyVO;
 import org.gensokyo.data.model.vo.stage.SelectStageVO;
 import org.gensokyo.data.util.RandomKitExt;
@@ -32,7 +33,7 @@ public class OnceRandomValueSelectStrategy<S extends SelectStageVO, T extends On
                         final Value input) {
         var num = spo.getSelectNum() > 0 ? spo.getSelectNum() : 1;
         if (input.size() < num) {
-            throw new DataGeneratorException(String.format("当前数据集的数据 %s 数量小于需要的数量 %s",
+            throw new NotEnoughElementException(String.format("当前数据集的数据 %s 数量小于需要的数量 %s",
                     input.size(), num));
         }
         var result = RandomKitExt.choice(input, num);
