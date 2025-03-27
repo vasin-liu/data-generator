@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.gensokyo.data.reader.AiReaderConfig
+org.gensokyo.data.writer.EsWriterConfig
