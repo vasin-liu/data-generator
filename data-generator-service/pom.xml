@@ -130,6 +130,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-excel</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.datafaker</groupId>
             <artifactId>datafaker</artifactId>
         </dependency>

@@ -1,5 +1,5 @@
 # 数据集名称，各个文件中唯一
-name: vehicle_gps_record
+name: archive_vehicle_info
 # 迭代器配置
 iterator:
   type: CONSTANT
@@ -33,51 +33,69 @@ fields:
           - type: SPEL
             content: "#faker.snowflake.next"
       - type: SELECT
+  - name: VEHICLE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].HPHM.get() + '_' + #dataset[0].HPYS.get()
   - name: PLATE_NUMBER
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].HPHM"
-  - name: LONGTITUDE
+          content: >-
+            #dataset[0].HPHM
+  - name: PLATE_COLOR
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].HPYS
+  - name: PLATE_TYPE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].HPZL
+  - name: VEHICLE_TYPE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].CLLX
+  - name: VEHICLE_COLOR
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].CSYS
+  - name: CAR_LOGO
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].CAR_LOGO
+  - name: PHONE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0].PHONE
+  - name: ARCHIVE_STATUS
     stages:
       - type: READ
         inMemory: true
         readers:
           - type: CONSTANT
-            content: [ [ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.40990371336989,23.07521170236646 ],[ 113.41024011292654,23.07500537913056 ],[ 113.41064058859126,23.07475484334654 ],[ 113.41151763029552,23.074275876579946 ],[ 113.41290327609437,23.07360900462477 ] ]
-      - type: SELECT
-      - type: SCRIPT
-        language:
-          type: SPEL
-          content: "#dataset[0]"
-  - name: LATITUDE
-    dependsOn:
-      - LONGTITUDE
-    stages:
-      - type: SCRIPT
-        language:
-          type: SPEL
-          content: "#dataset[1]"
-  - name: UPLOAD_TIME
-    stages:
-      - type: READ
-        readers:
-          - type: SPEL
-            content: >-
-              #faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}")
-  - name: SPEED
-    stages:
-      - type: READ
-        readers:
-          - type: SPEL
-            content: "#faker.number.numberBetween(60,120)"
-  - name: ANGLE
-    stages:
-      - type: READ
-        readers:
-          - type: SPEL
-            content: "#faker.number.numberBetween(1,360)"
+            content: [ 1 ]
   - name: STATUS
     stages:
       - type: READ
@@ -105,9 +123,10 @@ fields:
 # 数据输出配置
 output:
   writers:
-    - type: CONSOLE
-#    - type: JDBC
-#      dataSourceId: 'tocc_parking'
-#      target: 'VEHICLE_GPS_RECORD'
-#      template: >-
-#        ID,PLATE_NUMBER,LONGTITUDE,LATITUDE,UPLOAD_TIME,SPEED,ANGLE,STATUS,CREATE_TIME,UPDATE_TIME
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'ARCHIVE_VEHICLE_INFO'
+      template: >-
+        ID,VEHICLE_ID,PLATE_NUMBER,PLATE_COLOR,PLATE_TYPE,VEHICLE_TYPE,VEHICLE_COLOR,CAR_LOGO,PHONE,
+        ARCHIVE_STATUS,STATUS,CREATE_TIME,UPDATE_TIME

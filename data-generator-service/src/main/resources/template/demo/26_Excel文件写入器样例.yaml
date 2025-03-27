@@ -37,4 +37,4 @@ output:
   writers:
     - type: EXCEL
       target: "E:\\Desktop\\temp\\1-测试数据\\路内_辖区_output.xlsx"
-      headers: ["ID","NAME"]
+      headers: [["ID","NAME"]]

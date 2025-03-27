@@ -1,4 +1,8 @@
+server:
+  port: 9876
 spring:
+  application:
+    name: data-generator-service
   h2:
     console:
       enabled: true
@@ -60,7 +64,7 @@ spring:
 #          type: com.alibaba.druid.pool.DruidDataSource
 #          druid:
 #            filters: stat,slf4j
-        tocc_parking:
+        tocc_parking_20_12:
           url: jdbc:dm://dm.tocc:5236?schema=TOCC_PARKING_LOT
           username: SYSDBA
           password: Suntek123
@@ -68,7 +72,7 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
-        tocc_parking_22_2:
+        tocc_parking:
           url: jdbc:dm://172.25.22.2:30236?schema=TOCC_PARKING_LOT
           username: SYSDBA
           password: Suntek123
@@ -198,14 +202,3 @@ spring:
 #            filters: stat,slf4j
       druid:
         filters: stat,slf4j
-
-#mybatis-plus:
-#  mapper-locations: classpath:/mapper/**.xml
-#  configuration:
-#    # MyBatis 配置
-#    map-underscore-to-camel-case: true
-#  global-config:
-#    # 全局配置
-#    db-config:
-#      # 数据库配置
-#      id-type: auto

@@ -1,5 +1,5 @@
 # 数据集名称，各个文件中唯一
-name: parking_black_list
+name: parking_passing_record
 # 迭代器配置
 iterator:
   type: CONSTANT
@@ -16,61 +16,113 @@ iterator:
     { "HPHM": "粤A88888","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q7","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13812345678" },
     { "HPHM": "粤A379T7","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X5","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13898765432" },
   ]
+  iterator:
+    type: CONSTANT
+    dataset: [ 1, 2 ]
+    iterator:
+      type: database
+      dataSourceId: 'tocc_parking'
+      sql: >-
+        SELECT ID,PARKING_LOT_NAME FROM PARKING_LOT_BASE WHERE STATUS = 'S0A'
 # 生成器配置
 generator:
-  type: ASYNC
+  type: SYNC
   batchSize: 10
-  executor:
-    coreSize: 8
-    maxSize: 16
-    queueCapacity: 8
 # 数据集元数据配置
 fields:
+#  - name: PARKING_LOT
+#    stages:
+#      - type: READ
+#        inMemory: true
+#        readers:
+#          - type: CONSTANT
+#            content: [
+#              { "ID": "1902630276017287170","NAME": "宝墨园停车场","SPACE": 1639 },
+#              { "ID": "1904364811469844481","NAME": "沙湾古镇西2停车场","SPACE": 25 },
+#              { "ID": "1904365783499796482","NAME": "沙湾古镇东停车场","SPACE": 270 },
+#              { "ID": "1904366257288376321","NAME": "沙湾古镇南停车场","SPACE": 191 },
+#              { "ID": "1904373219975622658","NAME": "紫泥堂停车场","SPACE": 228 },
+#            ]
+#      - type: SELECT
+#        strategy:
+#          type: MULTIPLE_ORDER
+#          minTimes: 2
+#          maxTimes: 2
   - name: ID
     stages:
       - type: READ
         readers:
           - type: SPEL
-            content: "#faker.snowflake.next"
+            content: >-
+              #faker.snowflake.next
       - type: SELECT
-  - name: VEHICLE_ID
+  - name: PARKING_LOT_ID
+#    dependsOn:
+#      - PARKING_LOT
     stages:
       - type: SCRIPT
         language:
           type: SPEL
           content: >-
-            #dataset[0].HPHM.get() + '_' + #dataset[0].HPZL.get()
+            #dataset[2]['ID']
+      - type: SELECT
+  - name: PARKING_LOT_NAME
+#    dependsOn:
+#      - PARKING_LOT
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[2]['PARKING_LOT_NAME']
+      - type: SELECT
   - name: PLATE_NUMBER
     stages:
+      - type: SELECT
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].HPHM"
+          content: >-
+            #dataset[0]['HPHM']
   - name: PLATE_COLOR
     stages:
+      - type: SELECT
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].HPYS"
-  - name: VEHICLE_TYPE
+          content: >-
+            #dataset[0]['HPYS']
+  - name: VEHICLE_COLOR
     stages:
+      - type: SELECT
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].CLLX"
-  - name: PHONE
+          content: >-
+            #dataset[0]['CSYS']
+  - name: PASS_TIME
     stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.plusHours((#dataset[1].get()-1)*#faker.number.numberBetween(2,10))
+  - name: PASS_TYPE
+    stages:
+      - type: SELECT
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].PHONE"
-  - name: APPEAL_STATUS
+          content: >-
+            #dataset[1]
+  - name: PASS_PIC
     stages:
       - type: READ
         inMemory: true
         readers:
           - type: CONSTANT
-            content: [ 0,1 ]
+            content:
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
   - name: STATUS
     stages:
       - type: READ
@@ -79,28 +131,44 @@ fields:
           - type: CONSTANT
             content: [ 'S0A' ]
   - name: CREATE_TIME
+    dependsOn:
+      - PASS_TIME
     stages:
-      - type: READ
-        readers:
-          - type: SPEL
-            content: >-
-              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
   - name: UPDATE_TIME
     dependsOn:
-      - CREATE_TIME
+      - PASS_TIME
     stages:
       - type: SCRIPT
         language:
           type: SPEL
           content: "#dataset"
 
-
 # 数据输出配置
 output:
   writers:
-#    - type: CONSOLE
+    #- type: CONSOLE
+#    - type: CSV
+#      target: "E:\\Desktop\\PARKING_PASSING_RECORD_OUTPUT.csv"
+#      custom:
+#        headers: [ "ID",
+#                   "PARKING_LOT_ID",
+#                   "PARKING_LOT_NAME",
+#                   "PLATE_NUMBER",
+#                   "PLATE_COLOR",
+#                   "VEHICLE_COLOR",
+#                   "PASS_TIME",
+#                   "PASS_TYPE",
+#                   "PASS_PIC",
+#                   "STATUS",
+#                   "CREATE_TIME",
+#                   "UPDATE_TIME" ]
     - type: JDBC
       dataSourceId: 'tocc_parking'
-      target: 'PARKING_BLACK_LIST'
+      target: 'PARKING_PASSING_RECORD'
       template: >-
-        ID,PHONE,PLATE_NUMBER,PLATE_COLOR,VEHICLE_TYPE,STATUS,CREATE_TIME,UPDATE_TIME
+        ID,PARKING_LOT_ID,PARKING_LOT_NAME,PLATE_NUMBER,PLATE_COLOR,VEHICLE_COLOR,PASS_TIME,PASS_TYPE,
+        PASS_PIC,STATUS,CREATE_TIME,UPDATE_TIME
