@@ -52,7 +52,7 @@ public class ReadStage extends AbstractStage<ReadStageVO> {
         var rpo = ctx.stage();
         //如果数据集已经缓存，直接返回缓存数据集
         if (rpo.isInMemory()) {
-            var tdc = DataSet.getOrCreate(ctx.template().getId());
+            var tdc = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
             var ds = tdc.get(rpo.getDataSetId());
             if (Objects.isNull(ds)) {
                 //缓存数据集为空，尝试从数据源读取数据集

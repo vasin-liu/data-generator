@@ -187,8 +187,9 @@ public class DatabaseIterator<T extends DatabaseIteratorVO> extends AbstractIter
                 var spo = sctx.stage().getLanguage();
                 var script = scriptFactory.newInstance(spo);
                 if (Objects.nonNull(script)) {
-                    Value input = SingleValue.of(DatasetKit.toObject(ctx.dataset()));
-                    var v = script.eval(sctx, spo, input, DataSet.getOrCreate(ctx.template().getId())).get();
+                    var input = SingleValue.of(DatasetKit.toObject(ctx.dataset()));
+                    var dataset = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
+                    var v = script.eval(sctx, spo, input, dataset).get();
                     params.put(p.getName(), v);
                 }
 

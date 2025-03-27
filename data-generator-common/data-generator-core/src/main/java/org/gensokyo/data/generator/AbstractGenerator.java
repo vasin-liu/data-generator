@@ -184,7 +184,7 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      */
     protected void preloading(final Value input) throws InterruptedException {
         //先执行一行记录生成缓存数据
-        var tdc = DataSet.getOrCreate(ctx.template().getId());
+        var tdc = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
         if (tdc.isEmpty()) {
             produce(input);
             //初始化完成
@@ -313,7 +313,7 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
      *
      * @param input 输入值
      */
-    protected void produce(final Value input) throws InterruptedException {
+    protected void produce(final Value input) {
         try {
             //var nv = createPipelineAndExecute(ctx, input);
             var rowVal = defaultRowPipelineFactory.startup(new TemplateContext(ctx.template(), input));
@@ -398,7 +398,7 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
 
     @Override
     public void cleanup() {
-        DataSet.remove(ctx.template().getId());
+        DataSet.remove(ctx.template().getId(), ctx.template().getInstanceId());
         queue.clear();
         initialized.compareAndSet(true, false);
     }

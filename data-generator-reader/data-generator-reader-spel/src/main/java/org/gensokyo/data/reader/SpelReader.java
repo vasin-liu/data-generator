@@ -44,7 +44,8 @@ public class SpelReader<S extends ReadStageVO, T extends SpelReaderVO> implement
         sec.addPropertyAccessor(new MapAccessor());
         sec.setVariable(Const.SCRIPT_VAR_DATASET, input.get());
         sec.setVariable(Const.SCRIPT_VAR_FAKER, Objects.requireNonNull(dataFaker));
-        sec.setVariable(Const.SCRIPT_VAR_ARGS, new Object[]{DataSet.getOrCreate(ctx.template().getId())});
+        sec.setVariable(Const.SCRIPT_VAR_ARGS,
+                new Object[]{DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId())});
         final String rightBrace1 = "{";
         final String rightBrace2 = "#{";
         final String leftBrace = "}";

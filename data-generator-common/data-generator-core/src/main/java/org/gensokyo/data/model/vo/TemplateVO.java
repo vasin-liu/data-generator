@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.iterator.IteratorVO;
-import org.gensokyo.data.model.vo.stage.StageVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 
 import java.io.Serializable;
@@ -32,6 +31,11 @@ public class TemplateVO implements Serializable {
      * 模板ID，全局唯一，缓存的KEY以及调用的参数
      */
     private Long id;
+
+    /**
+     * 实例ID，全局唯一，缓存的KEY以及调用的参数
+     */
+    private Long instanceId;
 
     /**
      * 模板名称

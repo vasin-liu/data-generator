@@ -46,7 +46,8 @@ public class ScriptStage extends AbstractStage<ScriptStageVO> {
         try {
             var script = scriptFactory.newInstance(spo);
             if (Objects.nonNull(script)) {
-                return script.eval(StageContext.from(ctx), spo, input, DataSet.getOrCreate(ctx.template().getId()));
+                var dataset = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
+                return script.eval(StageContext.from(ctx), spo, input, dataset);
             }
             return input;
         } catch (Exception e) {

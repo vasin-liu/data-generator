@@ -5,6 +5,9 @@
  */
 package org.gensokyo.data.cache;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import org.gensokyo.data.value.ListValue;
 import org.gensokyo.data.value.MapValue;
 import org.gensokyo.data.value.Value;
@@ -27,18 +30,36 @@ public class DataSet {
 
     }
 
-    private static final Map<Long, TableDataSet> CACHE_MAP = new ConcurrentHashMap<>(8);
+    /**
+     * 模板实例数据缓存 ， 存放内容为：模板ID,实例ID,数据集
+     */
+    private static final Table<Long, Long, TableDataSet> CACHE = Tables.synchronizedTable(HashBasedTable.create());
 
-    public static TableDataSet getOrCreate(Long templateId) {
-        return CACHE_MAP.computeIfAbsent(templateId, k -> new TableDataSet());
+    private static final String TEMPLATE_ID_NON_NULL = "模板编号不能为空";
+    private static final String INSTANCE_ID_NON_NULL = "实例编号不能为空";
+
+    public static TableDataSet getOrCreate(Long templateId, Long instanceId) {
+        Objects.requireNonNull(templateId, TEMPLATE_ID_NON_NULL);
+        Objects.requireNonNull(instanceId, INSTANCE_ID_NON_NULL);
+        if (CACHE.contains(templateId, instanceId)) {
+            return CACHE.get(templateId, instanceId);
+        }
+        var dataset = new TableDataSet();
+        CACHE.put(templateId, instanceId, dataset);
+        return CACHE.get(templateId, instanceId);
     }
 
-    public static void set(Long templateId, TableDataSet tableDataSet) {
-        CACHE_MAP.put(Objects.requireNonNull(templateId), Objects.requireNonNull(tableDataSet));
+    public static void set(Long templateId, Long instanceId, TableDataSet tableDataSet) {
+        Objects.requireNonNull(templateId, TEMPLATE_ID_NON_NULL);
+        Objects.requireNonNull(instanceId, INSTANCE_ID_NON_NULL);
+        Objects.requireNonNull(tableDataSet, "数据集不能为空");
+        CACHE.put(templateId, instanceId, tableDataSet);
     }
 
-    public static void remove(Long templateId) {
-        CACHE_MAP.remove(templateId);
+    public static void remove(Long templateId, Long instanceId) {
+        Objects.requireNonNull(templateId, TEMPLATE_ID_NON_NULL);
+        Objects.requireNonNull(instanceId, INSTANCE_ID_NON_NULL);
+        CACHE.remove(templateId, instanceId);
     }
 
     public static final class TableDataSet {
@@ -46,7 +67,8 @@ public class DataSet {
         private final Map<String, Value> dataMap = new ConcurrentHashMap<>(32);
 
         public TableDataSet set(String key, Value value) {
-            dataMap.put(Objects.requireNonNull(key), Objects.requireNonNull(value));
+            dataMap.put(Objects.requireNonNull(key, "数据集键名不能为空"),
+                    Objects.requireNonNull(value, "数据集值不能为空"));
             return this;
         }
 

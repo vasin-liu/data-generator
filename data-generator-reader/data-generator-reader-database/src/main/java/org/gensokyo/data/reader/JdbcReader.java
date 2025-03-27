@@ -75,7 +75,8 @@ public class JdbcReader<S extends ReadStageVO, T extends JdbcReaderVO> implement
                 var spo = sctx.stage().getLanguage();
                 var script = scriptFactory.newInstance(spo);
                 if (Objects.nonNull(script)) {
-                    var v = script.eval(sctx, spo, input, DataSet.getOrCreate(ctx.template().getId())).get();
+                    var dataset = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
+                    var v = script.eval(sctx, spo, input, dataset).get();
                     params.put(p.getName(), v);
                 }
 

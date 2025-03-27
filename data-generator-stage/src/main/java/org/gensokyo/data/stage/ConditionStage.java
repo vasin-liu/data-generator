@@ -9,9 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.model.vo.condition.WhenVO;
 import org.gensokyo.data.model.vo.stage.ScriptStageVO;
 import org.gensokyo.data.script.ScriptFactory;
-import org.gensokyo.data.model.vo.condition.WhenVO;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.json.JsonKit;
@@ -43,7 +43,7 @@ public class ConditionStage extends AbstractStage<ConditionStageVO> {
     @Override
     public Value internalExecute(Value input) {
         var cpo = ctx.stage();
-        var ds = DataSet.getOrCreate(ctx.template().getId());
+        var ds = DataSet.getOrCreate(ctx.template().getId(), ctx.template().getInstanceId());
         try {
             var choose = choose(cpo, input, ds);
             if (Boolean.TRUE.equals(choose.getLeft())) {

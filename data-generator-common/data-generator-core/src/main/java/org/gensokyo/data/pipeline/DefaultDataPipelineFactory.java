@@ -12,6 +12,7 @@ import org.gensokyo.data.context.GeneratorContext;
 import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.generator.GeneratorFactory;
 import org.gensokyo.data.util.DatetimeKit;
+import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.springframework.util.StopWatch;
@@ -36,6 +37,8 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         Assert.notNull(ctx.template().getIterator(), "生成器配置不能为空");
         var stopWatch = new StopWatch();
         stopWatch.start();
+        //设置实例编号
+        ctx.template().setInstanceId(RandomKit.snowFlake().nextId());
         var nctx = new GeneratorContext<>(ctx.template(), ctx.template().getGenerator());
         var generator = generatorFactory.newInstance(nctx);
         generator.startup();
@@ -47,7 +50,7 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
 
     @Override
     public void cleanup(final TemplateContext ctx) {
-        DataSet.remove(ctx.template().getId());
+        DataSet.remove(ctx.template().getId(), ctx.template().getInstanceId());
     }
 
     @Override
