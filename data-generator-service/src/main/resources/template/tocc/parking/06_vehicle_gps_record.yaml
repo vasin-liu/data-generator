@@ -106,8 +106,8 @@ fields:
 output:
   writers:
     - type: CONSOLE
-#    - type: JDBC
-#      dataSourceId: 'tocc_parking'
-#      target: 'VEHICLE_GPS_RECORD'
-#      template: >-
-#        ID,PLATE_NUMBER,LONGTITUDE,LATITUDE,UPLOAD_TIME,SPEED,ANGLE,STATUS,CREATE_TIME,UPDATE_TIME
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'VEHICLE_GPS_RECORD'
+      template: >-
+        ID,PLATE_NUMBER,LONGTITUDE,LATITUDE,UPLOAD_TIME,SPEED,ANGLE,STATUS,CREATE_TIME,UPDATE_TIME

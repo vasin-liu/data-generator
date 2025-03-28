@@ -11,6 +11,8 @@
             <directory>${project.basedir}/src/main/resources</directory>
             <filtered>false</filtered>
             <includes>
+                <include>db/**/*</include>
+                <include>META-INF/**/*</include>
                 <include>template/**/*</include>
                 <include>application.yaml</include>
                 <include>logback-spring.xml</include>
@@ -31,21 +33,25 @@
             <fileMode>0755</fileMode>
             <lineEnding>unix</lineEnding>
         </fileSet>
+        <fileSet>
+            <!--指定jar包和输出位置-->
+            <directory>target</directory>
+            <outputDirectory>bin</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
     <dependencySets>
-        <!--<dependencySet>
-            &lt;!&ndash;<useProjectArtifact>false</useProjectArtifact>&ndash;&gt;
+        <dependencySet>
+            <!--<useProjectArtifact>false</useProjectArtifact>-->
             <outputDirectory>lib</outputDirectory>
             <unpack>false</unpack>
             <scope>runtime</scope>
-        </dependencySet>-->
-        <dependencySet>
-            <useProjectAttachments>true</useProjectAttachments>
-            <includes>
-                <include>${project.groupId}:${project.artifactId}:jar:${project.version}</include>
-            </includes>
-            <outputDirectory>/bin</outputDirectory>
+            <excludes>
+                <exclude>${groupId}:${artifactId}</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
 </assembly>
