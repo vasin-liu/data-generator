@@ -1,0 +1,96 @@
+# 数据集名称，各个文件中唯一
+name: parking_online_space_record
+# 迭代器配置
+iterator:
+  type: database
+  dataSourceId: 'tocc_parking'
+  sql: >-
+    SELECT ID,PARKING_LOT_NAME,ONLINE_SPACE_SCALE,REGULAR_SPACE_NUM FROM TOCC_PARKING_LOT.PARKING_LOT_BASE WHERE STATUS = 'S0A' AND IS_BOOKING = 1
+  pageIndex: 1
+  pageSize: 10
+  maxRows: 20
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: PARKING_LOT_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.ID"
+  - name: PARKING_LOT_NAME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PARKING_LOT_NAME"
+  - name: ONLINE_QUANTITY
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            (#dataset.ONLINE_SPACE_SCALE * #dataset.REGULAR_SPACE_NUM)/100
+  - name: ONLINE_IDLE_QUANTITY
+    dependsOn:
+      - ONLINE_QUANTITY
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.number.numberBetween(1,#dataset)
+  - name: ONLINE_QUANTITY_SCALE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.ONLINE_SPACE_SCALE"
+  - name: STATUS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'S0A' ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.now()
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE
+#    - type: JDBC
+#      dataSourceId: 'tocc_parking'
+#      target: 'PARKING_ONLINE_SPACE_RECORD'
+#      template: >-
+#        ID,PARKING_LOT_ID,PARKING_LOT_NAME,ONLINE_IDLE_QUANTITY,ONLINE_QUANTITY,ONLINE_QUANTITY_SCALE,STATUS,
+#        CREATE_TIME,UPDATE_TIME

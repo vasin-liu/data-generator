@@ -64,7 +64,7 @@ fields:
         readers:
           - type: SPEL
             content: "#faker.datetime.minusHours(#dataset[0],#dataset[1])"
-  - name: TOUTIST_NUM
+  - name: TOURIST_NUM
     stages:
       - type: READ
         readers:
@@ -101,4 +101,4 @@ output:
       dataSourceId: 'tocc_parking'
       target: 'TOURIST_NUM_DAY_HOUR_STAT'
       template: >-
-        ID,STAT_DAY,STAT_HOUR,TOUTIST_NUM,TOURIST_TYPE,CREATE_TIME,UPDATE_TIME
+        ID,STAT_DAY,STAT_HOUR,TOURIST_NUM,TOURIST_TYPE,CREATE_TIME,UPDATE_TIME

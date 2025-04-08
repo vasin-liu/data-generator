@@ -82,12 +82,11 @@ fields:
       - type: READ
         inMemory: true
         readers:
-          - type: JDBC
-            dataSourceId: 'pd_sysmanage'
-            content: >-
-              SELECT OVBI.KKBH,OVBI.KKMC,OVBI.KKDZ,OVBI.KKMC,OVBI.XZQH,OVBI.JSDW,OVBI.FXMS,OVBI.ZPFXLX,
-              OVBI.DLMC,OVBI.JD,OVBI.WD,OLI.SXJSBBM,OLI.CDBH,OLI.CDLX
-              FROM RES_OMOF_VEHICLE_BARRIER_INFO OVBI LEFT JOIN RES_OMOF_LANE_INFO OLI ON OVBI.KKBH = OLI.KKBH
+          - type: CONSTANT
+            content: [
+              { "KKBH": "","FXMS": "","CDBH": 1,"KKDZ": "","KKMC": "","CDLX": "","JSDW": "","ZPFXLX": "","DLMC": "","JD":"","WD":"","SXJSBBM":"","XZQH":"" },
+              { "KKBH": "","FXMS": "","CDBH": 1,"KKDZ": "","KKMC": "","CDLX": "","JSDW": "","ZPFXLX": "","DLMC": "","JD":"","WD":"","SXJSBBM":"","XZQH":"" },
+            ]
       - type: SELECT
       - type: SCRIPT
         language:

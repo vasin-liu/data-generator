@@ -202,9 +202,3 @@ spring:
 #            filters: stat,slf4j
       druid:
         filters: stat,slf4j
-
-pci:
-  data:
-    generator:
-      metaFolders:
-        - file:../conf/template/**/*.yaml

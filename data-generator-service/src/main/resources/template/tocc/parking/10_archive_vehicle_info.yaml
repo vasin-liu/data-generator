@@ -39,7 +39,7 @@ fields:
         language:
           type: SPEL
           content: >-
-            #dataset[0].HPHM.get() + '_' + #dataset[0].HPYS.get()
+            #dataset.HPHM + '_' + #dataset.HPYS
   - name: PLATE_NUMBER
     stages:
       - type: SCRIPT

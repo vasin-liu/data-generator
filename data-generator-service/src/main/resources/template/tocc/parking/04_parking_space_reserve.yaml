@@ -59,19 +59,19 @@ fields:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0]['HPHM']"
+          content: "#dataset['HPHM']"
   - name: PLATE_COLOR
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].HPYS"
+          content: "#dataset.HPYS"
   - name: PLATE_TYPE
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset[0].HPZL"
+          content: "#dataset.HPZL"
   - name: PHONE
     stages:
       - type: SCRIPT
