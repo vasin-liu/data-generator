@@ -27,25 +27,51 @@ import java.io.Serializable;
 @Table(name = "template")
 public class TemplatePO implements Serializable {
 
+    /**
+     * 路径MD5字符串
+     */
     @Id
-    //@GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
 
+    /**
+     * 模板属性名称
+     */
     @Column(name = "name")
     private String name;
 
+    /**
+     * 文件名称
+     */
     @Column(name = "file_name")
     private String fileName;
 
+    /**
+     * 文件后缀
+     */
     @Column(name = "file_ext")
     private String fileExt;
 
-    @Column(columnDefinition = "CLOB", name = "json_content")
-    private String jsonContent;
+    /**
+     * 文件路径MD5字符串
+     */
+    @Column(name = "path_md5")
+    private String pathMd5;
 
-    @Column(columnDefinition = "CLOB", name = "yaml_content")
-    private String yamlContent;
+    /**
+     * 文件内容MD5字符串
+     */
+    @Column(name = "content_md5")
+    private String contentMd5;
 
-    @Column(name = "status")
-    private String status;
+    /**
+     * 文件内容，JSON格式
+     */
+    @Column(columnDefinition = "CLOB", name = "content_json")
+    private String contentJson;
+
+    /**
+     * 文件内容，YAML格式
+     */
+    @Column(columnDefinition = "CLOB", name = "content_yaml")
+    private String contentYaml;
 }

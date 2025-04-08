@@ -23,9 +23,11 @@ public interface TemplateRepository extends JpaRepository<TemplatePO, Long> {
 
     List<TemplatePO> findByNameContaining(String name);
 
+    TemplatePO findByPathMd5(String contentMd5);
+
     List<TemplatePO> findByNameLike(String name);
 
-    List<TemplatePO>findByNameStartingWith(String prefix);
+    List<TemplatePO> findByNameStartingWith(String prefix);
 
     List<TemplatePO> findByNameEndingWith(String suffix);
 }

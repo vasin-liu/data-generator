@@ -17,6 +17,8 @@ import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.springframework.util.StopWatch;
 
+import java.util.Objects;
+
 /**
  * 线程池流水线工厂实现
  *
@@ -38,7 +40,9 @@ public class DefaultDataPipelineFactory implements PipelineFactory {
         var stopWatch = new StopWatch();
         stopWatch.start();
         //设置实例编号
-        ctx.template().setInstanceId(RandomKit.snowFlake().nextId());
+        if (Objects.isNull(ctx.template().getInstanceId())) {
+            ctx.template().setInstanceId(RandomKit.snowFlake().nextId());
+        }
         var nctx = new GeneratorContext<>(ctx.template(), ctx.template().getGenerator());
         var generator = generatorFactory.newInstance(nctx);
         generator.startup();

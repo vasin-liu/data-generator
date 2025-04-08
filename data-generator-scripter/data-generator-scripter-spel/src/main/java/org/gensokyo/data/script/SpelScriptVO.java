@@ -23,4 +23,6 @@ import org.gensokyo.data.model.vo.scripter.ScriptVO;
 @AutoService(ScriptVO.class)
 @JsonSubType(value = "SPEL")
 public class SpelScriptVO extends ScriptVO {
+
+    private boolean datasetAsRootObject = false;
 }

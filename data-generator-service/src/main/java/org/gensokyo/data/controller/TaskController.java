@@ -20,6 +20,7 @@ import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.json.JsonKit;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * 任务控制器V2
+ * 任务控制器
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -118,7 +119,7 @@ public class TaskController {
             return R.fail(String.format("存在多个模板名为 '%s' 的模板，请根据模板ID启动任务：%s", templateName, msg));
         }
 
-        var template = JsonKit.read(result.get(0).getJsonContent(), TemplateVO.class);
+        var template = JsonKit.read(result.get(0).getContentJson(), TemplateVO.class);
         run(template);
         return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
                 template.getName(), template.getId(), template.getInstanceId()));
@@ -132,13 +133,14 @@ public class TaskController {
             return R.fail(String.format("模板 '%s' 不存在", templateId));
         }
 
-        var template = JsonKit.read(result.getJsonContent(), TemplateVO.class);
+        var template = JsonKit.read(result.getContentJson(), TemplateVO.class);
         run(template);
         return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
                 template.getName(), template.getId(), template.getInstanceId()));
     }
 
     private void run(final TemplateVO template) {
+        template.setInstanceId(RandomKit.snowFlake().nextId());
         executor.execute(() -> {
             var ctx = new TemplateContext(template, Value.EMPTY);
             try {

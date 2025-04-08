@@ -21,11 +21,9 @@ import java.io.Serializable;
 @Data
 public class UpdateTemplateQO implements Serializable {
 
-    @NotNull
+    @NotNull(message = "文件编号不能为空")
     private Long id;
 
-    private String fileName;
-
-    @NotBlank
+    @NotBlank(message = "文件内容不能为空")
     private String yaml;
 }

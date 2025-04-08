@@ -28,12 +28,12 @@ public class TemplateDTO implements Serializable {
 
     public TemplateDTO(TemplatePO entity) {
         Assert.notNull(entity, "参数 'entity' 不能为空");
-        BeanUtils.copyProperties(entity, this, "jsonContent");
-        var vo = JsonKit.read(entity.getJsonContent(), TemplateVO.class);
-        this.setJsonContent(vo);
+        BeanUtils.copyProperties(entity, this, "contentJson");
+        var vo = JsonKit.read(entity.getContentJson(), TemplateVO.class);
+        this.setContentJson(vo);
     }
 
-    private Long id;
+    private String id;
 
     private String name;
 
@@ -41,11 +41,11 @@ public class TemplateDTO implements Serializable {
 
     private String fileExt;
 
-    private TemplateVO jsonContent;
+    private String pathMd5;
 
-    private String yamlContent;
+    private String contentMd5;
 
-    private String status;
+    private TemplateVO contentJson;
 
-
+    private String contentYaml;
 }

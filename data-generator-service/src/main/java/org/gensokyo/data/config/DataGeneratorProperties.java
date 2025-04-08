@@ -22,20 +22,31 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 public class DataGeneratorProperties {
-
     /**
      * 组件配置的前缀
      */
     public static final String PREFIX = "pci.data.generator";
 
-    private String[] metaFolders = new String[]{"classpath*:/template/**/*.yaml"};
-
+    /**
+     * 忽略文件前缀集合
+     */
     private String[] ignorePrefix = new String[]{"___", "!"};
 
+    /**
+     * 核心线程数
+     */
     private Integer corePoolSize = 3;
+    /**
+     * 最大线程数
+     */
     private Integer maxPoolSize = 8;
+    /**
+     * 队列任务数
+     */
     private Integer queueCapacity = 8;
-
+    /**
+     * 元数据最大缓存数量
+     */
     private Integer metaCacheMaximumSize = 100;
 
 }
