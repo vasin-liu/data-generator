@@ -56,6 +56,30 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
+        inet_cloud_ctrl:
+          url: jdbc:dm://172.25.21.15:30236?schema=IDPS_INET_CLOUD_CONTROL
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        traffic_ledger:
+          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_LEDGER
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+        traffic_vde_infohub:
+          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_VDE_INFOHUB
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
 #        tocc_driving_school:
 #          url: jdbc:mysql://172.25.22.135:3306/tocc_driving_school?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
 #          username: root
