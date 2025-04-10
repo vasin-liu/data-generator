@@ -1,0 +1,107 @@
+# 数据集名称，各个文件中唯一
+name: BASEDATA_COMMERIAL_VEHICLE
+# 迭代器配置
+iterator:
+  type: CONSTANT
+  dataset: [
+    {"PLATE_NUMBER":"粤A11111","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A22222","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A33333","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A44444","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A55555","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A66666","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A77777","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A88888","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {"PLATE_NUMBER":"粤A99999","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+  ]
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: PLATE_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_NUMBER"
+  - name: PLATE_TYPE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_TYPE"
+  - name: PLATE_COLOR
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.PLATE_COLOR"
+  - name: VEHICLE_COLOR
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.VEHICLE_COLOR"
+  - name: VEHICLE_COMPUTER_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.VEHICLE_COMPUTER_NUMBER"
+  - name: COMPUTER_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.COMPUTER_NUMBER"
+  - name: COMPANY_NAME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.COMPANY_NAME"
+  - name: STATE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1 ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.now()
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'traffic_vde_infohub'
+      target: 'BASEDATA_COMMERIAL_VEHICLE'
+      template: >-
+        ID,PLATE_NUMBER,PLATE_TYPE,PLATE_COLOR,VEHICLE_COLOR,VEHICLE_COMPUTER_NUMBER,COMPUTER_NUMBER,COMPANY_NAME,STATE,CREATE_TIME,UPDATE_TIME
