@@ -7,6 +7,7 @@ package org.gensokyo.data.iterator;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
 import org.gensokyo.data.constant.Const;
@@ -50,24 +51,12 @@ public class DatabaseIterator<T extends DatabaseIteratorVO> extends AbstractIter
     private final BlockingQueue<Value> queue;
     private final AtomicLong total = new AtomicLong(-1L);
 
+    @Setter(onMethod_ = @Autowired)
     private DynamicRoutingDataSource dynamicRoutingDataSource;
+    @Setter(onMethod_ = @Autowired)
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Setter(onMethod_ = @Autowired)
     private ScriptFactory scriptFactory;
-
-    @Autowired
-    public void setDynamicRoutingDataSource(DynamicRoutingDataSource dynamicRoutingDataSource) {
-        this.dynamicRoutingDataSource = dynamicRoutingDataSource;
-    }
-
-    @Autowired
-    public void setNamedParameterJdbcTemplate(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-    }
-
-    @Autowired
-    public void setScriptFactory(ScriptFactory scriptFactory) {
-        this.scriptFactory = scriptFactory;
-    }
 
     protected DatabaseIterator(IteratorContext<T> ctx) {
         super(ctx);

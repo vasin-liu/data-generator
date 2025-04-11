@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.converter.Converter;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -24,12 +25,8 @@ import java.util.Objects;
  */
 public class ConvertStage extends AbstractStage<ConvertStageVO> {
 
+    @Setter(onMethod_ = @Autowired)
     private AutowireCapableBeanFactory beanFactory;
-
-    @Autowired
-    public void setBeanFactory(AutowireCapableBeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
 
     public ConvertStage(StageContext<ConvertStageVO> ctx) {
         super(ctx);

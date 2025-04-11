@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -29,15 +30,11 @@ import java.util.*;
  */
 @Slf4j
 public class WriteStage extends AbstractStage<WriteStageVO> {
+    @Setter(onMethod_ = @Autowired)
     private WriterFactory writerFactory;
 
     public WriteStage(StageContext<WriteStageVO> ctx) {
         super(ctx);
-    }
-
-    @Autowired
-    public void setWriterFactory(WriterFactory writerFactory) {
-        this.writerFactory = writerFactory;
     }
 
     @Override

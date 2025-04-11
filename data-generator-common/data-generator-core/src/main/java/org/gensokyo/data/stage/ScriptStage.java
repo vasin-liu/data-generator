@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
 import org.gensokyo.data.context.StageContext;
@@ -26,15 +27,11 @@ import java.util.Objects;
  */
 @Slf4j
 public class ScriptStage extends AbstractStage<ScriptStageVO> {
+    @Setter(onMethod_ = @Autowired)
     private ScriptFactory scriptFactory;
 
     public ScriptStage(StageContext<ScriptStageVO> ctx) {
         super(ctx);
-    }
-
-    @Autowired
-    public void setScriptFactory(ScriptFactory scriptFactory) {
-        this.scriptFactory = scriptFactory;
     }
 
     @Override

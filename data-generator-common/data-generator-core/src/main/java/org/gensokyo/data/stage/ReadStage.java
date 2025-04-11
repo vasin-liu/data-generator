@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
 import org.gensokyo.data.context.StageContext;
@@ -30,18 +31,11 @@ import java.util.Objects;
  */
 @Slf4j
 public class ReadStage extends AbstractStage<ReadStageVO> {
+    @Setter(onMethod_ = @Autowired)
     private ReaderFactory readerFactory;
+
+    @Setter(onMethod_ = @Autowired)
     private ReaderSelectStrategyFactory readerSelectStrategyFactory;
-
-    @Autowired
-    public void setReaderFactory(ReaderFactory readerFactory) {
-        this.readerFactory = readerFactory;
-    }
-
-    @Autowired
-    public void setReaderSelectStrategyFactory(ReaderSelectStrategyFactory readerSelectStrategyFactory) {
-        this.readerSelectStrategyFactory = readerSelectStrategyFactory;
-    }
 
     public ReadStage(StageContext<ReadStageVO> ctx) {
         super(ctx);

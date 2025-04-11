@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.generator;
 
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
@@ -60,36 +61,16 @@ public abstract class AbstractGenerator<G extends GeneratorVO> implements Genera
     protected final BlockingQueue<Value> queue;
     protected final ThreadPoolTaskExecutor producerExecutor;
     protected final ThreadPoolTaskExecutor consumerExecutor;
+    @Setter(onMethod_ = @Autowired)
     protected IteratorFactory iteratorFactory;
+    @Setter(onMethod_ = @Autowired)
     protected StageFactory stageFactory;
+    @Setter(onMethod_ = @Autowired)
     protected ScriptFactory scriptFactory;
+    @Setter(onMethod_ = @Autowired)
     protected DefaultRowPipelineFactory defaultRowPipelineFactory;
+    @Setter(onMethod_ = @Autowired)
     protected DefaultWritePipelineFactory defaultWritePipelineFactory;
-
-    @Autowired
-    public void setIteratorFactory(IteratorFactory iteratorFactory) {
-        this.iteratorFactory = iteratorFactory;
-    }
-
-    @Autowired
-    public void setStageFactory(StageFactory stageFactory) {
-        this.stageFactory = stageFactory;
-    }
-
-    @Autowired
-    public void setScriptFactory(ScriptFactory scriptFactory) {
-        this.scriptFactory = scriptFactory;
-    }
-
-    @Autowired
-    public void setDefaultRowPipelineFactory(DefaultRowPipelineFactory defaultRowPipelineFactory) {
-        this.defaultRowPipelineFactory = defaultRowPipelineFactory;
-    }
-
-    @Autowired
-    public void setDefaultWritePipelineFactory(DefaultWritePipelineFactory defaultWritePipelineFactory) {
-        this.defaultWritePipelineFactory = defaultWritePipelineFactory;
-    }
 
     public AbstractGenerator(final GeneratorContext<G> ctx) {
         this.ctx = Objects.requireNonNull(ctx);

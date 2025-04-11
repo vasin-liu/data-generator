@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.generator;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.GeneratorContext;
 import org.gensokyo.data.value.Value;
@@ -21,13 +22,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 public class AsyncGenerator<G extends AsyncGeneratorVO> extends AbstractGenerator<G> {
 
+    @Setter(onMethod_ = @Autowired)
     private MdcTaskDecorator mdcTaskDecorator;
-
-
-    @Autowired
-    public void setMdcTaskDecorator(MdcTaskDecorator mdcTaskDecorator) {
-        this.mdcTaskDecorator = mdcTaskDecorator;
-    }
 
     public AsyncGenerator(final GeneratorContext<G> ctx) {
         super(ctx);

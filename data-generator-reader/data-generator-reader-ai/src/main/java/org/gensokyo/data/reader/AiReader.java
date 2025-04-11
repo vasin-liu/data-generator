@@ -6,6 +6,7 @@
 package org.gensokyo.data.reader;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.ai.chat.ChatResponse;
 import org.gensokyo.data.ai.chat.prompt.Prompt;
@@ -29,12 +30,8 @@ import org.springframework.context.ApplicationContext;
 public class AiReader<S extends ReadStageVO, T extends AiReaderVO> implements Reader<S, T> {
     private final ApplicationContext ctx;
 
+    @Setter(onMethod_ = @Autowired)
     private ChatClientFactory chatClientFactory;
-
-    @Autowired
-    public void setChatClientFactory(ChatClientFactory chatClientFactory) {
-        this.chatClientFactory = chatClientFactory;
-    }
 
     @Override
     public Value read(StageContext<S> sctx, final T rvo, final Value input) {

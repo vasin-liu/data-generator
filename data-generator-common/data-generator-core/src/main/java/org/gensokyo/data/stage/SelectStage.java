@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -26,12 +27,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class SelectStage extends AbstractStage<SelectStageVO> {
+    @Setter(onMethod_ = @Autowired)
     private ValueSelectStrategyFactory valueSelectStrategyFactory;
-
-    @Autowired
-    public void setSelectStrategyFactory(ValueSelectStrategyFactory valueSelectStrategyFactory) {
-        this.valueSelectStrategyFactory = valueSelectStrategyFactory;
-    }
 
     public SelectStage(StageContext<SelectStageVO> ctx) {
         super(ctx);

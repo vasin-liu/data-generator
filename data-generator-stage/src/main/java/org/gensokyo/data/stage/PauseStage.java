@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.stage;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.DataSet;
 import org.gensokyo.data.constant.Const;
@@ -30,12 +31,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class PauseStage extends AbstractStage<PauseStageVO> {
+    @Setter(onMethod_ = @Autowired)
     private ScriptFactory scriptFactory;
-
-    @Autowired
-    public void setScriptFactory(ScriptFactory scriptFactory) {
-        this.scriptFactory = scriptFactory;
-    }
 
     public PauseStage(StageContext<PauseStageVO> ctx) {
         super(ctx);
