@@ -4,15 +4,292 @@ name: BASEDATA_COMMERIAL_VEHICLE
 iterator:
   type: CONSTANT
   dataset: [
-    {"PLATE_NUMBER":"粤A11111","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A22222","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A33333","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A44444","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A55555","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A66666","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A77777","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A88888","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
-    {"PLATE_NUMBER":"粤A99999","PLATE_TYPE":"50","PLATE_COLOR":"42","VEHICLE_COLOR":"1","VEHICLE_COMPUTER_NUMBER":"12345678218","COMPUTER_NUMBER":"123456","COMPANY_NAME":"小马智行"},
+    {
+      "PLATE_NUMBER": "粤A****45",
+      "VEHICLE_ID": 985,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "李**",
+      "SAFETY_PHONE": "131****2819"
+    },
+    {
+      "PLATE_NUMBER": "粤A****53",
+      "VEHICLE_ID": 942,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "陈**",
+      "SAFETY_PHONE": "157****9102"
+    },
+    {
+      "PLATE_NUMBER": "粤A****12",
+      "VEHICLE_ID": 317,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "莫**",
+      "SAFETY_PHONE": "136****4702"
+    },
+    {
+      "PLATE_NUMBER": "粤A****80",
+      "VEHICLE_ID": 722,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "陈**",
+      "SAFETY_PHONE": "189****3579"
+    },
+    {
+      "PLATE_NUMBER": "粤A****87",
+      "VEHICLE_ID": 960,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "蚁**",
+      "SAFETY_PHONE": "185****0011"
+    },
+    {
+      "PLATE_NUMBER": "粤A****41",
+      "VEHICLE_ID": 367,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "8",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "孙**",
+      "SAFETY_PHONE": "135****7782"
+    },
+    {
+      "PLATE_NUMBER": "粤A****U6",
+      "VEHICLE_ID": 735,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "方**",
+      "SAFETY_PHONE": "139****5998"
+    },
+    {
+      "PLATE_NUMBER": "粤A****X2",
+      "VEHICLE_ID": 386,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "赵**",
+      "SAFETY_PHONE": "192****7737"
+    },
+    {
+      "PLATE_NUMBER": "粤A****X7",
+      "VEHICLE_ID": 610,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "郑**",
+      "SAFETY_PHONE": "185****2231"
+    },
+    {
+      "PLATE_NUMBER": "粤A****92",
+      "VEHICLE_ID": 875,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "8",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "周**",
+      "SAFETY_PHONE": "132****5180"
+    },
+    {
+      "PLATE_NUMBER": "粤A****L1",
+      "VEHICLE_ID": 667,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "吴**",
+      "SAFETY_PHONE": "133****9430"
+    },
+    {
+      "PLATE_NUMBER": "粤A****F2",
+      "VEHICLE_ID": 929,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "莫**",
+      "SAFETY_PHONE": "139****2217"
+    },
+    {
+      "PLATE_NUMBER": "粤A****G6",
+      "VEHICLE_ID": 410,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "李**",
+      "SAFETY_PHONE": "132****1697"
+    },
+    {
+      "PLATE_NUMBER": "粤A****91",
+      "VEHICLE_ID": 210,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "陈**",
+      "SAFETY_PHONE": "145****8095"
+    },
+    {
+      "PLATE_NUMBER": "粤A****K6",
+      "VEHICLE_ID": 619,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "冯**",
+      "SAFETY_PHONE": "171****6465"
+    },
+    {
+      "PLATE_NUMBER": "粤A****K2",
+      "VEHICLE_ID": 321,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "赵**",
+      "SAFETY_PHONE": "196****2395"
+    },
+    {
+      "PLATE_NUMBER": "粤A****17",
+      "VEHICLE_ID": 989,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "王**",
+      "SAFETY_PHONE": "177****9426"
+    },
+    {
+      "PLATE_NUMBER": "粤A****79",
+      "VEHICLE_ID": 347,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "梁**",
+      "SAFETY_PHONE": "185****6572"
+    },
+    {
+      "PLATE_NUMBER": "粤A****A2",
+      "VEHICLE_ID": 556,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "8",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "曹**",
+      "SAFETY_PHONE": "130****5464"
+    },
+    {
+      "PLATE_NUMBER": "粤A****Q9",
+      "VEHICLE_ID": 128,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "1",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "刘**",
+      "SAFETY_PHONE": "175****3319"
+    },
+    {
+      "PLATE_NUMBER": "粤A****P2",
+      "VEHICLE_ID": 338,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "8",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "赵**",
+      "SAFETY_PHONE": "180****1832"
+    },
+    {
+      "PLATE_NUMBER": "粤A****73",
+      "VEHICLE_ID": 851,
+      "PLATE_TYPE": "-1",
+      "BRAND": "***",
+      "SERIES": "***",
+      "VEHICLE_COLOR": "10",
+      "COMPANY": "***",
+      "COMPANY_CONTACT": "***",
+      "CONTACT_PHONE": "135****0092",
+      "SAFETY": "张**",
+      "SAFETY_PHONE": "149****1385"
+    }
   ]
 # 生成器配置
 generator:
@@ -36,43 +313,44 @@ fields:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.PLATE_NUMBER"
+          content: "#dataset[0].PLATE_NUMBER"
   - name: PLATE_TYPE
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.PLATE_TYPE"
+          content: "#dataset[0].PLATE_TYPE"
   - name: PLATE_COLOR
     stages:
-      - type: SCRIPT
-        language:
-          type: SPEL
-          content: "#dataset.PLATE_COLOR"
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 42 ]
   - name: VEHICLE_COLOR
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.VEHICLE_COLOR"
+          content: "#dataset[0].VEHICLE_COLOR"
   - name: VEHICLE_COMPUTER_NUMBER
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.VEHICLE_COMPUTER_NUMBER"
+          content: "#dataset[0].VEHICLE_ID"
   - name: COMPUTER_NUMBER
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.COMPUTER_NUMBER"
+          content: "#dataset[0].VEHICLE_ID"
   - name: COMPANY_NAME
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.COMPANY_NAME"
+          content: "#dataset[0].COMPANY"
   - name: STATE
     stages:
       - type: READ
@@ -99,9 +377,9 @@ fields:
 # 数据输出配置
 output:
   writers:
-#    - type: CONSOLE
-    - type: JDBC
-      dataSourceId: 'traffic_vde_infohub'
-      target: 'BASEDATA_COMMERIAL_VEHICLE'
-      template: >-
-        ID,PLATE_NUMBER,PLATE_TYPE,PLATE_COLOR,VEHICLE_COLOR,VEHICLE_COMPUTER_NUMBER,COMPUTER_NUMBER,COMPANY_NAME,STATE,CREATE_TIME,UPDATE_TIME
+    - type: CONSOLE
+#    - type: JDBC
+#      dataSourceId: 'traffic_vde_infohub'
+#      target: 'BASEDATA_COMMERIAL_VEHICLE'
+#      template: >-
+#        ID,PLATE_NUMBER,PLATE_TYPE,PLATE_COLOR,VEHICLE_COLOR,VEHICLE_COMPUTER_NUMBER,COMPUTER_NUMBER,COMPANY_NAME,STATE,CREATE_TIME,UPDATE_TIME
