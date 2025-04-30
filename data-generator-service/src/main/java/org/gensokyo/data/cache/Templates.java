@@ -64,6 +64,9 @@ public class Templates implements InitializingBean {
         observer.addListener(new FileAlterationListenerAdaptor() {
             @Override
             public void onFileCreate(File file) {
+                if (!isYamlFile(file)) {
+                    return;
+                }
                 var template = parse(file);
                 if (Objects.isNull(template)) {
                     return;
@@ -74,6 +77,9 @@ public class Templates implements InitializingBean {
 
             @Override
             public void onFileChange(File file) {
+                if (!isYamlFile(file)) {
+                    return;
+                }
                 var template = parse(file);
                 if (Objects.isNull(template)) {
                     return;
@@ -143,6 +149,14 @@ public class Templates implements InitializingBean {
                         return false;
                     }
                     return true;
+                })
+                .filter(r -> {
+                    try {
+                        return isYamlFile(r.getFile());
+                    } catch (IOException ignored) {
+
+                    }
+                    return false;
                 })
                 .map(this::parse)
                 .filter(Objects::nonNull)
@@ -259,5 +273,14 @@ public class Templates implements InitializingBean {
     private boolean isRunningFromJar() {
         var location = Templates.class.getProtectionDomain().getCodeSource().getLocation();
         return Objects.nonNull(location) && location.getPath().endsWith(".jar");
+    }
+
+    private boolean isYamlFile(File file) {
+        if (Objects.isNull(file) || !file.exists() || !file.isFile()) {
+            return false;
+        }
+
+        String name = file.getName().toLowerCase();
+        return name.endsWith(".yaml") || name.endsWith(".yml");
     }
 }
