@@ -202,4 +202,12 @@ public class DateTimeProvider extends AbstractProvider<BaseProviders> {
     public Date intervalMinutes(int amount, String salt) {
         return intervalMinutes(DateTime.now().startOfDay().toString(), amount, salt);
     }
+
+    public long millis() {
+        return System.currentTimeMillis();
+    }
+
+    public long seconds() {
+        return millis() / 1000;
+    }
 }

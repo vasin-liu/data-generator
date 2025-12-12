@@ -11,8 +11,10 @@ import org.gensokyo.data.value.Value;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 常量迭代器实现
@@ -23,7 +25,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class ConstantIterator<T extends ConstantIteratorVO> extends AbstractIterator<T> {
 
+    private final List<Value> dataset;
     private final BlockingQueue<Value> queue;
+    private final AtomicInteger repeat = new AtomicInteger(0);
 
     public ConstantIterator(IteratorContext<T> ctx) {
         super(ctx);
@@ -32,13 +36,18 @@ public class ConstantIterator<T extends ConstantIteratorVO> extends AbstractIter
         var it = ctx.iterator();
         Assert.notNull(it.getDataset(), "常量迭代器配置的数据集不能为NULL");
         Assert.isTrue(CollectKit.isNotEmpty(it.getDataset()), "常量迭代器配置的数据集不能为空");
+        Assert.isTrue(-1 == it.getRepeat() || it.getRepeat() > 0, "常量迭代器配置的重复次数必须大于0或者等于-1（-1为不限制次数）");
         this.queue = new LinkedBlockingQueue<>(it.getDataset().size());
-        var ds = it.getDataset().stream().map(DatasetKit::toValue).toList();
-        this.queue.addAll(ds);
+        this.dataset = it.getDataset().stream().map(DatasetKit::toValue).toList();
     }
 
     @Override
     public boolean hasNext() {
+        var empty = queue.isEmpty();
+        var isRepeat = (-1 == ctx.iterator().getRepeat() || repeat.incrementAndGet() <= ctx.iterator().getRepeat());
+        if (empty && isRepeat) {
+            queue.addAll(this.dataset);
+        }
         return !queue.isEmpty();
     }
 

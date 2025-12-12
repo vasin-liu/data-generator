@@ -26,6 +26,7 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 2023/10/24 , Version 1.0.0
  */
+@Deprecated
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultDataPipelineFactory implements PipelineFactory {

@@ -131,6 +131,56 @@ public class DatasetKit {
         return array;
     }
 
+    /**
+     * 给定的对象中，如果有包含 {@link Value} 类型的包装对象，则进行解包
+     *
+     * @param value 需要解包的对象
+     * @return 解包后的对象
+     */
+    public static Object unwrap(Object value) {
+        if (Objects.isNull(value)) {
+            return null;
+        }
+
+        if (value instanceof SingleValue sv) {
+            return unwrap(sv.get());
+        }
+
+        if (value instanceof Collection<?> coll) {
+            return unwrap(coll);
+        }
+
+        if (value instanceof Map<?, ?> mv) {
+            return unwrap(mv);
+        }
+
+        if (value.getClass().isArray()) {
+            return unwrap((Object[]) value);
+        }
+        return value;
+    }
+
+    public static Collection<?> unwrap(Collection<?> coll) {
+        return coll.stream()
+                .map(DatasetKit::unwrap)
+                .toList();
+    }
+
+    public static Object[] unwrap(Object[] array) {
+        return Stream.of(array)
+                .map(DatasetKit::unwrap)
+                .toArray();
+    }
+
+    @SuppressWarnings("DataFlowIssue")
+    public static Map<?, ?> unwrap(Map<?, ?> map) {
+        return map.entrySet()
+                .stream()
+                .filter(e -> Objects.nonNull(unwrap(e.getValue())))
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> unwrap(e.getValue())));
+    }
+
+
     public static InputStream buildBulkData(String template, List<Map<String, Object>> data) {
         return buildBulkData(template, data, Const.VERTICAL, Const.LF, Const.NULL);
     }

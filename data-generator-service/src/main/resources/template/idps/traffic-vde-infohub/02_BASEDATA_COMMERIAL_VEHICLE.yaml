@@ -377,9 +377,9 @@ fields:
 # 数据输出配置
 output:
   writers:
-    - type: CONSOLE
-#    - type: JDBC
-#      dataSourceId: 'traffic_vde_infohub'
-#      target: 'BASEDATA_COMMERIAL_VEHICLE'
-#      template: >-
-#        ID,PLATE_NUMBER,PLATE_TYPE,PLATE_COLOR,VEHICLE_COLOR,VEHICLE_COMPUTER_NUMBER,COMPUTER_NUMBER,COMPANY_NAME,STATE,CREATE_TIME,UPDATE_TIME
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'traffic_vde_infohub'
+      target: 'BASEDATA_COMMERIAL_VEHICLE'
+      template: >-
+        ID,PLATE_NUMBER,PLATE_TYPE,PLATE_COLOR,VEHICLE_COLOR,VEHICLE_COMPUTER_NUMBER,COMPUTER_NUMBER,COMPANY_NAME,STATE,CREATE_TIME,UPDATE_TIME

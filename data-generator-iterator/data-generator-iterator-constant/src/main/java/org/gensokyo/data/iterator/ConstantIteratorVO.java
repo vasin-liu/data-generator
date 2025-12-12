@@ -26,5 +26,10 @@ import java.util.List;
 @JsonSubType(value = "CONSTANT")
 public class ConstantIteratorVO extends IteratorVO {
 
+    /**
+     * 重复迭代次数：默认值为：1
+     */
+    private int repeat = 1;
+
     private List<Object> dataset;
 }

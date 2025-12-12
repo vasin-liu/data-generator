@@ -346,13 +346,13 @@ fields:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.SAFETY"
+          content: "#dataset[0].SAFETY"
   - name: SAFETY_PHONE
     stages:
       - type: SCRIPT
         language:
           type: SPEL
-          content: "#dataset.SAFETY_PHONE"
+          content: "#dataset[0].SAFETY_PHONE"
   - name: OPERATION_MILEAGE
     stages:
       - type: READ
@@ -385,9 +385,9 @@ fields:
 # 数据输出配置
 output:
   writers:
-#    - type: CONSOLE
-    - type: JDBC
-      dataSourceId: 'inet_cloud_ctrl'
-      target: 'VEHICLE_OPERATION'
-      template: >-
-        ID,PLATE_NUMBER,PLATE_TYPE,START_TIME,END_TIME,SAFETY_NAME,SAFETY_PHONE,OPERATION_MILEAGE,REPORT_TIME,CREATE_TIME,UPDATE_TIME
+    - type: CONSOLE
+#    - type: JDBC
+#      dataSourceId: 'inet_cloud_ctrl'
+#      target: 'VEHICLE_OPERATION'
+#      template: >-
+#        ID,PLATE_NUMBER,PLATE_TYPE,START_TIME,END_TIME,SAFETY_NAME,SAFETY_PHONE,OPERATION_MILEAGE,REPORT_TIME,CREATE_TIME,UPDATE_TIME

@@ -42,12 +42,10 @@ public class SpelScript<S extends ScriptStageVO, T extends SpelScriptVO> impleme
             return dataset;
         }
 
-        var dv = dataset.get();
+        //数据解包
+        var dv = DatasetKit.unwrap(dataset.get());
         try {
             var sec = new StandardEvaluationContext();
-            sec.addPropertyAccessor(new ArrayValuePropertyAccessor());
-            sec.addPropertyAccessor(new MapValuePropertyAccessor());
-            sec.addPropertyAccessor(new ListValuePropertyAccessor());
             sec.addPropertyAccessor(new MapAccessor());
             sec.addPropertyAccessor(new SingleValuePropertyAccessor());
             sec.setVariable(Const.SCRIPT_VAR_DATASET, dv);

@@ -8,6 +8,7 @@ package org.gensokyo.data.config;
 import org.gensokyo.data.generator.GeneratorFactory;
 import org.gensokyo.data.iterator.IteratorFactory;
 import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
+import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.pipeline.DefaultRowPipelineFactory;
 import org.gensokyo.data.pipeline.DefaultWritePipelineFactory;
 import org.gensokyo.data.reader.ReaderFactory;
@@ -88,5 +89,11 @@ public class FactoryConfig {
     @ConditionalOnMissingBean(DefaultDataPipelineFactory.class)
     public DefaultDataPipelineFactory defaultDataPipelineFactory(GeneratorFactory generatorFactory) {
         return new DefaultDataPipelineFactory(generatorFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DefaultDataPipelineTaskFactory.class)
+    public DefaultDataPipelineTaskFactory defaultDataPipelineTaskFactory(ApplicationContext ctx) {
+        return new DefaultDataPipelineTaskFactory(ctx);
     }
 }

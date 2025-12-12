@@ -10,11 +10,11 @@ import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
+import org.gensokyo.data.util.DatasetKit;
 import org.gensokyo.kit.json.JsonKit;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 控制台数据写入类
@@ -29,12 +29,11 @@ public class ConsoleWriter<S extends WriteStageVO, T extends ConsoleWriterVO> im
     @Override
     public long write(final StageContext<S> ctx, final T wvo, final List<Map<String, Object>> dataset) {
         try {
-            log.info("开始写入控制台数据：\n" + JsonKit.write(dataset));
+            log.info("开始写入控制台数据：\n{}", JsonKit.write(DatasetKit.unwrap(dataset)));
             log.info("写入控制台数据成功！");
-            return Objects.nonNull(dataset) ? dataset.size() : 0;
+            return dataset.size();
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("写入数据集出现异常，写入类型为：%s。",
-                    wvo.getType()), e);
+            throw new DataGeneratorException(String.format("写入数据集出现异常，写入类型为：%s。", wvo.getType()), e);
         }
     }
 

@@ -66,4 +66,8 @@ public class DataFaker extends Faker {
     public DateTimeProvider datetime() {
         return getProvider(DateTimeProvider.class, DateTimeProvider::new, this);
     }
+
+    public GeoProvider geo() {
+        return getProvider(GeoProvider.class, GeoProvider::new, this);
+    }
 }

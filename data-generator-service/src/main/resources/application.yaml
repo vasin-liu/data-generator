@@ -7,32 +7,18 @@ spring:
     console:
       enabled: true
       path: /h2
-#  elasticsearch:
-#    multiple:
-#      primary: es2
-#      clusters:
-##        es1:
-##          uris:
-##            - https://localhost:9200
-##          username: elastic
-##          password: PCI@suntek#123
-#        es2:
-#          uris:
-#            - 172.25.22.60:9401
-#            - 172.25.20.217:9401
-#            - 172.25.20.218:9401
-#          username: elastic
-#          password: Suntek123
-#  kafka:
-#    multiple:
-#      primary: kafka2
-#      clusters:
-#        kafka1:
-#          bootstrap-servers:
-#            - localhost:9092
-#        kafka2:
-#          bootstrap-servers:
-#            - 172.25.20.125:9092
+  kafka:
+    multiple:
+      primary: command_kafka
+      clusters:
+        command_kafka:
+          bootstrap-servers:
+            - 172.25.21.52:9092
+#          producer:
+#            properties:
+#              security.protocol: SASL_PLAINTEXT
+#              sasl.mechanism: PLAIN
+#              sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="admin" password="Suntek123";
   datasource:
     dynamic:
       primary: data-generator
@@ -48,6 +34,15 @@ spring:
             schema: classpath:db/schema.sql
           druid:
             filters: stat,slf4j
+        traffic_command_clickhouse:
+          url: jdbc:clickhouse://172.25.20.125:18123/idps_traffic_command
+          username: default
+          password: Suntek@123
+          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+
         tocc_parking:
           url: jdbc:dm://172.25.22.2:30236?schema=TOCC_PARKING_LOT
           username: SYSDBA
@@ -56,30 +51,30 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           druid:
             filters: stat,slf4j
-        inet_cloud_ctrl:
-          url: jdbc:dm://172.25.21.15:30236?schema=IDPS_INET_CLOUD_CONTROL
-          username: SYSDBA
-          password: Suntek123
-          driver-class-name: dm.jdbc.driver.DmDriver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        traffic_ledger:
-          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_LEDGER
-          username: SYSDBA
-          password: Suntek123
-          driver-class-name: dm.jdbc.driver.DmDriver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        traffic_vde_infohub:
-          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_VDE_INFOHUB
-          username: SYSDBA
-          password: Suntek123
-          driver-class-name: dm.jdbc.driver.DmDriver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
+#        inet_cloud_ctrl:
+#          url: jdbc:dm://172.25.21.15:30236?schema=IDPS_INET_CLOUD_CONTROL
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        traffic_ledger:
+#          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_LEDGER
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        traffic_vde_infohub:
+#          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_VDE_INFOHUB
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
 #        tocc_driving_school:
 #          url: jdbc:mysql://172.25.22.135:3306/tocc_driving_school?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
 #          username: root

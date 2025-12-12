@@ -1,0 +1,25 @@
+# 数据集名称，各个文件中唯一
+name: demo_28
+# 迭代器配置
+iterator:
+  type: constant
+  dataset: [1,2,3,4,5]
+  repeat: 3
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+# 数据集元数据配置
+fields:
+  - name: IT
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0]
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

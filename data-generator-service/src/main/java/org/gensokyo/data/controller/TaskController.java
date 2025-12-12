@@ -11,17 +11,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.constant.Const;
-import org.gensokyo.data.context.TemplateContext;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
 import org.gensokyo.data.generator.MdcTaskDecorator;
 import org.gensokyo.data.model.dto.TemplateDTO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
-import org.gensokyo.data.pipeline.DefaultDataPipelineFactory;
+import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.util.RandomKit;
-import org.gensokyo.data.value.Value;
+import org.gensokyo.kit.base.ObjectKit;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.json.JsonKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -49,7 +49,8 @@ import java.util.stream.Collectors;
 @Validated
 @RequiredArgsConstructor
 public class TaskController {
-    private final DefaultDataPipelineFactory defaultDataPipelineFactory;
+    private final DataGeneratorProperties properties;
+    private final DefaultDataPipelineTaskFactory defaultDataPipelineTaskFactory;
     private final TemplateRepository repository;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
@@ -57,11 +58,11 @@ public class TaskController {
     public void init() {
         executor.setTaskDecorator(new MdcTaskDecorator());
         //核心线程池大小
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(properties.getCorePoolSize());
         //最大线程数
-        executor.setMaxPoolSize(5);
+        executor.setMaxPoolSize(properties.getMaxPoolSize());
         //队列容量
-        executor.setQueueCapacity(10);
+        executor.setQueueCapacity(properties.getQueueCapacity());
         //活跃时间
         executor.setKeepAliveSeconds(120);
         //线程名字前缀
@@ -141,15 +142,6 @@ public class TaskController {
 
     private void run(final TemplateVO template) {
         template.setInstanceId(RandomKit.snowFlake().nextId());
-        executor.execute(() -> {
-            var ctx = new TemplateContext(template, Value.EMPTY);
-            try {
-                defaultDataPipelineFactory.startup(ctx);
-            } catch (Exception e) {
-                log.error("数据生成任务执行出现异常：", e);
-            } finally {
-                defaultDataPipelineFactory.shutdown(ctx);
-            }
-        });
+        executor.submit(defaultDataPipelineTaskFactory.newInstance(template));
     }
 }

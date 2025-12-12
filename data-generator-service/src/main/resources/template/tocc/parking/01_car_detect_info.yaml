@@ -84,8 +84,8 @@ fields:
         readers:
           - type: CONSTANT
             content: [
-              { "KKBH": "","FXMS": "","CDBH": 1,"KKDZ": "","KKMC": "","CDLX": "","JSDW": "","ZPFXLX": "","DLMC": "","JD":"","WD":"","SXJSBBM":"","XZQH":"" },
-              { "KKBH": "","FXMS": "","CDBH": 1,"KKDZ": "","KKMC": "","CDLX": "","JSDW": "","ZPFXLX": "","DLMC": "","JD":"","WD":"","SXJSBBM":"","XZQH":"" },
+              { "KKBH": "440112000000111112","FXMS": "1","CDBH": 1,"KKDZ": "测试卡口地址","KKMC": "测试卡口","CDLX": "1","JSDW": "","ZPFXLX": "1","DLMC": "测试卡口地址","JD":"113.4593690","WD":"23.0744790","SXJSBBM":"44011200000011111201","XZQH":"440112" },
+              { "KKBH": "440112000000111113","FXMS": "1","CDBH": 1,"KKDZ": "电警卡口地址","KKMC": "测试电警卡口","CDLX": "1","JSDW": "","ZPFXLX": "1","DLMC": "电警卡口地址","JD":"113.4293690","WD":"23.2744790","SXJSBBM":"44011200000011111301","XZQH":"440112" },
             ]
       - type: SELECT
       - type: SCRIPT
@@ -787,7 +787,7 @@ output:
   writers:
 #    - type: CONSOLE
     - type: JDBC
-      dataSourceId: 'tocc_parking'
+      dataSourceId: 'traffic_command_clickhouse'
       target: 'CAR_DETECT_INFO'
       template: >-
         HPZL,CLLX,CSYS,ILLEGAL,INFO_ID,DEVICE_ID,JGSK,HPHM,HPYS,CAR_YEAR,PILOT_SUNVISOR,COPILOT_SUNVISOR,PENDANTS,

@@ -49,6 +49,9 @@
         <jsonschema.version>4.35.0</jsonschema.version>
         <yamlbeans.version>1.17</yamlbeans.version>
 
+        <!-- geo tools -->
+        <geotools.version>26.3</geotools.version>
+
         <!-- database -->
         <dynamic-datasource.version>3.6.1</dynamic-datasource.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
@@ -322,6 +325,12 @@
             </dependency>-->
 
             <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+
+            <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
                 <version>${reactor.version}</version>
@@ -351,6 +360,25 @@
                 <groupId>org.apache.velocity</groupId>
                 <artifactId>velocity-engine-core</artifactId>
                 <version>2.3</version>
+            </dependency>
+
+            <!-- geo -->
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-geojson</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-shapefile</artifactId>
+                <version>${geotools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-jts</artifactId>
+                <version>${geotools.version}</version>
             </dependency>
 
             <!-- AI -->

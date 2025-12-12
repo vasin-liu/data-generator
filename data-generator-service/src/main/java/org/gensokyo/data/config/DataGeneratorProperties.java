@@ -35,15 +35,15 @@ public class DataGeneratorProperties {
     /**
      * 核心线程数
      */
-    private Integer corePoolSize = 3;
+    private Integer corePoolSize = 50;
     /**
      * 最大线程数
      */
-    private Integer maxPoolSize = 8;
+    private Integer maxPoolSize = 100;
     /**
      * 队列任务数
      */
-    private Integer queueCapacity = 8;
+    private Integer queueCapacity = 100;
     /**
      * 元数据最大缓存数量
      */
