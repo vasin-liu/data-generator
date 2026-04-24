@@ -5,7 +5,6 @@
  */
 package org.gensokyo.data.script;
 
-import com.oracle.truffle.js.runtime.JSContextOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -37,6 +36,7 @@ import java.util.Objects;
  */
 @Slf4j
 public class JsScript<S extends ScriptStageVO, T extends JsScriptVO> implements Script<S, T> {
+    private static final String JS_ECMASCRIPT_VERSION_OPTION = "js.ecmascript-version";
     private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
     private final Engine engine;
     private final ScriptFactory scriptFactory;
@@ -68,7 +68,7 @@ public class JsScript<S extends ScriptStageVO, T extends JsScriptVO> implements 
                 .allowHostClassLoading(true)
                 .allowIO(IOAccess.ALL)
                 .engine(engine)
-                .option(JSContextOptions.ECMASCRIPT_VERSION_NAME, "2022")
+                .option(JS_ECMASCRIPT_VERSION_OPTION, "2022")
                 .build()) {
             Source js = createScriptSource(spo.getContent());
             Value value = jsCtx.eval(js);

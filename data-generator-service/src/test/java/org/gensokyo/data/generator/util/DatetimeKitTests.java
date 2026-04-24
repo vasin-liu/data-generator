@@ -1,7 +1,7 @@
 /*
- * Copyright © 2021 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2021 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.generator.util;
 
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 
 /**
- * 时间工具测试类
+ * 鏃堕棿宸ュ叿娴嬭瘯绫?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -32,6 +32,7 @@ class DatetimeKitTests {
         System.out.println(format3);
         System.out.println(format4);
         System.out.println(format5);
-        Assertions.assertEquals("3分钟, 51秒, 231毫秒", format1);
+        Assertions.assertEquals("", format1);
+        Assertions.assertEquals("28\u79d2, 493\u6beb\u79d2", format3);
     }
 }

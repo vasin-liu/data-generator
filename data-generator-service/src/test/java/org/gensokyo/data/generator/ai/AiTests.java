@@ -15,9 +15,12 @@ import org.gensokyo.data.ai.ollama.OllamaChatClient;
 import org.gensokyo.data.ai.ollama.api.OllamaApi;
 import org.gensokyo.data.ai.ollama.api.OllamaOptions;
 import org.gensokyo.data.ai.parser.ListOutputParser;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +33,17 @@ import java.util.Map;
  */
 class AiTests {
 
+    private static void assumeOllamaAvailable() {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress("localhost", 11434), 1000);
+        } catch (Exception ex) {
+            Assumptions.assumeTrue(false, "Ollama is not available on localhost:11434");
+        }
+    }
+
     @Test
     void case1() throws JsonProcessingException {
+        assumeOllamaAvailable();
         OllamaApi api = new OllamaApi("http://localhost:11434");
         OllamaOptions options = OllamaOptions.create()
                 .withModel("llama3")
@@ -56,6 +68,7 @@ class AiTests {
 
     @Test
     void case2() throws JsonProcessingException {
+        assumeOllamaAvailable();
         OllamaApi api = new OllamaApi("http://localhost:11434");
         OllamaOptions options = OllamaOptions.create()
                 .withModel("llama3")

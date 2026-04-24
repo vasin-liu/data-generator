@@ -13,10 +13,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
 
-        <lombok.version>1.18.24</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
 
         <!-- gensokyo -->
         <revision>3.0.0-SNAPSHOT</revision>
@@ -26,10 +25,10 @@
 
         <!-- thirdpart -->
         <!-- ******************************************** -->
-        <spring-boot.version>3.0.1</spring-boot.version>
+        <spring-boot.version>3.5.13</spring-boot.version>
         <vaadin.version>24.4.0.beta3</vaadin.version>
         <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
-        <graal.js.version>23.0.4</graal.js.version>
+        <graal.js.version>24.2.2</graal.js.version>
         <stringtemplate.version>4.0.2</stringtemplate.version>
         <antlr.version>4.13.1</antlr.version>
         <eclipse-collections.version>12.0.0.M3</eclipse-collections.version>
@@ -38,14 +37,14 @@
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <guava.version>33.2.0-jre</guava.version>
         <elasticsearch.version>7.17.8</elasticsearch.version>
-        <reactor.version>3.5.1</reactor.version>
         <auto-service.version>1.1.1</auto-service.version>
         <caffeine.version>3.1.8</caffeine.version>
         <easyexcel.version>4.0.2</easyexcel.version>
         <commons-csv.version>1.11.0</commons-csv.version>
+        <reactor.version>3.7.14</reactor.version>
 
         <!-- yaml && json -->
-        <jackson.version>2.14.1</jackson.version>
+        <jackson.version>2.21.2</jackson.version>
         <jsonschema.version>4.35.0</jsonschema.version>
         <yamlbeans.version>1.17</yamlbeans.version>
 
@@ -126,7 +125,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.0.1</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -162,18 +161,14 @@
             </dependency>-->
 
             <dependency>
-                <groupId>org.graalvm.js</groupId>
-                <artifactId>js</artifactId>
+                <groupId>org.graalvm.polyglot</groupId>
+                <artifactId>js-community</artifactId>
                 <version>${graal.js.version}</version>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.graalvm.js</groupId>
                 <artifactId>js-scriptengine</artifactId>
-                <version>${graal.js.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.truffle</groupId>
-                <artifactId>truffle-api</artifactId>
                 <version>${graal.js.version}</version>
             </dependency>
 
@@ -445,7 +440,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>${spring-boot.version}</version>
                     <configuration>
                         <excludes>
                             <exclude>
@@ -458,8 +453,9 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.14.1</version>
                     <configuration>
+                        <release>${maven.compiler.release}</release>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
@@ -479,6 +475,41 @@
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.2</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-build-environment</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireJavaVersion>
+                                        <version>[17,)</version>
+                                        <message>Build requires JDK 17 or newer. Use JDK 25 for the upgraded baseline.</message>
+                                    </requireJavaVersion>
+                                    <requireMavenVersion>
+                                        <version>[3.6.3,)</version>
+                                        <message>Build requires Maven 3.6.3 or newer.</message>
+                                    </requireMavenVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -488,6 +519,28 @@
     </build>
 
     <repositories>
+        <repository>
+            <id>nexus-releases</id>
+            <name>nexus-releases</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <name>nexus-snapshots</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>maven_central</id>
             <name>Maven Central</name>
@@ -519,6 +572,28 @@
     </repositories>
 
     <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-releases</id>
+            <name>nexus-releases</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>nexus-snapshots</id>
+            <name>nexus-snapshots</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
         <pluginRepository>
             <id>vaadin-prereleases</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>

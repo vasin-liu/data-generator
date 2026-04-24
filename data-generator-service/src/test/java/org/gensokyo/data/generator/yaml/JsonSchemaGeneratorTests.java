@@ -9,10 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.*;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
-import com.github.victools.jsonschema.module.jackson.JacksonOption;
-import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.TemplateVO;
-import org.gensokyo.data.model.vo.iterator.IteratorVO;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -56,10 +53,12 @@ class JsonSchemaGeneratorTests {
 
     @Test
     void gen() throws Exception {
-        JacksonModule jacksonModule = new JacksonModule(JacksonOption.ALWAYS_REF_SUBTYPES, JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
+        JacksonModule jacksonModule = new JacksonModule();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(jacksonModule)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES, Option.DEFINITION_FOR_MAIN_SCHEMA);
+        configBuilder.forTypesInGeneral()
+                .withSubtypeResolver(new ClassGraphSubtypeResolver());
         SchemaGeneratorConfig config = configBuilder.build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode jsonSchema = generator.generateSchema(TemplateVO.class);
@@ -68,7 +67,7 @@ class JsonSchemaGeneratorTests {
 
     @Test
     void gen2() throws Exception {
-        JacksonModule jacksonModule = new JacksonModule(JacksonOption.ALWAYS_REF_SUBTYPES, JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
+        JacksonModule jacksonModule = new JacksonModule();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES)
                 .with(jacksonModule)
