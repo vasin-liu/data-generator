@@ -1,0 +1,899 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator-dependencies                                        [pom]
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-database-core                                       [jar]
+[INFO] data-generator-datasource                                          [pom]
+[INFO] data-generator-iterator                                            [pom]
+[INFO] data-generator-iterator-number                                     [jar]
+[INFO] data-generator-iterator-constant                                   [jar]
+[INFO] data-generator-iterator-datetime                                   [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-reader-database                                     [jar]
+[INFO] data-generator-iterator-database                                   [jar]
+[INFO] data-generator-iterator-excel                                      [jar]
+[INFO] data-generator-iterator-csv                                        [jar]
+[INFO] data-generator-iterator-json                                       [jar]
+[INFO] data-generator-generator                                           [pom]
+[INFO] data-generator-generator-async                                     [jar]
+[INFO] data-generator-generator-sync                                      [jar]
+[INFO] data-generator-stage                                               [jar]
+[INFO] data-generator-faker                                               [jar]
+[INFO] data-generator-reader-spel                                         [jar]
+[INFO] data-generator-reader-ai                                           [jar]
+[INFO] data-generator-reader-excel                                        [jar]
+[INFO] data-generator-reader-json                                         [jar]
+[INFO] data-generator-reader-csv                                          [jar]
+[INFO] data-generator-scripter                                            [pom]
+[INFO] data-generator-scripter-spel                                       [jar]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-database                                     [jar]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-writer-csv                                          [jar]
+[INFO] data-generator-writer-excel                                        [jar]
+[INFO] data-generator-service                                             [jar]
+[INFO] data-generator-reader-elasticsearch                                [jar]
+[INFO] data-generator-scripter-javascript                                 [jar]
+[INFO] data-generator-scripter-velocity                                   [jar]
+[INFO] data-generator-writer-elasticsearch                                [jar]
+[INFO] data-generator-writer-json                                         [jar]
+[INFO] data-generator-converter                                           [pom]
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-dependencies >-------
+[INFO] Building data-generator-dependencies 3.0.0-SNAPSHOT               [1/40]
+[INFO]   from data-generator-dependencies\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                            [2/40]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                     [3/40]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                       [4/40]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-core ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-core ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-database-core >------
+[INFO] Building data-generator-database-core 3.0.0-SNAPSHOT              [5/40]
+[INFO]   from data-generator-common\data-generator-database-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-database-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-database-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-database-core ---
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-datasource >--------
+[INFO] Building data-generator-datasource 3.0.0-SNAPSHOT                 [6/40]
+[INFO]   from data-generator-datasource\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-iterator >---------
+[INFO] Building data-generator-iterator 3.0.0-SNAPSHOT                   [7/40]
+[INFO]   from data-generator-iterator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-number >-----
+[INFO] Building data-generator-iterator-number 3.0.0-SNAPSHOT            [8/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-number\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-number ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-number ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-number ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-number ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-number ---
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-constant >----
+[INFO] Building data-generator-iterator-constant 3.0.0-SNAPSHOT          [9/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-constant\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-constant ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-constant ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-constant ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-constant ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-constant ---
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-datetime >----
+[INFO] Building data-generator-iterator-datetime 3.0.0-SNAPSHOT         [10/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-datetime\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-datetime ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-datetime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-datetime ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-datetime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-datetime ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-reader >----------
+[INFO] Building data-generator-reader 3.0.0-SNAPSHOT                    [11/40]
+[INFO]   from data-generator-reader\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-reader-database >-----
+[INFO] Building data-generator-reader-database 3.0.0-SNAPSHOT           [12/40]
+[INFO]   from data-generator-reader\data-generator-reader-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-database ---
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-database >----
+[INFO] Building data-generator-iterator-database 3.0.0-SNAPSHOT         [13/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-database ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-excel >------
+[INFO] Building data-generator-iterator-excel 3.0.0-SNAPSHOT            [14/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-excel ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-csv >-------
+[INFO] Building data-generator-iterator-csv 3.0.0-SNAPSHOT              [15/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-csv ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-json >------
+[INFO] Building data-generator-iterator-json 3.0.0-SNAPSHOT             [16/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-json ---
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-generator >--------
+[INFO] Building data-generator-generator 3.0.0-SNAPSHOT                 [17/40]
+[INFO]   from data-generator-generator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-async >-----
+[INFO] Building data-generator-generator-async 3.0.0-SNAPSHOT           [18/40]
+[INFO]   from data-generator-generator\data-generator-generator-async\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-async ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-async ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-async ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-async ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-async ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-sync >------
+[INFO] Building data-generator-generator-sync 3.0.0-SNAPSHOT            [19/40]
+[INFO]   from data-generator-generator\data-generator-generator-sync\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-sync ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-sync ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-sync ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-sync ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-sync ---
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-stage >----------
+[INFO] Building data-generator-stage 3.0.0-SNAPSHOT                     [20/40]
+[INFO]   from data-generator-stage\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-stage ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-stage ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-stage ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-stage ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-stage ---
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-faker >----------
+[INFO] Building data-generator-faker 3.0.0-SNAPSHOT                     [21/40]
+[INFO]   from data-generator-faker\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-faker ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-faker ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-faker ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.faker.geo.GeoKitTests
+[[113.43269466757374,22.759389153931938],[113.42789602071367,22.794480708326727],[113.41657210062915,22.779329889366164],[113.44206068984369,22.77397372178203],[113.41343854628802,22.768766170651304],[113.41674398848264,22.839783357585787],[113.44829405518328,22.80355064580371],[113.44918522763872,22.75248247721972],[113.461158274947,22.787577372570514],[113.4335339589122,22.750322978079954],[113.39188144874605,22.775947606636898],[113.47461020309989,22.796150885036457],[113.40091232647015,22.816160305322978],[113.39221262806176,22.765275609471004],[113.41170162786085,22.759155042827743],[113.43306042952207,22.830529218604624],[113.41294969506355,22.762164271688572],[113.39136535522006,22.81010448153157],[113.39394812040034,22.800534668910714],[113.46687171862024,22.769511267423436],[113.3878495339441,22.798948235046897],[113.45429804520097,22.759100491248706],[113.45772564211093,22.78741118121703],[113.44090640804245,22.778954547491857],[113.45799456860117,22.799716661016127],[113.37960814944948,22.766205077907824],[113.45338150121421,22.746794698990715],[113.41066437935669,22.814118094087352],[113.45004708284388,22.775778394459508],[113.44970634939857,22.772979326054724],[113.40456899858508,22.786351229524165],[113.45961830495233,22.769642867325352],[113.38175924197792,22.803384099141443],[113.42462195058638,22.77632050981062],[113.41185185466601,22.829564398296224],[113.45466505051392,22.810475314939904],[113.35397861241862,22.788595593010882],[113.41330542111695,22.80449124483544],[113.4438653302,22.796463559970455],[113.39629710047781,22.767861559188546],[113.46368464028525,22.80162879701744],[113.39325586995429,22.77655066241944],[113.4088907893137,22.831089020266443],[113.39834895559548,22.77203220146747],[113.43990493105426,22.74964470809021],[113.43564654914572,22.80877971509836],[113.4079602574648,22.796065323120917],[113.41523953659734,22.795288541701957],[113.41838793549854,22.832883196544017],[113.41471435775468,22.771935862603684],[113.43023330609995,22.819873891525283],[113.411498961682,22.78332345266055],[113.43019634591343,22.790870246112938],[113.46107404575415,22.78140561689528],[113.40660744652058,22.776505048039965],[113.40733197186198,22.80724874386676],[113.46768897633761,22.758181363214504],[113.44705480868883,22.74945388187823],[113.39344247942411,22.76776460123001],[113.44141001845928,22.791451281806857],[113.42402433107729,22.829973844737037],[113.39593679365144,22.766424617545223],[113.39702964729679,22.809289611413412],[113.36033583922553,22.792702445516415],[113.41138749243534,22.750112809946657],[113.45753376407333,22.782471838870133],[113.43398383329519,22.80219074154681],[113.4378019594238,22.76527256568253],[113.4392746281987,22.76841372730342],[113.43701139060168,22.753256984979735],[113.42678474154171,22.755997892945164],[113.37778537670727,22.77283157857172],[113.40616966020099,22.820458568553846],[113.46926187067761,22.769974184570412],[113.36579927759955,22.792705694120887],[113.44146362473215,22.801002830653164],[113.44212290065569,22.820789652545916],[113.37975801059547,22.799237973689397],[113.3632873236105,22.792504827715707],[113.42370396912278,22.756641374912416],[113.45455942075463,22.802938316829025],[113.45329599102243,22.792821347625434],[113.44103997537478,22.750758817562136],[113.37583364554118,22.78614058426035],[113.39653522760324,22.797736153853027],[113.43614112445225,22.7856713076859],[113.40517361836524,22.766653763812464],[113.4426042225258,22.779042154607858],[113.4052384020219,22.750461369342172],[113.43151590790788,22.78696154360142],[113.40574535862204,22.816393560858497],[113.4401422150718,22.798960503680096],[113.41124742651336,22.81142793208465],[113.43393252564238,22.742710522272557],[113.38551124416753,22.779198816818834],[113.42141988503745,22.764785977455645],[113.41839615023086,22.800374074112085],[113.41661153982966,22.785533383351684],[113.45174108618092,22.765208479783066],[113.41037125005639,22.7923223729657],]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.785 s -- in org.gensokyo.data.faker.geo.GeoKitTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-spel >-------
+[INFO] Building data-generator-reader-spel 3.0.0-SNAPSHOT               [22/40]
+[INFO]   from data-generator-reader\data-generator-reader-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-spel ---
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-reader-ai >--------
+[INFO] Building data-generator-reader-ai 3.0.0-SNAPSHOT                 [23/40]
+[INFO]   from data-generator-reader\data-generator-reader-ai\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-ai ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-ai ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-ai ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-ai ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-ai ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-reader-excel >-------
+[INFO] Building data-generator-reader-excel 3.0.0-SNAPSHOT              [24/40]
+[INFO]   from data-generator-reader\data-generator-reader-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-excel ---
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-json >-------
+[INFO] Building data-generator-reader-json 3.0.0-SNAPSHOT               [25/40]
+[INFO]   from data-generator-reader\data-generator-reader-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-json ---
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-csv >--------
+[INFO] Building data-generator-reader-csv 3.0.0-SNAPSHOT                [26/40]
+[INFO]   from data-generator-reader\data-generator-reader-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-csv ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.reader.CsvReaderTests
+[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.302 s -- in org.gensokyo.data.reader.CsvReaderTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-scripter >---------
+[INFO] Building data-generator-scripter 3.0.0-SNAPSHOT                  [27/40]
+[INFO]   from data-generator-scripter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-scripter-spel >------
+[INFO] Building data-generator-scripter-spel 3.0.0-SNAPSHOT             [28/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-spel ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-writer >----------
+[INFO] Building data-generator-writer 3.0.0-SNAPSHOT                    [29/40]
+[INFO]   from data-generator-writer\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-writer-database >-----
+[INFO] Building data-generator-writer-database 3.0.0-SNAPSHOT           [30/40]
+[INFO]   from data-generator-writer\data-generator-writer-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-database ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-kafka >-------
+[INFO] Building data-generator-writer-kafka 3.0.0-SNAPSHOT              [31/40]
+[INFO]   from data-generator-writer\data-generator-writer-kafka\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-kafka ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-kafka ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-kafka ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-kafka ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-kafka ---
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-csv >--------
+[INFO] Building data-generator-writer-csv 3.0.0-SNAPSHOT                [32/40]
+[INFO]   from data-generator-writer\data-generator-writer-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-csv ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-excel >-------
+[INFO] Building data-generator-writer-excel 3.0.0-SNAPSHOT              [33/40]
+[INFO]   from data-generator-writer\data-generator-writer-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-excel ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-service >---------
+[INFO] Building data-generator-service 3.0.0-SNAPSHOT                   [34/40]
+[INFO]   from data-generator-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-service ---
+[INFO] Copying 65 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-service ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-service ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-service ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.generator.ai.AiTests
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.767 s -- in org.gensokyo.data.generator.ai.AiTests
+[INFO] Running org.gensokyo.data.generator.DataFakerTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.598 s -- in org.gensokyo.data.generator.DataFakerTests
+[INFO] Running org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests
+17:10:16.505 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests]: DefaultDataGeneratorApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:10:17.429 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.gensokyo.data.DataGeneratorApplication for test class org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests
+17:10:17.936 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests]: DefaultDataGeneratorApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:10:17.939 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.gensokyo.data.DataGeneratorApplication for test class org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-04-24 17:10:22.509  INFO [] 27436 --- [           main] d.g.DefaultDataGeneratorApplicationTests : Starting DefaultDataGeneratorApplicationTests using Java 25.0.1 with PID 27436 (started by vasin in D:\Work\99_Code\data-generator\data-generator-service)
+2026-04-24 17:10:22.557  INFO [] 27436 --- [           main] d.g.DefaultDataGeneratorApplicationTests : No active profile set, falling back to 1 default profile: "default"
+2026-04-24 17:10:38.364  INFO [] 27436 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-24 17:10:39.934  INFO [] 27436 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 1485 ms. Found 1 JPA repository interface.
+2026-04-24 17:10:50.229  INFO [] 27436 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-24 17:11:01.535  INFO [] 27436 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:f521fa16-fc9a-4022-a7d3-fe464b1396c3 user=SA
+2026-04-24 17:11:01.543  INFO [] 27436 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-24 17:11:02.008  INFO [] 27436 --- [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-24 17:11:02.778  INFO [] 27436 --- [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-04-24 17:11:05.680  INFO [] 27436 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-24 17:11:06.231  INFO [] 27436 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:f521fa16-fc9a-4022-a7d3-fe464b1396c3]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.2.224
+	Default catalog/schema: F521FA16-FC9A-4022-A7D3-FE464B1396C3/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-24 17:11:07.585  INFO [] 27436 --- [           main] o.h.validator.internal.util.Version      : HV000001: Hibernate Validator 8.0.1.Final
+2026-04-24 17:11:10.526  INFO [] 27436 --- [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-24 17:11:10.694  INFO [] 27436 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-24 17:11:11.162  INFO [] 27436 --- [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-24 17:11:17.860  WARN [] 27436 --- [           main] org.gensokyo.data.cache.Templates        : 已忽略模板文件： !etm_training_plan.yaml 
+2026-04-24 17:11:17.864  WARN [] 27436 --- [           main] org.gensokyo.data.cache.Templates        : 已忽略模板文件： !etm_training_plan_item.yaml 
+2026-04-24 17:11:21.328  INFO [] 27436 --- [           main] org.gensokyo.data.cache.Templates        : 元数据缓存初始化完成
+2026-04-24 17:11:21.642  INFO [] 27436 --- [           main] org.gensokyo.data.cache.Templates        : 注册模板文件监听器完成
+2026-04-24 17:11:25.605  WARN [] 27436 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-24 17:11:29.795  INFO [] 27436 --- [           main] d.g.DefaultDataGeneratorApplicationTests : Started DefaultDataGeneratorApplicationTests in 71.585 seconds (process running for 82.068)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 74.75 s -- in org.gensokyo.data.generator.DefaultDataGeneratorApplicationTests
+[INFO] Running org.gensokyo.data.generator.faker.SpelTests
+fullName ===> 陈晓啸,池楷瑞,南门驰
+address ===> 缑路07号,尤中心08号,殴中心4号
+fullName ===> testslvjtest,testfokvtest,testrenotest
+2
+date ===> 260424075114
+[0,1,2,3,4]
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.365 s -- in org.gensokyo.data.generator.faker.SpelTests
+[INFO] Running org.gensokyo.data.generator.GeneratorTests
+预加载数据：1
+已生成 1 条数据
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in org.gensokyo.data.generator.GeneratorTests
+[INFO] Running org.gensokyo.data.generator.graph.GraphTests
+E
+B
+D
+A
+C
+F
+--------------------------------------
+A
+(org.gensokyo.data.model.vo.FieldVO@638d0527 : org.gensokyo.data.model.vo.FieldVO@151ddfc6)
+(org.gensokyo.data.model.vo.FieldVO@638d0527 : org.gensokyo.data.model.vo.FieldVO@7f006525)
+B
+(org.gensokyo.data.model.vo.FieldVO@638d0527 : org.gensokyo.data.model.vo.FieldVO@7f006525)
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@2177809a)
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@151ddfc6)
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@6f6cefb9)
+E
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@2177809a)
+(org.gensokyo.data.model.vo.FieldVO@2177809a : org.gensokyo.data.model.vo.FieldVO@591f4316)
+D
+(org.gensokyo.data.model.vo.FieldVO@638d0527 : org.gensokyo.data.model.vo.FieldVO@151ddfc6)
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@151ddfc6)
+(org.gensokyo.data.model.vo.FieldVO@151ddfc6 : org.gensokyo.data.model.vo.FieldVO@6f6cefb9)
+F
+(org.gensokyo.data.model.vo.FieldVO@2177809a : org.gensokyo.data.model.vo.FieldVO@591f4316)
+C
+(org.gensokyo.data.model.vo.FieldVO@151ddfc6 : org.gensokyo.data.model.vo.FieldVO@6f6cefb9)
+(org.gensokyo.data.model.vo.FieldVO@7f006525 : org.gensokyo.data.model.vo.FieldVO@6f6cefb9)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in org.gensokyo.data.generator.graph.GraphTests
+[INFO] Running org.gensokyo.data.generator.RandomKitTest
+[0,1,2,3,4,5,6,7,8,9,10]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in org.gensokyo.data.generator.RandomKitTest
+[INFO] Running org.gensokyo.data.generator.util.DatetimeKitTests
+
+6小时, 25分钟, 23秒, 131毫秒
+28秒, 493毫秒
+3天, 7小时, 8分钟, 50秒
+11天, 13小时, 46分钟, 39秒, 999毫秒
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in org.gensokyo.data.generator.util.DatetimeKitTests
+[INFO] Running org.gensokyo.data.generator.util.RandomKitTests
+kdg-8999
+A
+B
+C
+D
+E
+F
+G
+H
+J
+K
+L
+M
+N
+P
+Q
+R
+S
+T
+U
+V
+W
+X
+Y
+Z
+0.9717472613972908
+19454717235318784
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.374 s -- in org.gensokyo.data.generator.util.RandomKitTests
+[INFO] Running org.gensokyo.data.generator.util.TemplateKitTests
+col1
+col2
+col3
+insert into table (col1,col2,col3) values (:col1,:col2,:col3)
+f_string
+f_date
+f_float
+f_integer
+f_integer_desc
+LOAD DATA LOCAL INFILE 'sql.csv' IGNORE INTO TABLE test (:f_string,:f_date,:f_float,:f_integer,:f_integer_desc)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.139 s -- in org.gensokyo.data.generator.util.TemplateKitTests
+[INFO] Running org.gensokyo.data.generator.yaml.JsonSchemaGeneratorTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.143 s -- in org.gensokyo.data.generator.yaml.JsonSchemaGeneratorTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[WARNING] Tests run: 25, Failures: 0, Errors: 0, Skipped: 2
+[INFO] 
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-reader-elasticsearch >---
+[INFO] Building data-generator-reader-elasticsearch 3.0.0-SNAPSHOT      [35/40]
+[INFO]   from data-generator-reader\data-generator-reader-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-elasticsearch ---
+[INFO] 
+[INFO] ---< org.gensokyo.data.generator:data-generator-scripter-javascript >---
+[INFO] Building data-generator-scripter-javascript 3.0.0-SNAPSHOT       [36/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-javascript\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-javascript ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-javascript ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-javascript ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-javascript ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-javascript ---
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-scripter-velocity >----
+[INFO] Building data-generator-scripter-velocity 3.0.0-SNAPSHOT         [37/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-velocity\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-velocity ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-velocity ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-velocity ---
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-writer-elasticsearch >---
+[INFO] Building data-generator-writer-elasticsearch 3.0.0-SNAPSHOT      [38/40]
+[INFO]   from data-generator-writer\data-generator-writer-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-elasticsearch ---
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-json >-------
+[INFO] Building data-generator-writer-json 3.0.0-SNAPSHOT               [39/40]
+[INFO]   from data-generator-writer\data-generator-writer-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-json ---
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-converter >--------
+[INFO] Building data-generator-converter 3.0.0-SNAPSHOT                 [40/40]
+[INFO]   from data-generator-converter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator-dependencies ........................ SUCCESS [  0.008 s]
+[INFO] data-generator ..................................... SUCCESS [  0.001 s]
+[INFO] data-generator-common .............................. SUCCESS [  0.002 s]
+[INFO] data-generator-core ................................ SUCCESS [ 10.182 s]
+[INFO] data-generator-database-core ....................... SUCCESS [  1.617 s]
+[INFO] data-generator-datasource .......................... SUCCESS [  0.001 s]
+[INFO] data-generator-iterator ............................ SUCCESS [  0.000 s]
+[INFO] data-generator-iterator-number ..................... SUCCESS [  1.206 s]
+[INFO] data-generator-iterator-constant ................... SUCCESS [  1.267 s]
+[INFO] data-generator-iterator-datetime ................... SUCCESS [  3.407 s]
+[INFO] data-generator-reader .............................. SUCCESS [  0.001 s]
+[INFO] data-generator-reader-database ..................... SUCCESS [  3.840 s]
+[INFO] data-generator-iterator-database ................... SUCCESS [  1.605 s]
+[INFO] data-generator-iterator-excel ...................... SUCCESS [  3.176 s]
+[INFO] data-generator-iterator-csv ........................ SUCCESS [  1.658 s]
+[INFO] data-generator-iterator-json ....................... SUCCESS [  1.219 s]
+[INFO] data-generator-generator ........................... SUCCESS [  0.001 s]
+[INFO] data-generator-generator-async ..................... SUCCESS [  0.859 s]
+[INFO] data-generator-generator-sync ...................... SUCCESS [  0.901 s]
+[INFO] data-generator-stage ............................... SUCCESS [  0.773 s]
+[INFO] data-generator-faker ............................... SUCCESS [  9.193 s]
+[INFO] data-generator-reader-spel ......................... SUCCESS [  1.439 s]
+[INFO] data-generator-reader-ai ........................... SUCCESS [  3.513 s]
+[INFO] data-generator-reader-excel ........................ SUCCESS [  1.326 s]
+[INFO] data-generator-reader-json ......................... SUCCESS [  0.785 s]
+[INFO] data-generator-reader-csv .......................... SUCCESS [  5.632 s]
+[INFO] data-generator-scripter ............................ SUCCESS [  0.002 s]
+[INFO] data-generator-scripter-spel ....................... SUCCESS [  0.965 s]
+[INFO] data-generator-writer .............................. SUCCESS [  0.001 s]
+[INFO] data-generator-writer-database ..................... SUCCESS [  1.308 s]
+[INFO] data-generator-writer-kafka ........................ SUCCESS [  0.927 s]
+[INFO] data-generator-writer-csv .......................... SUCCESS [  0.659 s]
+[INFO] data-generator-writer-excel ........................ SUCCESS [  2.221 s]
+[INFO] data-generator-service ............................. SUCCESS [01:38 min]
+[INFO] data-generator-reader-elasticsearch ................ SUCCESS [  1.891 s]
+[INFO] data-generator-scripter-javascript ................. SUCCESS [  1.369 s]
+[INFO] data-generator-scripter-velocity ................... SUCCESS [  0.996 s]
+[INFO] data-generator-writer-elasticsearch ................ SUCCESS [  2.906 s]
+[INFO] data-generator-writer-json ......................... SUCCESS [  0.772 s]
+[INFO] data-generator-converter ........................... SUCCESS [  0.000 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:49 min
+[INFO] Finished at: 2026-04-24T17:11:48+08:00
+[INFO] ------------------------------------------------------------------------
