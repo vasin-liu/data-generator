@@ -69,16 +69,24 @@ Goal: preserve the known-good Boot 3.5.x + JDK 25 state before moving to Boot 4.
 
 TODO:
 
-- [ ] Tag or document the current passing baseline commit.
-- [ ] Export a full dependency tree for later comparison.
-- [ ] Export an effective POM snapshot for `data-generator-service`.
-- [ ] Save the outputs of:
+- [x] Tag or document the current passing baseline commit via `docs/phase-0-jdk25-baseline/README.md`.
+- [x] Export a full dependency tree for later comparison.
+- [x] Export an effective POM snapshot for `data-generator-service`.
+- [x] Save the outputs of:
   - `.\mvnw-jdk25.ps1 test`
   - `.\mvnw-jdk25.ps1 -U -DskipTests clean package`
-- [ ] Confirm all current JDK 25 repository-local helper files remain in place:
+- [x] Confirm all current JDK 25 repository-local helper files remain in place:
   - `.mvn/settings-jdk25.xml`
   - `.mvn/jvm.config`
   - `mvnw-jdk25.ps1`
+
+Artifacts:
+
+- [`docs/phase-0-jdk25-baseline/README.md`](D:\Work\99_Code\data-generator\docs\phase-0-jdk25-baseline\README.md)
+- [`docs/phase-0-jdk25-baseline/build-dependency-tree.txt`](D:\Work\99_Code\data-generator\docs\phase-0-jdk25-baseline\build-dependency-tree.txt)
+- [`docs/phase-0-jdk25-baseline/service-effective-pom.xml`](D:\Work\99_Code\data-generator\docs\phase-0-jdk25-baseline\service-effective-pom.xml)
+- [`docs/phase-0-jdk25-baseline/jdk25-test.log`](D:\Work\99_Code\data-generator\docs\phase-0-jdk25-baseline\jdk25-test.log)
+- [`docs/phase-0-jdk25-baseline/jdk25-clean-package.log`](D:\Work\99_Code\data-generator\docs\phase-0-jdk25-baseline\jdk25-clean-package.log)
 
 Suggested commands:
 
@@ -95,9 +103,9 @@ Goal: identify everything that is managed by Boot 4.0 versus everything we still
 
 TODO:
 
-- [ ] Produce a "managed by Boot vs manually pinned" dependency inventory.
-- [ ] Identify every Spring starter used by active modules.
-- [ ] Identify all non-Boot-managed libraries that must be verified independently:
+- [x] Produce a "managed by Boot vs manually pinned" dependency inventory.
+- [x] Identify every Spring starter used by active modules.
+- [x] Identify all non-Boot-managed libraries that must be verified independently:
   - Druid
   - MyBatis Plus
   - MyBatis Flex
@@ -105,20 +113,24 @@ TODO:
   - Elasticsearch client
   - internal `org.gensokyo.*` starters
   - ClickHouse / DM JDBC drivers
-- [ ] Check whether any module still assumes Spring Boot 3-specific starter names.
-- [ ] Check whether any module still relies on Spring Framework deprecated APIs removed in 7.x.
+- [x] Check whether any module still assumes Spring Boot 3-specific starter names.
+- [x] Check whether any module still relies on Spring Framework deprecated APIs removed in 7.x at inventory level, with code search deferred to Phase 3.
 
 Repository-specific inventory targets:
 
-- [ ] `data-generator-service`
-- [ ] `data-generator-reader-ai`
-- [ ] `data-generator-reader-elasticsearch`
-- [ ] `data-generator-writer-kafka`
-- [ ] `data-generator-scripter-javascript`
+- [x] `data-generator-service`
+- [x] `data-generator-reader-ai`
+- [x] `data-generator-reader-elasticsearch`
+- [x] `data-generator-writer-kafka`
+- [x] `data-generator-scripter-javascript`
 
 Deliverable:
 
-- [ ] Add a compatibility matrix section to this document or a sibling document under `docs/`.
+- [x] Add a compatibility matrix section to this document or a sibling document under `docs/`.
+
+Artifacts:
+
+- [`docs/phase-1-boot4-compatibility-matrix.md`](D:\Work\99_Code\data-generator\docs\phase-1-boot4-compatibility-matrix.md)
 
 ## Phase 2: Parent BOM move from Spring Boot 3.5.x to 4.0.x
 
@@ -126,29 +138,52 @@ Goal: move the parent dependency baseline first, without trying to fix every mod
 
 TODO:
 
-- [ ] Update `spring-boot.version` in [`pom.xml`](D:\Work\99_Code\data-generator\pom.xml) from `3.5.13` to the selected `4.0.x` target.
-- [ ] Re-evaluate explicit overrides in parent `pom.xml`:
-  - [ ] `jackson.version`
-  - [ ] `reactor.version`
-  - [ ] `hibernate-validator.version`
-  - [ ] `lombok.version`
-  - [ ] `classgraph.version`
-  - [ ] `mockito.version`
+- [x] Update `spring-boot.version` in [`pom.xml`](D:\Work\99_Code\data-generator\pom.xml) from `3.5.13` to `4.0.5`.
+- [x] Re-evaluate explicit overrides in parent `pom.xml` for the Phase 2 minimum move:
+  - [x] `jackson.version`
+  - [x] `reactor.version`
+  - [x] `hibernate-validator.version`
+  - [x] `lombok.version`
+  - [x] `classgraph.version`
+  - [x] `mockito.version`
+- [x] Re-check plugin compatibility posture:
+  - [x] `spring-boot-maven-plugin`
+  - [x] `maven-compiler-plugin`
+  - [x] `maven-surefire-plugin`
+  - [x] `maven-failsafe-plugin`
+  - [x] `maven-enforcer-plugin`
+- [x] Keep `maven.compiler.release=17` unless there is a deliberate follow-up decision to raise it.
+- [x] Run the Phase 2 compile gate and capture the output under `docs/`.
 - [ ] Confirm Boot 4.0 still manages:
   - [ ] `httpclient5`
   - [ ] Hibernate ORM / Validator
   - [ ] Reactor / Netty
-- [ ] Re-check plugin compatibility:
-  - [ ] `spring-boot-maven-plugin`
-  - [ ] `maven-compiler-plugin`
-  - [ ] `maven-surefire-plugin`
-  - [ ] `maven-failsafe-plugin`
-  - [ ] `maven-enforcer-plugin`
-- [ ] Keep `maven.compiler.release=17` unless there is a deliberate follow-up decision to raise it.
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -DskipTests compile`
+- [x] `.\mvnw-jdk25.ps1 -DskipTests compile`
+
+Phase 2 decisions for the minimum move:
+
+- Selected target: `Spring Boot 4.0.5`
+- Keep `maven.compiler.release=17` unchanged in this phase
+- Keep the existing explicit overrides in place for the first compile gate:
+  - `jackson.version=2.21.2`
+  - `reactor.version=3.7.14`
+  - `hibernate-validator.version=8.0.1.Final`
+  - `lombok.version=1.18.44`
+  - `classgraph.version=4.8.184`
+  - `mockito.version=5.17.0`
+- Defer Boot 3-specific starter replacement work to later phases:
+  - `mybatis-plus-spring-boot3-starter`
+  - `mybatis-flex-spring-boot3-starter`
+- Additional compatibility shim applied during this phase:
+  - add direct `jackson-datatype-jsr310` to `data-generator-reader-ai` so `JavaTimeModule` remains available on the compile classpath after the Boot 4 BOM move
+
+Artifacts:
+
+- [`docs/phase-2-boot4-bom-move/README.md`](D:\Work\99_Code\data-generator\docs\phase-2-boot4-bom-move\README.md)
+- [`docs/phase-2-boot4-bom-move/boot4-compile.log`](D:\Work\99_Code\data-generator\docs\phase-2-boot4-bom-move\boot4-compile.log)
 
 ## Phase 3: Starter and Spring Framework 7 alignment
 

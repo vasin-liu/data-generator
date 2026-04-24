@@ -29,7 +29,7 @@
 
         <!-- thirdpart -->
         <!-- ******************************************** -->
-        <spring-boot.version>3.5.13</spring-boot.version>
+        <spring-boot.version>4.0.5</spring-boot.version>
         <vaadin.version>24.4.0.beta3</vaadin.version>
         <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
         <graal.js.version>24.2.2</graal.js.version>
