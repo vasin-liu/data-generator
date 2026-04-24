@@ -5,10 +5,10 @@
  */
 package org.gensokyo.data.ai.chat;
 
+import org.jspecify.annotations.Nullable;
 import org.gensokyo.data.ai.chat.messages.AssistantMessage;
 import org.gensokyo.data.ai.chat.metadata.ChatGenerationMetadata;
 import org.gensokyo.data.ai.model.ModelResult;
-import org.springframework.lang.Nullable;
 
 import java.util.Map;
 import java.util.Objects;

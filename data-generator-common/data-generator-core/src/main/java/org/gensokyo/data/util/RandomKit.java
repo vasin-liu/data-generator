@@ -5,9 +5,9 @@
  */
 package org.gensokyo.data.util;
 
+import org.jspecify.annotations.Nullable;
 import org.gensokyo.data.constant.Chinese;
 
-import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;

@@ -7,13 +7,13 @@ package org.gensokyo.data.script;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.gensokyo.data.model.vo.scripter.ScriptVO;
 import org.gensokyo.data.model.vo.stage.ScriptStageVO;
 import org.gensokyo.data.script.vars.Variable;
 import org.gensokyo.data.util.TypeKit;
 import org.gensokyo.kit.collect.MapKit;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 import java.util.Collection;

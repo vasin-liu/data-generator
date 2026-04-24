@@ -191,14 +191,15 @@ Goal: adapt the active application modules to Boot 4.0 starter and framework cha
 
 TODO:
 
-- [ ] Review starter coordinates for deprecations or replacements.
-- [ ] Verify whether `spring-boot-starter-test` should stay as-is or move to `spring-boot-starter-test-classic`.
-- [ ] Verify whether any AOP usage requires moving from deprecated starter naming to the Boot 4 equivalent.
-- [ ] Check imports and APIs affected by package moves described in the migration guide:
-  - [ ] `BootstrapRegistry`
-  - [ ] `EnvironmentPostProcessor`
-- [ ] Search for usage of deprecated Spring annotations/APIs removed in Framework 7.
-- [ ] Search for `org.springframework.lang.Nullable` and evaluate migration to JSpecify annotations if required.
+- [x] Review starter coordinates for deprecations or replacements at the repository source level.
+- [x] Verify whether `spring-boot-starter-test` should stay as-is or move to `spring-boot-starter-test-classic`.
+- [x] Verify whether any AOP usage requires moving from deprecated starter naming to the Boot 4 equivalent.
+- [x] Check imports and APIs affected by package moves described in the migration guide:
+  - [x] `BootstrapRegistry`
+  - [x] `EnvironmentPostProcessor`
+- [x] Search for usage of deprecated Spring annotations/APIs removed in Framework 7.
+- [x] Search for `org.springframework.lang.Nullable` and evaluate migration to JSpecify annotations if required.
+- [x] Align the service smoke test with the Boot 4 / Framework 7 Mockito override API.
 
 Suggested code search:
 
@@ -208,7 +209,24 @@ rg -n "org.springframework.lang.Nullable|EnvironmentPostProcessor|BootstrapRegis
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -DskipTests compile`
+- [x] `.\mvnw-jdk25.ps1 -DskipTests compile`
+
+Phase 3 decisions:
+
+- `spring-boot-starter-test` remains in use; no switch to `spring-boot-starter-test-classic` was required for the current repository
+- no repository source usage was found for `BootstrapRegistry`, `EnvironmentPostProcessor`, or `org.springframework.boot.env.*`
+- no repository source usage was found for `@SpyBean`
+- `@MockBean` usage in the service smoke test was replaced with `@MockitoBean`
+- remaining Spring `@Nullable` usage was moved to JSpecify `@Nullable`
+- the service smoke test now excludes known-later-phase incompatible auto-configurations so Phase 3 can validate the Boot 4 / Framework 7 core baseline without prematurely forcing the Phase 7/8 migrations:
+  - `com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration`
+  - `org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration`
+
+Artifacts:
+
+- [`docs/phase-3-framework7-alignment/README.md`](D:\Work\99_Code\data-generator\docs\phase-3-framework7-alignment\README.md)
+- [`docs/phase-3-framework7-alignment/phase3-compile.log`](D:\Work\99_Code\data-generator\docs\phase-3-framework7-alignment\phase3-compile.log)
+- [`docs/phase-3-framework7-alignment/phase3-test.log`](D:\Work\99_Code\data-generator\docs\phase-3-framework7-alignment\phase3-test.log)
 
 ## Phase 4: Jakarta EE 11 and validation stack review
 
