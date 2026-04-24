@@ -234,11 +234,11 @@ Goal: absorb the Boot 4 move to Jakarta EE 11 and Servlet 6.1.
 
 TODO:
 
-- [ ] Verify there are no lingering `javax.*` imports in active modules.
-- [ ] Verify all servlet / validation / persistence APIs are aligned to Jakarta EE 11.
-- [ ] Re-check Hibernate Validator compatibility under Boot 4.
-- [ ] Verify JPA entities and persistence configuration still boot correctly.
-- [ ] Re-check any embedded servlet container assumptions in `data-generator-service`.
+- [x] Verify there are no lingering `javax.*` imports in active modules beyond Java SE `javax.sql`.
+- [x] Verify all servlet / validation / persistence APIs are aligned to Jakarta EE 11.
+- [x] Re-check Hibernate Validator compatibility under Boot 4.
+- [x] Verify JPA entities and persistence configuration still boot correctly.
+- [x] Re-check any embedded servlet container assumptions in `data-generator-service`.
 
 Suggested code search:
 
@@ -248,7 +248,27 @@ rg -n "\bjavax\." -S .
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -pl data-generator-service -DskipTests compile`
+- [x] `.\mvnw-jdk25.ps1 -pl data-generator-service -am -DskipTests compile`
+
+Phase 4 decisions:
+
+- remaining source-level `javax.*` usage is limited to `javax.sql.DataSource`, which is acceptable Java SE API usage and not a Jakarta migration blocker
+- no active source usage was found for:
+  - `javax.validation.*`
+  - `javax.persistence.*`
+  - `javax.servlet.*`
+  - `javax.annotation.*`
+  - `javax.inject.*`
+  - `javax.transaction.*`
+- active service code is already aligned to Jakarta APIs for validation and persistence
+- `hibernate-validator` remains compatible on the current Boot 4 baseline
+- service module compile and test both passed when executed with local reactor dependencies included
+
+Artifacts:
+
+- [`docs/phase-4-jakarta-ee11-review/README.md`](D:\Work\99_Code\data-generator\docs\phase-4-jakarta-ee11-review\README.md)
+- [`docs/phase-4-jakarta-ee11-review/service-compile.log`](D:\Work\99_Code\data-generator\docs\phase-4-jakarta-ee11-review\service-compile.log)
+- [`docs/phase-4-jakarta-ee11-review/service-test.log`](D:\Work\99_Code\data-generator\docs\phase-4-jakarta-ee11-review\service-test.log)
 
 ## Phase 5: Jackson 3 migration
 
