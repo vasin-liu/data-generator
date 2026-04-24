@@ -1,0 +1,31 @@
+---
+description: Java file copyright, Javadoc, and comments (PCI)
+globs: "**/*.java"
+alwaysApply: true
+---
+
+# Java source layout and documentation
+
+**Every** `.java` file must have (1) the copyright block, (2) a file-level comment on the primary top-level type, (3) Javadoc on **all public** methods, and (4) **inline** `//` comments on important or non-obvious steps. Order: copyright → `package` → `import` → type Javadoc → body.
+
+## Copyright (above `package`, do not change company text)
+
+```java
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+```
+
+## File-level (class / interface / enum) Javadoc
+
+Required on the main public type. Include a short description, `@author` (from `git config user.name` / `user.email` when available), and `@version` / `@since` as your project expects.
+
+## Public API Javadoc
+
+**Every** `public` method and `public` constructor must have Javadoc: summary; `@param` / `@return` / `@throws` whenever they apply. No empty or placeholder tags.
+
+## Inline comments
+
+Use `//` (or `/* */` for longer notes) for important control flow, invariants, workarounds, and anything a reader would miss without guidance—**not** for restating the code in English.

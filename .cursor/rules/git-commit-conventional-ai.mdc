@@ -1,0 +1,22 @@
+---
+description: Conventional commits + required AI-Assisted-by and Co-authored-by
+alwaysApply: true
+---
+
+# Git commits
+
+- Form: `type(optional scope): subject`, then optional body, then footer.
+- Subject: **~72** chars, imperative present tense, lowercase start, no trailing period.
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`. Use `BREAKING CHANGE:`, `Closes #n`, or `revert:` in footer when needed; revert body must include `This reverts commit <hash>.`
+
+## Required footer
+
+Every commit **must** end the footer with both lines, in this order:
+
+```
+AI-Assisted-by: <tool>
+Co-authored-by: <name> <email>
+```
+
+- **AI-Assisted-by**: set to the AI product that helped (e.g. `Cursor`); if no AI was used, set to `none`.
+- **Co-authored-by**: **default** the line to the current Git identity: `git config user.name` and `git config user.email` in the form `Name <email>`. If others co-authored, add extra `Co-authored-by:` lines; keep the first line as that default unless policy says otherwise.
