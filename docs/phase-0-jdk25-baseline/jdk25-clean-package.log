@@ -1,0 +1,1003 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator-dependencies                                        [pom]
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-database-core                                       [jar]
+[INFO] data-generator-datasource                                          [pom]
+[INFO] data-generator-iterator                                            [pom]
+[INFO] data-generator-iterator-number                                     [jar]
+[INFO] data-generator-iterator-constant                                   [jar]
+[INFO] data-generator-iterator-datetime                                   [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-reader-database                                     [jar]
+[INFO] data-generator-iterator-database                                   [jar]
+[INFO] data-generator-iterator-excel                                      [jar]
+[INFO] data-generator-iterator-csv                                        [jar]
+[INFO] data-generator-iterator-json                                       [jar]
+[INFO] data-generator-generator                                           [pom]
+[INFO] data-generator-generator-async                                     [jar]
+[INFO] data-generator-generator-sync                                      [jar]
+[INFO] data-generator-stage                                               [jar]
+[INFO] data-generator-faker                                               [jar]
+[INFO] data-generator-reader-spel                                         [jar]
+[INFO] data-generator-reader-ai                                           [jar]
+[INFO] data-generator-reader-excel                                        [jar]
+[INFO] data-generator-reader-json                                         [jar]
+[INFO] data-generator-reader-csv                                          [jar]
+[INFO] data-generator-scripter                                            [pom]
+[INFO] data-generator-scripter-spel                                       [jar]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-database                                     [jar]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-writer-csv                                          [jar]
+[INFO] data-generator-writer-excel                                        [jar]
+[INFO] data-generator-service                                             [jar]
+[INFO] data-generator-reader-elasticsearch                                [jar]
+[INFO] data-generator-scripter-javascript                                 [jar]
+[INFO] data-generator-scripter-velocity                                   [jar]
+[INFO] data-generator-writer-elasticsearch                                [jar]
+[INFO] data-generator-writer-json                                         [jar]
+[INFO] data-generator-converter                                           [pom]
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-dependencies >-------
+[INFO] Building data-generator-dependencies 3.0.0-SNAPSHOT               [1/40]
+[INFO]   from data-generator-dependencies\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-dependencies ---
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                            [2/40]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                     [3/40]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-common ---
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                       [4/40]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-core ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-core ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 116 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-common/data-generator-core/src/main/java/org/gensokyo/data/config/FactoryConfig.java: D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\src\main\java\org\gensokyo\data\config\FactoryConfig.java uses or overrides a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-common/data-generator-core/src/main/java/org/gensokyo/data/config/FactoryConfig.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-core ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-core ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\target\data-generator-core-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-database-core >------
+[INFO] Building data-generator-database-core 3.0.0-SNAPSHOT              [5/40]
+[INFO]   from data-generator-common\data-generator-database-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-database-core ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-database-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 13 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-database-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-database-core ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-database-core ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\target\data-generator-database-core-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-datasource >--------
+[INFO] Building data-generator-datasource 3.0.0-SNAPSHOT                 [6/40]
+[INFO]   from data-generator-datasource\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-datasource ---
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-iterator >---------
+[INFO] Building data-generator-iterator 3.0.0-SNAPSHOT                   [7/40]
+[INFO]   from data-generator-iterator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-number >-----
+[INFO] Building data-generator-iterator-number 3.0.0-SNAPSHOT            [8/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-number\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-number ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-number\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-number ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-number ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-number ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-number ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-number ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-number ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-number\target\data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-constant >----
+[INFO] Building data-generator-iterator-constant 3.0.0-SNAPSHOT          [9/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-constant\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-constant ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-constant\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-constant ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-constant ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-constant ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-constant ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-constant ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-constant ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-constant\target\data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-datetime >----
+[INFO] Building data-generator-iterator-datetime 3.0.0-SNAPSHOT         [10/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-datetime\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-datetime ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-datetime\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-datetime ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-datetime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-datetime ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-datetime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-datetime ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-datetime ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-datetime\target\data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-reader >----------
+[INFO] Building data-generator-reader 3.0.0-SNAPSHOT                    [11/40]
+[INFO]   from data-generator-reader\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-reader-database >-----
+[INFO] Building data-generator-reader-database 3.0.0-SNAPSHOT           [12/40]
+[INFO]   from data-generator-reader\data-generator-reader-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-database\target\data-generator-reader-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-database >----
+[INFO] Building data-generator-iterator-database 3.0.0-SNAPSHOT         [13/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-database\target\data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-excel >------
+[INFO] Building data-generator-iterator-excel 3.0.0-SNAPSHOT            [14/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-excel\target\data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-csv >-------
+[INFO] Building data-generator-iterator-csv 3.0.0-SNAPSHOT              [15/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-csv\target\data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-json >------
+[INFO] Building data-generator-iterator-json 3.0.0-SNAPSHOT             [16/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-json\target\data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-generator >--------
+[INFO] Building data-generator-generator 3.0.0-SNAPSHOT                 [17/40]
+[INFO]   from data-generator-generator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-async >-----
+[INFO] Building data-generator-generator-async 3.0.0-SNAPSHOT           [18/40]
+[INFO]   from data-generator-generator\data-generator-generator-async\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator-async ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-async\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-async ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-async ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-async ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-async ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-async ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-generator-async ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-async\target\data-generator-generator-async-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-sync >------
+[INFO] Building data-generator-generator-sync 3.0.0-SNAPSHOT            [19/40]
+[INFO]   from data-generator-generator\data-generator-generator-sync\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator-sync ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-sync\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-sync ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-sync ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-sync ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-sync ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-sync ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-generator-sync ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-sync\target\data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-stage >----------
+[INFO] Building data-generator-stage 3.0.0-SNAPSHOT                     [20/40]
+[INFO]   from data-generator-stage\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-stage ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-stage\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-stage ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-stage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 13 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-stage ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-stage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-stage ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-stage ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-stage\target\data-generator-stage-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-faker >----------
+[INFO] Building data-generator-faker 3.0.0-SNAPSHOT                     [21/40]
+[INFO]   from data-generator-faker\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-faker ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-faker\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-faker ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-faker ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-faker ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-faker ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-faker\target\data-generator-faker-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-spel >-------
+[INFO] Building data-generator-reader-spel 3.0.0-SNAPSHOT               [22/40]
+[INFO]   from data-generator-reader\data-generator-reader-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-spel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-spel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-spel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-spel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-spel\target\data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-reader-ai >--------
+[INFO] Building data-generator-reader-ai 3.0.0-SNAPSHOT                 [23/40]
+[INFO]   from data-generator-reader\data-generator-reader-ai\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-ai ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-ai\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-ai ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-ai ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 62 source files with javac [debug release 17] to target\classes
+[WARNING] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/reader/AiProviderOllamaVO.java:[23,1] Service provider org.gensokyo.data.reader.AiProviderVO is generic, so it can't be named exactly by @AutoService. If this is OK, add @SuppressWarnings("rawtypes").
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-ai\src\main\java\org\gensokyo\data\ai\model\ModelOptionsUtils.java uses or overrides a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Recompile with -Xlint:deprecation for details.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Some input files use unchecked or unsafe operations.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-ai ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-ai ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-ai ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-ai ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-ai\target\data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-reader-excel >-------
+[INFO] Building data-generator-reader-excel 3.0.0-SNAPSHOT              [24/40]
+[INFO]   from data-generator-reader\data-generator-reader-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-excel\target\data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-json >-------
+[INFO] Building data-generator-reader-json 3.0.0-SNAPSHOT               [25/40]
+[INFO]   from data-generator-reader\data-generator-reader-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-json\target\data-generator-reader-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-csv >--------
+[INFO] Building data-generator-reader-csv 3.0.0-SNAPSHOT                [26/40]
+[INFO]   from data-generator-reader\data-generator-reader-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-csv\target\data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-scripter >---------
+[INFO] Building data-generator-scripter 3.0.0-SNAPSHOT                  [27/40]
+[INFO]   from data-generator-scripter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-scripter-spel >------
+[INFO] Building data-generator-scripter-spel 3.0.0-SNAPSHOT             [28/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-spel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-spel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-spel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-spel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-spel\target\data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-writer >----------
+[INFO] Building data-generator-writer 3.0.0-SNAPSHOT                    [29/40]
+[INFO]   from data-generator-writer\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-writer-database >-----
+[INFO] Building data-generator-writer-database 3.0.0-SNAPSHOT           [30/40]
+[INFO]   from data-generator-writer\data-generator-writer-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-database\target\data-generator-writer-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-kafka >-------
+[INFO] Building data-generator-writer-kafka 3.0.0-SNAPSHOT              [31/40]
+[INFO]   from data-generator-writer\data-generator-writer-kafka\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-kafka ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-kafka\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-kafka ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-kafka ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-kafka ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-kafka ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-kafka ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-kafka ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-kafka\target\data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-csv >--------
+[INFO] Building data-generator-writer-csv 3.0.0-SNAPSHOT                [32/40]
+[INFO]   from data-generator-writer\data-generator-writer-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-csv\target\data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-excel >-------
+[INFO] Building data-generator-writer-excel 3.0.0-SNAPSHOT              [33/40]
+[INFO]   from data-generator-writer\data-generator-writer-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-excel\target\data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-service >---------
+[INFO] Building data-generator-service 3.0.0-SNAPSHOT                   [34/40]
+[INFO]   from data-generator-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-service ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-service ---
+[INFO] Copying 65 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-service ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 16 source files with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-service ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-service ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-service\target\data-generator-service-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.5.13:repackage (default) @ data-generator-service ---
+[INFO] 
+[INFO] --- assembly:3.7.1:single (make-assembly) @ data-generator-service ---
+[INFO] Reading assembly descriptor: D:\Work\99_Code\data-generator\data-generator-service/assembly.xml
+[INFO] Artifact org.gensokyo:kits:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.gensokyo:kits:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/gensokyo/kits/1.0.0/kits-1.0.0.pom
+[INFO] Artifact com.dameng:dm-jdbc:pom:1.8 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact com.dameng:dm-jdbc:pom:1.8 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/com/dameng/dm-jdbc/1.8/dm-jdbc-1.8.pom
+[INFO] Artifact org.gensokyo.boot:kafka-spring-boot-starter:pom:2.7.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.gensokyo.boot:kafka-spring-boot-starter:pom:2.7.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/gensokyo/boot/kafka-spring-boot-starter/2.7.0/kafka-spring-boot-starter-2.7.0.pom
+[INFO] Building tar: D:\Work\99_Code\data-generator\data-generator-service\target\data-generator-service.tar.gz
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-reader-elasticsearch >---
+[INFO] Building data-generator-reader-elasticsearch 3.0.0-SNAPSHOT      [35/40]
+[INFO]   from data-generator-reader\data-generator-reader-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-elasticsearch ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-elasticsearch\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-elasticsearch ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-elasticsearch ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-elasticsearch\target\data-generator-reader-elasticsearch-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---< org.gensokyo.data.generator:data-generator-scripter-javascript >---
+[INFO] Building data-generator-scripter-javascript 3.0.0-SNAPSHOT       [36/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-javascript\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-javascript ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-javascript\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-javascript ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-javascript ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-javascript ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-javascript ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-javascript ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-javascript ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-javascript\target\data-generator-scripter-javascript-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-scripter-velocity >----
+[INFO] Building data-generator-scripter-velocity 3.0.0-SNAPSHOT         [37/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-velocity\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-velocity ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-velocity\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-velocity ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-velocity ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-velocity ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-velocity ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-velocity\target\data-generator-scripter-velocity-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-writer-elasticsearch >---
+[INFO] Building data-generator-writer-elasticsearch 3.0.0-SNAPSHOT      [38/40]
+[INFO]   from data-generator-writer\data-generator-writer-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-elasticsearch ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-elasticsearch\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-elasticsearch\src\main\java\org\gensokyo\data\writer\ElasticsearchWriter.java uses or overrides a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-elasticsearch ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-elasticsearch ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-elasticsearch\target\data-generator-writer-elasticsearch-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-json >-------
+[INFO] Building data-generator-writer-json 3.0.0-SNAPSHOT               [39/40]
+[INFO]   from data-generator-writer\data-generator-writer-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-json\target\data-generator-writer-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-converter >--------
+[INFO] Building data-generator-converter 3.0.0-SNAPSHOT                 [40/40]
+[INFO]   from data-generator-converter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-converter ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator-dependencies ........................ SUCCESS [  1.421 s]
+[INFO] data-generator ..................................... SUCCESS [  0.325 s]
+[INFO] data-generator-common .............................. SUCCESS [  0.015 s]
+[INFO] data-generator-core ................................ SUCCESS [ 42.169 s]
+[INFO] data-generator-database-core ....................... SUCCESS [ 12.770 s]
+[INFO] data-generator-datasource .......................... SUCCESS [  0.019 s]
+[INFO] data-generator-iterator ............................ SUCCESS [  0.009 s]
+[INFO] data-generator-iterator-number ..................... SUCCESS [  9.512 s]
+[INFO] data-generator-iterator-constant ................... SUCCESS [  6.206 s]
+[INFO] data-generator-iterator-datetime ................... SUCCESS [ 14.251 s]
+[INFO] data-generator-reader .............................. SUCCESS [  0.006 s]
+[INFO] data-generator-reader-database ..................... SUCCESS [ 27.671 s]
+[INFO] data-generator-iterator-database ................... SUCCESS [  8.544 s]
+[INFO] data-generator-iterator-excel ...................... SUCCESS [  6.622 s]
+[INFO] data-generator-iterator-csv ........................ SUCCESS [  7.900 s]
+[INFO] data-generator-iterator-json ....................... SUCCESS [  5.771 s]
+[INFO] data-generator-generator ........................... SUCCESS [  0.005 s]
+[INFO] data-generator-generator-async ..................... SUCCESS [  6.273 s]
+[INFO] data-generator-generator-sync ...................... SUCCESS [  5.195 s]
+[INFO] data-generator-stage ............................... SUCCESS [ 15.427 s]
+[INFO] data-generator-faker ............................... SUCCESS [ 21.620 s]
+[INFO] data-generator-reader-spel ......................... SUCCESS [ 10.028 s]
+[INFO] data-generator-reader-ai ........................... SUCCESS [ 26.994 s]
+[INFO] data-generator-reader-excel ........................ SUCCESS [  7.225 s]
+[INFO] data-generator-reader-json ......................... SUCCESS [ 16.599 s]
+[INFO] data-generator-reader-csv .......................... SUCCESS [ 24.499 s]
+[INFO] data-generator-scripter ............................ SUCCESS [  0.003 s]
+[INFO] data-generator-scripter-spel ....................... SUCCESS [ 24.138 s]
+[INFO] data-generator-writer .............................. SUCCESS [  0.003 s]
+[INFO] data-generator-writer-database ..................... SUCCESS [  8.526 s]
+[INFO] data-generator-writer-kafka ........................ SUCCESS [  4.919 s]
+[INFO] data-generator-writer-csv .......................... SUCCESS [ 13.588 s]
+[INFO] data-generator-writer-excel ........................ SUCCESS [ 12.895 s]
+[INFO] data-generator-service ............................. SUCCESS [01:51 min]
+[INFO] data-generator-reader-elasticsearch ................ SUCCESS [ 16.796 s]
+[INFO] data-generator-scripter-javascript ................. SUCCESS [ 34.053 s]
+[INFO] data-generator-scripter-velocity ................... SUCCESS [  2.817 s]
+[INFO] data-generator-writer-elasticsearch ................ SUCCESS [ 17.530 s]
+[INFO] data-generator-writer-json ......................... SUCCESS [  6.132 s]
+[INFO] data-generator-converter ........................... SUCCESS [  0.002 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  08:53 min
+[INFO] Finished at: 2026-04-24T14:10:42+08:00
+[INFO] ------------------------------------------------------------------------
