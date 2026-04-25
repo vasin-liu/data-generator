@@ -1,19 +1,19 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
-import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
-import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+import tools.jackson.core.Version;
+import tools.jackson.databind.AnnotationIntrospector;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.cfg.MapperConfig;
+import tools.jackson.databind.introspect.Annotated;
+import tools.jackson.databind.jsontype.TypeResolverBuilder;
+import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.google.auto.service.AutoService;
 import org.gensokyo.kit.collect.MapKit;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -23,14 +23,14 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * SPI方式加载的子类型模块
+ * SPI鏂瑰紡鍔犺浇鐨勫瓙绫诲瀷妯″潡
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
  * @since 2024/7/9 , Version 1.0.0
  */
-@AutoService(Module.class)
-public class SpiSubtypeModule extends Module {
+@AutoService(JacksonModule.class)
+public class SpiSubtypeModule extends JacksonModule {
 
     private final Map<Class<?>, Map<String, Class<?>>> subtypeRegistry = new ConcurrentHashMap<>();
     private final Map<Class<?>, Class<?>> defaultSubtypeRegistry = new ConcurrentHashMap<>();
@@ -54,18 +54,23 @@ public class SpiSubtypeModule extends Module {
             }
 
             @Override
-            public TypeResolverBuilder<?> findTypeResolver(MapperConfig<?> config, AnnotatedClass ac, JavaType baseType) {
+            public TypeResolverBuilder<?> findTypeResolverBuilder(MapperConfig<?> config, Annotated ac) {
                 JsonTypeInfo info = ac.getAnnotation(JsonTypeInfo.class);
                 if (Objects.nonNull(info)) {
+                    JavaType baseType = ac.getType();
                     Class<?> clazz = findBaseClass(ac.getAnnotation(JsonSubType.class), baseType);
                     registerTypes(clazz);
                     Class<?> defaultSubtype = defaultSubtypeRegistry.get(clazz);
+                    JsonTypeInfo.Value settings = JsonTypeInfo.Value.construct(
+                            JsonTypeInfo.Id.NAME,
+                            JsonTypeInfo.As.EXISTING_PROPERTY,
+                            info.property(),
+                            defaultSubtype,
+                            true,
+                            null
+                    );
                     return new StdTypeResolverBuilder()
-                            .init(JsonTypeInfo.Id.NAME, new SpiSubTypeIdResolver(subtypeRegistry.get(clazz), defaultSubtype))
-                            .inclusion(JsonTypeInfo.As.EXISTING_PROPERTY)
-                            .typeProperty(info.property())
-                            .defaultImpl(defaultSubtype)
-                            .typeIdVisibility(true);
+                            .init(settings, new SpiSubTypeIdResolver(subtypeRegistry.get(clazz), defaultSubtype));
                 }
                 return null;
             }
@@ -105,3 +110,4 @@ public class SpiSubtypeModule extends Module {
         }
     }
 }
+

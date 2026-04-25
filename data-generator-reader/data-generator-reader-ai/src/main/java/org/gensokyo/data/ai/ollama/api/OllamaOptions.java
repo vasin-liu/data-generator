@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 濠?2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address闁挎稒鐡岰I Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou闁挎稑鐡攈ina闁挎稑婀糹p code闁?10653闁?
  */
 package org.gensokyo.data.ai.ollama.api;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Ollama选项参数
+ * Ollama闂侇偄顦甸妴宥夊矗閸屾稒娈?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -337,3 +337,4 @@ public class OllamaOptions extends AiModelOptionsVO implements ChatOptions, Embe
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
+

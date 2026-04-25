@@ -26,7 +26,7 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- JTS Topology Suite，用来做精准的地理空间计算 -->
+        <!-- JTS Topology Suite閿涘瞼鏁ら弶銉ヤ粵缁儳鍣惃鍕勾閻炲棛鈹栭梻纾嬵吀缁?-->
         <dependency>
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
@@ -36,6 +36,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>2.21.2</version>
         </dependency>
 
         <dependency>
@@ -72,3 +73,4 @@
         </plugins>
     </build>
 </project>
+

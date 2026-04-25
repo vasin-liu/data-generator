@@ -1,16 +1,16 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.json;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.Versioned;
-import com.fasterxml.jackson.core.util.VersionUtil;
+import tools.jackson.core.Version;
+import tools.jackson.core.Versioned;
+import tools.jackson.core.util.VersionUtil;
 
 /**
- * SPI方式加载的子类型模块版本定义
+ * SPI鏂瑰紡鍔犺浇鐨勫瓙绫诲瀷妯″潡鐗堟湰瀹氫箟
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -27,3 +27,4 @@ public class ModuleVersion implements Versioned {
         return VERSION;
     }
 }
+

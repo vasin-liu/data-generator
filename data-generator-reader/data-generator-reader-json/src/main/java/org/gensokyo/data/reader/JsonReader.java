@@ -1,11 +1,11 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.reader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
@@ -21,7 +21,7 @@ import java.util.Spliterators;
 import java.util.stream.StreamSupport;
 
 /**
- * JSON文件读取器
+ * JSON鏂囦欢璇诲彇鍣?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -44,7 +44,7 @@ public class JsonReader<S extends ReadStageVO, T extends JsonReaderVO> implement
                         .limit(endRow - startRow + 1)
                         .forEach(it -> {
                             if (Objects.nonNull(it)) {
-                                //不处理嵌套的数组
+                                //涓嶅鐞嗗祵濂楃殑鏁扮粍
                                 r.addValue(SingleValue.of(it));
                             }
                         });
@@ -57,3 +57,4 @@ public class JsonReader<S extends ReadStageVO, T extends JsonReaderVO> implement
         }
     }
 }
+

@@ -1,19 +1,20 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.DatabindContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.jsontype.TypeIdResolver;
 
 import java.util.Map;
 
 /**
- * 自定义属性子类型解析器
+ * 鑷畾涔夊睘鎬у瓙绫诲瀷瑙ｆ瀽鍣?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -29,27 +30,27 @@ public class SpiSubTypeIdResolver implements TypeIdResolver {
     }
 
     @Override
-    public void init(JavaType baseType) {
+    public void init(JavaType baseType) throws JacksonException {
         // No-op
     }
 
     @Override
-    public String idFromValue(Object value) {
+    public String idFromValue(DatabindContext context, Object value) throws JacksonException {
         return value.getClass().getSimpleName().toUpperCase();
     }
 
     @Override
-    public String idFromValueAndType(Object value, Class<?> suggestedType) {
-        return idFromValue(value);
+    public String idFromValueAndType(DatabindContext context, Object value, Class<?> suggestedType) throws JacksonException {
+        return idFromValue(context, value);
     }
 
     @Override
-    public String idFromBaseType() {
+    public String idFromBaseType(DatabindContext context) throws JacksonException {
         return null;
     }
 
     @Override
-    public JavaType typeFromId(DatabindContext context, String id) {
+    public JavaType typeFromId(DatabindContext context, String id) throws JacksonException {
         Class<?> subtype = subtypeRegistry.getOrDefault(id.toUpperCase(), defaultSubtype);
         if (subtype == null) {
             throw new IllegalArgumentException("Unknown subtype: " + id);

@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 濠?2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address闁挎稒鐡岰I Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou闁挎稑鐡攈ina闁挎稑婀糹p code闁?10653闁?
  */
 package org.gensokyo.data.ai.model;
 
@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.victools.jsonschema.generator.*;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * 模型参数工具类
+ * 婵☆垪鈧磭鈧兘宕ｉ崒娑欐鐎规悶鍎遍崣璺ㄧ尵?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -41,8 +40,7 @@ public final class ModelOptionsUtils {
 
     public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .registerModule(new JavaTimeModule());
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
     private final static List<String> BEAN_MERGE_FIELD_EXCISIONS = List.of("class");
 
@@ -282,3 +280,4 @@ public final class ModelOptionsUtils {
     }
 
 }
+

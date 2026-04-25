@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 濠?2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address闁挎稒鐡岰I Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou闁挎稑鐡攈ina闁挎稑婀糹p code闁?10653闁?
  */
 package org.gensokyo.data.ai.parser;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
 
 
 /**
- * 实体类输出解析器
+ * 閻庡湱鍋樼紞瀣尵閺勫繒缈婚柛鎴︾細琚欓柡瀣姇濞?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -106,3 +106,4 @@ public class BeanOutputParser<T> implements OutputParser<T> {
     }
 
 }
+

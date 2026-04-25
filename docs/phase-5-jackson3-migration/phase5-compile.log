@@ -1,0 +1,478 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator-dependencies                                        [pom]
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-database-core                                       [jar]
+[INFO] data-generator-datasource                                          [pom]
+[INFO] data-generator-iterator                                            [pom]
+[INFO] data-generator-iterator-number                                     [jar]
+[INFO] data-generator-iterator-constant                                   [jar]
+[INFO] data-generator-iterator-datetime                                   [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-reader-database                                     [jar]
+[INFO] data-generator-iterator-database                                   [jar]
+[INFO] data-generator-iterator-excel                                      [jar]
+[INFO] data-generator-iterator-csv                                        [jar]
+[INFO] data-generator-iterator-json                                       [jar]
+[INFO] data-generator-generator                                           [pom]
+[INFO] data-generator-generator-async                                     [jar]
+[INFO] data-generator-generator-sync                                      [jar]
+[INFO] data-generator-stage                                               [jar]
+[INFO] data-generator-faker                                               [jar]
+[INFO] data-generator-reader-spel                                         [jar]
+[INFO] data-generator-reader-ai                                           [jar]
+[INFO] data-generator-reader-excel                                        [jar]
+[INFO] data-generator-reader-json                                         [jar]
+[INFO] data-generator-reader-csv                                          [jar]
+[INFO] data-generator-scripter                                            [pom]
+[INFO] data-generator-scripter-spel                                       [jar]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-database                                     [jar]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-writer-csv                                          [jar]
+[INFO] data-generator-writer-excel                                        [jar]
+[INFO] data-generator-service                                             [jar]
+[INFO] data-generator-reader-elasticsearch                                [jar]
+[INFO] data-generator-scripter-javascript                                 [jar]
+[INFO] data-generator-scripter-velocity                                   [jar]
+[INFO] data-generator-writer-elasticsearch                                [jar]
+[INFO] data-generator-writer-json                                         [jar]
+[INFO] data-generator-converter                                           [pom]
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-dependencies >-------
+[INFO] Building data-generator-dependencies 3.0.0-SNAPSHOT               [1/40]
+[INFO]   from data-generator-dependencies\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                            [2/40]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                     [3/40]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                       [4/40]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-core ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-database-core >------
+[INFO] Building data-generator-database-core 3.0.0-SNAPSHOT              [5/40]
+[INFO]   from data-generator-common\data-generator-database-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-database-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-datasource >--------
+[INFO] Building data-generator-datasource 3.0.0-SNAPSHOT                 [6/40]
+[INFO]   from data-generator-datasource\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-iterator >---------
+[INFO] Building data-generator-iterator 3.0.0-SNAPSHOT                   [7/40]
+[INFO]   from data-generator-iterator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-number >-----
+[INFO] Building data-generator-iterator-number 3.0.0-SNAPSHOT            [8/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-number\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-number ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-number ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-constant >----
+[INFO] Building data-generator-iterator-constant 3.0.0-SNAPSHOT          [9/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-constant\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-constant ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-constant ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-datetime >----
+[INFO] Building data-generator-iterator-datetime 3.0.0-SNAPSHOT         [10/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-datetime\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-datetime ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-datetime ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-reader >----------
+[INFO] Building data-generator-reader 3.0.0-SNAPSHOT                    [11/40]
+[INFO]   from data-generator-reader\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-reader-database >-----
+[INFO] Building data-generator-reader-database 3.0.0-SNAPSHOT           [12/40]
+[INFO]   from data-generator-reader\data-generator-reader-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-database >----
+[INFO] Building data-generator-iterator-database 3.0.0-SNAPSHOT         [13/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-excel >------
+[INFO] Building data-generator-iterator-excel 3.0.0-SNAPSHOT            [14/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-csv >-------
+[INFO] Building data-generator-iterator-csv 3.0.0-SNAPSHOT              [15/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-json >------
+[INFO] Building data-generator-iterator-json 3.0.0-SNAPSHOT             [16/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-generator >--------
+[INFO] Building data-generator-generator 3.0.0-SNAPSHOT                 [17/40]
+[INFO]   from data-generator-generator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-async >-----
+[INFO] Building data-generator-generator-async 3.0.0-SNAPSHOT           [18/40]
+[INFO]   from data-generator-generator\data-generator-generator-async\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-async ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-async ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-sync >------
+[INFO] Building data-generator-generator-sync 3.0.0-SNAPSHOT            [19/40]
+[INFO]   from data-generator-generator\data-generator-generator-sync\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-sync ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-sync ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-stage >----------
+[INFO] Building data-generator-stage 3.0.0-SNAPSHOT                     [20/40]
+[INFO]   from data-generator-stage\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-stage ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-stage ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-faker >----------
+[INFO] Building data-generator-faker 3.0.0-SNAPSHOT                     [21/40]
+[INFO]   from data-generator-faker\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-faker ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-spel >-------
+[INFO] Building data-generator-reader-spel 3.0.0-SNAPSHOT               [22/40]
+[INFO]   from data-generator-reader\data-generator-reader-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-reader-ai >--------
+[INFO] Building data-generator-reader-ai 3.0.0-SNAPSHOT                 [23/40]
+[INFO]   from data-generator-reader\data-generator-reader-ai\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-ai ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-ai ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-reader-excel >-------
+[INFO] Building data-generator-reader-excel 3.0.0-SNAPSHOT              [24/40]
+[INFO]   from data-generator-reader\data-generator-reader-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-json >-------
+[INFO] Building data-generator-reader-json 3.0.0-SNAPSHOT               [25/40]
+[INFO]   from data-generator-reader\data-generator-reader-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-csv >--------
+[INFO] Building data-generator-reader-csv 3.0.0-SNAPSHOT                [26/40]
+[INFO]   from data-generator-reader\data-generator-reader-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-scripter >---------
+[INFO] Building data-generator-scripter 3.0.0-SNAPSHOT                  [27/40]
+[INFO]   from data-generator-scripter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-scripter-spel >------
+[INFO] Building data-generator-scripter-spel 3.0.0-SNAPSHOT             [28/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-spel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-writer >----------
+[INFO] Building data-generator-writer 3.0.0-SNAPSHOT                    [29/40]
+[INFO]   from data-generator-writer\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-writer-database >-----
+[INFO] Building data-generator-writer-database 3.0.0-SNAPSHOT           [30/40]
+[INFO]   from data-generator-writer\data-generator-writer-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-database ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-kafka >-------
+[INFO] Building data-generator-writer-kafka 3.0.0-SNAPSHOT              [31/40]
+[INFO]   from data-generator-writer\data-generator-writer-kafka\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-kafka ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-kafka ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-csv >--------
+[INFO] Building data-generator-writer-csv 3.0.0-SNAPSHOT                [32/40]
+[INFO]   from data-generator-writer\data-generator-writer-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-csv ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-excel >-------
+[INFO] Building data-generator-writer-excel 3.0.0-SNAPSHOT              [33/40]
+[INFO]   from data-generator-writer\data-generator-writer-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-excel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-service >---------
+[INFO] Building data-generator-service 3.0.0-SNAPSHOT                   [34/40]
+[INFO]   from data-generator-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-service ---
+[INFO] Copying 65 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-service ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 16 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-reader-elasticsearch >---
+[INFO] Building data-generator-reader-elasticsearch 3.0.0-SNAPSHOT      [35/40]
+[INFO]   from data-generator-reader\data-generator-reader-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ---< org.gensokyo.data.generator:data-generator-scripter-javascript >---
+[INFO] Building data-generator-scripter-javascript 3.0.0-SNAPSHOT       [36/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-javascript\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-javascript ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-javascript ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-scripter-velocity >----
+[INFO] Building data-generator-scripter-velocity 3.0.0-SNAPSHOT         [37/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-velocity\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-velocity ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-writer-elasticsearch >---
+[INFO] Building data-generator-writer-elasticsearch 3.0.0-SNAPSHOT      [38/40]
+[INFO]   from data-generator-writer\data-generator-writer-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-elasticsearch ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-json >-------
+[INFO] Building data-generator-writer-json 3.0.0-SNAPSHOT               [39/40]
+[INFO]   from data-generator-writer\data-generator-writer-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-json ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-converter >--------
+[INFO] Building data-generator-converter 3.0.0-SNAPSHOT                 [40/40]
+[INFO]   from data-generator-converter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator-dependencies ........................ SUCCESS [  0.012 s]
+[INFO] data-generator ..................................... SUCCESS [  0.003 s]
+[INFO] data-generator-common .............................. SUCCESS [  0.016 s]
+[INFO] data-generator-core ................................ SUCCESS [ 14.728 s]
+[INFO] data-generator-database-core ....................... SUCCESS [  0.991 s]
+[INFO] data-generator-datasource .......................... SUCCESS [  0.004 s]
+[INFO] data-generator-iterator ............................ SUCCESS [  0.016 s]
+[INFO] data-generator-iterator-number ..................... SUCCESS [  1.096 s]
+[INFO] data-generator-iterator-constant ................... SUCCESS [  1.013 s]
+[INFO] data-generator-iterator-datetime ................... SUCCESS [  3.122 s]
+[INFO] data-generator-reader .............................. SUCCESS [  0.002 s]
+[INFO] data-generator-reader-database ..................... SUCCESS [  2.636 s]
+[INFO] data-generator-iterator-database ................... SUCCESS [  1.696 s]
+[INFO] data-generator-iterator-excel ...................... SUCCESS [  2.885 s]
+[INFO] data-generator-iterator-csv ........................ SUCCESS [  1.023 s]
+[INFO] data-generator-iterator-json ....................... SUCCESS [  1.096 s]
+[INFO] data-generator-generator ........................... SUCCESS [  0.002 s]
+[INFO] data-generator-generator-async ..................... SUCCESS [  1.329 s]
+[INFO] data-generator-generator-sync ...................... SUCCESS [  1.326 s]
+[INFO] data-generator-stage ............................... SUCCESS [  1.342 s]
+[INFO] data-generator-faker ............................... SUCCESS [  4.346 s]
+[INFO] data-generator-reader-spel ......................... SUCCESS [  1.754 s]
+[INFO] data-generator-reader-ai ........................... SUCCESS [  5.096 s]
+[INFO] data-generator-reader-excel ........................ SUCCESS [  2.164 s]
+[INFO] data-generator-reader-json ......................... SUCCESS [  1.627 s]
+[INFO] data-generator-reader-csv .......................... SUCCESS [  1.830 s]
+[INFO] data-generator-scripter ............................ SUCCESS [  0.001 s]
+[INFO] data-generator-scripter-spel ....................... SUCCESS [  1.008 s]
+[INFO] data-generator-writer .............................. SUCCESS [  0.001 s]
+[INFO] data-generator-writer-database ..................... SUCCESS [  2.873 s]
+[INFO] data-generator-writer-kafka ........................ SUCCESS [  1.842 s]
+[INFO] data-generator-writer-csv .......................... SUCCESS [  0.804 s]
+[INFO] data-generator-writer-excel ........................ SUCCESS [  1.356 s]
+[INFO] data-generator-service ............................. SUCCESS [ 50.616 s]
+[INFO] data-generator-reader-elasticsearch ................ SUCCESS [  2.892 s]
+[INFO] data-generator-scripter-javascript ................. SUCCESS [  2.739 s]
+[INFO] data-generator-scripter-velocity ................... SUCCESS [  1.543 s]
+[INFO] data-generator-writer-elasticsearch ................ SUCCESS [  6.539 s]
+[INFO] data-generator-writer-json ......................... SUCCESS [  2.406 s]
+[INFO] data-generator-converter ........................... SUCCESS [  0.000 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:10 min
+[INFO] Finished at: 2026-04-25T15:52:41+08:00
+[INFO] ------------------------------------------------------------------------

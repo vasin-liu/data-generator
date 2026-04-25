@@ -1,38 +1,28 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
 package org.gensokyo.data.yaml;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.kit.character.StrKit;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-import static com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
+import static tools.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
 
-/**
- * Jackson解析器
- *
- * @author Gensokyo V.L.
- * @version 1.0.0
- * @since 2024/2/27 , Version 1.0.0
- */
 public class JacksonParser implements YamlParser {
     private final ObjectMapper mapper;
 
     public JacksonParser() {
-        mapper = JsonMapper.builder(new YAMLFactory())
-                //忽略枚举大小写
+        mapper = new ObjectMapper(new YAMLFactory())
+                .rebuild()
                 .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
-                //添加Jackson模块
                 .findAndAddModules()
                 .build();
     }
@@ -44,8 +34,9 @@ public class JacksonParser implements YamlParser {
         }
         try {
             return mapper.readValue(file, clazz);
-        } catch (IOException e) {
-            throw new DataGeneratorException("文件 [ " + file.getAbsolutePath() + " ] 解析出现异常", e);
+        }
+        catch (JacksonException e) {
+            throw new DataGeneratorException("Failed to parse YAML file [" + file.getAbsolutePath() + "]", e);
         }
     }
 
@@ -56,8 +47,9 @@ public class JacksonParser implements YamlParser {
         }
         try {
             return mapper.readValue(is, clazz);
-        } catch (IOException e) {
-            throw new DataGeneratorException("文件流解析出现异常", e);
+        }
+        catch (JacksonException e) {
+            throw new DataGeneratorException("Failed to parse YAML input stream", e);
         }
     }
 
@@ -68,8 +60,9 @@ public class JacksonParser implements YamlParser {
         }
         try {
             return mapper.readValue(content, clazz);
-        } catch (IOException e) {
-            throw new DataGeneratorException("字符串 [ " + content + " ] 解析出现异常", e);
+        }
+        catch (JacksonException e) {
+            throw new DataGeneratorException("Failed to parse YAML content [" + content + "]", e);
         }
     }
 }

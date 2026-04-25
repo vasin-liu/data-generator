@@ -48,7 +48,7 @@
         <reactor.version>3.7.14</reactor.version>
 
         <!-- yaml && json -->
-        <jackson.version>2.21.2</jackson.version>
+        <jackson.version>3.1.0</jackson.version>
         <jsonschema.version>4.35.0</jsonschema.version>
         <yamlbeans.version>1.17</yamlbeans.version>
 
@@ -117,7 +117,7 @@
     <dependencyManagement>
         <dependencies>
             <!-- bom -->
-            <!-- dap 依赖定义导入 -->
+            <!-- dap 渚濊禆瀹氫箟瀵煎叆 -->
             <dependency>
                 <groupId>org.gensokyo.data.generator</groupId>
                 <artifactId>data-generator-dependencies</artifactId>
@@ -270,13 +270,8 @@
                 <scope>provided</scope>
             </dependency>-->
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <groupId>tools.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <!--<dependency>
@@ -613,3 +608,4 @@
         </pluginRepository>
     </pluginRepositories>
 </project>
+

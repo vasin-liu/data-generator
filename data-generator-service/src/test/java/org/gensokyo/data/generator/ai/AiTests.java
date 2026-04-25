@@ -1,7 +1,6 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
 package org.gensokyo.data.generator.ai;
 
@@ -25,18 +24,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AI测试类
- *
- * @author Gensokyo V.L.
- * @version 1.0.0
- * @since 2024/5/27 , Version 1.0.0
+ * AI integration tests.
  */
 class AiTests {
 
     private static void assumeOllamaAvailable() {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress("localhost", 11434), 1000);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Assumptions.assumeTrue(false, "Ollama is not available on localhost:11434");
         }
     }
@@ -53,17 +49,17 @@ class AiTests {
         ListOutputParser parser = new ListOutputParser(new DefaultConversionService());
         String format = parser.getFormat();
         String template = """
-				List five {subject}
-				{format}
-				""";
+                List five {subject}
+                {format}
+                """;
         PromptTemplate promptTemplate = new PromptTemplate(template,
                 Map.of("subject", "ice cream flavors.", "format", format));
         Prompt prompt = new Prompt(promptTemplate.createMessage());
         Generation generation = client.call(prompt).getResult();
 
-        List<String> r = parser.parse(generation.getOutput().getContent());
+        List<String> result = parser.parse(generation.getOutput().getContent());
 
-        System.out.println("===> " + ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(r));
+        System.out.println("===> " + ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(result));
     }
 
     @Test
@@ -76,19 +72,18 @@ class AiTests {
         OllamaChatClient client = new OllamaChatClient(api, options);
         ListOutputParser parser = new ListOutputParser(new DefaultConversionService());
         String template = """
-                你是一个数据生成助手，{subject}，{format}
-                请仅输出生成结果，不需要其他说明
+                Please list five {subject}.
+                {format}
                 """;
         PromptTemplate promptTemplate = new PromptTemplate(template,
-                Map.of("subject", "列出5个项目培训计划标题", "format", parser.getFormat()));
+                Map.of("subject", "popular Chinese desserts", "format", parser.getFormat()));
         Prompt prompt = new Prompt(promptTemplate.createMessage());
 
         System.out.println("===> " + ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(prompt));
 
-        ChatResponse resp = client.call(prompt);
+        ChatResponse response = client.call(prompt);
+        List<String> result = parser.parse(response.getResult().getOutput().getContent());
 
-        List<String> r = parser.parse(resp.getResult().getOutput().getContent());
-
-        System.out.println("===> " + ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(r));
+        System.out.println("===> " + ModelOptionsUtils.OBJECT_MAPPER.writeValueAsString(result));
     }
 }
