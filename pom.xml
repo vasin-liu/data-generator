@@ -18,8 +18,7 @@
         <lombok.version>1.18.44</lombok.version>
         <mockito.version>5.17.0</mockito.version>
         <classgraph.version>4.8.184</classgraph.version>
-        <test.jvm.args>-Xshare:off -Dio.netty.noUnsafe=true</test.jvm.args>
-        <mockito.agentLine>${test.jvm.args} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.agentLine>
+        <mockito.agentLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.agentLine>
 
         <!-- gensokyo -->
         <revision>3.0.0-SNAPSHOT</revision>
@@ -45,7 +44,6 @@
         <caffeine.version>3.1.8</caffeine.version>
         <easyexcel.version>4.0.2</easyexcel.version>
         <commons-csv.version>1.11.0</commons-csv.version>
-        <reactor.version>3.7.14</reactor.version>
 
         <!-- yaml && json -->
         <jackson.version>3.1.0</jackson.version>
@@ -322,12 +320,6 @@
                 <groupId>com.lmax</groupId>
                 <artifactId>disruptor</artifactId>
                 <version>4.0.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.projectreactor</groupId>
-                <artifactId>reactor-core</artifactId>
-                <version>${reactor.version}</version>
             </dependency>
 
             <dependency>

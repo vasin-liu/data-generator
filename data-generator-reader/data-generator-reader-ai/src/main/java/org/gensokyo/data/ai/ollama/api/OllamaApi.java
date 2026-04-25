@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -164,7 +163,7 @@ public class OllamaApi {
 
         return this.webClient.post()
                 .uri("/api/generate")
-                .body(Mono.just(completionRequest), GenerateRequest.class)
+                .bodyValue(completionRequest)
                 .retrieve()
                 .bodyToMono(GenerateResponse.class)
                 .block();
@@ -176,7 +175,7 @@ public class OllamaApi {
 
         return webClient.post()
                 .uri("/api/generate")
-                .body(Mono.just(completionRequest), GenerateRequest.class)
+                .bodyValue(completionRequest)
                 .retrieve()
                 .bodyToFlux(GenerateResponse.class)
                 .handle((data, sink) -> {
@@ -313,7 +312,7 @@ public class OllamaApi {
 
         return this.webClient.post()
                 .uri("/api/chat")
-                .body(Mono.just(chatRequest), ChatRequest.class)
+                .bodyValue(chatRequest)
                 .retrieve()
                 .bodyToMono(ChatResponse.class)
                 .block();
@@ -325,7 +324,7 @@ public class OllamaApi {
 
         return webClient.post()
                 .uri("/api/chat")
-                .body(Mono.just(chatRequest), GenerateRequest.class)
+                .bodyValue(chatRequest)
                 .retrieve()
                 .bodyToFlux(ChatResponse.class)
                 .handle((data, sink) -> {
