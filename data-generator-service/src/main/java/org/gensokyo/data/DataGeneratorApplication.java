@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 2023/1/9 , Version 1.0.0
  */
 @Slf4j
-@SpringBootApplication
+@SpringBootApplication(excludeName = "com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration")
 public class DataGeneratorApplication {
 
     public static void main(String[] args) {
