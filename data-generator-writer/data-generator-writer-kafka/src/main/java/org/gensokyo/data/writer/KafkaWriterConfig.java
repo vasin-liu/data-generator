@@ -7,9 +7,10 @@ package org.gensokyo.data.writer;
 
 import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * 数据库写入器配置类
@@ -18,7 +19,8 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0.0
  * @since 2024/7/25 , Version 1.0.0
  */
-@Configuration
+@AutoConfiguration
+@ConditionalOnClass(MultipleKafkaTemplate.class)
 public class KafkaWriterConfig {
 
     @Bean

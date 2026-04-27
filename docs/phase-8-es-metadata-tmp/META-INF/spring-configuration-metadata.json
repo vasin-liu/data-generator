@@ -1,0 +1,29 @@
+{
+  "groups": [
+    {
+      "name": "pci.es.multiple",
+      "type": "org.gensokyo.boot.elasticsearch.config.MultipleProperties",
+      "sourceType": "org.gensokyo.boot.elasticsearch.config.MultipleProperties"
+    },
+    {
+      "name": "spring.elasticsearch.multiple",
+      "type": "org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterProperties",
+      "sourceType": "org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "spring.elasticsearch.multiple.clusters",
+      "type": "java.util.Map<java.lang.String,org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchProperties>",
+      "description": "多个集群的配置",
+      "sourceType": "org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterProperties"
+    },
+    {
+      "name": "spring.elasticsearch.multiple.primary",
+      "type": "java.lang.String",
+      "description": "主集群",
+      "sourceType": "org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterProperties"
+    }
+  ],
+  "hints": []
+}

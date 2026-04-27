@@ -5,7 +5,9 @@
  */
 package org.gensokyo.data.reader;
 
-import org.springframework.context.annotation.Configuration;
+import org.gensokyo.boot.elasticsearch.support.MultipleElasticsearchRestClient;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 
 /**
  * ES读取器配置类
@@ -14,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0.0
  * @since 2024/7/25 , Version 1.0.0
  */
-@Configuration
+@AutoConfiguration
+@ConditionalOnClass(MultipleElasticsearchRestClient.class)
 public class EsReaderConfig {
 }
