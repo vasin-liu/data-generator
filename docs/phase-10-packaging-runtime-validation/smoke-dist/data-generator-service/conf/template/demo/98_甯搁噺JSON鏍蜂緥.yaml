@@ -1,0 +1,39 @@
+# 数据集名称，各个文件中唯一
+name: demo_98
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 10
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: VEHICLE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ {"HPHM":"粤A12345","HPZL":"1","CSYS":"1","CLLX":"1"}, {"HPHM":"粤A54321","HPZL":"2","CSYS":"2","CLLX":"2"}]
+
+  - name: HPHM
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.HPHM"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

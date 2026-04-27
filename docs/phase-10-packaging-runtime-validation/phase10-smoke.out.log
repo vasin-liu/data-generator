@@ -1,0 +1,48 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.5)
+
+2026-04-27 14:22:11.680  INFO [] 37128 --- [           main] o.g.data.DataGeneratorApplication        : Starting DataGeneratorApplication using Java 25.0.1 with PID 37128 (D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\smoke-package\data-generator-service\bin\data-generator-service-3.0.0-SNAPSHOT.jar started by vasin in D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\smoke-package\data-generator-service\bin)
+2026-04-27 14:22:11.697  INFO [] 37128 --- [           main] o.g.data.DataGeneratorApplication        : No active profile set, falling back to 1 default profile: "default"
+2026-04-27 14:22:19.721  INFO [] 37128 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-27 14:22:20.883  INFO [] 37128 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 986 ms. Found 1 JPA repository interface.
+2026-04-27 14:22:29.422  INFO [] 37128 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 0 (http)
+2026-04-27 14:22:29.545  INFO [] 37128 --- [           main] o.a.coyote.http11.Http11NioProtocol      : Initializing ProtocolHandler ["http-nio-auto-1"]
+2026-04-27 14:22:29.554  INFO [] 37128 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-27 14:22:29.556  INFO [] 37128 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.20]
+2026-04-27 14:22:29.978  INFO [] 37128 --- [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 17932 ms
+2026-04-27 14:22:32.073 ERROR [] 37128 --- [           main] com.alibaba.druid.pool.DruidDataSource   : testWhileIdle is true, validationQuery not set
+2026-04-27 14:22:32.105  INFO [] 37128 --- [           main] com.alibaba.druid.pool.DruidDataSource   : {dataSource-1} inited
+2026-04-27 14:22:33.526  INFO [] 37128 --- [           main] c.b.d.d.DynamicRoutingDataSource         : dynamic-datasource - add a datasource named [data-generator] success
+2026-04-27 14:22:33.528  INFO [] 37128 --- [           main] c.b.d.d.DynamicRoutingDataSource         : dynamic-datasource initial loaded [1] datasource,primary datasource named [data-generator]
+2026-04-27 14:22:34.000  INFO [] 37128 --- [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-04-27 14:22:34.255  INFO [] 37128 --- [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
+2026-04-27 14:22:37.504  INFO [] 37128 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-27 14:22:37.759  INFO [] 37128 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:data-generator-phase10]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.2.224
+	Default catalog/schema: DATA-GENERATOR-PHASE10/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-27 14:22:40.355  INFO [] 37128 --- [           main] o.h.validator.internal.util.Version      : HV000001: Hibernate Validator 8.0.1.Final
+2026-04-27 14:22:44.991  INFO [] 37128 --- [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-27 14:22:45.134  INFO [] 37128 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-27 14:22:45.591  INFO [] 37128 --- [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-27 14:22:47.532  INFO [] 37128 --- [           main] org.gensokyo.data.cache.Templates        : 元数据缓存初始化完成
+2026-04-27 14:22:47.646  INFO [] 37128 --- [           main] org.gensokyo.data.cache.Templates        : 注册模板文件监听器完成
+2026-04-27 14:22:49.867  WARN [] 37128 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-27 14:22:52.048  INFO [] 37128 --- [           main] o.a.coyote.http11.Http11NioProtocol      : Starting ProtocolHandler ["http-nio-auto-1"]
+2026-04-27 14:22:52.289  INFO [] 37128 --- [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 53507 (http) with context path '/'
+2026-04-27 14:22:52.345  INFO [] 37128 --- [           main] o.g.data.DataGeneratorApplication        : Started DataGeneratorApplication in 46.704 seconds (process running for 51.09)

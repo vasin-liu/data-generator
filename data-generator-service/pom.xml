@@ -245,7 +245,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>${mainClass}</mainClass>
+                                        <mainClass>${mainClass}</mainClass>
+                    <skip>true</skip>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -258,10 +259,7 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
-                        <!-- 璺宠繃 repackage goal, 鐢盿ssembly鎻掍欢鎵撳寘锛岄伩鍏嶉噸澶嶆墦鍖咃紝鑺傜害鎵撳寘鏃堕棿 -->
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
+                        <!-- 璺宠�?repackage goal, 鐢盿ssembly鎻掍欢鎵撳寘锛岄伩鍏嶉噸澶嶆墦鍖咃紝鑺傜害鎵撳寘鏃堕�?-->
                     </execution>
                 </executions>
             </plugin>
@@ -293,14 +291,14 @@
                             <mainClass>${mainClass}</mainClass>
                         </manifest>
                     </archive>
-                    <!-- 瀛怭OM鐨勫睘鎬у畬鍏ㄨ鐩栫埗POM鐨?<descriptors combine.self="override"/> -->
+                    <!-- 瀛怭OM鐨勫睘鎬у畬鍏ㄨ鐩栫埗POM�?<descriptors combine.self="override"/> -->
                 </configuration>
                 <executions>
                     <execution>
                         <id>make-assembly</id><!-- ID 鏍囪瘑锛屽懡鍚嶉殢鎰?-->
                         <phase>package</phase> <!--缁戝畾鍒皃ackage鐢熷懡鍛ㄦ湡闃舵涓?-->
                         <goals>
-                            <goal>single</goal><!-- 鍦?PACKAGE 鐢熷懡鍛ㄦ湡闃舵浠呮墽琛屼竴娆?-->
+                            <goal>single</goal><!-- �?PACKAGE 鐢熷懡鍛ㄦ湡闃舵浠呮墽琛屼竴娆?-->
                         </goals>
                     </execution>
                 </executions>
@@ -308,4 +306,7 @@
         </plugins>
     </build>
 </project>
+
+
+
 

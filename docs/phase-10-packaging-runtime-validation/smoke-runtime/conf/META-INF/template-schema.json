@@ -1,0 +1,215 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "$ref" : "#/$defs/TemplateVO",
+  "$defs" : {
+    "FieldVO" : {
+      "type" : "object",
+      "properties" : {
+        "dependsOn" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "stages" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/StageVO"
+          }
+        }
+      }
+    },
+    "GeneratorVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "batchSize" : {
+            "type" : "integer"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "GeneratorVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "IteratorVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "choose" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/WhenVO"
+            }
+          },
+          "otherwise" : {
+            "$ref" : "#/$defs/OtherwiseVO"
+          },
+          "stages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/StageVO"
+            }
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "IteratorVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "OtherwiseVO" : {
+      "type" : "object",
+      "properties" : {
+        "then" : {
+          "$ref" : "#/$defs/ScriptVO"
+        }
+      }
+    },
+    "ScriptVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "ScriptVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "StageVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "StageVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "TemplateVO" : {
+      "type" : "object",
+      "properties" : {
+        "fields" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/$defs/FieldVO"
+          }
+        },
+        "generator" : {
+          "$ref" : "#/$defs/GeneratorVO"
+        },
+        "id" : {
+          "type" : "integer"
+        },
+        "iterator" : {
+          "$ref" : "#/$defs/IteratorVO"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "output" : {
+          "$ref" : "#/$defs/WriteStageVO"
+        }
+      }
+    },
+    "WhenVO" : {
+      "type" : "object",
+      "properties" : {
+        "then" : {
+          "$ref" : "#/$defs/ScriptVO"
+        },
+        "when" : {
+          "$ref" : "#/$defs/ScriptVO"
+        }
+      }
+    },
+    "WriteStageVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "writers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/$defs/WriterVO"
+            }
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "WriteStageVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "WriterVO" : {
+      "allOf" : [ {
+        "type" : "object",
+        "properties" : {
+          "dataSourceId" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          },
+          "template" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "WriterVO"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    }
+  }
+}

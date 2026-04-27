@@ -1,0 +1,174 @@
+# 数据集名称，各个文件中唯一
+name: parking_passing_record
+# 迭代器配置
+iterator:
+  type: CONSTANT
+  dataset: [
+    { "HPHM": "粤A11112","HPZL": 2,"CLLX": 24,"CSYS": 1,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X3","CAR_YEAR": "2021","NO_PLATE_CAR": 0,"PHONE": "13811111111" },
+    { "HPHM": "粤A33332","HPZL": 1,"CLLX": 21,"CSYS": 3,"HPYS": 2,"CAR_LOGO": "东风","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13822222222" },
+    { "HPHM": "粤A44441","HPZL": 2,"CLLX": 24,"CSYS": 4,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "A8","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13833333333" },
+    { "HPHM": "粤A55552","HPZL": 2,"CLLX": 24,"CSYS": 5,"HPYS": 0,"CAR_LOGO": "奔驰","CAR_SERIES": "S200","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13844444444" },
+    { "HPHM": "粤A66661","HPZL": 2,"CLLX": 24,"CSYS": 6,"HPYS": 0,"CAR_LOGO": "丰田","CAR_SERIES": "凯美瑞","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13855555555" },
+    { "HPHM": "粤A77772","HPZL": 1,"CLLX": 22,"CSYS": 7,"HPYS": 2,"CAR_LOGO": "解放","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13866666666" },
+    { "HPHM": "粤A88881","HPZL": 2,"CLLX": 24,"CSYS": 8,"HPYS": 0,"CAR_LOGO": "日产","CAR_SERIES": "奇骏","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13877777777" },
+    { "HPHM": "粤A99992","HPZL": 2,"CLLX": 24,"CSYS": 9,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X1","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13888888888" },
+    { "HPHM": "粤A12341","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q5","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13899999999" },
+    { "HPHM": "粤A88888","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q7","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13812345678" },
+    { "HPHM": "粤A379T7","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X5","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13898765432" },
+  ]
+  iterator:
+    type: CONSTANT
+    dataset: [ 1, 2 ]
+    iterator:
+      type: database
+      dataSourceId: 'tocc_parking'
+      sql: >-
+        SELECT ID,PARKING_LOT_NAME FROM PARKING_LOT_BASE WHERE STATUS = 'S0A'
+# 生成器配置
+generator:
+  type: SYNC
+  batchSize: 10
+# 数据集元数据配置
+fields:
+#  - name: PARKING_LOT
+#    stages:
+#      - type: READ
+#        inMemory: true
+#        readers:
+#          - type: CONSTANT
+#            content: [
+#              { "ID": "1902630276017287170","NAME": "宝墨园停车场","SPACE": 1639 },
+#              { "ID": "1904364811469844481","NAME": "沙湾古镇西2停车场","SPACE": 25 },
+#              { "ID": "1904365783499796482","NAME": "沙湾古镇东停车场","SPACE": 270 },
+#              { "ID": "1904366257288376321","NAME": "沙湾古镇南停车场","SPACE": 191 },
+#              { "ID": "1904373219975622658","NAME": "紫泥堂停车场","SPACE": 228 },
+#            ]
+#      - type: SELECT
+#        strategy:
+#          type: MULTIPLE_ORDER
+#          minTimes: 2
+#          maxTimes: 2
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.snowflake.next
+      - type: SELECT
+  - name: PARKING_LOT_ID
+#    dependsOn:
+#      - PARKING_LOT
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[2]['ID']
+      - type: SELECT
+  - name: PARKING_LOT_NAME
+#    dependsOn:
+#      - PARKING_LOT
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[2]['PARKING_LOT_NAME']
+      - type: SELECT
+  - name: PLATE_NUMBER
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0]['HPHM']
+  - name: PLATE_COLOR
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0]['HPYS']
+  - name: VEHICLE_COLOR
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[0]['CSYS']
+  - name: PASS_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.plusHours((#dataset[1].get()-1)*#faker.number.numberBetween(2,10))
+  - name: PASS_TYPE
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #dataset[1]
+  - name: PASS_PIC
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
+  - name: STATUS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'S0A' ]
+  - name: CREATE_TIME
+    dependsOn:
+      - PASS_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: UPDATE_TIME
+    dependsOn:
+      - PASS_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+# 数据输出配置
+output:
+  writers:
+    #- type: CONSOLE
+#    - type: CSV
+#      target: "E:\\Desktop\\PARKING_PASSING_RECORD_OUTPUT.csv"
+#      custom:
+#        headers: [ "ID",
+#                   "PARKING_LOT_ID",
+#                   "PARKING_LOT_NAME",
+#                   "PLATE_NUMBER",
+#                   "PLATE_COLOR",
+#                   "VEHICLE_COLOR",
+#                   "PASS_TIME",
+#                   "PASS_TYPE",
+#                   "PASS_PIC",
+#                   "STATUS",
+#                   "CREATE_TIME",
+#                   "UPDATE_TIME" ]
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'PARKING_PASSING_RECORD'
+      template: >-
+        ID,PARKING_LOT_ID,PARKING_LOT_NAME,PLATE_NUMBER,PLATE_COLOR,VEHICLE_COLOR,PASS_TIME,PASS_TYPE,
+        PASS_PIC,STATUS,CREATE_TIME,UPDATE_TIME

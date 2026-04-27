@@ -1,0 +1,21 @@
+server:
+  port: 0
+spring:
+  application:
+    name: data-generator-service-phase10-smoke
+  autoconfigure:
+    exclude: org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration
+  datasource:
+    dynamic:
+      primary: data-generator
+      datasource:
+        data-generator:
+          url: jdbc:h2:mem:data-generator-phase10;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          username: sa
+          password:
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          init:
+            schema: classpath:db/schema.sql
+      druid:
+        filters: stat,slf4j

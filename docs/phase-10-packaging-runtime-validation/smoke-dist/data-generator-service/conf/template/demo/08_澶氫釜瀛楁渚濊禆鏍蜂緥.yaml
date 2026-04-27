@@ -1,0 +1,68 @@
+# 数据集名称，各个文件中唯一
+name: demo_08
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+  - name: DISTRICT_CODE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: JDBC
+            dataSourceId: 'system_manage'
+            content: "SELECT CODE,NAME,PARENT_CODE FROM PC_DISTRICT WHERE PARENT_CODE = '440100' LIMIT 10"
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CODE"
+  - name: DISTRICT_NAME
+    dependsOn:
+      - DISTRICT_CODE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.NAME"
+  - name: SEQ_NO
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      - type: SELECT
+  - name: DISTRICT_CODE_COMBINE
+    dependsOn:
+      - SEQ_NO
+      - DISTRICT_CODE
+      - DISTRICT_NAME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0] + '-' + #dataset[1].CODE + '-' + #dataset[2]"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

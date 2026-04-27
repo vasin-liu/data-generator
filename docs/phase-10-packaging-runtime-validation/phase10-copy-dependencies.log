@@ -1,0 +1,178 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-database-core                                       [jar]
+[INFO] data-generator-iterator                                            [pom]
+[INFO] data-generator-iterator-number                                     [jar]
+[INFO] data-generator-iterator-constant                                   [jar]
+[INFO] data-generator-iterator-datetime                                   [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-reader-database                                     [jar]
+[INFO] data-generator-iterator-database                                   [jar]
+[INFO] data-generator-iterator-excel                                      [jar]
+[INFO] data-generator-iterator-csv                                        [jar]
+[INFO] data-generator-iterator-json                                       [jar]
+[INFO] data-generator-generator                                           [pom]
+[INFO] data-generator-generator-async                                     [jar]
+[INFO] data-generator-generator-sync                                      [jar]
+[INFO] data-generator-stage                                               [jar]
+[INFO] data-generator-faker                                               [jar]
+[INFO] data-generator-reader-spel                                         [jar]
+[INFO] data-generator-reader-ai                                           [jar]
+[INFO] data-generator-reader-excel                                        [jar]
+[INFO] data-generator-reader-json                                         [jar]
+[INFO] data-generator-reader-csv                                          [jar]
+[INFO] data-generator-scripter                                            [pom]
+[INFO] data-generator-scripter-spel                                       [jar]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-database                                     [jar]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-writer-csv                                          [jar]
+[INFO] data-generator-writer-excel                                        [jar]
+[INFO] data-generator-service                                             [jar]
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                            [1/32]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:copy-dependencies (default-cli) @ data-generator ---
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-configuration-processor:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-configuration-processor\4.0.5\spring-boot-configuration-processor-4.0.5.jar) to D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-configuration-processor-4.0.5.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                     [2/32]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:copy-dependencies (default-cli) @ data-generator-common ---
+[INFO] Copying artifact 'org.gensokyo:kits:jar:1.0.0:compile' (C:\Users\vasin\.m2\repository\org\gensokyo\kits\1.0.0\kits-1.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\kits-1.0.0.jar
+[INFO] Copying artifact 'com.google.code.findbugs:jsr305:jar:3.0.2:compile' (C:\Users\vasin\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar) to D:\Work\99_Code\data-generator\data-generator-common\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jsr305-3.0.2.jar
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-configuration-processor:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-configuration-processor\4.0.5\spring-boot-configuration-processor-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-configuration-processor-4.0.5.jar
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                       [3/32]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:copy-dependencies (default-cli) @ data-generator-core ---
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-starter:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-starter\4.0.5\spring-boot-starter-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-starter-4.0.5.jar
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-autoconfigure:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-autoconfigure\4.0.5\spring-boot-autoconfigure-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-autoconfigure-4.0.5.jar
+[INFO] Copying artifact 'org.springframework.boot:spring-boot:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot\4.0.5\spring-boot-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-4.0.5.jar
+[INFO] Copying artifact 'org.springframework:spring-context:jar:7.0.6:compile' (C:\Users\vasin\.m2\repository\org\springframework\spring-context\7.0.6\spring-context-7.0.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-context-7.0.6.jar
+[INFO] Copying artifact 'org.springframework:spring-aop:jar:7.0.6:compile' (C:\Users\vasin\.m2\repository\org\springframework\spring-aop\7.0.6\spring-aop-7.0.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-aop-7.0.6.jar
+[INFO] Copying artifact 'org.springframework:spring-beans:jar:7.0.6:compile' (C:\Users\vasin\.m2\repository\org\springframework\spring-beans\7.0.6\spring-beans-7.0.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-beans-7.0.6.jar
+[INFO] Copying artifact 'org.springframework:spring-expression:jar:7.0.6:compile' (C:\Users\vasin\.m2\repository\org\springframework\spring-expression\7.0.6\spring-expression-7.0.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-expression-7.0.6.jar
+[INFO] Copying artifact 'io.micrometer:micrometer-observation:jar:1.16.4:compile' (C:\Users\vasin\.m2\repository\io\micrometer\micrometer-observation\1.16.4\micrometer-observation-1.16.4.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\micrometer-observation-1.16.4.jar
+[INFO] Copying artifact 'io.micrometer:micrometer-commons:jar:1.16.4:compile' (C:\Users\vasin\.m2\repository\io\micrometer\micrometer-commons\1.16.4\micrometer-commons-1.16.4.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\micrometer-commons-1.16.4.jar
+[INFO] Copying artifact 'jakarta.annotation:jakarta.annotation-api:jar:3.0.0:compile' (C:\Users\vasin\.m2\repository\jakarta\annotation\jakarta.annotation-api\3.0.0\jakarta.annotation-api-3.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jakarta.annotation-api-3.0.0.jar
+[INFO] Copying artifact 'org.yaml:snakeyaml:jar:2.5:compile' (C:\Users\vasin\.m2\repository\org\yaml\snakeyaml\2.5\snakeyaml-2.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\snakeyaml-2.5.jar
+[INFO] Copying artifact 'tools.jackson.dataformat:jackson-dataformat-yaml:jar:3.1.0:compile' (C:\Users\vasin\.m2\repository\tools\jackson\dataformat\jackson-dataformat-yaml\3.1.0\jackson-dataformat-yaml-3.1.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jackson-dataformat-yaml-3.1.0.jar
+[INFO] Copying artifact 'tools.jackson.core:jackson-core:jar:3.1.0:compile' (C:\Users\vasin\.m2\repository\tools\jackson\core\jackson-core\3.1.0\jackson-core-3.1.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jackson-core-3.1.0.jar
+[INFO] Copying artifact 'org.snakeyaml:snakeyaml-engine:jar:3.0.1:compile' (C:\Users\vasin\.m2\repository\org\snakeyaml\snakeyaml-engine\3.0.1\snakeyaml-engine-3.0.1.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\snakeyaml-engine-3.0.1.jar
+[INFO] Copying artifact 'com.fasterxml.jackson.core:jackson-annotations:jar:2.21:compile' (C:\Users\vasin\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.21\jackson-annotations-2.21.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jackson-annotations-2.21.jar
+[INFO] Copying artifact 'tools.jackson.core:jackson-databind:jar:3.1.0:compile' (C:\Users\vasin\.m2\repository\tools\jackson\core\jackson-databind\3.1.0\jackson-databind-3.1.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jackson-databind-3.1.0.jar
+[INFO] Copying artifact 'org.jgrapht:jgrapht-core:jar:1.5.2:compile' (C:\Users\vasin\.m2\repository\org\jgrapht\jgrapht-core\1.5.2\jgrapht-core-1.5.2.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jgrapht-core-1.5.2.jar
+[INFO] Copying artifact 'org.jheaps:jheaps:jar:0.14:compile' (C:\Users\vasin\.m2\repository\org\jheaps\jheaps\0.14\jheaps-0.14.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jheaps-0.14.jar
+[INFO] Copying artifact 'org.apfloat:apfloat:jar:1.10.1:compile' (C:\Users\vasin\.m2\repository\org\apfloat\apfloat\1.10.1\apfloat-1.10.1.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\apfloat-1.10.1.jar
+[INFO] Copying artifact 'com.google.guava:guava:jar:33.2.0-jre:compile' (C:\Users\vasin\.m2\repository\com\google\guava\guava\33.2.0-jre\guava-33.2.0-jre.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\guava-33.2.0-jre.jar
+[INFO] Copying artifact 'com.google.guava:failureaccess:jar:1.0.2:compile' (C:\Users\vasin\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\failureaccess-1.0.2.jar
+[INFO] Copying artifact 'com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:compile' (C:\Users\vasin\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar
+[INFO] Copying artifact 'com.google.code.findbugs:jsr305:jar:3.0.2:compile' (C:\Users\vasin\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jsr305-3.0.2.jar
+[INFO] Copying artifact 'org.checkerframework:checker-qual:jar:3.42.0:compile' (C:\Users\vasin\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\checker-qual-3.42.0.jar
+[INFO] Copying artifact 'com.google.errorprone:error_prone_annotations:jar:2.26.1:compile' (C:\Users\vasin\.m2\repository\com\google\errorprone\error_prone_annotations\2.26.1\error_prone_annotations-2.26.1.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\error_prone_annotations-2.26.1.jar
+[INFO] Copying artifact 'com.google.j2objc:j2objc-annotations:jar:3.0.0:compile' (C:\Users\vasin\.m2\repository\com\google\j2objc\j2objc-annotations\3.0.0\j2objc-annotations-3.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\j2objc-annotations-3.0.0.jar
+[INFO] Copying artifact 'com.lmax:disruptor:jar:4.0.0:compile' (C:\Users\vasin\.m2\repository\com\lmax\disruptor\4.0.0\disruptor-4.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\disruptor-4.0.0.jar
+[INFO] Copying artifact 'org.gensokyo:kits:jar:1.0.0:compile' (C:\Users\vasin\.m2\repository\org\gensokyo\kits\1.0.0\kits-1.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\kits-1.0.0.jar
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-configuration-processor:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-configuration-processor\4.0.5\spring-boot-configuration-processor-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-configuration-processor-4.0.5.jar
+[INFO] Copying artifact 'org.springframework:spring-core:jar:7.0.6:compile' (C:\Users\vasin\.m2\repository\org\springframework\spring-core\7.0.6\spring-core-7.0.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-core-7.0.6.jar
+[INFO] Copying artifact 'commons-logging:commons-logging:jar:1.3.6:compile' (C:\Users\vasin\.m2\repository\commons-logging\commons-logging\1.3.6\commons-logging-1.3.6.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\commons-logging-1.3.6.jar
+[INFO] Copying artifact 'org.jspecify:jspecify:jar:1.0.0:compile' (C:\Users\vasin\.m2\repository\org\jspecify\jspecify\1.0.0\jspecify-1.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jspecify-1.0.0.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-database-core >------
+[INFO] Building data-generator-database-core 3.0.0-SNAPSHOT              [4/32]
+[INFO]   from data-generator-common\data-generator-database-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:copy-dependencies (default-cli) @ data-generator-database-core ---
+[INFO] Copying artifact 'org.gensokyo:kits:jar:1.0.0:compile' (C:\Users\vasin\.m2\repository\org\gensokyo\kits\1.0.0\kits-1.0.0.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\kits-1.0.0.jar
+[INFO] Copying artifact 'com.google.code.findbugs:jsr305:jar:3.0.2:compile' (C:\Users\vasin\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\jsr305-3.0.2.jar
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-configuration-processor:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-configuration-processor\4.0.5\spring-boot-configuration-processor-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-configuration-processor-4.0.5.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-iterator >---------
+[INFO] Building data-generator-iterator 3.0.0-SNAPSHOT                   [5/32]
+[INFO]   from data-generator-iterator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- dependency:3.7.0:copy-dependencies (default-cli) @ data-generator-iterator ---
+[INFO] Copying artifact 'org.springframework.boot:spring-boot-configuration-processor:jar:4.0.5:compile' (C:\Users\vasin\.m2\repository\org\springframework\boot\spring-boot-configuration-processor\4.0.5\spring-boot-configuration-processor-4.0.5.jar) to D:\Work\99_Code\data-generator\data-generator-iterator\docs\phase-10-packaging-runtime-validation\smoke-runtime\lib\spring-boot-configuration-processor-4.0.5.jar
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-number >-----
+[INFO] Building data-generator-iterator-number 3.0.0-SNAPSHOT            [6/32]
+[INFO]   from data-generator-iterator\data-generator-iterator-number\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator ..................................... SUCCESS [ 19.248 s]
+[INFO] data-generator-common .............................. SUCCESS [  3.834 s]
+[INFO] data-generator-core ................................ SUCCESS [  4.633 s]
+[INFO] data-generator-database-core ....................... SUCCESS [  1.057 s]
+[INFO] data-generator-iterator ............................ SUCCESS [  0.964 s]
+[INFO] data-generator-iterator-number ..................... FAILURE [  1.835 s]
+[INFO] data-generator-iterator-constant ................... SKIPPED
+[INFO] data-generator-iterator-datetime ................... SKIPPED
+[INFO] data-generator-reader .............................. SKIPPED
+[INFO] data-generator-reader-database ..................... SKIPPED
+[INFO] data-generator-iterator-database ................... SKIPPED
+[INFO] data-generator-iterator-excel ...................... SKIPPED
+[INFO] data-generator-iterator-csv ........................ SKIPPED
+[INFO] data-generator-iterator-json ....................... SKIPPED
+[INFO] data-generator-generator ........................... SKIPPED
+[INFO] data-generator-generator-async ..................... SKIPPED
+[INFO] data-generator-generator-sync ...................... SKIPPED
+[INFO] data-generator-stage ............................... SKIPPED
+[INFO] data-generator-faker ............................... SKIPPED
+[INFO] data-generator-reader-spel ......................... SKIPPED
+[INFO] data-generator-reader-ai ........................... SKIPPED
+[INFO] data-generator-reader-excel ........................ SKIPPED
+[INFO] data-generator-reader-json ......................... SKIPPED
+[INFO] data-generator-reader-csv .......................... SKIPPED
+[INFO] data-generator-scripter ............................ SKIPPED
+[INFO] data-generator-scripter-spel ....................... SKIPPED
+[INFO] data-generator-writer .............................. SKIPPED
+[INFO] data-generator-writer-database ..................... SKIPPED
+[INFO] data-generator-writer-kafka ........................ SKIPPED
+[INFO] data-generator-writer-csv .......................... SKIPPED
+[INFO] data-generator-writer-excel ........................ SKIPPED
+[INFO] data-generator-service ............................. SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  40.493 s
+[INFO] Finished at: 2026-04-27T13:42:52+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project data-generator-iterator-number: Could not resolve dependencies for project org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT was not found in http://172.25.20.192:8081/nexus/content/repositories/snapshots during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-snapshots has elapsed or updates are forced
+[ERROR] 	org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT was not found in https://repo.maven.apache.org/maven2/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of maven_central has elapsed or updates are forced
+[ERROR] 	org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT was not found in https://repo.spring.io/snapshot during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of spring-snapshots has elapsed or updates are forced
+[ERROR] 	org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT was not found in https://maven.vaadin.com/vaadin-prereleases during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of vaadin-prereleases has elapsed or updates are forced
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :data-generator-iterator-number

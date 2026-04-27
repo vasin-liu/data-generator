@@ -1,0 +1,98 @@
+# 数据集名称，各个文件中唯一
+name: VEHICLE_ONLINE_FLOW
+# 迭代器配置
+iterator:
+  type: CSV
+  path: "E:\\Desktop\\南沙\\车辆GPS在线.csv"
+  #endRow: 2
+  custom:
+    skipHeaderRecord: true
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+#  - name: VEHICLES
+#    stages:
+#      - type: READ
+#        inMemory: true
+#        readers:
+#          - type: CSV
+#            path: "E:\\Desktop\\车辆GPS在线.csv"
+#            endRow: 11
+#            custom:
+#              skipHeaderRecord: true
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: OPERATOR_ID
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '123456' ]
+  - name: STAT_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+  - name: PLATE_NUMBER
+#    dependsOn:
+#      - VEHICLES
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]['PLATE_NUMBER']"
+  - name: PLATE_TYPE
+#    dependsOn:
+#      - VEHICLES
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]['PLATE_TYPE']"
+  - name: ONLINE_STATUS
+#    dependsOn:
+#      - VEHICLES
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]['IS_ONLINE']"
+  - name: CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#faker.datetime.now()"
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'inet_cloud_ctrl'
+      target: 'VEHICLE_ONLINE_FLOW'
+      template: >-
+        ID,OPERATOR_ID,STAT_TIME,PLATE_NUMBER,PLATE_TYPE,ONLINE_STATUS,CREATE_TIME,UPDATE_TIME
