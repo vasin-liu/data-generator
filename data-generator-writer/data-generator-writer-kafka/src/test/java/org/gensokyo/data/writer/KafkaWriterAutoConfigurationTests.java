@@ -30,26 +30,19 @@ class KafkaWriterAutoConfigurationTests {
     }
 
     @Test
-    void internalKafkaStarterStillTargetsBoot3KafkaProperties() {
+    void internalKafkaStarterLoadsThroughBoot4CompatibilityBridge() {
         new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(MultipleKafkaAutoConfiguration.class))
+                .withConfiguration(AutoConfigurations.of(MultipleKafkaAutoConfiguration.class, KafkaWriterConfig.class))
                 .withPropertyValues(
                         "spring.kafka.multiple.primary=test",
-                        "spring.kafka.multiple.clusters.test.bootstrap-servers[0]=localhost:9092"
+                        "spring.kafka.multiple.clusters.test.bootstrap-servers[0]=localhost:9092",
+                        "spring.kafka.multiple.clusters.test.producer.properties.client.dns.lookup=use_all_dns_ips"
                 )
                 .run(context -> {
-                    assertThat(context).hasFailed();
-                    Throwable startupFailure = context.getStartupFailure();
-                    assertThat(startupFailure)
-                            .hasRootCauseInstanceOf(ClassNotFoundException.class)
-                            .isNotNull();
-                    Throwable rootCause = startupFailure;
-                    while (rootCause.getCause() != null) {
-                        rootCause = rootCause.getCause();
-                    }
-                    assertThat(rootCause)
-                            .isInstanceOf(ClassNotFoundException.class)
-                            .hasMessageContaining("org.springframework.boot.autoconfigure.kafka.KafkaProperties");
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(MultipleKafkaTemplate.class);
+                    assertThat(context).hasSingleBean(KafkaWriter.class);
+                    assertThat(context).hasBean("testKafkaTemplate");
                 });
     }
 }

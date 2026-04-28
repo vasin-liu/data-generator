@@ -39,6 +39,24 @@ As of `2026-04-24`, the official Spring Boot upgrade page shows `Spring Boot 4.0
 - Treat Jackson 3, Jakarta EE 11, and starter modularization as separate risk areas.
 - Keep JDK 25 as the runtime/build baseline throughout the plan.
 
+## Current status as of 2026-04-28
+
+Repository state verified against current `docs/` artifacts and parent POM:
+
+- parent BOM is already on Spring Boot `4.0.5`
+- parent Jackson baseline is already on `tools.jackson.*:3.1.0`
+- full repository `test` and full `clean package` have both been validated on JDK `25.0.1`
+- packaged service smoke startup has been validated under a local Boot 4-compatible smoke configuration
+
+What remains is no longer the core Boot 4 migration. The remaining work is compatibility debt around Boot 3-only internal starters and a small set of temporary shims:
+
+- internal `org.gensokyo.boot:kafka-spring-boot-starter:2.7.0` still depends on Boot 3 package paths
+- internal `org.gensokyo.boot:es-spring-boot-starter:2.7.0` still depends on Boot 3 package paths
+- service smoke/test startup still excludes Kafka-related auto-configuration on Boot 4
+- `data-generator-writer-elasticsearch` still relies on legacy `RestHighLevelClient`
+- the local dynamic-datasource Boot 4 compatibility shim should be removable once upstream support is available
+- some modules intentionally remain on Jackson 2 compatibility islands until upstream libraries catch up
+
 ## Current repository-specific hotspots
 
 - `data-generator-service`
@@ -52,7 +70,6 @@ As of `2026-04-24`, the official Spring Boot upgrade page shows `Spring Boot 4.0
   - GraalJS integration already adjusted for JDK 25
 - explicit dependency management in parent `pom.xml`
   - Jackson
-  - Reactor
   - Hibernate Validator
   - Druid
   - MyBatis Plus / MyBatis Flex
@@ -60,7 +77,6 @@ As of `2026-04-24`, the official Spring Boot upgrade page shows `Spring Boot 4.0
   - Kafka-related starters
 - test runtime customizations already present
   - Mockito javaagent
-  - Netty unsafe disabled in tests
   - ClassGraph upgraded for JDK 25
 
 ## Phase 0: Freeze the current JDK 25 baseline
@@ -282,24 +298,40 @@ Why this is a dedicated phase:
 
 TODO:
 
-- [ ] Review all direct `com.fasterxml.jackson.*` usage in source and tests.
-- [ ] Verify `jackson-dataformat-yaml` behavior under Jackson 3.
-- [ ] Verify `jackson-datatype-jsr310` behavior under Jackson 3.
-- [ ] Re-run and fix:
-  - [ ] `JsonSchemaGeneratorTests`
-  - [ ] service YAML parsing / generation tests
-- [ ] Check whether third-party libraries in this repository still require Jackson 2 compatibility.
+- [x] Review all direct `com.fasterxml.jackson.*` usage in source and tests.
+- [x] Verify `jackson-dataformat-yaml` behavior under Jackson 3.
+- [x] Verify `jackson-datatype-jsr310` behavior under Jackson 3.
+- [x] Re-run and fix:
+  - [x] `JsonSchemaGeneratorTests`
+  - [x] service YAML parsing / generation tests
+- [x] Check whether third-party libraries in this repository still require Jackson 2 compatibility.
 - [ ] Remove any no-longer-needed explicit Jackson version pinning after stabilization.
 
 Repository-specific focus:
 
-- [ ] `data-generator-service/src/test/java/org/gensokyo/data/generator/yaml/JsonSchemaGeneratorTests.java`
-- [ ] any module using YAML template loading
+- [x] `data-generator-service/src/test/java/org/gensokyo/data/generator/yaml/JsonSchemaGeneratorTests.java`
+- [x] any module using YAML template loading
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 test -Dtest=JsonSchemaGeneratorTests`
-- [ ] full `.\mvnw-jdk25.ps1 test`
+- [x] `.\mvnw-jdk25.ps1 test -Dtest=JsonSchemaGeneratorTests`
+- [x] full `.\mvnw-jdk25.ps1 test`
+
+Phase 5 decisions:
+
+- main Jackson baseline moved to `tools.jackson.*:3.1.0`
+- `jackson-datatype-jsr310` is no longer needed on the main Jackson 3 path
+- current compatibility islands that still remain on Jackson 2:
+  - `data-generator-faker`
+  - `data-generator-reader-ai`
+  - schema-generation code paths that still assume Jackson 2 model types
+
+Artifacts:
+
+- [`docs/phase-5-jackson3-migration/README.md`](D:\Work\99_Code\data-generator\docs\phase-5-jackson3-migration\README.md)
+- [`docs/phase-5-jackson3-migration/phase5-compile.log`](D:\Work\99_Code\data-generator\docs\phase-5-jackson3-migration\phase5-compile.log)
+- [`docs/phase-5-jackson3-migration/phase5-test-compile.log`](D:\Work\99_Code\data-generator\docs\phase-5-jackson3-migration\phase5-test-compile.log)
+- [`docs/phase-5-jackson3-migration/phase5-test.log`](D:\Work\99_Code\data-generator\docs\phase-5-jackson3-migration\phase5-test.log)
 
 ## Phase 6: Reactor / Netty / WebFlux alignment
 
@@ -307,19 +339,33 @@ Goal: validate all reactive HTTP paths on the new Boot 4.0 baseline.
 
 TODO:
 
-- [ ] Re-check explicit Reactor override in parent `pom.xml`.
-- [ ] Verify whether the override is still required under Boot 4.
-- [ ] Re-test active WebFlux modules:
-  - [ ] `data-generator-service`
-  - [ ] `data-generator-reader-ai`
-- [ ] Check whether test JVM flags still need:
-  - [ ] `-Dio.netty.noUnsafe=true`
-  - [ ] `-Xshare:off`
-- [ ] Validate that disabling Netty unsafe in tests does not hide real runtime problems.
+- [x] Re-check explicit Reactor override in parent `pom.xml`.
+- [x] Verify whether the override is still required under Boot 4.
+- [x] Re-test active WebFlux modules:
+  - [x] `data-generator-service`
+  - [x] `data-generator-reader-ai`
+- [x] Check whether test JVM flags still need:
+  - [x] `-Dio.netty.noUnsafe=true`
+  - [x] `-Xshare:off`
+- [x] Validate that disabling Netty unsafe in tests does not hide real runtime problems.
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -pl data-generator-service,data-generator-reader\data-generator-reader-ai test`
+- [x] `.\mvnw-jdk25.ps1 -pl data-generator-service,data-generator-reader\data-generator-reader-ai test`
+
+Phase 6 decisions:
+
+- removed the parent Reactor version override and returned version management to the Boot BOM
+- removed `-Dio.netty.noUnsafe=true` from the standard test JVM path
+- removed `-Xshare:off` from the standard test JVM path
+- updated the `data-generator-reader-ai` WebFlux request publishing path for Boot 4 compatibility
+
+Artifacts:
+
+- [`docs/phase-6-reactor-netty-webflux/README.md`](D:\Work\99_Code\data-generator\docs\phase-6-reactor-netty-webflux\README.md)
+- [`docs/phase-6-reactor-netty-webflux/phase6-test-final.log`](D:\Work\99_Code\data-generator\docs\phase-6-reactor-netty-webflux\phase6-test-final.log)
+- [`docs/phase-6-reactor-netty-webflux/phase6-test-no-unsafe.log`](D:\Work\99_Code\data-generator\docs\phase-6-reactor-netty-webflux\phase6-test-no-unsafe.log)
+- [`docs/phase-6-reactor-netty-webflux/phase6-test-no-extra-jvm-args.log`](D:\Work\99_Code\data-generator\docs\phase-6-reactor-netty-webflux\phase6-test-no-extra-jvm-args.log)
 
 ## Phase 7: Data layer and third-party starter alignment
 
@@ -327,28 +373,42 @@ Goal: validate libraries that are outside the main Spring-managed path.
 
 TODO:
 
-- [ ] Verify `dynamic-datasource-spring-boot-starter` compatibility with Boot 4.0.
-- [ ] Verify `druid` compatibility with Boot 4.0 and current test warnings.
-- [ ] Verify `mybatis-plus-spring-boot3-starter` replacement path for Boot 4.0.
-- [ ] Verify `mybatis-flex` Boot 4-compatible starter path.
-- [ ] Verify internal starters:
-  - [ ] `org.gensokyo.boot:kafka-spring-boot-starter`
-  - [ ] `org.gensokyo.boot:es-spring-boot-starter`
-- [ ] Re-check JDBC driver compatibility on JDK 25 + Boot 4:
-  - [ ] MySQL
-  - [ ] PostgreSQL
-  - [ ] ClickHouse
-  - [ ] DM JDBC
+- [x] Verify `dynamic-datasource-spring-boot-starter` compatibility with Boot 4.0.
+- [x] Verify `druid` compatibility with Boot 4.0 and current test warnings.
+- [x] Verify `mybatis-plus-spring-boot3-starter` replacement path for Boot 4.0.
+- [x] Verify `mybatis-flex` Boot 4-compatible starter path.
+- [x] Verify internal starters:
+  - [x] `org.gensokyo.boot:kafka-spring-boot-starter`
+  - [x] `org.gensokyo.boot:es-spring-boot-starter`
+- [x] Re-check JDBC driver compatibility on JDK 25 + Boot 4:
+  - [x] MySQL
+  - [x] PostgreSQL
+  - [x] ClickHouse
+  - [x] DM JDBC
 
 Repository-specific files:
 
-- [ ] [`pom.xml`](D:\Work\99_Code\data-generator\pom.xml)
-- [ ] [`data-generator-service/pom.xml`](D:\Work\99_Code\data-generator\data-generator-service\pom.xml)
+- [x] [`pom.xml`](D:\Work\99_Code\data-generator\pom.xml)
+- [x] [`data-generator-service/pom.xml`](D:\Work\99_Code\data-generator\data-generator-service\pom.xml)
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -pl data-generator-service test`
-- [ ] verify the application context still starts
+- [x] `.\mvnw-jdk25.ps1 -pl data-generator-service test`
+- [x] verify the application context still starts
+
+Phase 7 decisions:
+
+- `dynamic-datasource-spring-boot-starter:3.6.1` is not Boot 4 compatible as-is
+- service startup now uses a local Boot 4 compatibility shim for dynamic datasource wiring
+- `mybatis-plus` and `mybatis-flex` are currently dependency-managed only and were not found to be active runtime blockers in this repository
+- JDBC driver class availability for MySQL, PostgreSQL, ClickHouse, and DM has been validated on JDK 25
+- internal Kafka and Elasticsearch starter runtime behavior remains a later-phase concern, not a Phase 7 service bootstrap blocker
+
+Artifacts:
+
+- [`docs/phase-7-data-layer-alignment/README.md`](D:\Work\99_Code\data-generator\docs\phase-7-data-layer-alignment\README.md)
+- [`docs/phase-7-data-layer-alignment/phase7-service-test-am.log`](D:\Work\99_Code\data-generator\docs\phase-7-data-layer-alignment\phase7-service-test-am.log)
+- [`docs/phase-7-data-layer-alignment/phase7-starter-compile.log`](D:\Work\99_Code\data-generator\docs\phase-7-data-layer-alignment\phase7-starter-compile.log)
 
 ## Phase 8: Elasticsearch and Kafka component review
 
@@ -356,17 +416,30 @@ Goal: validate messaging and search dependencies that are sensitive to Spring re
 
 TODO:
 
-- [ ] Confirm whether Boot 4.0 still supports the current Elasticsearch client path used here.
+- [x] Confirm whether Boot 4.0 still supports the current Elasticsearch client path used here.
 - [ ] If needed, plan migration away from legacy high-level REST client usage.
-- [ ] Verify Kafka auto-configuration from internal starter still initializes on Boot 4.0.
-- [ ] Re-check `data-generator-reader-elasticsearch` and `data-generator-writer-elasticsearch`.
-- [ ] Re-check `data-generator-writer-kafka`.
+- [x] Verify Kafka auto-configuration from internal starter still initializes on Boot 4.0.
+- [x] Re-check `data-generator-reader-elasticsearch` and `data-generator-writer-elasticsearch`.
+- [x] Re-check `data-generator-writer-kafka`.
 
 Validation gate:
 
-- [ ] module compile
-- [ ] context startup
-- [ ] package build
+- [x] module compile
+- [x] context startup
+- [x] package build
+
+Phase 8 decisions:
+
+- repository-owned Kafka/Elasticsearch wrapper modules were aligned to Boot 4 auto-configuration conventions
+- the internal Kafka starter is not Boot 4 runtime-compatible because it still depends on Boot 3 `KafkaProperties` package paths
+- the internal Elasticsearch starter is not Boot 4 runtime-compatible because it still depends on Boot 3 `ElasticsearchProperties` package paths
+- `data-generator-writer-elasticsearch` still depends on legacy `RestHighLevelClient` and should be treated as follow-up migration debt
+
+Artifacts:
+
+- [`docs/phase-8-messaging-search-alignment/README.md`](D:\Work\99_Code\data-generator\docs\phase-8-messaging-search-alignment\README.md)
+- [`docs/phase-8-messaging-search-alignment/phase8-module-test.log`](D:\Work\99_Code\data-generator\docs\phase-8-messaging-search-alignment\phase8-module-test.log)
+- [`docs/phase-8-messaging-search-alignment/phase8-package.log`](D:\Work\99_Code\data-generator\docs\phase-8-messaging-search-alignment\phase8-package.log)
 
 ## Phase 9: Test framework and observability cleanup
 
@@ -374,18 +447,30 @@ Goal: finish the Boot 4.0 migration without leaving temporary migration aids beh
 
 TODO:
 
-- [ ] Temporarily add `spring-boot-properties-migrator` if configuration migration diagnostics are needed.
-- [ ] Capture all renamed/removed Boot properties during test startup.
-- [ ] Apply config changes in source files instead of keeping the migrator long-term.
-- [ ] Remove the migrator after property cleanup is complete.
-- [ ] Re-check Boot 4 logging behavior:
-  - [ ] UTF-8 default charset expectations
-  - [ ] `logback-spring.xml`
+- [x] Temporarily add `spring-boot-properties-migrator` if configuration migration diagnostics are needed.
+- [x] Capture all renamed/removed Boot properties during test startup.
+- [x] Apply config changes in source files instead of keeping the migrator long-term.
+- [x] Remove the migrator after property cleanup is complete.
+- [x] Re-check Boot 4 logging behavior:
+  - [x] UTF-8 default charset expectations
+  - [x] `logback-spring.xml`
 - [ ] Re-check Actuator / health probe defaults if Actuator is introduced later.
 
 Validation gate:
 
-- [ ] full `.\mvnw-jdk25.ps1 test`
+- [x] full `.\mvnw-jdk25.ps1 test`
+
+Phase 9 decisions:
+
+- no `spring-boot-properties-migrator` dependency was needed and none was added
+- active service configuration did not surface Boot 4 property migration blockers during the full test run
+- logging output remains explicitly configured for UTF-8 in `logback-spring.xml`
+- remaining startup warnings are understood and documented, primarily around Druid and the intentionally bounded internal starter compatibility tests
+
+Artifacts:
+
+- [`docs/phase-9-test-observability-cleanup/README.md`](D:\Work\99_Code\data-generator\docs\phase-9-test-observability-cleanup\README.md)
+- [`docs/phase-9-test-observability-cleanup/phase9-full-test.log`](D:\Work\99_Code\data-generator\docs\phase-9-test-observability-cleanup\phase9-full-test.log)
 
 ## Phase 10: Packaging, runtime validation, and rollback readiness
 
@@ -393,48 +478,59 @@ Goal: validate production-facing packaging and keep a clean rollback path.
 
 TODO:
 
-- [ ] Verify `clean package` still produces the expected service tarball.
-- [ ] Verify assembly output layout is unchanged unless intentionally modified.
-- [ ] Run a smoke startup with the packaged service artifact.
-- [ ] Record any runtime-only warnings or property migrations.
-- [ ] Document rollback instructions to the last Boot 3.5.x + JDK 25 green commit.
+- [x] Verify `clean package` still produces the expected service tarball.
+- [x] Verify assembly output layout is unchanged unless intentionally modified.
+- [x] Run a smoke startup with the packaged service artifact.
+- [x] Record any runtime-only warnings or property migrations.
+- [x] Document rollback instructions to the last Boot 3.5.x + JDK 25 green commit.
 
 Validation gate:
 
-- [ ] `.\mvnw-jdk25.ps1 -U -DskipTests clean package`
-- [ ] packaged smoke run
+- [x] `.\mvnw-jdk25.ps1 -U -DskipTests clean package`
+- [x] packaged smoke run
 
-## Suggested implementation sequence
+Phase 10 decisions:
 
-1. Phase 0
-2. Phase 1
-3. Phase 2
-4. Phase 3
-5. Phase 4
-6. Phase 5
-7. Phase 6
-8. Phase 7
-9. Phase 8
-10. Phase 9
-11. Phase 10
+- packaging remains centered on `maven-assembly-plugin`
+- Spring Boot repackaging is skipped at plugin level in the service module
+- packaged smoke startup is valid on Boot 4 when Kafka Boot 3-only auto-configuration is excluded from the smoke config
+- Windows `tar` extraction still has a local validation limitation for some non-ASCII archive entries, but package creation itself is not blocked
 
-## Suggested commit breakdown
+Artifacts:
 
-1. `docs: add spring boot 4 upgrade plan`
-2. `build: move parent BOM to spring boot 4`
-3. `fix: align starters and framework 7 APIs`
-4. `fix: migrate jackson 3 and web stack`
-5. `fix: align data and integration libraries for boot 4`
-6. `chore: remove temporary migration aids and finalize packaging`
+- [`docs/phase-10-packaging-runtime-validation/README.md`](D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\README.md)
+- [`docs/phase-10-packaging-runtime-validation/phase10-clean-package.log`](D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\phase10-clean-package.log)
+- [`docs/phase-10-packaging-runtime-validation/phase10-smoke.out.log`](D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\phase10-smoke.out.log)
+- [`docs/phase-10-packaging-runtime-validation/phase10-smoke.err.log`](D:\Work\99_Code\data-generator\docs\phase-10-packaging-runtime-validation\phase10-smoke.err.log)
+
+## Suggested next-step sequence
+
+1. Upgrade or replace `org.gensokyo.boot:kafka-spring-boot-starter` so Boot 4 service startup no longer requires exclusions.
+2. Upgrade or replace `org.gensokyo.boot:es-spring-boot-starter` and remove Boot 3 property-model assumptions.
+3. Replace `RestHighLevelClient` in `data-generator-writer-elasticsearch` with a supported client path.
+4. Remove temporary service smoke/test exclusions and re-validate real application context startup.
+5. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
+6. Collapse remaining Jackson 2 compatibility islands when upstream libraries become Jackson 3 ready.
+7. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+
+## Suggested remaining commit breakdown
+
+1. `fix: upgrade or replace boot4-incompatible internal kafka starter`
+2. `fix: upgrade or replace boot4-incompatible internal elasticsearch starter`
+3. `refactor: migrate elasticsearch writer off rest high level client`
+4. `cleanup: remove boot4 smoke exclusions and compatibility shims where possible`
 
 ## Definition of done
 
-The Spring Boot 4.0 upgrade is complete when all of the following are true:
+The Spring Boot 4.0 baseline move is already validated. The remaining Boot 4 completion criteria are:
 
-- [ ] parent BOM is on Spring Boot `4.0.x`
-- [ ] repository builds on JDK 25
-- [ ] full `test` passes
-- [ ] full `clean package` passes
-- [ ] no temporary migrator dependency remains
-- [ ] the remaining warnings are understood and documented
-- [ ] this document is updated with final decisions and any deviations from the plan
+- [x] parent BOM is on Spring Boot `4.0.x`
+- [x] repository builds on JDK 25
+- [x] full `test` passes
+- [x] full `clean package` passes
+- [x] no temporary migrator dependency remains
+- [x] the remaining warnings are understood and documented
+- [x] this document is updated with final decisions and any deviations from the plan
+- [ ] service startup no longer depends on excluding Boot 3-only Kafka/Elasticsearch auto-configuration paths
+- [ ] internal `org.gensokyo.boot` starters are upgraded or replaced for native Boot 4 compatibility
+- [ ] legacy Elasticsearch `RestHighLevelClient` usage is removed or explicitly accepted as long-term technical debt

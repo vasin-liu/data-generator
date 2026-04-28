@@ -31,29 +31,24 @@ class EsWriterAutoConfigurationTests {
     }
 
     @Test
-    void internalElasticsearchStarterStillTargetsBoot3ElasticsearchProperties() {
+    void internalElasticsearchStarterLoadsThroughBoot4CompatibilityBridge() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
                         MultipleElasticsearchAutoConfiguration.class,
-                        MultipleElasticsearchClusterAutoConfiguration.class
+                        MultipleElasticsearchClusterAutoConfiguration.class,
+                        EsWriterConfig.class
                 ))
                 .withPropertyValues(
                         "spring.elasticsearch.multiple.primary=test",
-                        "spring.elasticsearch.multiple.clusters.test.uris[0]=http://localhost:9200"
+                        "spring.elasticsearch.multiple.clusters.test.uris[0]=http://localhost:9200",
+                        "spring.elasticsearch.multiple.clusters.test.socket-timeout=5s"
                 )
                 .run(context -> {
-                    assertThat(context).hasFailed();
-                    Throwable startupFailure = context.getStartupFailure();
-                    assertThat(startupFailure)
-                            .hasRootCauseInstanceOf(ClassNotFoundException.class)
-                            .isNotNull();
-                    Throwable rootCause = startupFailure;
-                    while (rootCause.getCause() != null) {
-                        rootCause = rootCause.getCause();
-                    }
-                    assertThat(rootCause)
-                            .isInstanceOf(ClassNotFoundException.class)
-                            .hasMessageContaining("org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchProperties");
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasSingleBean(MultipleElasticsearchRestClient.class);
+                    assertThat(context).hasSingleBean(ElasticsearchWriter.class);
+                    assertThat(context).hasBean("testRestClient");
+                    assertThat(context).hasBean("testRestHighLevelClient");
                 });
     }
 }
