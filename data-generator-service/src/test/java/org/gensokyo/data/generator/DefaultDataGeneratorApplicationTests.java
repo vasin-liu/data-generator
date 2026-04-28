@@ -1,7 +1,7 @@
 package org.gensokyo.data.generator;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
-import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +14,11 @@ class DefaultDataGeneratorApplicationTests {
     private DynamicRoutingDataSource dynamicRoutingDataSource;
 
     @Autowired
-    private MultipleKafkaTemplate multipleKafkaTemplate;
+    private DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
 
     @Test
     void contextLoads() {
-        Assertions.assertNotNull(multipleKafkaTemplate);
+        Assertions.assertNotNull(kafkaTemplateRegistry);
         Assertions.assertNotNull(dynamicRoutingDataSource);
         Assertions.assertTrue(dynamicRoutingDataSource.getDataSources().containsKey("data-generator"));
     }

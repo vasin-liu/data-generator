@@ -3,10 +3,6 @@ server:
 spring:
   application:
     name: data-generator-service-phase10-smoke
-  autoconfigure:
-    exclude:
-      - org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration
-      - org.gensokyo.data.writer.KafkaWriterConfig
   datasource:
     dynamic:
       primary: data-generator

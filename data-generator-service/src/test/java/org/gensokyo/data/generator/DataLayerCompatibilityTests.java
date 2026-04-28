@@ -1,5 +1,7 @@
 package org.gensokyo.data.generator;
 
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,8 @@ class DataLayerCompatibilityTests {
         assertPresent("com.clickhouse.jdbc.ClickHouseDriver");
         assertPresent("dm.jdbc.driver.DmDriver");
 
-        assertPresent("org.gensokyo.boot.kafka.support.MultipleKafkaTemplate");
+        Assertions.assertNotNull(DynamicKafkaTemplateRegistry.class);
+        Assertions.assertNotNull(DynamicElasticsearchClientRegistry.class);
     }
 
     private static void assertPresent(String className) throws ClassNotFoundException {

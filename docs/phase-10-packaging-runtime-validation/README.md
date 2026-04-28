@@ -14,7 +14,7 @@ Validate the production-facing package output on Spring Boot 4.0.5 and JDK 25, c
   - `bin/`
   - `conf/`
   - `lib/`
-- The packaged service can start successfully from the assembled runtime layout when the known Kafka Boot 4 blocker is excluded in smoke configuration.
+- The packaged service can start successfully from the assembled runtime layout under the current repository-local Boot 4 Kafka/Elasticsearch integration path.
 - The current Windows `tar` tool fails when extracting the full archive because some packaged template file names contain non-ASCII characters.
   - This did not block package creation.
   - It only affected local full-archive extraction during validation.
@@ -47,7 +47,7 @@ Smoke validation:
   - `conf/logback-spring.xml`
   - `conf/db`
   - `conf/META-INF`
-- started with a local smoke config backed by H2 and excluding the known Kafka Boot 4 blocker
+- started with a local smoke config backed by H2
 
 Results:
 
@@ -58,10 +58,8 @@ Results:
 
 - The smoke startup still logs the existing Druid warning:
   - `testWhileIdle is true, validationQuery not set`
-- The smoke config had to exclude:
-  - `org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration`
-  - `org.gensokyo.data.writer.KafkaWriterConfig`
-- This is consistent with the Phase 8 conclusion that Kafka integration is still bounded by the non-Boot-4-compatible internal starter path.
+- No Kafka-specific auto-configuration exclusion is required on the current repository-local dynamic cluster path.
+- The remaining runtime caveat is the local dynamic-datasource compatibility shim that is still excluded at application bootstrap.
 
 ## Rollback Readiness
 
@@ -80,4 +78,4 @@ Results:
 - Phase 10 is complete.
 - The repository now passes both full `test` and full `clean package` on Spring Boot 4.0.5 + JDK 25.
 - The packaged service is startup-valid under a local smoke configuration.
-- The remaining runtime caveat is still the Kafka internal starter compatibility boundary already documented in Phase 8.
+- The remaining runtime caveat is the dynamic-datasource compatibility boundary already documented in Phase 7.

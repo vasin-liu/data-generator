@@ -1,8 +1,7 @@
 package org.gensokyo.data.writer;
 
-import org.gensokyo.boot.elasticsearch.MultipleElasticsearchAutoConfiguration;
-import org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterAutoConfiguration;
-import org.gensokyo.boot.elasticsearch.support.MultipleElasticsearchRestClient;
+import org.gensokyo.data.config.DynamicElasticsearchConfig;
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -18,24 +17,23 @@ class EsWriterAutoConfigurationTests {
     @Test
     void elasticsearchWriterIsRegisteredWhenClientExists() {
         contextRunner
-                .withBean(MultipleElasticsearchRestClient.class, () -> Mockito.mock(MultipleElasticsearchRestClient.class))
+                .withBean(DynamicElasticsearchClientRegistry.class, () -> Mockito.mock(DynamicElasticsearchClientRegistry.class))
                 .run(context -> assertThat(context).hasSingleBean(ElasticsearchWriter.class));
     }
 
     @Test
     void elasticsearchWriterBacksOffWhenCustomBeanExists() {
         contextRunner
-                .withBean(MultipleElasticsearchRestClient.class, () -> Mockito.mock(MultipleElasticsearchRestClient.class))
+                .withBean(DynamicElasticsearchClientRegistry.class, () -> Mockito.mock(DynamicElasticsearchClientRegistry.class))
                 .withBean("customElasticsearchWriter", ElasticsearchWriter.class, () -> Mockito.mock(ElasticsearchWriter.class))
                 .run(context -> assertThat(context).getBeans(ElasticsearchWriter.class).hasSize(1));
     }
 
     @Test
-    void internalElasticsearchStarterLoadsThroughBoot4CompatibilityBridge() {
+    void dynamicElasticsearchRegistryLoadsWithoutInternalStarter() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
-                        MultipleElasticsearchAutoConfiguration.class,
-                        MultipleElasticsearchClusterAutoConfiguration.class,
+                        DynamicElasticsearchConfig.class,
                         EsWriterConfig.class
                 ))
                 .withPropertyValues(
@@ -45,10 +43,11 @@ class EsWriterAutoConfigurationTests {
                 )
                 .run(context -> {
                     assertThat(context).hasNotFailed();
-                    assertThat(context).hasSingleBean(MultipleElasticsearchRestClient.class);
+                    assertThat(context).hasSingleBean(DynamicElasticsearchClientRegistry.class);
                     assertThat(context).hasSingleBean(ElasticsearchWriter.class);
                     assertThat(context).hasBean("testRestClient");
-                    assertThat(context).hasBean("testRestHighLevelClient");
+                    assertThat(context).doesNotHaveBean("testRestHighLevelClient");
+                    assertThat(context.getBean(DynamicElasticsearchClientRegistry.class).hasCluster("test")).isTrue();
                 });
     }
 }

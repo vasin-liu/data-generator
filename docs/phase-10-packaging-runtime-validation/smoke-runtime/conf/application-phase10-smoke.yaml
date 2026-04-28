@@ -3,8 +3,6 @@ server:
 spring:
   application:
     name: data-generator-service-phase10-smoke
-  autoconfigure:
-    exclude: org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration
   datasource:
     dynamic:
       primary: data-generator

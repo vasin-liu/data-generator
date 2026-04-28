@@ -27,11 +27,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.gensokyo.boot</groupId>
-            <artifactId>es-spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <scope>provided</scope>

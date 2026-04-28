@@ -8,9 +8,9 @@ package org.gensokyo.data.writer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.kit.base.ObjectKit;
 import org.gensokyo.kit.character.StrKit;
@@ -34,12 +34,12 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class KafkaWriter<S extends WriteStageVO, T extends KafkaWriterVO> implements Writer<S, T> {
     private final PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}");
-    private final MultipleKafkaTemplate multipleKafkaTemplate;
+    private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
 
     @Override
     public long write(final StageContext<S> ctx, final T wvo, final List<Map<String, Object>> dataset) {
         try {
-            KafkaTemplate<String, String> kt = multipleKafkaTemplate.template(wvo.getDataSourceId());
+            KafkaTemplate<String, String> kt = kafkaTemplateRegistry.template(wvo.getDataSourceId());
             Objects.requireNonNull(dataset)
                     .forEach(d -> kt.send(Objects.requireNonNull(wvo.getTarget()), fillValue(wvo.getTemplate(), d)));
             return dataset.size();

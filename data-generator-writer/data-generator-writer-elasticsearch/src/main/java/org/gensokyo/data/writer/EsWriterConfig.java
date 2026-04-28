@@ -5,8 +5,8 @@
  */
 package org.gensokyo.data.writer;
 
-import org.elasticsearch.client.RestHighLevelClient;
-import org.gensokyo.boot.elasticsearch.support.MultipleElasticsearchRestClient;
+import org.elasticsearch.client.RestClient;
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -21,14 +21,14 @@ import org.springframework.context.annotation.Bean;
  * @since 2024/7/25 , Version 1.0.0
  */
 @AutoConfiguration
-@ConditionalOnClass({MultipleElasticsearchRestClient.class, RestHighLevelClient.class})
+@ConditionalOnClass({DynamicElasticsearchClientRegistry.class, RestClient.class})
 public class EsWriterConfig {
 
     @Bean
     @ConditionalOnMissingBean(ElasticsearchWriter.class)
     public <S extends WriteStageVO, T extends ElasticsearchWriterVO> ElasticsearchWriter<S, T> elasticsearchWriter(
-            MultipleElasticsearchRestClient multipleElasticsearchRestClient) {
-        return new ElasticsearchWriter<>(multipleElasticsearchRestClient);
+            DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+        return new ElasticsearchWriter<>(elasticsearchClientRegistry);
     }
 
 }

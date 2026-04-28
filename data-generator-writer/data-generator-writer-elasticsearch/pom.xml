@@ -22,23 +22,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.gensokyo.boot</groupId>
-            <artifactId>es-spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>7.17.8</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-dataformat-yaml</artifactId>
-                    <groupId>com.fasterxml.jackson.dataformat</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <scope>provided</scope>

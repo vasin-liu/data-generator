@@ -1,5 +1,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.gensokyo.data.config.FactoryConfig,\
+org.gensokyo.data.config.DynamicKafkaConfig,\
+org.gensokyo.data.config.DynamicElasticsearchConfig,\
 org.gensokyo.data.config.ReaderConfig,\
 org.gensokyo.data.config.WriterConfig,\
 org.gensokyo.data.config.ScriptConfig,\

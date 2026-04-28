@@ -50,10 +50,9 @@ Repository state verified against current `docs/` artifacts and parent POM:
 
 What remains is no longer the core Boot 4 migration. The remaining work is compatibility debt around Boot 3-only internal starters and a small set of temporary shims:
 
-- internal `org.gensokyo.boot:kafka-spring-boot-starter:2.7.0` still depends on Boot 3 package paths
-- internal `org.gensokyo.boot:es-spring-boot-starter:2.7.0` still depends on Boot 3 package paths
-- service smoke/test startup still excludes Kafka-related auto-configuration on Boot 4
-- `data-generator-writer-elasticsearch` still relies on legacy `RestHighLevelClient`
+- repository-local dynamic Kafka cluster loading is now provided by `data-generator-core`, and `data-generator-writer-kafka` no longer depends on the internal Kafka starter
+- repository-local dynamic Elasticsearch cluster loading is now provided by `data-generator-core`, and the reader/writer Elasticsearch modules no longer depend on the internal Elasticsearch starter
+- `data-generator-writer-elasticsearch` has been migrated off `RestHighLevelClient` to low-level `RestClient` bulk requests
 - the local dynamic-datasource Boot 4 compatibility shim should be removable once upstream support is available
 - some modules intentionally remain on Jackson 2 compatibility islands until upstream libraries catch up
 
@@ -73,8 +72,7 @@ What remains is no longer the core Boot 4 migration. The remaining work is compa
   - Hibernate Validator
   - Druid
   - MyBatis Plus / MyBatis Flex
-  - Elasticsearch client
-  - Kafka-related starters
+  - Elasticsearch low-level client
 - test runtime customizations already present
   - Mockito javaagent
   - ClassGraph upgraded for JDK 25
@@ -236,7 +234,6 @@ Phase 3 decisions:
 - remaining Spring `@Nullable` usage was moved to JSpecify `@Nullable`
 - the service smoke test now excludes known-later-phase incompatible auto-configurations so Phase 3 can validate the Boot 4 / Framework 7 core baseline without prematurely forcing the Phase 7/8 migrations:
   - `com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration`
-  - `org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration`
 
 Artifacts:
 
@@ -402,7 +399,7 @@ Phase 7 decisions:
 - service startup now uses a local Boot 4 compatibility shim for dynamic datasource wiring
 - `mybatis-plus` and `mybatis-flex` are currently dependency-managed only and were not found to be active runtime blockers in this repository
 - JDBC driver class availability for MySQL, PostgreSQL, ClickHouse, and DM has been validated on JDK 25
-- internal Kafka and Elasticsearch starter runtime behavior remains a later-phase concern, not a Phase 7 service bootstrap blocker
+- internal Kafka and Elasticsearch starter runtime behavior was later removed from the active Kafka/Elasticsearch modules through repository-local Boot 4-native replacements
 
 Artifacts:
 
@@ -417,7 +414,7 @@ Goal: validate messaging and search dependencies that are sensitive to Spring re
 TODO:
 
 - [x] Confirm whether Boot 4.0 still supports the current Elasticsearch client path used here.
-- [ ] If needed, plan migration away from legacy high-level REST client usage.
+- [x] Replace legacy high-level REST client usage with a supported low-level client path.
 - [x] Verify Kafka auto-configuration from internal starter still initializes on Boot 4.0.
 - [x] Re-check `data-generator-reader-elasticsearch` and `data-generator-writer-elasticsearch`.
 - [x] Re-check `data-generator-writer-kafka`.
@@ -431,9 +428,10 @@ Validation gate:
 Phase 8 decisions:
 
 - repository-owned Kafka/Elasticsearch wrapper modules were aligned to Boot 4 auto-configuration conventions
-- the internal Kafka starter is not Boot 4 runtime-compatible because it still depends on Boot 3 `KafkaProperties` package paths
-- the internal Elasticsearch starter is not Boot 4 runtime-compatible because it still depends on Boot 3 `ElasticsearchProperties` package paths
-- `data-generator-writer-elasticsearch` still depends on legacy `RestHighLevelClient` and should be treated as follow-up migration debt
+- repository-local dynamic Kafka cluster loading replaced the Boot 3-only internal Kafka starter path in `data-generator-writer-kafka`
+- repository-local dynamic Elasticsearch cluster loading replaced the Boot 3-only internal Elasticsearch starter path in `data-generator-reader-elasticsearch` and `data-generator-writer-elasticsearch`
+- `data-generator-writer-elasticsearch` now writes through low-level `RestClient` `_bulk` requests instead of `RestHighLevelClient`
+- focused Boot 4 context tests passed for Kafka writer, Elasticsearch reader/writer, and service compatibility coverage after the replacement
 
 Artifacts:
 
@@ -493,7 +491,7 @@ Phase 10 decisions:
 
 - packaging remains centered on `maven-assembly-plugin`
 - Spring Boot repackaging is skipped at plugin level in the service module
-- packaged smoke startup is valid on Boot 4 when Kafka Boot 3-only auto-configuration is excluded from the smoke config
+- packaged smoke startup is valid on Boot 4 on the current repository-local Kafka/Elasticsearch integration path
 - Windows `tar` extraction still has a local validation limitation for some non-ASCII archive entries, but package creation itself is not blocked
 
 Artifacts:
@@ -505,18 +503,22 @@ Artifacts:
 
 ## Suggested next-step sequence
 
-1. Upgrade or replace `org.gensokyo.boot:kafka-spring-boot-starter` so Boot 4 service startup no longer requires exclusions.
-2. Upgrade or replace `org.gensokyo.boot:es-spring-boot-starter` and remove Boot 3 property-model assumptions.
-3. Replace `RestHighLevelClient` in `data-generator-writer-elasticsearch` with a supported client path.
-4. Remove temporary service smoke/test exclusions and re-validate real application context startup.
-5. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
-6. Collapse remaining Jackson 2 compatibility islands when upstream libraries become Jackson 3 ready.
-7. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+1. Remove any remaining smoke/package-level Kafka exclusion references that are now obsolete after the repository-local Kafka registry migration.
+2. Remove temporary service smoke/test exclusions and re-validate real application context startup without the dynamic-datasource compatibility shim.
+3. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
+4. Collapse remaining Jackson 2 compatibility islands when upstream libraries become Jackson 3 ready.
+5. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+
+Current blocker for step 2:
+
+- `dynamic-datasource-spring-boot-starter:3.6.1` still imports Boot 3 class `org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration`
+- removing the application-level exclusion currently breaks `DefaultDataGeneratorApplicationTests` during configuration-class import before local replacement beans can take effect
+- the repository-local `Boot4DynamicDataSourceConfiguration` remains necessary until the upstream starter is upgraded or replaced
 
 ## Suggested remaining commit breakdown
 
 1. `fix: upgrade or replace boot4-incompatible internal kafka starter`
-2. `fix: upgrade or replace boot4-incompatible internal elasticsearch starter`
+2. `fix: replace boot4-incompatible internal elasticsearch starter path with repository-local dynamic registry`
 3. `refactor: migrate elasticsearch writer off rest high level client`
 4. `cleanup: remove boot4 smoke exclusions and compatibility shims where possible`
 
@@ -531,6 +533,6 @@ The Spring Boot 4.0 baseline move is already validated. The remaining Boot 4 com
 - [x] no temporary migrator dependency remains
 - [x] the remaining warnings are understood and documented
 - [x] this document is updated with final decisions and any deviations from the plan
-- [ ] service startup no longer depends on excluding Boot 3-only Kafka/Elasticsearch auto-configuration paths
-- [ ] internal `org.gensokyo.boot` starters are upgraded or replaced for native Boot 4 compatibility
-- [ ] legacy Elasticsearch `RestHighLevelClient` usage is removed or explicitly accepted as long-term technical debt
+- [x] service startup no longer depends on excluding Boot 3-only Kafka/Elasticsearch auto-configuration paths
+- [x] internal `org.gensokyo.boot` Kafka/Elasticsearch starter paths used by active modules are replaced for native Boot 4 compatibility
+- [x] legacy Elasticsearch `RestHighLevelClient` usage is removed

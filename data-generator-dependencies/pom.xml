@@ -16,6 +16,7 @@
 
         <!-- gensokyo -->
         <gensokyo.version>2.7.0</gensokyo.version>
+        <elasticsearch.version>7.17.8</elasticsearch.version>
     </properties>
 
     <distributionManagement>
@@ -41,29 +42,8 @@
             </dependency>
 
             <dependency>
-                <groupId>org.gensokyo.boot</groupId>
-                <artifactId>kafka-spring-boot-starter</artifactId>
-                <version>${gensokyo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>checker-qual</artifactId>
-                        <groupId>org.checkerframework</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>zstd-jni</artifactId>
-                        <groupId>com.github.luben</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.gensokyo.boot</groupId>
-                <artifactId>es-spring-boot-starter</artifactId>
-                <version>${gensokyo.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.elasticsearch.client</groupId>
-                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <artifactId>elasticsearch-rest-client</artifactId>
                 <version>${elasticsearch.version}</version>
                 <exclusions>
                     <exclusion>

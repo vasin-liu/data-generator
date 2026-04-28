@@ -7,8 +7,6 @@ package org.gensokyo.data.writer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.xcontent.XContentType;
 import org.gensokyo.kit.base.ObjectKit;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -44,14 +42,19 @@ public final class TemplateKit {
         return Strings.EMPTY;
     }
 
-    public static IndexRequest toEs(String template, String index, Map<String, Object> data) {
-        IndexRequest ir = new IndexRequest(Objects.requireNonNull(index));
-        ir.create(false);
+    public static String toBulkDocument(String template, Map<String, Object> data) {
         String value = fillValue(template, Objects.requireNonNull(data));
         if (log.isDebugEnabled()) {
-            log.debug("IndexRequest source ===> {}", value);
+            log.debug("Bulk document ===> {}", value);
         }
-        ir.source(value, XContentType.JSON);
-        return ir;
+        return value;
+    }
+
+    public static String toBulkIndexAction(String index) {
+        return "{\"index\":{\"_index\":\"" + escapeJson(Objects.requireNonNull(index)) + "\"}}";
+    }
+
+    private static String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

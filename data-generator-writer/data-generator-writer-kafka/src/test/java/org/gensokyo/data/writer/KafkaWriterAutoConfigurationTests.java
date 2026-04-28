@@ -1,7 +1,7 @@
 package org.gensokyo.data.writer;
 
-import org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration;
-import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
+import org.gensokyo.data.config.DynamicKafkaConfig;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -17,22 +17,22 @@ class KafkaWriterAutoConfigurationTests {
     @Test
     void kafkaWriterIsRegisteredWhenKafkaTemplateExists() {
         contextRunner
-                .withBean(MultipleKafkaTemplate.class, () -> Mockito.mock(MultipleKafkaTemplate.class))
+                .withBean(DynamicKafkaTemplateRegistry.class, () -> Mockito.mock(DynamicKafkaTemplateRegistry.class))
                 .run(context -> assertThat(context).hasSingleBean(KafkaWriter.class));
     }
 
     @Test
     void kafkaWriterBacksOffWhenCustomBeanExists() {
         contextRunner
-                .withBean(MultipleKafkaTemplate.class, () -> Mockito.mock(MultipleKafkaTemplate.class))
+                .withBean(DynamicKafkaTemplateRegistry.class, () -> Mockito.mock(DynamicKafkaTemplateRegistry.class))
                 .withBean("customKafkaWriter", KafkaWriter.class, () -> Mockito.mock(KafkaWriter.class))
                 .run(context -> assertThat(context).getBeans(KafkaWriter.class).hasSize(1));
     }
 
     @Test
-    void internalKafkaStarterLoadsThroughBoot4CompatibilityBridge() {
+    void dynamicKafkaRegistryLoadsWithoutInternalStarter() {
         new ApplicationContextRunner()
-                .withConfiguration(AutoConfigurations.of(MultipleKafkaAutoConfiguration.class, KafkaWriterConfig.class))
+                .withConfiguration(AutoConfigurations.of(DynamicKafkaConfig.class, KafkaWriterConfig.class))
                 .withPropertyValues(
                         "spring.kafka.multiple.primary=test",
                         "spring.kafka.multiple.clusters.test.bootstrap-servers[0]=localhost:9092",
@@ -40,9 +40,10 @@ class KafkaWriterAutoConfigurationTests {
                 )
                 .run(context -> {
                     assertThat(context).hasNotFailed();
-                    assertThat(context).hasSingleBean(MultipleKafkaTemplate.class);
+                    assertThat(context).hasSingleBean(DynamicKafkaTemplateRegistry.class);
                     assertThat(context).hasSingleBean(KafkaWriter.class);
                     assertThat(context).hasBean("testKafkaTemplate");
+                    assertThat(context.getBean(DynamicKafkaTemplateRegistry.class).hasTemplate("test")).isTrue();
                 });
     }
 }

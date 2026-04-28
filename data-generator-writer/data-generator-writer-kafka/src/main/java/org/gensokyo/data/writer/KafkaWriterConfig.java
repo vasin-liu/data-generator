@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.writer;
 
-import org.gensokyo.boot.kafka.support.MultipleKafkaTemplate;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -20,13 +20,13 @@ import org.springframework.context.annotation.Bean;
  * @since 2024/7/25 , Version 1.0.0
  */
 @AutoConfiguration
-@ConditionalOnClass(MultipleKafkaTemplate.class)
+@ConditionalOnClass(DynamicKafkaTemplateRegistry.class)
 public class KafkaWriterConfig {
 
     @Bean
     @ConditionalOnMissingBean(KafkaWriter.class)
-    public <S extends WriteStageVO, T extends KafkaWriterVO> KafkaWriter<S, T> multipleKafkaWriter(MultipleKafkaTemplate multipleKafkaTemplate) {
-        return new KafkaWriter<>(multipleKafkaTemplate);
+    public <S extends WriteStageVO, T extends KafkaWriterVO> KafkaWriter<S, T> multipleKafkaWriter(DynamicKafkaTemplateRegistry kafkaTemplateRegistry) {
+        return new KafkaWriter<>(kafkaTemplateRegistry);
     }
 
 }
