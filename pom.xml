@@ -54,7 +54,7 @@
         <geotools.version>26.3</geotools.version>
 
         <!-- database -->
-        <dynamic-datasource.version>3.6.1</dynamic-datasource.version>
+        <dynamic-datasource.version>4.5.0</dynamic-datasource.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <mybatis-flex.version>1.9.5</mybatis-flex.version>
         <druid.version>1.2.23</druid.version>
@@ -177,7 +177,7 @@
             <!-- database -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+                <artifactId>dynamic-datasource-spring-boot4-starter</artifactId>
                 <version>${dynamic-datasource.version}</version>
             </dependency>
             <dependency>

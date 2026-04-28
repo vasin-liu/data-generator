@@ -59,7 +59,7 @@ Results:
 - The smoke startup still logs the existing Druid warning:
   - `testWhileIdle is true, validationQuery not set`
 - No Kafka-specific auto-configuration exclusion is required on the current repository-local dynamic cluster path.
-- The remaining runtime caveat is the local dynamic-datasource compatibility shim that is still excluded at application bootstrap.
+- The earlier local dynamic-datasource compatibility shim is no longer part of the active runtime path after the repository switched to `dynamic-datasource-spring-boot4-starter`.
 
 ## Rollback Readiness
 

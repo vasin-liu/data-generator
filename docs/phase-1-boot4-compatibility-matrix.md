@@ -19,7 +19,7 @@ Current baseline:
 
 | Module | Active starters / Spring-facing dependencies | Boot 4 focus |
 | --- | --- | --- |
-| `data-generator-service` | `spring-boot-starter-web`, `spring-boot-starter-logging`, `spring-boot-starter-webflux`, `spring-boot-starter-data-jpa`, `dynamic-datasource-spring-boot-starter`, `druid`, `hibernate-validator`, `httpclient5` | Highest-risk application entrypoint. Mixed MVC + WebFlux + JPA + datasource stack must be revalidated first after BOM move. |
+| `data-generator-service` | `spring-boot-starter-web`, `spring-boot-starter-logging`, `spring-boot-starter-webflux`, `spring-boot-starter-data-jpa`, `dynamic-datasource-spring-boot4-starter`, `druid`, `hibernate-validator`, `httpclient5` | Highest-risk application entrypoint. Mixed MVC + WebFlux + JPA + datasource stack must be revalidated first after BOM move. |
 | `data-generator-reader-ai` | `spring-boot-starter-webflux`, `reactor-core` | Reactive path plus later Spring AI alignment considerations. Historical schema/Jackson coupling was removed in later phases. |
 | `data-generator-reader-elasticsearch` | `spring-boot-starter`, `es-spring-boot-starter`, `elasticsearch-rest-high-level-client` | Legacy Elasticsearch client path is likely a migration hotspot under Boot 4 / Spring Framework 7. |
 | `data-generator-writer-kafka` | `kafka-spring-boot-starter` | Internal starter must be validated independently from the Boot BOM upgrade. |
@@ -27,7 +27,7 @@ Current baseline:
 | `data-generator-faker` | `spring-boot-starter` | Jackson 3 impact area addressed later by replacing the GeoJSON path with a Jackson 3 + JTS-core implementation. |
 | `data-generator-stage` | `spring-boot-starter` | Low-risk Spring baseline check. |
 | `data-generator-common/data-generator-core` | `spring-boot-starter`, `jackson-dataformat-yaml`, `jackson-datatype-jsr310`, `jackson-annotations`, `jackson-databind` | Shared Jackson/YAML surface; Phase 5 focus. |
-| `data-generator-reader-database` | `spring-boot-starter`, `dynamic-datasource-spring-boot-starter`, `druid` | Data-layer compatibility check with Boot 4. |
+| `data-generator-reader-database` | `spring-boot-starter`, `dynamic-datasource-spring-boot4-starter`, `druid` | Data-layer compatibility check with Boot 4. |
 | `data-generator-iterator-database` | `spring-boot-starter`, `mybatis-plus-spring-boot3-starter` | Direct Boot 3 starter naming dependency. Must be replaced or upgraded in Phase 7. |
 
 ## Parent POM version ownership
@@ -54,7 +54,7 @@ These items are already outside a pure "follow Boot defaults" posture and must b
 | `elasticsearch.version` | `7.17.8` | legacy Elasticsearch client | High-risk legacy component; likely cannot stay untouched. |
 | `reactor.version` | `3.7.14` | reactive stack | Recheck if the explicit override remains necessary on Boot 4. |
 | `jackson.version` | `2.21.2` | JSON/YAML/schema stack | Dedicated Phase 5 migration item because Boot 4 adopts Jackson 3. |
-| `dynamic-datasource.version` | `3.6.1` | datasource routing | Independent compatibility verification required. |
+| `dynamic-datasource.version` | `4.5.0` | datasource routing | Later phases replaced the Boot 3 starter with the Boot 4 variant. |
 | `mybatis-plus.version` | `3.5.7` | data access | Current artifact name is Boot 3-specific; expect replacement work. |
 | `mybatis-flex.version` | `1.9.5` | data access / processor | Current artifact name is Boot 3-specific; expect replacement work. |
 | `druid.version` | `1.2.23` | datasource pool | Independent compatibility verification required. |
@@ -77,7 +77,7 @@ These are not safe to assume just because the Boot BOM moves cleanly.
 
 | Component | Current repo usage | Risk | Why it is independent |
 | --- | --- | --- | --- |
-| `dynamic-datasource-spring-boot-starter` | service, reader-database, writer-database | High | Third-party starter outside the core Spring dependency train. |
+| `dynamic-datasource-spring-boot4-starter` | service, reader-database, writer-database | High | Third-party starter outside the core Spring dependency train; later adopted as the repository's Boot 4-native replacement path. |
 | `druid` | service, reader-database, writer-database | High | Boot integration and runtime warnings are library-specific. |
 | `mybatis-plus-spring-boot3-starter` | parent POM, iterator-database | High | Artifact name is explicitly tied to Boot 3. |
 | `mybatis-flex-spring-boot3-starter` | parent POM | High | Artifact name is explicitly tied to Boot 3. |

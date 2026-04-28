@@ -48,12 +48,12 @@ Repository state verified against current `docs/` artifacts and parent POM:
 - full repository `test` and full `clean package` have both been validated on JDK `25.0.1`
 - packaged service smoke startup has been validated under a local Boot 4-compatible smoke configuration
 
-What remains is no longer the core Boot 4 migration. The remaining work is compatibility debt around Boot 3-only internal starters and a small set of temporary shims:
+What remains is no longer the core Boot 4 migration. The remaining work is compatibility debt around a small number of third-party and historical compatibility residues:
 
 - repository-local dynamic Kafka cluster loading is now provided by `data-generator-core`, and `data-generator-writer-kafka` no longer depends on the internal Kafka starter
 - repository-local dynamic Elasticsearch cluster loading is now provided by `data-generator-core`, and the reader/writer Elasticsearch modules no longer depend on the internal Elasticsearch starter
 - `data-generator-writer-elasticsearch` has been migrated off `RestHighLevelClient` to low-level `RestClient` bulk requests
-- the local dynamic-datasource Boot 4 compatibility shim should be removable once upstream support is available
+- repository data-layer modules now use `dynamic-datasource-spring-boot4-starter:4.5.0`, and the temporary datasource shim/bridge path has been removed
 - active source/test Jackson 2 compatibility islands have now been removed; remaining Jackson 2 references are limited to annotation APIs and historical documentation artifacts
 
 ## Current repository-specific hotspots
@@ -232,8 +232,7 @@ Phase 3 decisions:
 - no repository source usage was found for `@SpyBean`
 - `@MockBean` usage in the service smoke test was replaced with `@MockitoBean`
 - remaining Spring `@Nullable` usage was moved to JSpecify `@Nullable`
-- the service smoke test now excludes known-later-phase incompatible auto-configurations so Phase 3 can validate the Boot 4 / Framework 7 core baseline without prematurely forcing the Phase 7/8 migrations:
-  - `com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration`
+- the service smoke test temporarily excluded known-later-phase incompatible auto-configurations so Phase 3 could validate the Boot 4 / Framework 7 core baseline before the later datasource and messaging work landed
 
 Artifacts:
 
@@ -367,7 +366,7 @@ Goal: validate libraries that are outside the main Spring-managed path.
 
 TODO:
 
-- [x] Verify `dynamic-datasource-spring-boot-starter` compatibility with Boot 4.0.
+- [x] Verify `dynamic-datasource` starter compatibility and replacement path for Boot 4.0.
 - [x] Verify `druid` compatibility with Boot 4.0 and current test warnings.
 - [x] Verify `mybatis-plus-spring-boot3-starter` replacement path for Boot 4.0.
 - [x] Verify `mybatis-flex` Boot 4-compatible starter path.
@@ -392,8 +391,9 @@ Validation gate:
 
 Phase 7 decisions:
 
-- `dynamic-datasource-spring-boot-starter:3.6.1` is not Boot 4 compatible as-is
-- service startup now uses a local Boot 4 compatibility shim for dynamic datasource wiring
+- `dynamic-datasource-spring-boot-starter:3.6.1` was not Boot 4 compatible as-is
+- repository data-layer modules now use `dynamic-datasource-spring-boot4-starter:4.5.0`
+- the temporary service-side exclusion, local datasource shim, and local package-name bridge have all been removed
 - `mybatis-plus` and `mybatis-flex` are currently dependency-managed only and were not found to be active runtime blockers in this repository
 - JDBC driver class availability for MySQL, PostgreSQL, ClickHouse, and DM has been validated on JDK 25
 - internal Kafka and Elasticsearch starter runtime behavior was later removed from the active Kafka/Elasticsearch modules through repository-local Boot 4-native replacements
@@ -501,17 +501,12 @@ Artifacts:
 ## Suggested next-step sequence
 
 1. Remove any remaining smoke/package-level Kafka exclusion references that are now obsolete after the repository-local Kafka registry migration.
-2. Remove temporary service smoke/test exclusions and re-validate real application context startup without the dynamic-datasource compatibility shim.
-3. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
-4. Remove temporary service smoke/test exclusions and re-validate real application context startup without the dynamic-datasource compatibility shim.
-5. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
-6. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+2. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
 
 Current blocker for step 2:
 
-- `dynamic-datasource-spring-boot-starter:3.6.1` still imports Boot 3 class `org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration`
-- removing the application-level exclusion currently breaks `DefaultDataGeneratorApplicationTests` during configuration-class import before local replacement beans can take effect
-- the repository-local `Boot4DynamicDataSourceConfiguration` remains necessary until the upstream starter is upgraded or replaced
+- no datasource-specific Boot 4 blocker remains after switching to `dynamic-datasource-spring-boot4-starter:4.5.0`
+- the main remaining startup cleanup item is optional log-noise reduction around Druid and the known YAML parse noise already documented elsewhere
 
 ## Suggested remaining commit breakdown
 
