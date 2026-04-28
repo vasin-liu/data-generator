@@ -2,7 +2,7 @@
 
 ## Goal
 
-Migrate the project's primary JSON/YAML path from Jackson 2 to Jackson 3 under JDK 25 and Spring Boot 4, while keeping unsupported libraries on isolated Jackson 2 compatibility paths.
+Migrate the project's primary JSON/YAML path from Jackson 2 to Jackson 3 under JDK 25 and Spring Boot 4, then remove temporary Jackson 2 compatibility paths once the repository no longer needs them.
 
 ## Changes
 
@@ -20,10 +20,12 @@ Migrate the project's primary JSON/YAML path from Jackson 2 to Jackson 3 under J
 
 ## Compatibility Islands
 
-The following areas remain on Jackson 2 intentionally because upstream dependencies are not yet Jackson 3 compatible:
+There are no remaining active Jackson 2 compatibility islands in the current source or test tree.
 
-- `data-generator-service` schema-related tests
-  - continue using `victools jsonschema` on Jackson 2 model assumptions
+Residual notes:
+
+- `com.fasterxml.jackson.annotation.*` remains the annotation API exposed by several dependencies; this is expected and does not imply a Jackson 2 databind/runtime path.
+- Historical `docs/` artifacts still contain pre-migration Jackson 2 and `victools` references captured from earlier phases.
 
 ## Validation
 
@@ -49,6 +51,5 @@ Artifacts:
 
 ## Follow-up
 
-- Replace Jackson 2 compatibility islands when upstream libraries release Jackson 3 support.
-- Revisit `victools jsonschema` integration after confirming a Jackson 3 compatible upgrade path.
-- Revisit the service-side `victools jsonschema` tests once a Jackson 3 compatible upgrade path is confirmed.
+- Remove no-longer-needed explicit parent Jackson version pinning once the repository baseline is considered fully stabilized.
+- Keep historical `docs/` artifacts as-is unless a later documentation cleanup wants to distinguish archived outputs from current-state guidance more aggressively.

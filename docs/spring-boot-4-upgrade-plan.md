@@ -54,7 +54,7 @@ What remains is no longer the core Boot 4 migration. The remaining work is compa
 - repository-local dynamic Elasticsearch cluster loading is now provided by `data-generator-core`, and the reader/writer Elasticsearch modules no longer depend on the internal Elasticsearch starter
 - `data-generator-writer-elasticsearch` has been migrated off `RestHighLevelClient` to low-level `RestClient` bulk requests
 - the local dynamic-datasource Boot 4 compatibility shim should be removable once upstream support is available
-- some modules intentionally remain on Jackson 2 compatibility islands until upstream libraries catch up
+- active source/test Jackson 2 compatibility islands have now been removed; remaining Jackson 2 references are limited to annotation APIs and historical documentation artifacts
 
 ## Current repository-specific hotspots
 
@@ -318,8 +318,7 @@ Phase 5 decisions:
 
 - main Jackson baseline moved to `tools.jackson.*:3.1.0`
 - `jackson-datatype-jsr310` is no longer needed on the main Jackson 3 path
-- current compatibility islands that still remain on Jackson 2:
-  - schema-generation code paths that still assume Jackson 2 model types
+- no active Jackson 2 compatibility islands remain in the current source/test tree
 
 Artifacts:
 
@@ -504,8 +503,9 @@ Artifacts:
 1. Remove any remaining smoke/package-level Kafka exclusion references that are now obsolete after the repository-local Kafka registry migration.
 2. Remove temporary service smoke/test exclusions and re-validate real application context startup without the dynamic-datasource compatibility shim.
 3. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
-4. Collapse remaining Jackson 2 compatibility islands when upstream libraries become Jackson 3 ready.
-5. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+4. Remove temporary service smoke/test exclusions and re-validate real application context startup without the dynamic-datasource compatibility shim.
+5. Revisit the local dynamic-datasource Boot 4 shim and remove it once upstream support is available.
+6. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
 
 Current blocker for step 2:
 

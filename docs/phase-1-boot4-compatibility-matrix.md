@@ -2,6 +2,8 @@
 
 Generated on `2026-04-24`.
 
+Status note as of `2026-04-28`: this file remains the Phase 1 baseline snapshot. Later phases removed the `data-generator-reader-ai` schema/Jackson compatibility path, migrated `data-generator-faker` to a Jackson 3-only GeoJSON path, and removed the service-side `victools` schema dependencies from the active build.
+
 ## Purpose
 
 This document converts the current JDK 25 + Spring Boot 3.5.13 baseline into a repository-specific compatibility inventory for the Spring Boot 4.0 upgrade.
@@ -18,11 +20,11 @@ Current baseline:
 | Module | Active starters / Spring-facing dependencies | Boot 4 focus |
 | --- | --- | --- |
 | `data-generator-service` | `spring-boot-starter-web`, `spring-boot-starter-logging`, `spring-boot-starter-webflux`, `spring-boot-starter-data-jpa`, `dynamic-datasource-spring-boot-starter`, `druid`, `hibernate-validator`, `httpclient5` | Highest-risk application entrypoint. Mixed MVC + WebFlux + JPA + datasource stack must be revalidated first after BOM move. |
-| `data-generator-reader-ai` | `spring-boot-starter-webflux`, `reactor-core`, `jsonschema-module-jackson` | Reactive path plus schema/Jackson coupling. Also candidate for later Spring AI alignment. |
+| `data-generator-reader-ai` | `spring-boot-starter-webflux`, `reactor-core` | Reactive path plus later Spring AI alignment considerations. Historical schema/Jackson coupling was removed in later phases. |
 | `data-generator-reader-elasticsearch` | `spring-boot-starter`, `es-spring-boot-starter`, `elasticsearch-rest-high-level-client` | Legacy Elasticsearch client path is likely a migration hotspot under Boot 4 / Spring Framework 7. |
 | `data-generator-writer-kafka` | `kafka-spring-boot-starter` | Internal starter must be validated independently from the Boot BOM upgrade. |
 | `data-generator-scripter-javascript` | `org.graalvm.polyglot:*`, `org.graalvm.js:*` | JDK 25 compatibility is already stabilized, but Boot 4 transitive drift still needs verification. |
-| `data-generator-faker` | `spring-boot-starter`, `jackson-databind`, `jackson-datatype-jts` | Jackson 3 impact area. |
+| `data-generator-faker` | `spring-boot-starter` | Jackson 3 impact area addressed later by replacing the GeoJSON path with a Jackson 3 + JTS-core implementation. |
 | `data-generator-stage` | `spring-boot-starter` | Low-risk Spring baseline check. |
 | `data-generator-common/data-generator-core` | `spring-boot-starter`, `jackson-dataformat-yaml`, `jackson-datatype-jsr310`, `jackson-annotations`, `jackson-databind` | Shared Jackson/YAML surface; Phase 5 focus. |
 | `data-generator-reader-database` | `spring-boot-starter`, `dynamic-datasource-spring-boot-starter`, `druid` | Data-layer compatibility check with Boot 4. |
@@ -82,7 +84,7 @@ These are not safe to assume just because the Boot BOM moves cleanly.
 | `org.gensokyo.boot:kafka-spring-boot-starter` | dependency BOM, writer-kafka | High | Internal starter; must be validated against Boot 4 autoconfiguration changes. |
 | `org.gensokyo.boot:es-spring-boot-starter` | dependency BOM, reader/writer Elasticsearch | High | Internal starter plus legacy Elasticsearch client coupling. |
 | `org.elasticsearch.client:elasticsearch-rest-high-level-client` | dependency BOM, reader/writer Elasticsearch | High | Legacy client path may conflict with Boot 4 ecosystem direction. |
-| `jsonschema-module-jackson` | service, reader-ai, parent POM | High | Sensitive to Jackson 3 adoption. |
+| `jsonschema-module-jackson` | historical Phase 1 risk item for service and reader-ai | High | Sensitive to Jackson 3 adoption; later removed from the active build/test path. |
 | `jackson-module-jsonSchema` | parent POM | High | Jackson 3 compatibility must be checked explicitly. |
 | `org.graalvm.polyglot` / `org.graalvm.js` | scripter-javascript, parent POM | Medium | Already stable on JDK 25, but still outside Spring's managed lane. |
 | `spring-ai-ollama-spring-boot-starter` | parent POM optional dependency management | Medium | Snapshot line with separate release cadence. |

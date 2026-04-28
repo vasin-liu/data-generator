@@ -187,16 +187,6 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-generator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.victools</groupId>
-            <artifactId>jsonschema-module-jackson</artifactId>
-        </dependency>
-
         <!-- jdbc driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -259,7 +249,7 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
-                        <!-- 璺宠�?repackage goal, 鐢盿ssembly鎻掍欢鎵撳寘锛岄伩鍏嶉噸澶嶆墦鍖咃紝鑺傜害鎵撳寘鏃堕�?-->
+                        <!-- Skip Spring Boot repackage; assembly packaging remains the delivery path. -->
                     </execution>
                 </executions>
             </plugin>
@@ -282,7 +272,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <finalName>${project.name}</finalName>
-                    <appendAssemblyId>false</appendAssemblyId> <!-- 鍖呭悕涓嶅惈assemblyId -->
+                    <appendAssemblyId>false</appendAssemblyId> <!-- Keep the assembly output name stable. -->
                     <descriptors>
                         <descriptor>${project.basedir}/assembly.xml</descriptor>
                     </descriptors>
@@ -291,14 +281,14 @@
                             <mainClass>${mainClass}</mainClass>
                         </manifest>
                     </archive>
-                    <!-- 瀛怭OM鐨勫睘鎬у畬鍏ㄨ鐩栫埗POM�?<descriptors combine.self="override"/> -->
+                    <!-- If the parent POM defines descriptors, use <descriptors combine.self="override"/>. -->
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id><!-- ID 鏍囪瘑锛屽懡鍚嶉殢鎰?-->
-                        <phase>package</phase> <!--缁戝畾鍒皃ackage鐢熷懡鍛ㄦ湡闃舵涓?-->
+                        <id>make-assembly</id><!-- Stable execution id for packaging. -->
+                        <phase>package</phase> <!-- Bind assembly generation to the package phase. -->
                         <goals>
-                            <goal>single</goal><!-- �?PACKAGE 鐢熷懡鍛ㄦ湡闃舵浠呮墽琛屼竴娆?-->
+                            <goal>single</goal><!-- Produce the final distributable archive. -->
                         </goals>
                     </execution>
                 </executions>
