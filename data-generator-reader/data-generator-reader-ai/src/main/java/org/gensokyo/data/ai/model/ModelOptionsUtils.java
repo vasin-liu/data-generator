@@ -6,27 +6,18 @@
 package org.gensokyo.data.ai.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.*;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
-import com.github.victools.jsonschema.module.jackson.JacksonOption;
 import org.gensokyo.kit.Assert;
 import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -38,15 +29,11 @@ import java.util.stream.Collectors;
  */
 public final class ModelOptionsUtils {
 
-    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    public final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final static List<String> BEAN_MERGE_FIELD_EXCISIONS = List.of("class");
 
     private static ConcurrentHashMap<Class<?>, List<String>> REQUEST_FIELD_NAMES_PER_CLASS = new ConcurrentHashMap<Class<?>, List<String>>();
-
-    private static AtomicReference<SchemaGenerator> SCHEMA_GENERATOR_CACHE = new AtomicReference<>();
 
     private ModelOptionsUtils() {
 
@@ -77,7 +64,7 @@ public final class ModelOptionsUtils {
         try {
             return OBJECT_MAPPER.writeValueAsString(object);
         }
-        catch (JsonProcessingException e) {
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -129,7 +116,7 @@ public final class ModelOptionsUtils {
                     .filter(e -> e.getValue() != null)
                     .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
         }
-        catch (JsonProcessingException e) {
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -139,7 +126,7 @@ public final class ModelOptionsUtils {
             String json = OBJECT_MAPPER.writeValueAsString(source);
             return OBJECT_MAPPER.readValue(json, clazz);
         }
-        catch (JsonProcessingException e) {
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -218,65 +205,6 @@ public final class ModelOptionsUtils {
 
     private static String toGetName(String name) {
         return "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
-    }
-
-    public static String getJsonSchema(Class<?> clazz, boolean toUpperCaseTypeValues) {
-
-        if (SCHEMA_GENERATOR_CACHE.get() == null) {
-            JacksonModule jacksonModule = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED);
-            //Swagger2Module swaggerModule = new Swagger2Module();
-
-            SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12,
-                    OptionPreset.PLAIN_JSON)
-                    .with(Option.EXTRA_OPEN_API_FORMAT_VALUES)
-                    .with(Option.PLAIN_DEFINITION_KEYS)
-                    //.with(swaggerModule)
-                    .with(jacksonModule);
-
-            SchemaGeneratorConfig config = configBuilder.build();
-            SchemaGenerator generator = new SchemaGenerator(config);
-            SCHEMA_GENERATOR_CACHE.compareAndSet(null, generator);
-        }
-
-        ObjectNode node = SCHEMA_GENERATOR_CACHE.get().generateSchema(clazz);
-        if (toUpperCaseTypeValues) { // Required for OpenAPI 3.0 (at least Vertex AI
-            // version of it).
-            toUpperCaseTypeValues(node);
-        }
-
-        return node.toPrettyString();
-    }
-
-    public static void toUpperCaseTypeValues(ObjectNode node) {
-        if (node == null) {
-            return;
-        }
-        if (node.isObject()) {
-            node.fields().forEachRemaining(entry -> {
-                JsonNode value = entry.getValue();
-                if (value.isObject()) {
-                    toUpperCaseTypeValues((ObjectNode) value);
-                }
-                else if (value.isArray()) {
-                    value.elements().forEachRemaining(element -> {
-                        if (element.isObject() || element.isArray()) {
-                            toUpperCaseTypeValues((ObjectNode) element);
-                        }
-                    });
-                }
-                else if (value.isTextual() && entry.getKey().equals("type")) {
-                    String oldValue = node.get("type").asText();
-                    node.put("type", oldValue.toUpperCase());
-                }
-            });
-        }
-        else if (node.isArray()) {
-            node.elements().forEachRemaining(element -> {
-                if (element.isObject() || element.isArray()) {
-                    toUpperCaseTypeValues((ObjectNode) element);
-                }
-            });
-        }
     }
 
 }

@@ -14,16 +14,14 @@ Migrate the project's primary JSON/YAML path from Jackson 2 to Jackson 3 under J
   - `ModuleVersion`
 - Switched YAML parsing in service module to Jackson 3 builder API.
 - Removed obsolete `jackson-datatype-jsr310` usage because Java time support is integrated in Jackson 3.
+- Replaced the `data-generator-faker` GeoJSON loader with a Jackson 3 + JTS-core implementation and removed the `jackson-datatype-jts` compatibility path.
+- Moved `data-generator-reader-ai` runtime JSON/object-mapping utilities to Jackson 3 and removed unused schema-generation helpers from the main source set.
 - Cleaned and repaired corrupted source/test files encountered during migration.
 
 ## Compatibility Islands
 
 The following areas remain on Jackson 2 intentionally because upstream dependencies are not yet Jackson 3 compatible:
 
-- `data-generator-faker`
-  - uses `com.graphhopper.external:jackson-datatype-jts:2.14`
-- `data-generator-reader-ai`
-  - keeps Jackson 2 databind for current AI/schema-related code paths
 - `data-generator-service` schema-related tests
   - continue using `victools jsonschema` on Jackson 2 model assumptions
 
@@ -53,3 +51,4 @@ Artifacts:
 
 - Replace Jackson 2 compatibility islands when upstream libraries release Jackson 3 support.
 - Revisit `victools jsonschema` integration after confirming a Jackson 3 compatible upgrade path.
+- Revisit the service-side `victools jsonschema` tests once a Jackson 3 compatible upgrade path is confirmed.

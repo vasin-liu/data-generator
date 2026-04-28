@@ -7,14 +7,12 @@ package org.gensokyo.data.ai.ollama.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auto.service.AutoService;
 import lombok.Getter;
 import lombok.Setter;
 import org.gensokyo.data.ai.chat.prompt.ChatOptions;
 import org.gensokyo.data.ai.embedding.EmbeddingOptions;
+import org.gensokyo.data.ai.model.ModelOptionsUtils;
 import org.gensokyo.data.json.JsonSubType;
 import org.gensokyo.data.reader.AiModelOptionsVO;
 
@@ -318,13 +316,7 @@ public class OllamaOptions extends AiModelOptionsVO implements ChatOptions, Embe
     }
 
     public Map<String, Object> toMap() {
-        try {
-            var json = new ObjectMapper().writeValueAsString(this);
-            return new ObjectMapper().readValue(json, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return ModelOptionsUtils.objectToMap(this);
     }
 
     public static OllamaOptions create() {

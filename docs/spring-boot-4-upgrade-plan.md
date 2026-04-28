@@ -319,8 +319,6 @@ Phase 5 decisions:
 - main Jackson baseline moved to `tools.jackson.*:3.1.0`
 - `jackson-datatype-jsr310` is no longer needed on the main Jackson 3 path
 - current compatibility islands that still remain on Jackson 2:
-  - `data-generator-faker`
-  - `data-generator-reader-ai`
   - schema-generation code paths that still assume Jackson 2 model types
 
 Artifacts:

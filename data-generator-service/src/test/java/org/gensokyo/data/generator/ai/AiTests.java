@@ -4,7 +4,6 @@
  */
 package org.gensokyo.data.generator.ai;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.gensokyo.data.ai.chat.ChatResponse;
 import org.gensokyo.data.ai.chat.Generation;
 import org.gensokyo.data.ai.chat.prompt.Prompt;
@@ -22,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
-
 /**
  * AI integration tests.
  */
@@ -38,7 +36,7 @@ class AiTests {
     }
 
     @Test
-    void case1() throws JsonProcessingException {
+    void case1() throws Exception {
         assumeOllamaAvailable();
         OllamaApi api = new OllamaApi("http://localhost:11434");
         OllamaOptions options = OllamaOptions.create()
@@ -63,7 +61,7 @@ class AiTests {
     }
 
     @Test
-    void case2() throws JsonProcessingException {
+    void case2() throws Exception {
         assumeOllamaAvailable();
         OllamaApi api = new OllamaApi("http://localhost:11434");
         OllamaOptions options = OllamaOptions.create()
