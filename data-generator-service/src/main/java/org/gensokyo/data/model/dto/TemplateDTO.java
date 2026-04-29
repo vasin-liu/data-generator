@@ -7,10 +7,10 @@ package org.gensokyo.data.model.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.kit.Assert;
-import org.gensokyo.kit.json.JsonKit;
 import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ public class TemplateDTO implements Serializable {
     public TemplateDTO(TemplatePO entity) {
         Assert.notNull(entity, "参数 'entity' 不能为空");
         BeanUtils.copyProperties(entity, this, "contentJson");
-        var vo = JsonKit.read(entity.getContentJson(), TemplateVO.class);
+        var vo = TemplateJsonCodec.read(entity.getContentJson());
         this.setContentJson(vo);
     }
 

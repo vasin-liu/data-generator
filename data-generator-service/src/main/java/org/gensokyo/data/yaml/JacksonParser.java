@@ -5,13 +5,25 @@
 package org.gensokyo.data.yaml;
 
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.json.JsonSubType;
+import org.gensokyo.data.model.vo.generator.GeneratorVO;
+import org.gensokyo.data.model.vo.iterator.IteratorVO;
+import org.gensokyo.data.model.vo.reader.ReaderVO;
+import org.gensokyo.data.model.vo.scripter.ScriptVO;
+import org.gensokyo.data.model.vo.selector.reader.ReaderSelectStrategyVO;
+import org.gensokyo.data.model.vo.selector.value.ValueSelectStrategyVO;
+import org.gensokyo.data.model.vo.stage.StageVO;
+import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.gensokyo.kit.character.StrKit;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.jsontype.NamedType;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ServiceLoader;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static tools.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
@@ -24,7 +36,31 @@ public class JacksonParser implements YamlParser {
                 .rebuild()
                 .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .findAndAddModules()
+                .registerSubtypes(loadSubtypes(GeneratorVO.class))
+                .registerSubtypes(loadSubtypes(IteratorVO.class))
+                .registerSubtypes(loadSubtypes(ReaderVO.class))
+                .registerSubtypes(loadSubtypes(ScriptVO.class))
+                .registerSubtypes(loadSubtypes(ReaderSelectStrategyVO.class))
+                .registerSubtypes(loadSubtypes(ValueSelectStrategyVO.class))
+                .registerSubtypes(loadSubtypes(StageVO.class))
+                .registerSubtypes(loadSubtypes(WriterVO.class))
                 .build();
+    }
+
+    private <T> NamedType[] loadSubtypes(Class<T> parent) {
+        var subtypes = new ArrayList<NamedType>();
+        for (T instance : ServiceLoader.load(parent)) {
+            Class<?> subtype = instance.getClass();
+            JsonSubType annotation = subtype.getAnnotation(JsonSubType.class);
+            if (annotation == null || StrKit.isBlank(annotation.value())) {
+                subtypes.add(new NamedType(subtype));
+            } else {
+                var typeId = annotation.value();
+                subtypes.add(new NamedType(subtype, typeId));
+                subtypes.add(new NamedType(subtype, typeId.toLowerCase()));
+            }
+        }
+        return subtypes.toArray(NamedType[]::new);
     }
 
     @Override

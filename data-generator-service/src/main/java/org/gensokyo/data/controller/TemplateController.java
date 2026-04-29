@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.qo.UpdateTemplateQO;
 import org.gensokyo.data.model.vo.R;
@@ -20,7 +21,6 @@ import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.io.FileKit;
 import org.gensokyo.kit.io.IOKit;
-import org.gensokyo.kit.json.JsonKit;
 import org.gensokyo.kit.security.Md5Kit;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +59,7 @@ public class TemplateController {
         }
         po.setName(vo.getName());
         vo.setId(po.getId());
-        po.setContentJson(JsonKit.write(vo));
+        po.setContentJson(TemplateJsonCodec.write(vo));
         po.setContentYaml(qo.getYaml());
         repository.save(po);
         return R.ok(String.format("模板 '%s' 已更新", qo.getId()));
@@ -91,7 +91,7 @@ public class TemplateController {
             po.setFileName(fileName);
             po.setPathMd5(Md5Kit.encrypt(fileName));
             po.setContentYaml(content);
-            po.setContentJson(JsonKit.write(vo));
+            po.setContentJson(TemplateJsonCodec.write(vo));
             repository.save(po);
             return R.ok("文件上传成功");
         } catch (Exception e) {

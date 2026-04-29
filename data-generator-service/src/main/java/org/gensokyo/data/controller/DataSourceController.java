@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.util.Set;
@@ -95,7 +96,7 @@ public class DataSourceController {
     }
 
     private void loadDriverJar(String jarFilePath, String driverClassName) throws Exception {
-        URL jarUrl = new URL("file:" + jarFilePath);
+        var jarUrl = Path.of(jarFilePath).toUri().toURL();
         URLClassLoader loader = new URLClassLoader(new URL[]{jarUrl});
         Class<?> driverClass = Class.forName(driverClassName, true, loader);
         DriverManager.registerDriver((java.sql.Driver) driverClass.getDeclaredConstructor().newInstance());

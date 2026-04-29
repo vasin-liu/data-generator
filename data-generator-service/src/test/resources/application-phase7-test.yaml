@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: data-generator-service-phase7-test
+  jpa:
+    open-in-view: false
   datasource:
     dynamic:
       primary: data-generator
@@ -18,3 +20,4 @@ spring:
             schema: classpath:db/schema.sql
       druid:
         filters: stat,slf4j
+        validation-query: SELECT 1

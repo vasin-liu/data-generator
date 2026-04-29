@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: data-generator-service
+  jpa:
+    open-in-view: false
   h2:
     console:
       enabled: true
@@ -221,3 +223,4 @@ spring:
 #            filters: stat,slf4j
       druid:
         filters: stat,slf4j
+        validation-query: SELECT 1

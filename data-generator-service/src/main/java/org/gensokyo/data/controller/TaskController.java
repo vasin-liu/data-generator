@@ -15,6 +15,7 @@ import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
 import org.gensokyo.data.generator.MdcTaskDecorator;
+import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.dto.TemplateDTO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
@@ -23,7 +24,6 @@ import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.kit.base.ObjectKit;
 import org.gensokyo.kit.collect.CollectKit;
-import org.gensokyo.kit.json.JsonKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -120,7 +120,7 @@ public class TaskController {
             return R.fail(String.format("存在多个模板名为 '%s' 的模板，请根据模板ID启动任务：%s", templateName, msg));
         }
 
-        var template = JsonKit.read(result.get(0).getContentJson(), TemplateVO.class);
+        var template = TemplateJsonCodec.read(result.get(0).getContentJson());
         run(template);
         return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
                 template.getName(), template.getId(), template.getInstanceId()));
@@ -134,7 +134,7 @@ public class TaskController {
             return R.fail(String.format("模板 '%s' 不存在", templateId));
         }
 
-        var template = JsonKit.read(result.getContentJson(), TemplateVO.class);
+        var template = TemplateJsonCodec.read(result.getContentJson());
         run(template);
         return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
                 template.getName(), template.getId(), template.getInstanceId()));

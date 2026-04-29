@@ -1,7 +1,6 @@
 /*
- * Copyright © 2021 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 2021 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
 package org.gensokyo.data.cache;
 
@@ -11,6 +10,7 @@ import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
@@ -19,7 +19,6 @@ import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 import org.gensokyo.kit.io.FileKit;
-import org.gensokyo.kit.json.JsonKit;
 import org.gensokyo.kit.security.Md5Kit;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.FileSystemResource;
@@ -28,17 +27,18 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
-/**
- * 元数据缓存
- *
- * @author Gensokyo V.L.
- * @version 1.0.0
- * @since 2023/1/4 , Version 1.0.0
- */
 @Slf4j
 @RequiredArgsConstructor
 public class Templates implements InitializingBean {
@@ -59,7 +59,6 @@ public class Templates implements InitializingBean {
             var url = Templates.class.getClassLoader().getResource("template");
             baseDir = Objects.requireNonNull(url).getPath();
         }
-        // 创建观察者，自动递归监控template目录及其子目录
         FileAlterationObserver observer = new FileAlterationObserver(baseDir);
         observer.addListener(new FileAlterationListenerAdaptor() {
             @Override
@@ -72,7 +71,7 @@ public class Templates implements InitializingBean {
                     return;
                 }
                 repository.saveAndFlush(template);
-                log.info("模板文件 {} 的缓存记录已创建", file.getAbsolutePath());
+                log.info("Template cache entry created for {}", file.getAbsolutePath());
             }
 
             @Override
@@ -89,7 +88,7 @@ public class Templates implements InitializingBean {
                     repository.delete(templateInDb);
                 }
                 repository.saveAndFlush(template);
-                log.info("模板文件 {} 的缓存记录已更新", file.getAbsolutePath());
+                log.info("Template cache entry updated for {}", file.getAbsolutePath());
             }
 
             @Override
@@ -97,7 +96,7 @@ public class Templates implements InitializingBean {
                 var templateInDb = repository.findByPathMd5(Md5Kit.encrypt(file.getAbsolutePath()));
                 if (Objects.nonNull(templateInDb)) {
                     repository.delete(templateInDb);
-                    log.info("模板文件 {} 的缓存记录已删除", file.getAbsolutePath());
+                    log.info("Template cache entry deleted for {}", file.getAbsolutePath());
                 }
             }
 
@@ -113,39 +112,39 @@ public class Templates implements InitializingBean {
                 }
                 repository.deleteAllInBatch(pos);
                 repository.saveAllAndFlush(pos);
-                log.info("模板目录 {} 下的所有文件的缓存记录已创建", directory.getAbsolutePath());
+                log.info("Template cache entries created for directory {}", directory.getAbsolutePath());
             }
 
             @Override
             public void onDirectoryDelete(File directory) {
-                log.info("模板目录 {} 已删除, 目录下的所有模板文件也一并删除", directory.getAbsolutePath());
+                log.info("Template directory deleted: {}", directory.getAbsolutePath());
             }
         });
         return observer;
     }
 
-
     @Override
     public void afterPropertiesSet() throws Exception {
         repository.saveAll(reloadAll());
-        log.info("元数据缓存初始化完成");
+        log.info("Template cache initialized");
         var monitor = new FileAlterationMonitor(1000, createResourceObserver());
         monitor.start();
-        log.info("注册模板文件监听器完成");
+        log.info("Template file monitor started");
     }
 
     public List<TemplatePO> parse(List<Resource> resources) {
         if (CollectKit.isEmpty(resources)) {
             return Collections.emptyList();
         }
-        return resources
-                .stream()
-                //忽略特定开头的文件
+        var parsed = new ArrayList<TemplatePO>();
+        var skipped = new ArrayList<String>();
+        var ignored = new ArrayList<String>();
+        resources.stream()
                 .filter(r -> {
-                    boolean ignored = Arrays.stream(props.getIgnorePrefix())
+                    boolean matched = Arrays.stream(props.getIgnorePrefix())
                             .anyMatch(prefix -> Objects.requireNonNull(r.getFilename()).startsWith(prefix));
-                    if (ignored) {
-                        log.warn("已忽略模板文件： {} ", r.getFilename());
+                    if (matched) {
+                        ignored.add(Objects.requireNonNullElse(r.getFilename(), describe(r)));
                         return false;
                     }
                     return true;
@@ -153,54 +152,113 @@ public class Templates implements InitializingBean {
                 .filter(r -> {
                     try {
                         return isYamlFile(r.getFile());
-                    } catch (IOException ignored) {
-
+                    } catch (IOException ex) {
                     }
                     return false;
                 })
-                .map(this::parse)
-                .filter(Objects::nonNull)
-                .toList();
+                .forEach(resource -> {
+                    var template = parse(resource, false);
+                    if (Objects.nonNull(template)) {
+                        parsed.add(template);
+                    } else {
+                        skipped.add(describe(resource));
+                    }
+                });
+        if (!ignored.isEmpty()) {
+            log.info("Ignored {} template files by prefix: {}", ignored.size(), ignored);
+        }
+        if (!skipped.isEmpty()) {
+            log.warn("Skipped {} template files that are incompatible with the current parser: {}", skipped.size(), abbreviate(skipped));
+        }
+        return parsed;
     }
 
-    private TemplatePO parse(Resource r) {
+    private TemplatePO parse(Resource resource) {
+        return parse(resource, true);
+    }
+
+    private TemplatePO parse(Resource resource, boolean verbose) {
         try {
-            return parse(r.getFile());
+            return parse(resource.getFile(), verbose);
         } catch (IOException e) {
-            log.error("解析模板文件失败：", e);
+            if (verbose) {
+                log.warn("Skip template resource {} because it cannot be opened: {}", describe(resource), sanitize(e.getMessage()));
+            }
         }
         return null;
     }
 
     private TemplatePO parse(File file) {
+        return parse(file, true);
+    }
+
+    private TemplatePO parse(File file, boolean verbose) {
         try {
-            var t = yamlParser.parse(file, TemplateVO.class);
+            var template = yamlParser.parse(file, TemplateVO.class);
             var id = RandomKit.snowFlake().nextId();
-            t.setId(id);
+            template.setId(id);
             var fileName = file.getName();
             var entity = new TemplatePO();
             entity.setId(id);
-            entity.setName(t.getName());
+            entity.setName(template.getName());
             entity.setFileName(fileName);
             entity.setFileExt(FileKit.getExtension(fileName));
             entity.setPathMd5(Md5Kit.encrypt(file.getPath()));
             var yamlContent = Files.readString(file.toPath());
             entity.setContentMd5(Md5Kit.encrypt(yamlContent));
-            entity.setContentJson(JsonKit.write(t));
+            entity.setContentJson(TemplateJsonCodec.write(template));
             entity.setContentYaml(yamlContent);
             return entity;
         } catch (Exception e) {
-            log.error("解析模板文件失败：", e);
+            if (verbose) {
+                log.warn("Skip template file {} because parsing failed: {}", file.getAbsolutePath(), summarize(e));
+            }
         }
         return null;
     }
 
-    /**
-     * 从外部模板目录递归加载所有资源。
-     *
-     * @param baseDir 外部模板目录
-     * @return 返回 Resource 列表
-     */
+    private String describe(Resource resource) {
+        if (Objects.isNull(resource)) {
+            return "<unknown>";
+        }
+        try {
+            return resource.getFile().getAbsolutePath();
+        } catch (IOException ignored) {
+            return Objects.toString(resource.getDescription(), resource.getFilename());
+        }
+    }
+
+    private String summarize(Exception exception) {
+        var root = exception;
+        while (root.getCause() instanceof Exception cause) {
+            root = cause;
+        }
+        var message = root.getMessage();
+        if (StrKit.isBlank(message)) {
+            return root.getClass().getSimpleName();
+        }
+        return sanitize(message);
+    }
+
+    private String sanitize(String message) {
+        if (StrKit.isBlank(message)) {
+            return message;
+        }
+        return message.replaceAll("\\s+", " ").trim();
+    }
+
+    private String abbreviate(List<String> values) {
+        if (CollectKit.isEmpty(values)) {
+            return "[]";
+        }
+        int limit = Math.min(values.size(), 5);
+        var sample = values.subList(0, limit);
+        if (values.size() == limit) {
+            return sample.toString();
+        }
+        return sample + " ...";
+    }
+
     private List<Resource> fromFileSystem(String baseDir) {
         if (StrKit.isBlank(baseDir)) {
             return Collections.emptyList();
@@ -209,12 +267,6 @@ public class Templates implements InitializingBean {
         return fromFileSystem(basePath);
     }
 
-    /**
-     * 从外部模板目录递归加载所有资源。
-     *
-     * @param basePath 外部模板目录
-     * @return 返回 Resource 列表
-     */
     private List<Resource> fromFileSystem(Path basePath) {
         var resourceList = new ArrayList<Resource>();
         try {
@@ -229,17 +281,11 @@ public class Templates implements InitializingBean {
                 }
             });
         } catch (Exception e) {
-            log.error("读取模板资源文件出现异常：", e);
+            log.error("Failed to read template resources from {}", basePath, e);
         }
         return resourceList;
     }
 
-    /**
-     * 从 classpath 下加载模板资源，支持递归搜索子目录。
-     *
-     * @param baseDir classpath 下模板基础目录
-     * @return 返回 Resource 列表
-     */
     private List<Resource> fromClasspath(String baseDir) {
         if (StrKit.isBlank(baseDir)) {
             return Collections.emptyList();
@@ -254,20 +300,17 @@ public class Templates implements InitializingBean {
                 }
             }
         } catch (Exception e) {
-            log.error("读取模板资源文件出现异常：", e);
+            log.error("Failed to read template resources from classpath: {}", baseDir, e);
         }
         return resourceList;
     }
 
     private List<Resource> loadTemplateResources() {
-        String baseDir;
         if (isRunningFromJar()) {
-            baseDir = Paths.get(System.getProperty("user.dir"), "..", "conf", "template").toString();
+            String baseDir = Paths.get(System.getProperty("user.dir"), "..", "conf", "template").toString();
             return fromFileSystem(baseDir);
-        } else {
-            baseDir = "/template/**/*.yaml";
-            return fromClasspath(baseDir);
         }
+        return fromClasspath("/template/**/*.yaml");
     }
 
     private boolean isRunningFromJar() {
@@ -279,7 +322,6 @@ public class Templates implements InitializingBean {
         if (Objects.isNull(file) || !file.exists() || !file.isFile()) {
             return false;
         }
-
         String name = file.getName().toLowerCase();
         return name.endsWith(".yaml") || name.endsWith(".yml");
     }

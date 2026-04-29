@@ -462,7 +462,11 @@ Phase 9 decisions:
 - no `spring-boot-properties-migrator` dependency was needed and none was added
 - active service configuration did not surface Boot 4 property migration blockers during the full test run
 - logging output remains explicitly configured for UTF-8 in `logback-spring.xml`
-- remaining startup warnings are understood and documented, primarily around Druid and the intentionally bounded internal starter compatibility tests
+- template YAML parsing noise was reduced from startup error stacks to a single compatibility summary, and later eliminated after Jackson 3 template codec alignment
+- Boot 4 YAML parsing now accepts both historical uppercase and lowercase subtype ids used by repository templates
+- current service startup test no longer reports template compatibility warnings; only intentional ignored `!` templates remain in startup logs
+- intentional ignored `!` templates are now reported as a single info summary instead of per-file warnings
+- `DataSourceController` no longer uses the JDK 25-deprecated `URL(String)` path during dynamic driver loading
 
 Artifacts:
 
@@ -502,13 +506,15 @@ Artifacts:
 
 ## Suggested next-step sequence
 
-1. Remove any remaining smoke/package-level Kafka exclusion references that are now obsolete after the repository-local Kafka registry migration.
-2. Optionally clean the Druid `validationQuery` warning if a quieter startup log is desired.
+1. Optionally trim remaining non-functional startup/build noise:
+   `DataSourceController` deprecation compile note, Druid init info logging, and Maven/JDK 25 `Unsafe` warnings from third-party tooling.
+2. Re-run full `.\mvnw-jdk25.ps1 test` if any further Jackson or logging cleanup touches shared infrastructure.
 
 Current blocker for step 2:
 
 - no datasource-specific Boot 4 blocker remains after switching to `dynamic-datasource-spring-boot4-starter:4.5.0`
-- the main remaining startup cleanup item is optional log-noise reduction around Druid and the known YAML parse noise already documented elsewhere
+- no remaining template-parser blocker is known on the service startup path
+- the remaining cleanup work is optional log/build noise reduction rather than Boot 4 functional compatibility
 
 ## Suggested remaining commit breakdown
 
@@ -531,3 +537,4 @@ The Spring Boot 4.0 baseline move is already validated. The remaining Boot 4 com
 - [x] service startup no longer depends on excluding Boot 3-only Kafka/Elasticsearch auto-configuration paths
 - [x] internal `org.gensokyo.boot` Kafka/Elasticsearch starter paths used by active modules are replaced for native Boot 4 compatibility
 - [x] legacy Elasticsearch `RestHighLevelClient` usage is removed
+- [x] template YAML startup parsing is clean on the Boot 4 / Jackson 3 path
