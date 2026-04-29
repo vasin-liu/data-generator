@@ -7,7 +7,7 @@ Generated on `2026-04-24`.
 This phase performs the minimum parent BOM move from Spring Boot `3.5.13` to `4.0.5` while keeping the repository on:
 
 - Build JDK: `25.0.1`
-- Compiler target: Java `17`
+- Compiler target: Java `25`
 
 ## Changes applied
 

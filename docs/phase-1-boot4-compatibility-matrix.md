@@ -11,7 +11,7 @@ This document converts the current JDK 25 + Spring Boot 3.5.13 baseline into a r
 Current baseline:
 
 - Build JDK: `25.0.1`
-- Compiler target: Java `17`
+- Compiler target: Java `25`
 - Spring Boot baseline: `3.5.13`
 - Maven Wrapper: `3.9.11`
 

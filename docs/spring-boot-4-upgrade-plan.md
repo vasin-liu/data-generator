@@ -7,7 +7,7 @@ This document defines the next-step plan after the repository has already reache
 Current validated baseline:
 
 - Build JDK: `25.0.1`
-- Compiler target: Java `17`
+- Compiler target: Java `25`
 - Spring Boot baseline: `3.5.13`
 - Maven Wrapper: `3.9.11`
 
@@ -167,6 +167,7 @@ TODO:
   - [x] `maven-failsafe-plugin`
   - [x] `maven-enforcer-plugin`
 - [x] Keep `maven.compiler.release=17` unless there is a deliberate follow-up decision to raise it.
+  - Later completed: repository output has now been raised to JDK `25`.
 - [x] Run the Phase 2 compile gate and capture the output under `docs/`.
 - [ ] Confirm Boot 4.0 still manages:
   - [ ] `httpclient5`
@@ -181,6 +182,7 @@ Phase 2 decisions for the minimum move:
 
 - Selected target: `Spring Boot 4.0.5`
 - Keep `maven.compiler.release=17` unchanged in this phase
+  - Later completed: repository output has now been raised to JDK `25`.
 - Keep the existing explicit overrides in place for the first compile gate:
   - `jackson.version=2.21.2`
   - `reactor.version=3.7.14`

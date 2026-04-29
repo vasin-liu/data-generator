@@ -9,7 +9,7 @@ These files freeze the last known-good repository state before starting the incr
 Current validated baseline:
 
 - Build JDK: `25.0.1`
-- Compiler target: Java `17`
+- Compiler target: Java `25`
 - Spring Boot baseline: `3.5.13`
 - Maven wrapper: `3.9.11`
 
