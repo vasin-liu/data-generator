@@ -7,7 +7,6 @@ package org.gensokyo.data.generator.faker;
 
 import net.datafaker.Faker;
 import org.gensokyo.data.constant.Const;
-import org.gensokyo.kit.json.JsonKit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -110,6 +109,7 @@ class SpelTests {
                                 idx::getAndIncrement)
                         .maxLen(5)
                         .generate();
-        System.out.println(JsonKit.write(objects));
+        Assertions.assertNotNull(objects);
+        System.out.println(objects);
     }
 }

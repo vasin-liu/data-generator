@@ -1,8 +1,3 @@
-/*
- * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
- * Site: http://www.pcitech.com/
- * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
- */
 package org.gensokyo.data.writer;
 
 import lombok.RequiredArgsConstructor;
@@ -27,13 +22,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * ElasticSearch鏁版嵁鍐欏叆鍣?
- *
- * @author Gensokyo V.L.
- * @version 1.0.0
- * @since 2024/2/23 , Version 1.0.0
- */
 @Slf4j
 @RequiredArgsConstructor
 public class ElasticsearchWriter<S extends WriteStageVO, T extends ElasticsearchWriterVO> implements Writer<S, T> {
@@ -60,7 +48,8 @@ public class ElasticsearchWriter<S extends WriteStageVO, T extends Elasticsearch
             String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
             return countSuccessfulItems(responseBody, documents.size());
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("鍐欏叆鏁版嵁闆嗗嚭鐜板紓甯革紝鍐欏叆鍣ㄧ被鍨嬩负锛?s 锛屾暟鎹簮缂栧彿涓猴細%s 锛岀洰鏍囪〃鍚嶄负锛?s锛屽啓鍏ユā鏉夸负锛?s銆?,
+            throw new DataGeneratorException(String.format(
+                    "写入数据集时发生异常，写入器类型为：%s，数据源编号为：%s，目标索引为：%s，写入模板为：%s。",
                     wvo.getType(), wvo.getDataSourceId(), wvo.getTarget(), wvo.getTemplate()), e);
         }
     }

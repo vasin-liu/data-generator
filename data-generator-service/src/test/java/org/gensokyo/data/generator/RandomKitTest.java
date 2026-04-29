@@ -6,7 +6,7 @@
 package org.gensokyo.data.generator;
 
 import org.gensokyo.data.util.RandomKit;
-import org.gensokyo.kit.json.JsonKit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -20,6 +20,8 @@ class RandomKitTest {
 
     @Test
     void case1() {
-        System.out.println(JsonKit.write(RandomKit.seq(0, 10)));
+        var seq = RandomKit.seq(0, 10);
+        Assertions.assertNotNull(seq);
+        System.out.println(seq);
     }
 }

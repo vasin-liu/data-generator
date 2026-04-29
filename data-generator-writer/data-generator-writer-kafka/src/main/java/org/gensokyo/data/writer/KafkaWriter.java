@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.writer;
 
@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * Kafka数据写入器
+ * Kafka鏁版嵁鍐欏叆鍣?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -45,7 +45,8 @@ public class KafkaWriter<S extends WriteStageVO, T extends KafkaWriterVO> implem
             return dataset.size();
 
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("写入数据集出现异常，写入器类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
+            throw new DataGeneratorException(String.format(
+                    "写入数据集时发生异常，写入器类型为：%s，数据源编号为：%s，目标为：%s，写入模板为：%s。",
                     wvo.getType(), wvo.getDataSourceId(), wvo.getTarget(), wvo.getTemplate()), e);
         }
     }

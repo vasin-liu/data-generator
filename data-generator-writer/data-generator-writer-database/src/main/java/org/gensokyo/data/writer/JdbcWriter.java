@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.writer;
 
@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * JDBC数据写入类
+ * JDBC鏁版嵁鍐欏叆绫?
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -36,7 +36,7 @@ public class JdbcWriter<S extends WriteStageVO, T extends JdbcWriterVO> implemen
 
 
     @DSTransactional
-    // 使用spring的事务注解会导致数据源切换失败
+    // 浣跨敤spring鐨勪簨鍔℃敞瑙ｄ細瀵艰嚧鏁版嵁婧愬垏鎹㈠け璐?
     // @Transactional(rollbackFor = Exception.class)
     @Override
     public long write(final StageContext<S> ctx, final T wvo, final List<Map<String, Object>> dataset) {
@@ -47,7 +47,8 @@ public class JdbcWriter<S extends WriteStageVO, T extends JdbcWriterVO> implemen
             int[] rows = namedParameterJdbcTemplate.batchUpdate(sql, batchValues(Objects.requireNonNull(dataset)));
             return rows.length;
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
+            throw new DataGeneratorException(String.format(
+                    "写入数据集时发生异常，数据库类型为：%s，数据源编号为：%s，目标表名为：%s，写入模板为：%s。",
                     wvo.getType(), wvo.getDataSourceId(), wvo.getTarget(), wvo.getTemplate()), e);
         } finally {
             DynamicDataSourceContextHolder.clear();

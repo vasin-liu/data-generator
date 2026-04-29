@@ -1,7 +1,7 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 漏 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
+ * Address锛歅CI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou锛孋hina锛圸ip code锛?10653锛?
  */
 package org.gensokyo.data.writer;
 
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * MySQL文件流写入器
+ * MySQL鏂囦欢娴佸啓鍏ュ櫒
  *
  * @author Gensokyo V.L.
  * @version 1.0.0
@@ -44,11 +44,11 @@ public class MySQLWriter<S extends WriteStageVO, T extends MySQLWriterVO> implem
         Connection conn = null;
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(wvo.getDataSourceId()));
-            //通过jdbcTemplate.getDataSource().getConnection()总是创建新的链接，不会复用已有链接，因此如果不手动关闭则会造成链接泄露
-            //DataSourceUtils.getConnection()它首先查看当前是否存在事务管理上下文，并尝试从事务管理上下文获取连接，如果获取失败，
-            //直接从数据源中获取连接。在获取连接后，如果当前拥有事务上下文，则将连接绑定到事务上下文中。如果处于事务上下文中，
-            //那么不需要显示关闭或者释放连接，但是如果 DataSourceUtils 在没有事务上下文的方法中使用 getConnection() 获取连接，
-            //依然会造成数据连接泄漏，因此需要手动释放：DataSourceUtils.releaseConnection(conn,jdbcTemplate.getDataSource())
+            //閫氳繃jdbcTemplate.getDataSource().getConnection()鎬绘槸鍒涘缓鏂扮殑閾炬帴锛屼笉浼氬鐢ㄥ凡鏈夐摼鎺ワ紝鍥犳濡傛灉涓嶆墜鍔ㄥ叧闂垯浼氶€犳垚閾炬帴娉勯湶
+            //DataSourceUtils.getConnection()瀹冮鍏堟煡鐪嬪綋鍓嶆槸鍚﹀瓨鍦ㄤ簨鍔＄鐞嗕笂涓嬫枃锛屽苟灏濊瘯浠庝簨鍔＄鐞嗕笂涓嬫枃鑾峰彇杩炴帴锛屽鏋滆幏鍙栧け璐ワ紝
+            //鐩存帴浠庢暟鎹簮涓幏鍙栬繛鎺ャ€傚湪鑾峰彇杩炴帴鍚庯紝濡傛灉褰撳墠鎷ユ湁浜嬪姟涓婁笅鏂囷紝鍒欏皢杩炴帴缁戝畾鍒颁簨鍔′笂涓嬫枃涓€傚鏋滃浜庝簨鍔′笂涓嬫枃涓紝
+            //閭ｄ箞涓嶉渶瑕佹樉绀哄叧闂垨鑰呴噴鏀捐繛鎺ワ紝浣嗘槸濡傛灉 DataSourceUtils 鍦ㄦ病鏈変簨鍔′笂涓嬫枃鐨勬柟娉曚腑浣跨敤 getConnection() 鑾峰彇杩炴帴锛?
+            //渚濈劧浼氶€犳垚鏁版嵁杩炴帴娉勬紡锛屽洜姝ら渶瑕佹墜鍔ㄩ噴鏀撅細DataSourceUtils.releaseConnection(conn,jdbcTemplate.getDataSource())
             conn = DataSourceUtils.getConnection(Objects.requireNonNull(jdbcTemplate.getDataSource()));
             //LOAD DATA LOCAL INFILE 'sql.csv' IGNORE INTO TABLE test.test (a,b,c,d,e,f)
             var sql = String.format(SQL_TEMPLATE, wvo.getTarget(), wvo.getTemplate());
@@ -59,7 +59,8 @@ public class MySQLWriter<S extends WriteStageVO, T extends MySQLWriterVO> implem
                 return jps.executeUpdate();
             }
         } catch (Exception e) {
-            throw new DataGeneratorException(String.format("写入数据集出现异常，数据库类型为：%s ，数据源编号为：%s ，目标表名为：%s，写入模板为：%s。",
+            throw new DataGeneratorException(String.format(
+                    "写入数据集时发生异常，数据库类型为：%s，数据源编号为：%s，目标表名为：%s，写入模板为：%s。",
                     wvo.getType(), wvo.getDataSourceId(), wvo.getTarget(), wvo.getTemplate()), e);
         } finally {
             DataSourceUtils.releaseConnection(conn, jdbcTemplate.getDataSource());
