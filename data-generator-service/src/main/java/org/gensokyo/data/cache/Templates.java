@@ -11,9 +11,12 @@ import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.json.TemplateJsonCodec;
+import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.TemplateDefinitionDetector;
+import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.character.StrKit;
@@ -194,19 +197,28 @@ public class Templates implements InitializingBean {
 
     private TemplatePO parse(File file, boolean verbose) {
         try {
-            var template = yamlParser.parse(file, TemplateVO.class);
             var id = RandomKit.snowFlake().nextId();
-            template.setId(id);
             var fileName = file.getName();
+            var yamlContent = Files.readString(file.toPath());
+            var template = tryParse(yamlContent, TemplateVO.class);
+            var templateV2 = tryParse(yamlContent, TemplateV2DraftVO.class);
+            var kind = TemplateDefinitionDetector.detect(template, templateV2);
             var entity = new TemplatePO();
             entity.setId(id);
-            entity.setName(template.getName());
+            if (kind == TemplateDefinitionKind.V2 && Objects.nonNull(templateV2)) {
+                entity.setName(templateV2.getName());
+                entity.setContentJson(TemplateJsonCodec.write(templateV2));
+            } else if (Objects.nonNull(template)) {
+                template.setId(id);
+                entity.setName(template.getName());
+                entity.setContentJson(TemplateJsonCodec.write(template));
+            } else {
+                throw new IllegalArgumentException("Template content is neither valid V1 nor valid V2");
+            }
             entity.setFileName(fileName);
             entity.setFileExt(FileKit.getExtension(fileName));
             entity.setPathMd5(Md5Kit.encrypt(file.getPath()));
-            var yamlContent = Files.readString(file.toPath());
             entity.setContentMd5(Md5Kit.encrypt(yamlContent));
-            entity.setContentJson(TemplateJsonCodec.write(template));
             entity.setContentYaml(yamlContent);
             return entity;
         } catch (Exception e) {
@@ -215,6 +227,14 @@ public class Templates implements InitializingBean {
             }
         }
         return null;
+    }
+
+    private <T> T tryParse(String yamlContent, Class<T> clazz) {
+        try {
+            return yamlParser.parse(yamlContent, clazz);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private String describe(Resource resource) {

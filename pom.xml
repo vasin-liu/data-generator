@@ -37,6 +37,7 @@
         <eclipse-collections.version>12.0.0.M3</eclipse-collections.version>
         <datafaker.version>2.2.2</datafaker.version>
         <jgrapht.version>1.5.2</jgrapht.version>
+        <calcite.version>1.41.0</calcite.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <guava.version>33.2.0-jre</guava.version>
         <elasticsearch.version>7.17.8</elasticsearch.version>
@@ -79,6 +80,7 @@
         <module>data-generator-scripter</module>
         <module>data-generator-writer</module>
         <module>data-generator-converter</module>
+        <module>data-generator-calcite</module>
     </modules>
 
     <scm>

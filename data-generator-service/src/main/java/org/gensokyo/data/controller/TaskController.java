@@ -1,7 +1,6 @@
 /*
- * Copyright © 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Copyright 2024 PCI Technology Group Co.,Ltd. All Rights Reserved.
  * Site: http://www.pcitech.com/
- * Address：PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou，China（Zip code：510653）
  */
 package org.gensokyo.data.controller;
 
@@ -11,18 +10,26 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.calcite.TemplateV2Runner;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
 import org.gensokyo.data.generator.MdcTaskDecorator;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.dto.TemplateDTO;
+import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.TemplateDefinitionDetector;
+import org.gensokyo.data.template.TemplateDefinitionKind;
+import org.gensokyo.data.template.TemplateV2Normalizer;
+import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.util.RandomKit;
-import org.gensokyo.kit.base.ObjectKit;
+import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
@@ -35,14 +42,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
-/**
- * 任务控制器
- *
- * @author Gensokyo V.L.
- * @version 1.0.0
- * @since 2024/2/23 , Version 1.0.0
- */
 @Slf4j
 @RestController
 @RequestMapping("/task")
@@ -52,25 +51,20 @@ public class TaskController {
     private final DataGeneratorProperties properties;
     private final DefaultDataPipelineTaskFactory defaultDataPipelineTaskFactory;
     private final TemplateRepository repository;
+    private final YamlParser yamlParser;
+    private final TemplateV2Runner templateV2Runner;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
     public void init() {
         executor.setTaskDecorator(new MdcTaskDecorator());
-        //核心线程池大小
         executor.setCorePoolSize(properties.getCorePoolSize());
-        //最大线程数
         executor.setMaxPoolSize(properties.getMaxPoolSize());
-        //队列容量
         executor.setQueueCapacity(properties.getQueueCapacity());
-        //活跃时间
         executor.setKeepAliveSeconds(120);
-        //线程名字前缀
         executor.setThreadNamePrefix("DG-TASK-");
-        // 设置线程池关闭的时候等待所有任务都完成再继续销毁其他的Bean
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(120);
-        //队列满时阻塞主线程提交任务动作
         executor.setRejectedExecutionHandler(new BlockWhenQueueFullHandler());
         executor.initialize();
     }
@@ -110,38 +104,69 @@ public class TaskController {
     public R<String> runByName(@NotBlank @PathVariable String templateName) {
         var result = repository.findByName(templateName);
         if (CollectKit.isEmpty(result)) {
-            return R.fail(String.format("模板 '%s' 不存在", templateName));
+            return R.fail(String.format("Template '%s' does not exist", templateName));
         }
 
         if (result.size() > 1) {
             var msg = result.stream()
                     .map(t -> t.getId() + Const.COLON + t.getName())
                     .collect(Collectors.joining(Const.COMMA));
-            return R.fail(String.format("存在多个模板名为 '%s' 的模板，请根据模板ID启动任务：%s", templateName, msg));
+            return R.fail(String.format("Multiple templates named '%s' exist, use template id instead: %s", templateName, msg));
         }
 
-        var template = TemplateJsonCodec.read(result.get(0).getContentJson());
-        run(template);
-        return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
-                template.getName(), template.getId(), template.getInstanceId()));
+        var runtime = run(result.get(0));
+        return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
+                runtime.name(), runtime.id(), runtime.instanceId()));
     }
 
     @GetMapping("/runById/{templateId}")
     public R<String> runById(@NotNull @PathVariable Long templateId) {
         var result = repository.findById(templateId).orElse(null);
-
         if (Objects.isNull(result)) {
-            return R.fail(String.format("模板 '%s' 不存在", templateId));
+            return R.fail(String.format("Template '%s' does not exist", templateId));
         }
 
-        var template = TemplateJsonCodec.read(result.getContentJson());
-        run(template);
-        return R.ok(String.format("模板 '%s' 已启动数据生成任务, 模板ID：%s, 实例ID：%s",
-                template.getName(), template.getId(), template.getInstanceId()));
+        var runtime = run(result);
+        return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
+                runtime.name(), runtime.id(), runtime.instanceId()));
     }
 
-    private void run(final TemplateVO template) {
+    private TemplateRuntimeInfo run(TemplatePO entity) {
+        String yaml = entity.getContentYaml();
+        TemplateV2DraftVO v2Draft = tryParse(yaml, TemplateV2DraftVO.class);
+        TemplateVO v1Template = tryParse(yaml, TemplateVO.class);
+        TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Template, v2Draft);
+        if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
+            return runV2(entity.getId(), v2Draft);
+        }
+
+        TemplateVO template = v1Template != null ? v1Template : TemplateJsonCodec.read(entity.getContentJson());
+        return runV1(template);
+    }
+
+    private TemplateRuntimeInfo runV1(TemplateVO template) {
         template.setInstanceId(RandomKit.snowFlake().nextId());
         executor.submit(defaultDataPipelineTaskFactory.newInstance(template));
+        return new TemplateRuntimeInfo(template.getId(), template.getName(), template.getInstanceId());
+    }
+
+    private TemplateRuntimeInfo runV2(Long templateId, TemplateV2DraftVO draft) {
+        TemplateV2VO template = TemplateV2Normalizer.normalize(draft);
+        template.setId(templateId);
+        template.setInstanceId(RandomKit.snowFlake().nextId());
+        TemplateV2Validator.validate(template);
+        executor.submit(() -> templateV2Runner.run(template));
+        return new TemplateRuntimeInfo(template.getId(), template.getName(), template.getInstanceId());
+    }
+
+    private <T> T tryParse(String yaml, Class<T> clazz) {
+        try {
+            return yamlParser.parse(yaml, clazz);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private record TemplateRuntimeInfo(Long id, String name, Long instanceId) {
     }
 }

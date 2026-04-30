@@ -61,6 +61,8 @@ public final class Const {
 
     public interface WriterType {
         String CONSOLE = "CONSOLE";
+
+        String JDBC = "JDBC";
     }
 
     public interface ReaderSelectStrategyType {

@@ -23,6 +23,11 @@
             <artifactId>data-generator-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-calcite</artifactId>
+        </dependency>
+
         <!-- iterator -->
         <dependency>
             <groupId>org.gensokyo.data.generator</groupId>

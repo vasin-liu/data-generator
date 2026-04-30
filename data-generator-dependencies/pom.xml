@@ -61,6 +61,12 @@
 
             <dependency>
                 <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-calcite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
                 <artifactId>data-generator-database-core</artifactId>
                 <version>${project.version}</version>
             </dependency>

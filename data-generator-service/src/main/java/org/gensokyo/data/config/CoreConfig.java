@@ -6,12 +6,16 @@
 package org.gensokyo.data.config;
 
 import org.gensokyo.data.cache.Templates;
+import org.gensokyo.data.calcite.IteratorSourceFactory;
+import org.gensokyo.data.calcite.QuerySourceFactory;
+import org.gensokyo.data.calcite.TemplateV2Runner;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.yaml.JacksonParser;
 import org.gensokyo.data.yaml.YamlParser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 /**
  * 配置类
@@ -35,5 +39,14 @@ public class CoreConfig {
                                YamlParser yamlParser,
                                TemplateRepository repository) {
         return new Templates(props, yamlParser, repository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TemplateV2Runner.class)
+    public TemplateV2Runner templateV2Runner(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+        return new TemplateV2Runner(java.util.List.of(
+                new IteratorSourceFactory(),
+                new QuerySourceFactory(namedParameterJdbcTemplate)
+        ), namedParameterJdbcTemplate);
     }
 }

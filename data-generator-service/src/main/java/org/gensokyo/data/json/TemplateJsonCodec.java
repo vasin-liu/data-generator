@@ -1,6 +1,8 @@
 package org.gensokyo.data.json;
 
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.model.v2.SourceVO;
+import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.iterator.IteratorVO;
@@ -33,24 +35,38 @@ public final class TemplateJsonCodec {
             .registerSubtypes(loadSubtypes(ValueSelectStrategyVO.class))
             .registerSubtypes(loadSubtypes(StageVO.class))
             .registerSubtypes(loadSubtypes(WriterVO.class))
+            .registerSubtypes(loadSubtypes(SourceVO.class))
+            .registerSubtypes(loadSubtypes(TransformVO.class))
             .build();
 
     private TemplateJsonCodec() {
     }
 
     public static String write(TemplateVO template) {
+        return writeValue(template);
+    }
+
+    public static <T> String write(T value) {
+        return writeValue(value);
+    }
+
+    public static <T> T read(String content, Class<T> clazz) {
         try {
-            return MAPPER.writeValueAsString(template);
+            return MAPPER.readValue(content, clazz);
         } catch (JacksonException e) {
-            throw new DataGeneratorException("Failed to write template JSON", e);
+            throw new DataGeneratorException("Failed to read template JSON", e);
         }
     }
 
     public static TemplateVO read(String content) {
+        return read(content, TemplateVO.class);
+    }
+
+    private static String writeValue(Object value) {
         try {
-            return MAPPER.readValue(content, TemplateVO.class);
+            return MAPPER.writeValueAsString(value);
         } catch (JacksonException e) {
-            throw new DataGeneratorException("Failed to read template JSON", e);
+            throw new DataGeneratorException("Failed to write template JSON", e);
         }
     }
 
