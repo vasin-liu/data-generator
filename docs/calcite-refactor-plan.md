@@ -428,6 +428,7 @@ Exit criteria:
 - [x] validate PF4J-driven template model subtype parsing for `SourceVO`, `TransformVO`, and `WriterVO`
 - [x] keep the current directory watcher as the refresh trigger and make the PF4J locator perform explicit unload/reload on refresh
 - [x] add first-pass plugin runtime factory failure diagnostics
+- [x] add sink write failure diagnostics for fail-fast multi-sink execution
 - [ ] add broader plugin lifecycle and load-failure diagnostics
 - [x] add runtime execution tests for plugin-provided source/transform/sink factories
 - [x] add refresh execution coverage proving newly added plugin jars become executable after subtype and registry refresh

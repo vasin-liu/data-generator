@@ -61,17 +61,22 @@ public class TemplateV2Runner {
 
     private void writeSinks(TemplateV2VO template, CalciteRowTransformer.TransformResult result) {
         SinkPolicyMode mode = sinkPolicyMode(template.getSinkExecutionPolicy());
+        int sinkIndex = 0;
         for (WriteStageVO sink : template.getSinks()) {
+            int writerIndex = 0;
             for (WriterVO writer : sink.getWriters()) {
                 try {
                     createSink(writer).write(result.schema(), result.rows());
                 } catch (RuntimeException e) {
                     if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
+                        writerIndex++;
                         continue;
                     }
-                    throw e;
+                    throw sinkWriteFailure(sinkIndex, writerIndex, writer, e);
                 }
+                writerIndex++;
             }
+            sinkIndex++;
         }
     }
 
@@ -84,6 +89,18 @@ public class TemplateV2Runner {
             return SinkPolicyMode.FAIL_FAST;
         }
         return SinkPolicyMode.valueOf(policy.getMode().trim().toUpperCase(Locale.ROOT));
+    }
+
+    private IllegalStateException sinkWriteFailure(int sinkIndex,
+                                                   int writerIndex,
+                                                   WriterVO writer,
+                                                   RuntimeException cause) {
+        return new IllegalStateException("Failed to execute Template V2 sink writer"
+                + " at sink index [" + sinkIndex + "]"
+                + ", writer index [" + writerIndex + "]"
+                + ", type [" + writer.getType() + "]"
+                + ", model [" + writer.getClass().getName() + "]"
+                + ", target [" + writer.getTarget() + "]", cause);
     }
 
     private enum SinkPolicyMode {

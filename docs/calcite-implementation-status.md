@@ -389,7 +389,9 @@ Current validation result:
 - focused integration tests have validated that a plugin jar added after initial startup becomes executable after subtype and registry refresh
 - runtime registry now wraps matched factory failures with node kind, template type, model class, and factory class diagnostics
 - focused registry tests cover transform factory failure diagnostics
-- the next PF4J gap is now broader non-happy-path execution coverage such as sink write failures, plugin load failures, and in-flight task refresh policy
+- runner sink-write failures now include sink index, writer index, writer type, model class, and target diagnostics under fail-fast policy
+- focused runner tests cover sink write diagnostics and continue-on-error behavior
+- the next PF4J gap is now broader non-happy-path execution coverage such as plugin load failures and in-flight task refresh policy
 
 See:
 

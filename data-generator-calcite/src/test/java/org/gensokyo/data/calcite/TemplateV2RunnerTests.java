@@ -238,8 +238,13 @@ class TemplateV2RunnerTests {
         template.setTransformers(List.of(sql("SELECT value FROM seed")));
         template.setSinks(List.of(failingSink, jdbcSink));
 
-        Assertions.assertThrows(IllegalStateException.class,
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,
                 () -> new PolicyAwareTemplateV2Runner(jdbcRegistry(jdbcTemplate)).run(template));
+        Assertions.assertTrue(exception.getMessage().contains("sink index [0]"));
+        Assertions.assertTrue(exception.getMessage().contains("writer index [0]"));
+        Assertions.assertTrue(exception.getMessage().contains("type [FAILING]"));
+        Assertions.assertTrue(exception.getMessage().contains("target [failing_target]"));
+        Assertions.assertEquals("Intentional sink failure", exception.getCause().getMessage());
 
         Integer count = jdbcTemplate.getJdbcTemplate().queryForObject("select count(*) from sink_output_fail_fast", Integer.class);
         Assertions.assertEquals(0, count);
@@ -329,6 +334,7 @@ class TemplateV2RunnerTests {
     private static final class FailingWriterVO extends WriterVO {
         private FailingWriterVO() {
             setType("FAILING");
+            setTarget("failing_target");
         }
     }
 
