@@ -157,10 +157,10 @@ Compatibility posture for the refactor:
 
 ### M0 - Freeze the V2 contract
 
-- [ ] Finalize the V2 template structure: `sources + transform + sink`
-- [ ] Finalize the first-phase SQL boundary: single-table `SELECT`
-- [ ] Finalize V2-first routing rules during template loading
-- [ ] Finalize V2 non-goals for phase 1
+- [x] Finalize the V2 template structure: `sources + transform + sink`
+- [x] Finalize the first-phase SQL boundary: single-table `SELECT`
+- [x] Finalize V2-first routing rules during template loading
+- [x] Finalize V2 non-goals for phase 1
 - [ ] Prepare 3 V2 sample templates for design review
 
 Artifacts:
@@ -175,15 +175,15 @@ Exit criteria:
 
 ### M1 - Introduce the V2 model layer
 
-- [ ] Add `TemplateV2VO`
-- [ ] Add `SourceVO` hierarchy
-- [ ] Add `TransformVO` hierarchy
-- [ ] Add `SqlTransformVO`
-- [ ] Decide whether `sink` reuses `WriteStageVO` directly or gets a thin `SinkVO`
-- [ ] Add `Row`
-- [ ] Add `RowSchema`
-- [ ] Add `ColumnDef`
-- [ ] Add V2 subtype registration to YAML/JSON parsing
+- [x] Add `TemplateV2VO`
+- [x] Add `SourceVO` hierarchy
+- [x] Add `TransformVO` hierarchy
+- [x] Add `SqlTransformVO`
+- [x] Decide whether `sink` reuses `WriteStageVO` directly or gets a thin `SinkVO`
+- [x] Add `Row`
+- [x] Add `RowSchema`
+- [x] Add `ColumnDef`
+- [x] Add V2 subtype registration to YAML/JSON parsing
 
 Suggested package targets:
 
@@ -197,11 +197,11 @@ Exit criteria:
 
 ### M2 - Template loading, cache, and runtime routing
 
-- [ ] Add V1/V2 template identification logic
-- [ ] Extend template cache metadata to record template version
-- [ ] Update template import/validation entry points
-- [ ] Update template execution entry points
-- [ ] Ensure startup cache loading accepts V1 and V2 templates together
+- [x] Add V1/V2 template identification logic
+- [x] Extend template cache metadata to record template version
+- [x] Update template import/validation entry points
+- [x] Update template execution entry points
+- [x] Ensure startup cache loading accepts V1 and V2 templates together
 
 Suggested routing rules:
 
@@ -215,13 +215,13 @@ Exit criteria:
 
 ### M3 - Add the Calcite infrastructure module
 
-- [ ] Create `data-generator-calcite`
-- [ ] Add Calcite dependencies
-- [ ] Add `CalciteExecutionContext`
-- [ ] Add `CalciteSchemaFactory`
-- [ ] Add `CalciteSqlValidator`
-- [ ] Add `CalcitePlanCompiler`
-- [ ] Standardize SQL validation error formatting
+- [x] Create `data-generator-calcite`
+- [x] Add Calcite dependencies
+- [x] Add `CalciteExecutionContext`
+- [x] Add `CalciteSchemaFactory`
+- [x] Add `CalciteSqlValidator`
+- [x] Add `CalcitePlanCompiler`
+- [x] Standardize SQL validation error formatting
 
 Exit criteria:
 
@@ -230,15 +230,15 @@ Exit criteria:
 
 ### M4 - Define source abstraction and adapt current inputs
 
-- [ ] Add `RowSource` interface
-- [ ] Add `IteratorRowSource`
-- [ ] Add `ReaderRowSource`
-- [ ] Define the convergence path from `DatabaseIterator` and `JdbcReader` into one V2 source model
-- [ ] Define `SourcePolicy` semantics, including selection behavior
-- [ ] Add `AiSourceVO` to the source model plan
-- [ ] Define source-to-schema mapping rules
-- [ ] Decide how iterator scalar outputs map into tabular columns
-- [ ] Decide whether first-phase reader schemas are explicit or inferred
+- [x] Add `RowSource` interface
+- [x] Add `IteratorRowSource`
+- [x] Add query-backed `RowSource`
+- [x] Define the convergence path from `DatabaseIterator` and `JdbcReader` into one V2 source model
+- [ ] Define `SourcePolicy` runtime semantics, including selection behavior
+- [x] Add `AiSourceVO` to the source model plan
+- [x] Define source-to-schema mapping rules for current iterator/query sources
+- [x] Decide how iterator scalar outputs map into tabular columns
+- [x] Decide whether first-phase reader schemas are explicit or inferred
 
 Recommended first-phase rule:
 
@@ -253,13 +253,14 @@ Exit criteria:
 
 ### M5 - Deliver the first SQL execution path
 
-- [ ] Support `SELECT ... FROM input`
-- [ ] Support projection aliases
-- [ ] Support arithmetic expressions
+- [x] Support `SELECT ... FROM input`
+- [x] Support projection aliases
+- [x] Support arithmetic expressions
 - [ ] Support `CASE WHEN`
-- [ ] Support `WHERE`
-- [ ] Support null handling and basic casts
-- [ ] Add output schema derivation
+- [x] Support `WHERE`
+- [ ] Support null handling beyond the current skeleton behavior
+- [x] Support basic casts
+- [x] Add output schema derivation
 
 Exit criteria:
 
@@ -268,13 +269,13 @@ Exit criteria:
 
 ### M6 - Reuse the sink stack through row adapters
 
-- [ ] Add `RowSink` interface or adapter layer
-- [ ] Adapt row output to `ConsoleWriter`
-- [ ] Adapt row output to DB writer
+- [x] Add `RowSink` interface or adapter layer
+- [x] Adapt row output to `ConsoleWriter`
+- [x] Adapt row output to DB writer
 - [ ] Adapt row output to Kafka writer
 - [ ] Adapt row output to Elasticsearch writer
-- [ ] Define a stable row-to-writer payload mapping contract
-- [ ] Define configurable multi-sink failure behavior
+- [x] Define a stable row-to-writer payload mapping contract for console/JDBC
+- [x] Define configurable multi-sink failure behavior
 
 Recommended implementation order:
 
@@ -383,16 +384,18 @@ Exit criteria:
 
 ### M12 - Finalize multi-source, multi-transformer, and multi-sink support
 
-- [ ] Extend `TemplateV2VO` from singular `transform/sink` shape to final compatible `transformers/sinks` shape
-- [ ] Keep backward-compatible parsing for the singular first-phase form
-- [ ] Support multiple named logical tables in the Calcite schema
-- [ ] Support multiple transformer stages as an ordered chain
-- [ ] Define intermediate result naming and schema handoff between transformers
-- [ ] Support multiple sinks as terminal fan-out nodes
-- [ ] Define sink execution mode: sequential first, optional parallel later
-- [ ] Define configurable multi-sink failure strategy modes
-- [ ] Add validation rules to prevent illegal transformer graphs and duplicate names
-- [ ] Add end-to-end tests for multi-source, multi-transformer, and multi-sink templates
+- [x] Extend `TemplateV2VO` from singular `transform/sink` shape to final compatible `transformers/sinks` shape
+- [x] Keep backward-compatible parsing for the singular first-phase form
+- [x] Support multiple named logical tables in the Calcite schema
+- [x] Support multiple transformer stages as an ordered chain
+- [x] Define current schema handoff between transformers through `input` / `current`
+- [ ] Define durable named intermediate result semantics beyond `input` / `current`
+- [x] Support multiple sinks as terminal fan-out nodes
+- [x] Define sink execution mode: sequential first, optional parallel later
+- [x] Define configurable multi-sink failure strategy modes
+- [x] Add validation rules for the ordered linear transformer shape
+- [ ] Add stronger validation for unresolved source references and ambiguous column references
+- [x] Add end-to-end tests for multi-source, multi-transformer, and multi-sink templates
 
 Design constraints for M12:
 
@@ -415,9 +418,10 @@ Exit criteria:
 - one template can read from more than one source table
 - one template can execute more than one ordered transformer
 - one template can write the same final dataset to more than one sink
-- validation rejects duplicate source/transformer names and unresolved references
+- validation rejects illegal transformer graph shapes
+- validation for unresolved references and ambiguous columns still needs hardening
 - sink failure behavior can switch by configuration
-- the V2 source model includes an official AI-backed source type
+- the V2 source model includes an official AI-backed source type, but its runtime factory is still pending
 
 ### M13 - Formalize external plugin runtime
 

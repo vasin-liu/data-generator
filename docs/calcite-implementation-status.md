@@ -193,7 +193,6 @@ Current JDBC sink behavior:
 
 Current limitation:
 
-- `WriterVO.template` is not used yet
 - no explicit upsert / merge / conflict strategy
 
 ### 8. Multi-source / multi-transform / multi-sink status
@@ -209,11 +208,13 @@ What is implemented today:
 - multiple sources can coexist in the same SQL context
 - multiple sources can participate in `INNER JOIN`
 - sinks are executed one after another
+- sink failure policy supports `FAIL_FAST` and `CONTINUE_ON_ERROR`
+- fail-fast sink write failures include sink index, writer index, writer type, model class, and target diagnostics
 
 What is not implemented yet:
 
-- sink failure strategy switching
-- partial-success policy control
+- parallel sink execution
+- rich partial-success reporting in `TemplateV2RunResult`
 - source policy semantics beyond model reservation
 
 ### 9. Test status
@@ -248,103 +249,86 @@ The following implementation milestones are complete:
 9. Multi-source `INNER JOIN` is runnable.
 10. Console sink is runnable.
 11. JDBC sink is runnable.
+12. JDBC sink template-based column mapping is runnable.
+13. Multi-sink sequential fan-out is runnable.
+14. Sink failure strategy switching is runnable.
+15. Query-backed source convergence is implemented at the model/mapping entrypoint level.
+16. PF4J external plugin loading, class isolation, subtype parsing, runtime execution, mixed execution, refresh, and first-pass diagnostics are implemented.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. JDBC sink column/template mapping
+### Next 1. Kafka sink factory
 
 Goal:
 
-- make JDBC sink usable when transform output column names do not exactly equal target table column names
+- make Kafka usable as a real V2 sink instead of a placeholder runtime provider
 
 Recommended implementation:
 
-- start using `WriterVO.template`
-- define a V2-safe interpretation for `template`
-- support at least:
-  - direct column mapping
-  - reordered insert columns
+- add a Kafka `V2SinkFactory`
+- resolve target cluster through `TemplateV2RuntimeServices.kafkaTemplate(...)`
+- define row serialization rules for key/value payloads
+- reuse the Boot 4 dynamic Kafka registry already present in `data-generator-core`
 
 Suggested acceptance:
 
-- V2 JDBC sink can write to a table with different physical column names than the transform output
-- add dedicated H2 test coverage
+- one unit test using a fake or mocked Kafka template path
+- one service wiring test proving the provider contributes a sink factory when Kafka runtime services exist
 
-### Next 2. Sink execution policy
+### Next 2. Elasticsearch sink factory
 
 Goal:
 
-- make multiple sinks production-usable instead of best-effort sequential only
+- make Elasticsearch usable as a real V2 sink instead of a placeholder runtime provider
 
 Recommended implementation:
 
-- wire `SinkExecutionPolicyVO` into `TemplateV2Runner`
-- define at least two policies:
-  - fail-fast
-  - continue-on-error
+- add an Elasticsearch `V2SinkFactory`
+- resolve target cluster through `TemplateV2RuntimeServices.elasticsearchClient(...)`
+- use low-level bulk requests consistent with the Boot 4 Elasticsearch path
+- define row-to-index document mapping
 
 Suggested acceptance:
 
-- one test for fail-fast
-- one test for continue-on-error
-- runner result or log path clearly reflects sink-level failures
+- focused test around bulk request generation
+- runtime-service test proving missing ES services produce clear diagnostics
 
-### Next 3. Query-backed source convergence
+### Next 3. AI source runtime
 
 Goal:
 
-- move V2 closer to the final decision that `DatabaseIterator` and `JdbcReader` converge into one query-backed source family
+- move `AiSourceVO` from model-only support to a runnable V2 source
 
 Recommended implementation:
 
-- complete the runtime migration entry so only `QuerySourceVO` remains as the V2 database-backed source shape
-- keep database paging and SQL params on `QuerySourceVO`
-- treat V1 `DatabaseIteratorVO` and `ReadStageVO + JdbcReaderVO` as compatibility inputs only
+- add `AiSourceFactory`
+- decide whether the first implementation uses existing reader-ai internals or Spring AI directly
+- define schema and row materialization behavior for AI output
+- keep provider configuration in `AiProviderVO`
 
 Suggested acceptance:
 
-- one documented convergence mapping
-- one reusable extraction/migration entry that emits `QuerySourceVO` only
-- no new V2 database source type is introduced
+- one deterministic test source path without live network calls
+- one validation test for missing provider configuration
 
-### Next 4. Join capability hardening
+### Next 4. Source policy runtime semantics
 
 Goal:
 
-- move from minimal `INNER JOIN` support to a safer multi-source SQL subset
+- make `SourcePolicyVO` more than a reserved model field
 
 Recommended implementation:
 
-- support `LEFT JOIN`
-- support multi-condition `ON`
-- define ambiguity rules for unqualified columns
+- map the relevant `SelectStrategy` behavior into source materialization policy
+- define caching/materialization rules for reusable sources
+- keep selection behavior outside SQL
 
 Suggested acceptance:
 
-- tests for `LEFT JOIN`
-- tests for compound `ON` conditions
-- clear error behavior for ambiguous column references
-
-### Next 5. Service-level V2 execution test
-
-Goal:
-
-- verify that the service path does not only parse V2, but also runs it end-to-end
-
-Recommended implementation:
-
-- add controller or integration test that exercises:
-  - V2 upload or task payload
-  - template detection
-  - normalization
-  - validation
-  - V2 runner dispatch
-
-Suggested acceptance:
-
-- one service-level test proving V2 task execution path is live
+- tests for at least one deterministic source policy
+- documentation mapping V1 select strategies to V2 source policy
 
 ## Deferred Work
 
@@ -356,6 +340,8 @@ The following items remain intentionally deferred after the current step:
 - Kafka sink on the V2 path
 - Elasticsearch sink on the V2 path
 - source policy runtime semantics
+- plugin load-failure diagnostics beyond matched runtime factory failures
+- in-flight task refresh policy
 - V1 retirement
 
 ## Current Recommendation
@@ -363,10 +349,10 @@ The following items remain intentionally deferred after the current step:
 The most pragmatic next implementation sequence is:
 
 1. finish real Kafka / Elasticsearch V2 runtime providers on the current registry/provider abstraction
-2. wire `SinkExecutionPolicyVO` into the runner and expose failure behavior clearly
-3. complete query-backed source convergence so `QuerySourceVO` is the only V2 database source shape
-4. harden multi-source SQL semantics and service-level end-to-end V2 execution coverage
-5. strengthen the plugin contract before any framework swap
+2. implement the AI source runtime path
+3. implement source policy runtime semantics
+4. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+5. add plugin load-failure diagnostics and in-flight refresh policy
 
 The plugin-framework recommendation is:
 
