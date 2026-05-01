@@ -427,7 +427,8 @@ Exit criteria:
 - [x] add a PF4J-backed runtime provider adapter behind the current V2 plugin provider contract
 - [x] validate PF4J-driven template model subtype parsing for `SourceVO`, `TransformVO`, and `WriterVO`
 - [x] keep the current directory watcher as the refresh trigger and make the PF4J locator perform explicit unload/reload on refresh
-- [ ] add plugin lifecycle and failure diagnostics
+- [x] add first-pass plugin runtime factory failure diagnostics
+- [ ] add broader plugin lifecycle and load-failure diagnostics
 - [x] add runtime execution tests for plugin-provided source/transform/sink factories
 - [x] add refresh execution coverage proving newly added plugin jars become executable after subtype and registry refresh
 - [x] add tests for plugin discovery, refresh, duplicate capability handling, and plugin disable/failure isolation
@@ -452,7 +453,8 @@ Current M13 status:
 - isolation tests have confirmed PF4J plugins load with separate classloaders, while the fallback path does not provide true plugin isolation
 - focused integration tests have confirmed plugin-provided template subtype parsing across source/transform/writer model families
 - focused integration tests have confirmed plugin-provided runtime execution, mixed built-in plus plugin execution, and refresh-after-new-jar execution
-- the remaining work is primarily lifecycle failure diagnostics, broader non-happy-path coverage, and a human-facing sample plugin/module
+- first-pass runtime factory failure diagnostics are implemented
+- the remaining work is primarily broader lifecycle and load-failure diagnostics, non-happy-path execution coverage, and a human-facing sample plugin/module
 
 ## Recommended Delivery Order
 

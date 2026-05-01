@@ -23,7 +23,11 @@ public class TemplateV2RuntimeRegistry {
     public RowSource createSource(String name, SourceVO source) {
         for (V2SourceFactory factory : sourceFactories) {
             if (factory.supports(source)) {
-                return factory.create(name, source);
+                try {
+                    return factory.create(name, source);
+                } catch (RuntimeException e) {
+                    throw runtimeFailure("source", source.getType(), source.getClass(), factory.getClass(), e);
+                }
             }
         }
         throw new UnsupportedOperationException("Unsupported V2 source in current runner: " + source.getClass().getSimpleName());
@@ -32,7 +36,11 @@ public class TemplateV2RuntimeRegistry {
     public CalciteRowTransformer.TransformResult applyTransform(TransformVO transform, CalciteExecutionContext context) {
         for (V2TransformFactory factory : transformFactories) {
             if (factory.supports(transform)) {
-                return factory.apply(transform, context);
+                try {
+                    return factory.apply(transform, context);
+                } catch (RuntimeException e) {
+                    throw runtimeFailure("transform", transform.getType(), transform.getClass(), factory.getClass(), e);
+                }
             }
         }
         throw new UnsupportedOperationException("Unsupported V2 transformer in current runner: " + transform.getClass().getSimpleName());
@@ -41,9 +49,23 @@ public class TemplateV2RuntimeRegistry {
     public RowSink createSink(WriterVO writer) {
         for (V2SinkFactory factory : sinkFactories) {
             if (factory.supports(writer)) {
-                return factory.create(writer);
+                try {
+                    return factory.create(writer);
+                } catch (RuntimeException e) {
+                    throw runtimeFailure("sink", writer.getType(), writer.getClass(), factory.getClass(), e);
+                }
             }
         }
         throw new UnsupportedOperationException("Unsupported V2 sink writer in current runner: " + writer.getClass().getSimpleName());
+    }
+
+    private IllegalStateException runtimeFailure(String nodeKind,
+                                                 String nodeType,
+                                                 Class<?> modelClass,
+                                                 Class<?> factoryClass,
+                                                 RuntimeException cause) {
+        return new IllegalStateException("Failed to execute Template V2 " + nodeKind
+                + " factory [" + factoryClass.getName() + "] for type [" + nodeType + "]"
+                + " and model [" + modelClass.getName() + "]", cause);
     }
 }

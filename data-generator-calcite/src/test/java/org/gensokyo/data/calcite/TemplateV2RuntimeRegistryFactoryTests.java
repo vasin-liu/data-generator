@@ -93,6 +93,24 @@ class TemplateV2RuntimeRegistryFactoryTests {
         Assertions.assertDoesNotThrow(() -> registry.applyTransform(new SpiOnlyTransformVO(), context));
     }
 
+    @Test
+    void wrapsFactoryFailuresWithNodeDiagnostics() {
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
+                List.of(),
+                List.of(new FailingTransformFactory()),
+                List.of()
+        );
+
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,
+                () -> registry.applyTransform(new FailingTransformVO(), new CalciteExecutionContext()));
+
+        Assertions.assertTrue(exception.getMessage().contains("Template V2 transform factory"));
+        Assertions.assertTrue(exception.getMessage().contains(FailingTransformFactory.class.getName()));
+        Assertions.assertTrue(exception.getMessage().contains("FAILING_TRANSFORM"));
+        Assertions.assertTrue(exception.getMessage().contains(FailingTransformVO.class.getName()));
+        Assertions.assertEquals("intentional transform failure", exception.getCause().getMessage());
+    }
+
     static final class SpiOnlySourceVO extends SourceVO {
         SpiOnlySourceVO() {
             setType("SPI_ONLY_SOURCE");
@@ -108,6 +126,12 @@ class TemplateV2RuntimeRegistryFactoryTests {
     static final class SpiOnlyWriterVO extends WriterVO {
         SpiOnlyWriterVO() {
             setType("SPI_ONLY_SINK");
+        }
+    }
+
+    static final class FailingTransformVO extends TransformVO {
+        FailingTransformVO() {
+            setType("FAILING_TRANSFORM");
         }
     }
 
@@ -190,6 +214,18 @@ class TemplateV2RuntimeRegistryFactoryTests {
         @Override
         public RowSink create(WriterVO writer) {
             return (schema, rows) -> Assertions.assertFalse(rows.isEmpty());
+        }
+    }
+
+    static final class FailingTransformFactory implements V2TransformFactory {
+        @Override
+        public boolean supports(TransformVO transform) {
+            return transform instanceof FailingTransformVO;
+        }
+
+        @Override
+        public CalciteRowTransformer.TransformResult apply(TransformVO transform, CalciteExecutionContext context) {
+            throw new IllegalArgumentException("intentional transform failure");
         }
     }
 }
