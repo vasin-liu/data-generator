@@ -2,6 +2,8 @@ package org.gensokyo.data.calcite;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import org.gensokyo.data.constant.Const;
+import org.gensokyo.data.database.DbTypeKit;
+import org.gensokyo.data.database.dialect.DialectFactory;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.Row;
@@ -15,6 +17,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import javax.sql.DataSource;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -35,8 +38,9 @@ public class QueryRowSource implements RowSource {
         Map<String, Object> params = toParams(source.getParams());
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(source.getDataSourceId()));
+            String sql = resolveSql(source, jdbcTemplate.getJdbcTemplate().getDataSource());
             List<Map<String, Object>> result = jdbcTemplate.query(
-                    Objects.requireNonNull(source.getSql()),
+                    sql,
                     params,
                     (ResultSetExtractor<List<Map<String, Object>>>) this::mapRows
             );
@@ -46,6 +50,7 @@ public class QueryRowSource implements RowSource {
             this.schema = source.getSchema() != null ? source.getSchema() : inferSchema(result);
         } finally {
             DynamicDataSourceContextHolder.clear();
+            DialectFactory.clearDbType();
         }
     }
 
@@ -101,6 +106,37 @@ public class QueryRowSource implements RowSource {
             return "BOOLEAN";
         }
         return "VARCHAR";
+    }
+
+    private String resolveSql(QuerySourceVO source, DataSource dataSource) {
+        String sql = Objects.requireNonNull(source.getSql());
+        long limit = resolveLimit(source);
+        long offset = resolveOffset(source);
+        if (limit <= 0 || dataSource == null) {
+            return sql;
+        }
+        DialectFactory.setDbType(DbTypeKit.getDbType(dataSource));
+        return DialectFactory.getDialect().forPagination(new StringBuilder(sql), limit, offset);
+    }
+
+    private long resolveOffset(QuerySourceVO source) {
+        Integer pageIndex = source.getPageIndex();
+        Integer pageSize = source.getPageSize();
+        if (pageIndex == null || pageSize == null || pageIndex <= 1 || pageSize <= 0) {
+            return 0L;
+        }
+        return (long) (pageIndex - 1) * pageSize;
+    }
+
+    private long resolveLimit(QuerySourceVO source) {
+        long limit = Long.MAX_VALUE;
+        if (source.getPageSize() != null && source.getPageSize() > 0) {
+            limit = Math.min(limit, source.getPageSize().longValue());
+        }
+        if (source.getMaxRows() != null && source.getMaxRows() > 0) {
+            limit = Math.min(limit, source.getMaxRows());
+        }
+        return limit == Long.MAX_VALUE ? 0L : limit;
     }
 
     private Map<String, Object> toParams(List<ParamVO> params) {

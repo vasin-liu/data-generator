@@ -509,12 +509,30 @@ Artifacts:
 1. Optionally trim remaining non-functional startup/build noise:
    `DataSourceController` deprecation compile note, Druid init info logging, and Maven/JDK 25 `Unsafe` warnings from third-party tooling.
 2. Re-run full `.\mvnw-jdk25.ps1 test` if any further Jackson or logging cleanup touches shared infrastructure.
+3. Treat Boot 4 as closed baseline work and move the main implementation focus to Template V2 / Calcite runtime completion.
+4. Keep the current repository-local V2 runtime abstractions for pluginization and hot loading:
+   `TemplateV2RuntimeContext`, `TemplateV2RuntimeServices`, `TemplateV2RuntimePluginProvider`, `TemplateV2RuntimeRegistryProvider`.
+5. Finish built-in V2 runtime capabilities first:
+   query-source convergence, sink execution policy, Kafka sink/provider, Elasticsearch sink/provider, AI source path.
+6. Keep PF4J as the default external plugin loading/lifecycle layer, and continue evolving only that external layer without rewriting the full V2 runtime around PF4J-native concepts.
 
 Current blocker for step 2:
 
 - no datasource-specific Boot 4 blocker remains after switching to `dynamic-datasource-spring-boot4-starter:4.5.0`
 - no remaining template-parser blocker is known on the service startup path
 - the remaining cleanup work is optional log/build noise reduction rather than Boot 4 functional compatibility
+
+Current recommendation for the post-Boot-4 phase:
+
+- keep the current custom V2 runtime abstraction layer
+- do not treat the coarse external `ServiceLoader + URLClassLoader` plugin path as the final design; it remains fallback only
+- continue the current hybrid evolution where PF4J is already the default external plugin lifecycle/classloading layer and the host/runtime contract remains repository-local
+
+Related V2 planning references:
+
+- [`docs/calcite-implementation-status.md`](D:\Work\99_Code\data-generator\docs\calcite-implementation-status.md)
+- [`docs/calcite-refactor-plan.md`](D:\Work\99_Code\data-generator\docs\calcite-refactor-plan.md)
+- [`docs/calcite-plugin-framework-evaluation.md`](D:\Work\99_Code\data-generator\docs\calcite-plugin-framework-evaluation.md)
 
 ## Suggested remaining commit breakdown
 

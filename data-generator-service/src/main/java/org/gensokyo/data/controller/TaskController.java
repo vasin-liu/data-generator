@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gensokyo.data.calcite.TemplateV2Runner;
+import org.gensokyo.data.calcite.TemplateV2RuntimeRegistryProvider;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
@@ -53,6 +54,7 @@ public class TaskController {
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
     private final TemplateV2Runner templateV2Runner;
+    private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -151,6 +153,7 @@ public class TaskController {
     }
 
     private TemplateRuntimeInfo runV2(Long templateId, TemplateV2DraftVO draft) {
+        templateV2RuntimeRegistryProvider.current();
         TemplateV2VO template = TemplateV2Normalizer.normalize(draft);
         template.setId(templateId);
         template.setInstanceId(RandomKit.snowFlake().nextId());

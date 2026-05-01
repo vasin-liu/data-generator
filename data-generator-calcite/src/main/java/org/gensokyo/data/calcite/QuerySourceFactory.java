@@ -6,9 +6,16 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class QuerySourceFactory implements V2SourceFactory {
     private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver;
 
     public QuerySourceFactory(NamedParameterJdbcTemplate jdbcTemplate) {
+        this(jdbcTemplate, new NoopRuntimeJdbcEndpointResolver());
+    }
+
+    public QuerySourceFactory(NamedParameterJdbcTemplate jdbcTemplate,
+                              RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver) {
         this.jdbcTemplate = jdbcTemplate;
+        this.runtimeJdbcEndpointResolver = runtimeJdbcEndpointResolver;
     }
 
     @Override
@@ -18,6 +25,11 @@ public class QuerySourceFactory implements V2SourceFactory {
 
     @Override
     public RowSource create(String name, SourceVO source) {
-        return new QueryRowSource(name, (QuerySourceVO) source, jdbcTemplate);
+        QuerySourceVO querySource = (QuerySourceVO) source;
+        String effectiveDataSourceId = runtimeJdbcEndpointResolver.resolveSourceDataSourceId(querySource);
+        if (effectiveDataSourceId != null && !effectiveDataSourceId.isBlank()) {
+            querySource.setDataSourceId(effectiveDataSourceId);
+        }
+        return new QueryRowSource(name, querySource, jdbcTemplate);
     }
 }

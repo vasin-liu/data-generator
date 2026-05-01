@@ -23,4 +23,5 @@ public class TemplateV2DraftVO implements Serializable {
     private List<TransformVO> transformers;
     private WriteStageVO sink;
     private List<WriteStageVO> sinks;
+    private SinkExecutionPolicyVO sinkExecutionPolicy;
 }

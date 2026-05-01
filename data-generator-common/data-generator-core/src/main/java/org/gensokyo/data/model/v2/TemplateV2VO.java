@@ -23,4 +23,5 @@ public class TemplateV2VO implements Serializable {
     private Map<String, SourceVO> sources = new LinkedHashMap<>();
     private List<TransformVO> transformers = new ArrayList<>();
     private List<WriteStageVO> sinks = new ArrayList<>();
+    private SinkExecutionPolicyVO sinkExecutionPolicy;
 }

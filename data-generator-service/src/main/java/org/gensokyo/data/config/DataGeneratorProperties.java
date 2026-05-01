@@ -10,6 +10,9 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 元数据信息
  *
@@ -48,6 +51,12 @@ public class DataGeneratorProperties {
      * 元数据最大缓存数量
      */
     private Integer metaCacheMaximumSize = 100;
+
+    private List<String> v2PluginDirectories = new ArrayList<>();
+
+    private boolean v2PluginAutoRefresh = true;
+
+    private String v2PluginFramework = "PF4J";
 
 }
 

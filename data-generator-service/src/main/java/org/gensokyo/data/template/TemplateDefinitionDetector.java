@@ -13,8 +13,11 @@ public final class TemplateDefinitionDetector {
     public static TemplateDefinitionKind detect(TemplateVO v1, TemplateV2DraftVO v2) {
         boolean looksV1 = Objects.nonNull(v1) && CollectKit.isNotEmpty(v1.getFields());
         boolean looksV2 = Objects.nonNull(v2)
-                && CollectKit.isNotEmpty(v2.getSources())
-                && (Objects.nonNull(v2.getTransform()) || CollectKit.isNotEmpty(v2.getTransformers()));
+                && (CollectKit.isNotEmpty(v2.getSources())
+                || Objects.nonNull(v2.getTransform())
+                || CollectKit.isNotEmpty(v2.getTransformers())
+                || Objects.nonNull(v2.getSink())
+                || CollectKit.isNotEmpty(v2.getSinks()));
         if (looksV1 && !looksV2) {
             return TemplateDefinitionKind.V1;
         }

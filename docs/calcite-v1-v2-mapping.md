@@ -28,7 +28,7 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 | Number iterator | `NUMBER` | `IteratorRowSource` | Direct | expose as `input` table with explicit schema |
 | Constant iterator | `CONSTANT` | `IteratorRowSource` | Direct | expose values as one-column or explicit-schema rows |
 | Datetime iterator | `DATETIME` | `IteratorRowSource` | Direct | expose generated timestamps as rows |
-| Database iterator | `DATABASE` | `IteratorRowSource` or `ReaderRowSource` | Adapted | clarify whether this remains iterator-owned or source-owned |
+| Database iterator | `DATABASE` | `QuerySourceVO` | Adapted | final direction is to converge into the query-backed source family only |
 | CSV iterator | `CSV` | `RowSource` | Adapted | prefer source abstraction over iterator semantics in V2 |
 | Excel iterator | `EXCEL` | `RowSource` | Adapted | prefer source abstraction over iterator semantics in V2 |
 | JSON iterator | `JSON` | `RowSource` | Adapted | prefer source abstraction over iterator semantics in V2 |
@@ -67,7 +67,7 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 | V1 Reader | V2 Target | Mapping Type | Notes |
 |---|---|---|---|
 | Constant reader | inline or source table | Direct | can become a logical source or SQL literal substitute |
-| JDBC reader | named query-backed source | Adapted | should converge with `DatabaseIterator` long-term |
+| JDBC reader | `QuerySourceVO` | Adapted | final direction is to converge with `DatabaseIterator` into one query-backed source family |
 | CSV reader | named source | Adapted | natural V2 source |
 | Excel reader | named source | Adapted | natural V2 source |
 | JSON reader | named source | Adapted | natural V2 source |
@@ -237,7 +237,8 @@ Expected coverage:
 
 - [ ] map number/constant/datetime iterators to `RowSource`
 - [ ] map JDBC/file readers to named sources
-- [ ] converge `DatabaseIterator` and `JdbcReader` into one query-backed source family
+- [x] converge `DatabaseIterator` and `JdbcReader` into one query-backed source family at the model/mapping level
+- [ ] complete runtime migration entrypoints so new V2 authoring only exposes `QuerySourceVO`
 - [ ] preserve `SelectStrategy` as source policy
 - [ ] introduce `AiSourceVO`
 - [ ] define explicit schema rules for first-phase V2 templates

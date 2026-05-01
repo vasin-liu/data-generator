@@ -21,6 +21,7 @@ public final class TemplateV2Normalizer {
         normalized.setInstanceId(draft.getInstanceId());
         normalized.setName(draft.getName());
         normalized.setGenerator(draft.getGenerator());
+        normalized.setSinkExecutionPolicy(draft.getSinkExecutionPolicy());
         if (draft.getSources() != null) {
             normalized.setSources(new LinkedHashMap<>(draft.getSources()));
         }

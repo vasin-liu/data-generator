@@ -19,7 +19,11 @@ public class QuerySourceVO extends SourceVO {
     }
 
     private String dataSourceId;
+    private InlineDataSourceVO dataSource;
     private String sql;
     private List<ParamVO> params = new ArrayList<>();
+    private Integer pageIndex;
+    private Integer pageSize;
+    private Long maxRows;
     private RowSchema schema;
 }

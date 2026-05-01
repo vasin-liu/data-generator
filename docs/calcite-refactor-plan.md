@@ -2,11 +2,11 @@
 
 ## Goal
 
-Introduce a Calcite-based V2 transformation path that simplifies the current field DAG and stage-heavy configuration model into a more declarative `source + transform + sink` flow, while keeping the existing V1 template path compatible during migration.
+Introduce a Calcite-based V2 transformation path that simplifies the current field DAG and stage-heavy configuration model into a more declarative `source + transform + sink` flow, with the explicit intent to replace the existing V1 path rather than preserve long-term compatibility.
 
 Final objective:
 
-- V2 should eventually implement the functional surface of V1
+- V2 should fully implement and then replace the functional surface of V1
 - V2 should exceed V1 in template simplicity, composability, and extensibility
 
 ## Target Architecture
@@ -91,6 +91,21 @@ sinks:
         target: demo_topic
 ```
 
+Seatunnel-style source direction:
+
+- sources should be allowed to declare connection information inline instead of relying only on pre-registered datasource ids
+- source read options should live next to the source definition instead of being split across old V1 stage concepts
+- runtime should be able to hot-load datasources from template-owned configuration
+- source / transformer / sink should evolve toward pluginized and hot-loadable execution nodes
+
+Plugin framework direction:
+
+- the V2 host runtime should keep repository-local abstractions such as runtime context, runtime services, plugin provider, and registry provider
+- external plugin loading should not stay permanently on the current coarse `ServiceLoader + URLClassLoader` path
+- PF4J is now the default external plugin lifecycle and classloading path, introduced behind the current V2 host contract instead of replacing the whole runtime model
+- the old `ServiceLoader + shared URLClassLoader` path remains only as fallback / temporary compatibility mode and is not class-isolated per plugin
+- built-in Spring-provided factories and future external plugin jars should converge on the same V2 runtime registry contract
+
 ## Scope
 
 In scope for the first implementation:
@@ -115,13 +130,19 @@ Explicitly out of scope for the first implementation:
 - removing the current writer modules
 - full support for multiple transformers and multiple sinks
 
+Compatibility posture for the refactor:
+
+- temporary migration helpers are acceptable
+- long-lived V1 compatibility is not a design goal
+- breaking changes are acceptable when they reduce model complexity or accelerate V2 completion
+
 ## Design Decisions
 
-- V1 and V2 run side by side.
+- V1 and V2 may run side by side temporarily, but V2 is the only target architecture.
 - V2 is a new mainline path, not a new `StageVO`.
 - Calcite should own SQL parsing and validation; do not translate SQL back into the old stage chain.
 - The V2 execution path should use a simple row model instead of `Value / SingleValue / ListValue / MapValue` as its primary abstraction.
-- Existing writer modules should be reused through adapters instead of rewritten first.
+- Existing writer modules may be reused through adapters temporarily, but V2 execution should not be constrained by V1 abstractions.
 - Multiple sources should be a supported end-state because they are a natural fit for Calcite table semantics.
 - Multiple transformers should be supported only as an ordered linear chain; do not allow arbitrary DAG transformers in V2.
 - Multiple sinks should be supported as independent terminal fan-out nodes after the final transform result is materialized.
@@ -130,6 +151,7 @@ Explicitly out of scope for the first implementation:
 - `SelectStrategy` should remain a source policy concern in V2.
 - Multi-sink failure handling should be configurable per template or per sink execution group.
 - `AiSourceVO` should be an official V2 source type; Spring AI integration is an acceptable direction if it fits the repository runtime model.
+- V2 runtime plugin APIs should remain business/runtime-oriented rather than directly exposing PF4J or other framework-native types across the codebase.
 
 ## Milestones
 
@@ -137,7 +159,7 @@ Explicitly out of scope for the first implementation:
 
 - [ ] Finalize the V2 template structure: `sources + transform + sink`
 - [ ] Finalize the first-phase SQL boundary: single-table `SELECT`
-- [ ] Finalize V1/V2 routing rules during template loading
+- [ ] Finalize V2-first routing rules during template loading
 - [ ] Finalize V2 non-goals for phase 1
 - [ ] Prepare 3 V2 sample templates for design review
 
@@ -148,7 +170,7 @@ Artifacts:
 
 Exit criteria:
 
-- the team agrees that V2 is not stage-based
+- the team agrees that V2 is not stage-based and is the only forward architecture
 - the first phase syntax boundary is documented and stable
 
 ### M1 - Introduce the V2 model layer
@@ -397,6 +419,39 @@ Exit criteria:
 - sink failure behavior can switch by configuration
 - the V2 source model includes an official AI-backed source type
 
+### M13 - Formalize external plugin runtime
+
+- [x] define the external plugin packaging contract for V2 runtime nodes
+- [x] define plugin metadata fields: id, version, host version range, capabilities
+- [x] define factory collision and capability resolution rules
+- [x] add a PF4J-backed runtime provider adapter behind the current V2 plugin provider contract
+- [x] validate PF4J-driven template model subtype parsing for `SourceVO`, `TransformVO`, and `WriterVO`
+- [ ] decide whether the current directory watcher remains only as a refresh trigger or is replaced by plugin-manager-driven refresh hooks
+- [ ] add plugin lifecycle and failure diagnostics
+- [ ] add runtime execution tests for plugin-provided source/transform/sink factories
+- [x] add tests for plugin discovery, refresh, duplicate capability handling, and plugin disable/failure isolation
+
+Design constraints for M13:
+
+- keep `TemplateV2RuntimePlugin`, `TemplateV2RuntimePluginProvider`, `TemplateV2RuntimeContext`, and `TemplateV2RuntimeRegistryProvider` as the host-side runtime contract
+- built-in plugins may continue to come from Spring beans or local service loading
+- external jar plugins now default to PF4J-managed lifecycle and classloader isolation
+- plugin-framework adoption must not block the delivery of built-in Kafka / Elasticsearch / AI / source-policy capabilities
+
+Exit criteria:
+
+- the host runtime can load at least one external V2 plugin through the formalized plugin path
+- plugin metadata and capability collisions are validated explicitly
+- plugin refresh behavior is observable and test-covered
+
+Current M13 status:
+
+- PF4J is already the default external plugin framework in service configuration
+- the fallback ServiceLoader path is retained only for compatibility and local/simple scenarios
+- isolation tests have confirmed PF4J plugins load with separate classloaders, while the fallback path does not provide true plugin isolation
+- focused integration tests have confirmed plugin-provided template subtype parsing across source/transform/writer model families
+- the remaining work is primarily runtime execution coverage, refresh/lifecycle hardening, diagnostics, and a human-facing sample plugin/module
+
 ## Recommended Delivery Order
 
 Sprint 1:
@@ -427,6 +482,10 @@ Sprint 4:
 Sprint 5:
 
 - M12
+
+Sprint 6:
+
+- M13
 
 ## First 6 Implementation Tasks
 

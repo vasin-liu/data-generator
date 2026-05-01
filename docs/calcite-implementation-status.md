@@ -25,10 +25,10 @@ The repository has already completed the Boot 4 / JDK 25 baseline transition nee
 
 The current active direction is:
 
-- keep V1 runnable
-- add a parallel V2 execution path
+- treat V2 as the only target architecture
+- keep V1 runnable only as a temporary migration scaffold
 - use Calcite for SQL parsing and validation
-- keep the first V2 runtime as a lightweight in-memory row engine instead of introducing full Calcite physical execution too early
+- keep the first V2 runtime as a lightweight in-memory row engine until the new architecture fully absorbs the old feature surface
 
 ### 2. V2 model and parsing
 
@@ -299,16 +299,15 @@ Goal:
 
 Recommended implementation:
 
-- review current `DatabaseIterator` and `JdbcReader`
-- identify what can become:
-  - query source options
-  - source policy options
-  - helper/factory concerns
+- complete the runtime migration entry so only `QuerySourceVO` remains as the V2 database-backed source shape
+- keep database paging and SQL params on `QuerySourceVO`
+- treat V1 `DatabaseIteratorVO` and `ReadStageVO + JdbcReaderVO` as compatibility inputs only
 
 Suggested acceptance:
 
 - one documented convergence mapping
-- at least one additional V2 source case migrated or represented by `QuerySourceVO`
+- one reusable extraction/migration entry that emits `QuerySourceVO` only
+- no new V2 database source type is introduced
 
 ### Next 4. Join capability hardening
 
@@ -363,10 +362,34 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. JDBC sink `template` mapping
-2. `SinkExecutionPolicyVO` runtime wiring
-3. query-backed source convergence
-4. join hardening
-5. service-level V2 end-to-end execution test
+1. finish real Kafka / Elasticsearch V2 runtime providers on the current registry/provider abstraction
+2. wire `SinkExecutionPolicyVO` into the runner and expose failure behavior clearly
+3. complete query-backed source convergence so `QuerySourceVO` is the only V2 database source shape
+4. harden multi-source SQL semantics and service-level end-to-end V2 execution coverage
+5. strengthen the plugin contract before any framework swap
 
-This sequence keeps the current V2 path moving from prototype to usable execution while staying aligned with the longer-term Calcite refactor direction.
+The plugin-framework recommendation is:
+
+- keep the current V2 runtime abstraction layer
+- do not rewrite the V2 runtime around PF4J-native types now
+- use PF4J as the preferred external plugin lifecycle/classloading layer
+- keep the old shared-classloader ServiceLoader path only as fallback
+
+Current validation result:
+
+- PF4J external plugin path has been wired into the service runtime
+- focused isolation tests now show PF4J plugins load with separate classloaders
+- the old ServiceLoader external plugin path does not provide true plugin isolation and can mis-handle multi-plugin descriptor attribution
+- a minimal PF4J external plugin sample skeleton is now available under `samples/template-v2-pf4j-plugin`
+- plugin-provided template model subtypes now refresh into the shared YAML/JSON codec path through the host-side subtype registry
+- focused integration tests have validated PF4J-provided `SourceVO`, `TransformVO`, and `WriterVO` subtype parsing end to end
+- focused integration tests have also validated one real V2 execution path where PF4J-provided source/transform/sink factories participate in runtime execution together
+- focused integration tests have also validated mixed execution where built-in source factories and PF4J-provided transform/sink factories run in one template
+- the next PF4J gap is now refresh/lifecycle hardening after plugin changes, plugin failure diagnostics, and broader non-happy-path execution coverage
+
+See:
+
+- `docs/calcite-plugin-framework-evaluation.md`
+- `docs/calcite-pf4j-plugin-packaging.md`
+
+This sequence keeps the current V2 path moving from prototype to usable execution while staying aligned with the longer-term Calcite refactor direction and the future external pluginization goal.

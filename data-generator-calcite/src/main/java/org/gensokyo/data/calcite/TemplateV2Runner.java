@@ -1,35 +1,32 @@
 package org.gensokyo.data.calcite;
 
-import org.gensokyo.data.model.v2.IteratorSourceVO;
+import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SourceVO;
-import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
-import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
-import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class TemplateV2Runner {
-    private final List<V2SourceFactory> sourceFactories;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final TemplateV2RuntimeRegistryProvider runtimeRegistryProvider;
 
-    public TemplateV2Runner() {
-        this(List.of(new IteratorSourceFactory()), null);
+    protected TemplateV2Runner() {
+        this(new RefreshableTemplateV2RuntimeRegistryProvider(
+                TemplateV2RuntimePlugins.loadProviders(),
+                new TemplateV2RuntimeRegistryFactory(),
+                TemplateV2RuntimeContext.empty()
+        ));
     }
 
-    public TemplateV2Runner(List<V2SourceFactory> sourceFactories) {
-        this(sourceFactories, null);
+    public TemplateV2Runner(TemplateV2RuntimeRegistry runtimeRegistry) {
+        this(new FixedTemplateV2RuntimeRegistryProvider(runtimeRegistry));
     }
 
-    public TemplateV2Runner(List<V2SourceFactory> sourceFactories, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.sourceFactories = new ArrayList<>(sourceFactories);
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    public TemplateV2Runner(TemplateV2RuntimeRegistryProvider runtimeRegistryProvider) {
+        this.runtimeRegistryProvider = runtimeRegistryProvider;
     }
 
     public TemplateV2RunResult run(TemplateV2VO template) {
@@ -41,13 +38,14 @@ public class TemplateV2Runner {
         }
 
         CalciteExecutionContext context = new CalciteExecutionContext();
+        TemplateV2RuntimeRegistry runtimeRegistry = runtimeRegistryProvider.current();
         for (Map.Entry<String, SourceVO> entry : template.getSources().entrySet()) {
-            context.addSource(createSource(entry.getKey(), entry.getValue()));
+            context.addSource(runtimeRegistry.createSource(entry.getKey(), entry.getValue()));
         }
 
         CalciteRowTransformer.TransformResult current = null;
         for (TransformVO transformer : template.getTransformers()) {
-            current = applyTransformer(transformer, context);
+            current = runtimeRegistry.applyTransform(transformer, context);
             context = new CalciteExecutionContext()
                     .addTable("input", current.schema(), current.rows())
                     .addTable("current", current.schema(), current.rows());
@@ -57,44 +55,57 @@ public class TemplateV2Runner {
             throw new IllegalStateException("Current V2 runner produced no transform result");
         }
 
-        writeSinks(template.getSinks(), current);
+        writeSinks(template, current);
         return new TemplateV2RunResult(current.schema(), current.rows());
     }
 
-    private RowSource createSource(String name, SourceVO source) {
-        for (V2SourceFactory factory : sourceFactories) {
-            if (factory.supports(source)) {
-                return factory.create(name, source);
-            }
-        }
-        throw new UnsupportedOperationException("Unsupported V2 source in current runner: " + source.getClass().getSimpleName());
-    }
-
-    private CalciteRowTransformer.TransformResult applyTransformer(TransformVO transformer, CalciteExecutionContext context) {
-        if (transformer instanceof SqlTransformVO sqlTransform) {
-            return new CalciteRowTransformer(sqlTransform.getSql()).transform(context);
-        }
-        throw new UnsupportedOperationException("Unsupported V2 transformer in current runner: " + transformer.getClass().getSimpleName());
-    }
-
-    private void writeSinks(List<WriteStageVO> sinks, CalciteRowTransformer.TransformResult result) {
-        for (WriteStageVO sink : sinks) {
+    private void writeSinks(TemplateV2VO template, CalciteRowTransformer.TransformResult result) {
+        SinkPolicyMode mode = sinkPolicyMode(template.getSinkExecutionPolicy());
+        for (WriteStageVO sink : template.getSinks()) {
             for (WriterVO writer : sink.getWriters()) {
-                createSink(writer).write(result.schema(), result.rows());
+                try {
+                    createSink(writer).write(result.schema(), result.rows());
+                } catch (RuntimeException e) {
+                    if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
+                        continue;
+                    }
+                    throw e;
+                }
             }
         }
     }
 
-    private RowSink createSink(WriterVO writer) {
-        if (writer instanceof ConsoleWriterVO) {
-            return new ConsoleRowSinkAdapter();
+    protected RowSink createSink(WriterVO writer) {
+        return runtimeRegistryProvider.current().createSink(writer);
+    }
+
+    private SinkPolicyMode sinkPolicyMode(SinkExecutionPolicyVO policy) {
+        if (policy == null || policy.getMode() == null || policy.getMode().isBlank()) {
+            return SinkPolicyMode.FAIL_FAST;
         }
-        if (writer instanceof JdbcWriterVO jdbcWriter) {
-            if (namedParameterJdbcTemplate == null) {
-                throw new IllegalStateException("NamedParameterJdbcTemplate is required for JDBC sink support");
-            }
-            return new JdbcRowSinkAdapter(namedParameterJdbcTemplate, jdbcWriter);
+        return SinkPolicyMode.valueOf(policy.getMode().trim().toUpperCase(Locale.ROOT));
+    }
+
+    private enum SinkPolicyMode {
+        FAIL_FAST,
+        CONTINUE_ON_ERROR
+    }
+
+    private static final class FixedTemplateV2RuntimeRegistryProvider implements TemplateV2RuntimeRegistryProvider {
+        private final TemplateV2RuntimeRegistry runtimeRegistry;
+
+        private FixedTemplateV2RuntimeRegistryProvider(TemplateV2RuntimeRegistry runtimeRegistry) {
+            this.runtimeRegistry = runtimeRegistry;
         }
-        throw new UnsupportedOperationException("Unsupported V2 sink writer in current runner: " + writer.getClass().getSimpleName());
+
+        @Override
+        public TemplateV2RuntimeRegistry current() {
+            return runtimeRegistry;
+        }
+
+        @Override
+        public TemplateV2RuntimeRegistry refresh() {
+            return runtimeRegistry;
+        }
     }
 }

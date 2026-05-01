@@ -1,6 +1,7 @@
 package org.gensokyo.data.json;
 
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.vo.TemplateVO;
@@ -12,32 +13,14 @@ import org.gensokyo.data.model.vo.selector.reader.ReaderSelectStrategyVO;
 import org.gensokyo.data.model.vo.selector.value.ValueSelectStrategyVO;
 import org.gensokyo.data.model.vo.stage.StageVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
-import org.gensokyo.kit.character.StrKit;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.jsontype.NamedType;
-
-import java.util.ArrayList;
-import java.util.ServiceLoader;
 
 import static tools.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
 
 public final class TemplateJsonCodec {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .rebuild()
-            .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
-            .findAndAddModules()
-            .registerSubtypes(loadSubtypes(GeneratorVO.class))
-            .registerSubtypes(loadSubtypes(IteratorVO.class))
-            .registerSubtypes(loadSubtypes(ReaderVO.class))
-            .registerSubtypes(loadSubtypes(ScriptVO.class))
-            .registerSubtypes(loadSubtypes(ReaderSelectStrategyVO.class))
-            .registerSubtypes(loadSubtypes(ValueSelectStrategyVO.class))
-            .registerSubtypes(loadSubtypes(StageVO.class))
-            .registerSubtypes(loadSubtypes(WriterVO.class))
-            .registerSubtypes(loadSubtypes(SourceVO.class))
-            .registerSubtypes(loadSubtypes(TransformVO.class))
-            .build();
+    private static volatile ObjectMapper mapper;
+    private static volatile long mapperVersion = Long.MIN_VALUE;
 
     private TemplateJsonCodec() {
     }
@@ -52,7 +35,7 @@ public final class TemplateJsonCodec {
 
     public static <T> T read(String content, Class<T> clazz) {
         try {
-            return MAPPER.readValue(content, clazz);
+            return mapper().readValue(content, clazz);
         } catch (JacksonException e) {
             throw new DataGeneratorException("Failed to read template JSON", e);
         }
@@ -64,25 +47,39 @@ public final class TemplateJsonCodec {
 
     private static String writeValue(Object value) {
         try {
-            return MAPPER.writeValueAsString(value);
+            return mapper().writeValueAsString(value);
         } catch (JacksonException e) {
             throw new DataGeneratorException("Failed to write template JSON", e);
         }
     }
 
-    private static <T> NamedType[] loadSubtypes(Class<T> parent) {
-        var subtypes = new ArrayList<NamedType>();
-        for (T instance : ServiceLoader.load(parent)) {
-            Class<?> subtype = instance.getClass();
-            JsonSubType annotation = subtype.getAnnotation(JsonSubType.class);
-            if (annotation == null || StrKit.isBlank(annotation.value())) {
-                subtypes.add(new NamedType(subtype));
-            } else {
-                var typeId = annotation.value();
-                subtypes.add(new NamedType(subtype, typeId));
-                subtypes.add(new NamedType(subtype, typeId.toLowerCase()));
+    private static ObjectMapper mapper() {
+        long currentVersion = JsonSubtypeRegistry.version();
+        ObjectMapper current = mapper;
+        if (current == null || mapperVersion != currentVersion) {
+            synchronized (TemplateJsonCodec.class) {
+                current = mapper;
+                if (current == null || mapperVersion != currentVersion) {
+                    mapper = new ObjectMapper()
+                            .rebuild()
+                            .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
+                            .findAndAddModules()
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(GeneratorVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(IteratorVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ReaderVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ScriptVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ReaderSelectStrategyVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ValueSelectStrategyVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(StageVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WriterVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(SourceVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(TransformVO.class))
+                            .build();
+                    mapperVersion = currentVersion;
+                    current = mapper;
+                }
             }
         }
-        return subtypes.toArray(NamedType[]::new);
+        return current;
     }
 }

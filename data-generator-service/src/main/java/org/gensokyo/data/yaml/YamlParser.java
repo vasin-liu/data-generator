@@ -46,4 +46,12 @@ public interface YamlParser {
      * @return 解析后的对象
      */
     <T> T parse(String content, Class<T> clazz);
+
+    /**
+     * 搴忓垪鍖栧璞′负 yaml 鍐呭
+     *
+     * @param value 瑕佸簭鍒楀寲鐨勫璞?
+     * @return yaml 鍐呭
+     */
+    String dump(Object value);
 }

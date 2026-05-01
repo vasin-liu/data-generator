@@ -39,7 +39,11 @@ class TemplateV2RunnerQuerySourceTests {
         template.setTransformers(List.of(transform));
         template.setSinks(List.of(sink));
 
-        TemplateV2RunResult result = new TemplateV2Runner(List.of(new QuerySourceFactory(jdbcTemplate))).run(template);
+        TemplateV2RunResult result = new TemplateV2Runner(new TemplateV2RuntimeRegistry(
+                List.of(new QuerySourceFactory(jdbcTemplate)),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        )).run(template);
 
         Assertions.assertEquals(2, result.getRows().size());
         Assertions.assertEquals("b", result.getRows().get(0).getString("name"));
@@ -75,7 +79,11 @@ class TemplateV2RunnerQuerySourceTests {
         template.setTransformers(List.of(transform));
         template.setSinks(List.of(sink));
 
-        TemplateV2RunResult result = new TemplateV2Runner(List.of(new QuerySourceFactory(jdbcTemplate))).run(template);
+        TemplateV2RunResult result = new TemplateV2Runner(new TemplateV2RuntimeRegistry(
+                List.of(new QuerySourceFactory(jdbcTemplate)),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        )).run(template);
 
         Assertions.assertEquals(1, result.getRows().size());
         Assertions.assertEquals("b", result.getRows().get(0).getString("name"));

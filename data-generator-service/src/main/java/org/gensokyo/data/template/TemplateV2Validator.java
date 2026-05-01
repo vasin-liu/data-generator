@@ -1,5 +1,6 @@
 package org.gensokyo.data.template;
 
+import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.kit.character.StrKit;
@@ -60,6 +61,18 @@ public final class TemplateV2Validator {
             if (sink == null || CollectKit.isEmpty(sink.getWriters())) {
                 throw new IllegalArgumentException("Template V2 sink must contain at least one writer");
             }
+        }
+
+        validateSinkExecutionPolicy(template.getSinkExecutionPolicy());
+    }
+
+    private static void validateSinkExecutionPolicy(SinkExecutionPolicyVO policy) {
+        if (policy == null || StrKit.isBlank(policy.getMode())) {
+            return;
+        }
+        String mode = policy.getMode().trim().toUpperCase();
+        if (!"FAIL_FAST".equals(mode) && !"CONTINUE_ON_ERROR".equals(mode)) {
+            throw new IllegalArgumentException("Unsupported sink execution policy mode: " + policy.getMode());
         }
     }
 }
