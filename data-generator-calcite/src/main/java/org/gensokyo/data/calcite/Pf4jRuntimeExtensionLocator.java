@@ -6,6 +6,11 @@ public interface Pf4jRuntimeExtensionLocator extends AutoCloseable {
     default void start() {
     }
 
+    default void refresh() {
+        close();
+        start();
+    }
+
     List<Pf4jTemplateV2RuntimeExtension> loadExtensions();
 
     default List<ClassLoader> pluginClassLoaders() {

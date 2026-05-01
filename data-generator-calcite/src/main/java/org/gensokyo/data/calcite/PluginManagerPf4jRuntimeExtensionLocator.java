@@ -43,6 +43,13 @@ public class PluginManagerPf4jRuntimeExtensionLocator implements Pf4jRuntimeExte
     }
 
     @Override
+    public synchronized void refresh() {
+        close();
+        pluginManager.unloadPlugins();
+        start();
+    }
+
+    @Override
     public synchronized void close() {
         if (!started) {
             return;

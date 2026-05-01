@@ -24,7 +24,7 @@ public class TemplateModelSubtypeRegistrar {
     }
 
     public void refresh() {
-        pf4jRuntimeExtensionLocator.start();
+        pf4jRuntimeExtensionLocator.refresh();
         for (ClassLoader classLoader : pf4jRuntimeExtensionLocator.pluginClassLoaders()) {
             JsonSubtypeRegistry.registerSubtypes(SourceVO.class, classLoader);
             JsonSubtypeRegistry.registerSubtypes(TransformVO.class, classLoader);

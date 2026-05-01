@@ -207,6 +207,69 @@ class Pf4jTemplateSubtypeIntegrationTests {
         }
     }
 
+    @Test
+    void pf4jRefreshMakesNewPluginFactoriesExecutable() throws Exception {
+        Path pluginDirectory = Files.createTempDirectory("pf4j-template-refresh-runtime");
+        try {
+            try (PathBasedPf4jRuntimeExtensionLocator locator = new PathBasedPf4jRuntimeExtensionLocator(List.of(pluginDirectory));
+                 Pf4jTemplateV2RuntimePluginProvider pluginProvider = new Pf4jTemplateV2RuntimePluginProvider(locator)) {
+                TemplateModelSubtypeRegistrar registrar = new TemplateModelSubtypeRegistrar(locator);
+                RefreshableTemplateV2RuntimeRegistryProvider registryProvider =
+                        new RefreshableTemplateV2RuntimeRegistryProvider(
+                                List.of(
+                                        new StaticTemplateV2RuntimePluginProvider(new DefaultTemplateV2RuntimePlugin()),
+                                        pluginProvider
+                                ),
+                                new TemplateV2RuntimeRegistryFactory(),
+                                TemplateV2RuntimeContext.empty()
+                        );
+                TemplateV2Runner runner = new TemplateV2Runner(registryProvider);
+
+                createPf4jPluginJar(pluginDirectory, "pf4jRefreshRuntimePlugin",
+                        "plugin_query_refresh", "plugin_transform_refresh", "plugin_writer_refresh");
+                registrar.refresh();
+                registryProvider.refresh();
+
+                TemplateV2DraftVO draft = new JacksonParser().parse("""
+                        name: pf4j-refresh-runtime-demo
+                        sources:
+                          input:
+                            type: iterator
+                            iterator:
+                              type: number
+                              from: 3
+                              to: 4
+                              step: 1
+                        transform:
+                          type: plugin_transform_refresh
+                          expression: refreshed-transform
+                        sink:
+                          writers:
+                            - type: plugin_writer_refresh
+                              target: refreshed_target
+                        """, TemplateV2DraftVO.class);
+
+                TemplateV2RunResult result = runner.run(TemplateV2Normalizer.normalize(draft));
+
+                Assertions.assertEquals(2, result.getRows().size());
+                Assertions.assertEquals("3-plugin", result.getRows().get(0).getString("value"));
+                Assertions.assertEquals("4-plugin", result.getRows().get(1).getString("value"));
+                Assertions.assertEquals("refreshed-transform", result.getRows().get(0).getString("pipeline"));
+
+                ClassLoader pluginClassLoader = locator.pluginClassLoaders().getFirst();
+                Class<?> sinkCapture = Class.forName("generated.pf4jRefreshRuntimePlugin.PluginSinkCapture", true, pluginClassLoader);
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> capturedRows = (List<Map<String, Object>>) sinkCapture.getMethod("capturedRows").invoke(null);
+                Assertions.assertEquals(2, capturedRows.size());
+                Assertions.assertEquals("refreshed_target", sinkCapture.getMethod("capturedTarget").invoke(null));
+                Assertions.assertEquals("3-plugin", capturedRows.get(0).get("value"));
+                Assertions.assertEquals("4-plugin", capturedRows.get(1).get("value"));
+            }
+        } finally {
+            deleteRecursively(pluginDirectory);
+        }
+    }
+
     private void createPf4jPluginJar(Path pluginDirectory,
                                      String pluginId,
                                      String sourceType,

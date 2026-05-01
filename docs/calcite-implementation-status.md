@@ -385,7 +385,9 @@ Current validation result:
 - focused integration tests have validated PF4J-provided `SourceVO`, `TransformVO`, and `WriterVO` subtype parsing end to end
 - focused integration tests have also validated one real V2 execution path where PF4J-provided source/transform/sink factories participate in runtime execution together
 - focused integration tests have also validated mixed execution where built-in source factories and PF4J-provided transform/sink factories run in one template
-- the next PF4J gap is now refresh/lifecycle hardening after plugin changes, plugin failure diagnostics, and broader non-happy-path execution coverage
+- PF4J locator refresh now unloads and reloads plugin jars before rebuilding the runtime registry
+- focused integration tests have validated that a plugin jar added after initial startup becomes executable after subtype and registry refresh
+- the next PF4J gap is now plugin failure diagnostics and broader non-happy-path execution coverage
 
 See:
 
