@@ -15,7 +15,11 @@ public class RefreshableTemplateV2RuntimeRegistryProvider implements TemplateV2R
         this.pluginProviders = List.copyOf(pluginProviders);
         this.registryFactory = registryFactory;
         this.runtimeContext = runtimeContext;
-        this.current.set(registryFactory.fromProviders(this.pluginProviders, runtimeContext));
+        try {
+            this.current.set(registryFactory.fromProviders(this.pluginProviders, runtimeContext));
+        } catch (RuntimeException e) {
+            throw new TemplateV2RuntimeRegistryBuildException("Failed to initialize Template V2 runtime registry", e);
+        }
     }
 
     @Override
@@ -25,8 +29,12 @@ public class RefreshableTemplateV2RuntimeRegistryProvider implements TemplateV2R
 
     @Override
     public TemplateV2RuntimeRegistry refresh() {
-        TemplateV2RuntimeRegistry refreshed = registryFactory.fromProviders(pluginProviders, runtimeContext);
-        current.set(refreshed);
-        return refreshed;
+        try {
+            TemplateV2RuntimeRegistry refreshed = registryFactory.fromProviders(pluginProviders, runtimeContext);
+            current.set(refreshed);
+            return refreshed;
+        } catch (RuntimeException e) {
+            throw new TemplateV2RuntimeRegistryBuildException("Failed to refresh Template V2 runtime registry", e);
+        }
     }
 }

@@ -111,6 +111,62 @@ class TemplateV2RuntimeRegistryFactoryTests {
         Assertions.assertEquals("intentional transform failure", exception.getCause().getMessage());
     }
 
+    @Test
+    void wrapsProviderCreateFailuresWithProviderDiagnostics() {
+        TemplateV2RuntimePluginProvider provider = context -> {
+            throw new IllegalStateException("provider boom");
+        };
+
+        TemplateV2RuntimeRegistryBuildException exception = Assertions.assertThrows(
+                TemplateV2RuntimeRegistryBuildException.class,
+                () -> new TemplateV2RuntimeRegistryFactory().fromProviders(List.of(provider)));
+
+        Assertions.assertTrue(exception.getMessage().contains("provider index [0]"));
+        Assertions.assertTrue(exception.getMessage().contains(provider.getClass().getName()));
+        Assertions.assertEquals("provider boom", exception.getCause().getMessage());
+    }
+
+    @Test
+    void wrapsDescriptorFailuresWithPluginDiagnostics() {
+        TemplateV2RuntimePlugin plugin = new TemplateV2RuntimePlugin() {
+            @Override
+            public TemplateV2RuntimePluginDescriptor descriptor() {
+                throw new IllegalStateException("descriptor boom");
+            }
+        };
+
+        TemplateV2RuntimeRegistryBuildException exception = Assertions.assertThrows(
+                TemplateV2RuntimeRegistryBuildException.class,
+                () -> new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(plugin)));
+
+        Assertions.assertTrue(exception.getMessage().contains("plugin descriptor"));
+        Assertions.assertTrue(exception.getMessage().contains(plugin.getClass().getName()));
+        Assertions.assertEquals("descriptor boom", exception.getCause().getMessage());
+    }
+
+    @Test
+    void wrapsPluginFactoryCollectionFailuresWithPluginDiagnostics() {
+        TemplateV2RuntimePlugin plugin = new TemplateV2RuntimePlugin() {
+            @Override
+            public TemplateV2RuntimePluginDescriptor descriptor() {
+                return TemplateV2RuntimePluginDescriptor.builder("failing-plugin").build();
+            }
+
+            @Override
+            public List<V2SourceFactory> sourceFactories() {
+                throw new IllegalStateException("source factories boom");
+            }
+        };
+
+        TemplateV2RuntimeRegistryBuildException exception = Assertions.assertThrows(
+                TemplateV2RuntimeRegistryBuildException.class,
+                () -> new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(plugin)));
+
+        Assertions.assertTrue(exception.getMessage().contains("source factories"));
+        Assertions.assertTrue(exception.getMessage().contains("failing-plugin"));
+        Assertions.assertEquals("source factories boom", exception.getCause().getMessage());
+    }
+
     static final class SpiOnlySourceVO extends SourceVO {
         SpiOnlySourceVO() {
             setType("SPI_ONLY_SOURCE");

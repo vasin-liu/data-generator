@@ -261,6 +261,7 @@ The following implementation milestones are complete:
 21. Remote AI source execution now has a runtime bridge contract and provider hook; tests cover prompt/options handoff and scalar/map/list output materialization without live network calls.
 22. Kafka and Elasticsearch blank-template row publishing now share `RowJsonCodec`, with focused coverage for null, primitive, and escaped string values.
 23. V2 writer-specific `options` are available on `WriterVO`; Kafka supports resolved `key` / `headers`, and Elasticsearch supports resolved `id` / `routing` plus `upsert`.
+24. Runtime registry build failures now include provider index/class, plugin descriptor, factory collection phase, and refresh/initialization context while preserving the last good registry on refresh failure.
 
 ## Immediate Next Work
 
@@ -288,7 +289,6 @@ The following items remain intentionally deferred after the current step:
 - concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
 - nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
-- plugin load-failure diagnostics beyond matched runtime factory failures
 - in-flight task refresh policy
 - V1 retirement
 
@@ -298,7 +298,7 @@ The most pragmatic next implementation sequence is:
 
 1. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-3. add plugin load-failure diagnostics and in-flight refresh policy
+3. define in-flight task refresh policy
 4. expand source policy caching/materialization modes after the row-level semantics stabilize
 5. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 
@@ -322,10 +322,12 @@ Current validation result:
 - PF4J locator refresh now unloads and reloads plugin jars before rebuilding the runtime registry
 - focused integration tests have validated that a plugin jar added after initial startup becomes executable after subtype and registry refresh
 - runtime registry now wraps matched factory failures with node kind, template type, model class, and factory class diagnostics
-- focused registry tests cover transform factory failure diagnostics
+- runtime registry build now wraps provider create failures, plugin descriptor failures, and plugin factory collection failures with actionable diagnostics
+- refreshable registry provider now wraps initialization/refresh failures and keeps the last good registry when refresh fails
+- focused registry tests cover transform factory failure diagnostics, build failure diagnostics, and refresh failure behavior
 - runner sink-write failures now include sink index, writer index, writer type, model class, and target diagnostics under fail-fast policy
 - focused runner tests cover sink write diagnostics and continue-on-error behavior
-- the next PF4J gap is now broader non-happy-path execution coverage such as plugin load failures and in-flight task refresh policy
+- the next PF4J gap is in-flight task refresh policy and more PF4J-specific malformed jar/load-failure fixtures
 
 See:
 
