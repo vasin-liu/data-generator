@@ -273,8 +273,8 @@ Exit criteria:
 - [x] Adapt row output to `ConsoleWriter`
 - [x] Adapt row output to DB writer
 - [x] Adapt row output to Kafka writer
-- [ ] Adapt row output to Elasticsearch writer
-- [x] Define a stable row-to-writer payload mapping contract for console/JDBC/Kafka value publishing
+- [x] Adapt row output to Elasticsearch writer
+- [x] Define a stable row-to-writer payload mapping contract for console/JDBC/Kafka/Elasticsearch value publishing
 - [x] Define configurable multi-sink failure behavior
 
 Recommended implementation order:

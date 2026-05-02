@@ -514,6 +514,7 @@ Artifacts:
    `TemplateV2RuntimeContext`, `TemplateV2RuntimeServices`, `TemplateV2RuntimePluginProvider`, `TemplateV2RuntimeRegistryProvider`.
 5. Finish built-in V2 runtime capabilities first:
    query-source convergence, sink execution policy, Kafka sink/provider, Elasticsearch sink/provider, AI source path.
+   Kafka and Elasticsearch now both have first-pass V2 runtime sink providers; the next built-in runtime gap is AI source execution.
 6. Keep PF4J as the default external plugin loading/lifecycle layer, and continue evolving only that external layer without rewriting the full V2 runtime around PF4J-native concepts.
 
 Current blocker for step 2:

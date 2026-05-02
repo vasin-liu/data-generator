@@ -255,30 +255,13 @@ The following implementation milestones are complete:
 15. Query-backed source convergence is implemented at the model/mapping entrypoint level.
 16. PF4J external plugin loading, class isolation, subtype parsing, runtime execution, mixed execution, refresh, and first-pass diagnostics are implemented.
 17. Kafka V2 sink factory is runnable through `TemplateV2RuntimeServices.kafkaTemplate(...)` with `WriterVO.type=KAFKA`.
+18. Elasticsearch V2 sink factory is runnable through `TemplateV2RuntimeServices.elasticsearchClient(...)` with `WriterVO.type=ELASTICSEARCH` or `ES`.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. Elasticsearch sink factory
-
-Goal:
-
-- make Elasticsearch usable as a real V2 sink instead of a placeholder runtime provider
-
-Recommended implementation:
-
-- add an Elasticsearch `V2SinkFactory`
-- resolve target cluster through `TemplateV2RuntimeServices.elasticsearchClient(...)`
-- use low-level bulk requests consistent with the Boot 4 Elasticsearch path
-- define row-to-index document mapping
-
-Suggested acceptance:
-
-- focused test around bulk request generation
-- runtime-service test proving missing ES services produce clear diagnostics
-
-### Next 2. AI source runtime
+### Next 1. AI source runtime
 
 Goal:
 
@@ -296,7 +279,7 @@ Suggested acceptance:
 - one deterministic test source path without live network calls
 - one validation test for missing provider configuration
 
-### Next 3. Source policy runtime semantics
+### Next 2. Source policy runtime semantics
 
 Goal:
 
@@ -313,18 +296,19 @@ Suggested acceptance:
 - tests for at least one deterministic source policy
 - documentation mapping V1 select strategies to V2 source policy
 
-### Next 4. Kafka sink hardening
+### Next 3. Kafka / Elasticsearch sink hardening
 
 Goal:
 
-- move the first Kafka sink factory from basic value publishing to production-ready message shaping
+- move the first Kafka and Elasticsearch sink factories from basic row publishing to production-ready message/document shaping
 
 Recommended implementation:
 
-- define optional key mapping
-- define optional headers
-- decide whether blank `template` should remain JSON-like output or move to a shared Jackson codec
-- add integration-style coverage around error diagnostics without requiring a live Kafka broker
+- define optional Kafka key mapping
+- define optional Kafka headers
+- define optional Elasticsearch id/routing/upsert mapping
+- decide whether blank `template` should remain local JSON-like output or move to a shared Jackson codec
+- add integration-style coverage around error diagnostics without requiring live Kafka or Elasticsearch services
 
 ## Deferred Work
 
@@ -333,9 +317,9 @@ The following items remain intentionally deferred after the current step:
 - full Calcite physical execution
 - UDF expansion
 - AI source real execution path
-- Elasticsearch sink on the V2 path
 - source policy runtime semantics
 - Kafka key/header/serialization hardening
+- Elasticsearch id/routing/upsert/serialization hardening
 - plugin load-failure diagnostics beyond matched runtime factory failures
 - in-flight task refresh policy
 - V1 retirement
@@ -344,10 +328,10 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. finish the real Elasticsearch V2 runtime provider on the current registry/provider abstraction
-2. implement the AI source runtime path
-3. implement source policy runtime semantics
-4. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+1. implement the AI source runtime path
+2. implement source policy runtime semantics
+3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+4. harden Kafka / Elasticsearch sink payload mapping
 5. add plugin load-failure diagnostics and in-flight refresh policy
 
 The plugin-framework recommendation is:
