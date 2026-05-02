@@ -161,6 +161,38 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsDateOrientedSqlFunctions() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-date-functions");
+        template.setSources(Map.of("date_seed", new DateSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT event_date,
+                       V2_FORMAT_DATE('%Y-%m-%d', event_date) AS formatted_date,
+                       V2_DATE_ADD(event_date, 2) AS date_plus_two,
+                       V2_DATE_SUB(event_date, 1) AS date_minus_one,
+                       V2_DATE_DIFF(event_date, base_date) AS days_from_base,
+                       YEAR(event_date) AS event_year,
+                       MONTH(event_date) AS event_month,
+                       DAYOFMONTH(event_date) AS event_day
+                FROM date_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(dateRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Row row = result.getRows().getFirst();
+        Assertions.assertEquals("2026-05-02", row.getString("event_date"));
+        Assertions.assertEquals("2026-05-02", row.getString("formatted_date"));
+        Assertions.assertEquals("2026-05-04", row.getString("date_plus_two"));
+        Assertions.assertEquals("2026-05-01", row.getString("date_minus_one"));
+        Assertions.assertEquals("1", row.getString("days_from_base"));
+        Assertions.assertEquals("2026", row.getString("event_year"));
+        Assertions.assertEquals("5", row.getString("event_month"));
+        Assertions.assertEquals("2", row.getString("event_day"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");
@@ -419,6 +451,14 @@ class TemplateV2RunnerTests {
         );
     }
 
+    private TemplateV2RuntimeRegistry dateRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new DateSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
     private static final class FailingWriterVO extends WriterVO {
         private FailingWriterVO() {
             setType("FAILING");
@@ -441,6 +481,12 @@ class TemplateV2RunnerTests {
     private static final class RegistryOnlySourceVO extends org.gensokyo.data.model.v2.SourceVO {
         private RegistryOnlySourceVO() {
             setType("REGISTRY_ONLY_SOURCE");
+        }
+    }
+
+    private static final class DateSourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private DateSourceVO() {
+            setType("DATE_SOURCE");
         }
     }
 
@@ -517,6 +563,41 @@ class TemplateV2RunnerTests {
             values.put(firstKey, firstValue);
             values.put(secondKey, secondValue);
             return values;
+        }
+    }
+
+    private static final class DateSourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof DateSourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("event_date", "DATE", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("base_date", "DATE", false)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(new Row(Map.of(
+                            "event_date", java.time.LocalDate.parse("2026-05-02"),
+                            "base_date", java.time.LocalDate.parse("2026-05-01")
+                    )));
+                }
+            };
         }
     }
 

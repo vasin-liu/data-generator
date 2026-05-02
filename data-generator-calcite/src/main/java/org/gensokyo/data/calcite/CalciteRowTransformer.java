@@ -17,7 +17,13 @@ import org.gensokyo.data.model.v2.RowSchema;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -193,6 +199,7 @@ public class CalciteRowTransformer {
             case OR -> (Boolean) evaluate(row, call.operand(0)) || (Boolean) evaluate(row, call.operand(1));
             case IS_NULL -> evaluate(row, call.operand(0)) == null;
             case IS_NOT_NULL -> evaluate(row, call.operand(0)) != null;
+            case EXTRACT -> extract(row, call);
             default -> evaluateFunction(row, call);
         };
     }
@@ -218,6 +225,14 @@ public class CalciteRowTransformer {
             case "FLOOR" -> numeric(row, call, value -> value.setScale(0, RoundingMode.FLOOR));
             case "CEIL", "CEILING" -> numeric(row, call, value -> value.setScale(0, RoundingMode.CEILING));
             case "ROUND" -> round(row, call);
+            case "V2_TO_DATE", "TO_DATE", "DATE" -> toLocalDate(evaluate(row, call.operand(0)));
+            case "V2_FORMAT_DATE", "FORMAT_DATE" -> formatDate(row, call);
+            case "V2_DATE_ADD", "DATE_ADD" -> dateAdd(row, call, 1);
+            case "V2_DATE_SUB", "DATE_SUB" -> dateAdd(row, call, -1);
+            case "V2_DATE_DIFF", "DATEDIFF", "DATE_DIFF" -> dateDiff(row, call);
+            case "YEAR" -> toLocalDate(evaluate(row, call.operand(0))).getYear();
+            case "MONTH" -> toLocalDate(evaluate(row, call.operand(0))).getMonthValue();
+            case "DAYOFMONTH", "DAY" -> toLocalDate(evaluate(row, call.operand(0))).getDayOfMonth();
             default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: "
                     + call.getKind() + " / " + functionName);
         };
@@ -292,6 +307,39 @@ public class CalciteRowTransformer {
         return asBigDecimal(value).setScale(scale, RoundingMode.HALF_UP);
     }
 
+    private Object formatDate(Row row, SqlBasicCall call) {
+        String pattern = Objects.toString(evaluate(row, call.operand(0)), "");
+        LocalDate date = toLocalDate(evaluate(row, call.operand(1)));
+        return date.format(DateTimeFormatter.ofPattern(toJavaDatePattern(pattern)));
+    }
+
+    private Object dateAdd(Row row, SqlBasicCall call, int direction) {
+        LocalDate date = toLocalDate(evaluate(row, call.operand(0)));
+        int days = toInt(evaluate(row, call.operand(1)));
+        return date.plusDays((long) direction * days);
+    }
+
+    private Object dateDiff(Row row, SqlBasicCall call) {
+        LocalDate end = toLocalDate(evaluate(row, call.operand(0)));
+        LocalDate start = toLocalDate(evaluate(row, call.operand(1)));
+        return ChronoUnit.DAYS.between(start, end);
+    }
+
+    private Object extract(Row row, SqlBasicCall call) {
+        String unit = call.operand(0).toString().toUpperCase(Locale.ROOT);
+        LocalDate date = toLocalDate(evaluate(row, call.operand(1)));
+        if (unit.contains("YEAR")) {
+            return date.getYear();
+        }
+        if (unit.contains("MONTH")) {
+            return date.getMonthValue();
+        }
+        if (unit.contains("DAY")) {
+            return date.getDayOfMonth();
+        }
+        throw new UnsupportedOperationException("Unsupported EXTRACT unit in current V2 skeleton: " + unit);
+    }
+
     private Object evaluateCase(Row row, SqlCase sqlCase) {
         SqlNodeList whenOperands = sqlCase.getWhenOperands();
         SqlNodeList thenOperands = sqlCase.getThenOperands();
@@ -348,6 +396,31 @@ public class CalciteRowTransformer {
             return new BigDecimal(stringValue);
         }
         throw new IllegalArgumentException("Expected numeric value but got: " + value);
+    }
+
+    private LocalDate toLocalDate(Object value) {
+        if (value instanceof LocalDate localDate) {
+            return localDate;
+        }
+        if (value instanceof LocalDateTime localDateTime) {
+            return localDateTime.toLocalDate();
+        }
+        if (value instanceof java.sql.Date sqlDate) {
+            return sqlDate.toLocalDate();
+        }
+        if (value instanceof Date date) {
+            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        if (value instanceof String stringValue) {
+            return LocalDate.parse(stringValue);
+        }
+        throw new IllegalArgumentException("Expected date value but got: " + value);
+    }
+
+    private String toJavaDatePattern(String pattern) {
+        return pattern.replace("%Y", "yyyy")
+                .replace("%m", "MM")
+                .replace("%d", "dd");
     }
 
     private int toInt(Object value) {

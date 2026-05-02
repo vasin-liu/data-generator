@@ -155,6 +155,7 @@ Current SQL support level:
 - `CAST NOT NULL` passthrough for Calcite-injected nullability casts
 - null/string functions: `COALESCE`, `CONCAT`, `UPPER`, `LOWER`, `TRIM`
 - conversion-oriented functions: `NULLIF`, `CHAR_LENGTH`, `SUBSTRING`, `ABS`, `FLOOR`, `CEIL`, `ROUND`
+- date-oriented functions: `V2_FORMAT_DATE`, `V2_DATE_ADD`, `V2_DATE_SUB`, `V2_DATE_DIFF`, plus `YEAR`, `MONTH`, and `DAYOFMONTH` through `EXTRACT`
 - single-table `FROM`
 - `FROM table AS alias`
 - `INNER JOIN`
@@ -269,6 +270,7 @@ The following implementation milestones are complete:
 26. SQL transform now supports `CASE WHEN`, `IS NULL`, and `IS NOT NULL`, covering the first V2 path for V1-style conditional/null handling.
 27. SQL transform now enables the Calcite standard / Calcite / MySQL operator tables and executes the first null/string function batch: `COALESCE`, `CONCAT`, `UPPER`, `LOWER`, and `TRIM`.
 28. SQL transform now executes the first conversion-oriented function batch: `NULLIF`, `CHAR_LENGTH`, `SUBSTRING`, `ABS`, `FLOOR`, `CEIL`, and `ROUND`.
+29. SQL transform now has a first repository-owned V2 UDF namespace for date conversion helpers: `V2_FORMAT_DATE`, `V2_DATE_ADD`, `V2_DATE_SUB`, and `V2_DATE_DIFF`.
 
 ## Immediate Next Work
 
