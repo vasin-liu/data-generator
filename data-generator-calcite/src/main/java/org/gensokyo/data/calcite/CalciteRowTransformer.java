@@ -16,6 +16,7 @@ import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -200,6 +201,7 @@ public class CalciteRowTransformer {
         String functionName = call.getOperator().getName().toUpperCase(Locale.ROOT);
         return switch (functionName) {
             case "COALESCE" -> coalesce(row, call);
+            case "NULLIF" -> nullif(row, call);
             case "CONCAT" -> concat(row, call);
             case "UPPER" -> {
                 Object value = evaluate(row, call.operand(0));
@@ -210,6 +212,12 @@ public class CalciteRowTransformer {
                 yield value == null ? null : value.toString().toLowerCase(Locale.ROOT);
             }
             case "TRIM" -> trim(row, call);
+            case "CHAR_LENGTH", "CHARACTER_LENGTH", "LENGTH" -> length(row, call);
+            case "SUBSTRING", "SUBSTR" -> substring(row, call);
+            case "ABS" -> numeric(row, call, BigDecimal::abs);
+            case "FLOOR" -> numeric(row, call, value -> value.setScale(0, RoundingMode.FLOOR));
+            case "CEIL", "CEILING" -> numeric(row, call, value -> value.setScale(0, RoundingMode.CEILING));
+            case "ROUND" -> round(row, call);
             default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: "
                     + call.getKind() + " / " + functionName);
         };
@@ -223,6 +231,12 @@ public class CalciteRowTransformer {
             }
         }
         return null;
+    }
+
+    private Object nullif(Row row, SqlBasicCall call) {
+        Object left = evaluate(row, call.operand(0));
+        Object right = evaluate(row, call.operand(1));
+        return Objects.equals(normalizeComparable(left), normalizeComparable(right)) ? null : left;
     }
 
     private String concat(Row row, SqlBasicCall call) {
@@ -240,6 +254,42 @@ public class CalciteRowTransformer {
         SqlNode operand = call.operand(call.operandCount() - 1);
         Object value = evaluate(row, operand);
         return value == null ? null : value.toString().trim();
+    }
+
+    private Object length(Row row, SqlBasicCall call) {
+        Object value = evaluate(row, call.operand(0));
+        return value == null ? null : value.toString().length();
+    }
+
+    private Object substring(Row row, SqlBasicCall call) {
+        Object value = evaluate(row, call.operand(0));
+        if (value == null) {
+            return null;
+        }
+        String stringValue = value.toString();
+        int start = Math.max(0, toInt(evaluate(row, call.operand(1))) - 1);
+        if (start >= stringValue.length()) {
+            return "";
+        }
+        if (call.operandCount() < 3) {
+            return stringValue.substring(start);
+        }
+        int end = Math.min(stringValue.length(), start + Math.max(0, toInt(evaluate(row, call.operand(2)))));
+        return stringValue.substring(start, end);
+    }
+
+    private Object numeric(Row row, SqlBasicCall call, java.util.function.UnaryOperator<BigDecimal> operator) {
+        Object value = evaluate(row, call.operand(0));
+        return value == null ? null : operator.apply(asBigDecimal(value));
+    }
+
+    private Object round(Row row, SqlBasicCall call) {
+        Object value = evaluate(row, call.operand(0));
+        if (value == null) {
+            return null;
+        }
+        int scale = call.operandCount() > 1 ? toInt(evaluate(row, call.operand(1))) : 0;
+        return asBigDecimal(value).setScale(scale, RoundingMode.HALF_UP);
     }
 
     private Object evaluateCase(Row row, SqlCase sqlCase) {
@@ -298,6 +348,10 @@ public class CalciteRowTransformer {
             return new BigDecimal(stringValue);
         }
         throw new IllegalArgumentException("Expected numeric value but got: " + value);
+    }
+
+    private int toInt(Object value) {
+        return asBigDecimal(value).intValue();
     }
 
     public record TransformResult(RowSchema schema, List<Row> rows) {

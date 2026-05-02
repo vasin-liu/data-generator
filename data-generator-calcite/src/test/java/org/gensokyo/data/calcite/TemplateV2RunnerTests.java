@@ -129,6 +129,38 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsConversionOrientedSqlFunctions() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-conversion-functions");
+        template.setSources(Map.of("nullable_seed", new RegistryOnlySourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT name,
+                       NULLIF(name, 'empty') AS normalized_name,
+                       CHAR_LENGTH(name) AS name_length,
+                       SUBSTRING(name, 1, 2) AS name_prefix,
+                       ABS(score - 15) AS score_distance,
+                       FLOOR(score / 4) AS score_floor,
+                       CEIL(score / 4) AS score_ceil,
+                       ROUND(score / 4, 0) AS score_round
+                FROM nullable_seed
+                WHERE score IS NOT NULL
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(nullableRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("alpha", result.getRows().get(0).getString("normalized_name"));
+        Assertions.assertEquals("5", result.getRows().get(0).getString("name_length"));
+        Assertions.assertEquals("al", result.getRows().get(0).getString("name_prefix"));
+        Assertions.assertEquals("5", result.getRows().get(0).getString("score_distance"));
+        Assertions.assertEquals("2", result.getRows().get(0).getString("score_floor"));
+        Assertions.assertEquals("3", result.getRows().get(0).getString("score_ceil"));
+        Assertions.assertEquals("3", result.getRows().get(0).getString("score_round"));
+        Assertions.assertEquals("be", result.getRows().get(1).getString("name_prefix"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");
