@@ -259,6 +259,7 @@ The following implementation milestones are complete:
 19. AI V2 source factory is runnable for deterministic `INLINE` / `STATIC` / `ECHO` providers and exposes rows to SQL transforms.
 20. Source policy runtime semantics are active as source materialization post-processing for ordered/random selection and `limit`.
 21. Remote AI source execution now has a runtime bridge contract and provider hook; tests cover prompt/options handoff and scalar/map/list output materialization without live network calls.
+22. Kafka and Elasticsearch blank-template row publishing now share `RowJsonCodec`, with focused coverage for null, primitive, and escaped string values.
 
 ## Immediate Next Work
 
@@ -275,7 +276,7 @@ Recommended implementation:
 - define optional Kafka key mapping
 - define optional Kafka headers
 - define optional Elasticsearch id/routing/upsert mapping
-- decide whether blank `template` should remain local JSON-like output or move to a shared Jackson codec
+- extend the shared `RowJsonCodec` or replace it with a Jackson-backed codec when nested values become required
 - add integration-style coverage around error diagnostics without requiring live Kafka or Elasticsearch services
 
 ## Deferred Work
@@ -286,8 +287,8 @@ The following items remain intentionally deferred after the current step:
 - UDF expansion
 - concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
-- Kafka key/header/serialization hardening
-- Elasticsearch id/routing/upsert/serialization hardening
+- Kafka key/header hardening
+- Elasticsearch id/routing/upsert hardening
 - plugin load-failure diagnostics beyond matched runtime factory failures
 - in-flight task refresh policy
 - V1 retirement
@@ -296,7 +297,7 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. harden Kafka / Elasticsearch sink payload mapping
+1. harden Kafka key/header and Elasticsearch id/routing/upsert mapping
 2. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
 4. add plugin load-failure diagnostics and in-flight refresh policy

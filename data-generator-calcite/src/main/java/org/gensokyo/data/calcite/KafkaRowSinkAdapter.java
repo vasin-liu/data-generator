@@ -7,9 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.StringUtils;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -40,32 +38,6 @@ public class KafkaRowSinkAdapter implements RowSink {
             row.values().forEach((key, value) -> properties.put(key, value == null ? "" : value.toString()));
             return placeholderHelper.replacePlaceholders(writer.getTemplate(), properties);
         }
-        return toJsonLikeValue(row.values());
-    }
-
-    private String toJsonLikeValue(Map<String, Object> values) {
-        Map<String, Object> ordered = new LinkedHashMap<>(values);
-        StringBuilder builder = new StringBuilder("{");
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : ordered.entrySet()) {
-            if (!first) {
-                builder.append(',');
-            }
-            builder.append('"').append(escape(entry.getKey())).append('"').append(':');
-            Object value = entry.getValue();
-            if (value == null) {
-                builder.append("null");
-            } else if (value instanceof Number || value instanceof Boolean) {
-                builder.append(value);
-            } else {
-                builder.append('"').append(escape(value.toString())).append('"');
-            }
-            first = false;
-        }
-        return builder.append('}').toString();
-    }
-
-    private String escape(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+        return RowJsonCodec.toJsonObject(row.values());
     }
 }

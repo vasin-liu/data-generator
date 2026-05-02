@@ -15,9 +15,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -60,7 +58,7 @@ public class ElasticsearchRowSinkAdapter implements RowSink {
     private String bulkPayload(String index, List<Row> rows) {
         StringBuilder payload = new StringBuilder(rows.size() * 128);
         for (Row row : rows) {
-            payload.append("{\"index\":{\"_index\":\"").append(escape(index)).append("\"}}").append('\n');
+            payload.append("{\"index\":{\"_index\":\"").append(RowJsonCodec.escape(index)).append("\"}}").append('\n');
             payload.append(document(row)).append('\n');
         }
         return payload.toString();
@@ -72,32 +70,7 @@ public class ElasticsearchRowSinkAdapter implements RowSink {
             row.values().forEach((key, value) -> properties.put(key, value == null ? "" : value.toString()));
             return placeholderHelper.replacePlaceholders(writer.getTemplate(), properties);
         }
-        return toJsonObject(row.values());
-    }
-
-    private String toJsonObject(Map<String, Object> values) {
-        Map<String, Object> ordered = new LinkedHashMap<>(values);
-        StringBuilder builder = new StringBuilder("{");
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : ordered.entrySet()) {
-            if (!first) {
-                builder.append(',');
-            }
-            builder.append('"').append(escape(entry.getKey())).append('"').append(':');
-            appendJsonValue(builder, entry.getValue());
-            first = false;
-        }
-        return builder.append('}').toString();
-    }
-
-    private void appendJsonValue(StringBuilder builder, Object value) {
-        if (value == null) {
-            builder.append("null");
-        } else if (value instanceof Number || value instanceof Boolean) {
-            builder.append(value);
-        } else {
-            builder.append('"').append(escape(value.toString())).append('"');
-        }
+        return RowJsonCodec.toJsonObject(row.values());
     }
 
     private static long countSuccessfulItems(HttpEntity entity, int expectedCount) throws IOException {
@@ -119,7 +92,4 @@ public class ElasticsearchRowSinkAdapter implements RowSink {
         return successCount;
     }
 
-    private static String escape(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
 }
