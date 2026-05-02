@@ -363,11 +363,11 @@ class TemplateV2RunnerTests {
         }
 
         @Override
-        protected RowSink createSink(WriterVO writer) {
+        protected RowSink createSink(TemplateV2RuntimeRegistry runtimeRegistry, WriterVO writer) {
             if (writer instanceof FailingWriterVO) {
                 return new FailingRowSinkAdapter();
             }
-            return super.createSink(writer);
+            return super.createSink(runtimeRegistry, writer);
         }
     }
 

@@ -262,6 +262,7 @@ The following implementation milestones are complete:
 22. Kafka and Elasticsearch blank-template row publishing now share `RowJsonCodec`, with focused coverage for null, primitive, and escaped string values.
 23. V2 writer-specific `options` are available on `WriterVO`; Kafka supports resolved `key` / `headers`, and Elasticsearch supports resolved `id` / `routing` plus `upsert`.
 24. Runtime registry build failures now include provider index/class, plugin descriptor, factory collection phase, and refresh/initialization context while preserving the last good registry on refresh failure.
+25. In-flight refresh policy is defined and implemented: a `TemplateV2Runner` run uses the registry snapshot captured at run start for source, transform, and sink execution; refresh affects only later runs.
 
 ## Immediate Next Work
 
@@ -289,7 +290,6 @@ The following items remain intentionally deferred after the current step:
 - concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
 - nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
-- in-flight task refresh policy
 - V1 retirement
 
 ## Current Recommendation
@@ -298,9 +298,9 @@ The most pragmatic next implementation sequence is:
 
 1. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-3. define in-flight task refresh policy
-4. expand source policy caching/materialization modes after the row-level semantics stabilize
-5. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
+3. expand source policy caching/materialization modes after the row-level semantics stabilize
+4. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
+5. plan V1 retirement checkpoints around V2 feature parity
 
 The plugin-framework recommendation is:
 
@@ -324,6 +324,7 @@ Current validation result:
 - runtime registry now wraps matched factory failures with node kind, template type, model class, and factory class diagnostics
 - runtime registry build now wraps provider create failures, plugin descriptor failures, and plugin factory collection failures with actionable diagnostics
 - refreshable registry provider now wraps initialization/refresh failures and keeps the last good registry when refresh fails
+- runner execution now keeps one registry snapshot for the entire in-flight run, including sink creation, so refresh is visible only to later runs
 - focused registry tests cover transform factory failure diagnostics, build failure diagnostics, and refresh failure behavior
 - runner sink-write failures now include sink index, writer index, writer type, model class, and target diagnostics under fail-fast policy
 - focused runner tests cover sink write diagnostics and continue-on-error behavior

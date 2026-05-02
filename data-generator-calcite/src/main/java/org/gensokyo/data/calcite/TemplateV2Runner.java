@@ -55,18 +55,20 @@ public class TemplateV2Runner {
             throw new IllegalStateException("Current V2 runner produced no transform result");
         }
 
-        writeSinks(template, current);
+        writeSinks(runtimeRegistry, template, current);
         return new TemplateV2RunResult(current.schema(), current.rows());
     }
 
-    private void writeSinks(TemplateV2VO template, CalciteRowTransformer.TransformResult result) {
+    private void writeSinks(TemplateV2RuntimeRegistry runtimeRegistry,
+                            TemplateV2VO template,
+                            CalciteRowTransformer.TransformResult result) {
         SinkPolicyMode mode = sinkPolicyMode(template.getSinkExecutionPolicy());
         int sinkIndex = 0;
         for (WriteStageVO sink : template.getSinks()) {
             int writerIndex = 0;
             for (WriterVO writer : sink.getWriters()) {
                 try {
-                    createSink(writer).write(result.schema(), result.rows());
+                    createSink(runtimeRegistry, writer).write(result.schema(), result.rows());
                 } catch (RuntimeException e) {
                     if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
                         writerIndex++;
@@ -78,6 +80,10 @@ public class TemplateV2Runner {
             }
             sinkIndex++;
         }
+    }
+
+    protected RowSink createSink(TemplateV2RuntimeRegistry runtimeRegistry, WriterVO writer) {
+        return runtimeRegistry.createSink(writer);
     }
 
     protected RowSink createSink(WriterVO writer) {
