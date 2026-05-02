@@ -10,6 +10,7 @@ import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.fun.SqlCase;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
@@ -164,6 +165,9 @@ public class CalciteRowTransformer {
         if (node instanceof SqlLiteral literal) {
             return literal.toValue();
         }
+        if (node instanceof SqlCase sqlCase) {
+            return evaluateCase(row, sqlCase);
+        }
         if (node instanceof SqlBasicCall call) {
             return evaluateCall(row, call);
         }
@@ -186,8 +190,23 @@ public class CalciteRowTransformer {
             case LESS_THAN_OR_EQUAL -> compare(row, call) <= 0;
             case AND -> (Boolean) evaluate(row, call.operand(0)) && (Boolean) evaluate(row, call.operand(1));
             case OR -> (Boolean) evaluate(row, call.operand(0)) || (Boolean) evaluate(row, call.operand(1));
+            case IS_NULL -> evaluate(row, call.operand(0)) == null;
+            case IS_NOT_NULL -> evaluate(row, call.operand(0)) != null;
             default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: " + kind);
         };
+    }
+
+    private Object evaluateCase(Row row, SqlCase sqlCase) {
+        SqlNodeList whenOperands = sqlCase.getWhenOperands();
+        SqlNodeList thenOperands = sqlCase.getThenOperands();
+        for (int i = 0; i < whenOperands.size(); i++) {
+            Object condition = evaluate(row, whenOperands.get(i));
+            if (condition instanceof Boolean booleanCondition && booleanCondition) {
+                return evaluate(row, thenOperands.get(i));
+            }
+        }
+        SqlNode elseOperand = sqlCase.getElseOperand();
+        return elseOperand == null ? null : evaluate(row, elseOperand);
     }
 
     private Object resolveIdentifier(Row row, SqlIdentifier identifier) {
@@ -195,11 +214,15 @@ public class CalciteRowTransformer {
             return null;
         }
         if (identifier.names.size() == 1) {
-            return row.get(identifier.getSimple().toLowerCase(Locale.ROOT));
+            return row.get(simpleName(identifier).toLowerCase(Locale.ROOT));
         }
         String qualified = String.join(".", identifier.names).toLowerCase(Locale.ROOT);
         Object value = row.get(qualified);
-        return value != null ? value : row.get(identifier.getSimple().toLowerCase(Locale.ROOT));
+        return value != null ? value : row.get(simpleName(identifier).toLowerCase(Locale.ROOT));
+    }
+
+    private String simpleName(SqlIdentifier identifier) {
+        return identifier.names.getLast();
     }
 
     private int compare(Row row, SqlBasicCall call) {

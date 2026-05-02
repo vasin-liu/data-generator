@@ -263,6 +263,7 @@ The following implementation milestones are complete:
 23. V2 writer-specific `options` are available on `WriterVO`; Kafka supports resolved `key` / `headers`, and Elasticsearch supports resolved `id` / `routing` plus `upsert`.
 24. Runtime registry build failures now include provider index/class, plugin descriptor, factory collection phase, and refresh/initialization context while preserving the last good registry on refresh failure.
 25. In-flight refresh policy is defined and implemented: a `TemplateV2Runner` run uses the registry snapshot captured at run start for source, transform, and sink execution; refresh affects only later runs.
+26. SQL transform now supports `CASE WHEN`, `IS NULL`, and `IS NOT NULL`, covering the first V2 path for V1-style conditional/null handling.
 
 ## Immediate Next Work
 
@@ -298,7 +299,7 @@ The most pragmatic next implementation sequence is:
 
 1. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-3. expand source policy caching/materialization modes after the row-level semantics stabilize
+3. add UDFs for repository-specific generation logic after the SQL conditional/null baseline
 4. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 5. plan V1 retirement checkpoints around V2 feature parity
 

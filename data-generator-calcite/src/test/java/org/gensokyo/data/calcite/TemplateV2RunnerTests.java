@@ -81,6 +81,30 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsCaseWhenAndNullPredicates() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-case-null");
+        template.setSources(Map.of("nullable_seed", new RegistryOnlySourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT name,
+                       CASE WHEN score IS NULL THEN 'missing'
+                            WHEN score >= 20 THEN 'high'
+                            ELSE 'low'
+                       END AS bucket
+                FROM nullable_seed
+                WHERE score IS NULL OR score IS NOT NULL
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(nullableRegistry()).run(template);
+
+        Assertions.assertEquals(3, result.getRows().size());
+        Assertions.assertEquals("missing", result.getRows().get(0).getString("bucket"));
+        Assertions.assertEquals("low", result.getRows().get(1).getString("bucket"));
+        Assertions.assertEquals("high", result.getRows().get(2).getString("bucket"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");
@@ -331,6 +355,14 @@ class TemplateV2RunnerTests {
         );
     }
 
+    private TemplateV2RuntimeRegistry nullableRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new RegistryOnlySourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
     private static final class FailingWriterVO extends WriterVO {
         private FailingWriterVO() {
             setType("FAILING");
@@ -347,6 +379,12 @@ class TemplateV2RunnerTests {
     private static final class RegistryOnlyWriterVO extends WriterVO {
         private RegistryOnlyWriterVO() {
             setType("REGISTRY_ONLY_SINK");
+        }
+    }
+
+    private static final class RegistryOnlySourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private RegistryOnlySourceVO() {
+            setType("REGISTRY_ONLY_SOURCE");
         }
     }
 
@@ -380,6 +418,49 @@ class TemplateV2RunnerTests {
         @Override
         public CalciteRowTransformer.TransformResult apply(TransformVO transform, CalciteExecutionContext context) {
             return new CalciteRowTransformer("SELECT value AS source_value FROM seed").transform(context);
+        }
+    }
+
+    private static final class RegistryOnlySourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof RegistryOnlySourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("name", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("score", "BIGINT", true)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(
+                            new Row(row("name", "empty", "score", null)),
+                            new Row(row("name", "alpha", "score", 10)),
+                            new Row(row("name", "beta", "score", 20))
+                    );
+                }
+            };
+        }
+
+        private Map<String, Object> row(String firstKey, Object firstValue, String secondKey, Object secondValue) {
+            Map<String, Object> values = new java.util.LinkedHashMap<>();
+            values.put(firstKey, firstValue);
+            values.put(secondKey, secondValue);
+            return values;
         }
     }
 
