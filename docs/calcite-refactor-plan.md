@@ -236,6 +236,7 @@ Exit criteria:
 - [x] Define the convergence path from `DatabaseIterator` and `JdbcReader` into one V2 source model
 - [ ] Define `SourcePolicy` runtime semantics, including selection behavior
 - [x] Add `AiSourceVO` to the source model plan
+- [x] Add first-pass `AiSourceVO` runtime support for deterministic inline/static/echo providers
 - [x] Define source-to-schema mapping rules for current iterator/query sources
 - [x] Decide how iterator scalar outputs map into tabular columns
 - [x] Decide whether first-phase reader schemas are explicit or inferred

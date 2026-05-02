@@ -256,30 +256,13 @@ The following implementation milestones are complete:
 16. PF4J external plugin loading, class isolation, subtype parsing, runtime execution, mixed execution, refresh, and first-pass diagnostics are implemented.
 17. Kafka V2 sink factory is runnable through `TemplateV2RuntimeServices.kafkaTemplate(...)` with `WriterVO.type=KAFKA`.
 18. Elasticsearch V2 sink factory is runnable through `TemplateV2RuntimeServices.elasticsearchClient(...)` with `WriterVO.type=ELASTICSEARCH` or `ES`.
+19. AI V2 source factory is runnable for deterministic `INLINE` / `STATIC` / `ECHO` providers and exposes rows to SQL transforms.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. AI source runtime
-
-Goal:
-
-- move `AiSourceVO` from model-only support to a runnable V2 source
-
-Recommended implementation:
-
-- add `AiSourceFactory`
-- decide whether the first implementation uses existing reader-ai internals or Spring AI directly
-- define schema and row materialization behavior for AI output
-- keep provider configuration in `AiProviderVO`
-
-Suggested acceptance:
-
-- one deterministic test source path without live network calls
-- one validation test for missing provider configuration
-
-### Next 2. Source policy runtime semantics
+### Next 1. Source policy runtime semantics
 
 Goal:
 
@@ -295,6 +278,24 @@ Suggested acceptance:
 
 - tests for at least one deterministic source policy
 - documentation mapping V1 select strategies to V2 source policy
+
+### Next 2. Remote AI provider bridge
+
+Goal:
+
+- connect the official `AiSourceVO` source contract to a real remote AI provider without making Calcite depend on a live network during tests
+
+Recommended implementation:
+
+- add a small AI runtime bridge interface rather than coupling core V2 execution directly to old `reader-ai` classes
+- provide an Ollama/Spring-AI implementation behind a runtime plugin/provider
+- keep deterministic `INLINE` / `STATIC` / `ECHO` providers for tests and local dry runs
+- define parser output rules for scalar, map, and list-of-map AI responses
+
+Suggested acceptance:
+
+- one mock bridge test proving prompt/provider/options are passed correctly
+- one parser test converting model output into schema-aligned rows
 
 ### Next 3. Kafka / Elasticsearch sink hardening
 
@@ -316,7 +317,7 @@ The following items remain intentionally deferred after the current step:
 
 - full Calcite physical execution
 - UDF expansion
-- AI source real execution path
+- remote AI provider bridge
 - source policy runtime semantics
 - Kafka key/header/serialization hardening
 - Elasticsearch id/routing/upsert/serialization hardening
@@ -328,8 +329,8 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. implement the AI source runtime path
-2. implement source policy runtime semantics
+1. implement source policy runtime semantics
+2. add the remote AI provider bridge behind the official `AiSourceVO` contract
 3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
 4. harden Kafka / Elasticsearch sink payload mapping
 5. add plugin load-failure diagnostics and in-flight refresh policy

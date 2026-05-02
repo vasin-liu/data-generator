@@ -36,7 +36,7 @@ Assess which current repository capabilities can be covered by the planned Calci
 | Reader: JDBC | query-based read | reader modules | High | Converge with database iterator into one query-backed source family | No | P0 | Natural source path |
 | Reader: CSV/Excel/JSON | file-backed reads | reader modules | High | Adapt into `RowSource` | No | P1 | Natural source path |
 | Reader: SpEL | expression-driven read | reader modules | Medium | Replace simple cases with UDFs; preserve complex cases | Yes | P1 | Expression-only subset is migratable |
-| Reader: AI | remote/AI backed read | reader modules | High | Promote into an official `AiSourceVO` | Yes | P1 | Prefer a first-class V2 source, potentially aligned with Spring AI |
+| Reader: AI | remote/AI backed read | reader modules | High | Official `AiSourceVO` with deterministic first-pass runtime; remote bridge pending | Yes | P1 | Prefer a first-class V2 source, potentially aligned with Spring AI |
 | Script: Plain | constant passthrough | script modules | High | Usually eliminate or replace with SQL literals | Yes | P1 | Often trivial to migrate |
 | Script: SpEL | expression engine | script modules | Medium | Migrate expression subset to SQL/UDFs | Yes | P0 | Requires a function compatibility map |
 | Script: JavaScript | procedural script engine | script modules | Low | Keep as compatibility-only for non-expression logic | Yes | P2 | Not a good direct SQL target |
@@ -209,7 +209,7 @@ Success criteria:
 - [ ] Cover JDBC reader as source
 - [ ] Cover CSV/Excel/JSON readers as sources
 - [ ] Converge `DatabaseIterator` and JDBC reader into one V2 query-backed source family
-- [ ] Add official `AiSourceVO`
+- [x] Add official `AiSourceVO`
 - [ ] Keep `SelectStrategy` semantics as source policy
 - [ ] Cover DB sink
 - [ ] Cover Kafka sink
