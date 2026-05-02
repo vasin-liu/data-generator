@@ -1,12 +1,18 @@
 package org.gensokyo.data.calcite;
 
+import org.apache.calcite.sql.type.OperandTypes;
+import org.apache.calcite.sql.type.ReturnTypes;
+import org.gensokyo.data.iterator.NumberIteratorVO;
+import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.SourceVO;
+import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
+import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -94,6 +100,41 @@ class TemplateV2RuntimeRegistryFactoryTests {
     }
 
     @Test
+    void pluginSqlFunctionsParticipateInDefaultSqlTransformFactory() {
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(
+                new DefaultTemplateV2RuntimePlugin(),
+                new TestSqlFunctionPlugin()
+        ));
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("plugin-udf-demo");
+        template.setSources(Map.of("seed", numberSource(1, 1, 1)));
+        template.setTransformers(List.of(sql("SELECT V2_PLUGIN_WRAP(value) AS wrapped FROM seed")));
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(new ConsoleWriterVO()));
+        template.setSinks(List.of(sink));
+
+        TemplateV2RunResult result = new TemplateV2Runner(registry).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("plugin-1", result.getRows().getFirst().getString("wrapped"));
+    }
+
+    @Test
+    void rejectsDuplicateSqlFunctionsWithDiagnostics() {
+        TemplateV2RuntimePlugin first = new TestSqlFunctionPlugin("udf-a");
+        TemplateV2RuntimePlugin second = new TestSqlFunctionPlugin("udf-b");
+
+        TemplateV2RuntimeRegistryBuildException exception = Assertions.assertThrows(
+                TemplateV2RuntimeRegistryBuildException.class,
+                () -> new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(first, second)));
+
+        Assertions.assertTrue(exception.getMessage().contains("Duplicate Template V2 SQL function"));
+        Assertions.assertTrue(exception.getMessage().contains("V2_PLUGIN_WRAP"));
+        Assertions.assertTrue(exception.getMessage().contains("udf-a"));
+        Assertions.assertTrue(exception.getMessage().contains("udf-b"));
+    }
+
+    @Test
     void wrapsFactoryFailuresWithNodeDiagnostics() {
         TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
                 List.of(),
@@ -167,6 +208,23 @@ class TemplateV2RuntimeRegistryFactoryTests {
         Assertions.assertEquals("source factories boom", exception.getCause().getMessage());
     }
 
+    private IteratorSourceVO numberSource(long from, long to, int step) {
+        NumberIteratorVO iterator = new NumberIteratorVO();
+        iterator.setType("number");
+        iterator.setFrom(from);
+        iterator.setTo(to);
+        iterator.setStep(step);
+        IteratorSourceVO source = new IteratorSourceVO();
+        source.setIterator(iterator);
+        return source;
+    }
+
+    private SqlTransformVO sql(String sql) {
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql(sql);
+        return transform;
+    }
+
     static final class SpiOnlySourceVO extends SourceVO {
         SpiOnlySourceVO() {
             setType("SPI_ONLY_SOURCE");
@@ -217,6 +275,36 @@ class TemplateV2RuntimeRegistryFactoryTests {
         @Override
         public List<V2SinkFactory> sinkFactories() {
             return List.of(new SpiSinkFactory());
+        }
+    }
+
+    static final class TestSqlFunctionPlugin implements TemplateV2RuntimePlugin {
+        private final String id;
+
+        TestSqlFunctionPlugin() {
+            this("test-sql-function-plugin");
+        }
+
+        TestSqlFunctionPlugin(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public TemplateV2RuntimePluginDescriptor descriptor() {
+            return TemplateV2RuntimePluginDescriptor.builder(id)
+                    .provider("test")
+                    .version("1.0.0")
+                    .hostVersionRange("current")
+                    .capability(TemplateV2PluginCapability.transform("udf:" + id))
+                    .build();
+        }
+
+        @Override
+        public List<TemplateV2SqlFunction> sqlFunctions() {
+            return List.of(new TemplateV2SqlFunction("V2_PLUGIN_WRAP",
+                    ReturnTypes.VARCHAR_NULLABLE,
+                    OperandTypes.ANY,
+                    context -> "plugin-" + context.stringArgument(0)));
         }
     }
 

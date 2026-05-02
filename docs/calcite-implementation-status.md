@@ -180,6 +180,7 @@ Current execution model:
 - this is intentionally a skeleton runtime, not full relational execution
 - V2 SQL functions now have a shared `TemplateV2SqlFunctionRegistry` used by both validator and row evaluator
 - custom UDFs can be injected through `SqlTransformFactory(TemplateV2SqlFunctionRegistry)` without bypassing Calcite validation
+- runtime plugins can now contribute `TemplateV2SqlFunction` definitions, and the registry factory merges them into the default SQL transform path with duplicate-name diagnostics
 
 ### 7. Sink capability currently implemented
 
@@ -285,25 +286,13 @@ The following implementation milestones are complete:
 28. SQL transform now executes the first conversion-oriented function batch: `NULLIF`, `CHAR_LENGTH`, `SUBSTRING`, `ABS`, `FLOOR`, `CEIL`, and `ROUND`.
 29. SQL transform now has a first repository-owned V2 UDF namespace for date conversion helpers: `V2_FORMAT_DATE`, `V2_DATE_ADD`, `V2_DATE_SUB`, and `V2_DATE_DIFF`.
 30. SQL transform now has a shared UDF registry abstraction so future repository or plugin-provided functions can register Calcite validation metadata and runtime evaluators through one extension point.
+31. Runtime plugins can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()`, and the default SQL transform factory receives the merged built-in + plugin UDF registry.
 
 ## Immediate Next Work
 
 The next work should be done in the following order. This supersedes the older AI-first next-step recommendation because the transformation core and UDF extension surface have advanced.
 
-### Next 1. Make UDF extension plugin-ready
-
-Goal:
-
-- allow repository modules and future PF4J plugins to contribute SQL UDFs through the same runtime registry path used by source / transform / sink factories
-
-Recommended implementation:
-
-- add `TemplateV2SqlFunction` collection support to `TemplateV2RuntimePlugin`
-- merge built-in and plugin-provided UDF registries when constructing `SqlTransformFactory`
-- add conflict diagnostics for duplicate UDF names
-- add one PF4J or provider-level test proving external UDF registration participates in Calcite validation and row evaluation
-
-### Next 2. File-backed source/sink adapters
+### Next 1. File-backed source/sink adapters
 
 Goal:
 
@@ -315,6 +304,18 @@ Recommended implementation:
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
 - expose file-backed sources as `RowSource` with explicit schema preferred and inference as fallback
 - add CSV/JSON sink adapters only after source path is stable
+
+### Next 2. External plugin UDF fixture
+
+Goal:
+
+- prove the new UDF plugin contract through the PF4J external plugin packaging path, not only in-process test plugins
+
+Recommended implementation:
+
+- extend the sample PF4J plugin with one `TemplateV2SqlFunction`
+- add or update a PF4J integration test proving the function is loaded from an isolated plugin jar
+- verify duplicate UDF diagnostics include plugin ids
 
 ### Next 3. Concrete AI runtime bridge
 
@@ -356,8 +357,8 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. make the UDF registry plugin-ready and runtime-registry-managed
-2. add file-backed source/sink adapters, starting with CSV source
+1. add file-backed source/sink adapters, starting with CSV source
+2. prove plugin-provided UDFs through the external PF4J packaging path
 3. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 4. build V1-to-V2 migration examples and a parity scorecard against business scenarios
 5. harden multi-source SQL semantics beyond the current `INNER JOIN` subset

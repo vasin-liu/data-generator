@@ -39,10 +39,11 @@ public class TemplateV2RuntimeRegistryFactory {
         List<V2SourceFactory> sourceFactories = new ArrayList<>();
         List<V2TransformFactory> transformFactories = new ArrayList<>();
         List<V2SinkFactory> sinkFactories = new ArrayList<>();
+        TemplateV2SqlFunctionRegistry sqlFunctionRegistry = sqlFunctionRegistry(deduplicatedPlugins);
 
         for (TemplateV2RuntimePlugin plugin : deduplicatedPlugins) {
             sourceFactories.addAll(sourceFactories(plugin));
-            transformFactories.addAll(transformFactories(plugin));
+            transformFactories.addAll(transformFactories(plugin, sqlFunctionRegistry));
             sinkFactories.addAll(sinkFactories(plugin));
         }
 
@@ -57,9 +58,10 @@ public class TemplateV2RuntimeRegistryFactory {
         }
     }
 
-    private List<V2TransformFactory> transformFactories(TemplateV2RuntimePlugin plugin) {
+    private List<V2TransformFactory> transformFactories(TemplateV2RuntimePlugin plugin,
+                                                        TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
         try {
-            return plugin.transformFactories();
+            return plugin.transformFactories(sqlFunctionRegistry);
         } catch (RuntimeException e) {
             throw pluginBuildFailure("transform factories", plugin, e);
         }
@@ -73,18 +75,51 @@ public class TemplateV2RuntimeRegistryFactory {
         }
     }
 
+    private TemplateV2SqlFunctionRegistry sqlFunctionRegistry(List<TemplateV2RuntimePlugin> plugins) {
+        List<TemplateV2SqlFunction> functions = new ArrayList<>(TemplateV2SqlFunctionRegistry.builtIn().functions());
+        Map<String, String> owners = new LinkedHashMap<>();
+        for (TemplateV2SqlFunction function : functions) {
+            owners.put(TemplateV2SqlFunctionRegistry.normalize(function.name()), "built-in");
+        }
+        for (TemplateV2RuntimePlugin plugin : plugins) {
+            String pluginId = pluginId(plugin);
+            for (TemplateV2SqlFunction function : sqlFunctions(plugin)) {
+                String normalizedName = TemplateV2SqlFunctionRegistry.normalize(function.name());
+                String previousOwner = owners.putIfAbsent(normalizedName, pluginId);
+                if (previousOwner != null) {
+                    throw new TemplateV2RuntimeRegistryBuildException("Duplicate Template V2 SQL function ["
+                            + function.name() + "] claimed by [" + previousOwner + "] and [" + pluginId + "]",
+                            new IllegalStateException("duplicate SQL function: " + function.name()));
+                }
+                functions.add(function);
+            }
+        }
+        return new TemplateV2SqlFunctionRegistry(functions);
+    }
+
+    private List<TemplateV2SqlFunction> sqlFunctions(TemplateV2RuntimePlugin plugin) {
+        try {
+            return plugin.sqlFunctions();
+        } catch (RuntimeException e) {
+            throw pluginBuildFailure("SQL functions", plugin, e);
+        }
+    }
+
     private TemplateV2RuntimeRegistryBuildException pluginBuildFailure(String phase,
                                                                        TemplateV2RuntimePlugin plugin,
                                                                        RuntimeException cause) {
-        String pluginId;
-        try {
-            pluginId = plugin.descriptor().id();
-        } catch (RuntimeException descriptorFailure) {
-            pluginId = "<descriptor-unavailable>";
-        }
+        String pluginId = pluginId(plugin);
         return new TemplateV2RuntimeRegistryBuildException("Failed to collect Template V2 runtime plugin "
                 + phase + " from plugin [" + plugin.getClass().getName() + "]"
                 + ", plugin id [" + pluginId + "]", cause);
+    }
+
+    private String pluginId(TemplateV2RuntimePlugin plugin) {
+        try {
+            return plugin.descriptor().id();
+        } catch (RuntimeException descriptorFailure) {
+            return "<descriptor-unavailable>";
+        }
     }
 
     private List<TemplateV2RuntimePlugin> deduplicatePlugins(List<TemplateV2RuntimePlugin> plugins) {

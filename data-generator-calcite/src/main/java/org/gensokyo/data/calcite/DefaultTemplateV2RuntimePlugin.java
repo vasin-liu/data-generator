@@ -22,8 +22,8 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
     }
 
     @Override
-    public List<V2TransformFactory> transformFactories() {
-        return List.of(new SqlTransformFactory());
+    public List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+        return List.of(new SqlTransformFactory(sqlFunctionRegistry));
     }
 
     @Override

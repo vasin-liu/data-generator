@@ -47,6 +47,10 @@ public final class TemplateV2SqlFunctionRegistry {
         return new TemplateV2SqlFunctionRegistry(merged);
     }
 
+    public List<TemplateV2SqlFunction> functions() {
+        return List.copyOf(functions.values());
+    }
+
     public Optional<TemplateV2SqlFunction> find(String name) {
         return Optional.ofNullable(functions.get(normalize(name)));
     }
@@ -57,7 +61,7 @@ public final class TemplateV2SqlFunctionRegistry {
                 .toList());
     }
 
-    private static String normalize(String name) {
+    public static String normalize(String name) {
         return name.toUpperCase(Locale.ROOT);
     }
 }

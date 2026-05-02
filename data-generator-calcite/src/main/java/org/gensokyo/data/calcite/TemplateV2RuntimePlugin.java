@@ -15,7 +15,15 @@ public interface TemplateV2RuntimePlugin {
         return List.of();
     }
 
+    default List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+        return transformFactories();
+    }
+
     default List<V2SinkFactory> sinkFactories() {
+        return List.of();
+    }
+
+    default List<TemplateV2SqlFunction> sqlFunctions() {
         return List.of();
     }
 }
