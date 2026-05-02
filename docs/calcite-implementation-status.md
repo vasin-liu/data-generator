@@ -257,29 +257,13 @@ The following implementation milestones are complete:
 17. Kafka V2 sink factory is runnable through `TemplateV2RuntimeServices.kafkaTemplate(...)` with `WriterVO.type=KAFKA`.
 18. Elasticsearch V2 sink factory is runnable through `TemplateV2RuntimeServices.elasticsearchClient(...)` with `WriterVO.type=ELASTICSEARCH` or `ES`.
 19. AI V2 source factory is runnable for deterministic `INLINE` / `STATIC` / `ECHO` providers and exposes rows to SQL transforms.
+20. Source policy runtime semantics are active as source materialization post-processing for ordered/random selection and `limit`.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. Source policy runtime semantics
-
-Goal:
-
-- make `SourcePolicyVO` more than a reserved model field
-
-Recommended implementation:
-
-- map the relevant `SelectStrategy` behavior into source materialization policy
-- define caching/materialization rules for reusable sources
-- keep selection behavior outside SQL
-
-Suggested acceptance:
-
-- tests for at least one deterministic source policy
-- documentation mapping V1 select strategies to V2 source policy
-
-### Next 2. Remote AI provider bridge
+### Next 1. Remote AI provider bridge
 
 Goal:
 
@@ -297,7 +281,7 @@ Suggested acceptance:
 - one mock bridge test proving prompt/provider/options are passed correctly
 - one parser test converting model output into schema-aligned rows
 
-### Next 3. Kafka / Elasticsearch sink hardening
+### Next 2. Kafka / Elasticsearch sink hardening
 
 Goal:
 
@@ -318,7 +302,7 @@ The following items remain intentionally deferred after the current step:
 - full Calcite physical execution
 - UDF expansion
 - remote AI provider bridge
-- source policy runtime semantics
+- source policy caching/materialization modes beyond row post-processing
 - Kafka key/header/serialization hardening
 - Elasticsearch id/routing/upsert/serialization hardening
 - plugin load-failure diagnostics beyond matched runtime factory failures
@@ -329,11 +313,11 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. implement source policy runtime semantics
-2. add the remote AI provider bridge behind the official `AiSourceVO` contract
-3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-4. harden Kafka / Elasticsearch sink payload mapping
-5. add plugin load-failure diagnostics and in-flight refresh policy
+1. add the remote AI provider bridge behind the official `AiSourceVO` contract
+2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+3. harden Kafka / Elasticsearch sink payload mapping
+4. add plugin load-failure diagnostics and in-flight refresh policy
+5. expand source policy caching/materialization modes after the row-level semantics stabilize
 
 The plugin-framework recommendation is:
 

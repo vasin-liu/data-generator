@@ -24,7 +24,11 @@ public class TemplateV2RuntimeRegistry {
         for (V2SourceFactory factory : sourceFactories) {
             if (factory.supports(source)) {
                 try {
-                    return factory.create(name, source);
+                    RowSource rowSource = factory.create(name, source);
+                    if (source.getPolicy() == null) {
+                        return rowSource;
+                    }
+                    return new SourcePolicyRowSource(rowSource, source.getPolicy());
                 } catch (RuntimeException e) {
                     throw runtimeFailure("source", source.getType(), source.getClass(), factory.getClass(), e);
                 }

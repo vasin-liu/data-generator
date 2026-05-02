@@ -234,7 +234,7 @@ Exit criteria:
 - [x] Add `IteratorRowSource`
 - [x] Add query-backed `RowSource`
 - [x] Define the convergence path from `DatabaseIterator` and `JdbcReader` into one V2 source model
-- [ ] Define `SourcePolicy` runtime semantics, including selection behavior
+- [x] Define first-pass `SourcePolicy` runtime semantics, including ordered/random selection and limit behavior
 - [x] Add `AiSourceVO` to the source model plan
 - [x] Add first-pass `AiSourceVO` runtime support for deterministic inline/static/echo providers
 - [x] Define source-to-schema mapping rules for current iterator/query sources
@@ -251,6 +251,7 @@ Exit criteria:
 - at least one reader-backed source can expose a stable schema
 - `DatabaseIterator` and `JdbcReader` no longer diverge architecturally in the V2 design
 - `SelectStrategy` behavior has a defined home in the V2 source layer
+- first-pass `SourcePolicyVO.selectionStrategy` supports `FIRST`/ordered strategies and deterministic random strategies as source row post-processing
 
 ### M5 - Deliver the first SQL execution path
 
