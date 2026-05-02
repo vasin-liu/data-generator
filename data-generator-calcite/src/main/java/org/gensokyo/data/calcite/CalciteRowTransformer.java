@@ -177,7 +177,7 @@ public class CalciteRowTransformer {
     private Object evaluateCall(Row row, SqlBasicCall call) {
         SqlKind kind = call.getKind();
         return switch (kind) {
-            case CAST -> evaluate(row, call.operand(0));
+            case CAST, CAST_NOT_NULL -> evaluate(row, call.operand(0));
             case PLUS -> asBigDecimal(evaluate(row, call.operand(0))).add(asBigDecimal(evaluate(row, call.operand(1))));
             case MINUS -> asBigDecimal(evaluate(row, call.operand(0))).subtract(asBigDecimal(evaluate(row, call.operand(1))));
             case TIMES -> asBigDecimal(evaluate(row, call.operand(0))).multiply(asBigDecimal(evaluate(row, call.operand(1))));
@@ -192,8 +192,54 @@ public class CalciteRowTransformer {
             case OR -> (Boolean) evaluate(row, call.operand(0)) || (Boolean) evaluate(row, call.operand(1));
             case IS_NULL -> evaluate(row, call.operand(0)) == null;
             case IS_NOT_NULL -> evaluate(row, call.operand(0)) != null;
-            default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: " + kind);
+            default -> evaluateFunction(row, call);
         };
+    }
+
+    private Object evaluateFunction(Row row, SqlBasicCall call) {
+        String functionName = call.getOperator().getName().toUpperCase(Locale.ROOT);
+        return switch (functionName) {
+            case "COALESCE" -> coalesce(row, call);
+            case "CONCAT" -> concat(row, call);
+            case "UPPER" -> {
+                Object value = evaluate(row, call.operand(0));
+                yield value == null ? null : value.toString().toUpperCase(Locale.ROOT);
+            }
+            case "LOWER" -> {
+                Object value = evaluate(row, call.operand(0));
+                yield value == null ? null : value.toString().toLowerCase(Locale.ROOT);
+            }
+            case "TRIM" -> trim(row, call);
+            default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: "
+                    + call.getKind() + " / " + functionName);
+        };
+    }
+
+    private Object coalesce(Row row, SqlBasicCall call) {
+        for (SqlNode operand : call.getOperandList()) {
+            Object value = evaluate(row, operand);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private String concat(Row row, SqlBasicCall call) {
+        StringBuilder builder = new StringBuilder();
+        for (SqlNode operand : call.getOperandList()) {
+            Object value = evaluate(row, operand);
+            if (value != null) {
+                builder.append(value);
+            }
+        }
+        return builder.toString();
+    }
+
+    private Object trim(Row row, SqlBasicCall call) {
+        SqlNode operand = call.operand(call.operandCount() - 1);
+        Object value = evaluate(row, operand);
+        return value == null ? null : value.toString().trim();
     }
 
     private Object evaluateCase(Row row, SqlCase sqlCase) {

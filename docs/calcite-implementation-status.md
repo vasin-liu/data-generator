@@ -152,6 +152,8 @@ Current SQL support level:
 - comparison operators
 - `AND` / `OR`
 - `CAST` passthrough
+- `CAST NOT NULL` passthrough for Calcite-injected nullability casts
+- null/string functions: `COALESCE`, `CONCAT`, `UPPER`, `LOWER`, `TRIM`
 - single-table `FROM`
 - `FROM table AS alias`
 - `INNER JOIN`
@@ -264,6 +266,7 @@ The following implementation milestones are complete:
 24. Runtime registry build failures now include provider index/class, plugin descriptor, factory collection phase, and refresh/initialization context while preserving the last good registry on refresh failure.
 25. In-flight refresh policy is defined and implemented: a `TemplateV2Runner` run uses the registry snapshot captured at run start for source, transform, and sink execution; refresh affects only later runs.
 26. SQL transform now supports `CASE WHEN`, `IS NULL`, and `IS NOT NULL`, covering the first V2 path for V1-style conditional/null handling.
+27. SQL transform now enables the Calcite standard / Calcite / MySQL operator tables and executes the first null/string function batch: `COALESCE`, `CONCAT`, `UPPER`, `LOWER`, and `TRIM`.
 
 ## Immediate Next Work
 

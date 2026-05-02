@@ -105,6 +105,30 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsFirstBatchSqlFunctions() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-functions");
+        template.setSources(Map.of("nullable_seed", new RegistryOnlySourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT name,
+                       COALESCE(score, 0) AS score_or_zero,
+                       CONCAT(UPPER(name), CONCAT('-', LOWER('TAIL'))) AS label,
+                       TRIM('  padded  ') AS trimmed
+                FROM nullable_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(nullableRegistry()).run(template);
+
+        Assertions.assertEquals(3, result.getRows().size());
+        Assertions.assertEquals("0", result.getRows().get(0).getString("score_or_zero"));
+        Assertions.assertEquals("EMPTY-tail", result.getRows().get(0).getString("label"));
+        Assertions.assertEquals("padded", result.getRows().get(0).getString("trimmed"));
+        Assertions.assertEquals("10", result.getRows().get(1).getString("score_or_zero"));
+        Assertions.assertEquals("BETA-tail", result.getRows().get(2).getString("label"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");

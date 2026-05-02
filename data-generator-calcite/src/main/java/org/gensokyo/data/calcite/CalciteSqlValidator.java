@@ -7,10 +7,14 @@ import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.schema.impl.AbstractTable;
+import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.fun.SqlLibrary;
+import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
+import org.apache.calcite.sql.util.SqlOperatorTables;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
 import org.apache.calcite.sql.validate.SqlValidatorUtil;
@@ -25,6 +29,11 @@ import java.util.Properties;
 
 public class CalciteSqlValidator {
     private static final SqlConformance SQL_CONFORMANCE = SqlConformanceEnum.BABEL;
+    private static final SqlOperatorTable OPERATOR_TABLE = SqlOperatorTables.chain(
+            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.STANDARD),
+            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.CALCITE),
+            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.MYSQL)
+    );
 
     public CalciteSqlValidationResult validate(String sql, CalciteExecutionContext context) {
         try {
@@ -46,6 +55,7 @@ public class CalciteSqlValidator {
         context.getSchemas().forEach((tableName, schema) -> root.add(tableName, new StaticRowTable(schema, typeFactory)));
         return Frameworks.newConfigBuilder()
                 .defaultSchema(root.plus())
+                .operatorTable(OPERATOR_TABLE)
                 .parserConfig(SqlParser.config()
                         .withParserFactory(SqlBabelParserImpl.FACTORY)
                         .withQuotedCasing(Casing.UNCHANGED)
@@ -70,7 +80,7 @@ public class CalciteSqlValidator {
                 new CalciteConnectionConfigImpl(properties)
         );
         return SqlValidatorUtil.newValidator(
-                config.getOperatorTable(),
+                OPERATOR_TABLE,
                 catalogReader,
                 typeFactory,
                 SqlValidator.Config.DEFAULT.withSqlConformance(SQL_CONFORMANCE)
