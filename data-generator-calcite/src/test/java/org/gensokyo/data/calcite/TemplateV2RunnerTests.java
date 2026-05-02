@@ -12,6 +12,8 @@ import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
+import org.apache.calcite.sql.type.OperandTypes;
+import org.apache.calcite.sql.type.ReturnTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -190,6 +192,34 @@ class TemplateV2RunnerTests {
         Assertions.assertEquals("2026", row.getString("event_year"));
         Assertions.assertEquals("5", row.getString("event_month"));
         Assertions.assertEquals("2", row.getString("event_day"));
+    }
+
+    @Test
+    void supportsCustomSqlFunctionsThroughRegistry() {
+        TemplateV2SqlFunctionRegistry registry = TemplateV2SqlFunctionRegistry.builtIn()
+                .with(new TemplateV2SqlFunction("V2_WRAP", ReturnTypes.VARCHAR_NULLABLE, OperandTypes.ANY,
+                        context -> "[" + context.stringArgument(0) + "]"));
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-custom-function");
+        template.setSources(Map.of("nullable_seed", new RegistryOnlySourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT V2_WRAP(name) AS wrapped_name
+                FROM nullable_seed
+                WHERE score IS NOT NULL
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistry(
+                List.of(new RegistryOnlySourceFactory()),
+                List.of(new SqlTransformFactory(registry)),
+                List.of(new ConsoleSinkFactory())
+        );
+
+        TemplateV2RunResult result = new TemplateV2Runner(runtimeRegistry).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("[alpha]", result.getRows().get(0).getString("wrapped_name"));
+        Assertions.assertEquals("[beta]", result.getRows().get(1).getString("wrapped_name"));
     }
 
     @Test

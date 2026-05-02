@@ -7,7 +7,6 @@ import org.apache.calcite.plan.Contexts;
 import org.apache.calcite.prepare.CalciteCatalogReader;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.schema.impl.AbstractTable;
-import org.apache.calcite.sql.SqlBasicFunction;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlLibrary;
@@ -15,8 +14,6 @@ import org.apache.calcite.sql.fun.SqlLibraryOperatorTableFactory;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
-import org.apache.calcite.sql.type.OperandTypes;
-import org.apache.calcite.sql.type.ReturnTypes;
 import org.apache.calcite.sql.util.SqlOperatorTables;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
@@ -32,18 +29,20 @@ import java.util.Properties;
 
 public class CalciteSqlValidator {
     private static final SqlConformance SQL_CONFORMANCE = SqlConformanceEnum.BABEL;
-    private static final SqlOperatorTable OPERATOR_TABLE = SqlOperatorTables.chain(
-            SqlOperatorTables.of(
-                    SqlBasicFunction.create("V2_TO_DATE", ReturnTypes.DATE_NULLABLE, OperandTypes.ANY),
-                    SqlBasicFunction.create("V2_FORMAT_DATE", ReturnTypes.VARCHAR_NULLABLE, OperandTypes.ANY_ANY),
-                    SqlBasicFunction.create("V2_DATE_ADD", ReturnTypes.DATE_NULLABLE, OperandTypes.ANY_ANY),
-                    SqlBasicFunction.create("V2_DATE_SUB", ReturnTypes.DATE_NULLABLE, OperandTypes.ANY_ANY),
-                    SqlBasicFunction.create("V2_DATE_DIFF", ReturnTypes.BIGINT_NULLABLE, OperandTypes.ANY_ANY)
-            ),
-            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.STANDARD),
-            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.CALCITE),
-            SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.MYSQL)
-    );
+    private final SqlOperatorTable operatorTable;
+
+    public CalciteSqlValidator() {
+        this(TemplateV2SqlFunctionRegistry.builtIn());
+    }
+
+    public CalciteSqlValidator(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+        this.operatorTable = SqlOperatorTables.chain(
+                sqlFunctionRegistry.operatorTable(),
+                SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.STANDARD),
+                SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.CALCITE),
+                SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(SqlLibrary.MYSQL)
+        );
+    }
 
     public CalciteSqlValidationResult validate(String sql, CalciteExecutionContext context) {
         try {
@@ -65,7 +64,7 @@ public class CalciteSqlValidator {
         context.getSchemas().forEach((tableName, schema) -> root.add(tableName, new StaticRowTable(schema, typeFactory)));
         return Frameworks.newConfigBuilder()
                 .defaultSchema(root.plus())
-                .operatorTable(OPERATOR_TABLE)
+                .operatorTable(operatorTable)
                 .parserConfig(SqlParser.config()
                         .withParserFactory(SqlBabelParserImpl.FACTORY)
                         .withQuotedCasing(Casing.UNCHANGED)
@@ -90,7 +89,7 @@ public class CalciteSqlValidator {
                 new CalciteConnectionConfigImpl(properties)
         );
         return SqlValidatorUtil.newValidator(
-                OPERATOR_TABLE,
+                operatorTable,
                 catalogReader,
                 typeFactory,
                 SqlValidator.Config.DEFAULT.withSqlConformance(SQL_CONFORMANCE)

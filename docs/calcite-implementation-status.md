@@ -167,6 +167,8 @@ Current execution model:
 - Calcite is used for parse + validate
 - row execution is still repository-local in-memory evaluation
 - this is intentionally a skeleton runtime, not full relational execution
+- V2 SQL functions now have a shared `TemplateV2SqlFunctionRegistry` used by both validator and row evaluator
+- custom UDFs can be injected through `SqlTransformFactory(TemplateV2SqlFunctionRegistry)` without bypassing Calcite validation
 
 ### 7. Sink capability currently implemented
 
@@ -271,6 +273,7 @@ The following implementation milestones are complete:
 27. SQL transform now enables the Calcite standard / Calcite / MySQL operator tables and executes the first null/string function batch: `COALESCE`, `CONCAT`, `UPPER`, `LOWER`, and `TRIM`.
 28. SQL transform now executes the first conversion-oriented function batch: `NULLIF`, `CHAR_LENGTH`, `SUBSTRING`, `ABS`, `FLOOR`, `CEIL`, and `ROUND`.
 29. SQL transform now has a first repository-owned V2 UDF namespace for date conversion helpers: `V2_FORMAT_DATE`, `V2_DATE_ADD`, `V2_DATE_SUB`, and `V2_DATE_DIFF`.
+30. SQL transform now has a shared UDF registry abstraction so future repository or plugin-provided functions can register Calcite validation metadata and runtime evaluators through one extension point.
 
 ## Immediate Next Work
 

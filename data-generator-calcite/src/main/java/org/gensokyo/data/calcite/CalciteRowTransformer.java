@@ -1,7 +1,6 @@
 package org.gensokyo.data.calcite;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlJoin;
@@ -20,8 +19,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -31,10 +28,20 @@ import java.util.Map;
 import java.util.Objects;
 
 @Getter
-@RequiredArgsConstructor
 public class CalciteRowTransformer {
     private final String sql;
-    private final CalcitePlanCompiler compiler = new CalcitePlanCompiler();
+    private final TemplateV2SqlFunctionRegistry sqlFunctionRegistry;
+    private final CalcitePlanCompiler compiler;
+
+    public CalciteRowTransformer(String sql) {
+        this(sql, TemplateV2SqlFunctionRegistry.builtIn());
+    }
+
+    public CalciteRowTransformer(String sql, TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+        this.sql = sql;
+        this.sqlFunctionRegistry = sqlFunctionRegistry;
+        this.compiler = new CalcitePlanCompiler(sqlFunctionRegistry);
+    }
 
     public TransformResult transform(CalciteExecutionContext context) {
         CalciteCompiledPlan plan = compiler.compile(sql, context);
@@ -225,16 +232,10 @@ public class CalciteRowTransformer {
             case "FLOOR" -> numeric(row, call, value -> value.setScale(0, RoundingMode.FLOOR));
             case "CEIL", "CEILING" -> numeric(row, call, value -> value.setScale(0, RoundingMode.CEILING));
             case "ROUND" -> round(row, call);
-            case "V2_TO_DATE", "TO_DATE", "DATE" -> toLocalDate(evaluate(row, call.operand(0)));
-            case "V2_FORMAT_DATE", "FORMAT_DATE" -> formatDate(row, call);
-            case "V2_DATE_ADD", "DATE_ADD" -> dateAdd(row, call, 1);
-            case "V2_DATE_SUB", "DATE_SUB" -> dateAdd(row, call, -1);
-            case "V2_DATE_DIFF", "DATEDIFF", "DATE_DIFF" -> dateDiff(row, call);
             case "YEAR" -> toLocalDate(evaluate(row, call.operand(0))).getYear();
             case "MONTH" -> toLocalDate(evaluate(row, call.operand(0))).getMonthValue();
             case "DAYOFMONTH", "DAY" -> toLocalDate(evaluate(row, call.operand(0))).getDayOfMonth();
-            default -> throw new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: "
-                    + call.getKind() + " / " + functionName);
+            default -> evaluateRegisteredFunction(row, call, functionName);
         };
     }
 
@@ -307,24 +308,6 @@ public class CalciteRowTransformer {
         return asBigDecimal(value).setScale(scale, RoundingMode.HALF_UP);
     }
 
-    private Object formatDate(Row row, SqlBasicCall call) {
-        String pattern = Objects.toString(evaluate(row, call.operand(0)), "");
-        LocalDate date = toLocalDate(evaluate(row, call.operand(1)));
-        return date.format(DateTimeFormatter.ofPattern(toJavaDatePattern(pattern)));
-    }
-
-    private Object dateAdd(Row row, SqlBasicCall call, int direction) {
-        LocalDate date = toLocalDate(evaluate(row, call.operand(0)));
-        int days = toInt(evaluate(row, call.operand(1)));
-        return date.plusDays((long) direction * days);
-    }
-
-    private Object dateDiff(Row row, SqlBasicCall call) {
-        LocalDate end = toLocalDate(evaluate(row, call.operand(0)));
-        LocalDate start = toLocalDate(evaluate(row, call.operand(1)));
-        return ChronoUnit.DAYS.between(start, end);
-    }
-
     private Object extract(Row row, SqlBasicCall call) {
         String unit = call.operand(0).toString().toUpperCase(Locale.ROOT);
         LocalDate date = toLocalDate(evaluate(row, call.operand(1)));
@@ -338,6 +321,16 @@ public class CalciteRowTransformer {
             return date.getDayOfMonth();
         }
         throw new UnsupportedOperationException("Unsupported EXTRACT unit in current V2 skeleton: " + unit);
+    }
+
+    private Object evaluateRegisteredFunction(Row row, SqlBasicCall call, String functionName) {
+        TemplateV2SqlFunction function = sqlFunctionRegistry.find(functionName)
+                .orElseThrow(() -> new UnsupportedOperationException("Unsupported SQL operator in current V2 skeleton: "
+                        + call.getKind() + " / " + functionName));
+        List<Object> arguments = call.getOperandList().stream()
+                .map(operand -> evaluate(row, operand))
+                .toList();
+        return function.evaluator().evaluate(new TemplateV2SqlFunctionContext(arguments));
     }
 
     private Object evaluateCase(Row row, SqlCase sqlCase) {
@@ -415,12 +408,6 @@ public class CalciteRowTransformer {
             return LocalDate.parse(stringValue);
         }
         throw new IllegalArgumentException("Expected date value but got: " + value);
-    }
-
-    private String toJavaDatePattern(String pattern) {
-        return pattern.replace("%Y", "yyyy")
-                .replace("%m", "MM")
-                .replace("%d", "dd");
     }
 
     private int toInt(Object value) {
