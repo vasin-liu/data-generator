@@ -254,30 +254,13 @@ The following implementation milestones are complete:
 14. Sink failure strategy switching is runnable.
 15. Query-backed source convergence is implemented at the model/mapping entrypoint level.
 16. PF4J external plugin loading, class isolation, subtype parsing, runtime execution, mixed execution, refresh, and first-pass diagnostics are implemented.
+17. Kafka V2 sink factory is runnable through `TemplateV2RuntimeServices.kafkaTemplate(...)` with `WriterVO.type=KAFKA`.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. Kafka sink factory
-
-Goal:
-
-- make Kafka usable as a real V2 sink instead of a placeholder runtime provider
-
-Recommended implementation:
-
-- add a Kafka `V2SinkFactory`
-- resolve target cluster through `TemplateV2RuntimeServices.kafkaTemplate(...)`
-- define row serialization rules for key/value payloads
-- reuse the Boot 4 dynamic Kafka registry already present in `data-generator-core`
-
-Suggested acceptance:
-
-- one unit test using a fake or mocked Kafka template path
-- one service wiring test proving the provider contributes a sink factory when Kafka runtime services exist
-
-### Next 2. Elasticsearch sink factory
+### Next 1. Elasticsearch sink factory
 
 Goal:
 
@@ -295,7 +278,7 @@ Suggested acceptance:
 - focused test around bulk request generation
 - runtime-service test proving missing ES services produce clear diagnostics
 
-### Next 3. AI source runtime
+### Next 2. AI source runtime
 
 Goal:
 
@@ -313,7 +296,7 @@ Suggested acceptance:
 - one deterministic test source path without live network calls
 - one validation test for missing provider configuration
 
-### Next 4. Source policy runtime semantics
+### Next 3. Source policy runtime semantics
 
 Goal:
 
@@ -330,6 +313,19 @@ Suggested acceptance:
 - tests for at least one deterministic source policy
 - documentation mapping V1 select strategies to V2 source policy
 
+### Next 4. Kafka sink hardening
+
+Goal:
+
+- move the first Kafka sink factory from basic value publishing to production-ready message shaping
+
+Recommended implementation:
+
+- define optional key mapping
+- define optional headers
+- decide whether blank `template` should remain JSON-like output or move to a shared Jackson codec
+- add integration-style coverage around error diagnostics without requiring a live Kafka broker
+
 ## Deferred Work
 
 The following items remain intentionally deferred after the current step:
@@ -337,9 +333,9 @@ The following items remain intentionally deferred after the current step:
 - full Calcite physical execution
 - UDF expansion
 - AI source real execution path
-- Kafka sink on the V2 path
 - Elasticsearch sink on the V2 path
 - source policy runtime semantics
+- Kafka key/header/serialization hardening
 - plugin load-failure diagnostics beyond matched runtime factory failures
 - in-flight task refresh policy
 - V1 retirement
@@ -348,7 +344,7 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. finish real Kafka / Elasticsearch V2 runtime providers on the current registry/provider abstraction
+1. finish the real Elasticsearch V2 runtime provider on the current registry/provider abstraction
 2. implement the AI source runtime path
 3. implement source policy runtime semantics
 4. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
