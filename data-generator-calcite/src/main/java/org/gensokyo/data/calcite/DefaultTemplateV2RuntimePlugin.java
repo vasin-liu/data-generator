@@ -11,6 +11,7 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .provider("gensokyo")
                 .capability(TemplateV2PluginCapability.source("iterator"))
                 .capability(TemplateV2PluginCapability.source("ai"))
+                .capability(TemplateV2PluginCapability.source("csv"))
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.sink("console"))
                 .build();
@@ -18,7 +19,7 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
 
     @Override
     public List<V2SourceFactory> sourceFactories() {
-        return List.of(new IteratorSourceFactory(), new AiSourceFactory());
+        return List.of(new IteratorSourceFactory(), new AiSourceFactory(), new CsvSourceFactory());
     }
 
     @Override

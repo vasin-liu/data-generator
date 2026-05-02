@@ -50,6 +50,7 @@ Implemented model set under `data-generator-common/data-generator-core`:
 - `SourceVO`
 - `IteratorSourceVO`
 - `QuerySourceVO`
+- `CsvSourceVO`
 - `AiSourceVO`
 - `AiProviderVO`
 - `TransformVO`
@@ -145,6 +146,27 @@ Parameter binding status:
 - `ParamVO.language == null` maps to `null`
 - `plain` script content is bound as a constant parameter value
 - non-plain scripts go through a lightweight SpEL evaluation path
+
+#### CSV source
+
+Implemented:
+
+- `CsvSourceVO`
+- `CsvRowSource`
+- `CsvSourceFactory`
+
+Current behavior:
+
+- reads local CSV files from a template-provided `path`
+- supports `charset`, single-character `delimiter`, `header`, `maxRows`, and optional explicit `RowSchema`
+- supports quoted fields and escaped quotes in the lightweight built-in parser
+- is registered as a built-in default source factory while still fitting the runtime plugin source extension contract
+
+Current limitation:
+
+- no streaming read mode yet
+- no multiline quoted-field support yet
+- no external parser SPI yet; the current parser is intentionally a first-pass built-in default
 
 ### 6. Transform capability currently implemented
 
@@ -287,12 +309,13 @@ The following implementation milestones are complete:
 29. SQL transform now has a first repository-owned V2 UDF namespace for date conversion helpers: `V2_FORMAT_DATE`, `V2_DATE_ADD`, `V2_DATE_SUB`, and `V2_DATE_DIFF`.
 30. SQL transform now has a shared UDF registry abstraction so future repository or plugin-provided functions can register Calcite validation metadata and runtime evaluators through one extension point.
 31. Runtime plugins can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()`, and the default SQL transform factory receives the merged built-in + plugin UDF registry.
+32. CSV V2 source is runnable through `CsvSourceVO` / `CsvRowSource` / `CsvSourceFactory` and can participate in SQL transforms with explicit schema.
 
 ## Immediate Next Work
 
 The next work should be done in the following order. This supersedes the older AI-first next-step recommendation because the transformation core and UDF extension surface have advanced.
 
-### Next 1. File-backed source/sink adapters
+### Next 1. Continue file-backed source/sink adapters
 
 Goal:
 
@@ -300,10 +323,10 @@ Goal:
 
 Recommended implementation:
 
-- add CSV source first because it is the smallest useful file-backed source
+- harden CSV source options and diagnostics
+- add JSON source next because it validates nested/object payload decisions earlier than Excel
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- expose file-backed sources as `RowSource` with explicit schema preferred and inference as fallback
-- add CSV/JSON sink adapters only after source path is stable
+- add CSV/JSON sink adapters after the source path is stable
 
 ### Next 2. External plugin UDF fixture
 
@@ -357,7 +380,7 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. add file-backed source/sink adapters, starting with CSV source
+1. continue file-backed source/sink adapters, starting with CSV hardening and JSON source
 2. prove plugin-provided UDFs through the external PF4J packaging path
 3. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
 4. build V1-to-V2 migration examples and a parity scorecard against business scenarios

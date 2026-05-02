@@ -211,7 +211,7 @@ Current gap:
 ### Phase 2 - Practical source/sink coverage
 
 - [x] Cover JDBC reader as source
-- [ ] Cover CSV/Excel/JSON readers as sources
+- [~] Cover CSV/Excel/JSON readers as sources
 - [x] Converge `DatabaseIterator` and JDBC reader into one V2 query-backed source family
 - [x] Add official `AiSourceVO`
 - [x] Keep `SelectStrategy` semantics as source policy
@@ -226,7 +226,7 @@ Success criteria:
 
 Current gap:
 
-- file-backed CSV/Excel/JSON sources and sinks are not yet covered
+- CSV source has first-pass V2 coverage; Excel/JSON sources and file-backed sinks are not yet covered
 - concrete remote AI bridge implementation remains pending behind `AiRuntimeBridge`
 
 ### Phase 3 - Transformation migration coverage

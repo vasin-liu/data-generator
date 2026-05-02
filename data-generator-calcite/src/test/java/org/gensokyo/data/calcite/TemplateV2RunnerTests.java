@@ -1,6 +1,7 @@
 package org.gensokyo.data.calcite;
 
 import org.gensokyo.data.iterator.NumberIteratorVO;
+import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
@@ -19,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -220,6 +223,40 @@ class TemplateV2RunnerTests {
         Assertions.assertEquals(2, result.getRows().size());
         Assertions.assertEquals("[alpha]", result.getRows().get(0).getString("wrapped_name"));
         Assertions.assertEquals("[beta]", result.getRows().get(1).getString("wrapped_name"));
+    }
+
+    @Test
+    void readsCsvSourceThroughSqlTransform() throws Exception {
+        Path csv = Files.createTempFile("template-v2-source", ".csv");
+        Files.writeString(csv, """
+                name,score,city
+                alpha,10,"New York"
+                beta,20,"Paris, FR"
+                """);
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setSchema(schema(
+                new org.gensokyo.data.model.v2.ColumnDef("name", "VARCHAR", false),
+                new org.gensokyo.data.model.v2.ColumnDef("score", "BIGINT", false),
+                new org.gensokyo.data.model.v2.ColumnDef("city", "VARCHAR", true)
+        ));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-csv-source");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("""
+                SELECT name, city, score + 1 AS score_next
+                FROM people
+                WHERE score >= 20
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("Paris, FR", result.getRows().getFirst().getString("city"));
+        Assertions.assertEquals("21", result.getRows().getFirst().getString("score_next"));
     }
 
     @Test
@@ -447,6 +484,12 @@ class TemplateV2RunnerTests {
         return sink;
     }
 
+    private RowSchema schema(org.gensokyo.data.model.v2.ColumnDef... columns) {
+        RowSchema schema = new RowSchema();
+        schema.setColumns(List.of(columns));
+        return schema;
+    }
+
     private DriverManagerDataSource dataSource(String name) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -458,7 +501,7 @@ class TemplateV2RunnerTests {
 
     private TemplateV2RuntimeRegistry defaultRegistry() {
         return new TemplateV2RuntimeRegistry(
-                List.of(new IteratorSourceFactory()),
+                List.of(new IteratorSourceFactory(), new CsvSourceFactory()),
                 List.of(new SqlTransformFactory()),
                 List.of(new ConsoleSinkFactory())
         );
