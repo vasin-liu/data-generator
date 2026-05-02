@@ -48,6 +48,7 @@ The skeleton should still preserve forward compatibility for the final end-state
 - `sources` stays plural from day 1
 - `transform` should be introduced in a way that can later expand to `transformers`
 - `sink` should be introduced in a way that can later expand to `sinks`
+- all new skeleton capabilities should be introduced behind extension-friendly contracts, so later source / transformer / sink / UDF / plugin implementations can be added without rewriting the core runtime
 
 ## Target Structure
 

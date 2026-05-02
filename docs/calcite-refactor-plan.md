@@ -140,6 +140,10 @@ Compatibility posture for the refactor:
 
 - V1 and V2 may run side by side temporarily, but V2 is the only target architecture.
 - V2 is a new mainline path, not a new `StageVO`.
+- Every new V2 capability must be designed as an extension point first, not as a one-off hard-coded branch.
+- Source, transformer, sink, SQL function/UDF, runtime service, datasource resolver, and plugin integration work must expose a registry/provider/contract boundary that can be extended by built-in modules, Spring wiring, and future external plugins.
+- Hard-coded implementations are acceptable only as built-in defaults behind those extension points; they must not become the only path for adding new behavior.
+- New feature PRs should document the extension surface they introduce or reuse, and tests should include at least one non-default/custom path when practical.
 - Calcite should own SQL parsing and validation; do not translate SQL back into the old stage chain.
 - The V2 execution path should use a simple row model instead of `Value / SingleValue / ListValue / MapValue` as its primary abstraction.
 - Existing writer modules may be reused through adapters temporarily, but V2 execution should not be constrained by V1 abstractions.

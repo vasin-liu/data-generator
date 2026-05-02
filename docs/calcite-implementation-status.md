@@ -29,6 +29,8 @@ The current active direction is:
 - keep V1 runnable only as a temporary migration scaffold
 - use Calcite for SQL parsing and validation
 - keep the first V2 runtime as a lightweight in-memory row engine until the new architecture fully absorbs the old feature surface
+- implement every new V2 capability behind an explicit extension point wherever practical, so built-in behavior, Spring wiring, and future plugin-provided behavior can share the same contract
+- avoid adding new hard-coded source / transform / sink / UDF branches unless they are built-in defaults behind a registry, provider, or runtime contract
 
 ### 2. V2 model and parsing
 
