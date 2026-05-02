@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 数据写入器配置
@@ -45,4 +47,5 @@ public class WriterVO implements Serializable {
      * 写入模板
      */
     private String template;
+    private Map<String, Object> options = new LinkedHashMap<>();
 }

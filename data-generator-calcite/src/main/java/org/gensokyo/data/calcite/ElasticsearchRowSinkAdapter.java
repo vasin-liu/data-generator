@@ -58,10 +58,29 @@ public class ElasticsearchRowSinkAdapter implements RowSink {
     private String bulkPayload(String index, List<Row> rows) {
         StringBuilder payload = new StringBuilder(rows.size() * 128);
         for (Row row : rows) {
-            payload.append("{\"index\":{\"_index\":\"").append(RowJsonCodec.escape(index)).append("\"}}").append('\n');
-            payload.append(document(row)).append('\n');
+            payload.append(action(index, row)).append('\n');
+            if (WriterOptionResolver.booleanOption(writer, "upsert")) {
+                payload.append("{\"doc\":").append(document(row)).append(",\"doc_as_upsert\":true}").append('\n');
+            } else {
+                payload.append(document(row)).append('\n');
+            }
         }
         return payload.toString();
+    }
+
+    private String action(String index, Row row) {
+        String action = WriterOptionResolver.booleanOption(writer, "upsert") ? "update" : "index";
+        StringBuilder builder = new StringBuilder("{\"").append(action).append("\":{\"_index\":\"")
+                .append(RowJsonCodec.escape(index)).append('"');
+        String id = WriterOptionResolver.stringOption(writer, "id", row);
+        if (StringUtils.hasText(id)) {
+            builder.append(",\"_id\":\"").append(RowJsonCodec.escape(id)).append('"');
+        }
+        String routing = WriterOptionResolver.stringOption(writer, "routing", row);
+        if (StringUtils.hasText(routing)) {
+            builder.append(",\"routing\":\"").append(RowJsonCodec.escape(routing)).append('"');
+        }
+        return builder.append("}}").toString();
     }
 
     private String document(Row row) {

@@ -65,6 +65,30 @@ class ElasticsearchSinkFactoryTests {
     }
 
     @Test
+    void writesRowsToElasticsearchWithResolvedIdRoutingAndUpsert() throws Exception {
+        RestClient client = restClient();
+        WriterVO writer = elasticsearchWriter();
+        writer.setOptions(Map.of(
+                "id", "${device}",
+                "routing", "route-${device}",
+                "upsert", true
+        ));
+
+        new ElasticsearchRowSinkAdapter(client, writer).write(schema(), List.of(
+                new Row(Map.of("device", "d1", "value", 10))
+        ));
+
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        Mockito.verify(client).performRequest(requestCaptor.capture());
+        String payload = EntityUtils.toString(requestCaptor.getValue().getEntity(), StandardCharsets.UTF_8);
+        Assertions.assertTrue(payload.contains(
+                "{\"update\":{\"_index\":\"metrics_v2\",\"_id\":\"d1\",\"routing\":\"route-d1\"}}"));
+        Assertions.assertTrue(payload.contains("\"doc_as_upsert\":true"));
+        Assertions.assertTrue(payload.contains("\"doc\":{"));
+        Assertions.assertTrue(payload.contains("\"device\":\"d1\""));
+    }
+
+    @Test
     void rejectsPartialBulkSuccess() throws Exception {
         RestClient client = restClient("{\"errors\":true,\"items\":[{\"index\":{\"status\":201}}]}");
 

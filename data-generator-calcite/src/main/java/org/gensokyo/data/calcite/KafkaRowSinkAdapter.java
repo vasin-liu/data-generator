@@ -1,5 +1,7 @@
 package org.gensokyo.data.calcite;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.vo.writer.WriterVO;
@@ -7,7 +9,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.StringUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -28,8 +32,18 @@ public class KafkaRowSinkAdapter implements RowSink {
         }
         String topic = Objects.requireNonNull(writer.getTarget(), "Kafka sink target topic must not be null");
         for (Row row : rows) {
-            kafkaTemplate.send(topic, value(row));
+            kafkaTemplate.send(record(topic, row));
         }
+    }
+
+    private ProducerRecord<String, String> record(String topic, Row row) {
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic,
+                WriterOptionResolver.stringOption(writer, "key", row),
+                value(row));
+        for (Map.Entry<String, String> header : WriterOptionResolver.stringMapOption(writer, "headers", row).entrySet()) {
+            record.headers().add(new RecordHeader(header.getKey(), header.getValue().getBytes(StandardCharsets.UTF_8)));
+        }
+        return record;
     }
 
     private String value(Row row) {

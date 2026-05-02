@@ -260,24 +260,24 @@ The following implementation milestones are complete:
 20. Source policy runtime semantics are active as source materialization post-processing for ordered/random selection and `limit`.
 21. Remote AI source execution now has a runtime bridge contract and provider hook; tests cover prompt/options handoff and scalar/map/list output materialization without live network calls.
 22. Kafka and Elasticsearch blank-template row publishing now share `RowJsonCodec`, with focused coverage for null, primitive, and escaped string values.
+23. V2 writer-specific `options` are available on `WriterVO`; Kafka supports resolved `key` / `headers`, and Elasticsearch supports resolved `id` / `routing` plus `upsert`.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. Kafka / Elasticsearch sink hardening
+### Next 1. Concrete AI runtime bridge
 
 Goal:
 
-- move the first Kafka and Elasticsearch sink factories from basic row publishing to production-ready message/document shaping
+- provide a real remote implementation behind the `AiRuntimeBridge` contract without coupling core V2 execution to network clients
 
 Recommended implementation:
 
-- define optional Kafka key mapping
-- define optional Kafka headers
-- define optional Elasticsearch id/routing/upsert mapping
-- extend the shared `RowJsonCodec` or replace it with a Jackson-backed codec when nested values become required
-- add integration-style coverage around error diagnostics without requiring live Kafka or Elasticsearch services
+- add an Ollama or Spring-AI-backed bridge as an optional runtime provider
+- keep mock / deterministic bridge tests as the primary no-network acceptance path
+- define timeout and model error diagnostics
+- decide whether bridge implementation lives in `data-generator-reader-ai` or a new V2 AI runtime module
 
 ## Deferred Work
 
@@ -287,8 +287,7 @@ The following items remain intentionally deferred after the current step:
 - UDF expansion
 - concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
-- Kafka key/header hardening
-- Elasticsearch id/routing/upsert hardening
+- nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
 - plugin load-failure diagnostics beyond matched runtime factory failures
 - in-flight task refresh policy
 - V1 retirement
@@ -297,11 +296,11 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. harden Kafka key/header and Elasticsearch id/routing/upsert mapping
-2. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
-3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-4. add plugin load-failure diagnostics and in-flight refresh policy
-5. expand source policy caching/materialization modes after the row-level semantics stabilize
+1. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
+2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+3. add plugin load-failure diagnostics and in-flight refresh policy
+4. expand source policy caching/materialization modes after the row-level semantics stabilize
+5. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 
 The plugin-framework recommendation is:
 

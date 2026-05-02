@@ -1,5 +1,7 @@
 package org.gensokyo.data.calcite;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.Header;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
@@ -32,11 +34,12 @@ class KafkaSinkFactoryTests {
                 new Row(Map.of("device", "d2", "value", 20))
         ));
 
-        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(kafkaTemplate, Mockito.times(2)).send(topicCaptor.capture(), valueCaptor.capture());
-        Assertions.assertEquals(List.of("topic_v2", "topic_v2"), topicCaptor.getAllValues());
-        Assertions.assertEquals(List.of("device=d1,value=10", "device=d2,value=20"), valueCaptor.getAllValues());
+        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor = producerRecordCaptor();
+        Mockito.verify(kafkaTemplate, Mockito.times(2)).send(recordCaptor.capture());
+        Assertions.assertEquals(List.of("topic_v2", "topic_v2"),
+                recordCaptor.getAllValues().stream().map(ProducerRecord::topic).toList());
+        Assertions.assertEquals(List.of("device=d1,value=10", "device=d2,value=20"),
+                recordCaptor.getAllValues().stream().map(ProducerRecord::value).toList());
     }
 
     @Test
@@ -48,10 +51,35 @@ class KafkaSinkFactoryTests {
                 new Row(Map.of("device", "d1", "value", 10))
         ));
 
-        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(kafkaTemplate).send(Mockito.eq("topic_v2"), valueCaptor.capture());
-        Assertions.assertTrue(valueCaptor.getValue().contains("\"device\":\"d1\""));
-        Assertions.assertTrue(valueCaptor.getValue().contains("\"value\":10"));
+        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor = producerRecordCaptor();
+        Mockito.verify(kafkaTemplate).send(recordCaptor.capture());
+        Assertions.assertEquals("topic_v2", recordCaptor.getValue().topic());
+        Assertions.assertTrue(recordCaptor.getValue().value().contains("\"device\":\"d1\""));
+        Assertions.assertTrue(recordCaptor.getValue().value().contains("\"value\":10"));
+    }
+
+    @Test
+    void writesRowsToKafkaWithResolvedKeyAndHeaders() {
+        KafkaTemplate<String, String> kafkaTemplate = kafkaTemplate();
+        WriterVO writer = kafkaWriter();
+        writer.setTemplate("value=${value}");
+        writer.setOptions(Map.of(
+                "key", "${device}",
+                "headers", Map.of("source", "v2", "device", "${device}")
+        ));
+
+        new KafkaRowSinkAdapter(kafkaTemplate, writer).write(schema(), List.of(
+                new Row(Map.of("device", "d1", "value", 10))
+        ));
+
+        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor = producerRecordCaptor();
+        Mockito.verify(kafkaTemplate).send(recordCaptor.capture());
+        ProducerRecord<String, String> record = recordCaptor.getValue();
+        Assertions.assertEquals("topic_v2", record.topic());
+        Assertions.assertEquals("d1", record.key());
+        Assertions.assertEquals("value=10", record.value());
+        Assertions.assertEquals("v2", headerValue(record, "source"));
+        Assertions.assertEquals("d1", headerValue(record, "device"));
     }
 
     @Test
@@ -103,14 +131,25 @@ class KafkaSinkFactoryTests {
 
         new TemplateV2Runner(runtimeRegistry).run(template());
 
-        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(kafkaTemplate, Mockito.times(2)).send(Mockito.eq("topic_v2"), valueCaptor.capture());
-        Assertions.assertEquals(List.of("value=2", "value=3"), valueCaptor.getAllValues());
+        ArgumentCaptor<ProducerRecord<String, String>> recordCaptor = producerRecordCaptor();
+        Mockito.verify(kafkaTemplate, Mockito.times(2)).send(recordCaptor.capture());
+        Assertions.assertEquals(List.of("value=2", "value=3"),
+                recordCaptor.getAllValues().stream().map(ProducerRecord::value).toList());
     }
 
     @SuppressWarnings("unchecked")
     private KafkaTemplate<String, String> kafkaTemplate() {
         return Mockito.mock(KafkaTemplate.class);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private ArgumentCaptor<ProducerRecord<String, String>> producerRecordCaptor() {
+        return ArgumentCaptor.forClass((Class) ProducerRecord.class);
+    }
+
+    private String headerValue(ProducerRecord<String, String> record, String name) {
+        Header header = record.headers().lastHeader(name);
+        return header == null ? null : new String(header.value(), java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private WriterVO kafkaWriter() {
