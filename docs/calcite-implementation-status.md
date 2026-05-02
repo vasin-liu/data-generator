@@ -258,30 +258,13 @@ The following implementation milestones are complete:
 18. Elasticsearch V2 sink factory is runnable through `TemplateV2RuntimeServices.elasticsearchClient(...)` with `WriterVO.type=ELASTICSEARCH` or `ES`.
 19. AI V2 source factory is runnable for deterministic `INLINE` / `STATIC` / `ECHO` providers and exposes rows to SQL transforms.
 20. Source policy runtime semantics are active as source materialization post-processing for ordered/random selection and `limit`.
+21. Remote AI source execution now has a runtime bridge contract and provider hook; tests cover prompt/options handoff and scalar/map/list output materialization without live network calls.
 
 ## Immediate Next Work
 
 The next work should be done in the following order.
 
-### Next 1. Remote AI provider bridge
-
-Goal:
-
-- connect the official `AiSourceVO` source contract to a real remote AI provider without making Calcite depend on a live network during tests
-
-Recommended implementation:
-
-- add a small AI runtime bridge interface rather than coupling core V2 execution directly to old `reader-ai` classes
-- provide an Ollama/Spring-AI implementation behind a runtime plugin/provider
-- keep deterministic `INLINE` / `STATIC` / `ECHO` providers for tests and local dry runs
-- define parser output rules for scalar, map, and list-of-map AI responses
-
-Suggested acceptance:
-
-- one mock bridge test proving prompt/provider/options are passed correctly
-- one parser test converting model output into schema-aligned rows
-
-### Next 2. Kafka / Elasticsearch sink hardening
+### Next 1. Kafka / Elasticsearch sink hardening
 
 Goal:
 
@@ -301,7 +284,7 @@ The following items remain intentionally deferred after the current step:
 
 - full Calcite physical execution
 - UDF expansion
-- remote AI provider bridge
+- concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
 - Kafka key/header/serialization hardening
 - Elasticsearch id/routing/upsert/serialization hardening
@@ -313,9 +296,9 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. add the remote AI provider bridge behind the official `AiSourceVO` contract
-2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-3. harden Kafka / Elasticsearch sink payload mapping
+1. harden Kafka / Elasticsearch sink payload mapping
+2. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
+3. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
 4. add plugin load-failure diagnostics and in-flight refresh policy
 5. expand source policy caching/materialization modes after the row-level semantics stabilize
 

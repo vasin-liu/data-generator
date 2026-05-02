@@ -423,7 +423,7 @@ Exit criteria:
 - validation rejects illegal transformer graph shapes
 - validation for unresolved references and ambiguous columns still needs hardening
 - sink failure behavior can switch by configuration
-- the V2 source model includes an official AI-backed source type, but its runtime factory is still pending
+- the V2 source model includes an official AI-backed source type, deterministic local runtime, and a remote runtime bridge contract; concrete Ollama/Spring-AI bridge implementation is still pending
 
 ### M13 - Formalize external plugin runtime
 

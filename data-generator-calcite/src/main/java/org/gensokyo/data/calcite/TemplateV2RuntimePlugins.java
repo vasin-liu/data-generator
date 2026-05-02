@@ -19,6 +19,7 @@ public final class TemplateV2RuntimePlugins {
     public static List<TemplateV2RuntimePluginProvider> loadProviders() {
         List<TemplateV2RuntimePluginProvider> providers = new ArrayList<>();
         providers.add(new StaticTemplateV2RuntimePluginProvider(new DefaultTemplateV2RuntimePlugin()));
+        providers.add(new AiRuntimeBridgeTemplateV2RuntimePluginProvider());
         providers.add(new DirectoryAwareTemplateV2RuntimePluginProvider());
         ServiceLoader.load(TemplateV2RuntimePluginProvider.class).forEach(providers::add);
         ServiceLoader.load(TemplateV2RuntimePlugin.class)

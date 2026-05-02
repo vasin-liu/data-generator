@@ -8,7 +8,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 public record TemplateV2RuntimeServices(NamedParameterJdbcTemplate jdbcTemplate,
                                         DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
-                                        DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+                                        DynamicElasticsearchClientRegistry elasticsearchClientRegistry,
+                                        AiRuntimeBridge aiRuntimeBridge) {
+
+    public TemplateV2RuntimeServices(NamedParameterJdbcTemplate jdbcTemplate,
+                                     DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
+                                     DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+        this(jdbcTemplate, kafkaTemplateRegistry, elasticsearchClientRegistry, null);
+    }
 
     public KafkaTemplate<String, String> kafkaTemplate(String cluster) {
         if (kafkaTemplateRegistry == null) {
