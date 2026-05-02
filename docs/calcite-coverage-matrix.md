@@ -193,43 +193,56 @@ Expected result:
 
 ### Phase 1 - Minimum viable V2
 
-- [ ] Cover row model with `Row + RowSchema`
-- [ ] Cover iterator number/constant/datetime as `RowSource`
-- [ ] Cover `SELECT` projection, alias, arithmetic, `CASE WHEN`, `WHERE`
-- [ ] Cover console sink
-- [ ] Cover first UDF batch
+- [x] Cover row model with `Row + RowSchema`
+- [~] Cover iterator number/constant/datetime as `RowSource`
+- [x] Cover `SELECT` projection, alias, arithmetic, `CASE WHEN`, `WHERE`
+- [x] Cover console sink
+- [x] Cover first UDF batch
 
 Success criteria:
 
 - `iterator -> sql -> console` works end to end
 - simple V1 field-stage templates can be rewritten as V2 SQL templates
 
+Current gap:
+
+- number iterator is covered; constant and datetime iterator adapters still need V2 source coverage
+
 ### Phase 2 - Practical source/sink coverage
 
-- [ ] Cover JDBC reader as source
+- [x] Cover JDBC reader as source
 - [ ] Cover CSV/Excel/JSON readers as sources
-- [ ] Converge `DatabaseIterator` and JDBC reader into one V2 query-backed source family
+- [x] Converge `DatabaseIterator` and JDBC reader into one V2 query-backed source family
 - [x] Add official `AiSourceVO`
-- [ ] Keep `SelectStrategy` semantics as source policy
-- [ ] Cover DB sink
-- [ ] Cover Kafka sink
-- [ ] Cover Elasticsearch sink
-- [ ] Cover multi-sink fan-out with configurable failure policy
+- [x] Keep `SelectStrategy` semantics as source policy
+- [x] Cover DB sink
+- [x] Cover Kafka sink
+- [x] Cover Elasticsearch sink
+- [x] Cover multi-sink fan-out with configurable failure policy
 
 Success criteria:
 
 - most repository-owned demo templates can be re-expressed with V2 sources and sinks
 
+Current gap:
+
+- file-backed CSV/Excel/JSON sources and sinks are not yet covered
+- concrete remote AI bridge implementation remains pending behind `AiRuntimeBridge`
+
 ### Phase 3 - Transformation migration coverage
 
-- [ ] Cover mapping migration patterns
-- [ ] Cover conversion migration patterns
-- [ ] Cover row-local condition migration patterns
-- [ ] Cover simple SpEL migration patterns
+- [x] Cover mapping migration patterns
+- [x] Cover conversion migration patterns
+- [x] Cover row-local condition migration patterns
+- [~] Cover simple SpEL migration patterns
 
 Success criteria:
 
 - a large share of current business templates can move from V1 field DAGs to V2 SQL transforms
+
+Current gap:
+
+- simple SpEL has a first UDF extension path, but there is not yet a compatibility mapping guide or broad repository-local UDF catalog
 
 ### Phase 4 - Compatibility stabilization
 

@@ -217,8 +217,15 @@ transform:
 | `#faker.snowflake.next` | `faker_snowflake()` |
 | `#faker.common.text(a,b)` | `faker_text(a, b)` |
 | `#faker.expression("#{date.past ...}")` | `faker_date_past(...)` |
-| `#faker.datetime.format(x,'yyyy-MM-dd')` | `faker_datetime_format(x, 'yyyy-MM-dd')` |
+| `#faker.datetime.format(x,'yyyy-MM-dd')` | repository UDF such as `V2_FORMAT_DATE('%Y-%m-%d', x)` or a future faker-specific UDF |
 | custom SpEL utility chains | targeted repository-local UDFs |
+
+Current V2 UDF status:
+
+- `TemplateV2SqlFunctionRegistry` is the extension point for repository and future plugin-provided SQL functions
+- built-in date helpers currently use the `V2_*` namespace to avoid Calcite dialect-function conflicts
+- custom UDFs must register both Calcite validation metadata and runtime evaluator behavior
+- future faker/script compatibility functions should be added through this registry, not by hard-coding more evaluator branches
 
 ## Coverage-Oriented Migration Plan
 

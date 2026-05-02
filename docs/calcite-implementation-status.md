@@ -19,6 +19,15 @@ Related references:
 
 ## Current Status
 
+### Progress snapshot
+
+As of the current implementation checkpoint:
+
+- Phase 1 minimum viable V2 is effectively complete except for additional iterator adapters beyond number
+- Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI model shape, source policy, and multi-sink failure policy
+- Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions and the shared UDF registry
+- the largest remaining gaps are file-backed source/sink adapters, concrete remote AI bridge, richer V1-to-V2 migration examples, and parity scorecard work
+
 ### 1. Baseline and scope
 
 The repository has already completed the Boot 4 / JDK 25 baseline transition needed for the V2 path.
@@ -279,9 +288,35 @@ The following implementation milestones are complete:
 
 ## Immediate Next Work
 
-The next work should be done in the following order.
+The next work should be done in the following order. This supersedes the older AI-first next-step recommendation because the transformation core and UDF extension surface have advanced.
 
-### Next 1. Concrete AI runtime bridge
+### Next 1. Make UDF extension plugin-ready
+
+Goal:
+
+- allow repository modules and future PF4J plugins to contribute SQL UDFs through the same runtime registry path used by source / transform / sink factories
+
+Recommended implementation:
+
+- add `TemplateV2SqlFunction` collection support to `TemplateV2RuntimePlugin`
+- merge built-in and plugin-provided UDF registries when constructing `SqlTransformFactory`
+- add conflict diagnostics for duplicate UDF names
+- add one PF4J or provider-level test proving external UDF registration participates in Calcite validation and row evaluation
+
+### Next 2. File-backed source/sink adapters
+
+Goal:
+
+- close the largest remaining practical source/sink gap after JDBC/Kafka/Elasticsearch
+
+Recommended implementation:
+
+- add CSV source first because it is the smallest useful file-backed source
+- keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
+- expose file-backed sources as `RowSource` with explicit schema preferred and inference as fallback
+- add CSV/JSON sink adapters only after source path is stable
+
+### Next 3. Concrete AI runtime bridge
 
 Goal:
 
@@ -293,6 +328,18 @@ Recommended implementation:
 - keep mock / deterministic bridge tests as the primary no-network acceptance path
 - define timeout and model error diagnostics
 - decide whether bridge implementation lives in `data-generator-reader-ai` or a new V2 AI runtime module
+
+### Next 4. V1-to-V2 migration examples and parity scorecard
+
+Goal:
+
+- validate that the new SQL/UDF/source/sink surface covers real business scenarios instead of only synthetic runner tests
+
+Recommended implementation:
+
+- add representative V2 examples for mapping, condition, convert, SpEL-expression subset, JDBC source, Kafka sink, and Elasticsearch sink
+- document unsupported direct migrations for log/pause/shared/procedural JavaScript paths
+- create a parity scorecard that tracks V1 stage/reader/writer families by `covered`, `partial`, `compatibility-only`, or `not started`
 
 ## Deferred Work
 
@@ -309,11 +356,12 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
-2. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
-3. add UDFs for repository-specific generation logic after the SQL conditional/null baseline
-4. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
-5. plan V1 retirement checkpoints around V2 feature parity
+1. make the UDF registry plugin-ready and runtime-registry-managed
+2. add file-backed source/sink adapters, starting with CSV source
+3. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
+4. build V1-to-V2 migration examples and a parity scorecard against business scenarios
+5. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+6. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 
 The plugin-framework recommendation is:
 
