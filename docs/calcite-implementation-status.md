@@ -160,13 +160,14 @@ Current behavior:
 - reads local CSV files from a template-provided `path`
 - supports `charset`, single-character `delimiter`, `header`, `maxRows`, and optional explicit `RowSchema`
 - supports quoted fields and escaped quotes in the lightweight built-in parser
+- CSV parsing is behind the `CsvParser` contract, with `DefaultCsvParser` as the built-in implementation and `CsvSourceFactory(CsvParser)` as the injection point
 - is registered as a built-in default source factory while still fitting the runtime plugin source extension contract
 
 Current limitation:
 
 - no streaming read mode yet
 - no multiline quoted-field support yet
-- no external parser SPI yet; the current parser is intentionally a first-pass built-in default
+- no external PF4J parser fixture yet; parser replacement is currently available through factory injection
 
 ### 6. Transform capability currently implemented
 
@@ -310,6 +311,7 @@ The following implementation milestones are complete:
 30. SQL transform now has a shared UDF registry abstraction so future repository or plugin-provided functions can register Calcite validation metadata and runtime evaluators through one extension point.
 31. Runtime plugins can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()`, and the default SQL transform factory receives the merged built-in + plugin UDF registry.
 32. CSV V2 source is runnable through `CsvSourceVO` / `CsvRowSource` / `CsvSourceFactory` and can participate in SQL transforms with explicit schema.
+33. CSV parsing is now isolated behind `CsvParser`, keeping the built-in parser replaceable by repository or plugin-provided parser implementations.
 
 ## Immediate Next Work
 
@@ -324,6 +326,7 @@ Goal:
 Recommended implementation:
 
 - harden CSV source options and diagnostics
+- add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - add JSON source next because it validates nested/object payload decisions earlier than Excel
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
 - add CSV/JSON sink adapters after the source path is stable

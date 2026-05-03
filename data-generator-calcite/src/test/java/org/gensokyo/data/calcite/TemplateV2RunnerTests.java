@@ -260,6 +260,35 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void readsCsvSourceThroughInjectedParser() throws Exception {
+        Path csv = Files.createTempFile("template-v2-source-custom-parser", ".csv");
+        Files.writeString(csv, """
+                ignored
+                """);
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(false);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-csv-parser");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("SELECT c1 AS name, c2 + 1 AS score_next FROM people")));
+        template.setSinks(List.of(consoleSink()));
+
+        CsvParser parser = (csvSource, lines) -> List.of(List.of("gamma", "30"));
+        TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory(parser)),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+        TemplateV2RunResult result = new TemplateV2Runner(runtimeRegistry).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("gamma", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("31", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");

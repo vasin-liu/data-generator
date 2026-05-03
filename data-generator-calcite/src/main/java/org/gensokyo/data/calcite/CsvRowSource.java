@@ -17,10 +17,16 @@ import java.util.Map;
 public class CsvRowSource implements RowSource {
     private final String name;
     private final CsvSourceVO source;
+    private final CsvParser csvParser;
 
     public CsvRowSource(String name, CsvSourceVO source) {
+        this(name, source, new DefaultCsvParser());
+    }
+
+    public CsvRowSource(String name, CsvSourceVO source, CsvParser csvParser) {
         this.name = name;
         this.source = source;
+        this.csvParser = csvParser;
     }
 
     @Override
@@ -33,10 +39,10 @@ public class CsvRowSource implements RowSource {
         if (source.getSchema() != null) {
             return source.getSchema();
         }
-        List<String> lines = readLines();
-        List<String> columns = source.isHeader() && !lines.isEmpty()
-                ? parseLine(lines.getFirst(), delimiter())
-                : generatedColumns(firstDataColumnCount(lines));
+        List<List<String>> records = records();
+        List<String> columns = source.isHeader() && !records.isEmpty()
+                ? records.getFirst()
+                : generatedColumns(firstDataColumnCount(records));
         RowSchema schema = new RowSchema();
         schema.setColumns(columns.stream()
                 .map(column -> new ColumnDef(column, "VARCHAR", true))
@@ -46,34 +52,34 @@ public class CsvRowSource implements RowSource {
 
     @Override
     public List<Row> rows() {
-        List<String> lines = readLines();
-        if (lines.isEmpty()) {
+        List<List<String>> records = records();
+        if (records.isEmpty()) {
             return List.of();
         }
-        List<String> columns = columnNames(lines);
+        List<String> columns = columnNames(records);
         int startIndex = source.isHeader() ? 1 : 0;
         long limit = source.getMaxRows() == null ? Long.MAX_VALUE : source.getMaxRows();
         List<Row> rows = new ArrayList<>();
-        for (int i = startIndex; i < lines.size() && rows.size() < limit; i++) {
-            if (lines.get(i).isBlank()) {
+        for (int i = startIndex; i < records.size() && rows.size() < limit; i++) {
+            if (records.get(i).isEmpty()) {
                 continue;
             }
-            rows.add(toRow(columns, parseLine(lines.get(i), delimiter())));
+            rows.add(toRow(columns, records.get(i)));
         }
         return rows;
     }
 
-    private List<String> columnNames(List<String> lines) {
+    private List<String> columnNames(List<List<String>> records) {
         if (source.getSchema() != null && source.getSchema().getColumns() != null
                 && !source.getSchema().getColumns().isEmpty()) {
             return source.getSchema().getColumns().stream()
                     .map(ColumnDef::getName)
                     .toList();
         }
-        if (source.isHeader() && !lines.isEmpty()) {
-            return parseLine(lines.getFirst(), delimiter());
+        if (source.isHeader() && !records.isEmpty()) {
+            return records.getFirst();
         }
-        return generatedColumns(firstDataColumnCount(lines));
+        return generatedColumns(firstDataColumnCount(records));
     }
 
     private Row toRow(List<String> columns, List<String> values) {
@@ -82,6 +88,12 @@ public class CsvRowSource implements RowSource {
             row.put(columns.get(i), i < values.size() ? values.get(i) : null);
         }
         return new Row(row);
+    }
+
+    private List<List<String>> records() {
+        return csvParser.parse(source, readLines()).stream()
+                .filter(record -> !record.stream().allMatch(String::isBlank))
+                .toList();
     }
 
     private List<String> readLines() {
@@ -95,12 +107,12 @@ public class CsvRowSource implements RowSource {
         }
     }
 
-    private int firstDataColumnCount(List<String> lines) {
+    private int firstDataColumnCount(List<List<String>> records) {
         int index = source.isHeader() ? 1 : 0;
-        if (index >= lines.size()) {
+        if (index >= records.size()) {
             return 0;
         }
-        return parseLine(lines.get(index), delimiter()).size();
+        return records.get(index).size();
     }
 
     private List<String> generatedColumns(int count) {
@@ -111,32 +123,4 @@ public class CsvRowSource implements RowSource {
         return columns;
     }
 
-    private char delimiter() {
-        String delimiter = source.getDelimiter();
-        return delimiter == null || delimiter.isEmpty() ? ',' : delimiter.charAt(0);
-    }
-
-    private List<String> parseLine(String line, char delimiter) {
-        List<String> values = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-        boolean quoted = false;
-        for (int i = 0; i < line.length(); i++) {
-            char ch = line.charAt(i);
-            if (ch == '"') {
-                if (quoted && i + 1 < line.length() && line.charAt(i + 1) == '"') {
-                    current.append('"');
-                    i++;
-                } else {
-                    quoted = !quoted;
-                }
-            } else if (ch == delimiter && !quoted) {
-                values.add(current.toString());
-                current.setLength(0);
-            } else {
-                current.append(ch);
-            }
-        }
-        values.add(current.toString());
-        return values;
-    }
 }
