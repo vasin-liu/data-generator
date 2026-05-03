@@ -31,10 +31,10 @@ Assess which current repository capabilities can be covered by the planned Calci
 | Iterator: constant | generated constant dataset | iterator modules | High | Adapt into `RowSource` | No | P0 | Strong V2 source candidate |
 | Iterator: datetime | generated time sequence | iterator modules | High | Adapt into `RowSource` | No | P0 | Strong V2 source candidate |
 | Iterator: database | paged DB iterator | iterator modules | High | Converge with JDBC-backed source family | No | P0 | Should not remain a distinct long-term V2 concept |
-| Iterator: csv/excel/json | file-backed iterators | iterator modules | High | Adapt into `RowSource` | No | P1 | Strong V2 source candidate |
+| Iterator: csv/excel/json | file-backed iterators | iterator modules | High | CSV/JSON have first-pass `RowSource`; Excel remains pending | No | P1 | Strong V2 source candidate |
 | Reader: constant | in-memory constants | reader modules | High | Adapt into `RowSource` or inline logical table | No | P1 | Can also become SQL literal tables later |
 | Reader: JDBC | query-based read | reader modules | High | Converge with database iterator into one query-backed source family | No | P0 | Natural source path |
-| Reader: CSV/Excel/JSON | file-backed reads | reader modules | High | Adapt into `RowSource` | No | P1 | Natural source path |
+| Reader: CSV/Excel/JSON | file-backed reads | reader modules | High | CSV/JSON have first-pass `RowSource`; Excel remains pending | No | P1 | Natural source path |
 | Reader: SpEL | expression-driven read | reader modules | Medium | Replace simple cases with UDFs; preserve complex cases | Yes | P1 | Expression-only subset is migratable |
 | Reader: AI | remote/AI backed read | reader modules | High | Official `AiSourceVO` with deterministic first-pass runtime; remote bridge pending | Yes | P1 | Prefer a first-class V2 source, potentially aligned with Spring AI |
 | Script: Plain | constant passthrough | script modules | High | Usually eliminate or replace with SQL literals | Yes | P1 | Often trivial to migrate |

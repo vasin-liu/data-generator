@@ -26,7 +26,7 @@ As of the current implementation checkpoint:
 - Phase 1 minimum viable V2 is effectively complete except for additional iterator adapters beyond number
 - Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI model shape, source policy, and multi-sink failure policy
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions and the shared UDF registry
-- the largest remaining gaps are file-backed source/sink adapters, concrete remote AI bridge, richer V1-to-V2 migration examples, and parity scorecard work
+- the largest remaining gaps are file-backed sink adapters, Excel source, concrete remote AI bridge, richer V1-to-V2 migration examples, and parity scorecard work
 
 ### 1. Baseline and scope
 
@@ -51,6 +51,7 @@ Implemented model set under `data-generator-common/data-generator-core`:
 - `IteratorSourceVO`
 - `QuerySourceVO`
 - `CsvSourceVO`
+- `JsonSourceVO`
 - `AiSourceVO`
 - `AiProviderVO`
 - `TransformVO`
@@ -168,6 +169,30 @@ Current limitation:
 - no streaming read mode yet
 - no multiline quoted-field support yet
 - no external PF4J parser fixture yet; parser replacement is currently available through factory injection
+
+#### JSON source
+
+Implemented:
+
+- `JsonSourceVO`
+- `JsonRowSource`
+- `JsonSourceFactory`
+
+Current behavior:
+
+- reads local JSON files from a template-provided `path`
+- supports `charset`, `maxRows`, and optional explicit `RowSchema`
+- supports a JSON object array as multiple rows and a single JSON object as one row
+- maps scalar root payloads to a single `value` column
+- serializes nested objects and arrays as JSON strings for the current flat row model
+- JSON parsing is behind the `JsonParser` contract, with `DefaultJsonParser` as the built-in Jackson 3 implementation and `JsonSourceFactory(JsonParser)` as the injection point
+- is registered as a built-in default source factory and as a Spring runtime source factory
+
+Current limitation:
+
+- no streaming read mode yet
+- no JSONPath/root selector yet
+- nested objects are not expanded into structured row values yet; this remains deferred until the row model intentionally supports complex values
 
 ### 6. Transform capability currently implemented
 
@@ -312,6 +337,7 @@ The following implementation milestones are complete:
 31. Runtime plugins can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()`, and the default SQL transform factory receives the merged built-in + plugin UDF registry.
 32. CSV V2 source is runnable through `CsvSourceVO` / `CsvRowSource` / `CsvSourceFactory` and can participate in SQL transforms with explicit schema.
 33. CSV parsing is now isolated behind `CsvParser`, keeping the built-in parser replaceable by repository or plugin-provided parser implementations.
+34. JSON V2 source is runnable through `JsonSourceVO` / `JsonRowSource` / `JsonSourceFactory`, supports object arrays and single objects, and keeps parsing replaceable through `JsonParser`.
 
 ## Immediate Next Work
 
@@ -327,7 +353,7 @@ Recommended implementation:
 
 - harden CSV source options and diagnostics
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
-- add JSON source next because it validates nested/object payload decisions earlier than Excel
+- harden JSON source options and diagnostics, especially root selection and nested value strategy
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
 - add CSV/JSON sink adapters after the source path is stable
 

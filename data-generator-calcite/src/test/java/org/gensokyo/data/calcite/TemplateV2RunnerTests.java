@@ -3,6 +3,7 @@ package org.gensokyo.data.calcite;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
+import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
@@ -289,6 +290,88 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void readsJsonSourceThroughSqlTransform() throws Exception {
+        Path json = Files.createTempFile("template-v2-source", ".json");
+        Files.writeString(json, """
+                [
+                  {"name":"alpha","score":10,"active":true},
+                  {"name":"beta","score":20,"active":false}
+                ]
+                """);
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(json.toString());
+        source.setSchema(schema(
+                new org.gensokyo.data.model.v2.ColumnDef("name", "VARCHAR", false),
+                new org.gensokyo.data.model.v2.ColumnDef("score", "BIGINT", false),
+                new org.gensokyo.data.model.v2.ColumnDef("active", "BOOLEAN", true)
+        ));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-json-source");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("""
+                SELECT name, score + 1 AS score_next
+                FROM people
+                WHERE score >= 20
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("21", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
+    void readsSingleJsonObjectAsOneRow() throws Exception {
+        Path json = Files.createTempFile("template-v2-single-source", ".json");
+        Files.writeString(json, """
+                {"name":"single","score":7}
+                """);
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(json.toString());
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-json-single-source");
+        template.setSources(Map.of("person", source));
+        template.setTransformers(List.of(sql("SELECT name, score + 3 AS score_next FROM person")));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("single", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("10", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
+    void readsJsonSourceThroughInjectedParser() throws Exception {
+        Path json = Files.createTempFile("template-v2-json-custom-parser", ".json");
+        Files.writeString(json, "{}");
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(json.toString());
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-json-parser");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("SELECT name, score + 1 AS score_next FROM people")));
+        template.setSinks(List.of(consoleSink()));
+
+        JsonParser parser = (jsonSource, content) -> List.of(Map.of("name", "gamma", "score", 30));
+        TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistry(
+                List.of(new JsonSourceFactory(parser)),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+        TemplateV2RunResult result = new TemplateV2Runner(runtimeRegistry).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("gamma", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("31", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");
@@ -530,7 +613,7 @@ class TemplateV2RunnerTests {
 
     private TemplateV2RuntimeRegistry defaultRegistry() {
         return new TemplateV2RuntimeRegistry(
-                List.of(new IteratorSourceFactory(), new CsvSourceFactory()),
+                List.of(new IteratorSourceFactory(), new CsvSourceFactory(), new JsonSourceFactory()),
                 List.of(new SqlTransformFactory()),
                 List.of(new ConsoleSinkFactory())
         );
