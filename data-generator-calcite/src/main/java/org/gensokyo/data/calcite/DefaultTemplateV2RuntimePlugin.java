@@ -15,6 +15,8 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .capability(TemplateV2PluginCapability.source("json"))
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.sink("console"))
+                .capability(TemplateV2PluginCapability.sink("csv"))
+                .capability(TemplateV2PluginCapability.sink("json"))
                 .build();
     }
 
@@ -30,6 +32,6 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
 
     @Override
     public List<V2SinkFactory> sinkFactories() {
-        return List.of(new ConsoleSinkFactory());
+        return List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new JsonSinkFactory());
     }
 }

@@ -372,6 +372,52 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void writesCsvSinkFromTransformedRows() throws Exception {
+        Path csv = Files.createTempFile("template-v2-sink", ".csv");
+        WriterVO writer = new WriterVO();
+        writer.setType("CSV");
+        writer.setTarget(csv.toString());
+
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-csv-sink");
+        template.setSources(Map.of("seed", numberSource(1, 2, 1)));
+        template.setTransformers(List.of(sql("SELECT value, value + 10 AS shifted FROM seed")));
+        template.setSinks(List.of(sink));
+
+        new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(List.of("value,shifted", "1,11", "2,12"), Files.readAllLines(csv));
+    }
+
+    @Test
+    void writesJsonSinkFromTransformedRows() throws Exception {
+        Path json = Files.createTempFile("template-v2-sink", ".json");
+        WriterVO writer = new WriterVO();
+        writer.setType("JSON");
+        writer.setTarget(json.toString());
+
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-json-sink");
+        template.setSources(Map.of("seed", numberSource(1, 2, 1)));
+        template.setTransformers(List.of(sql("SELECT value, value + 10 AS shifted FROM seed")));
+        template.setSinks(List.of(sink));
+
+        new TemplateV2Runner(defaultRegistry()).run(template);
+
+        String content = Files.readString(json);
+        Assertions.assertTrue(content.contains("\"value\":1"));
+        Assertions.assertTrue(content.contains("\"shifted\":11"));
+        Assertions.assertTrue(content.startsWith("["));
+        Assertions.assertTrue(content.endsWith("]"));
+    }
+
+    @Test
     void resolvesTransformAndSinkThroughRuntimeRegistry() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource("calcite_runner_registry"));
         jdbcTemplate.getJdbcTemplate().execute("create table sink_output_registry(source_value bigint)");
@@ -615,7 +661,7 @@ class TemplateV2RunnerTests {
         return new TemplateV2RuntimeRegistry(
                 List.of(new IteratorSourceFactory(), new CsvSourceFactory(), new JsonSourceFactory()),
                 List.of(new SqlTransformFactory()),
-                List.of(new ConsoleSinkFactory())
+                List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new JsonSinkFactory())
         );
     }
 

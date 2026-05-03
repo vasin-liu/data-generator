@@ -63,6 +63,10 @@ public final class Const {
         String CONSOLE = "CONSOLE";
 
         String JDBC = "JDBC";
+
+        String CSV = "CSV";
+
+        String JSON = "JSON";
     }
 
     public interface ReaderSelectStrategyType {

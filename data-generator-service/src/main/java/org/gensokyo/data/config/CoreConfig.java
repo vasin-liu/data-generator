@@ -8,10 +8,12 @@ package org.gensokyo.data.config;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.CsvSourceFactory;
+import org.gensokyo.data.calcite.CsvSinkFactory;
 import org.gensokyo.data.calcite.ElasticsearchTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.IteratorSourceFactory;
 import org.gensokyo.data.calcite.JdbcTemplateTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.JsonSourceFactory;
+import org.gensokyo.data.calcite.JsonSinkFactory;
 import org.gensokyo.data.calcite.KafkaTemplateTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.DirectoryAwareTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.PathBasedPf4jRuntimeExtensionLocator;
@@ -98,6 +100,18 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "consoleSinkFactory")
     public V2SinkFactory consoleSinkFactory() {
         return new ConsoleSinkFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "csvSinkFactory")
+    public V2SinkFactory csvSinkFactory() {
+        return new CsvSinkFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "jsonSinkFactory")
+    public V2SinkFactory jsonSinkFactory() {
+        return new JsonSinkFactory();
     }
 
     @Bean

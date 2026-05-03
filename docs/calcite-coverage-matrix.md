@@ -46,7 +46,7 @@ Assess which current repository capabilities can be covered by the planned Calci
 | Sink: DB writers | JDBC/MySQL/Postgres/ClickHouse | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
 | Sink: Kafka | dynamic Kafka output | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
 | Sink: Elasticsearch | dynamic ES output | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
-| Sink: CSV/Excel/JSON | file output | writer modules | High | `Row -> writer payload` adapter | No | P2 | Lower priority than console/db |
+| Sink: CSV/Excel/JSON | file output | writer modules | High | CSV/JSON have first-pass `RowSink`; Excel remains pending | No | P2 | Lower priority than console/db |
 
 ## Coverage Summary
 

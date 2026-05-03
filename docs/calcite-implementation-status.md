@@ -88,7 +88,14 @@ Current runtime wiring:
 - `TemplateV2Runner` is provided by `CoreConfig`
 - source factories currently wired:
   - iterator source
+  - CSV source
+  - JSON source
   - JDBC query source
+- sink factories currently wired:
+  - console sink
+  - CSV sink
+  - JSON sink
+  - JDBC / Kafka / Elasticsearch runtime providers when their runtime services are available
 
 ### 4. Calcite module skeleton
 
@@ -109,6 +116,8 @@ Implemented `data-generator-calcite` module:
 - `QuerySourceFactory`
 - `ConsoleRowSinkAdapter`
 - `JdbcRowSinkAdapter`
+- `CsvRowSinkAdapter`
+- `JsonRowSinkAdapter`
 - `TemplateV2Runner`
 - `TemplateV2RunResult`
 
@@ -261,6 +270,49 @@ Current limitation:
 
 - no explicit upsert / merge / conflict strategy
 
+#### CSV sink
+
+Implemented:
+
+- `Const.WriterType.CSV`
+- `CsvSinkFactory`
+- `CsvRowSinkAdapter`
+
+Current behavior:
+
+- writes transformed rows to `WriterVO.target`
+- uses output schema column order when available
+- supports `options.charset`, `options.delimiter`, `options.header`, and `options.append`
+- creates parent directories before writing
+- is registered as a built-in default sink factory and as a Spring runtime sink factory
+
+Current limitation:
+
+- no streaming writer mode yet
+- no external parser/formatter fixture yet
+- no old `CsvWriterVO.custom` format compatibility bridge yet
+
+#### JSON sink
+
+Implemented:
+
+- `Const.WriterType.JSON`
+- `JsonSinkFactory`
+- `JsonRowSinkAdapter`
+
+Current behavior:
+
+- writes transformed rows to `WriterVO.target`
+- serializes rows as a JSON array using the current `RowJsonCodec`
+- supports `options.charset`
+- creates parent directories before writing
+- is registered as a built-in default sink factory and as a Spring runtime sink factory
+
+Current limitation:
+
+- no streaming writer mode yet
+- uses the current flat/scalar `RowJsonCodec`; nested object fidelity remains deferred until the row model intentionally supports complex values
+
 ### 8. Multi-source / multi-transform / multi-sink status
 
 Current status:
@@ -338,6 +390,7 @@ The following implementation milestones are complete:
 32. CSV V2 source is runnable through `CsvSourceVO` / `CsvRowSource` / `CsvSourceFactory` and can participate in SQL transforms with explicit schema.
 33. CSV parsing is now isolated behind `CsvParser`, keeping the built-in parser replaceable by repository or plugin-provided parser implementations.
 34. JSON V2 source is runnable through `JsonSourceVO` / `JsonRowSource` / `JsonSourceFactory`, supports object arrays and single objects, and keeps parsing replaceable through `JsonParser`.
+35. CSV and JSON V2 file sinks are runnable through `WriterVO.type=CSV` / `JSON`, with file output adapters registered in both built-in and Spring runtime paths.
 
 ## Immediate Next Work
 
@@ -355,7 +408,7 @@ Recommended implementation:
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON source options and diagnostics, especially root selection and nested value strategy
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- add CSV/JSON sink adapters after the source path is stable
+- harden CSV/JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
 
 ### Next 2. External plugin UDF fixture
 
