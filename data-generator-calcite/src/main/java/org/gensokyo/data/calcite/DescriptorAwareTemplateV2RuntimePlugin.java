@@ -22,7 +22,17 @@ public record DescriptorAwareTemplateV2RuntimePlugin(TemplateV2RuntimePlugin del
     }
 
     @Override
+    public List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+        return delegate.transformFactories(sqlFunctionRegistry);
+    }
+
+    @Override
     public List<V2SinkFactory> sinkFactories() {
         return delegate.sinkFactories();
+    }
+
+    @Override
+    public List<TemplateV2SqlFunction> sqlFunctions() {
+        return delegate.sqlFunctions();
     }
 }

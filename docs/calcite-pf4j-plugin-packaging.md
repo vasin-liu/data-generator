@@ -145,12 +145,23 @@ public class MyTemplateV2Extension implements Pf4jTemplateV2RuntimeExtension {
                         .hostVersionRange("current")
                         .provider("my-team")
                         .capability(TemplateV2PluginCapability.source("custom_source"))
+                        .capability(TemplateV2PluginCapability.transform("sql"))
                         .build();
             }
 
             @Override
             public List<V2SourceFactory> sourceFactories() {
                 return List.of(new MySourceFactory());
+            }
+
+            @Override
+            public List<TemplateV2SqlFunction> sqlFunctions() {
+                return List.of(new TemplateV2SqlFunction(
+                        "V2_MY_WRAP",
+                        ReturnTypes.VARCHAR_NULLABLE,
+                        OperandTypes.ANY_ANY,
+                        context -> context.stringArgument(0) + context.stringArgument(1)
+                ));
             }
         };
     }
@@ -201,6 +212,7 @@ The repository now has:
 - runtime capability conflict validation
 - tests proving PF4J path uses separate plugin classloaders while the old ServiceLoader path does not provide true plugin isolation
 - tests proving PF4J plugins can contribute `SourceVO`, `TransformVO`, and `WriterVO` template subtypes into the shared parser path through plugin classloaders
+- tests proving PF4J plugins can contribute SQL UDFs into the built-in SQL transform path from an isolated plugin jar
 
 ## Repository Sample
 
@@ -214,10 +226,11 @@ This sample currently focuses on:
 - PF4J extension shape
 - repository descriptor contract
 - one minimal runtime sink contribution
+- one minimal SQL UDF contribution
 
 Template model subtype parsing is now validated through the PF4J path.
 
-What remains unproven in this sample line is runtime execution of plugin-provided source/transform/sink factories inside a real V2 run.
+Runtime execution of PF4J-provided source/transform/sink factories and SQL UDF contribution is now covered by focused integration tests.
 
 ## Related References
 

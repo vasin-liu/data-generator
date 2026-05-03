@@ -110,10 +110,10 @@ public class DirectoryAwareTemplateV2RuntimePluginProvider implements TemplateV2
         }
 
         @Override
-        public List<V2TransformFactory> transformFactories() {
+        public List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
             List<V2TransformFactory> factories = new ArrayList<>();
             for (TemplateV2RuntimePlugin plugin : plugins) {
-                factories.addAll(plugin.transformFactories());
+                factories.addAll(plugin.transformFactories(sqlFunctionRegistry));
             }
             return factories;
         }
@@ -125,6 +125,15 @@ public class DirectoryAwareTemplateV2RuntimePluginProvider implements TemplateV2
                 factories.addAll(plugin.sinkFactories());
             }
             return factories;
+        }
+
+        @Override
+        public List<TemplateV2SqlFunction> sqlFunctions() {
+            List<TemplateV2SqlFunction> functions = new ArrayList<>();
+            for (TemplateV2RuntimePlugin plugin : plugins) {
+                functions.addAll(plugin.sqlFunctions());
+            }
+            return functions;
         }
     }
 }

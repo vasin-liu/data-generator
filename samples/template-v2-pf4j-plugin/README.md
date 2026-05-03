@@ -10,13 +10,14 @@ This sample is intentionally small. It demonstrates:
 - the PF4J extension shape
 - the repository runtime plugin descriptor contract
 - one minimal `V2SinkFactory` contribution
+- one minimal SQL UDF contribution
 
 ## Important Current Boundary
 
 As of the current V2 host/runtime implementation:
 
 - PF4J external plugins are class-isolated at the plugin classloader level
-- PF4J external plugins can contribute runtime `source/transform/sink` factories
+- PF4J external plugins can contribute runtime `source/transform/sink` factories and SQL UDFs
 - the service-side YAML/JSON parser does **not** yet hot-load new `SourceVO` / `TransformVO` / `WriterVO` model subtypes from PF4J plugins
 
 That means this sample is currently best treated as:
@@ -47,14 +48,16 @@ samples/template-v2-pf4j-plugin
 
 ## What The Sample Contributes
 
-The sample contributes one sink capability:
+The sample contributes one sink capability and one SQL transform/UDF capability:
 
 - `SINK:sample_logging`
+- `TRANSFORM:sql`
 
 Its runtime behavior is intentionally simple:
 
 - accept writers whose `type` is `sample_logging`
 - print schema and row payloads to standard output
+- expose `V2_SAMPLE_WRAP(left, value)` as a SQL function that returns `left + value + left`
 
 This keeps the sample focused on the plugin contract itself rather than business behavior.
 
