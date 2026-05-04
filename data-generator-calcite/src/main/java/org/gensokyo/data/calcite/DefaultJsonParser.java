@@ -57,8 +57,12 @@ public class DefaultJsonParser implements JsonParser {
                         + selector);
             }
             current = selectSegment(current, segment, selector);
-            if (current == null || current.isNull()) {
-                return null;
+            if (current == null) {
+                throw new IllegalArgumentException("JSON source root selector [" + selector
+                        + "] did not match segment [" + segment + "]: " + source.getPath());
+            }
+            if (current.isNull()) {
+                return current;
             }
         }
         return current;

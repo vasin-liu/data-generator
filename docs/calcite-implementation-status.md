@@ -195,6 +195,7 @@ Current behavior:
 - supports `charset`, `root`, `maxRows`, and optional explicit `RowSchema`
 - supports a JSON object array as multiple rows and a single JSON object as one row
 - supports lightweight root selection with dot paths and array indexes, for example `payload.items` or `payload.items[0]`
+- rejects root selector misses and out-of-range array indexes with selector, segment, and source path diagnostics instead of silently producing empty rows
 - maps scalar root payloads to a single `value` column
 - serializes nested objects and arrays as JSON strings for the current flat row model
 - JSON parsing is behind the `JsonParser` contract, with `DefaultJsonParser` as the built-in Jackson 3 implementation and `JsonSourceFactory(JsonParser)` as the injection point
@@ -399,6 +400,7 @@ The following implementation milestones are complete:
 38. JSON V2 source now supports lightweight root selection before row materialization, covering nested object/array payloads without coupling the core source to a full JSONPath dependency yet.
 39. CSV V2 source diagnostics now reject invalid multi-character delimiters and unclosed quoted fields with source path and line number context.
 40. CSV V2 source row materialization now validates row-width mismatch by default through `strictColumns=true`, while keeping an explicit loose mode for imperfect files.
+41. JSON V2 source root selector diagnostics now fail fast on missing path segments and array index misses, avoiding silent empty datasets caused by bad source configuration.
 
 ## Immediate Next Work
 
@@ -414,7 +416,7 @@ Recommended implementation:
 
 - harden remaining CSV source options and diagnostics around schema/header mismatch
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
-- harden JSON source diagnostics and nested value strategy; root selection now has a lightweight built-in baseline
+- harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
 - harden CSV/JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
 
