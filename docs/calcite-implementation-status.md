@@ -170,6 +170,7 @@ Current behavior:
 - reads local CSV files from a template-provided `path`
 - supports `charset`, single-character `delimiter`, `header`, `maxRows`, and optional explicit `RowSchema`
 - supports quoted fields and escaped quotes in the lightweight built-in parser
+- rejects invalid multi-character delimiters and unclosed quoted fields with source path and line diagnostics
 - CSV parsing is behind the `CsvParser` contract, with `DefaultCsvParser` as the built-in implementation and `CsvSourceFactory(CsvParser)` as the injection point
 - is registered as a built-in default source factory while still fitting the runtime plugin source extension contract
 
@@ -395,6 +396,7 @@ The following implementation milestones are complete:
 36. PF4J external plugin jars can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()` into the built-in SQL transform path; descriptor-aware and composite plugin wrappers preserve registry-aware transform factories and UDF lists.
 37. PF4J plugin diagnostics now cover duplicate plugin-provided SQL UDF names with both plugin ids, null plugin-provider returns include the PF4J extension class in the failure chain, and locator start/load failures include the PF4J locator class plus failing phase.
 38. JSON V2 source now supports lightweight root selection before row materialization, covering nested object/array payloads without coupling the core source to a full JSONPath dependency yet.
+39. CSV V2 source diagnostics now reject invalid multi-character delimiters and unclosed quoted fields with source path and line number context.
 
 ## Immediate Next Work
 
@@ -408,7 +410,7 @@ Goal:
 
 Recommended implementation:
 
-- harden CSV source options and diagnostics
+- harden remaining CSV source options and diagnostics around schema/header mismatch and row-width mismatch
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON source diagnostics and nested value strategy; root selection now has a lightweight built-in baseline
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
