@@ -18,6 +18,7 @@ public class JsonSourceVO extends SourceVO {
 
     private String path;
     private String charset = StandardCharsets.UTF_8.name();
+    private String root;
     private Long maxRows;
     private RowSchema schema;
 }

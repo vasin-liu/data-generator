@@ -190,8 +190,9 @@ Implemented:
 Current behavior:
 
 - reads local JSON files from a template-provided `path`
-- supports `charset`, `maxRows`, and optional explicit `RowSchema`
+- supports `charset`, `root`, `maxRows`, and optional explicit `RowSchema`
 - supports a JSON object array as multiple rows and a single JSON object as one row
+- supports lightweight root selection with dot paths and array indexes, for example `payload.items` or `payload.items[0]`
 - maps scalar root payloads to a single `value` column
 - serializes nested objects and arrays as JSON strings for the current flat row model
 - JSON parsing is behind the `JsonParser` contract, with `DefaultJsonParser` as the built-in Jackson 3 implementation and `JsonSourceFactory(JsonParser)` as the injection point
@@ -200,7 +201,7 @@ Current behavior:
 Current limitation:
 
 - no streaming read mode yet
-- no JSONPath/root selector yet
+- no full JSONPath dependency yet; root selection is intentionally lightweight until nested/structured row semantics are finalized
 - nested objects are not expanded into structured row values yet; this remains deferred until the row model intentionally supports complex values
 
 ### 6. Transform capability currently implemented
@@ -393,6 +394,7 @@ The following implementation milestones are complete:
 35. CSV and JSON V2 file sinks are runnable through `WriterVO.type=CSV` / `JSON`, with file output adapters registered in both built-in and Spring runtime paths.
 36. PF4J external plugin jars can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()` into the built-in SQL transform path; descriptor-aware and composite plugin wrappers preserve registry-aware transform factories and UDF lists.
 37. PF4J plugin diagnostics now cover duplicate plugin-provided SQL UDF names with both plugin ids, null plugin-provider returns include the PF4J extension class in the failure chain, and locator start/load failures include the PF4J locator class plus failing phase.
+38. JSON V2 source now supports lightweight root selection before row materialization, covering nested object/array payloads without coupling the core source to a full JSONPath dependency yet.
 
 ## Immediate Next Work
 
@@ -408,7 +410,7 @@ Recommended implementation:
 
 - harden CSV source options and diagnostics
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
-- harden JSON source options and diagnostics, especially root selection and nested value strategy
+- harden JSON source diagnostics and nested value strategy; root selection now has a lightweight built-in baseline
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
 - harden CSV/JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
 

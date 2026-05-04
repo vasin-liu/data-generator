@@ -346,6 +346,36 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void readsJsonSourceFromRootSelector() throws Exception {
+        Path json = Files.createTempFile("template-v2-root-source", ".json");
+        Files.writeString(json, """
+                {
+                  "payload": {
+                    "people": [
+                      {"name":"alpha","score":10},
+                      {"name":"beta","score":20}
+                    ]
+                  }
+                }
+                """);
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(json.toString());
+        source.setRoot("payload.people");
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-json-root-source");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("SELECT name, score + 1 AS score_next FROM people WHERE score >= 20")));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("21", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
     void readsJsonSourceThroughInjectedParser() throws Exception {
         Path json = Files.createTempFile("template-v2-json-custom-parser", ".json");
         Files.writeString(json, "{}");
