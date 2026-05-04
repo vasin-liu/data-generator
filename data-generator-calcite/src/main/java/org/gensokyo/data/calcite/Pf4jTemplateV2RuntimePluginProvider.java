@@ -13,9 +13,9 @@ public class Pf4jTemplateV2RuntimePluginProvider implements TemplateV2RuntimePlu
 
     @Override
     public TemplateV2RuntimePlugin createPlugin(TemplateV2RuntimeContext context) {
-        extensionLocator.start();
+        startLocator();
         List<TemplateV2RuntimePlugin> plugins = new ArrayList<>();
-        for (Pf4jTemplateV2RuntimeExtension extension : extensionLocator.loadExtensions()) {
+        for (Pf4jTemplateV2RuntimeExtension extension : loadExtensions()) {
             TemplateV2RuntimePluginProvider provider = Objects.requireNonNull(extension.provider(),
                     "PF4J Template V2 extension [" + extension.getClass().getName()
                             + "] must return a plugin provider");
@@ -27,6 +27,24 @@ public class Pf4jTemplateV2RuntimePluginProvider implements TemplateV2RuntimePlu
         }
         TemplateV2RuntimePluginContractValidator.validate(plugins);
         return new DirectoryAwareTemplateV2RuntimePluginProvider.CompositeTemplateV2RuntimePlugin(plugins);
+    }
+
+    private void startLocator() {
+        try {
+            extensionLocator.start();
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Failed to start PF4J Template V2 extension locator ["
+                    + extensionLocator.getClass().getName() + "]", e);
+        }
+    }
+
+    private List<Pf4jTemplateV2RuntimeExtension> loadExtensions() {
+        try {
+            return extensionLocator.loadExtensions();
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Failed to load PF4J Template V2 extensions from locator ["
+                    + extensionLocator.getClass().getName() + "]", e);
+        }
     }
 
     @Override
