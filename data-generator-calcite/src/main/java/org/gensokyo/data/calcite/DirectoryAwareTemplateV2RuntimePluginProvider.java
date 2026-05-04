@@ -130,8 +130,19 @@ public class DirectoryAwareTemplateV2RuntimePluginProvider implements TemplateV2
         @Override
         public List<TemplateV2SqlFunction> sqlFunctions() {
             List<TemplateV2SqlFunction> functions = new ArrayList<>();
+            java.util.Map<String, String> owners = new java.util.LinkedHashMap<>();
             for (TemplateV2RuntimePlugin plugin : plugins) {
-                functions.addAll(plugin.sqlFunctions());
+                String pluginId = plugin.descriptor().id();
+                for (TemplateV2SqlFunction function : plugin.sqlFunctions()) {
+                    String normalizedName = TemplateV2SqlFunctionRegistry.normalize(function.name());
+                    String previousOwner = owners.putIfAbsent(normalizedName, pluginId);
+                    if (previousOwner != null) {
+                        throw new TemplateV2RuntimeRegistryBuildException("Duplicate Template V2 SQL function ["
+                                + function.name() + "] claimed by [" + previousOwner + "] and [" + pluginId + "]",
+                                new IllegalStateException("duplicate SQL function: " + function.name()));
+                    }
+                    functions.add(function);
+                }
             }
             return functions;
         }

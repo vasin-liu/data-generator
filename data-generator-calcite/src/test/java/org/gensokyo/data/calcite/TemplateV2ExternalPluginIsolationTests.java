@@ -90,6 +90,52 @@ class TemplateV2ExternalPluginIsolationTests {
         }
     }
 
+    @Test
+    void pf4jDuplicateSqlUdfDiagnosticsIncludePluginIds() throws Exception {
+        Path pluginDirectory = Files.createTempDirectory("v2-pf4j-duplicate-udf-plugins");
+        try {
+            createPf4jUdfPluginJar(pluginDirectory, "pf4jUdfA");
+            createPf4jUdfPluginJar(pluginDirectory, "pf4jUdfB");
+
+            try (Pf4jTemplateV2RuntimePluginProvider provider =
+                         new Pf4jTemplateV2RuntimePluginProvider(new PathBasedPf4jRuntimeExtensionLocator(List.of(pluginDirectory)))) {
+                TemplateV2RuntimeRegistryBuildException failure = Assertions.assertThrows(
+                        TemplateV2RuntimeRegistryBuildException.class,
+                        () -> new TemplateV2RuntimeRegistryFactory().fromProviders(List.of(provider), runtimeContext(pluginDirectory))
+                );
+
+                String diagnostics = diagnostics(failure);
+                Assertions.assertTrue(diagnostics.contains("Duplicate Template V2 SQL function [V2_PF4J_WRAP]"));
+                Assertions.assertTrue(diagnostics.contains("pf4jUdfA"));
+                Assertions.assertTrue(diagnostics.contains("pf4jUdfB"));
+            }
+        } finally {
+            deleteRecursively(pluginDirectory);
+        }
+    }
+
+    @Test
+    void pf4jNullProviderDiagnosticsIncludeExtensionClass() throws Exception {
+        Path pluginDirectory = Files.createTempDirectory("v2-pf4j-null-provider-plugin");
+        try {
+            createPf4jNullProviderPluginJar(pluginDirectory, "pf4jNullProvider");
+
+            try (Pf4jTemplateV2RuntimePluginProvider provider =
+                         new Pf4jTemplateV2RuntimePluginProvider(new PathBasedPf4jRuntimeExtensionLocator(List.of(pluginDirectory)))) {
+                TemplateV2RuntimeRegistryBuildException failure = Assertions.assertThrows(
+                        TemplateV2RuntimeRegistryBuildException.class,
+                        () -> new TemplateV2RuntimeRegistryFactory().fromProviders(List.of(provider), runtimeContext(pluginDirectory))
+                );
+
+                Assertions.assertTrue(failure.getMessage().contains("provider [org.gensokyo.data.calcite.Pf4jTemplateV2RuntimePluginProvider]"));
+                Assertions.assertTrue(failure.getCause().getMessage().contains("Pf4jNullProviderExtension"));
+                Assertions.assertTrue(failure.getCause().getMessage().contains("must return a plugin provider"));
+            }
+        } finally {
+            deleteRecursively(pluginDirectory);
+        }
+    }
+
     private TemplateV2RuntimeContext runtimeContext(Path pluginDirectory) {
         return new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
@@ -97,6 +143,16 @@ class TemplateV2ExternalPluginIsolationTests {
                 List.of(pluginDirectory),
                 getClass().getClassLoader()
         );
+    }
+
+    private String diagnostics(Throwable throwable) {
+        StringBuilder builder = new StringBuilder();
+        Throwable current = throwable;
+        while (current != null) {
+            builder.append(current.getMessage()).append('\n');
+            current = current.getCause();
+        }
+        return builder.toString();
     }
 
     private void createServiceLoaderPluginJar(Path pluginDirectory, String pluginId, String sourceKey) throws Exception {
@@ -178,6 +234,44 @@ class TemplateV2ExternalPluginIsolationTests {
         Path extensionsFile = classesDirectory.resolve("META-INF/extensions.idx");
         Files.createDirectories(extensionsFile.getParent());
         Files.writeString(extensionsFile, "generated." + pluginId + ".Pf4jUdfPluginExtension", StandardCharsets.UTF_8);
+
+        Path descriptorFile = classesDirectory.resolve("META-INF/data-generator/template-v2-plugin.properties");
+        Files.createDirectories(descriptorFile.getParent());
+        Files.writeString(descriptorFile,
+                """
+                plugin.id=%s
+                plugin.version=1.0.0
+                plugin.provider=test
+                plugin.host-version-range=current
+                plugin.capabilities=
+                """.formatted(pluginId), StandardCharsets.UTF_8);
+
+        Path pf4jPluginProperties = classesDirectory.resolve("plugin.properties");
+        Files.writeString(pf4jPluginProperties,
+                """
+                plugin.id=%s
+                plugin.version=1.0.0
+                plugin.provider=test
+                plugin.requires=1.0.0
+                """.formatted(pluginId), StandardCharsets.UTF_8);
+
+        packageJar(classesDirectory, pluginDirectory.resolve(pluginId + ".jar"));
+        deleteRecursively(workDirectory);
+        deleteRecursively(classesDirectory);
+    }
+
+    private void createPf4jNullProviderPluginJar(Path pluginDirectory, String pluginId) throws Exception {
+        Path workDirectory = Files.createTempDirectory(pluginId + "-src");
+        Path sourceFile = workDirectory.resolve("generated/" + pluginId + "/Pf4jNullProviderExtension.java");
+        Files.createDirectories(sourceFile.getParent());
+        Files.writeString(sourceFile, pf4jNullProviderPluginSource(pluginId), StandardCharsets.UTF_8);
+
+        Path classesDirectory = Files.createTempDirectory(pluginId + "-classes");
+        compile(sourceFile, classesDirectory);
+
+        Path extensionsFile = classesDirectory.resolve("META-INF/extensions.idx");
+        Files.createDirectories(extensionsFile.getParent());
+        Files.writeString(extensionsFile, "generated." + pluginId + ".Pf4jNullProviderExtension", StandardCharsets.UTF_8);
 
         Path descriptorFile = classesDirectory.resolve("META-INF/data-generator/template-v2-plugin.properties");
         Files.createDirectories(descriptorFile.getParent());
@@ -370,7 +464,6 @@ class TemplateV2ExternalPluginIsolationTests {
                                         .version("1.0.0")
                                         .hostVersionRange("current")
                                         .provider("test")
-                                        .capability(TemplateV2PluginCapability.transform("sql"))
                                         .build();
                             }
 
@@ -382,6 +475,24 @@ class TemplateV2ExternalPluginIsolationTests {
                                         context -> context.stringArgument(0) + "-" + context.stringArgument(1)));
                             }
                         };
+                    }
+                }
+                """.formatted(pluginId);
+    }
+
+    private String pf4jNullProviderPluginSource(String pluginId) {
+        return """
+                package generated.%1$s;
+
+                import org.gensokyo.data.calcite.Pf4jTemplateV2RuntimeExtension;
+                import org.gensokyo.data.calcite.TemplateV2RuntimePluginProvider;
+                import org.pf4j.Extension;
+
+                @Extension
+                public class Pf4jNullProviderExtension implements Pf4jTemplateV2RuntimeExtension {
+                    @Override
+                    public TemplateV2RuntimePluginProvider provider() {
+                        return null;
                     }
                 }
                 """.formatted(pluginId);

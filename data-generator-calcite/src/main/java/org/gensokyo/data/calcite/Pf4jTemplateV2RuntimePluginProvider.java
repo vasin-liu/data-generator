@@ -17,8 +17,12 @@ public class Pf4jTemplateV2RuntimePluginProvider implements TemplateV2RuntimePlu
         List<TemplateV2RuntimePlugin> plugins = new ArrayList<>();
         for (Pf4jTemplateV2RuntimeExtension extension : extensionLocator.loadExtensions()) {
             TemplateV2RuntimePluginProvider provider = Objects.requireNonNull(extension.provider(),
-                    "PF4J Template V2 extension must return a plugin provider");
-            TemplateV2RuntimePlugin plugin = provider.createPlugin(context);
+                    "PF4J Template V2 extension [" + extension.getClass().getName()
+                            + "] must return a plugin provider");
+            TemplateV2RuntimePlugin plugin = Objects.requireNonNull(provider.createPlugin(context),
+                    "PF4J Template V2 extension [" + extension.getClass().getName()
+                            + "] provider [" + provider.getClass().getName()
+                            + "] must return a runtime plugin");
             plugins.add(new DescriptorAwareTemplateV2RuntimePlugin(plugin, plugin.descriptor()));
         }
         TemplateV2RuntimePluginContractValidator.validate(plugins);

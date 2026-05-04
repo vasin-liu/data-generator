@@ -392,6 +392,7 @@ The following implementation milestones are complete:
 34. JSON V2 source is runnable through `JsonSourceVO` / `JsonRowSource` / `JsonSourceFactory`, supports object arrays and single objects, and keeps parsing replaceable through `JsonParser`.
 35. CSV and JSON V2 file sinks are runnable through `WriterVO.type=CSV` / `JSON`, with file output adapters registered in both built-in and Spring runtime paths.
 36. PF4J external plugin jars can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()` into the built-in SQL transform path; descriptor-aware and composite plugin wrappers preserve registry-aware transform factories and UDF lists.
+37. PF4J plugin diagnostics now cover duplicate plugin-provided SQL UDF names with both plugin ids, and null plugin-provider returns include the PF4J extension class in the failure chain.
 
 ## Immediate Next Work
 
@@ -419,8 +420,8 @@ Goal:
 
 Recommended implementation:
 
-- verify duplicate UDF diagnostics include plugin ids
 - add malformed PF4J jar/load-failure fixtures
+- add plugin descriptor mismatch or missing repository descriptor diagnostics if needed
 - add one focused fixture for plugin-provided CSV parser replacement only if parser customization becomes a concrete requirement
 
 ### Next 3. Concrete AI runtime bridge
