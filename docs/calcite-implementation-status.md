@@ -308,8 +308,11 @@ Implemented:
 Current behavior:
 
 - writes transformed rows to `WriterVO.target`
-- serializes rows as a JSON array using the current `RowJsonCodec`
-- supports `options.charset`
+- serializes rows through the current `RowJsonCodec`
+- supports `options.charset` and `options.mode`
+- `options.mode=ARRAY` writes the default JSON array output
+- `options.mode=NDJSON` writes one JSON object per line for line-oriented downstream consumers
+- rejects unsupported JSON sink modes with target path diagnostics
 - creates parent directories before writing
 - is registered as a built-in default sink factory and as a Spring runtime sink factory
 
@@ -402,6 +405,7 @@ The following implementation milestones are complete:
 39. CSV V2 source diagnostics now reject invalid multi-character delimiters and unclosed quoted fields with source path and line number context.
 40. CSV V2 source row materialization now validates row-width mismatch by default through `strictColumns=true`, while keeping an explicit loose mode for imperfect files.
 41. JSON V2 source root selector diagnostics now fail fast on missing path segments and array index misses, avoiding silent empty datasets caused by bad source configuration.
+42. JSON V2 sink now supports `options.mode=ARRAY|NDJSON` and rejects unsupported modes with target diagnostics.
 
 ## Immediate Next Work
 
@@ -419,7 +423,7 @@ Recommended implementation:
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- harden remaining JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
+- decide whether Excel source, concrete AI bridge, or additional external plugin fixtures should be next
 
 ### Next 2. Plugin diagnostics hardening
 
