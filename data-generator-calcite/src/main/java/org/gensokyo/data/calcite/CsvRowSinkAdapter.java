@@ -26,7 +26,7 @@ public class CsvRowSinkAdapter implements RowSink {
     public void write(RowSchema schema, List<Row> rows) {
         Path path = targetPath();
         Charset charset = Charset.forName(stringOption("charset", StandardCharsets.UTF_8.name()));
-        String delimiter = stringOption("delimiter", ",");
+        String delimiter = delimiter();
         boolean header = booleanOption("header", true);
         boolean append = booleanOption("append", false);
         List<String> columns = columns(schema, rows);
@@ -91,6 +91,18 @@ public class CsvRowSinkAdapter implements RowSink {
     private String stringOption(String name, String defaultValue) {
         Object value = writer.getOptions() == null ? null : writer.getOptions().get(name);
         return value == null ? defaultValue : value.toString();
+    }
+
+    private String delimiter() {
+        String delimiter = stringOption("delimiter", ",");
+        if (delimiter.isEmpty()) {
+            return ",";
+        }
+        if (delimiter.length() != 1) {
+            throw new IllegalArgumentException("CSV sink delimiter must be exactly one character: "
+                    + writer.getTarget());
+        }
+        return delimiter;
     }
 
     private boolean booleanOption(String name, boolean defaultValue) {

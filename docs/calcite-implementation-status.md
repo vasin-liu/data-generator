@@ -287,6 +287,7 @@ Current behavior:
 - writes transformed rows to `WriterVO.target`
 - uses output schema column order when available
 - supports `options.charset`, `options.delimiter`, `options.header`, and `options.append`
+- rejects invalid multi-character delimiters with target path diagnostics
 - creates parent directories before writing
 - is registered as a built-in default sink factory and as a Spring runtime sink factory
 
@@ -394,7 +395,7 @@ The following implementation milestones are complete:
 32. CSV V2 source is runnable through `CsvSourceVO` / `CsvRowSource` / `CsvSourceFactory` and can participate in SQL transforms with explicit schema.
 33. CSV parsing is now isolated behind `CsvParser`, keeping the built-in parser replaceable by repository or plugin-provided parser implementations.
 34. JSON V2 source is runnable through `JsonSourceVO` / `JsonRowSource` / `JsonSourceFactory`, supports object arrays and single objects, and keeps parsing replaceable through `JsonParser`.
-35. CSV and JSON V2 file sinks are runnable through `WriterVO.type=CSV` / `JSON`, with file output adapters registered in both built-in and Spring runtime paths.
+35. CSV and JSON V2 file sinks are runnable through `WriterVO.type=CSV` / `JSON`, with file output adapters registered in both built-in and Spring runtime paths; CSV sink delimiter diagnostics now align with CSV source.
 36. PF4J external plugin jars can now contribute SQL UDFs through `TemplateV2RuntimePlugin.sqlFunctions()` into the built-in SQL transform path; descriptor-aware and composite plugin wrappers preserve registry-aware transform factories and UDF lists.
 37. PF4J plugin diagnostics now cover duplicate plugin-provided SQL UDF names with both plugin ids, null plugin-provider returns include the PF4J extension class in the failure chain, and locator start/load failures include the PF4J locator class plus failing phase.
 38. JSON V2 source now supports lightweight root selection before row materialization, covering nested object/array payloads without coupling the core source to a full JSONPath dependency yet.
@@ -418,7 +419,7 @@ Recommended implementation:
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- harden CSV/JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
+- harden remaining JSON sink options and diagnostics, then decide whether Excel source or external UDF fixture should be next
 
 ### Next 2. Plugin diagnostics hardening
 
