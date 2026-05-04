@@ -20,6 +20,7 @@ public class CsvSourceVO extends SourceVO {
     private String charset = StandardCharsets.UTF_8.name();
     private String delimiter = ",";
     private boolean header = true;
+    private boolean strictColumns = true;
     private Long maxRows;
     private RowSchema schema;
 }

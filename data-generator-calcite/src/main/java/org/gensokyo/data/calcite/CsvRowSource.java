@@ -64,7 +64,7 @@ public class CsvRowSource implements RowSource {
             if (records.get(i).isEmpty()) {
                 continue;
             }
-            rows.add(toRow(columns, records.get(i)));
+            rows.add(toRow(columns, records.get(i), i + 1));
         }
         return rows;
     }
@@ -82,7 +82,12 @@ public class CsvRowSource implements RowSource {
         return generatedColumns(firstDataColumnCount(records));
     }
 
-    private Row toRow(List<String> columns, List<String> values) {
+    private Row toRow(List<String> columns, List<String> values, int lineNumber) {
+        if (source.isStrictColumns() && values.size() != columns.size()) {
+            throw new IllegalArgumentException("CSV source row width mismatch at line [" + lineNumber + "] for ["
+                    + source.getPath() + "]: expected [" + columns.size() + "] columns but got ["
+                    + values.size() + "]");
+        }
         Map<String, Object> row = new LinkedHashMap<>();
         for (int i = 0; i < columns.size(); i++) {
             row.put(columns.get(i), i < values.size() ? values.get(i) : null);
