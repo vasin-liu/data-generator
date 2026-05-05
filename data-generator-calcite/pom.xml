@@ -27,6 +27,16 @@
         </dependency>
 
         <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-constant</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-datetime</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
         </dependency>

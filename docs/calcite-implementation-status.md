@@ -24,10 +24,10 @@ Related references:
 
 As of the current implementation checkpoint:
 
-- Phase 1 minimum viable V2 is effectively complete except for additional iterator adapters beyond number
+- Phase 1 minimum viable V2 is complete for number/constant/datetime iterator-backed seeds
 - Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI model shape, source policy, and multi-sink failure policy
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions and the shared UDF registry
-- the largest remaining gaps are constant/datetime iterator adapters, Excel source/sink, concrete remote AI bridge, richer V1-to-V2 migration examples, and faker/SpEL compatibility UDF work
+- the largest remaining gaps are Excel source/sink, concrete remote AI bridge, richer V1-to-V2 migration examples, and faker/SpEL compatibility UDF work
 
 ### 1. Baseline and scope
 
@@ -130,11 +130,15 @@ Implemented:
 
 - `IteratorSourceVO`
 - `NumberIteratorVO` path through `IteratorRowSource`
+- `ConstantIteratorVO` path through `IteratorRowSource`
+- `DateTimeIteratorVO` path through `IteratorRowSource`
 
 Current status:
 
-- usable as V2 seed source
-- verified in runner-level tests
+- usable as V2 seed source for number, constant, and datetime iterators
+- constant iterator materializes finite repeated datasets; `repeat=-1` is rejected explicitly in V2 finite materialization
+- datetime iterator materializes inclusive `from -> to` ranges and can participate in SQL timestamp comparison
+- verified in runner-level and source-level tests
 
 #### Query source
 
@@ -420,8 +424,6 @@ Goal:
 
 Recommended implementation:
 
-- implement constant/inline source runtime coverage
-- implement datetime iterator source runtime coverage
 - harden remaining CSV source options and diagnostics around schema/header mismatch
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics

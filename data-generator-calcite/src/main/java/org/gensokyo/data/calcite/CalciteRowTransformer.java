@@ -363,12 +363,18 @@ public class CalciteRowTransformer {
     }
 
     private int compare(Row row, SqlBasicCall call) {
-        BigDecimal left = asBigDecimal(evaluate(row, call.operand(0)));
-        BigDecimal right = asBigDecimal(evaluate(row, call.operand(1)));
-        return left.compareTo(right);
+        Object left = evaluate(row, call.operand(0));
+        Object right = evaluate(row, call.operand(1));
+        if (isTemporal(left) || isTemporal(right)) {
+            return toLocalDateTime(left).compareTo(toLocalDateTime(right));
+        }
+        return asBigDecimal(left).compareTo(asBigDecimal(right));
     }
 
     private Object normalizeComparable(Object value) {
+        if (isTemporal(value)) {
+            return toLocalDateTime(value);
+        }
         if (value instanceof BigDecimal decimal) {
             return decimal.stripTrailingZeros();
         }
@@ -389,6 +395,48 @@ public class CalciteRowTransformer {
             return new BigDecimal(stringValue);
         }
         throw new IllegalArgumentException("Expected numeric value but got: " + value);
+    }
+
+    private boolean isTemporal(Object value) {
+        if (value instanceof LocalDateTime || value instanceof LocalDate || value instanceof Date) {
+            return true;
+        }
+        String className = value == null ? "" : value.getClass().getName();
+        return className.equals("org.apache.calcite.util.TimestampString")
+                || className.equals("org.apache.calcite.util.DateString");
+    }
+
+    private LocalDateTime toLocalDateTime(Object value) {
+        if (value instanceof LocalDateTime localDateTime) {
+            return localDateTime;
+        }
+        if (value instanceof LocalDate localDate) {
+            return localDate.atStartOfDay();
+        }
+        if (value instanceof java.sql.Timestamp timestamp) {
+            return timestamp.toLocalDateTime();
+        }
+        if (value instanceof java.sql.Date sqlDate) {
+            return sqlDate.toLocalDate().atStartOfDay();
+        }
+        if (value instanceof Date date) {
+            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        }
+        if (value instanceof CharSequence text) {
+            String normalized = text.toString().trim().replace(' ', 'T');
+            if (normalized.length() == 10) {
+                return LocalDate.parse(normalized).atStartOfDay();
+            }
+            return LocalDateTime.parse(normalized);
+        }
+        if (value != null) {
+            String className = value.getClass().getName();
+            if (className.equals("org.apache.calcite.util.TimestampString")
+                    || className.equals("org.apache.calcite.util.DateString")) {
+                return toLocalDateTime(value.toString());
+            }
+        }
+        throw new IllegalArgumentException("Expected datetime value but got: " + value);
     }
 
     private LocalDate toLocalDate(Object value) {

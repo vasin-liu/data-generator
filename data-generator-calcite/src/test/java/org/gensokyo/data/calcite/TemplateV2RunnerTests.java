@@ -1,6 +1,8 @@
 package org.gensokyo.data.calcite;
 
 import org.gensokyo.data.iterator.NumberIteratorVO;
+import org.gensokyo.data.iterator.ConstantIteratorVO;
+import org.gensokyo.data.iterator.DateTimeIteratorVO;
 import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.JsonSourceVO;
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -59,6 +63,48 @@ class TemplateV2RunnerTests {
 
         Assertions.assertEquals(1, result.getRows().size());
         Assertions.assertEquals("4", result.getRows().get(0).getString("value"));
+    }
+
+    @Test
+    void runsConstantIteratorSourceThroughSqlTransform() {
+        ConstantIteratorVO iterator = new ConstantIteratorVO();
+        iterator.setDataset(List.of("alpha", "beta"));
+        iterator.setRepeat(2);
+        IteratorSourceVO source = new IteratorSourceVO();
+        source.setIterator(iterator);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-constant-iterator");
+        template.setSources(Map.of("seed", source));
+        template.setTransformers(List.of(sql("SELECT value FROM seed WHERE value = 'beta'")));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().getFirst().getString("value"));
+    }
+
+    @Test
+    void runsDatetimeIteratorSourceThroughSqlTransform() {
+        DateTimeIteratorVO iterator = new DateTimeIteratorVO();
+        iterator.setFrom(LocalDateTime.parse("2026-05-01T00:00:00"));
+        iterator.setTo(LocalDateTime.parse("2026-05-03T00:00:00"));
+        iterator.setStep(1);
+        iterator.setUnit(ChronoUnit.DAYS);
+        IteratorSourceVO source = new IteratorSourceVO();
+        source.setIterator(iterator);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-datetime-iterator");
+        template.setSources(Map.of("seed", source));
+        template.setTransformers(List.of(sql("SELECT value FROM seed WHERE value >= TIMESTAMP '2026-05-02 00:00:00'")));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("2026-05-02T00:00", result.getRows().getFirst().getString("value"));
     }
 
     @Test

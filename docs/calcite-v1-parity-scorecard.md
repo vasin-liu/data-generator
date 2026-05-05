@@ -48,8 +48,8 @@ The remaining V1 parity gaps are concentrated in:
 | V1 Feature | V2 Status | Current V2 Replacement | Gap / Next Action |
 |---|---|---|---|
 | Number iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | none for baseline |
-| Constant iterator | Missing | should become `IteratorSourceVO` or `InlineDataSourceVO` backed `RowSource` | implement P0 adapter |
-| Datetime iterator | Missing | should become `IteratorSourceVO` backed `RowSource` | implement P0 adapter |
+| Constant iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | finite repeated datasets are supported; `repeat=-1` remains intentionally unsupported in finite V2 materialization |
+| Datetime iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | inclusive range materialization and SQL timestamp comparison are covered |
 | Database iterator | Covered | `QuerySourceVO` / `QueryRowSource` | old iterator-specific pagination semantics need migration examples |
 | CSV iterator/reader | Covered | `CsvSourceVO` / `CsvRowSource` | multiline quoted fields not supported |
 | JSON iterator/reader | Covered | `JsonSourceVO` / `JsonRowSource` | nested object expansion intentionally deferred |
@@ -126,8 +126,6 @@ The remaining V1 parity gaps are concentrated in:
 
 P0:
 
-- implement constant iterator / inline source adapter
-- implement datetime iterator source adapter
 - add representative V1-to-V2 examples for mapping, condition, convert, and simple SpEL
 - create a first faker/UDF compatibility batch for the most common V1 expressions
 
@@ -146,9 +144,8 @@ P2:
 
 ## Immediate Recommendation
 
-The next implementation slice should close the P0 source parity gaps before adding more sink formats:
+The next implementation slice should shift from iterator parity to migration usability:
 
-1. Add constant/inline source runtime coverage.
-2. Add datetime iterator source runtime coverage.
-3. Add V1-to-V2 migration examples for row-local transformation templates.
-4. Start a small faker/UDF compatibility catalog only for expressions observed in repository templates or business examples.
+1. Add V1-to-V2 migration examples for row-local transformation templates.
+2. Start a small faker/UDF compatibility catalog only for expressions observed in repository templates or business examples.
+3. Decide whether inline rows deserve a dedicated V2 source type or should remain an iterator-backed compatibility shape.

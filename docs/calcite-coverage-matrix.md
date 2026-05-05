@@ -206,7 +206,7 @@ Success criteria:
 
 Current gap:
 
-- number iterator is covered; constant and datetime iterator adapters still need V2 source coverage
+- number, constant, and datetime iterators are now covered; the remaining iterator-side gap is file-backed Excel coverage plus compatibility-only iterator control flow
 
 ### Phase 2 - Practical source/sink coverage
 
