@@ -14,6 +14,7 @@ Related references:
 - `docs/calcite-refactor-plan.md`
 - `docs/calcite-coverage-matrix.md`
 - `docs/calcite-v1-v2-mapping.md`
+- `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-skeleton-implementation-plan.md`
 - `docs/calcite-templatev2-model-design.md`
 
@@ -26,7 +27,7 @@ As of the current implementation checkpoint:
 - Phase 1 minimum viable V2 is effectively complete except for additional iterator adapters beyond number
 - Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI model shape, source policy, and multi-sink failure policy
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions and the shared UDF registry
-- the largest remaining gaps are file-backed sink adapters, Excel source, concrete remote AI bridge, richer V1-to-V2 migration examples, and parity scorecard work
+- the largest remaining gaps are constant/datetime iterator adapters, Excel source/sink, concrete remote AI bridge, richer V1-to-V2 migration examples, and faker/SpEL compatibility UDF work
 
 ### 1. Baseline and scope
 
@@ -419,6 +420,8 @@ Goal:
 
 Recommended implementation:
 
+- implement constant/inline source runtime coverage
+- implement datetime iterator source runtime coverage
 - harden remaining CSV source options and diagnostics around schema/header mismatch
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
@@ -458,9 +461,10 @@ Goal:
 
 Recommended implementation:
 
+- keep `docs/calcite-v1-parity-scorecard.md` current as each V1 capability lands in V2
 - add representative V2 examples for mapping, condition, convert, SpEL-expression subset, JDBC source, Kafka sink, and Elasticsearch sink
 - document unsupported direct migrations for log/pause/shared/procedural JavaScript paths
-- create a parity scorecard that tracks V1 stage/reader/writer families by `covered`, `partial`, `compatibility-only`, or `not started`
+- add a small faker/UDF compatibility catalog driven by observed V1 templates and business examples
 
 ## Deferred Work
 
