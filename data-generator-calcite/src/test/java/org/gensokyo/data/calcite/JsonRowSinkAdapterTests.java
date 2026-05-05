@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,8 +71,15 @@ class JsonRowSinkAdapterTests {
 
     private List<Row> rows() {
         return List.of(
-                new Row(Map.of("name", "alpha", "score", 10)),
-                new Row(Map.of("name", "beta", "score", 20))
+                row("alpha", 10),
+                row("beta", 20)
         );
+    }
+
+    private Row row(String name, int score) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("name", name);
+        values.put("score", score);
+        return new Row(values);
     }
 }
