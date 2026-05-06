@@ -231,9 +231,9 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals(2, multi.getSourceOrder().size());
         Assertions.assertEquals(2, multi.getAliases().size());
         Assertions.assertEquals(3, multi.getProjectionSkeleton().size());
-        Assertions.assertEquals("s0.id AS iterator_id", multi.getProjectionSkeleton().get(0));
-        Assertions.assertEquals("s1.id AS customer_lookup_id", multi.getProjectionSkeleton().get(1));
-        Assertions.assertEquals("s1.name AS customer_lookup_name", multi.getProjectionSkeleton().get(2));
+        Assertions.assertEquals("s0.id AS id", multi.getProjectionSkeleton().get(0));
+        Assertions.assertEquals("s1.id AS customer_id", multi.getProjectionSkeleton().get(1));
+        Assertions.assertEquals("s1.name AS customer_name", multi.getProjectionSkeleton().get(2));
         Assertions.assertEquals(1, multi.getJoinHints().size());
         Assertions.assertEquals(2, multi.getSourceMetadata().size());
         Assertions.assertNotNull(multi.getPreflight());
@@ -241,7 +241,7 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(multi.getPreflight().isCalciteValid());
         Assertions.assertTrue(multi.getTransform().getSql().contains("JOIN"));
         Assertions.assertTrue(multi.getTransform().getSql().startsWith(
-                "SELECT s0.id AS iterator_id, s1.id AS customer_lookup_id, s1.name AS customer_lookup_name FROM"));
+                "SELECT s0.id AS id, s1.id AS customer_id, s1.name AS customer_name FROM"));
         Assertions.assertTrue(multi.getJoinHints().get(0).contains("Replace ON 1 = 1"));
     }
 
@@ -393,9 +393,9 @@ class TemplateControllerQuerySourceMigrationTests {
                 .findFirst()
                 .orElseThrow();
         Assertions.assertTrue(lookup.getTransform().getSql().contains("LEFT JOIN"));
-        Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.id AS iterator_id"));
-        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.id AS customer_lookup_id"));
-        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.name AS customer_lookup_name"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.id AS id"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.id AS customer_id"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.name AS customer_name"));
         Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertEquals(1, lookup.getJoinHints().size());
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("expects params [customerId]"));
@@ -452,9 +452,9 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertInstanceOf(SqlTransformVO.class, migrated.getData().getTransform());
         SqlTransformVO transform = (SqlTransformVO) migrated.getData().getTransform();
         Assertions.assertTrue(transform.getSql().contains("JOIN"));
-        Assertions.assertTrue(transform.getSql().contains("s0.id AS iterator_id"));
-        Assertions.assertTrue(transform.getSql().contains("s1.id AS customer_lookup_id"));
-        Assertions.assertTrue(transform.getSql().contains("s1.name AS customer_lookup_name"));
+        Assertions.assertTrue(transform.getSql().contains("s0.id AS id"));
+        Assertions.assertTrue(transform.getSql().contains("s1.id AS customer_id"));
+        Assertions.assertTrue(transform.getSql().contains("s1.name AS customer_name"));
         Assertions.assertTrue(transform.getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertFalse(transform.getSql().contains("ON 1 = 1"));
     }

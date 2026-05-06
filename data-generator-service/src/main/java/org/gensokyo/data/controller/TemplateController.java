@@ -1156,7 +1156,7 @@ public class TemplateController {
                                          String sqlAlias,
                                          String column,
                                          Map<String, Integer> aliasCounters) {
-        String sourceToken = sanitizedProjectionToken(sourceName);
+        String sourceToken = preferredProjectionSourceToken(sourceName, sqlAlias);
         if (StrKit.isBlank(sourceToken)) {
             sourceToken = sanitizedProjectionToken(sqlAlias);
         }
@@ -1164,9 +1164,54 @@ public class TemplateController {
         if (StrKit.isBlank(columnToken)) {
             columnToken = "column";
         }
-        String base = sourceToken + "_" + columnToken;
-        Integer count = aliasCounters.merge(base, 1, Integer::sum);
-        return count == 1 ? base : base + "_" + count;
+        List<String> candidates = projectionAliasCandidates(sourceToken, columnToken);
+        for (String candidate : candidates) {
+            Integer count = aliasCounters.get(candidate);
+            if (count == null) {
+                aliasCounters.put(candidate, 1);
+                return candidate;
+            }
+        }
+        String fallback = sourceToken + "_" + columnToken;
+        Integer count = aliasCounters.merge(fallback, 1, Integer::sum);
+        return fallback + "_" + count;
+    }
+
+    private List<String> projectionAliasCandidates(String sourceToken, String columnToken) {
+        List<String> candidates = new ArrayList<>();
+        if (!"iterator".equals(sourceToken)) {
+            addCandidate(candidates, sourceToken + "_" + columnToken);
+        }
+        addCandidate(candidates, columnToken);
+        addCandidate(candidates, sourceToken + "_" + columnToken);
+        return candidates;
+    }
+
+    private String preferredProjectionSourceToken(String sourceName, String sqlAlias) {
+        String sourceToken = normalizedProjectionStem(sourceName);
+        if (StrKit.isBlank(sourceToken)) {
+            sourceToken = normalizedProjectionStem(sqlAlias);
+        }
+        return sourceToken;
+    }
+
+    private String normalizedProjectionStem(String value) {
+        String token = sanitizedProjectionToken(value);
+        if (StrKit.isBlank(token)) {
+            return token;
+        }
+        String[] parts = token.split("_");
+        List<String> kept = new ArrayList<>();
+        for (String part : parts) {
+            if (StrKit.isBlank(part) || SOURCE_NAME_STOP_WORDS.contains(part)) {
+                continue;
+            }
+            kept.add(part);
+        }
+        if (kept.isEmpty()) {
+            return token;
+        }
+        return String.join("_", kept);
     }
 
     private String sanitizedProjectionToken(String value) {

@@ -234,6 +234,7 @@ Current gap:
 - multi-source candidate SQL now emits explicit projection aliases when source schemas can be resolved, reducing duplicate-column ambiguity during V2 authoring and sink mapping
 - structural join hints now cover common business scope columns, simple composite business keys, and basic date-window predicates; more complex temporal logic still needs explicit author review
 - parameterized lookup guidance now explicitly points users toward relational source rewrites instead of implying that per-row param execution is already a first-class V2 join runtime
+- candidate projection aliases are now closer to business-facing field names, though final naming still benefits from explicit author review in larger templates
 
 ### Phase 3 - Transformation migration coverage
 

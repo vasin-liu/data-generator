@@ -428,6 +428,7 @@ The following implementation milestones are complete:
 53. Structural join inference now treats entity keys such as `id`, `code`, `type`, and `version` as composable business keys, so candidate SQL can emit composite joins like `customer_id + customer_type + tenant_id` when the source schemas support them.
 54. Multi-source migration candidates now also infer simple date-window predicates, allowing rule/lookup sources with `start_time`/`end_time` style schemas to produce preflight-valid conditions such as `event_time >= start_time AND event_time <= end_time`.
 55. Parameterized lookup candidates now emit more explicit relational rewrite guidance: when a join condition can be inferred, the analysis API tells authors to remove per-row params from the source definition and reshape the lookup into a relational source that joins on the inferred business condition.
+56. Candidate SQL projection aliases are now less mechanical: source names such as `customer_lookup` are normalized toward business stems like `customer`, while primary iterator columns can keep simple names such as `id` when no collision exists.
 
 ## Immediate Next Work
 
@@ -454,7 +455,7 @@ Goal:
 
 Recommended implementation:
 
-- continue beyond the new param-name/schema-based join inference for business-named projection refinement and source-level authoring suggestions that can eventually feed an automatic rewrite path
+- continue beyond the new param-name/schema-based join inference for source-level authoring suggestions that can eventually feed an automatic rewrite path
 - add better aliasing and projection guidance for multi-query-source migration, especially where projected business names should differ from raw source names
 - keep validating candidate transforms with Calcite preflight before persistence
 
