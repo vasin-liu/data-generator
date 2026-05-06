@@ -753,12 +753,14 @@ public class TemplateController {
                             + parameterNames(draft, source.getSourceName())
                             + ". Inferred join "
                             + inferred.predicate()
-                            + "; if the source query is still row-parameterized, widen it into a relational lookup before finalizing.");
+                            + ". Rewrite it as a relational lookup by removing per-row params from the source definition and keeping business filters that can join on "
+                            + inferred.predicate()
+                            + ".");
                     continue;
                 }
                 joinHints.add("Source '" + source.getSourceName() + "' expects params "
                         + parameterNames(draft, source.getSourceName())
-                        + ". Replace ON 1 = 1 with a business join that derives these values from upstream rows.");
+                        + ". Replace ON 1 = 1 with a business join that derives these values from upstream rows, then move row-parameterized filters into a relational lookup shape.");
             } else {
                 joinHints.add("Replace ON 1 = 1 with a business lookup condition between "
                         + aliases.get(sourceOrder.get(i - 1)) + " and " + aliases.get(sourceOrder.get(i)));

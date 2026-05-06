@@ -400,6 +400,8 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals(1, lookup.getJoinHints().size());
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("expects params [customerId]"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Inferred join s0.customer_id = s1.id"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Rewrite it as a relational lookup"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("removing per-row params"));
         Assertions.assertNotNull(lookup.getPreflight());
         Assertions.assertTrue(lookup.getPreflight().isNormalized());
         Assertions.assertTrue(lookup.getPreflight().isCalciteValid());
