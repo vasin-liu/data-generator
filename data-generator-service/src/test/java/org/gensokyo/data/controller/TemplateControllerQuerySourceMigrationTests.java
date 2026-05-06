@@ -504,6 +504,73 @@ class TemplateControllerQuerySourceMigrationTests {
     }
 
     @Test
+    void infersCompositeStructuralJoinForLookupCandidate() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_composite");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_composite");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                create table t_order_composite(
+                    id bigint,
+                    customer_id bigint,
+                    customer_type varchar(32),
+                    tenant_id bigint
+                )
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                create table t_customer_composite(
+                    id bigint,
+                    type varchar(32),
+                    tenant_id bigint,
+                    name varchar(64)
+                )
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                insert into t_order_composite(id, customer_id, customer_type, tenant_id)
+                values (1, 10, 'vip', 101)
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                insert into t_customer_composite(id, type, tenant_id, name)
+                values (10, 'vip', 101, 'alice')
+                """);
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91014L);
+        entity.setName("multi-source-composite-scope");
+        entity.setContentYaml("""
+                name: multi-source-composite-scope
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id, customer_type, tenant_id from t_order_composite
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, type, tenant_id, name from t_customer_composite
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO multi = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-join-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.customer_id = s1.id"));
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.customer_type = s1.type"));
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.tenant_id = s1.tenant_id"));
+        Assertions.assertTrue(multi.getJoinHints().get(0).contains("s0.customer_id = s1.id"));
+        Assertions.assertNotNull(multi.getPreflight());
+        Assertions.assertTrue(multi.getPreflight().isCalciteValid());
+    }
+
+    @Test
     void appliesAnalyzedTransformCandidateAndPersistsDraft() {
         TemplatePO entity = new TemplatePO();
         entity.setId(91005L);

@@ -87,6 +87,14 @@ public class TemplateController {
             "city_code",
             "province_code"
     );
+    private static final List<String> STRUCTURAL_ENTITY_KEYS = List.of(
+            "id",
+            "code",
+            "no",
+            "key",
+            "type",
+            "version"
+    );
     private static final Set<String> SOURCE_NAME_STOP_WORDS = Set.of(
             "lookup",
             "reader",
@@ -911,10 +919,9 @@ public class TemplateController {
 
     private List<String> currentStructuralKeys(List<String> currentColumns) {
         List<String> keys = new ArrayList<>();
-        addCurrentStructuralKey(keys, currentColumns, "id");
-        addCurrentStructuralKey(keys, currentColumns, "code");
-        addCurrentStructuralKey(keys, currentColumns, "no");
-        addCurrentStructuralKey(keys, currentColumns, "key");
+        for (String key : STRUCTURAL_ENTITY_KEYS) {
+            addCurrentStructuralKey(keys, currentColumns, key);
+        }
         return keys;
     }
 
