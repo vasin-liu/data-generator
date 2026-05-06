@@ -67,7 +67,7 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 | V1 Reader | V2 Target | Mapping Type | Notes |
 |---|---|---|---|
 | Constant reader | inline or source table | Direct | can become a logical source or SQL literal substitute |
-| JDBC reader | `QuerySourceVO` | Adapted | final direction is to converge with `DatabaseIterator` into one query-backed source family |
+| JDBC reader | `QuerySourceVO` | Adapted | final direction is to converge with `DatabaseIterator` into one query-backed source family; multiple JDBC readers under one V1 field now migrate into distinct QuerySource entries instead of overwriting |
 | CSV reader | named source | Adapted | natural V2 source |
 | Excel reader | named source | Adapted | natural V2 source |
 | JSON reader | named source | Adapted | natural V2 source |
@@ -214,11 +214,55 @@ transform:
 
 | V1 Expression Style | V2 Direction |
 |---|---|
-| `#faker.snowflake.next` | `faker_snowflake()` |
-| `#faker.common.text(a,b)` | `faker_text(a, b)` |
-| `#faker.expression("#{date.past ...}")` | `faker_date_past(...)` |
-| `#faker.datetime.format(x,'yyyy-MM-dd')` | repository UDF such as `V2_FORMAT_DATE('%Y-%m-%d', x)` or a future faker-specific UDF |
+| `#faker.snowflake.next` | `FAKER_SNOWFLAKE()` |
+| `#faker.common.text(a,b)` | `FAKER_TEXT(a, b)` |
+| `#faker.number.numberBetween(a,b)` | `FAKER_NUMBER_BETWEEN(a, b)` |
+| `#faker.phoneNumber.cellPhone` | `FAKER_PHONE_CELL()` |
+| `#faker.expression("#{date.past ...}")` | `FAKER_DATE_PAST(...)` |
+| `#faker.datetime.now()` | `FAKER_DATETIME_NOW()` |
+| `#faker.datetime.seconds()` | `FAKER_DATETIME_SECONDS()` |
+| `#faker.datetime.minusDays(n)` | `FAKER_DATETIME_MINUS_DAYS(n)` |
+| `#faker.datetime.minusDays(x,n)` | `FAKER_DATETIME_MINUS_DAYS(x, n)` |
+| `#faker.datetime.minusHours(n)` | `FAKER_DATETIME_MINUS_HOURS(n)` |
+| `#faker.datetime.minusHours(x,n)` | `FAKER_DATETIME_MINUS_HOURS(x, n)` |
+| `#faker.datetime.minusMinutes(n)` | `FAKER_DATETIME_MINUS_MINUTES(n)` |
+| `#faker.datetime.minusMinutes(x,n)` | `FAKER_DATETIME_MINUS_MINUTES(x, n)` |
+| `#faker.datetime.minusSeconds(n)` | `FAKER_DATETIME_MINUS_SECONDS(n)` |
+| `#faker.datetime.minusSeconds(x,n)` | `FAKER_DATETIME_MINUS_SECONDS(x, n)` |
+| `#faker.datetime.plusDays(n)` | `FAKER_DATETIME_PLUS_DAYS(n)` |
+| `#faker.datetime.plusDays(x,n)` | `FAKER_DATETIME_PLUS_DAYS(x, n)` |
+| `#faker.datetime.plusHours(n)` | `FAKER_DATETIME_PLUS_HOURS(n)` |
+| `#faker.datetime.plusHours(x,n)` | `FAKER_DATETIME_PLUS_HOURS(x, n)` |
+| `#faker.datetime.plusMinutes(n)` | `FAKER_DATETIME_PLUS_MINUTES(n)` |
+| `#faker.datetime.plusMinutes(x,n)` | `FAKER_DATETIME_PLUS_MINUTES(x, n)` |
+| `#faker.datetime.plusSeconds(n)` | `FAKER_DATETIME_PLUS_SECONDS(n)` |
+| `#faker.datetime.plusSeconds(x,n)` | `FAKER_DATETIME_PLUS_SECONDS(x, n)` |
+| `#faker.datetime.parse(x)` | `FAKER_DATETIME_PARSE(x)` |
+| `#faker.datetime.beforeDays(min,max)` | `FAKER_DATETIME_BEFORE_DAYS(min, max)` |
+| `#faker.datetime.beforeDays(x,min,max)` | `FAKER_DATETIME_BEFORE_DAYS(x, min, max)` |
+| `#faker.datetime.beforeHours(min,max)` | `FAKER_DATETIME_BEFORE_HOURS(min, max)` |
+| `#faker.datetime.beforeHours(x,min,max)` | `FAKER_DATETIME_BEFORE_HOURS(x, min, max)` |
+| `#faker.datetime.beforeMinutes(min,max)` | `FAKER_DATETIME_BEFORE_MINUTES(min, max)` |
+| `#faker.datetime.beforeMinutes(x,min,max)` | `FAKER_DATETIME_BEFORE_MINUTES(x, min, max)` |
+| `#faker.datetime.beforeSeconds(min,max)` | `FAKER_DATETIME_BEFORE_SECONDS(min, max)` |
+| `#faker.datetime.beforeSeconds(x,min,max)` | `FAKER_DATETIME_BEFORE_SECONDS(x, min, max)` |
+| `#faker.datetime.afterDays(min,max)` | `FAKER_DATETIME_AFTER_DAYS(min, max)` |
+| `#faker.datetime.afterDays(x,min,max)` | `FAKER_DATETIME_AFTER_DAYS(x, min, max)` |
+| `#faker.datetime.afterHours(min,max)` | `FAKER_DATETIME_AFTER_HOURS(min, max)` |
+| `#faker.datetime.afterHours(x,min,max)` | `FAKER_DATETIME_AFTER_HOURS(x, min, max)` |
+| `#faker.datetime.afterMinutes(min,max)` | `FAKER_DATETIME_AFTER_MINUTES(min, max)` |
+| `#faker.datetime.afterMinutes(x,min,max)` | `FAKER_DATETIME_AFTER_MINUTES(x, min, max)` |
+| `#faker.datetime.afterSeconds(min,max)` | `FAKER_DATETIME_AFTER_SECONDS(min, max)` |
+| `#faker.datetime.afterSeconds(x,min,max)` | `FAKER_DATETIME_AFTER_SECONDS(x, min, max)` |
+| `#faker.datetime.format(x)` | `FAKER_DATETIME_FORMAT(x)` |
+| `#faker.datetime.format(x,'yyyy-MM-dd')` | `FAKER_DATETIME_FORMAT(x, 'yyyy-MM-dd')` or `V2_FORMAT_DATE(...)` when the value is already a date |
+| `#faker.vehicleCN.plateProvince(x)` | `FAKER_VEHICLE_CN_PLATE_PROVINCE(x)` |
+| `#faker.snowflake.viid(deviceId, baseType, passTime, semanticType)` | `FAKER_SNOWFLAKE_VIID(deviceId, baseType, passTime, semanticType)` |
 | custom SpEL utility chains | targeted repository-local UDFs |
+
+Real migration examples:
+
+- see `docs/calcite-v1-v2-migration-examples.md` for repository-backed V1-to-V2 rewrites covering query source convergence, faker UDF migration, mapping/condition rewrites, and multi-sink fan-out
 
 Current V2 UDF status:
 
@@ -231,37 +275,39 @@ Current V2 UDF status:
 
 ### Wave 1 - Direct migration patterns
 
-- [ ] map `MAPPING` to `CASE WHEN`
-- [ ] map `CONDITION` to `CASE WHEN / WHERE`
-- [ ] map `CONVERT` to `CAST / UDF`
-- [ ] map simple dependent `SCRIPT` stages to SQL projection
+- [x] map `MAPPING` to `CASE WHEN`
+- [x] map `CONDITION` to `CASE WHEN / WHERE`
+- [x] map `CONVERT` to `CAST / UDF`
+- [x] map simple dependent `SCRIPT` stages to SQL projection
 
 Expected coverage:
 
 - a large fraction of current row-local transformation templates
+- repository-backed migration examples now exist in `docs/calcite-v1-v2-migration-examples.md`
 
 ### Wave 2 - Source normalization
 
-- [ ] map number/constant/datetime iterators to `RowSource`
-- [ ] map JDBC/file readers to named sources
+- [x] map number/constant/datetime iterators to `RowSource`
+- [x] map JDBC/file readers to named sources
 - [x] converge `DatabaseIterator` and `JdbcReader` into one query-backed source family at the model/mapping level
-- [ ] complete runtime migration entrypoints so new V2 authoring only exposes `QuerySourceVO`
-- [ ] preserve `SelectStrategy` as source policy
-- [ ] introduce `AiSourceVO`
-- [ ] define explicit schema rules for first-phase V2 templates
+- [x] complete runtime migration entrypoints so new V2 authoring only exposes `QuerySourceVO`
+- [x] preserve `SelectStrategy` as source policy
+- [x] introduce `AiSourceVO`
+- [x] define explicit schema rules for first-phase V2 templates
 
 Expected coverage:
 
 - removal of most `READ + SELECT` configuration chains from V2 authoring
+- exact V1 selection semantics are still partial even though the source policy model/runtime is in place
 
 ### Wave 3 - Sink reuse
 
-- [ ] map console writer first
-- [ ] map DB writers
-- [ ] map Kafka writer
-- [ ] map Elasticsearch writer
-- [ ] add multi-sink fan-out
-- [ ] add configurable multi-sink failure policy
+- [x] map console writer first
+- [x] map DB writers
+- [x] map Kafka writer
+- [x] map Elasticsearch writer
+- [x] add multi-sink fan-out
+- [x] add configurable multi-sink failure policy
 
 Expected coverage:
 
@@ -269,13 +315,14 @@ Expected coverage:
 
 ### Wave 4 - Script reduction
 
-- [ ] map the common SpEL expression subset to SQL/UDFs
+- [x] map the common SpEL expression subset to SQL/UDFs
 - [ ] identify which JavaScript usage remains compatibility-only
-- [ ] publish a script-to-UDF migration guide
+- [x] publish a script-to-UDF migration guide
 
 Expected coverage:
 
 - SQL becomes the preferred transformation language for new templates
+- remaining work is the long-tail SpEL/faker catalog, not the first migration path
 
 ### Wave 5 - Compatibility stabilization
 

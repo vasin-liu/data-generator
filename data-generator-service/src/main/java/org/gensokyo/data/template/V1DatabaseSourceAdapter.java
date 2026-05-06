@@ -3,6 +3,7 @@ package org.gensokyo.data.template;
 import org.gensokyo.data.iterator.DatabaseIteratorVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.vo.stage.ReadStageVO;
+import org.gensokyo.data.model.vo.stage.SelectStageVO;
 import org.gensokyo.data.reader.JdbcReaderVO;
 
 public final class V1DatabaseSourceAdapter {
@@ -23,7 +24,7 @@ public final class V1DatabaseSourceAdapter {
         return source;
     }
 
-    public static QuerySourceVO fromJdbcReader(ReadStageVO stage, JdbcReaderVO reader) {
+    public static QuerySourceVO fromJdbcReader(ReadStageVO stage, SelectStageVO selectStage, JdbcReaderVO reader) {
         if (reader == null) {
             return null;
         }
@@ -33,6 +34,11 @@ public final class V1DatabaseSourceAdapter {
         if (stage != null && stage.getParams() != null) {
             source.setParams(stage.getParams());
         }
+        source.setPolicy(V1SourcePolicyAdapter.fromStages(stage, selectStage));
         return source;
+    }
+
+    public static QuerySourceVO fromJdbcReader(ReadStageVO stage, JdbcReaderVO reader) {
+        return fromJdbcReader(stage, null, reader);
     }
 }

@@ -1,5 +1,8 @@
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
+import org.gensokyo.data.calcite.AiRuntimeBridge;
+import org.gensokyo.data.calcite.TemplateV2RuntimeContext;
 import org.gensokyo.data.calcite.Pf4jRuntimeExtensionLocator;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.TemplateV2RuntimePluginProvider;
@@ -60,6 +63,18 @@ class Pf4jRuntimeConfigTests {
                 .run(context -> Assertions.assertEquals(
                         Pf4jTemplateV2RuntimePluginProvider.class,
                         AopUtils.getTargetClass(context.getBean("externalTemplateV2RuntimePluginProvider", TemplateV2RuntimePluginProvider.class))));
+    }
+
+    @Test
+    void wiresAiRuntimeBridgeIntoTemplateV2RuntimeContext() {
+        contextRunner
+                .withBean(DataGeneratorProperties.class, DataGeneratorProperties::new)
+                .run(context -> {
+                    Assertions.assertInstanceOf(OllamaAiRuntimeBridge.class, context.getBean(AiRuntimeBridge.class));
+                    TemplateV2RuntimeContext runtimeContext = context.getBean(TemplateV2RuntimeContext.class);
+                    Assertions.assertNotNull(runtimeContext.runtimeServices().aiRuntimeBridge());
+                    Assertions.assertInstanceOf(OllamaAiRuntimeBridge.class, runtimeContext.runtimeServices().aiRuntimeBridge());
+                });
     }
 
     private static final class EmptyObjectProvider<T> implements ObjectProvider<T> {

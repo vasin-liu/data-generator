@@ -24,20 +24,18 @@ V2 now covers the main declarative path:
 
 The remaining V1 parity gaps are concentrated in:
 
-- additional iterator adapters: constant and datetime
-- Excel source and sink
 - database-writer dialect-specific behavior for MySQL/Postgres/ClickHouse
 - broad SpEL/faker compatibility UDF catalog
 - JavaScript/procedural script migration policy
 - V1 orchestration features: pause, log, shared state, generator scheduling, iterator branching
-- migration examples and business-scenario parity validation
+- business-scenario parity validation beyond the first migration-example batch
 
 ## Template And Runtime
 
 | V1 Feature | V2 Status | Evidence | Gap / Decision |
 |---|---|---|---|
 | Template root with iterator, generator, fields, output | Partial | `TemplateV2VO` uses `sources`, `transformers`, `sinks`; service routing supports V1/V2 | `GeneratorVO` scheduling/batching is not a V2 runtime contract yet |
-| Field dependency graph | Covered | SQL projection and Calcite validation replace row-local DAG dependency | Need representative V1-to-V2 examples |
+| Field dependency graph | Covered | SQL projection and Calcite validation replace row-local DAG dependency | first repository-backed migration examples are documented; continue adding business-family coverage |
 | Multiple fields / transformations | Covered | ordered `transformers` chain exists | no arbitrary transformer DAG by design |
 | Multiple outputs | Covered | sequential multi-sink fan-out exists | no parallel sink execution yet |
 | Sink failure policy | Covered | `FAIL_FAST` / `CONTINUE_ON_ERROR` | partial-success reporting remains thin |
@@ -50,21 +48,21 @@ The remaining V1 parity gaps are concentrated in:
 | Number iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | none for baseline |
 | Constant iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | finite repeated datasets are supported; `repeat=-1` remains intentionally unsupported in finite V2 materialization |
 | Datetime iterator | Covered | `IteratorSourceVO` + `IteratorRowSource` | inclusive range materialization and SQL timestamp comparison are covered |
-| Database iterator | Covered | `QuerySourceVO` / `QueryRowSource` | old iterator-specific pagination semantics need migration examples |
+| Database iterator | Covered | `QuerySourceVO` / `QueryRowSource` | old iterator-specific pagination semantics still need broader business validation |
 | CSV iterator/reader | Covered | `CsvSourceVO` / `CsvRowSource` | multiline quoted fields not supported |
 | JSON iterator/reader | Covered | `JsonSourceVO` / `JsonRowSource` | nested object expansion intentionally deferred |
-| Excel iterator/reader | Missing | future `ExcelSourceVO` / `ExcelRowSource` | implement P1 source |
+| Excel iterator/reader | Covered | `ExcelSourceVO` / `ExcelRowSource` | sheet row-window semantics and SQL path are covered; business examples can be added later |
 | JDBC reader | Covered | `QuerySourceVO` / `QueryRowSource` | dynamic datasource endpoint resolution exists |
 | Constant reader | Partial | SQL literals or future inline source | no first-class inline table source runtime yet |
-| SpEL reader | Partial | query params support lightweight SpEL; SQL/UDF path exists | broad SpEL migration map missing |
-| AI reader | Partial | `AiSourceVO`, deterministic local providers, `AiRuntimeBridge` contract | concrete remote bridge not implemented |
+| SpEL reader | Partial | query params support lightweight SpEL; SQL/UDF path exists | first migration examples are in place; long-tail expression coverage remains |
+| AI reader | Covered | `AiSourceVO`, deterministic local providers, service-wired Ollama `AiRuntimeBridge` | additional providers, richer parser catalogs, and business examples can be added incrementally |
 
 ## Source Policies And Selection
 
 | V1 Feature | V2 Status | Current V2 Replacement | Gap / Next Action |
 |---|---|---|---|
-| Reader select equal/weight | Partial | `SourcePolicyVO` source materialization policy | weight/equal reader-pool semantics are not fully modeled |
-| Value select repeat random/order | Partial | `SourcePolicyVO` ordered/random selection and `limit` | exact V1 once/multiple/repeat semantics need scorecard examples |
+| Reader select equal/weight | Partial | `SourcePolicyVO` source materialization policy | migration analysis now warns explicitly when multi-reader `EQUAL` / `WEIGHT` dispatch semantics are only approximated; exact parity is still not implemented |
+| Value select repeat random/order | Partial | `SourcePolicyVO` ordered/random selection and `limit` | migration analysis now warns explicitly for `ONCE_*` / `MULTIPLE_ORDER`; exact V1 once/multiple/repeat consumptive semantics are still not implemented |
 | Iterator choose/otherwise | Compatibility-only | orchestration layer | do not force into SQL transform |
 | Iterator pause | Compatibility-only | orchestration layer | keep V1 unless V2 orchestration is introduced |
 
@@ -74,12 +72,12 @@ The remaining V1 parity gaps are concentrated in:
 |---|---|---|---|
 | READ stage | Covered | named `sources` | richer reader options still handled per source type |
 | SELECT stage | Partial | source policy | exact V1 selector semantics incomplete |
-| SCRIPT plain | Covered | SQL literal/projection or query param constant | migration examples needed |
-| SCRIPT SpEL | Partial | SQL functions + plugin/repository UDFs | faker/SpEL UDF catalog and guide missing |
+| SCRIPT plain | Covered | SQL literal/projection or query param constant | first migration examples are documented |
+| SCRIPT SpEL | Partial | SQL functions + plugin/repository UDFs, including first-pass `FAKER_*` compatibility functions | first migration guide/examples are in place; long-tail expression coverage still missing |
 | SCRIPT JavaScript | Compatibility-only | none | keep V1 or introduce explicit script plugin later |
-| MAPPING stage | Covered | `CASE WHEN`, SQL expressions | examples needed |
-| CONDITION stage | Covered | `CASE WHEN` / `WHERE` | examples needed |
-| CONVERT stage | Covered | `CAST`, standard functions, V2 UDFs | add more V1 converter examples |
+| MAPPING stage | Covered | `CASE WHEN`, SQL expressions | first real migration examples are documented |
+| CONDITION stage | Covered | `CASE WHEN` / `WHERE` | first real migration examples are documented |
+| CONVERT stage | Covered | `CAST`, standard functions, V2 UDFs | continue adding converter-heavy business examples only as needed |
 | LOG stage | Compatibility-only | runtime diagnostics | do not model as SQL transform |
 | PAUSE stage | Compatibility-only | orchestration | do not model as SQL transform |
 | SHARED stage | Compatibility-only | orchestration/shared state | requires separate runtime design if needed |
@@ -89,10 +87,10 @@ The remaining V1 parity gaps are concentrated in:
 | V1 Feature | V2 Status | Current V2 Replacement | Gap / Next Action |
 |---|---|---|---|
 | Plain script | Covered | SQL constants / expressions | none for baseline |
-| Simple SpEL expression | Partial | SQL + `TemplateV2SqlFunctionRegistry` | define compatibility function list |
-| Faker date formatting | Partial | `V2_FORMAT_DATE`, date UDFs | broader faker UDF catalog missing |
-| Faker snowflake/text/common providers | Missing | future repository/plugin UDFs | implement common faker UDF batch |
-| Custom project SpEL utilities | Partial | plugin UDFs | migration guide missing |
+| Simple SpEL expression | Partial | SQL + `TemplateV2SqlFunctionRegistry` | compatibility list exists for the first high-frequency batch; long-tail expressions remain |
+| Faker date formatting | Partial | `V2_FORMAT_DATE` plus `FAKER_DATETIME_FORMAT` / related datetime helpers, including default-format and relative-time variants | broader faker UDF catalog still has long-tail gaps outside the high-frequency datetime path |
+| Faker snowflake/text/common providers | Partial | `FAKER_SNOWFLAKE`, `FAKER_TEXT`, `FAKER_NUMBER_BETWEEN`, `FAKER_PHONE_CELL`, `FAKER_DATE_PAST`, and expanded datetime helpers across `before/after/plus/minus` day-hour-minute-second variants | add provider-specific and business-specific long-tail functions only as needed |
+| Custom project SpEL utilities | Partial | plugin UDFs | migration guide exists for the common path; project-specific utility chains still need case-by-case migration |
 | JavaScript scripts | Compatibility-only | none | keep V1 unless a script transform plugin is explicitly required |
 | Plugin-provided UDF | Covered | `TemplateV2RuntimePlugin.sqlFunctions()` and PF4J fixtures | none for baseline |
 
@@ -109,14 +107,14 @@ The remaining V1 parity gaps are concentrated in:
 | Elasticsearch | Covered | `ElasticsearchSinkFactory` / `ElasticsearchRowSinkAdapter` | verify business examples |
 | CSV | Covered | `CsvSinkFactory`, delimiter/header/append diagnostics | old `CsvWriterVO.custom` compatibility bridge not implemented |
 | JSON | Covered | `JsonSinkFactory`, `ARRAY` / `NDJSON` modes | nested object fidelity deferred to row model decision |
-| Excel | Missing | none | implement P1/P2 `ExcelSinkFactory` |
+| Excel | Covered | `ExcelSinkFactory` / `ExcelRowSinkAdapter` | baseline sheet/header write path is covered; append/multi-sheet extensions can be added later |
 
 ## Extension And Plugin Parity
 
 | V1/Target Capability | V2 Status | Evidence | Gap / Next Action |
 |---|---|---|---|
 | Built-in extension points | Covered | source/transform/sink factories and UDF registry | none |
-| Spring-provided runtime services | Covered | JDBC/Kafka/Elasticsearch/AI bridge providers | concrete AI bridge pending |
+| Spring-provided runtime services | Covered | JDBC/Kafka/Elasticsearch plus service-wired Ollama AI bridge providers | expand only when another provider or plugin boundary becomes necessary |
 | External plugin class isolation | Covered | PF4J integration tests | malformed jar / descriptor policy can be hardened further |
 | Hot reload / refresh | Covered | refreshable registry and PF4J refresh tests | in-flight refresh policy documented and tested |
 | Plugin-provided source/transform/sink | Covered | PF4J runtime execution tests | sample plugin remains minimal |
@@ -126,15 +124,13 @@ The remaining V1 parity gaps are concentrated in:
 
 P0:
 
-- add representative V1-to-V2 examples for mapping, condition, convert, and simple SpEL
-- create a first faker/UDF compatibility batch for the most common V1 expressions
+- extend business-family migration validation beyond the first documented V1-to-V2 example batch
+- create the next faker/UDF compatibility batch only for newly observed high-value V1 expressions
 
 P1:
 
-- implement Excel source
-- implement Excel sink
-- add concrete remote AI runtime bridge behind `AiRuntimeBridge`
 - clarify source policy coverage for V1 value select strategies with examples
+- add migration examples that exercise the new AI source bridge in realistic V2 templates
 
 P2:
 
@@ -146,6 +142,6 @@ P2:
 
 The next implementation slice should shift from iterator parity to migration usability:
 
-1. Add V1-to-V2 migration examples for row-local transformation templates.
-2. Start a small faker/UDF compatibility catalog only for expressions observed in repository templates or business examples.
+1. Expand migration examples from the current first batch into more business-template families, especially AI source and selection-heavy templates.
+2. Continue the faker/UDF catalog only for expressions observed in repository templates or business examples beyond the current covered batch.
 3. Decide whether inline rows deserve a dedicated V2 source type or should remain an iterator-backed compatibility shape.

@@ -67,6 +67,8 @@ public final class Const {
         String CSV = "CSV";
 
         String JSON = "JSON";
+
+        String EXCEL = "EXCEL";
     }
 
     public interface ReaderSelectStrategyType {

@@ -4,6 +4,8 @@ import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.iterator.ConstantIteratorVO;
 import org.gensokyo.data.iterator.DateTimeIteratorVO;
 import org.gensokyo.data.model.v2.CsvSourceVO;
+import org.gensokyo.data.model.v2.ExcelSheetSourceVO;
+import org.gensokyo.data.model.v2.ExcelSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.Row;
@@ -18,6 +20,7 @@ import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.type.ReturnTypes;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,8 +28,10 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -245,6 +250,157 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsFirstFakerCompatibilityFunctionBatch() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-faker-functions");
+        template.setSources(Map.of("date_seed", new DateSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT FAKER_SNOWFLAKE() AS snowflake_id,
+                       FAKER_TEXT(5, 8) AS random_text,
+                       FAKER_NUMBER_BETWEEN(40, 60) AS ranged_number,
+                       FAKER_PHONE_CELL() AS phone_cell,
+                       FAKER_DATE_PAST(1, 'yyyy-MM-dd HH:mm:ss') AS past_time,
+                       FAKER_DATETIME_NOW() AS now_text,
+                       FAKER_DATETIME_SECONDS() AS epoch_seconds,
+                       FAKER_DATETIME_MINUS_DAYS(event_time, 1) AS minus_days,
+                       FAKER_DATETIME_MINUS_HOURS(event_time, 2) AS minus_hours,
+                       FAKER_DATETIME_PLUS_HOURS(event_time, 3) AS plus_hours,
+                       FAKER_DATETIME_FORMAT(event_time, 'yyMMddHHmmss') AS compact_time
+                FROM date_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(dateRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Row row = result.getRows().getFirst();
+        Assertions.assertTrue(Long.parseLong(row.getString("snowflake_id")) > 0);
+        Assertions.assertFalse(row.getString("random_text").isBlank());
+        int rangedNumber = Integer.parseInt(row.getString("ranged_number"));
+        Assertions.assertTrue(rangedNumber >= 40 && rangedNumber < 60);
+        Assertions.assertTrue(row.getString("phone_cell").matches("1\\d{10}"));
+        Assertions.assertEquals(19, row.getString("past_time").length());
+        Assertions.assertEquals(19, row.getString("now_text").length());
+        Assertions.assertTrue(Long.parseLong(row.getString("epoch_seconds")) > 0);
+        Assertions.assertEquals("2026-05-01 10:20:30", row.getString("minus_days"));
+        Assertions.assertEquals("2026-05-02 08:20:30", row.getString("minus_hours"));
+        Assertions.assertEquals("2026-05-02 13:20:30", row.getString("plus_hours"));
+        Assertions.assertEquals("260502102030", row.getString("compact_time"));
+    }
+
+    @Test
+    void supportsFakerDatetimeMigrationPathForLegacyCompactStrings() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-faker-legacy-datetime");
+        template.setSources(Map.of("legacy_time_seed", new LegacyCompactTimeSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT raw_time,
+                       FAKER_DATETIME_MINUS_HOURS(raw_time, 2) AS minus_hours,
+                       FAKER_DATETIME_PLUS_HOURS(raw_time, 1) AS plus_hours,
+                       FAKER_DATETIME_FORMAT(raw_time, 'yyyy-MM-dd HH:mm:ss') AS normalized_time
+                FROM legacy_time_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(legacyTimeRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Row row = result.getRows().getFirst();
+        Assertions.assertEquals("2026-05-02 08:20:30", row.getString("minus_hours"));
+        Assertions.assertEquals("2026-05-02 11:20:30", row.getString("plus_hours"));
+        Assertions.assertEquals("2026-05-02 10:20:30", row.getString("normalized_time"));
+    }
+
+    @Test
+    void supportsSecondFakerCompatibilityFunctionBatch() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-faker-second-batch");
+        template.setSources(Map.of("vehicle_seed", new VehicleSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT plate,
+                       pass_time,
+                       FAKER_DATETIME_PARSE(pass_time) AS parsed_time,
+                       FAKER_DATETIME_AFTER_MINUTES(pass_time, 30, 120) AS delayed_time,
+                       FAKER_VEHICLE_CN_PLATE_PROVINCE(plate) AS province_code,
+                       FAKER_SNOWFLAKE_VIID(device_id, '02', compact_time, '02') AS viid_code
+                FROM vehicle_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(vehicleRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Row row = result.getRows().getFirst();
+        Assertions.assertEquals("2026-05-02 10:20:30", row.getString("parsed_time"));
+        LocalDateTime delayed = LocalDateTime.parse(row.getString("delayed_time").replace(' ', 'T'));
+        LocalDateTime base = LocalDateTime.parse("2026-05-02T10:20:30");
+        long delayMinutes = java.time.Duration.between(base, delayed).toMinutes();
+        Assertions.assertTrue(delayMinutes >= 30 && delayMinutes < 120);
+        Assertions.assertEquals("5", row.getString("province_code"));
+        String viidCode = row.getString("viid_code");
+        Assertions.assertTrue(viidCode.startsWith("44010000001102260502102030"));
+        Assertions.assertTrue(viidCode.matches("44010000001102260502102030\\d+02\\d+"));
+    }
+
+    @Test
+    void supportsThirdFakerDatetimeCompatibilityBatch() {
+        LocalDateTime before = LocalDateTime.now().withNano(0);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-faker-third-batch");
+        template.setSources(Map.of("date_seed", new DateSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT FAKER_DATETIME_MINUS_DAYS(3) AS minus_days_now,
+                       FAKER_DATETIME_MINUS_HOURS(5) AS minus_hours_now,
+                       FAKER_DATETIME_PLUS_HOURS(7) AS plus_hours_now,
+                       FAKER_DATETIME_PLUS_DAYS(event_time, 2) AS plus_days,
+                       FAKER_DATETIME_MINUS_MINUTES(event_time, 15) AS minus_minutes,
+                       FAKER_DATETIME_PLUS_SECONDS(event_time, 45) AS plus_seconds,
+                       FAKER_DATETIME_FORMAT(event_time) AS default_formatted,
+                       FAKER_DATETIME_BEFORE_MINUTES(event_time, 10, 20) AS before_minutes,
+                       FAKER_DATETIME_AFTER_HOURS(event_time, 2, 5) AS after_hours,
+                       FAKER_DATETIME_AFTER_MINUTES(30, 60) AS after_minutes_now
+                FROM date_seed
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(dateRegistry()).run(template);
+        LocalDateTime after = LocalDateTime.now().withNano(0);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Row row = result.getRows().getFirst();
+        Assertions.assertEquals("2026-05-04 10:20:30", row.getString("plus_days"));
+        Assertions.assertEquals("2026-05-02 10:05:30", row.getString("minus_minutes"));
+        Assertions.assertEquals("2026-05-02 10:21:15", row.getString("plus_seconds"));
+        Assertions.assertEquals("2026-05-02 10:20:30", row.getString("default_formatted"));
+
+        LocalDateTime minusDaysNow = LocalDateTime.parse(row.getString("minus_days_now").replace(' ', 'T'));
+        Assertions.assertFalse(minusDaysNow.isBefore(before.minusDays(3)));
+        Assertions.assertFalse(minusDaysNow.isAfter(after.minusDays(3)));
+
+        LocalDateTime minusHoursNow = LocalDateTime.parse(row.getString("minus_hours_now").replace(' ', 'T'));
+        Assertions.assertFalse(minusHoursNow.isBefore(before.minusHours(5)));
+        Assertions.assertFalse(minusHoursNow.isAfter(after.minusHours(5)));
+
+        LocalDateTime plusHoursNow = LocalDateTime.parse(row.getString("plus_hours_now").replace(' ', 'T'));
+        Assertions.assertFalse(plusHoursNow.isBefore(before.plusHours(7)));
+        Assertions.assertFalse(plusHoursNow.isAfter(after.plusHours(7)));
+
+        LocalDateTime base = LocalDateTime.parse("2026-05-02T10:20:30");
+        LocalDateTime beforeMinutes = LocalDateTime.parse(row.getString("before_minutes").replace(' ', 'T'));
+        long beforeMinutesDiff = java.time.Duration.between(beforeMinutes, base).toMinutes();
+        Assertions.assertTrue(beforeMinutesDiff >= 10 && beforeMinutesDiff < 20);
+
+        LocalDateTime afterHours = LocalDateTime.parse(row.getString("after_hours").replace(' ', 'T'));
+        long afterHoursDiff = java.time.Duration.between(base, afterHours).toHours();
+        Assertions.assertTrue(afterHoursDiff >= 2 && afterHoursDiff < 5);
+
+        LocalDateTime afterMinutesNow = LocalDateTime.parse(row.getString("after_minutes_now").replace(' ', 'T'));
+        long nowMinutesDiff = java.time.Duration.between(before, afterMinutesNow).toMinutes();
+        Assertions.assertTrue(nowMinutesDiff >= 30 && nowMinutesDiff <= 60);
+    }
+
+    @Test
     void supportsCustomSqlFunctionsThroughRegistry() {
         TemplateV2SqlFunctionRegistry registry = TemplateV2SqlFunctionRegistry.builtIn()
                 .with(new TemplateV2SqlFunction("V2_WRAP", ReturnTypes.VARCHAR_NULLABLE, OperandTypes.ANY,
@@ -448,6 +604,44 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void readsExcelSourceThroughSqlTransform() throws Exception {
+        Path excel = Files.createTempFile("template-v2-source", ".xlsx");
+        writeSheet(excel, "Sheet1", List.of(
+                excelRow("name", "score"),
+                excelRow("alpha", "10"),
+                excelRow("beta", "20")
+        ));
+
+        ExcelSheetSourceVO sheet = new ExcelSheetSourceVO("Sheet1");
+        sheet.setStartRow(1);
+        sheet.setEndRow(3);
+
+        ExcelSourceVO source = new ExcelSourceVO();
+        source.setPath(excel.toString());
+        source.setSheets(List.of(sheet));
+        source.setSchema(schema(
+                new org.gensokyo.data.model.v2.ColumnDef("name", "VARCHAR", false),
+                new org.gensokyo.data.model.v2.ColumnDef("score", "BIGINT", false)
+        ));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-excel-source");
+        template.setSources(Map.of("people", source));
+        template.setTransformers(List.of(sql("""
+                SELECT name, score + 1 AS score_next
+                FROM people
+                WHERE score >= 20
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().getFirst().getString("name"));
+        Assertions.assertEquals("21", result.getRows().getFirst().getString("score_next"));
+    }
+
+    @Test
     void writesCsvSinkFromTransformedRows() throws Exception {
         Path csv = Files.createTempFile("template-v2-sink", ".csv");
         WriterVO writer = new WriterVO();
@@ -491,6 +685,37 @@ class TemplateV2RunnerTests {
         Assertions.assertTrue(content.contains("\"shifted\":11"));
         Assertions.assertTrue(content.startsWith("["));
         Assertions.assertTrue(content.endsWith("]"));
+    }
+
+    @Test
+    void writesExcelSinkFromTransformedRows() throws Exception {
+        Path excel = Files.createTempFile("template-v2-sink", ".xlsx");
+        WriterVO writer = new WriterVO();
+        writer.setType("EXCEL");
+        writer.setTarget(excel.toString());
+        writer.setOptions(Map.of("name", "Output"));
+
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-excel-sink");
+        template.setSources(Map.of("seed", numberSource(1, 2, 1)));
+        template.setTransformers(List.of(sql("SELECT value, value + 10 AS shifted FROM seed")));
+        template.setSinks(List.of(sink));
+
+        new TemplateV2Runner(defaultRegistry()).run(template);
+
+        try (var input = Files.newInputStream(excel); var workbook = new XSSFWorkbook(input)) {
+            var sheet = workbook.getSheet("Output");
+            Assertions.assertNotNull(sheet);
+            Assertions.assertEquals("value", sheet.getRow(0).getCell(0).getStringCellValue());
+            Assertions.assertEquals("shifted", sheet.getRow(0).getCell(1).getStringCellValue());
+            Assertions.assertEquals(1, (int) sheet.getRow(1).getCell(0).getNumericCellValue());
+            Assertions.assertEquals(11, (int) sheet.getRow(1).getCell(1).getNumericCellValue());
+            Assertions.assertEquals(2, (int) sheet.getRow(2).getCell(0).getNumericCellValue());
+            Assertions.assertEquals(12, (int) sheet.getRow(2).getCell(1).getNumericCellValue());
+        }
     }
 
     @Test
@@ -735,10 +960,45 @@ class TemplateV2RunnerTests {
 
     private TemplateV2RuntimeRegistry defaultRegistry() {
         return new TemplateV2RuntimeRegistry(
-                List.of(new IteratorSourceFactory(), new CsvSourceFactory(), new JsonSourceFactory()),
+                List.of(new IteratorSourceFactory(), new CsvSourceFactory(), new ExcelSourceFactory(), new JsonSourceFactory()),
                 List.of(new SqlTransformFactory()),
-                List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new JsonSinkFactory())
+                List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new ExcelSinkFactory(), new JsonSinkFactory())
         );
+    }
+
+    private void writeSheet(Path excel, String sheetName, List<Map<String, String>> rows) throws Exception {
+        XSSFWorkbook workbook;
+        if (Files.exists(excel) && Files.size(excel) > 0) {
+            try (var input = Files.newInputStream(excel)) {
+                workbook = new XSSFWorkbook(input);
+            }
+        } else {
+            workbook = new XSSFWorkbook();
+        }
+        try (workbook) {
+            var existing = workbook.getSheet(sheetName);
+            if (existing != null) {
+                workbook.removeSheetAt(workbook.getSheetIndex(existing));
+            }
+            var sheet = workbook.createSheet(sheetName);
+            for (int i = 0; i < rows.size(); i++) {
+                var row = sheet.createRow(i);
+                int cellIndex = 0;
+                for (String value : rows.get(i).values()) {
+                    row.createCell(cellIndex++).setCellValue(value);
+                }
+            }
+            try (OutputStream output = Files.newOutputStream(excel)) {
+                workbook.write(output);
+            }
+        }
+    }
+
+    private Map<String, String> excelRow(String first, String second) {
+        Map<String, String> row = new LinkedHashMap<>();
+        row.put("c1", first);
+        row.put("c2", second);
+        return row;
     }
 
     private TemplateV2RuntimeRegistry jdbcRegistry(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -761,6 +1021,22 @@ class TemplateV2RunnerTests {
     private TemplateV2RuntimeRegistry dateRegistry() {
         return new TemplateV2RuntimeRegistry(
                 List.of(new DateSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
+    private TemplateV2RuntimeRegistry legacyTimeRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new LegacyCompactTimeSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
+    private TemplateV2RuntimeRegistry vehicleRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new VehicleSourceFactory()),
                 List.of(new SqlTransformFactory()),
                 List.of(new ConsoleSinkFactory())
         );
@@ -794,6 +1070,18 @@ class TemplateV2RunnerTests {
     private static final class DateSourceVO extends org.gensokyo.data.model.v2.SourceVO {
         private DateSourceVO() {
             setType("DATE_SOURCE");
+        }
+    }
+
+    private static final class LegacyCompactTimeSourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private LegacyCompactTimeSourceVO() {
+            setType("LEGACY_TIME_SOURCE");
+        }
+    }
+
+    private static final class VehicleSourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private VehicleSourceVO() {
+            setType("VEHICLE_SOURCE");
         }
     }
 
@@ -892,7 +1180,8 @@ class TemplateV2RunnerTests {
                     RowSchema schema = new RowSchema();
                     schema.setColumns(List.of(
                             new org.gensokyo.data.model.v2.ColumnDef("event_date", "DATE", false),
-                            new org.gensokyo.data.model.v2.ColumnDef("base_date", "DATE", false)
+                            new org.gensokyo.data.model.v2.ColumnDef("base_date", "DATE", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("event_time", "VARCHAR", false)
                     ));
                     return schema;
                 }
@@ -901,7 +1190,78 @@ class TemplateV2RunnerTests {
                 public List<Row> rows() {
                     return List.of(new Row(Map.of(
                             "event_date", java.time.LocalDate.parse("2026-05-02"),
-                            "base_date", java.time.LocalDate.parse("2026-05-01")
+                            "base_date", java.time.LocalDate.parse("2026-05-01"),
+                            "event_time", "2026-05-02 10:20:30"
+                    )));
+                }
+            };
+        }
+    }
+
+    private static final class LegacyCompactTimeSourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof LegacyCompactTimeSourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("raw_time", "VARCHAR", false)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(new Row(Map.of("raw_time", "260502102030")));
+                }
+            };
+        }
+    }
+
+    private static final class VehicleSourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof VehicleSourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("plate", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("pass_time", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("compact_time", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("device_id", "VARCHAR", false)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(new Row(Map.of(
+                            "plate", "\u7ca4A12345",
+                            "pass_time", "2026-05-02 10:20:30",
+                            "compact_time", "260502102030",
+                            "device_id", "440100000011"
                     )));
                 }
             };

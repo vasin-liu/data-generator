@@ -5,7 +5,9 @@
  */
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.cache.Templates;
+import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.CsvSourceFactory;
 import org.gensokyo.data.calcite.CsvSinkFactory;
@@ -43,7 +45,9 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -181,7 +185,8 @@ public class CoreConfig {
                                                              RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver,
                                                              NamedParameterJdbcTemplate namedParameterJdbcTemplate,
                                                              ObjectProvider<DynamicKafkaTemplateRegistry> kafkaTemplateRegistryProvider,
-                                                             ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchClientRegistryProvider) {
+                                                             ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchClientRegistryProvider,
+                                                             ObjectProvider<AiRuntimeBridge> aiRuntimeBridgeProvider) {
         List<Path> pluginDirectories = properties.getV2PluginDirectories().stream()
                 .map(Path::of)
                 .toList();
@@ -190,11 +195,19 @@ public class CoreConfig {
                 new TemplateV2RuntimeServices(
                         namedParameterJdbcTemplate,
                         kafkaTemplateRegistryProvider.getIfAvailable(),
-                        elasticsearchClientRegistryProvider.getIfAvailable()
+                        elasticsearchClientRegistryProvider.getIfAvailable(),
+                        aiRuntimeBridgeProvider.getIfAvailable()
                 ),
                 pluginDirectories,
                 getClass().getClassLoader()
         );
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(AiRuntimeBridge.class)
+    public AiRuntimeBridge aiRuntimeBridge(ApplicationContext applicationContext,
+                                           AutowireCapableBeanFactory beanFactory) {
+        return new OllamaAiRuntimeBridge(applicationContext, beanFactory);
     }
 
     @Bean

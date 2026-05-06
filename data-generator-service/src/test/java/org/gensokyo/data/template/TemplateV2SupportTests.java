@@ -367,6 +367,33 @@ class TemplateV2SupportTests {
     }
 
     @Test
+    void extractsMultipleJdbcReadersFromOneFieldWithoutOverwriting() {
+        JdbcReaderVO readerA = new JdbcReaderVO();
+        readerA.setDataSourceId("reader-db-a");
+        readerA.setContent("select id from t_customer_a");
+
+        JdbcReaderVO readerB = new JdbcReaderVO();
+        readerB.setDataSourceId("reader-db-b");
+        readerB.setContent("select id from t_customer_b");
+
+        ReadStageVO readStage = new ReadStageVO();
+        readStage.setReaders(List.of(readerA, readerB));
+
+        FieldVO field = new FieldVO();
+        field.setName("customer_lookup");
+        field.setStages(List.of(readStage));
+
+        TemplateVO template = new TemplateVO();
+        template.setFields(List.of(field));
+
+        Map<String, QuerySourceVO> sources = V1QuerySourceExtractor.extract(template);
+
+        Assertions.assertEquals(2, sources.size());
+        Assertions.assertEquals("reader-db-a", sources.get("customer_lookup").getDataSourceId());
+        Assertions.assertEquals("reader-db-b", sources.get("customer_lookup_2").getDataSourceId());
+    }
+
+    @Test
     void createsMinimalExecutableTransformForSingleQuerySourceDraft() {
         DatabaseIteratorVO iterator = new DatabaseIteratorVO();
         iterator.setDataSourceId("iterator-db");

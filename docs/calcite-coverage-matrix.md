@@ -31,12 +31,12 @@ Assess which current repository capabilities can be covered by the planned Calci
 | Iterator: constant | generated constant dataset | iterator modules | High | Adapt into `RowSource` | No | P0 | Strong V2 source candidate |
 | Iterator: datetime | generated time sequence | iterator modules | High | Adapt into `RowSource` | No | P0 | Strong V2 source candidate |
 | Iterator: database | paged DB iterator | iterator modules | High | Converge with JDBC-backed source family | No | P0 | Should not remain a distinct long-term V2 concept |
-| Iterator: csv/excel/json | file-backed iterators | iterator modules | High | CSV/JSON have first-pass `RowSource`; Excel remains pending | No | P1 | Strong V2 source candidate |
+| Iterator: csv/excel/json | file-backed iterators | iterator modules | High | CSV/JSON/Excel now have first-pass `RowSource` | No | P1 | Strong V2 source candidate |
 | Reader: constant | in-memory constants | reader modules | High | Adapt into `RowSource` or inline logical table | No | P1 | Can also become SQL literal tables later |
 | Reader: JDBC | query-based read | reader modules | High | Converge with database iterator into one query-backed source family | No | P0 | Natural source path |
-| Reader: CSV/Excel/JSON | file-backed reads | reader modules | High | CSV/JSON have first-pass `RowSource`; Excel remains pending | No | P1 | Natural source path |
+| Reader: CSV/Excel/JSON | file-backed reads | reader modules | High | CSV/JSON/Excel now have first-pass `RowSource`; richer Excel compatibility examples still needed | No | P1 | Natural source path |
 | Reader: SpEL | expression-driven read | reader modules | Medium | Replace simple cases with UDFs; preserve complex cases | Yes | P1 | Expression-only subset is migratable |
-| Reader: AI | remote/AI backed read | reader modules | High | Official `AiSourceVO` with deterministic first-pass runtime; remote bridge pending | Yes | P1 | Prefer a first-class V2 source, potentially aligned with Spring AI |
+| Reader: AI | remote/AI backed read | reader modules | High | Official `AiSourceVO` with deterministic providers and a concrete Ollama-backed runtime bridge | Yes | P1 | Prefer a first-class V2 source, potentially aligned with Spring AI or plugin-provided providers later |
 | Script: Plain | constant passthrough | script modules | High | Usually eliminate or replace with SQL literals | Yes | P1 | Often trivial to migrate |
 | Script: SpEL | expression engine | script modules | Medium | Migrate expression subset to SQL/UDFs | Yes | P0 | Requires a function compatibility map |
 | Script: JavaScript | procedural script engine | script modules | Low | Keep as compatibility-only for non-expression logic | Yes | P2 | Not a good direct SQL target |
@@ -46,7 +46,7 @@ Assess which current repository capabilities can be covered by the planned Calci
 | Sink: DB writers | JDBC/MySQL/Postgres/ClickHouse | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
 | Sink: Kafka | dynamic Kafka output | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
 | Sink: Elasticsearch | dynamic ES output | writer modules | High | `Row -> writer payload` adapter | No | P1 | Strong reuse candidate |
-| Sink: CSV/Excel/JSON | file output | writer modules | High | CSV/JSON have first-pass `RowSink`; Excel remains pending | No | P2 | Lower priority than console/db |
+| Sink: CSV/Excel/JSON | file output | writer modules | High | CSV/JSON/Excel now have first-pass `RowSink` | No | P2 | Lower priority than console/db |
 
 ## Coverage Summary
 
@@ -206,12 +206,12 @@ Success criteria:
 
 Current gap:
 
-- number, constant, and datetime iterators are now covered; the remaining iterator-side gap is file-backed Excel coverage plus compatibility-only iterator control flow
+- number, constant, datetime, and file-backed iterator/source coverage are now in place; the remaining iterator-side gap is compatibility-only iterator control flow
 
 ### Phase 2 - Practical source/sink coverage
 
 - [x] Cover JDBC reader as source
-- [~] Cover CSV/Excel/JSON readers as sources
+- [x] Cover CSV/Excel/JSON readers as sources
 - [x] Converge `DatabaseIterator` and JDBC reader into one V2 query-backed source family
 - [x] Add official `AiSourceVO`
 - [x] Keep `SelectStrategy` semantics as source policy
@@ -226,8 +226,9 @@ Success criteria:
 
 Current gap:
 
-- CSV source has first-pass V2 coverage; Excel/JSON sources and file-backed sinks are not yet covered
-- concrete remote AI bridge implementation remains pending behind `AiRuntimeBridge`
+- CSV/Excel/JSON sources and sinks now have first-pass V2 coverage
+- concrete Ollama-backed AI bridge is now in place behind `AiRuntimeBridge`; broader provider coverage remains pending
+- `SourcePolicyVO` currently covers ordered/random materialization aliases plus `limit`, but not full V1 consumptive `SELECT` semantics such as depletion, repeated-use counts, or weighted reader pools
 
 ### Phase 3 - Transformation migration coverage
 
@@ -242,14 +243,14 @@ Success criteria:
 
 Current gap:
 
-- simple SpEL has a first UDF extension path, but there is not yet a compatibility mapping guide or broad repository-local UDF catalog
+- simple SpEL has a first UDF extension path and first migration examples, but the broad repository-local compatibility catalog is still incomplete
 
 ### Phase 4 - Compatibility stabilization
 
 - [ ] Keep non-migrated V1 templates green
 - [ ] Document unsupported direct migrations
 - [ ] Mark V1-only features as compatibility-only
-- [ ] Build a migration guide and template examples
+- [~] Build a migration guide and template examples
 
 ### Phase 5 - V1 parity and beyond
 

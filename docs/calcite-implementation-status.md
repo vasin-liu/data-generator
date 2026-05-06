@@ -14,6 +14,7 @@ Related references:
 - `docs/calcite-refactor-plan.md`
 - `docs/calcite-coverage-matrix.md`
 - `docs/calcite-v1-v2-mapping.md`
+- `docs/calcite-v1-v2-migration-examples.md`
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-skeleton-implementation-plan.md`
 - `docs/calcite-templatev2-model-design.md`
@@ -25,9 +26,10 @@ Related references:
 As of the current implementation checkpoint:
 
 - Phase 1 minimum viable V2 is complete for number/constant/datetime iterator-backed seeds
-- Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI model shape, source policy, and multi-sink failure policy
-- Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions and the shared UDF registry
-- the largest remaining gaps are Excel source/sink, concrete remote AI bridge, richer V1-to-V2 migration examples, and faker/SpEL compatibility UDF work
+- Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI source runtime bridge, source policy, and multi-sink failure policy
+- Phase 2 now also includes first-pass Excel source and sink support through `ExcelSourceVO` / `ExcelRowSource` and `ExcelSinkFactory` / `ExcelRowSinkAdapter`
+- Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions, the shared UDF registry, a first high-frequency faker compatibility batch, and a first repository-backed V1-to-V2 migration example set
+- the largest remaining gaps are broader SpEL/faker compatibility coverage beyond the first batch, richer business-family parity validation, exact V1 selection semantics beyond current source-policy aliases, and broader provider/plugin examples around the AI bridge
 
 ### 1. Baseline and scope
 
@@ -52,6 +54,8 @@ Implemented model set under `data-generator-common/data-generator-core`:
 - `IteratorSourceVO`
 - `QuerySourceVO`
 - `CsvSourceVO`
+- `ExcelSourceVO`
+- `ExcelSheetSourceVO`
 - `JsonSourceVO`
 - `AiSourceVO`
 - `AiProviderVO`
@@ -389,7 +393,7 @@ The following implementation milestones are complete:
 18. Elasticsearch V2 sink factory is runnable through `TemplateV2RuntimeServices.elasticsearchClient(...)` with `WriterVO.type=ELASTICSEARCH` or `ES`.
 19. AI V2 source factory is runnable for deterministic `INLINE` / `STATIC` / `ECHO` providers and exposes rows to SQL transforms.
 20. Source policy runtime semantics are active as source materialization post-processing for ordered/random selection and `limit`.
-21. Remote AI source execution now has a runtime bridge contract and provider hook; tests cover prompt/options handoff and scalar/map/list output materialization without live network calls.
+21. Remote AI source execution now has a concrete Ollama-backed runtime bridge in the service layer; tests cover prompt/options handoff, parser resolution, Spring runtime wiring, and scalar/map/list output materialization without live network calls.
 22. Kafka and Elasticsearch blank-template row publishing now share `RowJsonCodec`, with focused coverage for null, primitive, and escaped string values.
 23. V2 writer-specific `options` are available on `WriterVO`; Kafka supports resolved `key` / `headers`, and Elasticsearch supports resolved `id` / `routing` plus `upsert`.
 24. Runtime registry build failures now include provider index/class, plugin descriptor, factory collection phase, and refresh/initialization context while preserving the last good registry on refresh failure.
@@ -411,6 +415,12 @@ The following implementation milestones are complete:
 40. CSV V2 source row materialization now validates row-width mismatch by default through `strictColumns=true`, while keeping an explicit loose mode for imperfect files.
 41. JSON V2 source root selector diagnostics now fail fast on missing path segments and array index misses, avoiding silent empty datasets caused by bad source configuration.
 42. JSON V2 sink now supports `options.mode=ARRAY|NDJSON` and rejects unsupported modes with target diagnostics.
+43. The built-in V2 faker datetime compatibility layer now covers the highest-frequency V1 relative-time shapes: single-argument and value-based `minus/plus` variants, default `format(x)`, and `before/after` range helpers across day/hour/minute/second where needed for migration.
+44. The built-in V2 faker compatibility layer now also covers `#faker.phoneNumber.cellPhone` through `FAKER_PHONE_CELL()`, closing one of the remaining high-frequency repository template gaps outside datetime handling.
+45. Repository-backed V1-to-V2 migration examples now exist for query-source convergence, faker datetime migration, mapping/condition SQL rewrites, and multi-sink fan-out in `docs/calcite-v1-v2-migration-examples.md`.
+46. The migration examples now also cover the repository AI reader path through a first-class `AiSourceVO` / `OLLAMA` example, and the docs now explicitly record that `SourcePolicyVO` currently models ordered/random materialization aliases plus `limit`, not full V1 consumptive `SELECT` semantics.
+47. Query-source migration analysis is now V1-aware for selection and reader-pool semantics: `ONCE_ORDER`, `ONCE_RANDOM`, `MULTIPLE_ORDER`, and multi-reader `EQUAL` / `WEIGHT` cases emit explicit approximation warnings instead of silently appearing fully compatible.
+48. V1 query-source extraction no longer overwrites multiple JDBC readers declared under the same field; migrated drafts now emit stable unique source names such as `customer_lookup` and `customer_lookup_2`.
 
 ## Immediate Next Work
 
@@ -428,7 +438,7 @@ Recommended implementation:
 - add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
 - harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
 - keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- decide whether Excel source, concrete AI bridge, or additional external plugin fixtures should be next
+- decide whether concrete AI bridge, additional external plugin fixtures, or migration-example batches should be next
 
 ### Next 2. Plugin diagnostics hardening
 
@@ -442,31 +452,33 @@ Recommended implementation:
 - add plugin descriptor mismatch or missing repository descriptor diagnostics if needed
 - add one focused fixture for plugin-provided CSV parser replacement only if parser customization becomes a concrete requirement
 
-### Next 3. Concrete AI runtime bridge
+### Next 3. AI bridge hardening and provider expansion
 
 Goal:
 
-- provide a real remote implementation behind the `AiRuntimeBridge` contract without coupling core V2 execution to network clients
+- harden the concrete `AiRuntimeBridge` path and keep room for additional providers without coupling core V2 execution to network clients
 
 Recommended implementation:
 
-- add an Ollama or Spring-AI-backed bridge as an optional runtime provider
-- keep mock / deterministic bridge tests as the primary no-network acceptance path
+- keep the new Ollama-backed bridge as the default optional runtime provider
+- add timeout, retry, and model/provider diagnostics where business scenarios require them
+- preserve mock / deterministic bridge tests as the primary no-network acceptance path
 - define timeout and model error diagnostics
-- decide whether bridge implementation lives in `data-generator-reader-ai` or a new V2 AI runtime module
+- decide whether additional providers should stay in `data-generator-service`, move into a dedicated V2 AI runtime module, or be offered as external PF4J plugins
 
-### Next 4. V1-to-V2 migration examples and parity scorecard
+### Next 4. Business-scenario parity expansion and scorecard hardening
 
 Goal:
 
-- validate that the new SQL/UDF/source/sink surface covers real business scenarios instead of only synthetic runner tests
+- validate that the new SQL/UDF/source/sink surface covers more business scenarios than the first documented migration-example batch
 
 Recommended implementation:
 
 - keep `docs/calcite-v1-parity-scorecard.md` current as each V1 capability lands in V2
-- add representative V2 examples for mapping, condition, convert, SpEL-expression subset, JDBC source, Kafka sink, and Elasticsearch sink
+- continue adding representative V2 examples only where a new business-family gap appears
 - document unsupported direct migrations for log/pause/shared/procedural JavaScript paths
-- add a small faker/UDF compatibility catalog driven by observed V1 templates and business examples
+- keep the `SourcePolicyVO` boundary explicit until a decision is made on whether V2 should absorb V1 consumptive selection semantics
+- extend the faker/UDF compatibility catalog only when repository templates or business examples show uncovered high-frequency expressions
 
 ## Deferred Work
 
@@ -474,7 +486,6 @@ The following items remain intentionally deferred after the current step:
 
 - full Calcite physical execution
 - UDF expansion
-- concrete Ollama/Spring-AI bridge implementation for `AiRuntimeBridge`
 - source policy caching/materialization modes beyond row post-processing
 - nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
 - V1 retirement
@@ -485,8 +496,8 @@ The most pragmatic next implementation sequence is:
 
 1. continue file-backed source/sink adapters, starting with CSV hardening and JSON source
 2. prove plugin-provided UDFs through the external PF4J packaging path
-3. add the concrete Ollama/Spring-AI implementation behind `AiRuntimeBridge`
-4. build V1-to-V2 migration examples and a parity scorecard against business scenarios
+3. harden the concrete Ollama bridge and add additional provider implementations only when justified by business scenarios
+4. expand V1-to-V2 migration examples and keep the parity scorecard aligned against business scenarios
 5. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
 6. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 

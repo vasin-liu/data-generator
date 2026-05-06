@@ -7,6 +7,7 @@ import org.gensokyo.data.model.dto.QuerySourceMigrationAnalysisDTO;
 import org.gensokyo.data.model.dto.QuerySourceTransformCandidateDTO;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
+import org.gensokyo.data.model.v2.SourcePolicyVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
@@ -238,6 +239,107 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(multi.getTransform().getSql().contains("JOIN"));
         Assertions.assertTrue(multi.getTransform().getSql().startsWith("SELECT s0.*, s1.* FROM"));
         Assertions.assertTrue(multi.getJoinHints().get(0).contains("Replace ON 1 = 1"));
+    }
+
+    @Test
+    void migratesJdbcReaderSelectHintsIntoSourcePolicy() {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91006L);
+        entity.setName("policy-migrate");
+        entity.setContentYaml("""
+                name: policy-migrate
+                fields:
+                  - name: district_lookup
+                    stages:
+                      - type: read
+                        inMemory: true
+                        params:
+                          - name: areaCode
+                            language:
+                              type: plain
+                              content: 440100
+                        readers:
+                          - type: jdbc
+                            dataSourceId: ds_lookup
+                            content: select code, name from pc_district where parent_code = :areaCode
+                      - type: select
+                        strategy:
+                          type: ONCE_ORDER
+                          selectNum: 2
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<TemplateV2DraftVO> result = templateController.previewQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertNotNull(result.getData());
+        Assertions.assertTrue(result.getData().getSources().get("district_lookup") instanceof QuerySourceVO);
+        QuerySourceVO source = (QuerySourceVO) result.getData().getSources().get("district_lookup");
+        Assertions.assertEquals("ds_lookup", source.getDataSourceId());
+        Assertions.assertEquals("select code, name from pc_district where parent_code = :areaCode", source.getSql());
+        Assertions.assertNotNull(source.getParams());
+        Assertions.assertEquals(1, source.getParams().size());
+        SourcePolicyVO policy = source.getPolicy();
+        Assertions.assertNotNull(policy);
+        Assertions.assertEquals("ONCE_ORDER", policy.getSelectionStrategy());
+        Assertions.assertEquals(2, policy.getLimit());
+        Assertions.assertEquals(Boolean.TRUE, policy.getInMemory());
+    }
+
+    @Test
+    void analyzesApproximateV1SelectionAndReaderPoolMigrations() {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91010L);
+        entity.setName("approximate-policy-analyze");
+        entity.setContentYaml("""
+                name: approximate-policy-analyze
+                fields:
+                  - name: weighted_lookup
+                    stages:
+                      - type: read
+                        strategy:
+                          type: WEIGHT
+                        readers:
+                          - type: jdbc
+                            dataSourceId: ds_lookup_a
+                            content: select id, name from t_customer_a
+                          - type: jdbc
+                            dataSourceId: ds_lookup_b
+                            content: select id, name from t_customer_b
+                      - type: select
+                        strategy:
+                          type: MULTIPLE_ORDER
+                          selectNum: 2
+                          maxTimes: 3
+                  - name: district_lookup
+                    stages:
+                      - type: read
+                        readers:
+                          - type: jdbc
+                            dataSourceId: ds_lookup_c
+                            content: select code, name from t_district
+                      - type: select
+                        strategy:
+                          type: ONCE_RANDOM
+                          selectNum: 1
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertNotNull(result.getData());
+        Assertions.assertNotNull(result.getData().getWarnings());
+        Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("WEIGHT")));
+        Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("MULTIPLE_ORDER")));
+        Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("ONCE_RANDOM")));
+        Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("not preserve")));
     }
 
     @Test

@@ -12,17 +12,25 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .capability(TemplateV2PluginCapability.source("iterator"))
                 .capability(TemplateV2PluginCapability.source("ai"))
                 .capability(TemplateV2PluginCapability.source("csv"))
+                .capability(TemplateV2PluginCapability.source("excel"))
                 .capability(TemplateV2PluginCapability.source("json"))
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.sink("console"))
                 .capability(TemplateV2PluginCapability.sink("csv"))
+                .capability(TemplateV2PluginCapability.sink("excel"))
                 .capability(TemplateV2PluginCapability.sink("json"))
                 .build();
     }
 
     @Override
     public List<V2SourceFactory> sourceFactories() {
-        return List.of(new IteratorSourceFactory(), new AiSourceFactory(), new CsvSourceFactory(), new JsonSourceFactory());
+        return List.of(
+                new IteratorSourceFactory(),
+                new AiSourceFactory(),
+                new CsvSourceFactory(),
+                new ExcelSourceFactory(),
+                new JsonSourceFactory()
+        );
     }
 
     @Override
@@ -32,6 +40,6 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
 
     @Override
     public List<V2SinkFactory> sinkFactories() {
-        return List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new JsonSinkFactory());
+        return List.of(new ConsoleSinkFactory(), new CsvSinkFactory(), new ExcelSinkFactory(), new JsonSinkFactory());
     }
 }

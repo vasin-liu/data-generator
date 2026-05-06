@@ -30,6 +30,29 @@ class TemplateV2RuntimeServicesTests {
         Assertions.assertSame(elasticsearchRegistry, context.runtimeServices().elasticsearchClientRegistry());
     }
 
+    @Test
+    void exposesAiRuntimeBridgeThroughContext() {
+        AiRuntimeBridge bridge = new AiRuntimeBridge() {
+            @Override
+            public boolean supports(org.gensokyo.data.model.v2.AiProviderVO provider) {
+                return true;
+            }
+
+            @Override
+            public Object generate(org.gensokyo.data.model.v2.AiSourceVO source) {
+                return java.util.List.of();
+            }
+        };
+        TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
+                new NoopRuntimeJdbcEndpointResolver(),
+                new TemplateV2RuntimeServices(null, null, null, bridge),
+                java.util.List.of(),
+                getClass().getClassLoader()
+        );
+
+        Assertions.assertSame(bridge, context.runtimeServices().aiRuntimeBridge());
+    }
+
     private DriverManagerDataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");

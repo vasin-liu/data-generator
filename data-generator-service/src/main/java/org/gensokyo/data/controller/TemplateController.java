@@ -34,6 +34,7 @@ import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.template.V1QuerySourceDraftConverter;
+import org.gensokyo.data.template.V1QuerySourceMigrationWarningAnalyzer;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.character.StrKit;
@@ -159,16 +160,18 @@ public class TemplateController {
             return R.fail(String.format("Template '%s' does not exist", templateId));
         }
 
+        TemplateVO v1;
         TemplateV2DraftVO draft;
         try {
-            draft = buildQuerySourceDraft(entity);
+            v1 = buildV1Template(entity);
+            draft = V1QuerySourceDraftConverter.convert(v1);
         } catch (IllegalArgumentException e) {
             return R.fail(e.getMessage());
         }
         if (Objects.isNull(draft) || CollectKit.isEmpty(draft.getSources())) {
             return R.fail(String.format("Template '%s' has no database-backed sources that can be converted into QuerySourceVO", templateId));
         }
-        return R.ok("Analysis generated", analyzeDraft(draft));
+        return R.ok("Analysis generated", analyzeDraft(v1, draft));
     }
 
     @PostMapping("/applyQuerySourceCandidateById/{templateId}/{scenario}")
@@ -322,6 +325,10 @@ public class TemplateController {
     }
 
     private TemplateV2DraftVO buildQuerySourceDraft(TemplatePO entity) {
+        return V1QuerySourceDraftConverter.convert(buildV1Template(entity));
+    }
+
+    private TemplateVO buildV1Template(TemplatePO entity) {
         var v2 = tryParse(entity.getContentYaml(), TemplateV2DraftVO.class);
         var v1 = tryParse(entity.getContentYaml(), TemplateVO.class);
         var kind = TemplateDefinitionDetector.detect(v1, v2);
@@ -335,11 +342,11 @@ public class TemplateController {
         if (StrKit.isBlank(v1.getName())) {
             v1.setName(entity.getName());
         }
-        return V1QuerySourceDraftConverter.convert(v1);
+        return v1;
     }
 
-    private QuerySourceMigrationAnalysisDTO analyzeDraft(TemplateV2DraftVO draft) {
-        List<String> warnings = new ArrayList<>();
+    private QuerySourceMigrationAnalysisDTO analyzeDraft(TemplateVO v1, TemplateV2DraftVO draft) {
+        List<String> warnings = new ArrayList<>(V1QuerySourceMigrationWarningAnalyzer.analyze(v1));
         List<QuerySourceTransformCandidateDTO> candidates = enrichCandidatesWithPreflight(draft, buildTransformCandidates(draft));
         boolean executable = Objects.nonNull(draft.getTransform()) && Objects.nonNull(draft.getSink());
         String recommendedScenario = recommendedScenario(candidates);

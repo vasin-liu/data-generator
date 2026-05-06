@@ -38,6 +38,44 @@ class SourcePolicyRowSourceTests {
     }
 
     @Test
+    void treatsOrderAliasesAsOrderedMaterializationPlusLimit() {
+        List<String> expected = List.of("1", "2");
+
+        Assertions.assertEquals(expected, values(policy("ORDER", 2)));
+        Assertions.assertEquals(expected, values(policy("FIRST", 2)));
+        Assertions.assertEquals(expected, values(policy("REPEAT_ORDER", 2)));
+        Assertions.assertEquals(expected, values(policy("ONCE_ORDER", 2)));
+        Assertions.assertEquals(expected, values(policy("MULTIPLE_ORDER", 2)));
+    }
+
+    @Test
+    void treatsRandomAliasesAsDeterministicShuffledMaterializationPlusLimit() {
+        List<String> repeatRandom = values(policy("REPEAT_RANDOM", 3));
+
+        Assertions.assertEquals(repeatRandom, values(policy("RANDOM", 3)));
+        Assertions.assertEquals(repeatRandom, values(policy("ONCE_RANDOM", 3)));
+    }
+
+    @Test
+    void defaultsBlankSelectionStrategyToOrder() {
+        Assertions.assertEquals(List.of("1", "2"), values(policy("   ", 2)));
+    }
+
+    @Test
+    void supportsNullSelectionStrategyAsOrder() {
+        Assertions.assertEquals(List.of("1", "2"), values(policy(null, 2)));
+    }
+
+    @Test
+    void currentPolicyDoesNotModelV1ConsumptiveSelectionSemantics() {
+        List<String> firstRun = values(policy("ONCE_ORDER", 2));
+        List<String> secondRun = values(policy("ONCE_ORDER", 2));
+
+        Assertions.assertEquals(List.of("1", "2"), firstRun);
+        Assertions.assertEquals(firstRun, secondRun);
+    }
+
+    @Test
     void rejectsNegativeLimit() {
         IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, () ->
                 registry().createSource("seed", withPolicy(numberSource(1, 5, 1), policy("ORDER", -1))));
@@ -78,6 +116,11 @@ class SourcePolicyRowSourceTests {
         policy.setSelectionStrategy(selectionStrategy);
         policy.setLimit(limit);
         return policy;
+    }
+
+    private List<String> values(SourcePolicyVO policy) {
+        RowSource source = new SourcePolicyRowSource(new IteratorRowSource("seed", numberSource(1, 5, 1)), policy);
+        return source.rows().stream().map(row -> row.getString("value")).toList();
     }
 
     private IteratorSourceVO numberSource(long from, long to, int step) {
