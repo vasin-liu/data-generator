@@ -423,6 +423,8 @@ The following implementation milestones are complete:
 48. V1 query-source extraction no longer overwrites multiple JDBC readers declared under the same field; migrated drafts now emit stable unique source names such as `customer_lookup` and `customer_lookup_2`.
 49. The migration examples now also cover repository-real selection-heavy templates, showing when `SourcePolicyVO` approximation is acceptable and when V1 selector behavior should instead be rewritten explicitly as relational V2 SQL.
 50. Multi-source migration candidates now infer practical join predicates from parameter names, query predicates, and runtime-resolved source schemas; lookup skeletons can emit preflight-valid joins such as `s0.customer_id = s1.id` instead of only `ON 1 = 1`.
+51. Multi-source candidate SQL now expands explicit projection aliases from resolved source schemas, producing more stable authoring drafts such as `iterator_id` and `customer_lookup_name` instead of relying on ambiguous `s0.*`, `s1.*` output.
+52. Multi-source join inference now also covers structural business patterns beyond direct params: source-name-derived foreign keys such as `customer_id = id` and shared scope columns such as `tenant_id` are appended automatically when both sides expose compatible schema.
 
 ## Immediate Next Work
 
@@ -449,8 +451,8 @@ Goal:
 
 Recommended implementation:
 
-- continue beyond the new param-name/schema-based join inference for more business-specific patterns such as composite keys, tenant scoping, and date-window joins
-- add better aliasing and projection guidance for multi-query-source migration
+- continue beyond the new param-name/schema-based join inference for more business-specific patterns such as composite keys and date-window joins
+- add better aliasing and projection guidance for multi-query-source migration, especially where projected business names should differ from raw source names
 - keep validating candidate transforms with Calcite preflight before persistence
 
 ### Next 3. AI bridge hardening and provider expansion

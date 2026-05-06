@@ -231,6 +231,8 @@ Current gap:
 - `SourcePolicyVO` currently covers ordered/random materialization aliases plus `limit`, but not full V1 consumptive `SELECT` semantics such as depletion, repeated-use counts, or weighted reader pools
 - the migration examples now also show that some selection-heavy templates should be rewritten explicitly in V2 relational form instead of being mapped mechanically into `SourcePolicyVO`
 - multi-source migration candidate generation now infers simple lookup joins from param names and source schemas, but composite/business-specific join semantics still need explicit author review
+- multi-source candidate SQL now emits explicit projection aliases when source schemas can be resolved, reducing duplicate-column ambiguity during V2 authoring and sink mapping
+- structural join hints now cover common business scope columns such as `tenant_id`, but temporal windows and higher-order composite keys are still not inferred automatically
 
 ### Phase 3 - Transformation migration coverage
 

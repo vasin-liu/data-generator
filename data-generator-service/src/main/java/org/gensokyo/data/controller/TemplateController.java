@@ -52,10 +52,12 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,6 +76,31 @@ import java.util.regex.Pattern;
 public class TemplateController {
     private static final Pattern COLUMN_EQUALS_PARAM = Pattern.compile("(?i)([a-zA-Z_][\\w.]*)\\s*=\\s*:(\\w+)");
     private static final Pattern PARAM_EQUALS_COLUMN = Pattern.compile("(?i):(\\w+)\\s*=\\s*([a-zA-Z_][\\w.]*)");
+    private static final List<String> STRUCTURAL_SCOPE_COLUMNS = List.of(
+            "tenant_id",
+            "org_id",
+            "dept_id",
+            "site_id",
+            "project_id",
+            "region_code",
+            "area_code",
+            "city_code",
+            "province_code"
+    );
+    private static final Set<String> SOURCE_NAME_STOP_WORDS = Set.of(
+            "lookup",
+            "reader",
+            "source",
+            "query",
+            "jdbc",
+            "read",
+            "stage",
+            "input",
+            "output",
+            "rows",
+            "row",
+            "data"
+    );
 
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
@@ -465,9 +492,9 @@ public class TemplateController {
             for (int i = 0; i < sourceOrder.size(); i++) {
                 aliases.put(sourceOrder.get(i), "s" + i);
             }
-            List<QuerySourceCandidateSourceDTO> sourceMetadata = multiSourceMetadata(draft, sourceOrder, aliases);
-            List<String> projectionSkeleton = projectionSkeleton(aliases);
             Map<String, List<String>> sourceColumns = resolveSourceColumns(draft, sourceOrder);
+            List<QuerySourceCandidateSourceDTO> sourceMetadata = multiSourceMetadata(draft, sourceOrder, aliases);
+            List<String> projectionSkeleton = projectionSkeleton(sourceOrder, aliases, sourceColumns);
             if (hasParameterizedSecondarySource(sourceMetadata)) {
                 candidates.add(new QuerySourceTransformCandidateDTO(
                         "multi-source-lookup-skeleton",
@@ -609,10 +636,25 @@ public class TemplateController {
         return sourceMetadata;
     }
 
-    private List<String> projectionSkeleton(LinkedHashMap<String, String> aliases) {
+    private List<String> projectionSkeleton(List<String> sourceOrder,
+                                           LinkedHashMap<String, String> aliases,
+                                           Map<String, List<String>> sourceColumns) {
         List<String> projectionSkeleton = new ArrayList<>();
-        for (String alias : aliases.values()) {
-            projectionSkeleton.add(alias + ".*");
+        Map<String, Integer> aliasCounters = new LinkedHashMap<>();
+        for (String sourceName : sourceOrder) {
+            String alias = aliases.get(sourceName);
+            List<String> columns = sourceColumns.getOrDefault(sourceName, List.of());
+            if (CollectKit.isEmpty(columns)) {
+                projectionSkeleton.add(alias + ".*");
+                continue;
+            }
+            for (String column : columns) {
+                projectionSkeleton.add(alias
+                        + "."
+                        + column
+                        + " AS "
+                        + uniqueProjectionAlias(sourceName, alias, column, aliasCounters));
+            }
         }
         return projectionSkeleton;
     }
@@ -765,25 +807,150 @@ public class TemplateController {
             return null;
         }
         String currentSourceName = sourceOrder.get(currentIndex);
-        List<String> params = parameterNames(draft, currentSourceName);
-        if (CollectKit.isEmpty(params)) {
-            return null;
-        }
-        Map<String, String> paramColumns = extractParameterColumns(sourceMetadata.get(currentIndex).getSql());
         List<String> currentColumns = sourceColumns.getOrDefault(currentSourceName, List.of());
-        List<String> predicates = new ArrayList<>();
-        for (String paramName : params) {
-            SourceColumnRef upstream = findUpstreamColumn(paramName, sourceOrder, currentIndex, aliases, sourceColumns);
-            String currentColumn = findCurrentColumn(paramName, paramColumns, currentColumns);
-            if (upstream == null || StrKit.isBlank(currentColumn)) {
-                continue;
+        LinkedHashSet<String> predicates = new LinkedHashSet<>();
+        List<String> params = parameterNames(draft, currentSourceName);
+        if (CollectKit.isNotEmpty(params)) {
+            Map<String, String> paramColumns = extractParameterColumns(sourceMetadata.get(currentIndex).getSql());
+            for (String paramName : params) {
+                SourceColumnRef upstream = findUpstreamColumn(paramName, sourceOrder, currentIndex, aliases, sourceColumns);
+                String currentColumn = findCurrentColumn(paramName, paramColumns, currentColumns);
+                if (upstream == null || StrKit.isBlank(currentColumn)) {
+                    continue;
+                }
+                predicates.add(upstream.alias() + "." + upstream.column() + " = " + aliases.get(currentSourceName) + "." + currentColumn);
             }
-            predicates.add(upstream.alias() + "." + upstream.column() + " = " + aliases.get(currentSourceName) + "." + currentColumn);
+        }
+        if (predicates.isEmpty()) {
+            predicates.addAll(inferStructuralJoinPredicates(sourceOrder, currentIndex, aliases, sourceColumns));
         }
         if (predicates.isEmpty()) {
             return null;
         }
         return new InferredJoinCondition(String.join(" AND ", predicates));
+    }
+
+    private List<String> inferStructuralJoinPredicates(List<String> sourceOrder,
+                                                       int currentIndex,
+                                                       LinkedHashMap<String, String> aliases,
+                                                       Map<String, List<String>> sourceColumns) {
+        String currentSourceName = sourceOrder.get(currentIndex);
+        List<String> currentColumns = sourceColumns.getOrDefault(currentSourceName, List.of());
+        if (CollectKit.isEmpty(currentColumns)) {
+            return List.of();
+        }
+        List<String> bestPredicates = List.of();
+        for (int i = currentIndex - 1; i >= 0; i--) {
+            String upstreamSourceName = sourceOrder.get(i);
+            List<String> upstreamColumns = sourceColumns.getOrDefault(upstreamSourceName, List.of());
+            if (CollectKit.isEmpty(upstreamColumns)) {
+                continue;
+            }
+            List<String> predicates = structuralJoinPredicates(
+                    currentSourceName,
+                    currentColumns,
+                    upstreamColumns,
+                    aliases.get(upstreamSourceName),
+                    aliases.get(currentSourceName)
+            );
+            if (predicates.size() > bestPredicates.size()) {
+                bestPredicates = predicates;
+            }
+        }
+        return bestPredicates;
+    }
+
+    private List<String> structuralJoinPredicates(String currentSourceName,
+                                                  List<String> currentColumns,
+                                                  List<String> upstreamColumns,
+                                                  String upstreamAlias,
+                                                  String currentAlias) {
+        LinkedHashSet<String> predicates = new LinkedHashSet<>();
+        predicates.addAll(foreignKeyPredicates(currentSourceName, currentColumns, upstreamColumns, upstreamAlias, currentAlias));
+        predicates.addAll(sharedScopePredicates(currentColumns, upstreamColumns, upstreamAlias, currentAlias));
+        return new ArrayList<>(predicates);
+    }
+
+    private List<String> foreignKeyPredicates(String currentSourceName,
+                                              List<String> currentColumns,
+                                              List<String> upstreamColumns,
+                                              String upstreamAlias,
+                                              String currentAlias) {
+        LinkedHashSet<String> predicates = new LinkedHashSet<>();
+        for (String currentKey : currentStructuralKeys(currentColumns)) {
+            String currentColumn = findMatchingColumn(currentColumns, List.of(currentKey));
+            if (StrKit.isBlank(currentColumn)) {
+                continue;
+            }
+            for (String token : sourceEntityTokens(currentSourceName)) {
+                String upstreamColumn = findMatchingColumn(upstreamColumns, foreignKeyCandidates(token, currentKey));
+                if (StrKit.isBlank(upstreamColumn)) {
+                    continue;
+                }
+                predicates.add(upstreamAlias + "." + upstreamColumn + " = " + currentAlias + "." + currentColumn);
+            }
+        }
+        return new ArrayList<>(predicates);
+    }
+
+    private List<String> sharedScopePredicates(List<String> currentColumns,
+                                               List<String> upstreamColumns,
+                                               String upstreamAlias,
+                                               String currentAlias) {
+        List<String> predicates = new ArrayList<>();
+        for (String scopeColumn : STRUCTURAL_SCOPE_COLUMNS) {
+            String upstreamColumn = findMatchingColumn(upstreamColumns, List.of(scopeColumn));
+            String currentColumn = findMatchingColumn(currentColumns, List.of(scopeColumn));
+            if (StrKit.isBlank(upstreamColumn) || StrKit.isBlank(currentColumn)) {
+                continue;
+            }
+            predicates.add(upstreamAlias + "." + upstreamColumn + " = " + currentAlias + "." + currentColumn);
+        }
+        return predicates;
+    }
+
+    private List<String> currentStructuralKeys(List<String> currentColumns) {
+        List<String> keys = new ArrayList<>();
+        addCurrentStructuralKey(keys, currentColumns, "id");
+        addCurrentStructuralKey(keys, currentColumns, "code");
+        addCurrentStructuralKey(keys, currentColumns, "no");
+        addCurrentStructuralKey(keys, currentColumns, "key");
+        return keys;
+    }
+
+    private void addCurrentStructuralKey(List<String> keys, List<String> currentColumns, String key) {
+        if (containsColumn(currentColumns, key) && !keys.contains(key)) {
+            keys.add(key);
+        }
+    }
+
+    private List<String> sourceEntityTokens(String sourceName) {
+        if (StrKit.isBlank(sourceName)) {
+            return List.of();
+        }
+        String normalized = toSnakeCase(sourceName)
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "_");
+        String[] rawTokens = normalized.split("_");
+        List<String> tokens = new ArrayList<>();
+        for (String rawToken : rawTokens) {
+            if (StrKit.isBlank(rawToken) || SOURCE_NAME_STOP_WORDS.contains(rawToken) || rawToken.chars().allMatch(Character::isDigit)) {
+                continue;
+            }
+            addCandidate(tokens, rawToken);
+        }
+        if (tokens.isEmpty()) {
+            addCandidate(tokens, normalized);
+        }
+        return tokens;
+    }
+
+    private List<String> foreignKeyCandidates(String token, String currentKey) {
+        List<String> candidates = new ArrayList<>();
+        addCandidate(candidates, token + "_" + currentKey);
+        addCandidate(candidates, token + currentKey);
+        addCandidate(candidates, toSnakeCase(token + currentKey.substring(0, 1).toUpperCase(Locale.ROOT) + currentKey.substring(1)));
+        return candidates;
     }
 
     private SourceColumnRef findUpstreamColumn(String paramName,
@@ -910,6 +1077,40 @@ public class TemplateController {
 
     private boolean containsColumn(List<String> columns, String candidate) {
         return StrKit.isNotBlank(findMatchingColumn(columns, List.of(candidate)));
+    }
+
+    private String uniqueProjectionAlias(String sourceName,
+                                         String sqlAlias,
+                                         String column,
+                                         Map<String, Integer> aliasCounters) {
+        String sourceToken = sanitizedProjectionToken(sourceName);
+        if (StrKit.isBlank(sourceToken)) {
+            sourceToken = sanitizedProjectionToken(sqlAlias);
+        }
+        String columnToken = sanitizedProjectionToken(column);
+        if (StrKit.isBlank(columnToken)) {
+            columnToken = "column";
+        }
+        String base = sourceToken + "_" + columnToken;
+        Integer count = aliasCounters.merge(base, 1, Integer::sum);
+        return count == 1 ? base : base + "_" + count;
+    }
+
+    private String sanitizedProjectionToken(String value) {
+        if (StrKit.isBlank(value)) {
+            return "";
+        }
+        String normalized = value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "_");
+        normalized = normalized.replaceAll("_+", "_");
+        normalized = normalized.replaceAll("^_+", "");
+        normalized = normalized.replaceAll("_+$", "");
+        if (normalized.isEmpty()) {
+            return "";
+        }
+        if (Character.isDigit(normalized.charAt(0))) {
+            return "c_" + normalized;
+        }
+        return normalized;
     }
 
     private String normalizeIdentifier(String value) {

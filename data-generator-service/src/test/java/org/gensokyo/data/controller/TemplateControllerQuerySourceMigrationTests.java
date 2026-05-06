@@ -230,14 +230,18 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals("multi-source-join-skeleton", multi.getScenario());
         Assertions.assertEquals(2, multi.getSourceOrder().size());
         Assertions.assertEquals(2, multi.getAliases().size());
-        Assertions.assertEquals(2, multi.getProjectionSkeleton().size());
+        Assertions.assertEquals(3, multi.getProjectionSkeleton().size());
+        Assertions.assertEquals("s0.id AS iterator_id", multi.getProjectionSkeleton().get(0));
+        Assertions.assertEquals("s1.id AS customer_lookup_id", multi.getProjectionSkeleton().get(1));
+        Assertions.assertEquals("s1.name AS customer_lookup_name", multi.getProjectionSkeleton().get(2));
         Assertions.assertEquals(1, multi.getJoinHints().size());
         Assertions.assertEquals(2, multi.getSourceMetadata().size());
         Assertions.assertNotNull(multi.getPreflight());
         Assertions.assertTrue(multi.getPreflight().isNormalized());
         Assertions.assertTrue(multi.getPreflight().isCalciteValid());
         Assertions.assertTrue(multi.getTransform().getSql().contains("JOIN"));
-        Assertions.assertTrue(multi.getTransform().getSql().startsWith("SELECT s0.*, s1.* FROM"));
+        Assertions.assertTrue(multi.getTransform().getSql().startsWith(
+                "SELECT s0.id AS iterator_id, s1.id AS customer_lookup_id, s1.name AS customer_lookup_name FROM"));
         Assertions.assertTrue(multi.getJoinHints().get(0).contains("Replace ON 1 = 1"));
     }
 
@@ -389,6 +393,9 @@ class TemplateControllerQuerySourceMigrationTests {
                 .findFirst()
                 .orElseThrow();
         Assertions.assertTrue(lookup.getTransform().getSql().contains("LEFT JOIN"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.id AS iterator_id"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.id AS customer_lookup_id"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.name AS customer_lookup_name"));
         Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertEquals(1, lookup.getJoinHints().size());
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("expects params [customerId]"));
@@ -443,8 +450,57 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertInstanceOf(SqlTransformVO.class, migrated.getData().getTransform());
         SqlTransformVO transform = (SqlTransformVO) migrated.getData().getTransform();
         Assertions.assertTrue(transform.getSql().contains("JOIN"));
+        Assertions.assertTrue(transform.getSql().contains("s0.id AS iterator_id"));
+        Assertions.assertTrue(transform.getSql().contains("s1.id AS customer_lookup_id"));
+        Assertions.assertTrue(transform.getSql().contains("s1.name AS customer_lookup_name"));
         Assertions.assertTrue(transform.getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertFalse(transform.getSql().contains("ON 1 = 1"));
+    }
+
+    @Test
+    void infersTenantScopedJoinForLookupCandidate() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_scope");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_scope");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_scope(id bigint, customer_id bigint, tenant_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_scope(id bigint, tenant_id bigint, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_scope(id, customer_id, tenant_id) values (1, 10, 101)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_scope(id, tenant_id, name) values (10, 101, 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91013L);
+        entity.setName("multi-source-tenant-scope");
+        entity.setContentYaml("""
+                name: multi-source-tenant-scope
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id, tenant_id from t_order_scope
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, tenant_id, name from t_customer_scope
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO multi = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-join-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.customer_id = s1.id"));
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.tenant_id = s1.tenant_id"));
+        Assertions.assertTrue(multi.getJoinHints().get(0).contains("s0.customer_id = s1.id"));
+        Assertions.assertNotNull(multi.getPreflight());
+        Assertions.assertTrue(multi.getPreflight().isCalciteValid());
     }
 
     @Test
