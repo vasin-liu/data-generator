@@ -16,4 +16,5 @@ public class QuerySourceCandidateSourceDTO implements Serializable {
     private String sql;
     private boolean parameterized;
     private boolean paged;
+    private String suggestedSql;
 }

@@ -398,6 +398,8 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(lookup.getTransform().getSql().contains("s1.name AS customer_name"));
         Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertEquals(1, lookup.getJoinHints().size());
+        Assertions.assertEquals(2, lookup.getSourceMetadata().size());
+        Assertions.assertEquals("select id, name from t_customer_lookup", lookup.getSourceMetadata().get(1).getSuggestedSql());
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("expects params [customerId]"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Inferred join s0.customer_id = s1.id"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Rewrite it as a relational lookup"));
@@ -408,6 +410,56 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(lookup.getPreflight().isNormalized());
         Assertions.assertTrue(lookup.getPreflight().isCalciteValid());
         Assertions.assertEquals("multi-source-lookup-skeleton", result.getData().getRecommendedScenario());
+    }
+
+    @Test
+    void suggestsRelationalSqlForParameterizedLookupWhileKeepingStaticFilters() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_lookup_filter");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_lookup_filter");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_lookup_filter(id bigint, customer_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_lookup_filter(id bigint, tenant_id bigint, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_lookup_filter(id, customer_id) values (1, 10)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_lookup_filter(id, tenant_id, name) values (10, 101, 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91016L);
+        entity.setName("multi-source-lookup-filter-analyze");
+        entity.setContentYaml("""
+                name: multi-source-lookup-filter-analyze
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id from t_order_lookup_filter
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        params:
+                          - name: customerId
+                            language:
+                              type: plain
+                              content: 10
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, tenant_id, name from t_customer_lookup_filter where id = :customerId and tenant_id = 101 order by name
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO lookup = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-lookup-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(
+                "select id, tenant_id, name from t_customer_lookup_filter where tenant_id = 101 order by name",
+                lookup.getSourceMetadata().get(1).getSuggestedSql()
+        );
     }
 
     @Test

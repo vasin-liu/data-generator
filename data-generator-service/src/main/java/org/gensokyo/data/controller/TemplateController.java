@@ -76,6 +76,10 @@ import java.util.regex.Pattern;
 public class TemplateController {
     private static final Pattern COLUMN_EQUALS_PARAM = Pattern.compile("(?i)([a-zA-Z_][\\w.]*)\\s*=\\s*:(\\w+)");
     private static final Pattern PARAM_EQUALS_COLUMN = Pattern.compile("(?i):(\\w+)\\s*=\\s*([a-zA-Z_][\\w.]*)");
+    private static final Pattern WHERE_CLAUSE = Pattern.compile("(?is)\\bwhere\\b\\s+(.+?)(?=\\border\\s+by\\b|\\bgroup\\s+by\\b|\\bhaving\\b|\\blimit\\b|$)");
+    private static final Pattern PARAMETER_PREDICATE = Pattern.compile(
+            "(?is)(?:\\b[a-zA-Z_][\\w.]*\\b\\s*=\\s*:\\w+|:\\w+\\s*=\\s*\\b[a-zA-Z_][\\w.]*\\b)"
+    );
     private static final List<String> STRUCTURAL_SCOPE_COLUMNS = List.of(
             "tenant_id",
             "org_id",
@@ -655,19 +659,21 @@ public class TemplateController {
 
     private QuerySourceCandidateSourceDTO sourceMetadata(TemplateV2DraftVO draft, String sourceName, String alias) {
         if (!(draft.getSources().get(sourceName) instanceof QuerySourceVO source)) {
-            return new QuerySourceCandidateSourceDTO(sourceName, alias, null, null, false, false);
+            return new QuerySourceCandidateSourceDTO(sourceName, alias, null, null, false, false, null);
         }
         boolean parameterized = CollectKit.isNotEmpty(source.getParams());
         boolean paged = Objects.nonNull(source.getPageIndex())
                 || Objects.nonNull(source.getPageSize())
                 || Objects.nonNull(source.getMaxRows());
+        String suggestedSql = parameterized ? suggestedRelationalSql(source.getSql()) : null;
         return new QuerySourceCandidateSourceDTO(
                 sourceName,
                 alias,
                 source.getDataSourceId(),
                 source.getSql(),
                 parameterized,
-                paged
+                paged,
+                suggestedSql
         );
     }
 
@@ -1086,6 +1092,60 @@ public class TemplateController {
                 .replace("`", "")
                 .replace("[", "")
                 .replace("]", "");
+    }
+
+    private String suggestedRelationalSql(String sql) {
+        if (StrKit.isBlank(sql)) {
+            return null;
+        }
+        Matcher matcher = WHERE_CLAUSE.matcher(sql);
+        if (!matcher.find()) {
+            return null;
+        }
+        String originalWhere = matcher.group(1);
+        String rewrittenWhere = stripParameterizedPredicates(originalWhere);
+        if (Objects.equals(normalizeSqlFragment(originalWhere), normalizeSqlFragment(rewrittenWhere))) {
+            return null;
+        }
+        if (StrKit.isBlank(rewrittenWhere)) {
+            String rewritten = sql.substring(0, matcher.start()).trim() + " " + sql.substring(matcher.end()).trim();
+            return normalizeSqlSpacing(rewritten);
+        }
+        String rewritten = sql.substring(0, matcher.start(1))
+                + rewrittenWhere
+                + " "
+                + sql.substring(matcher.end(1));
+        return normalizeSqlSpacing(rewritten);
+    }
+
+    private String stripParameterizedPredicates(String whereClause) {
+        if (StrKit.isBlank(whereClause)) {
+            return whereClause;
+        }
+        String[] parts = whereClause.split("(?i)\\s+and\\s+");
+        List<String> kept = new ArrayList<>();
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            if (PARAMETER_PREDICATE.matcher(trimmed).matches()) {
+                continue;
+            }
+            kept.add(trimmed);
+        }
+        return String.join(" AND ", kept);
+    }
+
+    private String normalizeSqlFragment(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceAll("\\s+", " ").trim();
+    }
+
+    private String normalizeSqlSpacing(String sql) {
+        return sql.replaceAll("\\s+", " ").trim();
     }
 
     private List<String> candidateColumnNames(String paramName) {
