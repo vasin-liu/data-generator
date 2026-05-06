@@ -402,6 +402,8 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Inferred join s0.customer_id = s1.id"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Rewrite it as a relational lookup"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("removing per-row params"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Keep [id] as likely join keys"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("treat [name] as likely output columns"));
         Assertions.assertNotNull(lookup.getPreflight());
         Assertions.assertTrue(lookup.getPreflight().isNormalized());
         Assertions.assertTrue(lookup.getPreflight().isCalciteValid());
@@ -501,6 +503,8 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(multi.getTransform().getSql().contains("s0.customer_id = s1.id"));
         Assertions.assertTrue(multi.getTransform().getSql().contains("s0.tenant_id = s1.tenant_id"));
         Assertions.assertTrue(multi.getJoinHints().get(0).contains("s0.customer_id = s1.id"));
+        Assertions.assertTrue(multi.getJoinHints().get(0).contains("Keep [id, tenant_id] as likely join keys"));
+        Assertions.assertTrue(multi.getJoinHints().get(0).contains("treat [name] as likely output columns"));
         Assertions.assertNotNull(multi.getPreflight());
         Assertions.assertTrue(multi.getPreflight().isCalciteValid());
     }

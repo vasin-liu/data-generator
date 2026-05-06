@@ -429,6 +429,7 @@ The following implementation milestones are complete:
 54. Multi-source migration candidates now also infer simple date-window predicates, allowing rule/lookup sources with `start_time`/`end_time` style schemas to produce preflight-valid conditions such as `event_time >= start_time AND event_time <= end_time`.
 55. Parameterized lookup candidates now emit more explicit relational rewrite guidance: when a join condition can be inferred, the analysis API tells authors to remove per-row params from the source definition and reshape the lookup into a relational source that joins on the inferred business condition.
 56. Candidate SQL projection aliases are now less mechanical: source names such as `customer_lookup` are normalized toward business stems like `customer`, while primary iterator columns can keep simple names such as `id` when no collision exists.
+57. Query-source migration hints now also surface lightweight field-role guidance on inferred joins, highlighting likely join keys such as `id` / `tenant_id` and likely business output columns such as `name` so multi-source V2 drafts are easier to review before hand-tuning.
 
 ## Immediate Next Work
 

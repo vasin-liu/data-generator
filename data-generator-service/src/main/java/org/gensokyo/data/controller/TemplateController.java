@@ -729,7 +729,8 @@ public class TemplateController {
                         + inferred.predicate()
                         + " for source '"
                         + sourceMetadata.get(i).getSourceName()
-                        + "'.");
+                        + "'. "
+                        + fieldRoleHint(sourceOrder, i, sourceColumns));
                 continue;
             }
             joinHints.add("Replace ON 1 = 1 with a business join condition between "
@@ -755,7 +756,8 @@ public class TemplateController {
                             + inferred.predicate()
                             + ". Rewrite it as a relational lookup by removing per-row params from the source definition and keeping business filters that can join on "
                             + inferred.predicate()
-                            + ".");
+                            + ". "
+                            + fieldRoleHint(sourceOrder, i, sourceColumns));
                     continue;
                 }
                 joinHints.add("Source '" + source.getSourceName() + "' expects params "
@@ -1229,6 +1231,41 @@ public class TemplateController {
             return "c_" + normalized;
         }
         return normalized;
+    }
+
+    private String fieldRoleHint(List<String> sourceOrder,
+                                 int currentIndex,
+                                 Map<String, List<String>> sourceColumns) {
+        if (currentIndex <= 0 || currentIndex >= sourceOrder.size()) {
+            return "";
+        }
+        String currentSource = sourceOrder.get(currentIndex);
+        List<String> currentColumns = sourceColumns.getOrDefault(currentSource, List.of());
+        List<String> joinKeys = new ArrayList<>();
+        for (String candidate : List.of("id", "code", "type", "tenant_id", "org_id", "site_id", "area_code")) {
+            String matched = findMatchingColumn(currentColumns, List.of(candidate));
+            if (StrKit.isNotBlank(matched)) {
+                joinKeys.add(matched);
+            }
+        }
+        List<String> businessOutputs = new ArrayList<>();
+        for (String column : currentColumns) {
+            String normalized = normalizeIdentifier(column);
+            if (normalized.contains("name")
+                    || normalized.contains("title")
+                    || normalized.contains("label")
+                    || normalized.contains("desc")) {
+                businessOutputs.add(column);
+            }
+        }
+        List<String> parts = new ArrayList<>();
+        if (!joinKeys.isEmpty()) {
+            parts.add("Keep " + joinKeys + " as likely join keys");
+        }
+        if (!businessOutputs.isEmpty()) {
+            parts.add("treat " + businessOutputs + " as likely output columns");
+        }
+        return String.join("; ", parts) + (parts.isEmpty() ? "" : ".");
     }
 
     private String normalizeIdentifier(String value) {

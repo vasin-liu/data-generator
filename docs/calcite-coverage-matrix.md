@@ -235,6 +235,7 @@ Current gap:
 - structural join hints now cover common business scope columns, simple composite business keys, and basic date-window predicates; more complex temporal logic still needs explicit author review
 - parameterized lookup guidance now explicitly points users toward relational source rewrites instead of implying that per-row param execution is already a first-class V2 join runtime
 - candidate projection aliases are now closer to business-facing field names, though final naming still benefits from explicit author review in larger templates
+- inferred join hints now also call out likely join-key columns and likely business output columns, reducing the amount of manual source-schema inspection needed during multi-source migration review
 
 ### Phase 3 - Transformation migration coverage
 
