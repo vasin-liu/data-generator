@@ -47,7 +47,7 @@ public class QueryRowSource implements RowSource {
             this.rows = result.stream()
                     .map(row -> new Row(new LinkedHashMap<>(row)))
                     .toList();
-            this.schema = source.getSchema() != null ? source.getSchema() : inferSchema(result);
+            this.schema = source.getSchema() != null ? source.getSchema() : inferSchema(result, sql, params, jdbcTemplate);
         } finally {
             DynamicDataSourceContextHolder.clear();
             DialectFactory.clearDbType();
@@ -84,14 +84,37 @@ public class QueryRowSource implements RowSource {
         return normalized;
     }
 
-    private RowSchema inferSchema(List<Map<String, Object>> result) {
+    private RowSchema inferSchema(List<Map<String, Object>> result,
+                                  String sql,
+                                  Map<String, Object> params,
+                                  NamedParameterJdbcTemplate jdbcTemplate) {
         RowSchema schema = new RowSchema();
-        if (result.isEmpty()) {
+        if (!result.isEmpty()) {
+            List<ColumnDef> columns = new ArrayList<>();
+            result.get(0).forEach((key, value) -> columns.add(new ColumnDef(key, logicalType(value), true)));
+            schema.setColumns(columns);
             return schema;
         }
-        List<ColumnDef> columns = new ArrayList<>();
-        result.get(0).forEach((key, value) -> columns.add(new ColumnDef(key, logicalType(value), true)));
-        schema.setColumns(columns);
+        return inferSchemaWithoutRows(schema, sql, params, jdbcTemplate);
+    }
+
+    private RowSchema inferSchemaWithoutRows(RowSchema schema,
+                                             String sql,
+                                             Map<String, Object> params,
+                                             NamedParameterJdbcTemplate jdbcTemplate) {
+        jdbcTemplate.query(sql, params, (ResultSetExtractor<Void>) rs -> {
+            ResultSetMetaData metaData = rs.getMetaData();
+            List<ColumnDef> columns = new ArrayList<>();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                columns.add(new ColumnDef(
+                        metaData.getColumnLabel(i).toLowerCase(Locale.ROOT),
+                        normalizeJdbcType(metaData.getColumnTypeName(i)),
+                        true
+                ));
+            }
+            schema.setColumns(columns);
+            return null;
+        });
         return schema;
     }
 
@@ -106,6 +129,21 @@ public class QueryRowSource implements RowSource {
             return "BOOLEAN";
         }
         return "VARCHAR";
+    }
+
+    private String normalizeJdbcType(String jdbcType) {
+        if (jdbcType == null || jdbcType.isBlank()) {
+            return "VARCHAR";
+        }
+        String normalized = jdbcType.trim().toUpperCase(Locale.ROOT);
+        return switch (normalized) {
+            case "INTEGER", "INT", "BIGINT", "SMALLINT", "TINYINT" -> "BIGINT";
+            case "DECIMAL", "NUMERIC", "DOUBLE", "FLOAT", "REAL" -> "DECIMAL";
+            case "BOOLEAN", "BIT" -> "BOOLEAN";
+            case "DATE" -> "DATE";
+            case "TIMESTAMP", "TIMESTAMP WITH TIME ZONE", "DATETIME" -> "TIMESTAMP";
+            default -> "VARCHAR";
+        };
     }
 
     private String resolveSql(QuerySourceVO source, DataSource dataSource) {

@@ -57,6 +57,32 @@ class QueryRowSourceTests {
     }
 
     @Test
+    void infersSchemaEvenWhenParameterizedQueryReturnsNoRows() {
+        NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource());
+        jdbcTemplate.getJdbcTemplate().execute("create table sample_empty_param(num_value bigint, name varchar(20))");
+        jdbcTemplate.getJdbcTemplate().execute("insert into sample_empty_param(num_value, name) values (1, 'a'), (2, 'b')");
+
+        PlainScriptVO script = new PlainScriptVO();
+        script.setContent("99");
+        ParamVO param = new ParamVO();
+        param.setName("minValue");
+        param.setLanguage(script);
+
+        QuerySourceVO source = new QuerySourceVO();
+        source.setDataSourceId("ignored");
+        source.setSql("select num_value, name from sample_empty_param where num_value >= :minValue order by num_value");
+        source.setParams(List.of(param));
+
+        QueryRowSource rowSource = new QueryRowSource("input", source, jdbcTemplate);
+
+        Assertions.assertTrue(rowSource.rows().isEmpty());
+        Assertions.assertTrue(rowSource.schema().contains("num_value"));
+        Assertions.assertTrue(rowSource.schema().contains("name"));
+        Assertions.assertEquals("BIGINT", rowSource.schema().column("num_value").getLogicalType());
+        Assertions.assertEquals("VARCHAR", rowSource.schema().column("name").getLogicalType());
+    }
+
+    @Test
     void appliesPageWindowAndMaxRowsForQuerySource() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource());
         jdbcTemplate.getJdbcTemplate().execute("create table sample_window(num_value bigint, name varchar(20))");

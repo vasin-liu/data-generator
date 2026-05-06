@@ -421,36 +421,37 @@ The following implementation milestones are complete:
 46. The migration examples now also cover the repository AI reader path through a first-class `AiSourceVO` / `OLLAMA` example, and the docs now explicitly record that `SourcePolicyVO` currently models ordered/random materialization aliases plus `limit`, not full V1 consumptive `SELECT` semantics.
 47. Query-source migration analysis is now V1-aware for selection and reader-pool semantics: `ONCE_ORDER`, `ONCE_RANDOM`, `MULTIPLE_ORDER`, and multi-reader `EQUAL` / `WEIGHT` cases emit explicit approximation warnings instead of silently appearing fully compatible.
 48. V1 query-source extraction no longer overwrites multiple JDBC readers declared under the same field; migrated drafts now emit stable unique source names such as `customer_lookup` and `customer_lookup_2`.
+49. The migration examples now also cover repository-real selection-heavy templates, showing when `SourcePolicyVO` approximation is acceptable and when V1 selector behavior should instead be rewritten explicitly as relational V2 SQL.
+50. Multi-source migration candidates now infer practical join predicates from parameter names, query predicates, and runtime-resolved source schemas; lookup skeletons can emit preflight-valid joins such as `s0.customer_id = s1.id` instead of only `ON 1 = 1`.
 
 ## Immediate Next Work
 
 The next work should be done in the following order. This supersedes the older AI-first next-step recommendation because the transformation core and UDF extension surface have advanced.
 
-### Next 1. Continue file-backed source/sink adapters
+### Next 1. Expand business-scenario migration rewrites
 
 Goal:
 
-- close the largest remaining practical source/sink gap after JDBC/Kafka/Elasticsearch
+- convert the remaining high-value V1 business templates into trustworthy V2 authoring patterns, especially where direct `SourcePolicyVO` parity does not exist
 
 Recommended implementation:
 
-- harden remaining CSV source options and diagnostics around schema/header mismatch
-- add a PF4J or provider-level fixture for custom CSV parser replacement if parser customization becomes a concrete plugin requirement
-- harden JSON nested value strategy; root selection now has a lightweight built-in baseline and fail-fast miss diagnostics
-- keep source configuration Seatunnel-style: connection/path/read options live inside the source definition
-- decide whether concrete AI bridge, additional external plugin fixtures, or migration-example batches should be next
+- keep extending `docs/calcite-v1-v2-migration-examples.md` with repository-real templates rather than synthetic cases
+- rewrite selection-heavy templates explicitly when their real intent is dimensional expansion or weighted branching
+- keep `SourcePolicyVO` only for cases where ordered/shuffled materialization is good enough
+- keep documenting exact-vs-approximate migration boundaries so the preview/analyze APIs do not over-promise parity
 
-### Next 2. Plugin diagnostics hardening
+### Next 2. Harden multi-source SQL migration ergonomics
 
 Goal:
 
-- improve failure diagnostics now that PF4J source/transform/sink/UDF contribution paths are all executable
+- make multi-source V2 authoring easier for real business templates that currently rely on field DAGs and implicit V1 dependency flow
 
 Recommended implementation:
 
-- add malformed PF4J jar fixtures if a real-world PF4J packaging failure cannot be diagnosed clearly from the current locator start/load wrapper
-- add plugin descriptor mismatch or missing repository descriptor diagnostics if needed
-- add one focused fixture for plugin-provided CSV parser replacement only if parser customization becomes a concrete requirement
+- continue beyond the new param-name/schema-based join inference for more business-specific patterns such as composite keys, tenant scoping, and date-window joins
+- add better aliasing and projection guidance for multi-query-source migration
+- keep validating candidate transforms with Calcite preflight before persistence
 
 ### Next 3. AI bridge hardening and provider expansion
 
@@ -466,11 +467,23 @@ Recommended implementation:
 - define timeout and model error diagnostics
 - decide whether additional providers should stay in `data-generator-service`, move into a dedicated V2 AI runtime module, or be offered as external PF4J plugins
 
-### Next 4. Business-scenario parity expansion and scorecard hardening
+### Next 4. Plugin diagnostics hardening
 
 Goal:
 
-- validate that the new SQL/UDF/source/sink surface covers more business scenarios than the first documented migration-example batch
+- improve failure diagnostics now that PF4J source/transform/sink/UDF contribution paths are all executable
+
+Recommended implementation:
+
+- add malformed PF4J jar fixtures if a real-world PF4J packaging failure cannot be diagnosed clearly from the current locator start/load wrapper
+- add plugin descriptor mismatch or missing repository descriptor diagnostics if needed
+- add one focused fixture for plugin-provided CSV parser replacement only if parser customization becomes a concrete requirement
+
+### Next 5. Business-scenario parity expansion and scorecard hardening
+
+Goal:
+
+- validate that the new SQL/UDF/source/sink surface covers more business scenarios than the current migration-example batch
 
 Recommended implementation:
 
@@ -494,11 +507,11 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. continue file-backed source/sink adapters, starting with CSV hardening and JSON source
-2. prove plugin-provided UDFs through the external PF4J packaging path
+1. expand repository-real migration rewrites for selection-heavy and multi-source templates
+2. harden multi-source SQL candidate generation beyond the current `INNER JOIN` subset
 3. harden the concrete Ollama bridge and add additional provider implementations only when justified by business scenarios
-4. expand V1-to-V2 migration examples and keep the parity scorecard aligned against business scenarios
-5. harden multi-source SQL semantics beyond the current `INNER JOIN` subset
+4. prove plugin-provided UDFs through the external PF4J packaging path
+5. keep the parity scorecard aligned against business scenarios instead of broad speculative feature work
 6. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 
 The plugin-framework recommendation is:

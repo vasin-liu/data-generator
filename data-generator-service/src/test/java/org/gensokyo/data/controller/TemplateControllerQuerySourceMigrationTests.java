@@ -209,7 +209,7 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertNotNull(result.getData().getDraft());
         Assertions.assertEquals(2, result.getData().getDraft().getSources().size());
         Assertions.assertNull(result.getData().getDraft().getTransform());
-        Assertions.assertEquals("single-source-baseline", result.getData().getRecommendedScenario());
+        Assertions.assertEquals("multi-source-join-skeleton", result.getData().getRecommendedScenario());
         Assertions.assertNotNull(result.getData().getWarnings());
         Assertions.assertFalse(result.getData().getWarnings().isEmpty());
         Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("Multiple QuerySourceVO sources")));
@@ -340,6 +340,111 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("MULTIPLE_ORDER")));
         Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("ONCE_RANDOM")));
         Assertions.assertTrue(result.getData().getWarnings().stream().anyMatch(it -> it.contains("not preserve")));
+    }
+
+    @Test
+    void analyzesParameterizedLookupCandidateForMultiSourceMigration() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_lookup");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_lookup");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_lookup(id bigint, customer_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_lookup(id bigint, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_lookup(id, customer_id) values (1, 10)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_lookup(id, name) values (10, 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91011L);
+        entity.setName("multi-source-lookup-analyze");
+        entity.setContentYaml("""
+                name: multi-source-lookup-analyze
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id from t_order_lookup
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        params:
+                          - name: customerId
+                            language:
+                              type: plain
+                              content: 10
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, name from t_customer_lookup where id = :customerId
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertNotNull(result.getData());
+        Assertions.assertEquals(3, result.getData().getCandidates().size());
+        QuerySourceTransformCandidateDTO lookup = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-lookup-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("LEFT JOIN"));
+        Assertions.assertTrue(lookup.getTransform().getSql().contains("s0.customer_id = s1.id"));
+        Assertions.assertEquals(1, lookup.getJoinHints().size());
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("expects params [customerId]"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Inferred join s0.customer_id = s1.id"));
+        Assertions.assertNotNull(lookup.getPreflight());
+        Assertions.assertTrue(lookup.getPreflight().isNormalized());
+        Assertions.assertTrue(lookup.getPreflight().isCalciteValid());
+        Assertions.assertEquals("multi-source-lookup-skeleton", result.getData().getRecommendedScenario());
+    }
+
+    @Test
+    void infersJoinPredicateForNonParameterizedMultiSourceWhenColumnsMatch() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_join");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_join");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_join(id bigint, customer_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_join(id bigint, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_join(id, customer_id) values (1, 10)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_join(id, name) values (10, 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91012L);
+        entity.setName("multi-source-join-infer");
+        entity.setContentYaml("""
+                name: multi-source-join-infer
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id from t_order_join
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        params:
+                          - name: customerId
+                            language:
+                              type: plain
+                              content: 10
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, name from t_customer_join where id = :customerId
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<TemplateV2DraftVO> migrated = templateController.applyQuerySourceCandidateById(entity.getId(), "multi-source-join-skeleton");
+
+        Assertions.assertTrue(migrated.isSuccess());
+        Assertions.assertNotNull(migrated.getData());
+        Assertions.assertInstanceOf(SqlTransformVO.class, migrated.getData().getTransform());
+        SqlTransformVO transform = (SqlTransformVO) migrated.getData().getTransform();
+        Assertions.assertTrue(transform.getSql().contains("JOIN"));
+        Assertions.assertTrue(transform.getSql().contains("s0.customer_id = s1.id"));
+        Assertions.assertFalse(transform.getSql().contains("ON 1 = 1"));
     }
 
     @Test

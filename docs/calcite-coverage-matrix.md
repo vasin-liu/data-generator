@@ -229,6 +229,8 @@ Current gap:
 - CSV/Excel/JSON sources and sinks now have first-pass V2 coverage
 - concrete Ollama-backed AI bridge is now in place behind `AiRuntimeBridge`; broader provider coverage remains pending
 - `SourcePolicyVO` currently covers ordered/random materialization aliases plus `limit`, but not full V1 consumptive `SELECT` semantics such as depletion, repeated-use counts, or weighted reader pools
+- the migration examples now also show that some selection-heavy templates should be rewritten explicitly in V2 relational form instead of being mapped mechanically into `SourcePolicyVO`
+- multi-source migration candidate generation now infers simple lookup joins from param names and source schemas, but composite/business-specific join semantics still need explicit author review
 
 ### Phase 3 - Transformation migration coverage
 

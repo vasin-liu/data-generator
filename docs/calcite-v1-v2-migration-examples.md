@@ -478,6 +478,184 @@ Migration notes:
 - When the parser returns structured rows instead of plain strings, declare `schema` explicitly and query the returned columns directly.
 - Two AI sources can stay independent in V2; if they need relational composition later, use multiple named sources plus SQL joins or staged transforms.
 
+## Example 8. `utcs/site/01_UTCS_BAS_SITE_INFO`
+
+Source template:
+
+- `data-generator-service/src/main/resources/template/utcs/site/01_UTCS_BAS_SITE_INFO.yaml`
+
+Representative V1 patterns:
+
+- JDBC reader with `inMemory=true`
+- `SELECT.strategy=ONCE_RANDOM`
+- multiple dependent fields projected from the same dataset row
+
+Suggested V2 shape:
+
+```yaml
+name: utcs_bas_site_info_v2
+sources:
+  seq:
+    type: iterator
+    iterator:
+      type: number
+      from: 1
+      to: 100
+      step: 1
+  site_seed:
+    type: query
+    dataSourceId: utcs_pg
+    sql: |
+      SELECT code, road_name, area_code, supplier, current_state, road_level
+      FROM utcs_bas_siteinfo
+      WHERE road_name IS NOT NULL
+        AND code LIKE 'GZ%'
+      LIMIT 1000
+    policy:
+      inMemory: true
+      selectionStrategy: ONCE_RANDOM
+
+transform:
+  type: sql
+  sql: |
+    SELECT
+      FAKER_SNOWFLAKE() AS ID,
+      site_seed.code AS SITE_CODE,
+      site_seed.road_name AS SITE_NAME,
+      site_seed.area_code AS DISTRICT_CODE,
+      site_seed.supplier AS SIGNAL_MODEL,
+      site_seed.current_state AS NETWORKING,
+      site_seed.road_level AS ROAD_TYPE
+    FROM seq
+    INNER JOIN site_seed ON 1 = 1
+
+sink:
+  writers:
+    - type: console
+```
+
+Migration notes:
+
+- This is a good fit for `QuerySourceVO` plus `SourcePolicyVO` when the business only needs shuffled in-memory materialization.
+- Current V2 `ONCE_RANDOM` is still an approximation: it preserves shuffled ordering plus `limit`, not strict cross-call depletion semantics.
+- The V1 field DAG around `SITE_CODE` should collapse into one SQL projection instead of keeping separate dependent field stages.
+
+## Example 9. `tocc/parking/07_tourist_num_day_hour_stat`
+
+Source template:
+
+- `data-generator-service/src/main/resources/template/tocc/parking/07_tourist_num_day_hour_stat.yaml`
+
+Representative V1 patterns:
+
+- `SELECT.strategy=MULTIPLE_ORDER`
+- `SELECT.strategy=REPEAT_ORDER`
+- derived datetime fields composed from sequence dimensions
+
+Suggested V2 shape:
+
+```yaml
+name: tourist_num_day_hour_stat_v2
+sources:
+  days:
+    type: iterator
+    iterator:
+      type: constant
+      dataset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  hours:
+    type: iterator
+    iterator:
+      type: constant
+      dataset: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+transform:
+  type: sql
+  sql: |
+    SELECT
+      FAKER_SNOWFLAKE() AS ID,
+      FAKER_DATETIME_MINUS_DAYS(days.value) AS STAT_DAY,
+      FAKER_DATETIME_MINUS_HOURS(
+        FAKER_DATETIME_MINUS_DAYS(days.value),
+        hours.value
+      ) AS STAT_HOUR,
+      FAKER_NUMBER_BETWEEN(0, 1000) AS TOURIST_NUM,
+      CASE
+        WHEN FAKER_NUMBER_BETWEEN(1, 2) = 1 THEN 1
+        ELSE 2
+      END AS TOURIST_TYPE,
+      FAKER_DATETIME_NOW() AS CREATE_TIME,
+      FAKER_DATETIME_NOW() AS UPDATE_TIME
+    FROM days
+    INNER JOIN hours ON 1 = 1
+
+sink:
+  writers:
+    - type: jdbc
+      dataSourceId: tocc_parking
+      target: TOURIST_NUM_DAY_HOUR_STAT
+      template: ID,STAT_DAY,STAT_HOUR,TOURIST_NUM,TOURIST_TYPE,CREATE_TIME,UPDATE_TIME
+```
+
+Migration notes:
+
+- This template is better rewritten explicitly in relational V2 form than mapped mechanically into `SourcePolicyVO`.
+- `MULTIPLE_ORDER` plus `REPEAT_ORDER` here is really expressing a `days × hours` shape, and SQL cross-join preserves that intent more directly than selection-policy approximation.
+- When the business intent is dimensional expansion, prefer explicit sources and joins over trying to preserve V1 selector internals.
+
+## Example 10. `demo/01_带权重读取器样例`
+
+Source template:
+
+- `data-generator-service/src/main/resources/template/demo/01_带权重读取器样例.yaml`
+
+Representative V1 patterns:
+
+- `READ.strategy=WEIGHT`
+- one field randomly switches between two generation branches
+- reader pool mixes faker output and constant/value-style output
+
+Suggested V2 shape:
+
+```yaml
+name: demo_weighted_read_v2
+sources:
+  seq:
+    type: iterator
+    iterator:
+      type: number
+      from: 1
+      to: 5
+      step: 1
+
+transform:
+  type: sql
+  sql: |
+    SELECT
+      CASE
+        WHEN FAKER_NUMBER_BETWEEN(1, 200) <= 100
+          THEN CAST(FAKER_SNOWFLAKE() AS VARCHAR)
+        ELSE FAKER_TEXT(9, 10)
+      END AS ID,
+      CASE
+        WHEN MOD(seq.value, 4) = 0 THEN 'S0A'
+        WHEN MOD(seq.value, 4) = 1 THEN 'S0X'
+        WHEN MOD(seq.value, 4) = 2 THEN 'S0D'
+        ELSE 'S0H'
+      END AS STATUS,
+      FAKER_DATE_PAST(1, 'yyyy-MM-dd HH:mm:ss') AS CREATE_TIME
+    FROM seq
+
+sink:
+  writers:
+    - type: console
+```
+
+Migration notes:
+
+- Current V2 has no first-class weighted reader-pool runtime equivalent, so this should be rewritten as explicit SQL branching when only weighted business intent matters.
+- If exact historic reader dispatch behavior matters, keep the path compatibility-first instead of pretending `SourcePolicyVO` preserves it.
+- This pattern is usually easier to reason about after migration because branch logic becomes visible in one SQL projection.
+
 ## Source Policy Mapping
 
 Current V2 `SourcePolicyVO` is a source materialization policy, not a byte-for-byte clone of V1 `SELECT` stage consumption semantics.
@@ -496,6 +674,10 @@ Current recommended migration rule:
 
 - If the old template only needs stable ordered or shuffled materialization, use `SourcePolicyVO`.
 - If the old template depends on per-call depletion, repeated reuse count, or reader-pool weight fairness, keep the path compatibility-first for now or rewrite the business intent explicitly in V2 source design.
+- `utcs/site/01_UTCS_BAS_SITE_INFO` is a reasonable candidate for current `SourcePolicyVO` approximation.
+- `tocc/parking/07_tourist_num_day_hour_stat` is better rewritten as explicit relational dimensions than migrated mechanically.
+- `demo/01_带权重读取器样例` is better rewritten as explicit SQL branching than treated as a preserved reader-pool contract.
+- for multi-source lookup templates, the current analysis API can now infer first-pass joins such as `s0.customer_id = s1.id` from parameter names and query predicates, but the result should still be treated as an authoring draft rather than exact business truth
 
 ## Recommended Migration Order
 

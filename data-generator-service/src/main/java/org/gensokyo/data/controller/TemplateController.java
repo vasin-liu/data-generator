@@ -26,6 +26,7 @@ import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.qo.UpdateTemplateQO;
+import org.gensokyo.data.model.vo.stage.ParamVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
@@ -53,7 +54,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 模板管理接口
@@ -68,6 +72,9 @@ import java.util.Objects;
 @Validated
 @RequiredArgsConstructor
 public class TemplateController {
+    private static final Pattern COLUMN_EQUALS_PARAM = Pattern.compile("(?i)([a-zA-Z_][\\w.]*)\\s*=\\s*:(\\w+)");
+    private static final Pattern PARAM_EQUALS_COLUMN = Pattern.compile("(?i):(\\w+)\\s*=\\s*([a-zA-Z_][\\w.]*)");
+
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
     private final Templates templates;
@@ -458,25 +465,22 @@ public class TemplateController {
             for (int i = 0; i < sourceOrder.size(); i++) {
                 aliases.put(sourceOrder.get(i), "s" + i);
             }
-            List<String> projectionSkeleton = new ArrayList<>();
-            List<String> joinHints = new ArrayList<>();
-            List<QuerySourceCandidateSourceDTO> sourceMetadata = new ArrayList<>();
-            StringBuilder sql = new StringBuilder("SELECT ");
-            for (String alias : aliases.values()) {
-                projectionSkeleton.add(alias + ".*");
-            }
-            sql.append(String.join(", ", projectionSkeleton)).append(" FROM ");
-            for (int i = 0; i < sourceOrder.size(); i++) {
-                String sourceName = sourceOrder.get(i);
-                String alias = aliases.get(sourceName);
-                sourceMetadata.add(sourceMetadata(draft, sourceName, alias));
-                if (i == 0) {
-                    sql.append(sourceName).append(' ').append(alias);
-                } else {
-                    sql.append(" JOIN ").append(sourceName).append(' ').append(alias).append(" ON 1 = 1");
-                    joinHints.add("Replace ON 1 = 1 with a business join condition between "
-                            + aliases.get(sourceOrder.get(i - 1)) + " and " + alias);
-                }
+            List<QuerySourceCandidateSourceDTO> sourceMetadata = multiSourceMetadata(draft, sourceOrder, aliases);
+            List<String> projectionSkeleton = projectionSkeleton(aliases);
+            Map<String, List<String>> sourceColumns = resolveSourceColumns(draft, sourceOrder);
+            if (hasParameterizedSecondarySource(sourceMetadata)) {
+                candidates.add(new QuerySourceTransformCandidateDTO(
+                        "multi-source-lookup-skeleton",
+                        primarySource,
+                        sourceOrder,
+                        new ArrayList<>(aliases.values()),
+                        projectionSkeleton,
+                        lookupJoinHints(draft, sourceOrder, aliases, sourceMetadata, sourceColumns),
+                        sourceMetadata,
+                        sqlTransform(buildMultiSourceSql(draft, sourceOrder, aliases, projectionSkeleton, sourceMetadata, sourceColumns, true),
+                                "candidate_multi_source_lookup_skeleton"),
+                        null
+                ));
             }
             candidates.add(new QuerySourceTransformCandidateDTO(
                     "multi-source-join-skeleton",
@@ -484,9 +488,10 @@ public class TemplateController {
                     sourceOrder,
                     new ArrayList<>(aliases.values()),
                     projectionSkeleton,
-                    joinHints,
+                    genericJoinHints(draft, sourceOrder, aliases, sourceMetadata, sourceColumns),
                     sourceMetadata,
-                    sqlTransform(sql.toString(), "candidate_multi_source_join_skeleton"),
+                    sqlTransform(buildMultiSourceSql(draft, sourceOrder, aliases, projectionSkeleton, sourceMetadata, sourceColumns, false),
+                            "candidate_multi_source_join_skeleton"),
                     null
             ));
         }
@@ -516,6 +521,10 @@ public class TemplateController {
     }
 
     private String recommendedScenario(List<QuerySourceTransformCandidateDTO> candidates) {
+        QuerySourceTransformCandidateDTO preferred = preferredCandidate(candidates);
+        if (preferred != null) {
+            return preferred.getScenario();
+        }
         for (QuerySourceTransformCandidateDTO candidate : candidates) {
             if (candidate.getPreflight() != null
                     && candidate.getPreflight().isNormalized()
@@ -529,6 +538,47 @@ public class TemplateController {
             }
         }
         return candidates.isEmpty() ? null : candidates.getFirst().getScenario();
+    }
+
+    private QuerySourceTransformCandidateDTO preferredCandidate(List<QuerySourceTransformCandidateDTO> candidates) {
+        if (candidates == null || candidates.isEmpty()) {
+            return null;
+        }
+        boolean hasMultiSource = candidates.stream().anyMatch(it -> it.getSourceOrder() != null && it.getSourceOrder().size() > 1);
+        if (!hasMultiSource) {
+            return null;
+        }
+        QuerySourceTransformCandidateDTO lookup = firstValidScenario(candidates, "multi-source-lookup-skeleton");
+        if (lookup != null) {
+            return lookup;
+        }
+        QuerySourceTransformCandidateDTO join = firstValidScenario(candidates, "multi-source-join-skeleton");
+        if (join != null) {
+            return join;
+        }
+        return null;
+    }
+
+    private QuerySourceTransformCandidateDTO firstValidScenario(List<QuerySourceTransformCandidateDTO> candidates, String scenario) {
+        for (QuerySourceTransformCandidateDTO candidate : candidates) {
+            if (!scenario.equals(candidate.getScenario())) {
+                continue;
+            }
+            if (candidate.getPreflight() != null
+                    && candidate.getPreflight().isNormalized()
+                    && candidate.getPreflight().isCalciteValid()) {
+                return candidate;
+            }
+        }
+        for (QuerySourceTransformCandidateDTO candidate : candidates) {
+            if (!scenario.equals(candidate.getScenario())) {
+                continue;
+            }
+            if (candidate.getPreflight() != null && candidate.getPreflight().isNormalized()) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     private QuerySourceCandidateSourceDTO sourceMetadata(TemplateV2DraftVO draft, String sourceName, String alias) {
@@ -549,11 +599,355 @@ public class TemplateController {
         );
     }
 
+    private List<QuerySourceCandidateSourceDTO> multiSourceMetadata(TemplateV2DraftVO draft,
+                                                                    List<String> sourceOrder,
+                                                                    LinkedHashMap<String, String> aliases) {
+        List<QuerySourceCandidateSourceDTO> sourceMetadata = new ArrayList<>();
+        for (String sourceName : sourceOrder) {
+            sourceMetadata.add(sourceMetadata(draft, sourceName, aliases.get(sourceName)));
+        }
+        return sourceMetadata;
+    }
+
+    private List<String> projectionSkeleton(LinkedHashMap<String, String> aliases) {
+        List<String> projectionSkeleton = new ArrayList<>();
+        for (String alias : aliases.values()) {
+            projectionSkeleton.add(alias + ".*");
+        }
+        return projectionSkeleton;
+    }
+
+    private boolean hasParameterizedSecondarySource(List<QuerySourceCandidateSourceDTO> sourceMetadata) {
+        if (sourceMetadata.size() <= 1) {
+            return false;
+        }
+        for (int i = 1; i < sourceMetadata.size(); i++) {
+            if (sourceMetadata.get(i).isParameterized()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> genericJoinHints(TemplateV2DraftVO draft,
+                                          List<String> sourceOrder,
+                                          LinkedHashMap<String, String> aliases,
+                                          List<QuerySourceCandidateSourceDTO> sourceMetadata,
+                                          Map<String, List<String>> sourceColumns) {
+        List<String> joinHints = new ArrayList<>();
+        for (int i = 1; i < sourceOrder.size(); i++) {
+            InferredJoinCondition inferred = inferJoinCondition(draft, sourceOrder, aliases, sourceMetadata, sourceColumns, i);
+            if (inferred != null) {
+                joinHints.add("Review inferred join condition "
+                        + inferred.predicate()
+                        + " for source '"
+                        + sourceMetadata.get(i).getSourceName()
+                        + "'.");
+                continue;
+            }
+            joinHints.add("Replace ON 1 = 1 with a business join condition between "
+                    + aliases.get(sourceOrder.get(i - 1)) + " and " + aliases.get(sourceOrder.get(i)));
+        }
+        return joinHints;
+    }
+
+    private List<String> lookupJoinHints(TemplateV2DraftVO draft,
+                                         List<String> sourceOrder,
+                                         LinkedHashMap<String, String> aliases,
+                                         List<QuerySourceCandidateSourceDTO> sourceMetadata,
+                                         Map<String, List<String>> sourceColumns) {
+        List<String> joinHints = new ArrayList<>();
+        for (int i = 1; i < sourceOrder.size(); i++) {
+            QuerySourceCandidateSourceDTO source = sourceMetadata.get(i);
+            if (source.isParameterized()) {
+                InferredJoinCondition inferred = inferJoinCondition(draft, sourceOrder, aliases, sourceMetadata, sourceColumns, i);
+                if (inferred != null) {
+                    joinHints.add("Source '" + source.getSourceName() + "' expects params "
+                            + parameterNames(draft, source.getSourceName())
+                            + ". Inferred join "
+                            + inferred.predicate()
+                            + "; if the source query is still row-parameterized, widen it into a relational lookup before finalizing.");
+                    continue;
+                }
+                joinHints.add("Source '" + source.getSourceName() + "' expects params "
+                        + parameterNames(draft, source.getSourceName())
+                        + ". Replace ON 1 = 1 with a business join that derives these values from upstream rows.");
+            } else {
+                joinHints.add("Replace ON 1 = 1 with a business lookup condition between "
+                        + aliases.get(sourceOrder.get(i - 1)) + " and " + aliases.get(sourceOrder.get(i)));
+            }
+        }
+        return joinHints;
+    }
+
+    private List<String> parameterNames(TemplateV2DraftVO draft, String sourceName) {
+        if (!(draft.getSources().get(sourceName) instanceof QuerySourceVO source) || source.getParams() == null) {
+            return List.of();
+        }
+        List<String> names = new ArrayList<>();
+        for (ParamVO param : source.getParams()) {
+            if (param != null && StrKit.isNotBlank(param.getName())) {
+                names.add(param.getName());
+            }
+        }
+        return names;
+    }
+
+    private String buildMultiSourceSql(TemplateV2DraftVO draft,
+                                       List<String> sourceOrder,
+                                       LinkedHashMap<String, String> aliases,
+                                       List<String> projectionSkeleton,
+                                       List<QuerySourceCandidateSourceDTO> sourceMetadata,
+                                       Map<String, List<String>> sourceColumns,
+                                       boolean lookupMode) {
+        StringBuilder sql = new StringBuilder("SELECT ");
+        sql.append(String.join(", ", projectionSkeleton)).append(" FROM ");
+        for (int i = 0; i < sourceOrder.size(); i++) {
+            String sourceName = sourceOrder.get(i);
+            String alias = aliases.get(sourceName);
+            if (i == 0) {
+                sql.append(sourceName).append(' ').append(alias);
+                continue;
+            }
+            String joinType = lookupMode && sourceMetadata.get(i).isParameterized() ? " LEFT JOIN " : " JOIN ";
+            InferredJoinCondition inferred = inferJoinCondition(draft, sourceOrder, aliases, sourceMetadata, sourceColumns, i);
+            sql.append(joinType)
+                    .append(sourceName)
+                    .append(' ')
+                    .append(alias)
+                    .append(" ON ")
+                    .append(inferred == null ? "1 = 1" : inferred.predicate());
+        }
+        return sql.toString();
+    }
+
+    private Map<String, List<String>> resolveSourceColumns(TemplateV2DraftVO draft, List<String> sourceOrder) {
+        Map<String, List<String>> sourceColumns = new LinkedHashMap<>();
+        for (String sourceName : sourceOrder) {
+            sourceColumns.put(sourceName, resolveSourceColumns(draft, sourceName));
+        }
+        return sourceColumns;
+    }
+
+    private List<String> resolveSourceColumns(TemplateV2DraftVO draft, String sourceName) {
+        SourceVO source = draft.getSources().get(sourceName);
+        if (source == null) {
+            return List.of();
+        }
+        if (source instanceof QuerySourceVO querySource
+                && querySource.getSchema() != null
+                && CollectKit.isNotEmpty(querySource.getSchema().getColumns())) {
+            List<String> columns = new ArrayList<>();
+            querySource.getSchema().getColumns().forEach(column -> columns.add(column.getName()));
+            return columns;
+        }
+        try {
+            RowSource rowSource = createSource(sourceName, source);
+            if (rowSource.schema() == null || CollectKit.isEmpty(rowSource.schema().getColumns())) {
+                return List.of();
+            }
+            List<String> columns = new ArrayList<>();
+            rowSource.schema().getColumns().forEach(column -> columns.add(column.getName()));
+            return columns;
+        } catch (Exception e) {
+            log.debug("Failed to resolve source columns for candidate inference: {}", sourceName, e);
+            return List.of();
+        }
+    }
+
+    private InferredJoinCondition inferJoinCondition(TemplateV2DraftVO draft,
+                                                     List<String> sourceOrder,
+                                                     LinkedHashMap<String, String> aliases,
+                                                     List<QuerySourceCandidateSourceDTO> sourceMetadata,
+                                                     Map<String, List<String>> sourceColumns,
+                                                     int currentIndex) {
+        if (currentIndex <= 0 || currentIndex >= sourceOrder.size()) {
+            return null;
+        }
+        String currentSourceName = sourceOrder.get(currentIndex);
+        List<String> params = parameterNames(draft, currentSourceName);
+        if (CollectKit.isEmpty(params)) {
+            return null;
+        }
+        Map<String, String> paramColumns = extractParameterColumns(sourceMetadata.get(currentIndex).getSql());
+        List<String> currentColumns = sourceColumns.getOrDefault(currentSourceName, List.of());
+        List<String> predicates = new ArrayList<>();
+        for (String paramName : params) {
+            SourceColumnRef upstream = findUpstreamColumn(paramName, sourceOrder, currentIndex, aliases, sourceColumns);
+            String currentColumn = findCurrentColumn(paramName, paramColumns, currentColumns);
+            if (upstream == null || StrKit.isBlank(currentColumn)) {
+                continue;
+            }
+            predicates.add(upstream.alias() + "." + upstream.column() + " = " + aliases.get(currentSourceName) + "." + currentColumn);
+        }
+        if (predicates.isEmpty()) {
+            return null;
+        }
+        return new InferredJoinCondition(String.join(" AND ", predicates));
+    }
+
+    private SourceColumnRef findUpstreamColumn(String paramName,
+                                               List<String> sourceOrder,
+                                               int currentIndex,
+                                               LinkedHashMap<String, String> aliases,
+                                               Map<String, List<String>> sourceColumns) {
+        List<String> candidates = candidateColumnNames(paramName);
+        for (int i = currentIndex - 1; i >= 0; i--) {
+            String sourceName = sourceOrder.get(i);
+            String column = findMatchingColumn(sourceColumns.getOrDefault(sourceName, List.of()), candidates);
+            if (StrKit.isNotBlank(column)) {
+                return new SourceColumnRef(sourceName, aliases.get(sourceName), column);
+            }
+        }
+        return null;
+    }
+
+    private String findCurrentColumn(String paramName,
+                                     Map<String, String> paramColumns,
+                                     List<String> currentColumns) {
+        String hinted = paramColumns.get(paramName);
+        if (StrKit.isNotBlank(hinted)) {
+            return hinted;
+        }
+        String matched = findMatchingColumn(currentColumns, candidateColumnNames(paramName));
+        if (StrKit.isNotBlank(matched)) {
+            return matched;
+        }
+        if (paramName != null
+                && paramName.toLowerCase(Locale.ROOT).endsWith("id")
+                && containsColumn(currentColumns, "id")) {
+            return "id";
+        }
+        return null;
+    }
+
+    private Map<String, String> extractParameterColumns(String sql) {
+        Map<String, String> columns = new LinkedHashMap<>();
+        if (StrKit.isBlank(sql)) {
+            return columns;
+        }
+        collectParameterColumns(columns, COLUMN_EQUALS_PARAM.matcher(sql), false);
+        collectParameterColumns(columns, PARAM_EQUALS_COLUMN.matcher(sql), true);
+        return columns;
+    }
+
+    private void collectParameterColumns(Map<String, String> columns, Matcher matcher, boolean reversed) {
+        while (matcher.find()) {
+            String column = unqualifyIdentifier(reversed ? matcher.group(2) : matcher.group(1));
+            String param = reversed ? matcher.group(1) : matcher.group(2);
+            if (StrKit.isNotBlank(column) && StrKit.isNotBlank(param)) {
+                columns.putIfAbsent(param, column);
+            }
+        }
+    }
+
+    private String unqualifyIdentifier(String identifier) {
+        if (StrKit.isBlank(identifier)) {
+            return null;
+        }
+        String normalized = identifier.trim();
+        int index = normalized.lastIndexOf('.');
+        if (index >= 0 && index + 1 < normalized.length()) {
+            normalized = normalized.substring(index + 1);
+        }
+        return normalized.replace("\"", "")
+                .replace("`", "")
+                .replace("[", "")
+                .replace("]", "");
+    }
+
+    private List<String> candidateColumnNames(String paramName) {
+        if (StrKit.isBlank(paramName)) {
+            return List.of();
+        }
+        List<String> candidates = new ArrayList<>();
+        addCandidate(candidates, paramName);
+        addCandidate(candidates, toSnakeCase(paramName));
+        addCandidate(candidates, normalizeIdentifier(paramName));
+        String lower = paramName.toLowerCase(Locale.ROOT);
+        if (lower.endsWith("id") && paramName.length() > 2) {
+            String base = paramName.substring(0, paramName.length() - 2);
+            addCandidate(candidates, base);
+            addCandidate(candidates, toSnakeCase(base));
+            addCandidate(candidates, normalizeIdentifier(base));
+        }
+        return candidates;
+    }
+
+    private void addCandidate(List<String> candidates, String candidate) {
+        if (StrKit.isBlank(candidate)) {
+            return;
+        }
+        for (String existing : candidates) {
+            if (existing.equalsIgnoreCase(candidate)) {
+                return;
+            }
+        }
+        candidates.add(candidate);
+    }
+
+    private String findMatchingColumn(List<String> columns, List<String> candidates) {
+        if (CollectKit.isEmpty(columns) || CollectKit.isEmpty(candidates)) {
+            return null;
+        }
+        for (String candidate : candidates) {
+            for (String column : columns) {
+                if (column.equalsIgnoreCase(candidate)) {
+                    return column;
+                }
+            }
+        }
+        for (String candidate : candidates) {
+            String normalizedCandidate = normalizeIdentifier(candidate);
+            for (String column : columns) {
+                if (normalizeIdentifier(column).equals(normalizedCandidate)) {
+                    return column;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean containsColumn(List<String> columns, String candidate) {
+        return StrKit.isNotBlank(findMatchingColumn(columns, List.of(candidate)));
+    }
+
+    private String normalizeIdentifier(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replaceAll("[^A-Za-z0-9]", "").toLowerCase(Locale.ROOT);
+    }
+
+    private String toSnakeCase(String value) {
+        if (StrKit.isBlank(value)) {
+            return value;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char current = value.charAt(i);
+            if (Character.isUpperCase(current) && i > 0) {
+                char previous = value.charAt(i - 1);
+                if (Character.isLowerCase(previous) || Character.isDigit(previous)) {
+                    builder.append('_');
+                }
+            }
+            builder.append(Character.toLowerCase(current));
+        }
+        return builder.toString();
+    }
+
     private SqlTransformVO sqlTransform(String sql, String name) {
         SqlTransformVO transform = new SqlTransformVO();
         transform.setName(name.toLowerCase(Locale.ROOT));
         transform.setSql(sql);
         return transform;
+    }
+
+    private record InferredJoinCondition(String predicate) {
+    }
+
+    private record SourceColumnRef(String sourceName, String alias, String column) {
     }
 
     private record ParsedTemplate(String name, String contentJson) {
