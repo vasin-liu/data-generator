@@ -426,6 +426,7 @@ The following implementation milestones are complete:
 51. Multi-source candidate SQL now expands explicit projection aliases from resolved source schemas, producing more stable authoring drafts such as `iterator_id` and `customer_lookup_name` instead of relying on ambiguous `s0.*`, `s1.*` output.
 52. Multi-source join inference now also covers structural business patterns beyond direct params: source-name-derived foreign keys such as `customer_id = id` and shared scope columns such as `tenant_id` are appended automatically when both sides expose compatible schema.
 53. Structural join inference now treats entity keys such as `id`, `code`, `type`, and `version` as composable business keys, so candidate SQL can emit composite joins like `customer_id + customer_type + tenant_id` when the source schemas support them.
+54. Multi-source migration candidates now also infer simple date-window predicates, allowing rule/lookup sources with `start_time`/`end_time` style schemas to produce preflight-valid conditions such as `event_time >= start_time AND event_time <= end_time`.
 
 ## Immediate Next Work
 
@@ -452,7 +453,7 @@ Goal:
 
 Recommended implementation:
 
-- continue beyond the new param-name/schema-based join inference for more business-specific patterns such as date-window joins
+- continue beyond the new param-name/schema-based join inference for more business-specific patterns such as correlated lookup rewrites and business-named projection refinement
 - add better aliasing and projection guidance for multi-query-source migration, especially where projected business names should differ from raw source names
 - keep validating candidate transforms with Calcite preflight before persistence
 

@@ -571,6 +571,72 @@ class TemplateControllerQuerySourceMigrationTests {
     }
 
     @Test
+    void infersDateWindowJoinForRuleLookupCandidate() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_event_window");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_rule_window");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                create table t_event_window(
+                    id bigint,
+                    area_code varchar(32),
+                    event_time timestamp
+                )
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                create table t_rule_window(
+                    id bigint,
+                    area_code varchar(32),
+                    start_time timestamp,
+                    end_time timestamp,
+                    name varchar(64)
+                )
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                insert into t_event_window(id, area_code, event_time)
+                values (1, '440100', TIMESTAMP '2026-05-06 10:00:00')
+                """);
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("""
+                insert into t_rule_window(id, area_code, start_time, end_time, name)
+                values (10, '440100', TIMESTAMP '2026-05-06 09:00:00', TIMESTAMP '2026-05-06 11:00:00', 'rush-hour')
+                """);
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91015L);
+        entity.setName("multi-source-date-window");
+        entity.setContentYaml("""
+                name: multi-source-date-window
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, area_code, event_time from t_event_window
+                fields:
+                  - name: rule_lookup
+                    stages:
+                      - type: read
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, area_code, start_time, end_time, name from t_rule_window
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO multi = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-join-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.area_code = s1.area_code"));
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.event_time >= s1.start_time"));
+        Assertions.assertTrue(multi.getTransform().getSql().contains("s0.event_time <= s1.end_time"));
+        Assertions.assertNotNull(multi.getPreflight());
+        Assertions.assertTrue(multi.getPreflight().isCalciteValid());
+    }
+
+    @Test
     void appliesAnalyzedTransformCandidateAndPersistsDraft() {
         TemplatePO entity = new TemplatePO();
         entity.setId(91005L);

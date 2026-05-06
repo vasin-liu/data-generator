@@ -232,7 +232,7 @@ Current gap:
 - the migration examples now also show that some selection-heavy templates should be rewritten explicitly in V2 relational form instead of being mapped mechanically into `SourcePolicyVO`
 - multi-source migration candidate generation now infers simple lookup joins from param names and source schemas, but composite/business-specific join semantics still need explicit author review
 - multi-source candidate SQL now emits explicit projection aliases when source schemas can be resolved, reducing duplicate-column ambiguity during V2 authoring and sink mapping
-- structural join hints now cover common business scope columns and simple composite business keys, but temporal windows are still not inferred automatically
+- structural join hints now cover common business scope columns, simple composite business keys, and basic date-window predicates; more complex temporal logic still needs explicit author review
 
 ### Phase 3 - Transformation migration coverage
 

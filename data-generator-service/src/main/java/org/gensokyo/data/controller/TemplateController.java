@@ -95,6 +95,43 @@ public class TemplateController {
             "type",
             "version"
     );
+    private static final List<String> WINDOW_VALUE_COLUMNS = List.of(
+            "event_time",
+            "stat_time",
+            "create_time",
+            "update_time",
+            "biz_time",
+            "occur_time",
+            "occur_date",
+            "biz_date",
+            "stat_day",
+            "day",
+            "dt"
+    );
+    private static final List<String> WINDOW_START_COLUMNS = List.of(
+            "start_time",
+            "begin_time",
+            "effective_time",
+            "from_time",
+            "start_date",
+            "begin_date",
+            "effective_date",
+            "from_date",
+            "start_day",
+            "begin_day"
+    );
+    private static final List<String> WINDOW_END_COLUMNS = List.of(
+            "end_time",
+            "expire_time",
+            "to_time",
+            "until_time",
+            "end_date",
+            "expire_date",
+            "to_date",
+            "until_date",
+            "end_day",
+            "expire_day"
+    );
     private static final Set<String> SOURCE_NAME_STOP_WORDS = Set.of(
             "lookup",
             "reader",
@@ -876,6 +913,7 @@ public class TemplateController {
         LinkedHashSet<String> predicates = new LinkedHashSet<>();
         predicates.addAll(foreignKeyPredicates(currentSourceName, currentColumns, upstreamColumns, upstreamAlias, currentAlias));
         predicates.addAll(sharedScopePredicates(currentColumns, upstreamColumns, upstreamAlias, currentAlias));
+        predicates.addAll(windowPredicates(currentColumns, upstreamColumns, upstreamAlias, currentAlias));
         return new ArrayList<>(predicates);
     }
 
@@ -923,6 +961,22 @@ public class TemplateController {
             addCurrentStructuralKey(keys, currentColumns, key);
         }
         return keys;
+    }
+
+    private List<String> windowPredicates(List<String> currentColumns,
+                                          List<String> upstreamColumns,
+                                          String upstreamAlias,
+                                          String currentAlias) {
+        String upstreamValueColumn = findFirstMatchingColumn(upstreamColumns, WINDOW_VALUE_COLUMNS);
+        String currentStartColumn = findFirstMatchingColumn(currentColumns, WINDOW_START_COLUMNS);
+        String currentEndColumn = findFirstMatchingColumn(currentColumns, WINDOW_END_COLUMNS);
+        if (StrKit.isBlank(upstreamValueColumn) || StrKit.isBlank(currentStartColumn) || StrKit.isBlank(currentEndColumn)) {
+            return List.of();
+        }
+        return List.of(
+                upstreamAlias + "." + upstreamValueColumn + " >= " + currentAlias + "." + currentStartColumn,
+                upstreamAlias + "." + upstreamValueColumn + " <= " + currentAlias + "." + currentEndColumn
+        );
     }
 
     private void addCurrentStructuralKey(List<String> keys, List<String> currentColumns, String key) {
@@ -1077,6 +1131,16 @@ public class TemplateController {
                 if (normalizeIdentifier(column).equals(normalizedCandidate)) {
                     return column;
                 }
+            }
+        }
+        return null;
+    }
+
+    private String findFirstMatchingColumn(List<String> columns, List<String> candidates) {
+        for (String candidate : candidates) {
+            String matched = findMatchingColumn(columns, List.of(candidate));
+            if (StrKit.isNotBlank(matched)) {
+                return matched;
             }
         }
         return null;
