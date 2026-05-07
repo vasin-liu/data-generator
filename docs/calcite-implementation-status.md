@@ -24,6 +24,7 @@ Related references:
 - `docs/template-v2-control-plane-requirements.md`
 - `docs/template-v2-migration-program.md`
 - `docs/template-v2-scenario-template-catalog.md`
+- `docs/template-v2-plugin-operational-guide.md`
 
 ## Current Status
 

@@ -21,6 +21,7 @@ Related references:
 - `docs/template-v2-control-plane-requirements.md`
 - `docs/template-v2-datasource-and-secret-governance.md`
 - `docs/template-v2-migration-program.md`
+- `docs/template-v2-plugin-operational-guide.md`
 - `docs/template-v2-scenario-template-catalog.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/calcite-v1-parity-scorecard.md`
@@ -411,9 +412,9 @@ The following should not be expanded prematurely.
 
 After this roadmap, the most useful follow-up planning artifacts are:
 
-1. a plugin operational guide
-   - install / refresh / rollback
-   - diagnostics and support procedures
-2. a scenario evidence maintenance process
+1. a scenario evidence maintenance process
    - how scenario entries are reviewed and updated
    - where acceptance evidence is stored
+2. an execution scalability plan
+   - streaming and chunked execution boundaries
+   - sink batching and memory protection
