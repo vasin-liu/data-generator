@@ -24,7 +24,7 @@ public record TemplateV2SqlFunction(String name,
         }
     }
 
-    SqlFunction toSqlFunction() {
+    public SqlFunction toSqlFunction() {
         return SqlBasicFunction.create(name, returnTypeInference, operandTypeChecker);
     }
 }

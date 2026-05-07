@@ -1,5 +1,10 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.plugin.*;
+import org.gensokyo.data.calcite.runtime.*;
+import org.gensokyo.data.calcite.sink.*;
+import org.gensokyo.data.calcite.source.*;
+import org.gensokyo.data.calcite.sql.*;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.gensokyo.data.model.v2.ColumnDef;

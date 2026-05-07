@@ -1,5 +1,12 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.codec.*;
+import org.gensokyo.data.calcite.parser.*;
+import org.gensokyo.data.calcite.plugin.*;
+import org.gensokyo.data.calcite.runtime.*;
+import org.gensokyo.data.calcite.sink.*;
+import org.gensokyo.data.calcite.source.*;
+import org.gensokyo.data.calcite.sql.*;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.junit.jupiter.api.Assertions;
@@ -18,6 +25,19 @@ class CalciteSqlValidatorTests {
 
         Assertions.assertTrue(result.isValid(), result.getMessage());
         Assertions.assertNotNull(result.getSqlNode());
+    }
+
+    @Test
+    void validatesDistinctProjection() {
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addSchema("input", schema("value", "BIGINT"));
+
+        CalciteSqlValidationResult result = new CalciteSqlValidator().validate(
+                "SELECT DISTINCT value FROM input ORDER BY value DESC",
+                context
+        );
+
+        Assertions.assertTrue(result.isValid(), result.getMessage());
     }
 
     @Test
@@ -57,6 +77,24 @@ class CalciteSqlValidatorTests {
 
         CalciteSqlValidationResult result = new CalciteSqlValidator().validate(
                 "SELECT category, COUNT(*) AS row_count, SUM(amount) AS total_amount FROM input GROUP BY category",
+                context
+        );
+
+        Assertions.assertTrue(result.isValid(), result.getMessage());
+    }
+
+    @Test
+    void validatesDistinctAggregates() {
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addSchema("input", schema(
+                        new ColumnDef("category", "VARCHAR", true),
+                        new ColumnDef("amount", "BIGINT", true)
+                ));
+
+        CalciteSqlValidationResult result = new CalciteSqlValidator().validate(
+                "SELECT category, COUNT(DISTINCT amount) AS distinct_amount_count, "
+                        + "SUM(DISTINCT amount) AS distinct_amount_sum "
+                        + "FROM input GROUP BY category",
                 context
         );
 

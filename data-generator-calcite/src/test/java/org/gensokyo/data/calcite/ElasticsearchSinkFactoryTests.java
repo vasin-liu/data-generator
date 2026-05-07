@@ -1,5 +1,12 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.codec.*;
+import org.gensokyo.data.calcite.parser.*;
+import org.gensokyo.data.calcite.plugin.*;
+import org.gensokyo.data.calcite.runtime.*;
+import org.gensokyo.data.calcite.sink.*;
+import org.gensokyo.data.calcite.source.*;
+import org.gensokyo.data.calcite.sql.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;

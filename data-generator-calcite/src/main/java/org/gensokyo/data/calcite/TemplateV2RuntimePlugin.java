@@ -1,5 +1,7 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.sql.TemplateV2SqlFunctionRegistry;
+
 import java.util.List;
 
 public interface TemplateV2RuntimePlugin {

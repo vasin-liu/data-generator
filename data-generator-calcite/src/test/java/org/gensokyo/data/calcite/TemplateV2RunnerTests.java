@@ -1,5 +1,10 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.runtime.*;
+import org.gensokyo.data.calcite.parser.*;
+import org.gensokyo.data.calcite.sink.*;
+import org.gensokyo.data.calcite.source.*;
+import org.gensokyo.data.calcite.sql.*;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.iterator.ConstantIteratorVO;
 import org.gensokyo.data.iterator.DateTimeIteratorVO;
@@ -204,6 +209,25 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsDistinctProjectionWithOrderingAndPaging() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-distinct");
+        template.setSources(Map.of("aggregate_seed", new AggregateSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT DISTINCT category
+                FROM aggregate_seed
+                ORDER BY category DESC
+                OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(aggregateRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals("a", result.getRows().getFirst().getString("category"));
+    }
+
+    @Test
     void supportsCaseWhenAndNullPredicates() {
         TemplateV2VO template = new TemplateV2VO();
         template.setName("demo-v2-case-null");
@@ -347,6 +371,44 @@ class TemplateV2RunnerTests {
         Assertions.assertEquals("5", categoryB.getString("amount_avg"));
         Assertions.assertEquals("5", categoryB.getString("amount_min"));
         Assertions.assertEquals("5", categoryB.getString("amount_max"));
+    }
+
+    @Test
+    void supportsDistinctAggregates() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-distinct-aggregates");
+        template.setSources(Map.of("aggregate_seed", new AggregateDistinctSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT category,
+                       COUNT(DISTINCT amount) AS distinct_amount_count,
+                       SUM(DISTINCT amount) AS distinct_amount_sum,
+                       AVG(DISTINCT amount) AS distinct_amount_avg,
+                       MIN(DISTINCT amount) AS distinct_amount_min,
+                       MAX(DISTINCT amount) AS distinct_amount_max
+                FROM aggregate_seed
+                GROUP BY category
+                ORDER BY category ASC
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(aggregateDistinctRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Row categoryA = result.getRows().get(0);
+        Assertions.assertEquals("a", categoryA.getString("category"));
+        Assertions.assertEquals("2", categoryA.getString("distinct_amount_count"));
+        Assertions.assertEquals("30", categoryA.getString("distinct_amount_sum"));
+        Assertions.assertEquals("15", categoryA.getString("distinct_amount_avg"));
+        Assertions.assertEquals("10", categoryA.getString("distinct_amount_min"));
+        Assertions.assertEquals("20", categoryA.getString("distinct_amount_max"));
+
+        Row categoryB = result.getRows().get(1);
+        Assertions.assertEquals("b", categoryB.getString("category"));
+        Assertions.assertEquals("1", categoryB.getString("distinct_amount_count"));
+        Assertions.assertEquals("5", categoryB.getString("distinct_amount_sum"));
+        Assertions.assertEquals("5", categoryB.getString("distinct_amount_avg"));
+        Assertions.assertEquals("5", categoryB.getString("distinct_amount_min"));
+        Assertions.assertEquals("5", categoryB.getString("distinct_amount_max"));
     }
 
     @Test
@@ -1182,6 +1244,14 @@ class TemplateV2RunnerTests {
         );
     }
 
+    private TemplateV2RuntimeRegistry aggregateDistinctRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new AggregateDistinctSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
     private static final class FailingWriterVO extends WriterVO {
         private FailingWriterVO() {
             setType("FAILING");
@@ -1228,6 +1298,12 @@ class TemplateV2RunnerTests {
     private static final class AggregateSourceVO extends org.gensokyo.data.model.v2.SourceVO {
         private AggregateSourceVO() {
             setType("AGGREGATE_SOURCE");
+        }
+    }
+
+    private static final class AggregateDistinctSourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private AggregateDistinctSourceVO() {
+            setType("AGGREGATE_DISTINCT_SOURCE");
         }
     }
 
@@ -1443,6 +1519,44 @@ class TemplateV2RunnerTests {
                     return List.of(
                             new Row(Map.of("category", "a", "amount", 10)),
                             new Row(Map.of("category", "a", "amount", 20)),
+                            new Row(Map.of("category", "b", "amount", 5))
+                    );
+                }
+            };
+        }
+    }
+
+    private static final class AggregateDistinctSourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof AggregateDistinctSourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("category", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("amount", "BIGINT", true)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(
+                            new Row(Map.of("category", "a", "amount", 10)),
+                            new Row(Map.of("category", "a", "amount", 10)),
+                            new Row(Map.of("category", "a", "amount", 20)),
+                            new Row(Map.of("category", "b", "amount", 5)),
                             new Row(Map.of("category", "b", "amount", 5))
                     );
                 }

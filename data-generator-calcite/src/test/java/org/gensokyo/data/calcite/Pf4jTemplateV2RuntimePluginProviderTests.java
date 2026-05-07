@@ -1,5 +1,8 @@
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.plugin.*;
+import org.gensokyo.data.calcite.runtime.*;
+import org.gensokyo.data.calcite.sql.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
