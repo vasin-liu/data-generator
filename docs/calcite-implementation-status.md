@@ -21,6 +21,7 @@ Related references:
 - `docs/template-v2-product-roadmap.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/template-v2-datasource-and-secret-governance.md`
+- `docs/template-v2-control-plane-requirements.md`
 
 ## Current Status
 

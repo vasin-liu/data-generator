@@ -18,6 +18,7 @@ Related references:
 - `docs/calcite-refactor-plan.md`
 - `docs/calcite-implementation-status.md`
 - `docs/calcite-templatev2-model-design.md`
+- `docs/template-v2-control-plane-requirements.md`
 - `docs/template-v2-datasource-and-secret-governance.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/calcite-v1-parity-scorecard.md`
@@ -408,11 +409,7 @@ The following should not be expanded prematurely.
 
 After this roadmap, the most useful follow-up planning artifacts are:
 
-1. a control-plane requirements document
-   - explain / preview / dry-run
-   - task lifecycle
-   - run reporting
-2. a migration program document
+1. a migration program document
    - V1 scenario inventory
    - parity gates
    - migration assistant scope
