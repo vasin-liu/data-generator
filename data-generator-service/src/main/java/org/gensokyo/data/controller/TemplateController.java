@@ -78,7 +78,7 @@ public class TemplateController {
     private static final Pattern PARAM_EQUALS_COLUMN = Pattern.compile("(?i):(\\w+)\\s*=\\s*([a-zA-Z_][\\w.]*)");
     private static final Pattern WHERE_CLAUSE = Pattern.compile("(?is)\\bwhere\\b\\s+(.+?)(?=\\border\\s+by\\b|\\bgroup\\s+by\\b|\\bhaving\\b|\\blimit\\b|$)");
     private static final Pattern PARAMETER_PREDICATE = Pattern.compile(
-            "(?is)(?:\\b[a-zA-Z_][\\w.]*\\b\\s*=\\s*:\\w+|:\\w+\\s*=\\s*\\b[a-zA-Z_][\\w.]*\\b|\\b[a-zA-Z_][\\w.]*\\b\\s+in\\s*\\(\\s*:\\w+\\s*\\))"
+            "(?is)(?:\\b[a-zA-Z_][\\w.]*\\b\\s*(?:=|>=|<=|>|<)\\s*:\\w+|:\\w+\\s*=\\s*\\b[a-zA-Z_][\\w.]*\\b|\\b[a-zA-Z_][\\w.]*\\b\\s+in\\s*\\(\\s*:\\w+\\s*\\))"
     );
     private static final List<String> STRUCTURAL_SCOPE_COLUMNS = List.of(
             "tenant_id",

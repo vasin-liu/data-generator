@@ -520,6 +520,63 @@ class TemplateControllerQuerySourceMigrationTests {
     }
 
     @Test
+    void suggestsRelationalSqlForParameterizedWindowPredicates() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_lookup_window");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_lookup_window");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_lookup_window(id bigint, customer_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_lookup_window(id bigint, tenant_id bigint, event_time timestamp, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_lookup_window(id, customer_id) values (1, 10)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_lookup_window(id, tenant_id, event_time, name) values (10, 101, TIMESTAMP '2026-05-07 08:00:00', 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91018L);
+        entity.setName("multi-source-lookup-window-analyze");
+        entity.setContentYaml("""
+                name: multi-source-lookup-window-analyze
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id from t_order_lookup_window
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        params:
+                          - name: startTime
+                            language:
+                              type: plain
+                              content: 2026-05-07 00:00:00
+                          - name: endTime
+                            language:
+                              type: plain
+                              content: 2026-05-07 23:59:59
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, tenant_id, event_time, name from t_customer_lookup_window where event_time >= :startTime and event_time <= :endTime and tenant_id = 101 order by event_time
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO lookup = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-lookup-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(
+                "select id, tenant_id, event_time, name from t_customer_lookup_window where tenant_id = 101 order by event_time",
+                lookup.getSourceMetadata().get(1).getSuggestedSql()
+        );
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains(
+                "Suggested source SQL: select id, tenant_id, event_time, name from t_customer_lookup_window where tenant_id = 101 order by event_time."
+        ));
+    }
+
+    @Test
     void infersJoinPredicateForNonParameterizedMultiSourceWhenColumnsMatch() {
         namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_join");
         namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_join");
