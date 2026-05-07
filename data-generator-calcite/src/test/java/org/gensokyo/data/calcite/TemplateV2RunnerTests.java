@@ -164,6 +164,46 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsOrderByAndLimit() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-order-limit");
+        template.setSources(Map.of("seed", numberSource(1, 5, 1)));
+        template.setTransformers(List.of(sql("""
+                SELECT value
+                FROM seed
+                ORDER BY value DESC
+                LIMIT 2
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("5", result.getRows().get(0).getString("value"));
+        Assertions.assertEquals("4", result.getRows().get(1).getString("value"));
+    }
+
+    @Test
+    void supportsOrderByOffsetAndFetch() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-order-offset-fetch");
+        template.setSources(Map.of("seed", numberSource(1, 5, 1)));
+        template.setTransformers(List.of(sql("""
+                SELECT value
+                FROM seed
+                ORDER BY value DESC
+                OFFSET 1 ROWS FETCH NEXT 2 ROWS ONLY
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("4", result.getRows().get(0).getString("value"));
+        Assertions.assertEquals("3", result.getRows().get(1).getString("value"));
+    }
+
+    @Test
     void supportsCaseWhenAndNullPredicates() {
         TemplateV2VO template = new TemplateV2VO();
         template.setName("demo-v2-case-null");
@@ -241,6 +281,30 @@ class TemplateV2RunnerTests {
         Assertions.assertEquals("3", result.getRows().get(0).getString("score_ceil"));
         Assertions.assertEquals("3", result.getRows().get(0).getString("score_round"));
         Assertions.assertEquals("be", result.getRows().get(1).getString("name_prefix"));
+    }
+
+    @Test
+    void supportsLikeInBetweenAndNotPredicates() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-like-in-between-not");
+        template.setSources(Map.of("nullable_seed", new RegistryOnlySourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT name, score
+                FROM nullable_seed
+                WHERE NOT (name LIKE 'e%')
+                  AND name IN ('alpha', 'beta')
+                  AND score BETWEEN 10 AND 20
+                ORDER BY score DESC
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(nullableRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Assertions.assertEquals("beta", result.getRows().get(0).getString("name"));
+        Assertions.assertEquals("20", result.getRows().get(0).getString("score"));
+        Assertions.assertEquals("alpha", result.getRows().get(1).getString("name"));
+        Assertions.assertEquals("10", result.getRows().get(1).getString("score"));
     }
 
     @Test

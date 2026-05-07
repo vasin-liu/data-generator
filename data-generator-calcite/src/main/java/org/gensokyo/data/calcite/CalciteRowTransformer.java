@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,8 +53,10 @@ public class CalciteRowTransformer {
         List<Row> filtered = input.stream()
                 .filter(row -> matches(row, select.getWhere()))
                 .toList();
+        List<Row> ordered = applyOrderBy(filtered, plan.getOrderBy());
+        List<Row> paged = applyLimitAndOffset(ordered, plan.getOffset(), plan.getFetch());
         RowSchema outputSchema = buildSchema(select.getSelectList());
-        List<Row> output = filtered.stream()
+        List<Row> output = paged.stream()
                 .map(row -> project(row, select.getSelectList()))
                 .toList();
         return new TransformResult(outputSchema, output);
@@ -70,6 +73,73 @@ public class CalciteRowTransformer {
             return joinRows(join, context);
         }
         throw new UnsupportedOperationException("Unsupported FROM clause in current V2 skeleton: " + from.getKind());
+    }
+
+    private List<Row> applyOrderBy(List<Row> rows, SqlNodeList orderBy) {
+        if (orderBy == null || orderBy.isEmpty()) {
+            return rows;
+        }
+        List<Row> sorted = new ArrayList<>(rows);
+        sorted.sort(orderComparator(orderBy));
+        return sorted;
+    }
+
+    private Comparator<Row> orderComparator(SqlNodeList orderBy) {
+        Comparator<Row> comparator = null;
+        for (SqlNode node : orderBy) {
+            Comparator<Row> next = comparatorForOrderSpec(orderSpec(node));
+            comparator = comparator == null ? next : comparator.thenComparing(next);
+        }
+        return comparator == null ? (left, right) -> 0 : comparator;
+    }
+
+    private Comparator<Row> comparatorForOrderSpec(OrderSpec spec) {
+        return comparingRows(spec.expression(), spec.ascending(), spec.nullsLast());
+    }
+
+    private Comparator<Row> comparingRows(SqlNode expression, boolean ascending) {
+        return comparingRows(expression, ascending, false);
+    }
+
+    private Comparator<Row> comparingRows(SqlNode expression, boolean ascending, boolean nullsLast) {
+        return (left, right) -> {
+            Object leftValue = evaluate(left, expression);
+            Object rightValue = evaluate(right, expression);
+            int compared = compareValues(leftValue, rightValue, nullsLast);
+            return ascending ? compared : -compared;
+        };
+    }
+
+    private List<Row> applyLimitAndOffset(List<Row> rows, SqlNode offsetNode, SqlNode fetchNode) {
+        int fromIndex = offsetNode == null ? 0 : Math.max(0, toInt(literalValue(offsetNode)));
+        if (fromIndex >= rows.size()) {
+            return List.of();
+        }
+        int toIndex = rows.size();
+        if (fetchNode != null) {
+            int fetch = Math.max(0, toInt(literalValue(fetchNode)));
+            toIndex = Math.min(rows.size(), fromIndex + fetch);
+        }
+        return rows.subList(fromIndex, toIndex);
+    }
+
+    private Object literalValue(SqlNode node) {
+        if (node instanceof SqlLiteral literal) {
+            return literal.toValue();
+        }
+        throw new UnsupportedOperationException("Only literal OFFSET/FETCH values are supported in the current V2 skeleton");
+    }
+
+    private OrderSpec orderSpec(SqlNode node) {
+        if (!(node instanceof SqlBasicCall call)) {
+            return new OrderSpec(node, true, false);
+        }
+        return switch (call.getKind()) {
+            case DESCENDING -> orderSpec(call.operand(0)).withDescending();
+            case NULLS_FIRST -> orderSpec(call.operand(0)).withNullsFirst();
+            case NULLS_LAST -> orderSpec(call.operand(0)).withNullsLast();
+            default -> new OrderSpec(node, true, false);
+        };
     }
 
     private List<Row> rowsForAliasedTable(SqlBasicCall call, CalciteExecutionContext context) {
@@ -231,11 +301,73 @@ public class CalciteRowTransformer {
             case LESS_THAN_OR_EQUAL -> compare(row, call) <= 0;
             case AND -> (Boolean) evaluate(row, call.operand(0)) && (Boolean) evaluate(row, call.operand(1));
             case OR -> (Boolean) evaluate(row, call.operand(0)) || (Boolean) evaluate(row, call.operand(1));
+            case NOT -> !toBoolean(evaluate(row, call.operand(0)));
             case IS_NULL -> evaluate(row, call.operand(0)) == null;
             case IS_NOT_NULL -> evaluate(row, call.operand(0)) != null;
+            case LIKE -> like(row, call);
+            case BETWEEN -> between(row, call);
+            case IN -> in(row, call);
             case EXTRACT -> extract(row, call);
             default -> evaluateFunction(row, call);
         };
+    }
+
+    private boolean like(Row row, SqlBasicCall call) {
+        Object candidate = evaluate(row, call.operand(0));
+        if (candidate == null) {
+            return false;
+        }
+        Object patternValue = evaluate(row, call.operand(1));
+        if (patternValue == null) {
+            return false;
+        }
+        Character escape = null;
+        if (call.operandCount() > 2) {
+            Object escapeValue = evaluate(row, call.operand(2));
+            if (escapeValue != null) {
+                String text = escapeValue.toString();
+                escape = text.isEmpty() ? null : text.charAt(0);
+            }
+        }
+        return candidate.toString().matches(likePatternToRegex(patternValue.toString(), escape));
+    }
+
+    private boolean between(Row row, SqlBasicCall call) {
+        Object value = evaluate(row, call.operand(0));
+        Object lower = evaluate(row, call.operand(call.operandCount() - 2));
+        Object upper = evaluate(row, call.operand(call.operandCount() - 1));
+        return compareValues(value, lower, false) >= 0 && compareValues(value, upper, false) <= 0;
+    }
+
+    private boolean in(Row row, SqlBasicCall call) {
+        Object value = evaluate(row, call.operand(0));
+        Object normalizedValue = normalizeComparable(value);
+        List<Object> candidates = new ArrayList<>();
+        for (int i = 1; i < call.operandCount(); i++) {
+            collectInCandidates(row, call.operand(i), candidates);
+        }
+        for (Object candidate : candidates) {
+            if (Objects.equals(normalizedValue, normalizeComparable(candidate))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void collectInCandidates(Row row, SqlNode node, List<Object> candidates) {
+        if (node instanceof SqlNodeList nodeList) {
+            for (SqlNode child : nodeList) {
+                collectInCandidates(row, child, candidates);
+            }
+            return;
+        }
+        if (node instanceof SqlBasicCall call && call.getKind() == SqlKind.ROW) {
+            for (SqlNode child : call.getOperandList()) {
+                collectInCandidates(row, child, candidates);
+            }
+            return;
+        }
+        candidates.add(evaluate(row, node));
     }
 
     private Object evaluateFunction(Row row, SqlBasicCall call) {
@@ -391,8 +523,36 @@ public class CalciteRowTransformer {
     private int compare(Row row, SqlBasicCall call) {
         Object left = evaluate(row, call.operand(0));
         Object right = evaluate(row, call.operand(1));
+        return compareValues(left, right, false);
+    }
+
+    private int compareValues(Object left, Object right, boolean nullsLast) {
+        if (left == null || right == null) {
+            if (left == null && right == null) {
+                return 0;
+            }
+            return left == null
+                    ? (nullsLast ? 1 : -1)
+                    : (nullsLast ? -1 : 1);
+        }
         if (isTemporal(left) || isTemporal(right)) {
             return toLocalDateTime(left).compareTo(toLocalDateTime(right));
+        }
+        if (left instanceof Number || right instanceof Number) {
+            return asBigDecimal(left).compareTo(asBigDecimal(right));
+        }
+        if (left instanceof CharSequence || right instanceof CharSequence) {
+            return String.valueOf(left).compareTo(String.valueOf(right));
+        }
+        if (left instanceof Boolean leftBoolean && right instanceof Boolean rightBoolean) {
+            return Boolean.compare(leftBoolean, rightBoolean);
+        }
+        if (left instanceof Comparable<?> leftComparable
+                && right instanceof Comparable<?> rightComparable
+                && leftComparable.getClass().isInstance(rightComparable)) {
+            @SuppressWarnings("unchecked")
+            Comparable<Object> comparable = (Comparable<Object>) leftComparable;
+            return comparable.compareTo(rightComparable);
         }
         return asBigDecimal(left).compareTo(asBigDecimal(right));
     }
@@ -488,6 +648,66 @@ public class CalciteRowTransformer {
         return asBigDecimal(value).intValue();
     }
 
+    private boolean toBoolean(Object value) {
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        }
+        if (value instanceof Number number) {
+            return number.intValue() != 0;
+        }
+        if (value instanceof CharSequence text) {
+            return Boolean.parseBoolean(text.toString());
+        }
+        return value != null;
+    }
+
+    private String likePatternToRegex(String pattern, Character escape) {
+        StringBuilder regex = new StringBuilder("^");
+        boolean escaping = false;
+        for (int i = 0; i < pattern.length(); i++) {
+            char current = pattern.charAt(i);
+            if (escape != null && current == escape && !escaping) {
+                escaping = true;
+                continue;
+            }
+            if (!escaping) {
+                if (current == '%') {
+                    regex.append(".*");
+                    continue;
+                }
+                if (current == '_') {
+                    regex.append('.');
+                    continue;
+                }
+            }
+            appendRegexLiteral(regex, current);
+            escaping = false;
+        }
+        regex.append('$');
+        return regex.toString();
+    }
+
+    private void appendRegexLiteral(StringBuilder builder, char current) {
+        if ("\\.^$|?*+()[]{}".indexOf(current) >= 0) {
+            builder.append('\\');
+        }
+        builder.append(current);
+    }
+
     public record TransformResult(RowSchema schema, List<Row> rows) {
+    }
+
+    private record OrderSpec(SqlNode expression, boolean ascending, boolean nullsLast) {
+        private OrderSpec withDescending() {
+            return new OrderSpec(expression, false, nullsLast);
+        }
+
+        private OrderSpec withNullsFirst() {
+            return new OrderSpec(expression, ascending, false);
+        }
+
+        private OrderSpec withNullsLast() {
+            return new OrderSpec(expression, ascending, true);
+        }
     }
 }
