@@ -432,6 +432,7 @@ The following implementation milestones are complete:
 57. Query-source migration hints now also surface lightweight field-role guidance on inferred joins, highlighting likely join keys such as `id` / `tenant_id` and likely business output columns such as `name` so multi-source V2 drafts are easier to review before hand-tuning.
 58. Parameterized lookup candidate metadata can now also emit a conservative `suggestedSql` rewrite for the source itself, stripping simple per-row parameter predicates while keeping static filters and ordering so authors can reshape V1 row-parameterized reads into V2 relational sources faster.
 59. Lookup migration `joinHints` now surface that `suggestedSql` directly as source-level authoring guidance, so the analysis API tells authors not only how to join, but also how to rewrite the lookup source definition itself.
+60. Conservative lookup source rewrites now also cover simple `IN (:param)` predicates in the same `AND` chain; more complex boolean groups and `OR` shapes remain intentionally manual-review territory.
 
 ## Immediate Next Work
 

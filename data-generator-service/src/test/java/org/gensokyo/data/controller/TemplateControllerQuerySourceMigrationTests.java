@@ -467,6 +467,59 @@ class TemplateControllerQuerySourceMigrationTests {
     }
 
     @Test
+    void suggestsRelationalSqlForParameterizedInPredicate() {
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_lookup_in");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_lookup_in");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_order_lookup_in(id bigint, customer_id bigint)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("create table t_customer_lookup_in(id bigint, tenant_id bigint, name varchar(64))");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_order_lookup_in(id, customer_id) values (1, 10)");
+        namedParameterJdbcTemplate.getJdbcTemplate().execute("insert into t_customer_lookup_in(id, tenant_id, name) values (10, 101, 'alice')");
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91017L);
+        entity.setName("multi-source-lookup-in-analyze");
+        entity.setContentYaml("""
+                name: multi-source-lookup-in-analyze
+                iterator:
+                  type: database
+                  dataSourceId: data-generator
+                  sql: select id, customer_id from t_order_lookup_in
+                fields:
+                  - name: customer_lookup
+                    stages:
+                      - type: read
+                        params:
+                          - name: customerIds
+                            language:
+                              type: plain
+                              content: 10
+                        readers:
+                          - type: jdbc
+                            dataSourceId: data-generator
+                            content: select id, tenant_id, name from t_customer_lookup_in where id in (:customerIds) and tenant_id = 101
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<QuerySourceMigrationAnalysisDTO> result = templateController.analyzeQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        QuerySourceTransformCandidateDTO lookup = result.getData().getCandidates().stream()
+                .filter(it -> "multi-source-lookup-skeleton".equals(it.getScenario()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(
+                "select id, tenant_id, name from t_customer_lookup_in where tenant_id = 101",
+                lookup.getSourceMetadata().get(1).getSuggestedSql()
+        );
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains(
+                "Suggested source SQL: select id, tenant_id, name from t_customer_lookup_in where tenant_id = 101."
+        ));
+    }
+
+    @Test
     void infersJoinPredicateForNonParameterizedMultiSourceWhenColumnsMatch() {
         namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_order_join");
         namedParameterJdbcTemplate.getJdbcTemplate().execute("drop table if exists t_customer_join");
