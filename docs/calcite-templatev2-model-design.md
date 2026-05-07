@@ -4,6 +4,8 @@
 
 Define the final in-memory model shape for the Calcite-based V2 template path, while preserving backward-compatible parsing for the first-phase singular `transform` and `sink` forms.
 
+The final model should treat `sql` as the default transformer family, not the only transformer family. It must leave room for additional repository-owned transformer types and typed custom/plugin-provided transformers without another model rewrite.
+
 ## Design Principles
 
 - The in-memory model should target the final plural form from day 1.
@@ -248,11 +250,43 @@ public class SqlTransformVO extends TransformVO {
 }
 ```
 
+Recommended future built-in subtype:
+
+```java
+public class ScriptTransformVO extends TransformVO {
+    private String language;
+    private String script;
+    private RowSchema outputSchema;
+}
+```
+
 Notes:
 
 - `transformers` should be an ordered list
 - each transformer consumes the current relation namespace
 - each transformer may publish a named intermediate relation
+- `sql` should stay the preferred built-in transformer for relational work
+- V2 should still support a small number of additional built-in transformer families where repeated business scenarios are awkward in SQL/UDF form
+- custom transformers should extend `TransformVO` through typed subtypes registered in the same YAML/JSON subtype registry path; do not rely on one generic opaque `CustomTransformVO` as the primary extension model
+- every non-SQL/custom transformer should either infer its output schema reliably or require an explicit `outputSchema`
+- additional transformer families should not recreate one-to-one equivalents of old V1 stages unless a repeated business scenario proves the need
+
+### Recommended transformer family strategy
+
+1. `SqlTransformVO`
+   - default for projection, filter, join, aggregate, lookup, and most row-local expression rewrites
+2. `ScriptTransformVO` or equivalent deterministic expression/script transformer
+   - reserved for high-value residual logic that is too awkward to express as SQL + UDF
+   - should stay deterministic and side-effect-light
+3. typed custom transformer subtypes
+   - repository-owned or PF4J-provided
+   - should be used for project-specific enrichment, payload shaping, or dataset logic that does not fit the built-in families cleanly
+
+Selection rule:
+
+- prefer SQL first
+- introduce an official non-SQL built-in transformer only after repeated scenario evidence
+- use a typed custom transformer when the logic is business-specific and not broadly reusable across templates
 
 ## Sink Model
 
@@ -338,6 +372,9 @@ Not supported in the first multi-transformer phase:
 - SQL text must not be blank
 - transformer names must be unique when present
 - if more than one transformer exists, all transformers must have names
+- non-SQL/custom transformers must expose enough metadata to validate input/output schema handoff
+- if a transformer cannot infer output schema, explicit schema should be required at model-validation time
+- plugin-provided custom transformers should fail validation early if their subtype or factory is missing after registry refresh
 
 ### Sink validation
 
@@ -354,6 +391,7 @@ Not supported in the first multi-transformer phase:
 - `ReaderSourceVO`
 - `TransformVO`
 - `SqlTransformVO`
+- `ScriptTransformVO` or equivalent first non-SQL transformer type when the repository chooses one
 
 ### Parsing and normalization
 
@@ -418,6 +456,12 @@ Responsibilities:
 ## Recommendation
 
 The code should adopt the plural final shape internally now, even if the first public YAML examples stay simple.
+
+The transform model should also stay open from day 1 for:
+
+- the built-in SQL path
+- one or more future repository-owned non-SQL transformer families
+- typed custom/plugin-provided transformer subtypes using the same registry and validation contract
 
 That keeps the first V2 implementation easy to author while avoiding later churn when:
 

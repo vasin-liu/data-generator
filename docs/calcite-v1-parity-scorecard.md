@@ -24,6 +24,8 @@ V2 now covers the main declarative path:
 
 The remaining V1 parity gaps are concentrated in:
 
+- official repository-owned non-SQL transformer families beyond the current SQL-first path
+- clear migration policy for residual script/business logic that should use a custom transformer instead of more SQL/UDF expansion
 - database-writer dialect-specific behavior for MySQL/Postgres/ClickHouse
 - broad SpEL/faker compatibility UDF catalog
 - JavaScript/procedural script migration policy
@@ -72,9 +74,10 @@ The remaining V1 parity gaps are concentrated in:
 |---|---|---|---|
 | READ stage | Covered | named `sources` | richer reader options still handled per source type |
 | SELECT stage | Partial | source policy | exact V1 selector semantics incomplete |
+| Non-SQL built-in transformer families | Partial | ordered `transformers` chain plus transform factory SPI | runtime can already host plugin/custom transformers, but the repository still lacks an official built-in non-SQL transformer family |
 | SCRIPT plain | Covered | SQL literal/projection or query param constant | first migration examples are documented |
-| SCRIPT SpEL | Partial | SQL functions + plugin/repository UDFs, including first-pass `FAKER_*` compatibility functions | first migration guide/examples are in place; long-tail expression coverage still missing |
-| SCRIPT JavaScript | Compatibility-only | none | keep V1 or introduce explicit script plugin later |
+| SCRIPT SpEL | Partial | SQL functions + plugin/repository UDFs, including first-pass `FAKER_*` compatibility functions | first migration guide/examples are in place; long-tail expression coverage still missing and some cases may be better served by a dedicated non-SQL/custom transformer |
+| SCRIPT JavaScript | Compatibility-only | none | keep V1 or introduce an explicit script/custom transformer later |
 | MAPPING stage | Covered | `CASE WHEN`, SQL expressions | first real migration examples are documented |
 | CONDITION stage | Covered | `CASE WHEN` / `WHERE` | first real migration examples are documented |
 | CONVERT stage | Covered | `CAST`, standard functions, V2 UDFs | continue adding converter-heavy business examples only as needed |
@@ -91,7 +94,7 @@ The remaining V1 parity gaps are concentrated in:
 | Faker date formatting | Partial | `V2_FORMAT_DATE` plus `FAKER_DATETIME_FORMAT` / related datetime helpers, including default-format and relative-time variants | broader faker UDF catalog still has long-tail gaps outside the high-frequency datetime path |
 | Faker snowflake/text/common providers | Partial | `FAKER_SNOWFLAKE`, `FAKER_TEXT`, `FAKER_NUMBER_BETWEEN`, `FAKER_PHONE_CELL`, `FAKER_DATE_PAST`, and expanded datetime helpers across `before/after/plus/minus` day-hour-minute-second variants | add provider-specific and business-specific long-tail functions only as needed |
 | Custom project SpEL utilities | Partial | plugin UDFs | migration guide exists for the common path; project-specific utility chains still need case-by-case migration |
-| JavaScript scripts | Compatibility-only | none | keep V1 unless a script transform plugin is explicitly required |
+| JavaScript scripts | Compatibility-only | none | keep V1 unless a script/custom transform path is explicitly required |
 | Plugin-provided UDF | Covered | `TemplateV2RuntimePlugin.sqlFunctions()` and PF4J fixtures | none for baseline |
 
 ## Writers And Sinks
@@ -124,11 +127,13 @@ The remaining V1 parity gaps are concentrated in:
 
 P0:
 
+- define the first official non-SQL transformer family and the decision rule for SQL/UDF vs custom transformer
 - extend business-family migration validation beyond the first documented V1-to-V2 example batch
 - create the next faker/UDF compatibility batch only for newly observed high-value V1 expressions
 
 P1:
 
+- add one repository-owned or PF4J-supplied custom transformer example that covers residual script/business logic
 - clarify source policy coverage for V1 value select strategies with examples
 - add migration examples that exercise the new AI source bridge in realistic V2 templates
 
@@ -142,6 +147,7 @@ P2:
 
 The next implementation slice should shift from iterator parity to migration usability:
 
-1. Expand migration examples from the current first batch into more business-template families, especially AI source and selection-heavy templates.
-2. Continue the faker/UDF catalog only for expressions observed in repository templates or business examples beyond the current covered batch.
-3. Decide whether inline rows deserve a dedicated V2 source type or should remain an iterator-backed compatibility shape.
+1. Define the first official non-SQL transformer family and document when authors should choose SQL/UDF versus a custom transformer.
+2. Expand migration examples from the current first batch into more business-template families, especially AI source, selection-heavy, and residual script-heavy templates.
+3. Continue the faker/UDF catalog only for expressions observed in repository templates or business examples beyond the current covered batch.
+4. Decide whether inline rows deserve a dedicated V2 source type or should remain an iterator-backed compatibility shape.

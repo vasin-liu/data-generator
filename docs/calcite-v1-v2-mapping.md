@@ -15,10 +15,10 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 
 | V1 Area | V1 Shape | V2 Target | Mapping Type | Notes |
 |---|---|---|---|---|
-| Template root | `iterator + generator + fields + output` | `sources + transform + sink` | Adapted | generator can be retained initially as an execution option |
+| Template root | `iterator + generator + fields + output` | `sources + transformers + sinks` | Adapted | generator can be retained initially as an execution option |
 | Iterator root | `template.iterator` | `sources.input` or named sources | Adapted | iterator becomes a logical table source |
 | Field graph | `fields[].dependsOn` | SQL projection dependency | Direct | Calcite naturally resolves projection dependencies |
-| Field stage chain | `fields[].stages` | `transform.sql` | Partial | transformation stages map well; orchestration stages do not |
+| Field stage chain | `fields[].stages` | `transformers` | Partial | most transformation stages map well to SQL/UDF; residual logic may need a non-SQL/custom transformer |
 | Output root | `output.writers` | `sink.writers` | Adapted | sink should reuse current writers through adapters |
 
 ## Iterator Mapping
@@ -41,7 +41,7 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 
 | V1 Stage | V2 Target | Mapping Type | Suggested V2 Form |
 |---|---|---|---|
-| `SCRIPT` | SQL expressions + UDFs | Partial | `SELECT expr AS alias` |
+| `SCRIPT` | SQL expressions + UDFs, or a non-SQL/custom transformer for residual logic | Partial | `SELECT expr AS alias` first; fall back to a typed transformer only where SQL/UDF becomes unnatural |
 | `MAPPING` | SQL conditional mapping | Direct | `CASE WHEN ... THEN ... ELSE ... END` |
 | `CONDITION` | row-local SQL condition | Direct | `CASE WHEN` or `WHERE` |
 | `CONVERT` | cast/format UDF | Direct | `CAST`, format functions, custom UDFs |
@@ -79,8 +79,19 @@ Map the current V1 template capabilities to the planned Calcite-based V2 model s
 | V1 Script Type | V2 Target | Mapping Type | Notes |
 |---|---|---|---|
 | Plain | SQL literal/expression | Direct | often removable entirely |
-| SpEL | SQL + UDF | Partial | strong migration target for expression subset |
-| JavaScript | compatibility-only or targeted UDF extraction | Partial | not a strong direct SQL target |
+| SpEL | SQL + UDF first, then a non-SQL/custom transformer for residual logic | Partial | strong migration target for expression subset; do not force every long-tail expression into SQL |
+| JavaScript | custom transformer or compatibility-only | Partial | not a strong direct SQL target; prefer a dedicated script/custom transformer over bloating core SQL support |
+
+## Transformer Family Direction
+
+V2 should not be SQL-only forever, but it also should not recreate V1's stage sprawl.
+
+Recommended direction:
+
+- prefer SQL + UDF for relational logic, simple row-local expressions, mapping, and conversion
+- add a small number of official non-SQL transformer families only when repeated business scenarios prove that SQL/UDF authoring is too awkward
+- use typed custom transformer subtypes for project-specific enrichment, payload shaping, or dataset logic that is not broadly reusable
+- keep built-in and plugin-provided transformers on the same `TransformVO` + factory + registry contract so migration, validation, and hot reload do not diverge by transformer type
 
 ## Writer Mapping
 

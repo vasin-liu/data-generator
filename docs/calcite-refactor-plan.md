@@ -8,6 +8,8 @@ Final objective:
 
 - V2 should fully implement and then replace the functional surface of V1
 - V2 should exceed V1 in template simplicity, composability, and extensibility
+- SQL should remain the default declarative transformer, but not the only transformer family
+- V2 should support repository-built and plugin-provided custom transformers behind the same typed runtime contract
 
 ## Target Architecture
 
@@ -16,10 +18,6 @@ Current V1 model:
 - `iterator + generator + fields(dependsOn + stages) + output`
 
 Target V2 model:
-
-- `sources + transform + sink`
-
-Target end-state extension:
 
 - `sources + transformers + sinks`
 
@@ -106,6 +104,15 @@ Plugin framework direction:
 - the old `ServiceLoader + shared URLClassLoader` path remains only as fallback / temporary compatibility mode and is not class-isolated per plugin
 - built-in Spring-provided factories and future external plugin jars should converge on the same V2 runtime registry contract
 
+Transformer direction:
+
+- `sql` remains the preferred built-in transformer for relational projection, filtering, joining, grouping, and most row-local rewrites
+- V2 should still support additional built-in transformer families where repeated business scenarios are awkward or noisy in pure SQL/UDF form
+- the first non-SQL built-in transformer should target deterministic row-local or row-set-local logic that is currently hard to migrate cleanly from V1 long-tail SpEL or project-specific scripting
+- custom transformers should be added as typed `TransformVO` subtypes plus `V2TransformFactory` implementations, not as one untyped catch-all config bag
+- built-in and plugin-provided transformers should share the same validation, registry, diagnostics, refresh, and class-isolation rules
+- avoid recreating the V1 stage explosion; keep the number of built-in transformer families intentionally small and scenario-driven
+
 ## Scope
 
 In scope for the first implementation:
@@ -116,6 +123,7 @@ In scope for the first implementation:
 - iterator/reader source adaptation into logical tables
 - reuse of the current writer stack through a row sink adapter
 - repository-local UDF registration for common faker/date/string functions
+- a transformer runtime contract that is open to non-SQL and custom transformer families later
 - converging `DatabaseIterator` and `JdbcReader` into the same V2 `RowSource` family
 - preserving `SelectStrategy` semantics as source policy instead of forcing them into SQL
 - introducing an official `AiSourceVO`
@@ -128,7 +136,7 @@ Explicitly out of scope for the first implementation:
 - subqueries
 - replacing V1 templates
 - removing the current writer modules
-- full support for multiple transformers and multiple sinks
+- full support for multiple repository-owned transformer families beyond the first SQL path
 
 Compatibility posture for the refactor:
 
@@ -145,10 +153,13 @@ Compatibility posture for the refactor:
 - Hard-coded implementations are acceptable only as built-in defaults behind those extension points; they must not become the only path for adding new behavior.
 - New feature PRs should document the extension surface they introduce or reuse, and tests should include at least one non-default/custom path when practical.
 - Calcite should own SQL parsing and validation; do not translate SQL back into the old stage chain.
+- SQL should be the preferred transformer authoring path for relational work, but the runtime must not assume every future transform is SQL-backed.
 - The V2 execution path should use a simple row model instead of `Value / SingleValue / ListValue / MapValue` as its primary abstraction.
 - Existing writer modules may be reused through adapters temporarily, but V2 execution should not be constrained by V1 abstractions.
 - Multiple sources should be a supported end-state because they are a natural fit for Calcite table semantics.
 - Multiple transformers should be supported only as an ordered linear chain; do not allow arbitrary DAG transformers in V2.
+- Additional built-in transformer families should be introduced only when they cover repeated business scenarios better than SQL + UDF; do not reintroduce one transformer type per old V1 stage.
+- Custom transformers should be modeled as typed `TransformVO` subtypes with explicit input/output schema rules, validation, and diagnostics rather than opaque runtime maps.
 - Multiple sinks should be supported as independent terminal fan-out nodes after the final transform result is materialized.
 - The first implementation should still start with one `source entry set`, one `transform`, and one `sink`, but the model should avoid painting us into a single-node corner.
 - `DatabaseIterator` and `JdbcReader` should converge into one V2 source abstraction instead of remaining two separate long-term concepts.
@@ -467,6 +478,27 @@ Current M13 status:
 - first-pass runtime factory failure diagnostics are implemented
 - the remaining work is primarily broader lifecycle and load-failure diagnostics, non-happy-path execution coverage, and a human-facing sample plugin/module
 
+### M14 - Broaden transformer families beyond SQL
+
+- [ ] define the first official non-SQL built-in transformer family and its authoring rules
+- [ ] formalize when business logic should stay in SQL/UDF versus move into a dedicated transformer
+- [ ] define schema inference versus explicit-schema rules for non-SQL/custom transformers
+- [ ] add at least one repository-owned non-SQL transformer implementation
+- [ ] add one PF4J sample or fixture showing a plugin-provided custom transformer subtype
+- [ ] add focused validation, refresh, and failure diagnostics for non-SQL/custom transformer execution
+- [ ] document migration guidance for V1 SpEL/JavaScript/business-specific logic that should not be forced into SQL
+
+Recommended first targets for M14:
+
+- a deterministic expression/script-style transformer for row-local logic that still fits V2's declarative runtime
+- a plugin-provided business transformer example for project-specific enrichment or payload shaping
+
+Exit criteria:
+
+- V2 no longer appears SQL-only at the transformer layer
+- authors have one documented path for relational logic and one documented path for residual custom logic
+- repository-owned and plugin-provided transformers use the same typed registry and validation model
+
 ## Recommended Delivery Order
 
 Sprint 1:
@@ -516,6 +548,7 @@ Sprint 6:
 - V2 templates materially reduce configuration complexity for row transformations.
 - New row transformation logic no longer requires `FieldVO.dependsOn + multiple StageVO` chains by default.
 - Calcite becomes the primary validation and transformation engine for V2 templates.
+- Calcite-backed SQL remains the primary relational transformer, but V2 can also host non-SQL/custom transformers without falling back to V1 stages.
 - The existing writer ecosystem remains reusable.
 - V1 templates continue to run during the migration window.
 - The final V2 model can scale from the first-phase singular form to multiple sources, ordered transformers, and fan-out sinks without a second model rewrite.

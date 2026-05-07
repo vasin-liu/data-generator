@@ -18,6 +18,7 @@ Related references:
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-skeleton-implementation-plan.md`
 - `docs/calcite-templatev2-model-design.md`
+- `docs/template-v2-product-roadmap.md`
 
 ## Current Status
 
@@ -29,7 +30,7 @@ As of the current implementation checkpoint:
 - Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI source runtime bridge, source policy, and multi-sink failure policy
 - Phase 2 now also includes first-pass Excel source and sink support through `ExcelSourceVO` / `ExcelRowSource` and `ExcelSinkFactory` / `ExcelRowSinkAdapter`
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions, the shared UDF registry, a first high-frequency faker compatibility batch, and a first repository-backed V1-to-V2 migration example set
-- the largest remaining gaps are broader SpEL/faker compatibility coverage beyond the first batch, richer business-family parity validation, exact V1 selection semantics beyond current source-policy aliases, and broader provider/plugin examples around the AI bridge
+- the largest remaining gaps are official non-SQL transformer families beyond the current SQL-first path, broader SpEL/faker compatibility coverage beyond the first batch, richer business-family parity validation, exact V1 selection semantics beyond current source-policy aliases, and broader provider/plugin examples around the AI bridge
 
 ### 1. Baseline and scope
 
@@ -224,6 +225,13 @@ Implemented transform family:
 - `CalciteSqlValidator`
 - `CalciteRowTransformer`
 
+Current transformer architecture note:
+
+- the runtime contract already supports ordered transformer chains and plugin-provided transform factories
+- the built-in transformer family is still SQL-only today
+- the next architecture step is to add at least one official non-SQL transformer family without recreating V1-style stage sprawl
+- custom transformers should continue to land as typed `TransformVO` subtypes plus `V2TransformFactory` implementations
+
 Current SQL support level:
 
 - projection
@@ -342,12 +350,15 @@ What is implemented today:
 
 - multiple sources can coexist in the same SQL context
 - multiple sources can participate in `INNER JOIN`
+- the runtime registry and runner already accept non-SQL/plugin-provided transformer factories by contract
 - sinks are executed one after another
 - sink failure policy supports `FAIL_FAST` and `CONTINUE_ON_ERROR`
 - fail-fast sink write failures include sink index, writer index, writer type, model class, and target diagnostics
 
 What is not implemented yet:
 
+- a repository-owned built-in transformer family beyond `sql`
+- clear authoring guidance for when to use SQL/UDF versus a custom transformer
 - parallel sink execution
 - rich partial-success reporting in `TemplateV2RunResult`
 - source policy semantics beyond model reservation
@@ -440,7 +451,22 @@ The following implementation milestones are complete:
 
 The next work should be done in the following order. This supersedes the older AI-first next-step recommendation because the transformation core and UDF extension surface have advanced.
 
-### Next 1. Expand business-scenario migration rewrites
+### Next 1. Broaden the transformer surface beyond SQL
+
+Goal:
+
+- keep SQL as the default V2 authoring path, but stop making it appear to be the only transformer path
+
+Recommended implementation:
+
+- define the first official non-SQL built-in transformer family for deterministic residual logic that does not fit cleanly into SQL + UDF
+- formalize the decision rule for SQL/UDF vs built-in non-SQL transformer vs project/plugin-specific custom transformer
+- require non-SQL/custom transformers to declare or infer output schema explicitly so multi-transform chaining stays predictable
+- add one repository-owned non-SQL transformer implementation and one PF4J-based custom transformer sample or fixture
+- keep validation, refresh, diagnostics, and class-isolation behavior consistent across SQL and non-SQL transformers
+- avoid reintroducing one transformer type per old V1 stage; only repeated business scenarios should justify additional built-in families
+
+### Next 2. Expand business-scenario migration rewrites
 
 Goal:
 
@@ -452,8 +478,9 @@ Recommended implementation:
 - rewrite selection-heavy templates explicitly when their real intent is dimensional expansion or weighted branching
 - keep `SourcePolicyVO` only for cases where ordered/shuffled materialization is good enough
 - keep documenting exact-vs-approximate migration boundaries so the preview/analyze APIs do not over-promise parity
+- identify which residual V1 script/business patterns should migrate through SQL/UDF and which should become non-SQL/custom transformer candidates
 
-### Next 2. Harden multi-source SQL migration ergonomics
+### Next 3. Harden multi-source SQL migration ergonomics
 
 Goal:
 
@@ -465,7 +492,7 @@ Recommended implementation:
 - add better aliasing and projection guidance for multi-query-source migration, especially where projected business names should differ from raw source names
 - keep validating candidate transforms with Calcite preflight before persistence
 
-### Next 3. AI bridge hardening and provider expansion
+### Next 4. AI bridge hardening and provider expansion
 
 Goal:
 
@@ -479,7 +506,7 @@ Recommended implementation:
 - define timeout and model error diagnostics
 - decide whether additional providers should stay in `data-generator-service`, move into a dedicated V2 AI runtime module, or be offered as external PF4J plugins
 
-### Next 4. Plugin diagnostics hardening
+### Next 5. Plugin diagnostics hardening
 
 Goal:
 
@@ -491,7 +518,7 @@ Recommended implementation:
 - add plugin descriptor mismatch or missing repository descriptor diagnostics if needed
 - add one focused fixture for plugin-provided CSV parser replacement only if parser customization becomes a concrete requirement
 
-### Next 5. Business-scenario parity expansion and scorecard hardening
+### Next 6. Business-scenario parity expansion and scorecard hardening
 
 Goal:
 
@@ -504,12 +531,14 @@ Recommended implementation:
 - document unsupported direct migrations for log/pause/shared/procedural JavaScript paths
 - keep the `SourcePolicyVO` boundary explicit until a decision is made on whether V2 should absorb V1 consumptive selection semantics
 - extend the faker/UDF compatibility catalog only when repository templates or business examples show uncovered high-frequency expressions
+- keep the future non-SQL/custom transformer backlog grounded in observed repository templates instead of speculative transformer proliferation
 
 ## Deferred Work
 
 The following items remain intentionally deferred after the current step:
 
 - full Calcite physical execution
+- a broad transformer catalog beyond the first repository-owned non-SQL/custom path
 - UDF expansion
 - source policy caching/materialization modes beyond row post-processing
 - nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
@@ -519,12 +548,13 @@ The following items remain intentionally deferred after the current step:
 
 The most pragmatic next implementation sequence is:
 
-1. expand repository-real migration rewrites for selection-heavy and multi-source templates
-2. harden multi-source SQL candidate generation beyond the current `INNER JOIN` subset
-3. harden the concrete Ollama bridge and add additional provider implementations only when justified by business scenarios
-4. prove plugin-provided UDFs through the external PF4J packaging path
-5. keep the parity scorecard aligned against business scenarios instead of broad speculative feature work
-6. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
+1. define and implement the first official non-SQL transformer path plus one plugin-provided custom transformer example
+2. expand repository-real migration rewrites for selection-heavy, script-heavy, and multi-source templates
+3. harden multi-source SQL candidate generation beyond the current `INNER JOIN` subset
+4. harden the concrete Ollama bridge and add additional provider implementations only when justified by business scenarios
+5. prove plugin-provided UDFs and non-SQL/custom transformers through the external PF4J packaging path
+6. keep the parity scorecard aligned against business scenarios instead of broad speculative feature work
+7. replace `RowJsonCodec` with a Jackson-backed codec only when nested object payloads become a concrete requirement
 
 The plugin-framework recommendation is:
 
