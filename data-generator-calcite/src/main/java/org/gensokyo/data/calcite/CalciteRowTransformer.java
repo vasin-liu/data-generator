@@ -9,6 +9,7 @@ import org.apache.calcite.sql.SqlLiteral;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.sql.fun.SqlCase;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.Row;
@@ -90,19 +91,25 @@ public class CalciteRowTransformer {
     }
 
     private List<Row> joinRows(SqlJoin join, CalciteExecutionContext context) {
-        String joinType = join.getJoinType().name();
-        if (!"INNER".equals(joinType) && !"COMMA".equals(joinType)) {
-            throw new UnsupportedOperationException("Only INNER JOIN is supported in the current V2 skeleton");
+        JoinType joinType = join.getJoinType();
+        if (joinType != JoinType.INNER && joinType != JoinType.COMMA && joinType != JoinType.LEFT) {
+            throw new UnsupportedOperationException("Only INNER JOIN and LEFT JOIN are supported in the current V2 skeleton");
         }
         List<Row> leftRows = materialize(join.getLeft(), context);
         List<Row> rightRows = materialize(join.getRight(), context);
+        List<String> rightColumns = collectColumns(rightRows);
         List<Row> joined = new ArrayList<>();
         for (Row left : leftRows) {
+            boolean matched = false;
             for (Row right : rightRows) {
                 Row merged = mergeRows(left, right);
                 if (matches(merged, join.getCondition())) {
+                    matched = true;
                     joined.add(merged);
                 }
+            }
+            if (!matched && joinType == JoinType.LEFT) {
+                joined.add(mergeRows(left, nullPaddedRow(rightColumns)));
             }
         }
         return joined;
@@ -124,6 +131,26 @@ public class CalciteRowTransformer {
         Map<String, Object> merged = new LinkedHashMap<>(left.values());
         right.values().forEach(merged::putIfAbsent);
         return new Row(merged);
+    }
+
+    private List<String> collectColumns(List<Row> rows) {
+        List<String> columns = new ArrayList<>();
+        for (Row row : rows) {
+            for (String key : row.values().keySet()) {
+                if (!columns.contains(key)) {
+                    columns.add(key);
+                }
+            }
+        }
+        return columns;
+    }
+
+    private Row nullPaddedRow(List<String> columns) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        for (String column : columns) {
+            values.put(column, null);
+        }
+        return new Row(values);
     }
 
     private boolean matches(Row row, SqlNode where) {
@@ -354,8 +381,7 @@ public class CalciteRowTransformer {
             return row.get(simpleName(identifier).toLowerCase(Locale.ROOT));
         }
         String qualified = String.join(".", identifier.names).toLowerCase(Locale.ROOT);
-        Object value = row.get(qualified);
-        return value != null ? value : row.get(simpleName(identifier).toLowerCase(Locale.ROOT));
+        return row.get(qualified);
     }
 
     private String simpleName(SqlIdentifier identifier) {

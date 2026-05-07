@@ -434,6 +434,7 @@ The following implementation milestones are complete:
 59. Lookup migration `joinHints` now surface that `suggestedSql` directly as source-level authoring guidance, so the analysis API tells authors not only how to join, but also how to rewrite the lookup source definition itself.
 60. Conservative lookup source rewrites now also cover simple `IN (:param)` predicates in the same `AND` chain; more complex boolean groups and `OR` shapes remain intentionally manual-review territory.
 61. Conservative lookup source rewrites now also cover simple parameterized comparison predicates such as `>= :startTime` and `<= :endTime` in the same `AND` chain, which is enough for first-pass time-window lookup rewrites while still leaving `BETWEEN` and more complex boolean shapes to explicit author review.
+62. The in-memory Calcite V2 runtime now executes `LEFT JOIN` in addition to `INNER JOIN`, including null-padding for unmatched right-side rows, so lookup-style V2 templates are not limited to migration previews and can run end to end in the current runner.
 
 ## Immediate Next Work
 

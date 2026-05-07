@@ -138,6 +138,32 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsLeftJoinAcrossMultipleSources() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-left-join");
+        template.setSources(Map.of(
+                "left_input", numberSource(1, 3, 1),
+                "right_input", numberSource(2, 2, 1)
+        ));
+        template.setTransformers(List.of(sql("""
+                SELECT l.value AS left_value, r.value AS right_value
+                FROM left_input AS l
+                LEFT JOIN right_input AS r ON l.value = r.value
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(defaultRegistry()).run(template);
+
+        Assertions.assertEquals(3, result.getRows().size());
+        Assertions.assertEquals("1", result.getRows().get(0).getString("left_value"));
+        Assertions.assertNull(result.getRows().get(0).getString("right_value"));
+        Assertions.assertEquals("2", result.getRows().get(1).getString("left_value"));
+        Assertions.assertEquals("2", result.getRows().get(1).getString("right_value"));
+        Assertions.assertEquals("3", result.getRows().get(2).getString("left_value"));
+        Assertions.assertNull(result.getRows().get(2).getString("right_value"));
+    }
+
+    @Test
     void supportsCaseWhenAndNullPredicates() {
         TemplateV2VO template = new TemplateV2VO();
         template.setName("demo-v2-case-null");
