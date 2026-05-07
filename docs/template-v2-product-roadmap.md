@@ -21,6 +21,7 @@ Related references:
 - `docs/template-v2-control-plane-requirements.md`
 - `docs/template-v2-datasource-and-secret-governance.md`
 - `docs/template-v2-migration-program.md`
+- `docs/template-v2-scenario-template-catalog.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-v1-v2-mapping.md`
@@ -410,10 +411,9 @@ The following should not be expanded prematurely.
 
 After this roadmap, the most useful follow-up planning artifacts are:
 
-1. a scenario template catalog and acceptance matrix
-   - representative templates by scenario family
-   - expected outputs
-   - parity evidence links
-2. a plugin operational guide
+1. a plugin operational guide
    - install / refresh / rollback
    - diagnostics and support procedures
+2. a scenario evidence maintenance process
+   - how scenario entries are reviewed and updated
+   - where acceptance evidence is stored
