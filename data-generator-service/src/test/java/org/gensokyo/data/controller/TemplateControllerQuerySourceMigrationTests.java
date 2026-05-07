@@ -404,6 +404,7 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Inferred join s0.customer_id = s1.id"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Rewrite it as a relational lookup"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("removing per-row params"));
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Suggested source SQL: select id, name from t_customer_lookup."));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("Keep [id] as likely join keys"));
         Assertions.assertTrue(lookup.getJoinHints().get(0).contains("treat [name] as likely output columns"));
         Assertions.assertNotNull(lookup.getPreflight());
@@ -460,6 +461,9 @@ class TemplateControllerQuerySourceMigrationTests {
                 "select id, tenant_id, name from t_customer_lookup_filter where tenant_id = 101 order by name",
                 lookup.getSourceMetadata().get(1).getSuggestedSql()
         );
+        Assertions.assertTrue(lookup.getJoinHints().get(0).contains(
+                "Suggested source SQL: select id, tenant_id, name from t_customer_lookup_filter where tenant_id = 101 order by name."
+        ));
     }
 
     @Test

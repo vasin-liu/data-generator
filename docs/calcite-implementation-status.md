@@ -431,6 +431,7 @@ The following implementation milestones are complete:
 56. Candidate SQL projection aliases are now less mechanical: source names such as `customer_lookup` are normalized toward business stems like `customer`, while primary iterator columns can keep simple names such as `id` when no collision exists.
 57. Query-source migration hints now also surface lightweight field-role guidance on inferred joins, highlighting likely join keys such as `id` / `tenant_id` and likely business output columns such as `name` so multi-source V2 drafts are easier to review before hand-tuning.
 58. Parameterized lookup candidate metadata can now also emit a conservative `suggestedSql` rewrite for the source itself, stripping simple per-row parameter predicates while keeping static filters and ordering so authors can reshape V1 row-parameterized reads into V2 relational sources faster.
+59. Lookup migration `joinHints` now surface that `suggestedSql` directly as source-level authoring guidance, so the analysis API tells authors not only how to join, but also how to rewrite the lookup source definition itself.
 
 ## Immediate Next Work
 

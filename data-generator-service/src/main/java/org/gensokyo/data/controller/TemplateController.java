@@ -763,6 +763,8 @@ public class TemplateController {
                             + ". Rewrite it as a relational lookup by removing per-row params from the source definition and keeping business filters that can join on "
                             + inferred.predicate()
                             + ". "
+                            + sourceRewriteHint(source)
+                            + " "
                             + fieldRoleHint(sourceOrder, i, sourceColumns));
                     continue;
                 }
@@ -775,6 +777,13 @@ public class TemplateController {
             }
         }
         return joinHints;
+    }
+
+    private String sourceRewriteHint(QuerySourceCandidateSourceDTO source) {
+        if (source == null || StrKit.isBlank(source.getSuggestedSql())) {
+            return "";
+        }
+        return "Suggested source SQL: " + source.getSuggestedSql() + ".";
     }
 
     private List<String> parameterNames(TemplateV2DraftVO draft, String sourceName) {
