@@ -26,9 +26,11 @@ import org.gensokyo.data.model.v2.RowSchema;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class CalciteSqlValidator {
     private static final SqlConformance SQL_CONFORMANCE = SqlConformanceEnum.BABEL;
+    private static final Pattern COUNT_STAR = Pattern.compile("(?i)\\bcount\\s*\\(\\s*\\*\\s*\\)");
     private final SqlOperatorTable operatorTable;
 
     public CalciteSqlValidator() {
@@ -47,7 +49,7 @@ public class CalciteSqlValidator {
     public CalciteSqlValidationResult validate(String sql, CalciteExecutionContext context) {
         try {
             FrameworkConfig config = newConfig(context);
-            SqlParser parser = SqlParser.create(sql, config.getParserConfig());
+            SqlParser parser = SqlParser.create(normalizeSql(sql), config.getParserConfig());
             SqlNode parsed = parser.parseQuery();
             validator(config, context).validate(parsed);
             return CalciteSqlValidationResult.success(parsed);
@@ -56,6 +58,13 @@ public class CalciteSqlValidator {
         } catch (RuntimeException e) {
             return CalciteSqlValidationResult.failure(e.getMessage());
         }
+    }
+
+    private String normalizeSql(String sql) {
+        if (sql == null || sql.isBlank()) {
+            return sql;
+        }
+        return COUNT_STAR.matcher(sql).replaceAll("COUNT(1)");
     }
 
     private FrameworkConfig newConfig(CalciteExecutionContext context) {

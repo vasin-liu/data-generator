@@ -308,6 +308,48 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void supportsGroupByHavingAndAggregates() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-group-by");
+        template.setSources(Map.of("aggregate_seed", new AggregateSourceVO()));
+        template.setTransformers(List.of(sql("""
+                SELECT category,
+                       COUNT(*) AS row_count,
+                       COUNT(amount) AS amount_count,
+                       SUM(amount) AS amount_sum,
+                       AVG(amount) AS amount_avg,
+                       MIN(amount) AS amount_min,
+                       MAX(amount) AS amount_max
+                FROM aggregate_seed
+                GROUP BY category
+                HAVING COUNT(*) >= 1
+                ORDER BY row_count DESC, category ASC
+                """)));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(aggregateRegistry()).run(template);
+
+        Assertions.assertEquals(2, result.getRows().size());
+        Row categoryA = result.getRows().get(0);
+        Assertions.assertEquals("a", categoryA.getString("category"));
+        Assertions.assertEquals("2", categoryA.getString("row_count"));
+        Assertions.assertEquals("2", categoryA.getString("amount_count"));
+        Assertions.assertEquals("30", categoryA.getString("amount_sum"));
+        Assertions.assertEquals("15", categoryA.getString("amount_avg"));
+        Assertions.assertEquals("10", categoryA.getString("amount_min"));
+        Assertions.assertEquals("20", categoryA.getString("amount_max"));
+
+        Row categoryB = result.getRows().get(1);
+        Assertions.assertEquals("b", categoryB.getString("category"));
+        Assertions.assertEquals("1", categoryB.getString("row_count"));
+        Assertions.assertEquals("1", categoryB.getString("amount_count"));
+        Assertions.assertEquals("5", categoryB.getString("amount_sum"));
+        Assertions.assertEquals("5", categoryB.getString("amount_avg"));
+        Assertions.assertEquals("5", categoryB.getString("amount_min"));
+        Assertions.assertEquals("5", categoryB.getString("amount_max"));
+    }
+
+    @Test
     void supportsDateOrientedSqlFunctions() {
         TemplateV2VO template = new TemplateV2VO();
         template.setName("demo-v2-date-functions");
@@ -1132,6 +1174,14 @@ class TemplateV2RunnerTests {
         );
     }
 
+    private TemplateV2RuntimeRegistry aggregateRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new AggregateSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+    }
+
     private static final class FailingWriterVO extends WriterVO {
         private FailingWriterVO() {
             setType("FAILING");
@@ -1172,6 +1222,12 @@ class TemplateV2RunnerTests {
     private static final class VehicleSourceVO extends org.gensokyo.data.model.v2.SourceVO {
         private VehicleSourceVO() {
             setType("VEHICLE_SOURCE");
+        }
+    }
+
+    private static final class AggregateSourceVO extends org.gensokyo.data.model.v2.SourceVO {
+        private AggregateSourceVO() {
+            setType("AGGREGATE_SOURCE");
         }
     }
 
@@ -1353,6 +1409,42 @@ class TemplateV2RunnerTests {
                             "compact_time", "260502102030",
                             "device_id", "440100000011"
                     )));
+                }
+            };
+        }
+    }
+
+    private static final class AggregateSourceFactory implements V2SourceFactory {
+        @Override
+        public boolean supports(org.gensokyo.data.model.v2.SourceVO source) {
+            return source instanceof AggregateSourceVO;
+        }
+
+        @Override
+        public RowSource create(String name, org.gensokyo.data.model.v2.SourceVO source) {
+            return new RowSource() {
+                @Override
+                public String name() {
+                    return name;
+                }
+
+                @Override
+                public RowSchema schema() {
+                    RowSchema schema = new RowSchema();
+                    schema.setColumns(List.of(
+                            new org.gensokyo.data.model.v2.ColumnDef("category", "VARCHAR", false),
+                            new org.gensokyo.data.model.v2.ColumnDef("amount", "BIGINT", true)
+                    ));
+                    return schema;
+                }
+
+                @Override
+                public List<Row> rows() {
+                    return List.of(
+                            new Row(Map.of("category", "a", "amount", 10)),
+                            new Row(Map.of("category", "a", "amount", 20)),
+                            new Row(Map.of("category", "b", "amount", 5))
+                    );
                 }
             };
         }
