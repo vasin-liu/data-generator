@@ -1,4 +1,4 @@
-package org.gensokyo.data.model.dto;
+package org.gensokyo.data.template.querysource.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
