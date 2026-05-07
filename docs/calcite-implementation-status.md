@@ -19,6 +19,7 @@ Related references:
 - `docs/calcite-skeleton-implementation-plan.md`
 - `docs/calcite-templatev2-model-design.md`
 - `docs/template-v2-product-roadmap.md`
+- `docs/template-v2-transformer-strategy.md`
 
 ## Current Status
 
