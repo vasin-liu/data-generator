@@ -20,6 +20,7 @@ Related references:
 - `docs/calcite-templatev2-model-design.md`
 - `docs/template-v2-product-roadmap.md`
 - `docs/template-v2-transformer-strategy.md`
+- `docs/template-v2-datasource-and-secret-governance.md`
 
 ## Current Status
 

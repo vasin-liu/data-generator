@@ -18,6 +18,7 @@ Related references:
 - `docs/calcite-refactor-plan.md`
 - `docs/calcite-implementation-status.md`
 - `docs/calcite-templatev2-model-design.md`
+- `docs/template-v2-datasource-and-secret-governance.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-v1-v2-mapping.md`
@@ -407,15 +408,11 @@ The following should not be expanded prematurely.
 
 After this roadmap, the most useful follow-up planning artifacts are:
 
-1. a datasource and secret governance document
-   - inline vs managed connections
-   - hot load rules
-   - credential policy
-2. a control-plane requirements document
+1. a control-plane requirements document
    - explain / preview / dry-run
    - task lifecycle
    - run reporting
-3. a migration program document
+2. a migration program document
    - V1 scenario inventory
    - parity gates
    - migration assistant scope
