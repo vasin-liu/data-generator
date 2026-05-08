@@ -25,6 +25,7 @@ Related references:
 - `docs/template-v2-migration-program.md`
 - `docs/template-v2-scenario-template-catalog.md`
 - `docs/template-v2-plugin-operational-guide.md`
+- `docs/template-v2-execution-scalability-plan.md`
 
 ## Current Status
 
