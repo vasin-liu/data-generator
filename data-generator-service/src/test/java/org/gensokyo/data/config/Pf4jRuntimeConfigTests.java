@@ -2,12 +2,12 @@ package org.gensokyo.data.config;
 
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
-import org.gensokyo.data.calcite.TemplateV2RuntimeContext;
-import org.gensokyo.data.calcite.Pf4jRuntimeExtensionLocator;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.TemplateV2RuntimePluginProvider;
-import org.gensokyo.data.calcite.Pf4jTemplateV2RuntimePluginProvider;
-import org.gensokyo.data.calcite.DirectoryAwareTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.plugin.DirectoryAwareTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.plugin.Pf4jRuntimeExtensionLocator;
+import org.gensokyo.data.calcite.plugin.Pf4jTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeContext;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

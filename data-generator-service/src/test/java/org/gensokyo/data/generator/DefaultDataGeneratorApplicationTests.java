@@ -2,7 +2,7 @@ package org.gensokyo.data.generator;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
-import org.gensokyo.data.calcite.TemplateV2RuntimeRegistryProvider;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistryProvider;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

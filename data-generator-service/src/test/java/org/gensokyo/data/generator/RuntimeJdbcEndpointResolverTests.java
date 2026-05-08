@@ -2,10 +2,10 @@ package org.gensokyo.data.generator;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import org.gensokyo.data.DataGeneratorApplication;
-import org.gensokyo.data.calcite.QuerySourceFactory;
-import org.gensokyo.data.calcite.QueryRowSource;
-import org.gensokyo.data.calcite.JdbcRowSinkAdapter;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.sink.JdbcRowSinkAdapter;
+import org.gensokyo.data.calcite.source.QueryRowSource;
+import org.gensokyo.data.calcite.source.QuerySourceFactory;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.Row;

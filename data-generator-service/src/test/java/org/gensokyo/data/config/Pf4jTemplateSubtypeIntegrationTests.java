@@ -1,14 +1,14 @@
 package org.gensokyo.data.config;
 
-import org.gensokyo.data.calcite.PathBasedPf4jRuntimeExtensionLocator;
-import org.gensokyo.data.calcite.Pf4jTemplateV2RuntimePluginProvider;
-import org.gensokyo.data.calcite.RefreshableTemplateV2RuntimeRegistryProvider;
-import org.gensokyo.data.calcite.StaticTemplateV2RuntimePluginProvider;
-import org.gensokyo.data.calcite.TemplateV2RunResult;
-import org.gensokyo.data.calcite.TemplateV2Runner;
-import org.gensokyo.data.calcite.TemplateV2RuntimeContext;
-import org.gensokyo.data.calcite.TemplateV2RuntimeRegistryFactory;
-import org.gensokyo.data.calcite.DefaultTemplateV2RuntimePlugin;
+import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
+import org.gensokyo.data.calcite.plugin.PathBasedPf4jRuntimeExtensionLocator;
+import org.gensokyo.data.calcite.plugin.Pf4jTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.plugin.StaticTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.runtime.RefreshableTemplateV2RuntimeRegistryProvider;
+import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
+import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeContext;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistryFactory;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
@@ -393,8 +393,8 @@ class Pf4jTemplateSubtypeIntegrationTests {
                 import org.gensokyo.data.calcite.V2SinkFactory;
                 import org.gensokyo.data.calcite.V2SourceFactory;
                 import org.gensokyo.data.calcite.V2TransformFactory;
-                import org.gensokyo.data.calcite.CalciteExecutionContext;
-                import org.gensokyo.data.calcite.CalciteRowTransformer;
+                import org.gensokyo.data.calcite.sql.CalciteExecutionContext;
+                import org.gensokyo.data.calcite.sql.CalciteRowTransformer;
                 import org.gensokyo.data.model.v2.SourceVO;
                 import org.gensokyo.data.model.v2.TransformVO;
                 import org.gensokyo.data.model.vo.writer.WriterVO;

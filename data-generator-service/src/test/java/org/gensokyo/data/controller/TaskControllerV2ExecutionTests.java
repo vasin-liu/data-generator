@@ -1,8 +1,8 @@
 package org.gensokyo.data.controller;
 
 import org.gensokyo.data.DataGeneratorApplication;
-import org.gensokyo.data.calcite.TemplateV2RunResult;
-import org.gensokyo.data.calcite.TemplateV2Runner;
+import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
+import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;

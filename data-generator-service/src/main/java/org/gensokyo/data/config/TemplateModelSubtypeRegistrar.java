@@ -1,7 +1,7 @@
 package org.gensokyo.data.config;
 
 import jakarta.annotation.PostConstruct;
-import org.gensokyo.data.calcite.Pf4jRuntimeExtensionLocator;
+import org.gensokyo.data.calcite.plugin.Pf4jRuntimeExtensionLocator;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;

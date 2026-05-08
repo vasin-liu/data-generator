@@ -2,9 +2,11 @@ package org.gensokyo.data.config;
 
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
-import org.gensokyo.data.calcite.TemplateV2RuntimeContext;
-import org.gensokyo.data.calcite.TemplateV2RuntimeRegistry;
-import org.gensokyo.data.calcite.TemplateV2RuntimeRegistryProvider;
+import org.gensokyo.data.calcite.plugin.Pf4jRuntimeExtensionLocator;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeContext;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistry;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistryProvider;
+import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeServices;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -25,7 +27,7 @@ class TemplateV2RuntimeWatcherTests {
             CountingSubtypeRegistrar subtypeRegistrar = new CountingSubtypeRegistrar();
             CountingTemplates templates = new CountingTemplates();
             TemplateV2RuntimeWatcher watcher = new TemplateV2RuntimeWatcher(
-                    new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new org.gensokyo.data.calcite.TemplateV2RuntimeServices(null, null, null), List.of(directory),
+                    new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new TemplateV2RuntimeServices(null, null, null), List.of(directory),
                             getClass().getClassLoader()),
                     registryProvider,
                     new FixedObjectProvider<>(subtypeRegistrar),
@@ -124,7 +126,7 @@ class TemplateV2RuntimeWatcherTests {
         }
     }
 
-    private static final class EmptyPf4jRuntimeExtensionLocator implements org.gensokyo.data.calcite.Pf4jRuntimeExtensionLocator {
+    private static final class EmptyPf4jRuntimeExtensionLocator implements Pf4jRuntimeExtensionLocator {
         @Override
         public List<org.gensokyo.data.calcite.Pf4jTemplateV2RuntimeExtension> loadExtensions() {
             return List.of();
