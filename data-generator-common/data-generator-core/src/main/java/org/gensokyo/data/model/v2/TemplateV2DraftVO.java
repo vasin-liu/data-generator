@@ -21,7 +21,9 @@ public class TemplateV2DraftVO implements Serializable {
     private Map<String, SourceVO> sources;
     private TransformVO transform;
     private List<TransformVO> transformers;
+    private List<TransformerCapabilityVO> transformerCapabilities;
     private WriteStageVO sink;
     private List<WriteStageVO> sinks;
+    private ExecutionPolicyVO executionPolicy;
     private SinkExecutionPolicyVO sinkExecutionPolicy;
 }

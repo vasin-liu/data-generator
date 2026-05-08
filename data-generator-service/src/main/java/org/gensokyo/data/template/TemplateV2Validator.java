@@ -1,5 +1,6 @@
 package org.gensokyo.data.template;
 
+import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
@@ -47,6 +48,7 @@ public final class TemplateV2Validator {
                 throw new IllegalArgumentException("SQL transformer SQL must not be blank");
             }
         }
+        validateExecutionPolicy(template.getExecutionPolicy());
 
         for (var entry : template.getSources().entrySet()) {
             if (StrKit.isBlank(entry.getKey())) {
@@ -73,6 +75,28 @@ public final class TemplateV2Validator {
         String mode = policy.getMode().trim().toUpperCase();
         if (!"FAIL_FAST".equals(mode) && !"CONTINUE_ON_ERROR".equals(mode)) {
             throw new IllegalArgumentException("Unsupported sink execution policy mode: " + policy.getMode());
+        }
+    }
+
+    private static void validateExecutionPolicy(ExecutionPolicyVO policy) {
+        if (policy == null || StrKit.isBlank(policy.getMode())) {
+            return;
+        }
+        String mode = policy.getMode().trim().toUpperCase();
+        if (!"IN_MEMORY".equals(mode) && !"CHUNKED".equals(mode) && !"STREAMING".equals(mode)) {
+            throw new IllegalArgumentException("Unsupported execution policy mode: " + policy.getMode());
+        }
+        if (policy.getMaxRowsInMemory() != null && policy.getMaxRowsInMemory() <= 0) {
+            throw new IllegalArgumentException("Execution policy maxRowsInMemory must be positive");
+        }
+        if (policy.getPreviewRowLimit() != null && policy.getPreviewRowLimit() <= 0) {
+            throw new IllegalArgumentException("Execution policy previewRowLimit must be positive");
+        }
+        if (policy.getSourceChunkSize() != null && policy.getSourceChunkSize() <= 0) {
+            throw new IllegalArgumentException("Execution policy sourceChunkSize must be positive");
+        }
+        if (policy.getSinkBatchSize() != null && policy.getSinkBatchSize() <= 0) {
+            throw new IllegalArgumentException("Execution policy sinkBatchSize must be positive");
         }
     }
 }
