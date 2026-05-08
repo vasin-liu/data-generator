@@ -22,6 +22,7 @@ Related references:
 - `docs/template-v2-datasource-and-secret-governance.md`
 - `docs/template-v2-execution-scalability-plan.md`
 - `docs/template-v2-migration-program.md`
+- `docs/template-v2-policy-to-runtime-mapping-guide.md`
 - `docs/template-v2-plugin-operational-guide.md`
 - `docs/template-v2-scenario-template-catalog.md`
 - `docs/template-v2-transformer-strategy.md`
@@ -416,5 +417,7 @@ After this roadmap, the most useful follow-up planning artifacts are:
 1. a scenario evidence maintenance process
    - how scenario entries are reviewed and updated
    - where acceptance evidence is stored
-2. a policy-to-runtime mapping guide
-   - how roadmap and governance policies map to concrete model fields and APIs
+2. a concrete model/API proposal set
+   - source endpoint model
+   - execution policy model
+   - transformer capability metadata model
