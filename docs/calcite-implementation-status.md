@@ -28,6 +28,7 @@ Related references:
 - `docs/template-v2-execution-scalability-plan.md`
 - `docs/template-v2-policy-to-runtime-mapping-guide.md`
 - `docs/template-v2-source-endpoint-model-proposal.md`
+- `docs/template-v2-execution-policy-model-proposal.md`
 
 ## Current Status
 
