@@ -131,7 +131,8 @@ class TemplateV2ExternalPluginIsolationTests {
                         () -> new TemplateV2RuntimeRegistryFactory().fromProviders(List.of(provider), runtimeContext(pluginDirectory))
                 );
 
-                Assertions.assertTrue(failure.getMessage().contains("provider [org.gensokyo.data.calcite.Pf4jTemplateV2RuntimePluginProvider]"));
+                Assertions.assertTrue(failure.getMessage().contains(
+                        "provider [org.gensokyo.data.calcite.plugin.Pf4jTemplateV2RuntimePluginProvider]"));
                 Assertions.assertTrue(failure.getCause().getMessage().contains("Pf4jNullProviderExtension"));
                 Assertions.assertTrue(failure.getCause().getMessage().contains("must return a plugin provider"));
             }

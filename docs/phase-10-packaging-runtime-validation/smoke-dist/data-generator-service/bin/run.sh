@@ -63,8 +63,8 @@ fi
 # Check if JAVA_VERSION is valid
 check_java_version() {
     JAVA_VERSION=$("$1" -version 2>&1 | awk -F '"' '/version/ {print $2}' | awk -F. '{print ($1 == "1") ? $2 : $1}')
-    if [ "$JAVA_VERSION" -lt 17 ]; then
-        echo "Java version is lower than 17. Please set JAVA_HOME to point to JDK 17+."
+    if [ "$JAVA_VERSION" -lt 25 ]; then
+        echo "Java version is lower than 25. Please set JAVA_HOME to point to JDK 25."
         return 1
     fi
     return 0
@@ -105,14 +105,14 @@ fi
 
 # If JAVA_HOME is not set, prompt the user to enter it
 while [ -z "$DG_JAVA_HOME" ]; do
-    echo "Please enter the path to JDK 17+:"
+    echo "Please enter the path to JDK 25:"
     read -r DG_JAVA_HOME
 
     if validate_java_home "$DG_JAVA_HOME"; then
         JAVA_CMD="${DG_JAVA_HOME}/bin/java"
         echo "Using Java from: $JAVA_CMD"
     else
-        echo "Invalid Java path or version. Please enter a valid JDK 17+ path."
+        echo "Invalid Java path or version. Please enter a valid JDK 25 path."
     fi
 done
 

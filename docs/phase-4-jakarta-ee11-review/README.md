@@ -10,7 +10,7 @@ Baseline:
 
 - Spring Boot: `4.0.5`
 - Build JDK: `25.0.1`
-- Compiler target: Java `17`
+- Compiler target: Java `25`
 
 ## Review result
 

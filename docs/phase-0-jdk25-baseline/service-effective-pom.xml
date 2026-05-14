@@ -71,12 +71,12 @@
     <h2.version>2.2.224</h2.version>
     <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
     <jackson.version>2.21.2</jackson.version>
-    <java.version>17</java.version>
+    <java.version>25</java.version>
     <jgrapht.version>1.5.2</jgrapht.version>
     <jsonschema.version>4.35.0</jsonschema.version>
     <lombok.version>1.18.44</lombok.version>
     <mainClass>org.gensokyo.data.DataGeneratorApplication</mainClass>
-    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
     <mockito.agentLine>-Xshare:off -Dio.netty.noUnsafe=true -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.17.0/mockito-core-5.17.0.jar</mockito.agentLine>
     <mockito.version>5.17.0</mockito.version>
     <mybatis-flex.version>1.9.5</mybatis-flex.version>
@@ -8546,7 +8546,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.14.1</version>
           <configuration>
-            <release>17</release>
+            <release>25</release>
             <annotationProcessorPaths>
               <path>
                 <groupId>org.projectlombok</groupId>
@@ -8593,7 +8593,7 @@
                 <rules>
                   <requireJavaVersion>
                     <version>[17,)</version>
-                    <message>Build requires JDK 17 or newer. Use JDK 25 for the upgraded baseline.</message>
+                    <message>Build requires JDK 25.</message>
                   </requireJavaVersion>
                   <requireMavenVersion>
                     <version>[3.6.3,)</version>
@@ -8630,7 +8630,7 @@
                   <version>1.1.1</version>
                 </path>
               </annotationProcessorPaths>
-              <release>17</release>
+              <release>25</release>
             </configuration>
           </execution>
           <execution>
@@ -8652,7 +8652,7 @@
                   <version>1.1.1</version>
                 </path>
               </annotationProcessorPaths>
-              <release>17</release>
+              <release>25</release>
             </configuration>
           </execution>
         </executions>
@@ -8669,7 +8669,7 @@
               <version>1.1.1</version>
             </path>
           </annotationProcessorPaths>
-          <release>17</release>
+          <release>25</release>
         </configuration>
       </plugin>
       <plugin>

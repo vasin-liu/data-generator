@@ -3,7 +3,7 @@
 ## Current baseline
 
 - Runtime JDK used for validation: `E:\Home\vasin.GENSOKYO\sdk\zulu-jdk25.0.1`
-- Compiler target remains Java `17`
+- Compiler target: Java `25` (aligned with `maven.compiler.release` in the root build)
 - Maven wrapper version: `3.9.11`
 
 ## Verified commands

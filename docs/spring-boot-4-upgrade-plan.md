@@ -166,8 +166,7 @@ TODO:
   - [x] `maven-surefire-plugin`
   - [x] `maven-failsafe-plugin`
   - [x] `maven-enforcer-plugin`
-- [x] Keep `maven.compiler.release=17` unless there is a deliberate follow-up decision to raise it.
-  - Later completed: repository output has now been raised to JDK `25`.
+- [x] Compiler baseline is JDK `25` (`maven.compiler.release` in the root build).
 - [x] Run the Phase 2 compile gate and capture the output under `docs/`.
 - [ ] Confirm Boot 4.0 still manages:
   - [ ] `httpclient5`
@@ -181,8 +180,7 @@ Validation gate:
 Phase 2 decisions for the minimum move:
 
 - Selected target: `Spring Boot 4.0.5`
-- Keep `maven.compiler.release=17` unchanged in this phase
-  - Later completed: repository output has now been raised to JDK `25`.
+- Compiler baseline: JDK `25` (`maven.compiler.release` in the root build).
 - Keep the existing explicit overrides in place for the first compile gate:
   - `jackson.version=2.21.2`
   - `reactor.version=3.7.14`
