@@ -144,6 +144,18 @@ P2:
 - document JavaScript, log, pause, shared, iterator branching, and generator scheduling as compatibility-only unless V2 orchestration is introduced
 - add business-scenario parity examples and acceptance criteria for V1 retirement
 
+## Migration dual-run evidence
+
+| Capability | V2 Status | Evidence | Gap / Decision |
+|---|---|---|---|
+| Scenario inventory (DB + repo) | Covered | `docs/migration/scenario-inventory.yaml`, `MigrationInventoryService` | DB refresh via tests / future admin profile |
+| Dual-run compare (V1 vs V2) | Covered | `POST /template/migration/compare/{templateId}`, `docs/migration/reports/*.md` | Production executor parity still business-validated |
+| Migration classification | Covered | `MigrationClassificationRules`, inventory `migrationClass` | APPROXIMATE templates need manual review |
+| Unified draft migration | Covered | `POST /template/migration/draft/{templateId}`, `MigrationDraftService` | Complex multi-source transforms still manual |
+| Promote after review | Covered | `POST /template/migration/promote/{templateId}`, `MigrationPromoteService` | V1 yaml retained on entity until archive policy |
+| CHUNKED policy on JDBC migrate | Covered | `V1QuerySourceExecutionPolicySuggester`, tests | Skips explicit small `maxRows` and `Const.AMOUNT` default |
+| Inventory maintained with report paths | Covered | ≥10 rows in `scenario-inventory.yaml`, sample reports committed | Automate nightly compare in CI optional |
+
 ## Immediate Recommendation
 
 The next implementation slice should shift from iterator parity to migration usability:

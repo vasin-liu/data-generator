@@ -13,6 +13,9 @@ It is not a byte-for-byte converter output. It shows the preferred V2 shape afte
 
 Related references:
 
+- `docs/migration/scenario-inventory.yaml` — canonical migration inventory (scenario family, wave, `lastCompareReportPath`, `migrationClass`)
+- `docs/migration/retirement-readiness.md` — P1/P2/P3 retirement gates
+- `docs/migration/compatibility-only-templates.md` — templates that should stay on V1
 - `docs/calcite-v1-v2-mapping.md`
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-implementation-status.md`

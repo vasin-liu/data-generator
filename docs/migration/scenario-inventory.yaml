@@ -1,16 +1,96 @@
 version: 1
 templates:
+  - id: regression-v1-constant-five-rows
+    name: regression-constant-five-rows
+    origin: repository
+    scenarioFamily: synthetic
+    migrationClass: EXACT
+    wave: 1
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-constant-five-rows.md
+    notes: Wave 1 number iterator; dual-run sample EXACT
   - id: regression-v1-iterator-simple
     name: regression-iterator-simple
     origin: repository
     scenarioFamily: synthetic
-    migrationClass: UNCLASSIFIED
+    migrationClass: ADAPTED
+    wave: 1
     blockers: []
-    v2DraftPresent: false
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-iterator-simple.md
+    notes: Iterator draft + SCRIPT field; review before promote
   - id: regression-v1-query-lookup
     name: regression-query-lookup
     origin: repository
     scenarioFamily: multi_source
-    migrationClass: UNCLASSIFIED
+    migrationClass: ADAPTED
+    wave: 2
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-query-lookup.md
+    notes: Single JDBC field reader; CHUNKED policy on migrate
+  - id: regression-v1-with-pause
+    name: regression-with-pause
+    origin: repository
+    scenarioFamily: orchestration_legacy
+    migrationClass: COMPATIBILITY_ONLY
+    blockers:
+      - Template uses PAUSE orchestration stage; V2 SQL migration cannot preserve pause semantics.
+    v2DraftPresent: false
+    notes: Remain on V1 until orchestration design exists
+  - id: wave1-synthetic-number-1to5
+    name: wave1-number-1to5
+    origin: repository
+    scenarioFamily: synthetic
+    migrationClass: EXACT
+    wave: 1
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-constant-five-rows.md
+    notes: Alias evidence for 1..5 number iterator family
+  - id: wave1-synthetic-iterator-draft
+    name: wave1-iterator-draft
+    origin: repository
+    scenarioFamily: synthetic
+    migrationClass: ADAPTED
+    wave: 1
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-iterator-simple.md
+  - id: wave2-jdbc-single-reader
+    name: wave2-jdbc-single
+    origin: repository
+    scenarioFamily: multi_source
+    migrationClass: ADAPTED
+    wave: 2
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-query-lookup.md
+  - id: wave2-jdbc-chunked-policy
+    name: wave2-jdbc-chunked
+    origin: repository
+    scenarioFamily: multi_source
+    migrationClass: ADAPTED
+    wave: 2
+    blockers: []
+    v2DraftPresent: true
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-query-lookup.md
+    notes: executionPolicy CHUNKED defaults on migrate
+  - id: evidence-dual-run-inventory
+    name: migration-dual-run-evidence
+    origin: repository
+    scenarioFamily: governance
+    migrationClass: EXACT
     blockers: []
     v2DraftPresent: false
+    lastCompareReportPath: docs/migration/reports/sample-regression-v1-constant-five-rows.md
+    notes: Meta row — inventory + compare reports maintained
+  - id: evidence-inventory-maintained
+    name: scenario-inventory-maintained
+    origin: repository
+    scenarioFamily: governance
+    migrationClass: EXACT
+    blockers: []
+    v2DraftPresent: false
+    notes: Committed scenario-inventory.yaml with compare report paths
