@@ -6,6 +6,11 @@
 package org.gensokyo.data.calcite.runtime;
 
 import org.gensokyo.data.calcite.RowSink;
+import org.gensokyo.data.calcite.RowSource;
+import org.gensokyo.data.calcite.join.BroadcastJoinExecutor;
+import org.gensokyo.data.calcite.join.BroadcastJoinSnapshot;
+import org.gensokyo.data.calcite.join.BroadcastJoinSpec;
+import org.gensokyo.data.calcite.join.BroadcastJoinSqlParser;
 import org.gensokyo.data.calcite.sql.CalciteExecutionContext;
 import org.gensokyo.data.calcite.sql.CalciteRowTransformer;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
@@ -25,8 +30,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Chunked Template V2 pipeline for {@code ROW_LOCAL} shapes: reads JDBC query sources in chunks,
- * applies the first SQL transform per chunk, and writes sinks in batches without retaining all rows.
+ * Chunked Template V2 pipeline for {@link ExecutionShape#ROW_LOCAL} and {@link ExecutionShape#BROADCAST_JOIN}:
+ * reads JDBC query sources in chunks, applies SQL per chunk (or broadcast-joins fact chunks to a materialized
+ * dimension), and writes sinks in batches without retaining all rows.
  *
  * @author Gensokyo
  * @since 2026-05-19
@@ -68,11 +74,18 @@ public final class ChunkedPipeline {
         }
 
         ExecutionShape shape = ExecutionShapeClassifier.classify(template);
-        if (shape != ExecutionShape.ROW_LOCAL) {
-            throw new IllegalStateException(
-                    "CHUNKED mode requires ROW_LOCAL execution shape, got " + shape);
-        }
+        return switch (shape) {
+            case ROW_LOCAL -> runRowLocal(template, policy, registry);
+            case BROADCAST_JOIN -> runBroadcastJoin(template, policy, registry);
+            default -> throw new IllegalStateException(
+                    "CHUNKED mode requires ROW_LOCAL or BROADCAST_JOIN execution shape, got " + shape);
+        };
+    }
 
+    private TemplateV2RunResult runRowLocal(
+            TemplateV2VO template,
+            EffectiveExecutionPolicy policy,
+            TemplateV2RuntimeRegistry registry) {
         Map.Entry<String, QuerySourceVO> queryEntry = soleQuerySource(template);
         String sourceName = queryEntry.getKey();
         QuerySourceVO querySource = queryEntry.getValue();
@@ -118,6 +131,61 @@ public final class ChunkedPipeline {
         return new TemplateV2RunResult(lastSchema, List.of(), metrics);
     }
 
+    private TemplateV2RunResult runBroadcastJoin(
+            TemplateV2VO template,
+            EffectiveExecutionPolicy policy,
+            TemplateV2RuntimeRegistry registry) {
+        BroadcastJoinSpec spec = BroadcastJoinSqlParser.parse(template);
+        Map<String, SourceVO> sources = template.getSources();
+        QuerySourceVO dimSourceVo = (QuerySourceVO) sources.get(spec.dimSourceName());
+        QuerySourceVO factSourceVo = (QuerySourceVO) sources.get(spec.factSourceName());
+
+        RunMetrics metrics = new RunMetrics(policy.mode());
+        int sinkBatchSize = policy.sinkBatchSize();
+        int chunkSize = policy.sourceChunkSize();
+
+        // Materialize dimension in memory (non-chunked read).
+        RowSource dimRowSource = registry.createSource(spec.dimSourceName(), dimSourceVo, null);
+        BroadcastJoinSnapshot snapshot = BroadcastJoinSnapshot.materialize(
+                dimRowSource,
+                spec.dimJoinColumn(),
+                policy.broadcastMaxRows(),
+                spec.dimSourceName());
+        metrics.addRead(spec.dimSourceName(), dimRowSource.rows().size());
+
+        RowSource factRowSource = registry.createSource(spec.factSourceName(), factSourceVo, policy);
+        if (!(factRowSource instanceof ChunkedRowSource chunked)) {
+            throw new IllegalStateException(
+                    "CHUNKED broadcast join requires a chunked fact source for ["
+                            + spec.factSourceName() + "], got " + factRowSource.getClass().getName());
+        }
+
+        RowSchema lastSchema = spec.outputSchema();
+        while (chunked.hasNextChunk()) {
+            var chunk = chunked.nextChunk(chunkSize);
+            if (chunk.isEmpty()) {
+                continue;
+            }
+            metrics.incrementChunks();
+            metrics.addRead(spec.factSourceName(), chunk.size());
+            if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
+                throw new ScaleLimitExceededException(
+                        "maxRowsInMemory",
+                        policy.maxRowsInMemory(),
+                        metrics.getTotalRowsRead(),
+                        "SOURCE_READ",
+                        spec.factSourceName());
+            }
+
+            CalciteRowTransformer.TransformResult joined =
+                    BroadcastJoinExecutor.join(chunk, snapshot, spec);
+            lastSchema = joined.schema();
+            writeSinks(registry, template, joined, sinkBatchSize);
+        }
+
+        return new TemplateV2RunResult(lastSchema, List.of(), metrics);
+    }
+
     private void writeSinks(
             TemplateV2RuntimeRegistry registry,
             TemplateV2VO template,
@@ -148,12 +216,12 @@ public final class ChunkedPipeline {
         if (template.getSources() == null || template.getSources().size() != 1) {
             int count = template.getSources() == null ? 0 : template.getSources().size();
             throw new IllegalStateException(
-                    "CHUNKED mode v1 requires exactly one source entry, found " + count);
+                    "CHUNKED ROW_LOCAL mode requires exactly one source entry, found " + count);
         }
         Map.Entry<String, SourceVO> entry = template.getSources().entrySet().iterator().next();
         if (!(entry.getValue() instanceof QuerySourceVO querySource)) {
             throw new IllegalStateException(
-                    "CHUNKED mode v1 requires a QuerySourceVO source, got "
+                    "CHUNKED mode requires a QuerySourceVO source, got "
                             + entry.getValue().getClass().getSimpleName());
         }
         return Map.entry(entry.getKey(), querySource);
