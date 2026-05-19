@@ -131,6 +131,31 @@ class TemplateV2SupportTests {
     }
 
     @Test
+    void rejectsChunkedModeWithTwoLargeQuerySources() {
+        var left = new QuerySourceVO();
+        left.setSql("SELECT id, customer_id FROM orders");
+        var right = new QuerySourceVO();
+        right.setSql("SELECT id, name FROM customers");
+
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("orders", left, "customers", right));
+        template.setTransformers(List.of(sql(
+                "SELECT o.id, c.name FROM orders o INNER JOIN customers c ON o.customer_id = c.id")));
+        template.setSinks(List.of(consoleSink()));
+        var policy = new ExecutionPolicyVO();
+        policy.setMode("CHUNKED");
+        template.setExecutionPolicy(policy);
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> TemplateV2Validator.validate(template));
+        Assertions.assertTrue(ex.getMessage().contains("CHUNKED"));
+        Assertions.assertTrue(ex.getMessage().contains("unbounded QuerySourceVO"));
+        Assertions.assertTrue(ex.getMessage().contains("2"));
+    }
+
+    @Test
     void rejectsChunkedModeWithGroupBySql() {
         var template = new TemplateV2VO();
         template.setName("demo");

@@ -69,6 +69,27 @@ public final class ExecutionShapeClassifier {
         return classifyParsed(parseQuery(requireFirstSql(template)), template);
     }
 
+    /**
+     * Counts {@link QuerySourceVO} entries that are not bounded for broadcast (no {@code maxRows}, or
+     * {@code maxRows} above {@code broadcastMaxRows}).
+     *
+     * @param template          template definition
+     * @param broadcastMaxRows  maximum rows allowed on the broadcast (dimension) side
+     * @return number of unbounded query sources
+     */
+    public static int countUnboundedQuerySources(TemplateV2VO template, int broadcastMaxRows) {
+        if (template == null || template.getSources() == null) {
+            return 0;
+        }
+        int count = 0;
+        for (SourceVO source : template.getSources().values()) {
+            if (source instanceof QuerySourceVO query && !hasRestrictiveMaxRows(query, broadcastMaxRows)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private static ExecutionShape classifyParsed(SqlNode parsed, TemplateV2VO template) {
         SqlNodeList orderBy = null;
         SqlNode fetch = null;

@@ -82,6 +82,21 @@ class ExecutionShapeClassifierTests {
     }
 
     @Test
+    void countsUnboundedQuerySources() {
+        QuerySourceVO left = new QuerySourceVO();
+        left.setSql("SELECT id FROM orders");
+        QuerySourceVO right = new QuerySourceVO();
+        right.setSql("SELECT id FROM customers");
+        right.setMaxRows(100L);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setSources(new LinkedHashMap<>(Map.of("orders", left, "customers", right)));
+
+        Assertions.assertEquals(1, ExecutionShapeClassifier.countUnboundedQuerySources(template, 10_000));
+        Assertions.assertEquals(2, ExecutionShapeClassifier.countUnboundedQuerySources(template, 50));
+    }
+
+    @Test
     void twoLargeQuerySourcesWithJoinRequireMaterialization() {
         QuerySourceVO left = new QuerySourceVO();
         left.setSql("SELECT id, customer_id FROM orders");

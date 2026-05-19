@@ -1,5 +1,6 @@
 package org.gensokyo.data.template;
 
+import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
@@ -122,6 +123,17 @@ public final class TemplateV2Validator {
     }
 
     private static void validateChunkedCompatibility(TemplateV2VO template) {
+        int broadcastMaxRows = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy()).broadcastMaxRows();
+        int unboundedQuerySources = ExecutionShapeClassifier.countUnboundedQuerySources(template, broadcastMaxRows);
+        if (unboundedQuerySources >= 2) {
+            throw new IllegalArgumentException(
+                    "CHUNKED execution policy allows at most one unbounded QuerySourceVO, or a broadcast join "
+                            + "with one dimension bounded by broadcastMaxRows ("
+                            + broadcastMaxRows
+                            + "); found "
+                            + unboundedQuerySources
+                            + " unbounded query sources");
+        }
         ExecutionShape shape = ExecutionShapeClassifier.classify(template);
         // ROW_LOCAL and BROADCAST_JOIN are compatible with CHUNKED; only full materialization is rejected.
         if (shape == ExecutionShape.MATERIALIZATION_REQUIRED) {
