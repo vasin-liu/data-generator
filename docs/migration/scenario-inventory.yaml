@@ -1,2 +1,16 @@
 version: 1
-templates: []
+templates:
+  - id: regression-v1-iterator-simple
+    name: regression-iterator-simple
+    origin: repository
+    scenarioFamily: synthetic
+    migrationClass: UNCLASSIFIED
+    blockers: []
+    v2DraftPresent: false
+  - id: regression-v1-query-lookup
+    name: regression-query-lookup
+    origin: repository
+    scenarioFamily: multi_source
+    migrationClass: UNCLASSIFIED
+    blockers: []
+    v2DraftPresent: false

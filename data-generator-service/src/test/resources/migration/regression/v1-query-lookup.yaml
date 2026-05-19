@@ -1,0 +1,12 @@
+name: regression-query-lookup
+fields:
+  - name: district_lookup
+    stages:
+      - type: read
+        readers:
+          - type: jdbc
+            dataSourceId: ds_lookup
+            content: select code, name from pc_district
+output:
+  writers:
+    - type: console

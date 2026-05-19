@@ -6,6 +6,7 @@
 package org.gensokyo.data.template.migration;
 
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.repository.TemplateRepository;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLFactory;
@@ -15,8 +16,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static tools.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
 
@@ -80,6 +83,32 @@ public class MigrationInventoryService {
         return entries.stream()
                 .filter(entry -> id.equals(entry.getId()))
                 .findFirst();
+    }
+
+    /**
+     * Merges V1 database templates into the inventory (ids {@code db-{templateId}}), skipping ids already present.
+     *
+     * @param repository template persistence
+     */
+    public void refreshFromRepository(TemplateRepository repository) {
+        MigrationInventorySeeder seeder = new MigrationInventorySeeder();
+        Set<String> existingIds = new HashSet<>();
+        for (MigrationInventoryEntry entry : entries) {
+            if (entry.getId() != null) {
+                existingIds.add(entry.getId());
+            }
+        }
+        boolean changed = false;
+        for (MigrationInventoryEntry dbEntry : seeder.entriesFromDatabase(repository)) {
+            if (!existingIds.contains(dbEntry.getId())) {
+                entries.add(dbEntry);
+                existingIds.add(dbEntry.getId());
+                changed = true;
+            }
+        }
+        if (changed) {
+            writeToDisk();
+        }
     }
 
     private List<MigrationInventoryEntry> loadFromDisk() {
