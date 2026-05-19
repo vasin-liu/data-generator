@@ -36,18 +36,29 @@ public class JdbcRowSinkAdapter implements RowSink {
 
     @Override
     public void write(RowSchema schema, List<Row> rows) {
+        writeBatch(schema, rows, rows == null || rows.isEmpty() ? 1 : rows.size());
+    }
+
+    @Override
+    public void writeBatch(RowSchema schema, List<Row> rows, int batchSize) {
         if (rows == null || rows.isEmpty()) {
             return;
         }
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize must be positive");
+        }
         List<ColumnMapping> mappings = resolveMappings(schema);
         String sql = buildSql(mappings);
-        Map<String, ?>[] batch = rows.stream()
-                .map(row -> toSqlParams(row, mappings))
-                .toArray(Map[]::new);
         String dataSourceId = runtimeJdbcEndpointResolver.resolveSinkDataSourceId(writer);
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(dataSourceId));
-            jdbcTemplate.batchUpdate(sql, batch);
+            for (int i = 0; i < rows.size(); i += batchSize) {
+                List<Row> slice = rows.subList(i, Math.min(i + batchSize, rows.size()));
+                Map<String, ?>[] batch = slice.stream()
+                        .map(row -> toSqlParams(row, mappings))
+                        .toArray(Map[]::new);
+                jdbcTemplate.batchUpdate(sql, batch);
+            }
         } finally {
             DynamicDataSourceContextHolder.clear();
         }

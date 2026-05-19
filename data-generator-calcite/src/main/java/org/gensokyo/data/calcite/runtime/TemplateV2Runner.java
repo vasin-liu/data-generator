@@ -41,6 +41,9 @@ public class TemplateV2Runner {
         if ("IN_MEMORY".equals(policy.mode())) {
             return new InMemoryPipeline(this::createSink).run(template, policy, registry);
         }
+        if ("CHUNKED".equals(policy.mode())) {
+            return new ChunkedPipeline(this::createSink).run(template, policy, registry);
+        }
         throw new UnsupportedOperationException("Execution mode not yet supported: " + policy.mode());
     }
 

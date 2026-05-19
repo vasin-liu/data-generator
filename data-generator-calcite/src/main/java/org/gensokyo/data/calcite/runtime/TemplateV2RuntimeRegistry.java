@@ -27,10 +27,27 @@ public class TemplateV2RuntimeRegistry {
     }
 
     public RowSource createSource(String name, SourceVO source) {
+        return createSource(name, source, null);
+    }
+
+    /**
+     * Creates a row source, passing execution policy to factories that support it (e.g. {@link QuerySourceFactory}).
+     *
+     * @param name   logical source name
+     * @param source source configuration
+     * @param policy optional effective execution policy for chunked JDBC reads
+     * @return row source
+     */
+    public RowSource createSource(String name, SourceVO source, EffectiveExecutionPolicy policy) {
         for (V2SourceFactory factory : sourceFactories) {
             if (factory.supports(source)) {
                 try {
-                    RowSource rowSource = factory.create(name, source);
+                    RowSource rowSource;
+                    if (policy != null && factory instanceof QuerySourceFactory queryFactory) {
+                        rowSource = queryFactory.create(name, source, policy);
+                    } else {
+                        rowSource = factory.create(name, source);
+                    }
                     if (source.getPolicy() == null) {
                         return rowSource;
                     }

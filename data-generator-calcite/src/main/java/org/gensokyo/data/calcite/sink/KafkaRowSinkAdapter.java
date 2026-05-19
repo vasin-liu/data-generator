@@ -30,12 +30,24 @@ public class KafkaRowSinkAdapter implements RowSink {
 
     @Override
     public void write(RowSchema schema, List<Row> rows) {
+        writeBatch(schema, rows, rows == null || rows.isEmpty() ? 1 : rows.size());
+    }
+
+    @Override
+    public void writeBatch(RowSchema schema, List<Row> rows, int batchSize) {
         if (rows == null || rows.isEmpty()) {
             return;
         }
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize must be positive");
+        }
         String topic = Objects.requireNonNull(writer.getTarget(), "Kafka sink target topic must not be null");
-        for (Row row : rows) {
-            kafkaTemplate.send(record(topic, row));
+        for (int i = 0; i < rows.size(); i += batchSize) {
+            List<Row> slice = rows.subList(i, Math.min(i + batchSize, rows.size()));
+            for (Row row : slice) {
+                kafkaTemplate.send(record(topic, row));
+            }
+            kafkaTemplate.flush();
         }
     }
 
