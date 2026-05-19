@@ -1,0 +1,9 @@
+name: regression-constant-five-rows
+iterator:
+  type: number
+  from: 1
+  to: 5
+  step: 1
+output:
+  writers:
+    - type: console
