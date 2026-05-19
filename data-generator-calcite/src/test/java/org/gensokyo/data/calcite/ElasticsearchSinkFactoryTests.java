@@ -96,6 +96,19 @@ class ElasticsearchSinkFactoryTests {
     }
 
     @Test
+    void writeBatchIssuesOneBulkRequestPerBatchSlice() throws Exception {
+        RestClient client = restClient();
+
+        new ElasticsearchRowSinkAdapter(client, elasticsearchWriter()).writeBatch(schema(), List.of(
+                new Row(Map.of("device", "d1", "value", 10)),
+                new Row(Map.of("device", "d2", "value", 20)),
+                new Row(Map.of("device", "d3", "value", 30))
+        ), 1);
+
+        Mockito.verify(client, Mockito.times(3)).performRequest(Mockito.any(Request.class));
+    }
+
+    @Test
     void rejectsPartialBulkSuccess() throws Exception {
         RestClient client = restClient("{\"errors\":true,\"items\":[{\"index\":{\"status\":201}}]}");
 

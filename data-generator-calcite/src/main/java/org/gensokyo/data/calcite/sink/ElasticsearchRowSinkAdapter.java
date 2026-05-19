@@ -39,10 +39,25 @@ public class ElasticsearchRowSinkAdapter implements RowSink {
 
     @Override
     public void write(RowSchema schema, List<Row> rows) {
+        writeBatch(schema, rows, rows == null || rows.isEmpty() ? 1 : rows.size());
+    }
+
+    @Override
+    public void writeBatch(RowSchema schema, List<Row> rows, int batchSize) {
         if (rows == null || rows.isEmpty()) {
             return;
         }
+        if (batchSize <= 0) {
+            throw new IllegalArgumentException("batchSize must be positive");
+        }
         String index = Objects.requireNonNull(writer.getTarget(), "Elasticsearch sink target index must not be null");
+        for (int i = 0; i < rows.size(); i += batchSize) {
+            List<Row> slice = rows.subList(i, Math.min(i + batchSize, rows.size()));
+            bulkWrite(index, slice);
+        }
+    }
+
+    private void bulkWrite(String index, List<Row> rows) {
         Request request = new Request("POST", "/_bulk");
         request.setEntity(new NStringEntity(bulkPayload(index, rows),
                 ContentType.create("application/x-ndjson", StandardCharsets.UTF_8)));
