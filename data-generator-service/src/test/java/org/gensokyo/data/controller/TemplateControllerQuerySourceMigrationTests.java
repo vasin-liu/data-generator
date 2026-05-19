@@ -3,10 +3,12 @@ package org.gensokyo.data.controller;
 import org.gensokyo.data.DataGeneratorApplication;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SourcePolicyVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.template.querysource.V1QuerySourceExecutionPolicySuggester;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateV2Normalizer;
@@ -144,6 +146,12 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals("SELECT * FROM iterator", ((SqlTransformVO) result.getData().getTransform()).getSql());
         Assertions.assertNotNull(result.getData().getSinkExecutionPolicy());
         Assertions.assertEquals("FAIL_FAST", result.getData().getSinkExecutionPolicy().getMode());
+        ExecutionPolicyVO executionPolicy = result.getData().getExecutionPolicy();
+        Assertions.assertNotNull(executionPolicy);
+        Assertions.assertEquals("CHUNKED", executionPolicy.getMode());
+        Assertions.assertEquals(V1QuerySourceExecutionPolicySuggester.DEFAULT_SOURCE_CHUNK_SIZE, executionPolicy.getSourceChunkSize());
+        Assertions.assertEquals(V1QuerySourceExecutionPolicySuggester.DEFAULT_SINK_BATCH_SIZE, executionPolicy.getSinkBatchSize());
+        Assertions.assertEquals(V1QuerySourceExecutionPolicySuggester.DEFAULT_MAX_ROWS_IN_MEMORY, executionPolicy.getMaxRowsInMemory());
 
         TemplatePO migrated = templateRepository.findById(entity.getId()).orElseThrow();
         TemplateV2DraftVO yamlDraft = new org.gensokyo.data.yaml.JacksonParser().parse(migrated.getContentYaml(), TemplateV2DraftVO.class);
@@ -155,6 +163,8 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals("SELECT * FROM iterator", ((SqlTransformVO) yamlDraft.getTransform()).getSql());
         Assertions.assertNotNull(yamlDraft.getSinkExecutionPolicy());
         Assertions.assertEquals("FAIL_FAST", yamlDraft.getSinkExecutionPolicy().getMode());
+        Assertions.assertNotNull(yamlDraft.getExecutionPolicy());
+        Assertions.assertEquals("CHUNKED", yamlDraft.getExecutionPolicy().getMode());
         Assertions.assertNotNull(migrated.getContentYaml());
         Assertions.assertFalse(migrated.getContentYaml().isBlank());
 
@@ -166,6 +176,39 @@ class TemplateControllerQuerySourceMigrationTests {
         Assertions.assertEquals("SELECT * FROM iterator", ((SqlTransformVO) jsonDraft.getTransform()).getSql());
         Assertions.assertNotNull(jsonDraft.getSinkExecutionPolicy());
         Assertions.assertEquals("FAIL_FAST", jsonDraft.getSinkExecutionPolicy().getMode());
+        Assertions.assertNotNull(jsonDraft.getExecutionPolicy());
+        Assertions.assertEquals("CHUNKED", jsonDraft.getExecutionPolicy().getMode());
+    }
+
+    @Test
+    void previewSkipsChunkedPolicyWhenMaxRowsIsSmall() {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(91020L);
+        entity.setName("v1-preview-small-cap");
+        entity.setContentYaml("""
+                name: v1-preview-small-cap
+                iterator:
+                  type: database
+                  dataSourceId: ds_main
+                  sql: select id, tenant_id from t_order where tenant_id = :tenantId
+                  pageIndex: 1
+                  pageSize: 100
+                  maxRows: 300
+                  params:
+                    - name: tenantId
+                      language:
+                        type: plain
+                        content: tenant-a
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<TemplateV2DraftVO> result = templateController.previewQuerySourceV2ById(entity.getId());
+
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertNull(result.getData().getExecutionPolicy());
     }
 
     @Test

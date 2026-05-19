@@ -30,6 +30,7 @@ public final class V1QuerySourceDraftConverter {
         if (template.getOutput() != null) {
             draft.setSink(template.getOutput());
         }
+        V1QuerySourceExecutionPolicySuggester.suggestChunkedPolicyIfEligible(template, draft);
         SinkExecutionPolicyVO sinkExecutionPolicy = new SinkExecutionPolicyVO();
         sinkExecutionPolicy.setMode("FAIL_FAST");
         draft.setSinkExecutionPolicy(sinkExecutionPolicy);
