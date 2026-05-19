@@ -9,6 +9,7 @@ import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.iterator.ConstantIteratorVO;
 import org.gensokyo.data.iterator.DateTimeIteratorVO;
 import org.gensokyo.data.model.v2.CsvSourceVO;
+import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.ExcelSheetSourceVO;
 import org.gensokyo.data.model.v2.ExcelSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
@@ -73,6 +74,31 @@ class TemplateV2RunnerTests {
 
         Assertions.assertEquals(1, result.getRows().size());
         Assertions.assertEquals("4", result.getRows().get(0).getString("value"));
+    }
+
+    @Test
+    void failsWhenInMemoryRowLimitExceeded() {
+        ConstantIteratorVO iterator = new ConstantIteratorVO();
+        iterator.setDataset(List.of("one", "two", "three", "four", "five"));
+        iterator.setRepeat(1);
+        IteratorSourceVO source = new IteratorSourceVO();
+        source.setIterator(iterator);
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("IN_MEMORY");
+        executionPolicy.setMaxRowsInMemory(2);
+        executionPolicy.setFailOnLimitExceeded(true);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-row-limit");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("seed", source));
+        template.setTransformers(List.of(sql("SELECT value FROM seed")));
+        template.setSinks(List.of(consoleSink()));
+
+        ScaleLimitExceededException exception = Assertions.assertThrows(ScaleLimitExceededException.class,
+                () -> new TemplateV2Runner(defaultRegistry()).run(template));
+        Assertions.assertTrue(exception.getMessage().contains("maxRowsInMemory"));
     }
 
     @Test
