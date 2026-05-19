@@ -28,6 +28,8 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 | POST | `/template/migration/draft/{id}` |
 | POST | `/template/migration/compare/{id}` |
 | POST | `/template/migration/promote/{id}` |
+| GET | `/template/migration/inventory` |
+| POST | `/template/migration/inventory/refresh` |
 
 See `docs/migration/workbench-usage.md`.
 
@@ -41,7 +43,6 @@ See `docs/migration/workbench-usage.md`.
 
 ## Out of scope (follow-ups)
 
-- Public `POST /migration/inventory/refresh` admin endpoint
 - Full explain/preview control plane (roadmap P0, deferred)
 - Official non-SQL transformer (blocks Wave 3 script-heavy migrations)
 - Production-wide inventory export (manual refresh via `MigrationInventoryService.refreshFromRepository`)

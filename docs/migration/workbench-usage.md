@@ -75,15 +75,23 @@ curl -s -X POST "http://localhost:8080/template/migration/promote/42"
 
 Runs `TemplateV2Validator`, writes V2 content to the template, updates inventory. **V1 YAML is not deleted** (compatibility with rollback notes in inventory).
 
-## Refresh inventory from database
+## Inventory list and refresh
 
-In tests or a future admin task, merge all V1 templates from the DB into `scenario-inventory.yaml`:
+List committed + merged inventory rows:
 
-```java
-migrationInventoryService.refreshFromRepository(templateRepository);
+```bash
+curl -s "http://localhost:8080/template/migration/inventory"
 ```
 
-Regression fixtures are seeded from `classpath:migration/regression/*.yaml` via `MigrationInventorySeeder`.
+Merge **new** V1 templates from the database (`db-{templateId}` ids only; existing ids are skipped):
+
+```bash
+curl -s -X POST "http://localhost:8080/template/migration/inventory/refresh"
+```
+
+Response fields: `addedCount`, `totalCount`, `inventoryPath`, `persisted` (whether YAML was rewritten).
+
+Regression fixtures are seeded from `classpath:migration/regression/*.yaml` via `MigrationInventorySeeder` when building DB entries; the committed file under `docs/migration/scenario-inventory.yaml` is updated on refresh when new templates appear.
 
 ## Classification quick reference
 

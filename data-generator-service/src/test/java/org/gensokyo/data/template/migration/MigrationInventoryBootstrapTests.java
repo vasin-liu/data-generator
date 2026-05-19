@@ -47,7 +47,9 @@ class MigrationInventoryBootstrapTests {
         Files.writeString(inventoryPath, "version: 1\ntemplates: []\n");
         MigrationInventoryService service = new MigrationInventoryService(inventoryPath);
 
-        service.refreshFromRepository(templateRepository);
+        MigrationInventoryRefreshResult result = service.refreshFromRepository(templateRepository);
+        Assertions.assertTrue(result.getAddedCount() >= 1, "expected at least the saved template in inventory");
+        Assertions.assertTrue(result.isPersisted());
 
         String expectedId = "db-" + entity.getId();
         MigrationInventoryEntry dbEntry = service.findById(expectedId).orElseThrow();

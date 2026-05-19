@@ -136,11 +136,21 @@ public class MigrationInventoryService {
     }
 
     /**
+     * Returns the path to the on-disk scenario inventory file.
+     *
+     * @return inventory YAML path
+     */
+    public String inventoryPathString() {
+        return inventoryPath.toString();
+    }
+
+    /**
      * Merges V1 database templates into the inventory (ids {@code db-{templateId}}), skipping ids already present.
      *
      * @param repository template persistence
+     * @return counts and whether the inventory file was updated
      */
-    public void refreshFromRepository(TemplateRepository repository) {
+    public MigrationInventoryRefreshResult refreshFromRepository(TemplateRepository repository) {
         MigrationInventorySeeder seeder = new MigrationInventorySeeder();
         Set<String> existingIds = new HashSet<>();
         for (MigrationInventoryEntry entry : entries) {
@@ -148,17 +158,20 @@ public class MigrationInventoryService {
                 existingIds.add(entry.getId());
             }
         }
-        boolean changed = false;
+        int added = 0;
         for (MigrationInventoryEntry dbEntry : seeder.entriesFromDatabase(repository)) {
             if (!existingIds.contains(dbEntry.getId())) {
                 entries.add(dbEntry);
                 existingIds.add(dbEntry.getId());
-                changed = true;
+                added++;
             }
         }
-        if (changed) {
+        boolean persisted = added > 0;
+        if (persisted) {
             writeToDisk();
         }
+        return MigrationInventoryRefreshResult.of(
+                added, entries.size(), inventoryPathString(), persisted);
     }
 
     private List<MigrationInventoryEntry> loadFromDisk() {

@@ -35,6 +35,8 @@ import org.gensokyo.data.template.migration.MigrationCompareOptions;
 import org.gensokyo.data.template.migration.MigrationCompareService;
 import org.gensokyo.data.template.migration.MigrationComparisonReport;
 import org.gensokyo.data.template.migration.MigrationDraftService;
+import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
+import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.MigrationReportWriter;
@@ -250,6 +252,27 @@ public class TemplateController {
             return R.fail(String.format("Template '%s' has no database-backed sources that can be converted into QuerySourceVO", templateId));
         }
         return R.ok("Preview generated", draft);
+    }
+
+    /**
+     * Lists all rows in the migration scenario inventory ({@code scenario-inventory.yaml}).
+     *
+     * @return inventory entries (regression fixtures and {@code db-*} templates)
+     */
+    @GetMapping("/migration/inventory")
+    public R<List<MigrationInventoryEntry>> listMigrationInventory() {
+        return R.ok("Inventory loaded", migrationInventoryService.listAll());
+    }
+
+    /**
+     * Merges V1 templates from the database into the scenario inventory (new {@code db-{id}} rows only).
+     *
+     * @return merge counts and inventory file path
+     */
+    @PostMapping("/migration/inventory/refresh")
+    public R<MigrationInventoryRefreshResult> refreshMigrationInventory() {
+        MigrationInventoryRefreshResult result = migrationInventoryService.refreshFromRepository(repository);
+        return R.ok("Inventory refresh completed", result);
     }
 
     /**
