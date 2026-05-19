@@ -2,6 +2,7 @@ package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.*;
 import org.gensokyo.data.calcite.parser.*;
+import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
@@ -28,10 +29,25 @@ public class QuerySourceFactory implements V2SourceFactory {
 
     @Override
     public RowSource create(String name, SourceVO source) {
+        return create(name, source, null);
+    }
+
+    /**
+     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED}.
+     *
+     * @param name   logical source name
+     * @param source source configuration
+     * @param policy optional effective execution policy; when {@code null}, uses in-memory {@link QueryRowSource}
+     * @return row source implementation
+     */
+    public RowSource create(String name, SourceVO source, EffectiveExecutionPolicy policy) {
         QuerySourceVO querySource = (QuerySourceVO) source;
         String effectiveDataSourceId = runtimeJdbcEndpointResolver.resolveSourceDataSourceId(querySource);
         if (effectiveDataSourceId != null && !effectiveDataSourceId.isBlank()) {
             querySource.setDataSourceId(effectiveDataSourceId);
+        }
+        if (policy != null && "CHUNKED".equals(policy.mode())) {
+            return new ChunkedQueryRowSource(name, querySource, jdbcTemplate, policy.sourceChunkSize());
         }
         return new QueryRowSource(name, querySource, jdbcTemplate);
     }
