@@ -86,6 +86,34 @@ public class MigrationInventoryService {
     }
 
     /**
+     * Updates inventory for a database template after compare (classification and report path).
+     *
+     * @param templateId persisted template id
+     * @param report     compare report with classification set
+     * @param reportPath relative report path written under {@code docs/migration/reports/}
+     */
+    public void updateCompareResult(Long templateId, MigrationComparisonReport report, String reportPath) {
+        if (templateId == null || report == null) {
+            return;
+        }
+        String inventoryId = "db-" + templateId;
+        MigrationInventoryEntry entry = findById(inventoryId).orElseGet(() -> {
+            MigrationInventoryEntry created = new MigrationInventoryEntry();
+            created.setId(inventoryId);
+            created.setOrigin("database");
+            created.setDbTemplateId(templateId);
+            entries.add(created);
+            return created;
+        });
+        if (report.getClassification() != null) {
+            entry.setMigrationClass(report.getClassification());
+        }
+        entry.setLastCompareReportPath(reportPath);
+        entry.setV2DraftPresent(true);
+        writeToDisk();
+    }
+
+    /**
      * Merges V1 database templates into the inventory (ids {@code db-{templateId}}), skipping ids already present.
      *
      * @param repository template persistence
