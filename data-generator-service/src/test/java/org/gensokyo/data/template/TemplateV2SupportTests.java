@@ -3,6 +3,7 @@ package org.gensokyo.data.template;
 import org.gensokyo.data.iterator.DatabaseIteratorVO;
 import org.gensokyo.data.json.JsonSubType;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
+import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
@@ -92,6 +93,39 @@ class TemplateV2SupportTests {
         template.setSinks(List.of(consoleSink()));
 
         Assertions.assertDoesNotThrow(() -> TemplateV2Validator.validate(template));
+    }
+
+    @Test
+    void validatesChunkedModeWithRowLocalSql() {
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("input", new IteratorSourceVO()));
+        template.setTransformers(List.of(sql("SELECT value FROM input")));
+        template.setSinks(List.of(consoleSink()));
+        var policy = new ExecutionPolicyVO();
+        policy.setMode("chunked");
+        template.setExecutionPolicy(policy);
+
+        Assertions.assertDoesNotThrow(() -> TemplateV2Validator.validate(template));
+    }
+
+    @Test
+    void rejectsChunkedModeWithGroupBySql() {
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("input", new IteratorSourceVO()));
+        template.setTransformers(List.of(sql("SELECT status, COUNT(*) FROM input GROUP BY status")));
+        template.setSinks(List.of(consoleSink()));
+        var policy = new ExecutionPolicyVO();
+        policy.setMode("CHUNKED");
+        template.setExecutionPolicy(policy);
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> TemplateV2Validator.validate(template));
+        Assertions.assertTrue(ex.getMessage().contains("CHUNKED"));
+        Assertions.assertTrue(
+                ex.getMessage().contains("GROUP BY") || ex.getMessage().contains("MATERIALIZATION"));
     }
 
     @Test

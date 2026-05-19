@@ -1,15 +1,22 @@
 package org.gensokyo.data.template;
 
+import org.gensokyo.data.calcite.sql.ExecutionShape;
+import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public final class TemplateV2Validator {
     private TemplateV2Validator() {
@@ -48,7 +55,7 @@ public final class TemplateV2Validator {
                 throw new IllegalArgumentException("SQL transformer SQL must not be blank");
             }
         }
-        validateExecutionPolicy(template.getExecutionPolicy());
+        validateExecutionPolicy(template);
 
         for (var entry : template.getSources().entrySet()) {
             if (StrKit.isBlank(entry.getKey())) {
@@ -78,13 +85,21 @@ public final class TemplateV2Validator {
         }
     }
 
-    private static void validateExecutionPolicy(ExecutionPolicyVO policy) {
+    private static final Pattern SQL_JOIN = Pattern.compile("\\bJOIN\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SQL_SELECT_DISTINCT =
+            Pattern.compile("\\bSELECT\\s+DISTINCT\\b", Pattern.CASE_INSENSITIVE);
+
+    private static void validateExecutionPolicy(TemplateV2VO template) {
+        ExecutionPolicyVO policy = template.getExecutionPolicy();
         if (policy == null || StrKit.isBlank(policy.getMode())) {
             return;
         }
-        String mode = policy.getMode().trim().toUpperCase();
+        String mode = policy.getMode().trim().toUpperCase(Locale.ROOT);
         if (!"IN_MEMORY".equals(mode) && !"CHUNKED".equals(mode) && !"STREAMING".equals(mode)) {
             throw new IllegalArgumentException("Unsupported execution policy mode: " + policy.getMode());
+        }
+        if ("STREAMING".equals(mode)) {
+            throw new IllegalArgumentException("STREAMING execution policy mode is not implemented");
         }
         if (policy.getMaxRowsInMemory() != null && policy.getMaxRowsInMemory() <= 0) {
             throw new IllegalArgumentException("Execution policy maxRowsInMemory must be positive");
@@ -98,5 +113,52 @@ public final class TemplateV2Validator {
         if (policy.getSinkBatchSize() != null && policy.getSinkBatchSize() <= 0) {
             throw new IllegalArgumentException("Execution policy sinkBatchSize must be positive");
         }
+        if ("CHUNKED".equals(mode)) {
+            validateChunkedCompatibility(template);
+        }
+    }
+
+    private static void validateChunkedCompatibility(TemplateV2VO template) {
+        ExecutionShape shape = ExecutionShapeClassifier.classify(template);
+        if (shape == ExecutionShape.MATERIALIZATION_REQUIRED) {
+            String features = describeMaterializationFeatures(firstSqlTransform(template));
+            throw new IllegalArgumentException(
+                    "CHUNKED execution policy is incompatible with SQL requiring materialization: " + features);
+        }
+    }
+
+    private static String firstSqlTransform(TemplateV2VO template) {
+        for (TransformVO transformer : template.getTransformers()) {
+            if (transformer instanceof SqlTransformVO sqlTransform && StrKit.isNotBlank(sqlTransform.getSql())) {
+                return sqlTransform.getSql();
+            }
+        }
+        return "";
+    }
+
+    private static String describeMaterializationFeatures(String sql) {
+        if (StrKit.isBlank(sql)) {
+            return ExecutionShape.MATERIALIZATION_REQUIRED.name();
+        }
+        String normalized = sql.toUpperCase(Locale.ROOT);
+        List<String> features = new ArrayList<>();
+        if (normalized.contains("GROUP BY")) {
+            features.add("GROUP BY");
+        }
+        if (SQL_JOIN.matcher(sql).find()) {
+            features.add("JOIN");
+        }
+        if (SQL_SELECT_DISTINCT.matcher(sql).find()) {
+            features.add("DISTINCT");
+        }
+        if (normalized.contains("ORDER BY")
+                && !normalized.contains("FETCH")
+                && !normalized.contains("LIMIT")) {
+            features.add("ORDER BY without LIMIT");
+        }
+        if (features.isEmpty()) {
+            return ExecutionShape.MATERIALIZATION_REQUIRED.name();
+        }
+        return String.join(", ", features);
     }
 }
