@@ -77,6 +77,23 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void rejectsStreamingExecutionModeAtRuntime() {
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-streaming");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("seed", numberSource(1, 2, 1)));
+        template.setTransformers(List.of(sql("SELECT value FROM seed")));
+        template.setSinks(List.of(consoleSink()));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new TemplateV2Runner(defaultRegistry()).run(template));
+        Assertions.assertEquals("STREAMING execution mode is not implemented", exception.getMessage());
+    }
+
+    @Test
     void failsWhenInMemoryRowLimitExceeded() {
         ConstantIteratorVO iterator = new ConstantIteratorVO();
         iterator.setDataset(List.of("one", "two", "three", "four", "five"));

@@ -38,6 +38,9 @@ public class TemplateV2Runner {
 
         EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy());
         TemplateV2RuntimeRegistry registry = runtimeRegistryProvider.current();
+        if ("STREAMING".equals(policy.mode())) {
+            throw new IllegalArgumentException("STREAMING execution mode is not implemented");
+        }
         if ("IN_MEMORY".equals(policy.mode())) {
             return new InMemoryPipeline(this::createSink).run(template, policy, registry);
         }
