@@ -29,6 +29,7 @@ Related references:
 - `docs/template-v2-policy-to-runtime-mapping-guide.md`
 - `docs/template-v2-source-endpoint-model-proposal.md`
 - `docs/template-v2-execution-policy-model-proposal.md`
+- `docs/template-v2-jdbc-chunked-execution-guide.md`
 - `docs/template-v2-transformer-capability-metadata-model-proposal.md`
 
 ## Current Status
@@ -41,6 +42,7 @@ As of the current implementation checkpoint:
 - Phase 2 practical source/sink coverage is mostly complete for JDBC, Kafka, Elasticsearch, AI source runtime bridge, source policy, and multi-sink failure policy
 - Phase 2 now also includes first-pass Excel source and sink support through `ExcelSourceVO` / `ExcelRowSource` and `ExcelSinkFactory` / `ExcelRowSinkAdapter`
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions, the shared UDF registry, a first high-frequency faker compatibility batch, and a first repository-backed V1-to-V2 migration example set
+- JDBC chunked execution (`CHUNKED` mode, Pattern S row-local export, Pattern B broadcast join) is delivered with policy wiring, validation, and H2 integration tests; MySQL cursor URL configuration remains operator-documented
 - the largest remaining gaps are official non-SQL transformer families beyond the current SQL-first path, broader SpEL/faker compatibility coverage beyond the first batch, richer business-family parity validation, exact V1 selection semantics beyond current source-policy aliases, and broader provider/plugin examples around the AI bridge
 
 ### 1. Baseline and scope
@@ -137,6 +139,12 @@ Implemented `data-generator-calcite` module:
 - `JsonRowSinkAdapter`
 - `TemplateV2Runner`
 - `TemplateV2RunResult`
+- `EffectiveExecutionPolicy`
+- `InMemoryPipeline` / `ChunkedPipeline`
+- `ChunkedRowSource` / `ChunkedQueryRowSource`
+- `ExecutionShapeClassifier` / `ExecutionShape`
+- `BroadcastJoinSnapshot` / `BroadcastJoinExecutor`
+- `ScaleLimitExceededException` / run `metrics` on `TemplateV2RunResult`
 
 ### 5. Source capability currently implemented
 
@@ -170,6 +178,7 @@ Current behavior:
 - switches datasource with `DynamicDataSourceContextHolder`
 - normalizes result column keys to lowercase
 - infers schema when schema is not explicitly provided
+- when `executionPolicy.mode` is `CHUNKED`, `QuerySourceFactory` builds `ChunkedQueryRowSource` with JDBC `fetchSize` from `sourceChunkSize` instead of full `QueryRowSource` materialization
 
 Parameter binding status:
 
@@ -374,7 +383,32 @@ What is not implemented yet:
 - rich partial-success reporting in `TemplateV2RunResult`
 - source policy semantics beyond model reservation
 
-### 9. Test status
+### 9. JDBC chunked execution (delivered)
+
+Delivered for large JDBC export and bounded-memory runs:
+
+- `ExecutionPolicyVO` is resolved at runtime through `EffectiveExecutionPolicy` and selects `InMemoryPipeline` vs `ChunkedPipeline` in `TemplateV2Runner`
+- **Pattern S (`ROW_LOCAL`)**: single `QuerySourceVO`, chunked read → per-chunk SQL transform → `writeBatch` on JDBC/Kafka/Elasticsearch sinks
+- **Pattern B (`BROADCAST_JOIN`)**: one chunked fact query plus one broadcast-small dimension (`QuerySourceVO.maxRows` ≤ `broadcastMaxRows`, or bounded constant iterator); dimension snapshot + per-chunk equi-join (`INNER` / `LEFT`)
+- `TemplateV2Validator` rejects `CHUNKED` when SQL classifies as `MATERIALIZATION_REQUIRED` (`GROUP BY`, `DISTINCT`, unbounded `ORDER BY`, invalid join topology, two large JDBC sources)
+- `maxRowsInMemory` enforced cumulatively with `ScaleLimitExceededException` (stage and policy field in message)
+- `CHUNKED` runs return metrics (`executionMode`, `totalRowsRead`, `chunksProcessed`, sink batch counts) and an empty or capped row list
+
+Operator guide: `docs/template-v2-jdbc-chunked-execution-guide.md` (includes MySQL `useCursorFetch` note).
+
+Evidence:
+
+- `ChunkedPipelineTests`, `ChunkedQueryRowSourceTests`, `EffectiveExecutionPolicyTests`
+- `BroadcastJoinExecutorTests.chunkedBroadcastJoinWritesAllFactRows`
+- `TemplateV2SupportTests` (CHUNKED + `GROUP BY` rejection)
+
+Not in scope for this delivery:
+
+- `STREAMING` mode runtime
+- chunked CSV/JSON sources
+- multi-transform chunked chains beyond row-local / broadcast-join shapes
+
+### 10. Test status
 
 Implemented and passing focused tests include:
 
@@ -457,6 +491,7 @@ The following implementation milestones are complete:
 60. Conservative lookup source rewrites now also cover simple `IN (:param)` predicates in the same `AND` chain; more complex boolean groups and `OR` shapes remain intentionally manual-review territory.
 61. Conservative lookup source rewrites now also cover simple parameterized comparison predicates such as `>= :startTime` and `<= :endTime` in the same `AND` chain, which is enough for first-pass time-window lookup rewrites while still leaving `BETWEEN` and more complex boolean shapes to explicit author review.
 62. The in-memory Calcite V2 runtime now executes `LEFT JOIN` in addition to `INNER JOIN`, including null-padding for unmatched right-side rows, so lookup-style V2 templates are not limited to migration previews and can run end to end in the current runner.
+63. JDBC chunked execution is delivered: `executionPolicy.mode: CHUNKED` runs `ChunkedPipeline` with `ChunkedQueryRowSource`, sink batching, `ExecutionShapeClassifier` preflight, Pattern S row-local export, Pattern B broadcast join, cumulative `maxRowsInMemory` limits, and operator documentation in `docs/template-v2-jdbc-chunked-execution-guide.md`.
 
 ## Immediate Next Work
 

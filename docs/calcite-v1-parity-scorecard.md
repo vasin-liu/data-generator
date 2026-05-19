@@ -55,6 +55,7 @@ The remaining V1 parity gaps are concentrated in:
 | JSON iterator/reader | Covered | `JsonSourceVO` / `JsonRowSource` | nested object expansion intentionally deferred |
 | Excel iterator/reader | Covered | `ExcelSourceVO` / `ExcelRowSource` | sheet row-window semantics and SQL path are covered; business examples can be added later |
 | JDBC reader | Covered | `QuerySourceVO` / `QueryRowSource` | dynamic datasource endpoint resolution exists |
+| Large JDBC export (bounded memory) | Covered | `executionPolicy.mode: CHUNKED`, `ChunkedPipeline`, `ChunkedQueryRowSource`, Pattern S/B in `docs/template-v2-jdbc-chunked-execution-guide.md` | MySQL needs `useCursorFetch=true` on datasource URL for server-side cursors; `GROUP BY`/two large queries rejected; `STREAMING` not implemented |
 | Constant reader | Partial | SQL literals or future inline source | no first-class inline table source runtime yet |
 | SpEL reader | Partial | query params support lightweight SpEL; SQL/UDF path exists | first migration examples are in place; long-tail expression coverage remains |
 | AI reader | Covered | `AiSourceVO`, deterministic local providers, service-wired Ollama `AiRuntimeBridge` | additional providers, richer parser catalogs, and business examples can be added incrementally |
