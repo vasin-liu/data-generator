@@ -34,7 +34,9 @@ import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.template.migration.MigrationCompareOptions;
 import org.gensokyo.data.template.migration.MigrationCompareService;
 import org.gensokyo.data.template.migration.MigrationComparisonReport;
+import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.MigrationReportWriter;
 import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
 import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
@@ -168,6 +170,8 @@ public class TemplateController {
     private final MigrationCompareService migrationCompareService;
     private final MigrationReportWriter migrationReportWriter;
     private final MigrationInventoryService migrationInventoryService;
+    private final MigrationDraftService migrationDraftService;
+    private final MigrationPromoteService migrationPromoteService;
 
     @PostMapping("/updateById")
     public R<String> updateById(@Validated @RequestBody UpdateTemplateQO qo) {
@@ -308,6 +312,49 @@ public class TemplateController {
         String reportPath = migrationReportWriter.write(report);
         migrationInventoryService.updateCompareResult(templateId, report, reportPath);
         return R.ok("Compare completed", report);
+    }
+
+    /**
+     * Builds a unified V2 migration draft (query-source JDBC or simple iterator) without persisting.
+     *
+     * @param templateId persisted template id
+     * @return migration draft for preview or compare
+     */
+    @PostMapping("/migration/draft/{templateId}")
+    public R<TemplateV2DraftVO> buildMigrationDraft(@NotNull @PathVariable Long templateId) {
+        var entity = repository.findById(templateId).orElse(null);
+        if (Objects.isNull(entity)) {
+            return R.fail(String.format("Template '%s' does not exist", templateId));
+        }
+
+        TemplateV2DraftVO draft;
+        try {
+            draft = buildMigrationDraft(entity);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
+        if (Objects.isNull(draft) || CollectKit.isEmpty(draft.getSources())) {
+            return R.fail(String.format("Template '%s' could not be converted into a V2 draft", templateId));
+        }
+        return R.ok("Draft generated", draft);
+    }
+
+    /**
+     * Promotes a validated V2 draft onto the template and updates migration inventory (V1 yaml retained).
+     *
+     * @param templateId persisted template id
+     * @return promoted draft
+     */
+    @PostMapping("/migration/promote/{templateId}")
+    public R<TemplateV2DraftVO> promoteMigration(@NotNull @PathVariable Long templateId) {
+        try {
+            TemplateV2DraftVO draft = migrationPromoteService.promote(templateId);
+            return R.ok("Promote completed", draft);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
     }
 
     @GetMapping("/analyzeQuerySourceV2ById/{templateId}")
@@ -482,7 +529,11 @@ public class TemplateController {
     }
 
     private TemplateV2DraftVO buildQuerySourceDraft(TemplatePO entity) {
-        return V1QuerySourceDraftConverter.convert(buildV1Template(entity));
+        return buildMigrationDraft(entity);
+    }
+
+    private TemplateV2DraftVO buildMigrationDraft(TemplatePO entity) {
+        return migrationDraftService.buildDraft(buildV1Template(entity));
     }
 
     private TemplateV2VO resolveV2ForCompare(TemplatePO entity) {

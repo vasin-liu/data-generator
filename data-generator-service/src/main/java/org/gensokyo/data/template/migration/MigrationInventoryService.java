@@ -86,6 +86,28 @@ public class MigrationInventoryService {
     }
 
     /**
+     * Marks a database template as promoted (V2 draft persisted); retains {@code migrationClass} from the last compare when set.
+     *
+     * @param templateId persisted template id
+     */
+    public void updatePromoteResult(Long templateId) {
+        if (templateId == null) {
+            return;
+        }
+        String inventoryId = "db-" + templateId;
+        MigrationInventoryEntry entry = findById(inventoryId).orElseGet(() -> {
+            MigrationInventoryEntry created = new MigrationInventoryEntry();
+            created.setId(inventoryId);
+            created.setOrigin("database");
+            created.setDbTemplateId(templateId);
+            entries.add(created);
+            return created;
+        });
+        entry.setV2DraftPresent(true);
+        writeToDisk();
+    }
+
+    /**
      * Updates inventory for a database template after compare (classification and report path).
      *
      * @param templateId persisted template id

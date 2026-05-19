@@ -1,0 +1,45 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.template.migration;
+
+import org.gensokyo.data.model.v2.QuerySourceVO;
+import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.model.vo.TemplateVO;
+import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
+import org.gensokyo.data.template.querysource.V1QuerySourceExtractor;
+import org.gensokyo.kit.collect.CollectKit;
+
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Unified V1 → V2 draft builder (query-source JDBC path or simple iterator path).
+ *
+ * @author Gensokyo
+ * @since 2026-05-19
+ */
+public class MigrationDraftService {
+
+    /**
+     * Builds a V2 migration draft from a V1 template (query sources preferred over iterator).
+     *
+     * @param v1 V1 template definition
+     * @return draft suitable for preview, compare, or promote
+     * @throws IllegalArgumentException when no supported migration path exists
+     */
+    public TemplateV2DraftVO buildDraft(TemplateVO v1) {
+        Objects.requireNonNull(v1, "v1");
+        Map<String, QuerySourceVO> querySources = V1QuerySourceExtractor.extract(v1);
+        if (CollectKit.isNotEmpty(querySources)) {
+            return V1QuerySourceDraftConverter.convert(v1);
+        }
+        if (V1IteratorDraftConverter.supports(v1)) {
+            return V1IteratorDraftConverter.convert(v1);
+        }
+        throw new IllegalArgumentException(
+                "Template has no database-backed sources or supported iterator for V2 draft migration");
+    }
+}

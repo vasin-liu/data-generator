@@ -8,9 +8,13 @@ package org.gensokyo.data.config;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
+import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.migration.MigrationCompareService;
+import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.MigrationReportWriter;
+import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.data.template.migration.PipelineTemplateRunExecutor;
 import org.gensokyo.data.template.migration.TemplateRunExecutor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -81,5 +85,36 @@ public class MigrationConfig {
     @ConditionalOnMissingBean(MigrationCompareService.class)
     public MigrationCompareService migrationCompareService(TemplateRunExecutor executor) {
         return new MigrationCompareService(executor);
+    }
+
+    /**
+     * Unified V1 → V2 draft builder (query-source and iterator paths).
+     *
+     * @return draft service
+     */
+    @Bean
+    @ConditionalOnMissingBean(MigrationDraftService.class)
+    public MigrationDraftService migrationDraftService() {
+        return new MigrationDraftService();
+    }
+
+    /**
+     * Promote workflow after dual-run review.
+     *
+     * @param repository                 template persistence
+     * @param migrationDraftService      draft builder
+     * @param migrationInventoryService  inventory
+     * @param yamlParser                 YAML serializer
+     * @return promote service
+     */
+    @Bean
+    @ConditionalOnMissingBean(MigrationPromoteService.class)
+    public MigrationPromoteService migrationPromoteService(
+            TemplateRepository repository,
+            MigrationDraftService migrationDraftService,
+            MigrationInventoryService migrationInventoryService,
+            YamlParser yamlParser) {
+        return new MigrationPromoteService(
+                repository, migrationDraftService, migrationInventoryService, yamlParser);
     }
 }
