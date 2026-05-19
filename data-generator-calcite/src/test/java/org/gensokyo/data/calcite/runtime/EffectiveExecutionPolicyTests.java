@@ -48,4 +48,16 @@ class EffectiveExecutionPolicyTests {
         Assertions.assertTrue(policy.failOnLimitExceeded());
         Assertions.assertEquals(100, policy.broadcastMaxRows());
     }
+
+    @Test
+    void overlaysBroadcastMaxRowsFromTemplate() {
+        ExecutionPolicyVO vo = new ExecutionPolicyVO();
+        vo.setMode("CHUNKED");
+        vo.setMaxRowsInMemory(1_000_000);
+        vo.setBroadcastMaxRows(25_000);
+
+        EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(vo);
+
+        Assertions.assertEquals(25_000, policy.broadcastMaxRows());
+    }
 }

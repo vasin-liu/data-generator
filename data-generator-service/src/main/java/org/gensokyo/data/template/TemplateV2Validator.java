@@ -113,6 +113,9 @@ public final class TemplateV2Validator {
         if (policy.getSinkBatchSize() != null && policy.getSinkBatchSize() <= 0) {
             throw new IllegalArgumentException("Execution policy sinkBatchSize must be positive");
         }
+        if (policy.getBroadcastMaxRows() != null && policy.getBroadcastMaxRows() <= 0) {
+            throw new IllegalArgumentException("Execution policy broadcastMaxRows must be positive");
+        }
         if ("CHUNKED".equals(mode)) {
             validateChunkedCompatibility(template);
         }

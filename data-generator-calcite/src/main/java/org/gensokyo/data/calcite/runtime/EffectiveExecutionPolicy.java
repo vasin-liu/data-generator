@@ -85,7 +85,12 @@ public final class EffectiveExecutionPolicy {
             }
         }
 
-        int broadcastMaxRows = Math.min(BROADCAST_MAX_ROWS_CAP, maxRowsInMemory / 10);
+        int broadcastMaxRows;
+        if (templatePolicy != null && templatePolicy.getBroadcastMaxRows() != null) {
+            broadcastMaxRows = templatePolicy.getBroadcastMaxRows();
+        } else {
+            broadcastMaxRows = Math.min(BROADCAST_MAX_ROWS_CAP, maxRowsInMemory / 10);
+        }
         return new EffectiveExecutionPolicy(
                 mode,
                 maxRowsInMemory,

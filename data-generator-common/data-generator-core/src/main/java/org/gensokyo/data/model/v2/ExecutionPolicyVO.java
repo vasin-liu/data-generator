@@ -14,4 +14,5 @@ public class ExecutionPolicyVO implements Serializable {
     private Integer sourceChunkSize;
     private Integer sinkBatchSize;
     private Boolean failOnLimitExceeded;
+    private Integer broadcastMaxRows;
 }
