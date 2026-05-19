@@ -27,8 +27,11 @@ import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
+import org.gensokyo.data.template.TemplateV1Loader;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
+import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
+import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
 import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
 import org.gensokyo.data.template.querysource.V1QuerySourceMigrationWarningAnalyzer;
 import org.gensokyo.data.template.querysource.dto.QuerySourceCandidatePreflightDTO;
@@ -236,6 +239,29 @@ public class TemplateController {
         return R.ok("Preview generated", draft);
     }
 
+    /**
+     * Full-template V1 migration analysis (scenario family, wave, blockers, recommended path).
+     *
+     * @param templateId persisted template id
+     * @return migration analysis for the V1 definition
+     */
+    @GetMapping("/migration/analyze/{templateId}")
+    public R<TemplateMigrationAnalysisDTO> analyzeMigration(@NotNull @PathVariable Long templateId) {
+        var entity = repository.findById(templateId).orElse(null);
+        if (Objects.isNull(entity)) {
+            return R.fail(String.format("Template '%s' does not exist", templateId));
+        }
+
+        TemplateVO v1;
+        try {
+            v1 = buildV1Template(entity);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
+        return R.ok("Analysis generated", V1TemplateMigrationAnalyzer.analyze(v1));
+    }
+
     @GetMapping("/analyzeQuerySourceV2ById/{templateId}")
     public R<QuerySourceMigrationAnalysisDTO> analyzeQuerySourceV2ById(@NotNull @PathVariable Long templateId) {
         var entity = repository.findById(templateId).orElse(null);
@@ -412,20 +438,7 @@ public class TemplateController {
     }
 
     private TemplateVO buildV1Template(TemplatePO entity) {
-        var v2 = tryParse(entity.getContentYaml(), TemplateV2DraftVO.class);
-        var v1 = tryParse(entity.getContentYaml(), TemplateVO.class);
-        var kind = TemplateDefinitionDetector.detect(v1, v2);
-        if (kind == TemplateDefinitionKind.V2 && Objects.nonNull(v2)) {
-            throw new IllegalArgumentException(String.format("Template '%s' is already a V2 template", entity.getId()));
-        }
-        if (Objects.isNull(v1)) {
-            throw new IllegalArgumentException(String.format("Template '%s' is not a valid V1 template", entity.getId()));
-        }
-        v1.setId(entity.getId());
-        if (StrKit.isBlank(v1.getName())) {
-            v1.setName(entity.getName());
-        }
-        return v1;
+        return new TemplateV1Loader(yamlParser).load(entity);
     }
 
     private QuerySourceMigrationAnalysisDTO analyzeDraft(TemplateVO v1, TemplateV2DraftVO draft) {

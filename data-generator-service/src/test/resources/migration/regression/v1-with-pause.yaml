@@ -1,0 +1,19 @@
+name: regression-with-pause
+iterator:
+  type: number
+  from: 1
+  to: 2
+  stages:
+    - type: PAUSE
+      duration: 1
+      unit: SECONDS
+fields:
+  - name: label
+    stages:
+      - type: SCRIPT
+        language:
+          type: plain
+          content: "row"
+output:
+  writers:
+    - type: console
