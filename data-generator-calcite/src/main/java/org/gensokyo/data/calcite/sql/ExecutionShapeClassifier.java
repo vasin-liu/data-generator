@@ -6,6 +6,7 @@
 package org.gensokyo.data.calcite.sql;
 
 import org.apache.calcite.avatica.util.Casing;
+import org.apache.calcite.sql.JoinType;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlJoin;
@@ -19,10 +20,17 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.parser.babel.SqlBabelParserImpl;
 import org.apache.calcite.sql.validate.SqlConformance;
 import org.apache.calcite.sql.validate.SqlConformanceEnum;
+import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
+import org.gensokyo.data.iterator.ConstantIteratorVO;
+import org.gensokyo.data.model.v2.IteratorSourceVO;
+import org.gensokyo.data.model.v2.QuerySourceVO;
+import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.vo.iterator.IteratorVO;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -47,7 +55,21 @@ public final class ExecutionShapeClassifier {
      * @throws IllegalArgumentException if SQL cannot be parsed
      */
     public static ExecutionShape classify(String sql) {
-        SqlNode parsed = parseQuery(sql);
+        return classifyParsed(parseQuery(sql), null);
+    }
+
+    /**
+     * Classifies execution shape from the first SQL transform and template sources.
+     *
+     * @param template Template V2 definition
+     * @return classified shape
+     * @throws IllegalArgumentException if the template has no SQL transform or SQL is blank
+     */
+    public static ExecutionShape classify(TemplateV2VO template) {
+        return classifyParsed(parseQuery(requireFirstSql(template)), template);
+    }
+
+    private static ExecutionShape classifyParsed(SqlNode parsed, TemplateV2VO template) {
         SqlNodeList orderBy = null;
         SqlNode fetch = null;
         SqlNode query = parsed;
@@ -71,24 +93,94 @@ public final class ExecutionShapeClassifier {
         if (hasOrderByWithoutLimit(orderBy, fetch)) {
             return ExecutionShape.MATERIALIZATION_REQUIRED;
         }
-        if (containsJoin(select.getFrom())) {
+
+        SingleJoinInfo join = findSingleInnerOrLeftJoin(select.getFrom());
+        if (join != null) {
+            if (template != null) {
+                ExecutionShape broadcastShape = classifyBroadcastJoin(template, join);
+                if (broadcastShape != null) {
+                    return broadcastShape;
+                }
+            }
             return ExecutionShape.MATERIALIZATION_REQUIRED;
         }
+
         if (isSimpleTableFrom(select.getFrom())) {
             return ExecutionShape.ROW_LOCAL;
         }
         return ExecutionShape.MATERIALIZATION_REQUIRED;
     }
 
-    /**
-     * Classifies execution shape from the first SQL transform on a template.
-     *
-     * @param template Template V2 definition
-     * @return classified shape
-     * @throws IllegalArgumentException if the template has no SQL transform or SQL is blank
-     */
-    public static ExecutionShape classify(TemplateV2VO template) {
-        return classify(requireFirstSql(template));
+    private static ExecutionShape classifyBroadcastJoin(TemplateV2VO template, SingleJoinInfo join) {
+        Map<String, SourceVO> sources = template.getSources();
+        if (sources == null || sources.size() != 2) {
+            return null;
+        }
+        if (!sources.containsKey(join.leftTable()) || !sources.containsKey(join.rightTable())) {
+            return null;
+        }
+
+        int broadcastMaxRows = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy()).broadcastMaxRows();
+        String broadcastSource = null;
+        String factSource = null;
+
+        for (String sourceName : new String[] {join.leftTable(), join.rightTable()}) {
+            SourceVO source = sources.get(sourceName);
+            if (isBroadcastSource(source, broadcastMaxRows)) {
+                if (broadcastSource != null) {
+                    return null;
+                }
+                broadcastSource = sourceName;
+            } else if (isFactSource(source, broadcastMaxRows)) {
+                if (factSource != null) {
+                    return null;
+                }
+                factSource = sourceName;
+            }
+        }
+
+        if (broadcastSource != null && factSource != null) {
+            return ExecutionShape.BROADCAST_JOIN;
+        }
+        return null;
+    }
+
+    private static boolean isBroadcastSource(SourceVO source, int broadcastMaxRows) {
+        if (source instanceof QuerySourceVO query) {
+            return hasRestrictiveMaxRows(query, broadcastMaxRows);
+        }
+        if (source instanceof IteratorSourceVO iteratorSource) {
+            return isBoundedConstantIterator(iteratorSource, broadcastMaxRows);
+        }
+        return false;
+    }
+
+    private static boolean isFactSource(SourceVO source, int broadcastMaxRows) {
+        if (source instanceof QuerySourceVO query) {
+            return !hasRestrictiveMaxRows(query, broadcastMaxRows);
+        }
+        return false;
+    }
+
+    private static boolean hasRestrictiveMaxRows(QuerySourceVO query, int broadcastMaxRows) {
+        Long maxRows = query.getMaxRows();
+        return maxRows != null && maxRows > 0 && maxRows <= broadcastMaxRows;
+    }
+
+    private static boolean isBoundedConstantIterator(IteratorSourceVO iteratorSource, int broadcastMaxRows) {
+        IteratorVO iterator = iteratorSource.getIterator();
+        if (!(iterator instanceof ConstantIteratorVO constant)) {
+            return false;
+        }
+        int repeat = constant.getRepeat();
+        if (repeat <= 0 || repeat == -1) {
+            return false;
+        }
+        if (constant.getDataset() == null || constant.getDataset().isEmpty()) {
+            return false;
+        }
+        long estimatedRows = (long) repeat * constant.getDataset().size();
+        return estimatedRows <= broadcastMaxRows;
     }
 
     private static String requireFirstSql(TemplateV2VO template) {
@@ -154,6 +246,36 @@ public final class ExecutionShapeClassifier {
         return false;
     }
 
+    private static SingleJoinInfo findSingleInnerOrLeftJoin(SqlNode from) {
+        if (!(from instanceof SqlJoin join)) {
+            return null;
+        }
+        if (containsJoin(join.getLeft())) {
+            return null;
+        }
+        JoinType joinType = join.getJoinType();
+        if (joinType != JoinType.INNER && joinType != JoinType.LEFT) {
+            return null;
+        }
+        String leftTable = tableNameFromFromNode(join.getLeft());
+        String rightTable = tableNameFromFromNode(join.getRight());
+        if (leftTable == null || rightTable == null) {
+            return null;
+        }
+        return new SingleJoinInfo(leftTable, rightTable);
+    }
+
+    private static String tableNameFromFromNode(SqlNode from) {
+        if (from instanceof SqlIdentifier identifier) {
+            return identifier.getSimple();
+        }
+        if (from instanceof SqlBasicCall call && call.getKind() == SqlKind.AS
+                && call.operand(0) instanceof SqlIdentifier identifier) {
+            return identifier.getSimple();
+        }
+        return null;
+    }
+
     private static boolean isSimpleTableFrom(SqlNode from) {
         if (from instanceof SqlIdentifier) {
             return true;
@@ -162,5 +284,8 @@ public final class ExecutionShapeClassifier {
             return true;
         }
         return false;
+    }
+
+    private record SingleJoinInfo(String leftTable, String rightTable) {
     }
 }

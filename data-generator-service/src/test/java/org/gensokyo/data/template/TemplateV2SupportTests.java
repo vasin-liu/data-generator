@@ -110,6 +110,27 @@ class TemplateV2SupportTests {
     }
 
     @Test
+    void validatesChunkedModeWithBroadcastJoinSql() {
+        var fact = new QuerySourceVO();
+        fact.setSql("SELECT id, dim_id FROM fact_table");
+        var dim = new QuerySourceVO();
+        dim.setSql("SELECT id, name FROM dim_table");
+        dim.setMaxRows(100L);
+
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("fact", fact, "dim", dim));
+        template.setTransformers(List.of(sql(
+                "SELECT f.id, d.name FROM fact f LEFT JOIN dim d ON f.dim_id = d.id")));
+        template.setSinks(List.of(consoleSink()));
+        var policy = new ExecutionPolicyVO();
+        policy.setMode("CHUNKED");
+        template.setExecutionPolicy(policy);
+
+        Assertions.assertDoesNotThrow(() -> TemplateV2Validator.validate(template));
+    }
+
+    @Test
     void rejectsChunkedModeWithGroupBySql() {
         var template = new TemplateV2VO();
         template.setName("demo");

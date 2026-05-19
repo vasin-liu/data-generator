@@ -123,6 +123,7 @@ public final class TemplateV2Validator {
 
     private static void validateChunkedCompatibility(TemplateV2VO template) {
         ExecutionShape shape = ExecutionShapeClassifier.classify(template);
+        // ROW_LOCAL and BROADCAST_JOIN are compatible with CHUNKED; only full materialization is rejected.
         if (shape == ExecutionShape.MATERIALIZATION_REQUIRED) {
             String features = describeMaterializationFeatures(firstSqlTransform(template));
             throw new IllegalArgumentException(
