@@ -5,9 +5,11 @@
  */
 package org.gensokyo.data.template.migration;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,14 +61,28 @@ public final class RowSampleComparator {
         if (keyColumns != null && !keyColumns.isEmpty()) {
             return keyColumns;
         }
-        Set<String> intersection = new HashSet<>();
-        if (leftRow != null) {
-            intersection.addAll(leftRow.keySet());
+        return caseInsensitiveColumnIntersection(leftRow, rightRow);
+    }
+
+    private static List<String> caseInsensitiveColumnIntersection(
+            Map<String, Object> leftRow,
+            Map<String, Object> rightRow) {
+        if (leftRow == null || rightRow == null) {
+            return List.of();
         }
-        if (rightRow != null) {
-            intersection.retainAll(rightRow.keySet());
+        Set<String> columns = new LinkedHashSet<>();
+        for (String leftKey : leftRow.keySet()) {
+            if (leftKey == null) {
+                continue;
+            }
+            for (String rightKey : rightRow.keySet()) {
+                if (columnNamesMatch(leftKey, rightKey)) {
+                    columns.add(leftKey);
+                    break;
+                }
+            }
         }
-        return new ArrayList<>(intersection);
+        return new ArrayList<>(columns);
     }
 
     private static boolean rowsEqual(Map<String, Object> leftRow, Map<String, Object> rightRow, List<String> columns) {
@@ -75,11 +91,59 @@ public final class RowSampleComparator {
         }
         for (String column : columns) {
             Object leftValue = leftRow == null ? null : leftRow.get(column);
-            Object rightValue = rightRow == null ? null : rightRow.get(column);
-            if (!Objects.equals(leftValue, rightValue)) {
+            Object rightValue = resolveColumnValue(rightRow, column);
+            if (!valuesEqual(leftValue, rightValue)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private static Object resolveColumnValue(Map<String, Object> row, String column) {
+        if (row == null || column == null) {
+            return null;
+        }
+        if (row.containsKey(column)) {
+            return row.get(column);
+        }
+        for (Map.Entry<String, Object> entry : row.entrySet()) {
+            if (columnNamesMatch(column, entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private static boolean columnNamesMatch(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        if (expected.equalsIgnoreCase(actual)) {
+            return true;
+        }
+        String expectedLower = expected.toLowerCase(Locale.ROOT);
+        String actualLower = actual.toLowerCase(Locale.ROOT);
+        return actualLower.endsWith("." + expectedLower);
+    }
+
+    /**
+     * Compares cell values, treating numeric types with the same magnitude as equal (V1 Long vs V2 Integer, etc.).
+     */
+    private static boolean valuesEqual(Object leftValue, Object rightValue) {
+        if (Objects.equals(leftValue, rightValue)) {
+            return true;
+        }
+        if (leftValue instanceof Number leftNumber && rightValue instanceof Number rightNumber) {
+            return new BigDecimal(leftNumber.toString()).compareTo(new BigDecimal(rightNumber.toString())) == 0;
+        }
+        if (leftValue != null && rightValue != null) {
+            try {
+                return new BigDecimal(leftValue.toString()).compareTo(new BigDecimal(rightValue.toString())) == 0;
+            }
+            catch (NumberFormatException ignored) {
+                // fall through
+            }
+        }
+        return false;
     }
 }

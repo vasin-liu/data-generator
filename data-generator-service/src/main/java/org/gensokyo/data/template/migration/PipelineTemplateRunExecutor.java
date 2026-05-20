@@ -80,15 +80,15 @@ public class PipelineTemplateRunExecutor implements TemplateRunExecutor {
 
     private static TemplateV2VO prepareV2ForCompare(TemplateV2VO template, MigrationCompareOptions options) {
         TemplateV2VO copy = copyTemplate(template);
+        // Dual-run compare needs materialized rows; CHUNKED runs do not retain them in TemplateV2RunResult.
+        ExecutionPolicyVO policy = copy.getExecutionPolicy();
+        if (policy == null) {
+            policy = new ExecutionPolicyVO();
+            copy.setExecutionPolicy(policy);
+        }
+        policy.setMode("IN_MEMORY");
         if (options != null && options.isPreferChunked()) {
-            ExecutionPolicyVO policy = copy.getExecutionPolicy();
-            if (policy == null) {
-                policy = new ExecutionPolicyVO();
-                copy.setExecutionPolicy(policy);
-            }
-            if (policy.getMode() == null || policy.getMode().isBlank()) {
-                policy.setMode("CHUNKED");
-            }
+            // preferChunked applies to promoted templates; compare sampling stays in-memory.
         }
         return copy;
     }

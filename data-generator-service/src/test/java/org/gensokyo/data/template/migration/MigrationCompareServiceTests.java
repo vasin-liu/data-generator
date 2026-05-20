@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Tests for {@link MigrationCompareService}.
+ * Unit tests for {@link MigrationCompareService} classification logic (stub executor only).
+ * End-to-end dual-run with embedded components is covered by
+ * {@link org.gensokyo.data.controller.TemplateControllerMigrationCompareTests}.
  *
  * @author Gensokyo
  * @since 2026-05-19

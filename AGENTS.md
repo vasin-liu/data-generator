@@ -72,6 +72,10 @@ Focused builds (examples from internal upgrade docs):
 
 **Note:** Some AI-related tests may be skipped when Ollama is not reachable on `localhost:11434` (see `docs/jdk25-upgrade.md`).
 
+## Testing (embedded-first)
+
+Prefer **in-process embedded** infrastructure in unit and integration tests: H2 for JDBC, embedded Kafka/Redis (or Testcontainers) when broker/cache behavior matters, WireMock for HTTP. Use `classpath:/application-phase7-test.yaml` for service `@SpringBootTest` slices. Avoid stubbing whole pipelines when the test targets execution parity; reserve mocks for pure logic and external boundaries. See `docs/testing-embedded-components.md`.
+
 ## Git workflow
 
 - Use **Conventional Commits**: `type(optional scope): subject` with imperative, lowercase subject (~72 characters, no trailing period). Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.

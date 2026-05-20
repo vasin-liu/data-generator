@@ -1,0 +1,68 @@
+# Embedded-first testing
+
+Unit and integration tests in this repository should exercise **real components in-process**, not external staging services. Prefer embedded or in-memory substitutes for infrastructure.
+
+## Principles
+
+| Prefer | Avoid |
+|--------|--------|
+| In-memory **H2** (or test-scoped JDBC URL) for SQL / JDBC iterators and sinks | Connecting to shared dev MySQL/PostgreSQL |
+| **Embedded Kafka** (`spring-kafka-test` / `@EmbeddedKafka`) or Testcontainers Kafka when broker semantics matter | Mockito-only `KafkaTemplate` for integration paths |
+| **Embedded Redis** (e.g. embedded-redis, Testcontainers Redis) when cache semantics matter | `localhost:6379` in CI |
+| **WireMock** or in-process HTTP stubs for REST clients | Calling real third-party APIs in unit tests |
+| **Console / in-memory sinks** for pipeline output assertions | Writing to production Kafka topics |
+| `@SpringBootTest` + `application-phase7-test.yaml` (H2 metadata DB) for service slices | Full production `application.yaml` |
+
+**Mocks** are still appropriate for:
+
+- Narrow unit tests of pure logic (classification rules, comparators, YAML parsing).
+- Boundaries you intentionally do not own (e.g. a single method on a huge client).
+- Fail-fast tests where embedded setup would dominate runtime without adding signal.
+
+Do **not** replace an entire pipeline or dual-run executor with a stub when the test goal is to prove V1/V2 execution parity.
+
+## Standard service test profile
+
+`data-generator-service/src/test/resources/application-phase7-test.yaml`:
+
+- Spring metadata DB: `jdbc:h2:mem:data-generator-phase7` with `classpath:db/schema.sql`
+- `server.port: 0` (random port)
+
+Reference this profile from `@SpringBootTest`:
+
+```java
+@SpringBootTest(
+        classes = DataGeneratorApplication.class,
+        properties = "spring.config.location=classpath:/application-phase7-test.yaml"
+)
+```
+
+## JDBC fixtures
+
+1. Define data in an H2 database (inline URL in template YAML or dynamic datasource id).
+2. Create tables in `@BeforeEach` / test body via `NamedParameterJdbcTemplate` + `DynamicDataSourceContextHolder.push(dsId)` when using dynamic datasources.
+3. Use `MODE=PostgreSQL` or `MODE=MySQL` on the H2 URL when dialect-specific SQL is required.
+
+Example: `TemplateControllerMigrationCompareTests` (number iterator dual-run with real `PipelineTemplateRunExecutor`).
+
+## Kafka
+
+Calcite writer tests today often use **Mockito** on `KafkaTemplate` for fast adapter tests. When validating producer wiring end-to-end, add `spring-kafka-test` and `@EmbeddedKafka` (or Testcontainers) in the **writer-kafka** or **calcite** module test scope.
+
+## Redis / Elasticsearch
+
+- Redis: use embedded or Testcontainers; do not require a shared Redis instance in `mvn test`.
+- Elasticsearch: prefer HTTP-level mocks (MockWebServer / WireMock) or the test client patterns in `ElasticsearchSinkFactoryTests` until an embedded ES strategy is adopted.
+
+## AI / Ollama
+
+Tests that call Ollama remain **conditional** (skip when `localhost:11434` is unreachable). See `docs/jdk25-upgrade.md`.
+
+## Migration workbench tests
+
+| Test | Style |
+|------|--------|
+| `MigrationCompareServiceTests` | Pure unit: stub executor for classification math only |
+| `TemplateControllerMigrationCompareTests` | Integration: embedded H2 + real `PipelineTemplateRunExecutor` |
+| `MigrationInventoryBootstrapTests` | Integration: temp inventory file + H2 repository |
+| Controller inventory/draft/promote | Integration: `application-phase7-test.yaml`, temp paths for inventory/reports |

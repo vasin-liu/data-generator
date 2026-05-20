@@ -18,6 +18,12 @@ spring:
           type: com.alibaba.druid.pool.DruidDataSource
           init:
             schema: classpath:db/schema.sql
+        compare-inline-ds:
+          url: jdbc:h2:mem:compare_migration_embedded;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          username: sa
+          password:
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
       druid:
         filters: stat,slf4j
         validation-query: SELECT 1

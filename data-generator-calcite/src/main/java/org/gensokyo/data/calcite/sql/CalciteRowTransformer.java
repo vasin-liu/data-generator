@@ -60,7 +60,8 @@ public class CalciteRowTransformer {
         if (requiresAggregation(select, plan.getOrderBy())) {
             return aggregateTransform(plan, select, filtered);
         }
-        RowSchema outputSchema = buildSchema(select.getSelectList());
+        Row sampleRow = filtered.isEmpty() ? null : filtered.getFirst();
+        RowSchema outputSchema = buildSchema(select.getSelectList(), sampleRow);
         List<Row> projected = filtered.stream()
                 .map(row -> project(row, select.getSelectList()))
                 .toList();
@@ -76,7 +77,8 @@ public class CalciteRowTransformer {
         List<AggregateFrame> havingPassed = grouped.stream()
                 .filter(frame -> matches(frame, select.getHaving(), aliasExpressions))
                 .toList();
-        RowSchema outputSchema = buildSchema(select.getSelectList());
+        Row sampleRow = filtered.isEmpty() ? null : filtered.getFirst();
+        RowSchema outputSchema = buildSchema(select.getSelectList(), sampleRow);
         List<Row> projected = havingPassed.stream()
                 .map(frame -> project(frame, select.getSelectList(), aliasExpressions))
                 .toList();
@@ -419,10 +421,18 @@ public class CalciteRowTransformer {
         return toBoolean(evaluate(frame, where, aliasExpressions));
     }
 
-    private RowSchema buildSchema(SqlNodeList selectList) {
+    private RowSchema buildSchema(SqlNodeList selectList, Row sampleRow) {
         RowSchema schema = new RowSchema();
         List<ColumnDef> columns = new ArrayList<>();
         for (SqlNode node : selectList) {
+            if (isSelectAll(node)) {
+                if (sampleRow != null && sampleRow.values() != null) {
+                    for (String key : bareColumnNames(sampleRow)) {
+                        columns.add(new ColumnDef(key, "ANY", true));
+                    }
+                }
+                continue;
+            }
             String columnName = columnName(node);
             columns.add(new ColumnDef(columnName, "ANY", true));
         }
@@ -433,6 +443,12 @@ public class CalciteRowTransformer {
     private Row project(Row row, SqlNodeList selectList) {
         Map<String, Object> values = new LinkedHashMap<>();
         for (SqlNode node : selectList) {
+            if (isSelectAll(node)) {
+                if (row != null && row.values() != null) {
+                    projectAllColumns(row, values);
+                }
+                continue;
+            }
             values.put(columnName(node), evaluate(row, expression(node)));
         }
         return new Row(values);
@@ -442,10 +458,56 @@ public class CalciteRowTransformer {
                         SqlNodeList selectList,
                         Map<String, SqlNode> aliasExpressions) {
         Map<String, Object> values = new LinkedHashMap<>();
+        Row row = frame.representative();
         for (SqlNode node : selectList) {
+            if (isSelectAll(node)) {
+                if (row != null && row.values() != null) {
+                    projectAllColumns(row, values);
+                }
+                continue;
+            }
             values.put(columnName(node), evaluate(frame, expression(node), aliasExpressions));
         }
         return new Row(values);
+    }
+
+    private static boolean isSelectAll(SqlNode node) {
+        if (node instanceof SqlIdentifier identifier) {
+            if (identifier.isStar()) {
+                return true;
+            }
+            String simple = identifier.getSimple();
+            return "*".equals(simple);
+        }
+        return false;
+    }
+
+    private static void projectAllColumns(Row row, Map<String, Object> values) {
+        for (Map.Entry<String, Object> entry : row.values().entrySet()) {
+            String bare = bareColumnName(entry.getKey());
+            if (bare != null) {
+                values.putIfAbsent(bare, entry.getValue());
+            }
+        }
+    }
+
+    private static List<String> bareColumnNames(Row row) {
+        List<String> names = new ArrayList<>();
+        for (String key : row.values().keySet()) {
+            String bare = bareColumnName(key);
+            if (bare != null && !names.contains(bare)) {
+                names.add(bare);
+            }
+        }
+        return names;
+    }
+
+    private static String bareColumnName(String key) {
+        if (key == null || key.isBlank()) {
+            return null;
+        }
+        int dot = key.lastIndexOf('.');
+        return dot >= 0 ? key.substring(dot + 1) : key;
     }
 
     private List<Row> applyDistinct(List<Row> rows, boolean distinct) {

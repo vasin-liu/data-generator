@@ -39,6 +39,36 @@ class RowSampleComparatorTests {
     }
 
     @Test
+    void matchesColumnsCaseInsensitivelyWhenKeyColumnsOmitted() {
+        List<Map<String, Object>> v1 = List.of(Map.of("value", 1L));
+        List<Map<String, Object>> v2 = List.of(Map.of("VALUE", 1));
+
+        double rate = RowSampleComparator.matchRate(v1, v2, null);
+
+        Assertions.assertEquals(1.0d, rate, 1e-9);
+    }
+
+    @Test
+    void matchesQualifiedCalciteColumnNames() {
+        List<Map<String, Object>> v1 = List.of(Map.of("value", 1L));
+        List<Map<String, Object>> v2 = List.of(Map.of("input.value", 1));
+
+        double rate = RowSampleComparator.matchRate(v1, v2, null);
+
+        Assertions.assertEquals(1.0d, rate, 1e-9);
+    }
+
+    @Test
+    void treatsNumericTypesWithSameMagnitudeAsEqual() {
+        List<Map<String, Object>> v1 = List.of(Map.of("value", 1L));
+        List<Map<String, Object>> v2 = List.of(Map.of("value", 1));
+
+        double rate = RowSampleComparator.matchRate(v1, v2, List.of("value"));
+
+        Assertions.assertEquals(1.0d, rate, 0.0001d);
+    }
+
+    @Test
     void comparesOnlyRequestedKeyColumns() {
         List<Map<String, Object>> v1 = List.of(Map.of("id", 1, "name", "a", "extra", "x"));
         List<Map<String, Object>> v2 = List.of(Map.of("id", 1, "name", "a", "extra", "y"));

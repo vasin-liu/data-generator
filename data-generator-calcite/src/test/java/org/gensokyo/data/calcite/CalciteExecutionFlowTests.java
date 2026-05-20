@@ -38,4 +38,28 @@ class CalciteExecutionFlowTests {
         Assertions.assertEquals("4", result.rows().get(0).getString("next_value"));
         Assertions.assertEquals("6", result.rows().get(2).getString("next_value"));
     }
+
+    @Test
+    void expandsSelectStarFromInputSource() {
+        NumberIteratorVO iterator = new NumberIteratorVO();
+        iterator.setType("number");
+        iterator.setFrom(1);
+        iterator.setTo(3);
+        iterator.setStep(1);
+
+        IteratorSourceVO source = new IteratorSourceVO();
+        source.setIterator(iterator);
+
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addSource(new IteratorRowSource("input", source));
+
+        CalciteRowTransformer.TransformResult result = new CalciteRowTransformer(
+                "SELECT * FROM input"
+        ).transform(context);
+
+        Assertions.assertTrue(
+                result.schema().getColumns().stream().anyMatch(column -> "value".equals(column.getName())));
+        Assertions.assertEquals(3, result.rows().size());
+        Assertions.assertEquals("1", result.rows().get(0).getString("value"));
+    }
 }
