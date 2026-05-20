@@ -32,6 +32,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fast unit tests for Elasticsearch sink adapters (Mockito on {@link RestClient}).
+ * HTTP integration uses {@link org.gensokyo.data.calcite.sink.ElasticsearchRowSinkAdapterHttpEmbeddedTests};
+ * runner E2E uses {@link org.gensokyo.data.calcite.runtime.TemplateV2RunnerElasticsearchHttpEmbeddedTests}.
+ */
 class ElasticsearchSinkFactoryTests {
 
     @Test

@@ -33,6 +33,17 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 
 See `docs/migration/workbench-usage.md`.
 
+## Embedded integration tests (calcite)
+
+| Component | Tests |
+|-----------|--------|
+| H2 / JDBC | `ChunkedPipelineTests`, `TemplateControllerMigrationCompareTests`, `application-phase7-test.yaml` |
+| Kafka | `EmbeddedKafkaTestSupport`, `KafkaRowSinkAdapterEmbeddedTests`, `TemplateV2RunnerKafkaEmbeddedTests` |
+| Elasticsearch | `EmbeddedElasticsearchHttpSupport`, `ElasticsearchRowSinkAdapterHttpEmbeddedTests`, `TemplateV2RunnerElasticsearchHttpEmbeddedTests` |
+| Migration dual-run | `PipelineTemplateRunExecutor` + H2 (`MigrationCompareService` / controller tests) |
+
+See `docs/testing-embedded-components.md`.
+
 ## Test plan
 
 - [ ] `.\mvnw-jdk25.ps1 "-pl" "data-generator-service,data-generator-calcite" "-am" "test"`

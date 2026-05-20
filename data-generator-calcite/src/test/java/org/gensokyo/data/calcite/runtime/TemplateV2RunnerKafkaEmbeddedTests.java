@@ -5,13 +5,10 @@
  */
 package org.gensokyo.data.calcite.runtime;
 
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
 import org.gensokyo.data.calcite.plugin.KafkaTemplateTemplateV2RuntimePluginProvider;
+import org.gensokyo.data.calcite.support.EmbeddedKafkaTestSupport;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
@@ -24,54 +21,41 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.EmbeddedKafkaKraftBroker;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
  * End-to-end {@link TemplateV2Runner} test with iterator source, SQL transform, and Kafka sink
- * against an embedded KRaft broker (no Mockito on {@link KafkaTemplate}).
+ * against an embedded KRaft broker (no Mockito on {@link org.springframework.kafka.core.KafkaTemplate}).
  *
  * @author Gensokyo
  * @since 2026-05-20
  */
 class TemplateV2RunnerKafkaEmbeddedTests {
 
-    private static EmbeddedKafkaBroker embeddedKafka;
-
     private String topic;
 
     @BeforeAll
-    static void startEmbeddedKafka() {
-        embeddedKafka = new EmbeddedKafkaKraftBroker(1, 1);
-        embeddedKafka.afterPropertiesSet();
+    static void acquireBroker() {
+        EmbeddedKafkaTestSupport.acquire();
     }
 
     @BeforeEach
     void createTopic() {
-        topic = "runner-kafka-" + UUID.randomUUID().toString().replace("-", "");
-        embeddedKafka.addTopics(new NewTopic(topic, 1, (short) 1));
+        topic = EmbeddedKafkaTestSupport.createTopic("runner-kafka");
     }
 
     @AfterAll
-    static void stopEmbeddedKafka() {
-        if (embeddedKafka != null) {
-            embeddedKafka.destroy();
-        }
+    static void releaseBroker() {
+        EmbeddedKafkaTestSupport.release();
     }
 
     @Test
     void runnerWritesFilteredRowsToEmbeddedKafkaTopic() {
-        KafkaTemplate<String, String> kafkaTemplate = kafkaTemplate();
+        var kafkaTemplate = EmbeddedKafkaTestSupport.kafkaTemplate();
         DynamicKafkaTemplateRegistry registry = new DynamicKafkaTemplateRegistry("main", Map.of("main", kafkaTemplate));
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
@@ -84,7 +68,8 @@ class TemplateV2RunnerKafkaEmbeddedTests {
 
         new TemplateV2Runner(runtimeRegistry).run(template());
 
-        List<String> payloads = consumePayloads();
+        List<String> payloads = EmbeddedKafkaTestSupport.consumePayloads(
+                topic, "runner-kafka-" + UUID.randomUUID(), Duration.ofSeconds(15));
         Assertions.assertEquals(2, payloads.size());
         Assertions.assertEquals(List.of("value=2", "value=3"), payloads.stream().sorted().toList());
     }
@@ -116,24 +101,5 @@ class TemplateV2RunnerKafkaEmbeddedTests {
         template.setTransformers(List.of(transform));
         template.setSinks(List.of(sink));
         return template;
-    }
-
-    private static KafkaTemplate<String, String> kafkaTemplate() {
-        Map<String, Object> producerProps = KafkaTestUtils.producerProps(embeddedKafka);
-        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProps));
-    }
-
-    private List<String> consumePayloads() {
-        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
-                "runner-kafka-embedded-" + UUID.randomUUID(), "true", embeddedKafka);
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        try (Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<String, String>(consumerProps)
-                .createConsumer()) {
-            embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
-            ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer, Duration.ofSeconds(15));
-            List<String> payloads = new ArrayList<>();
-            records.forEach(record -> payloads.add(record.value()));
-            return payloads;
-        }
     }
 }

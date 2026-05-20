@@ -48,14 +48,16 @@ Example: `TemplateControllerMigrationCompareTests` (number iterator dual-run wit
 ## Kafka
 
 - **Fast unit tests:** `KafkaSinkFactoryTests` uses Mockito on `KafkaTemplate` for adapter contract checks.
-- **Embedded broker:** `KafkaRowSinkAdapterEmbeddedTests` in `data-generator-calcite` uses `spring-kafka-test` `EmbeddedKafkaKraftBroker` (KRaft) and a real `KafkaTemplate` producer/consumer pair.
-- **Runner E2E:** `TemplateV2RunnerKafkaEmbeddedTests` runs iterator → SQL → Kafka sink through `TemplateV2Runner` on the same embedded broker.
+- **Shared broker:** `EmbeddedKafkaTestSupport` (reference-counted `EmbeddedKafkaKraftBroker`) used by adapter and runner embedded tests.
+- **Embedded broker:** `KafkaRowSinkAdapterEmbeddedTests` — real `KafkaTemplate` producer/consumer.
+- **Runner E2E:** `TemplateV2RunnerKafkaEmbeddedTests` — iterator → SQL → Kafka on the shared broker.
 - **Writer autoconfig:** `KafkaWriterAutoConfigurationTests` stays on `ApplicationContextRunner` with mocked registry (Spring wiring only).
 
 ## Redis / Elasticsearch
 
 - **Redis:** no Redis writer/reader module exists in this repository yet; when added, use embedded-redis or Testcontainers and avoid `localhost:6379` in CI.
-- **Elasticsearch:** prefer HTTP-level mocks (MockWebServer / WireMock) or the test client patterns in `ElasticsearchSinkFactoryTests` until an embedded ES strategy is adopted.
+- **Elasticsearch (fast unit):** `ElasticsearchSinkFactoryTests` — Mockito on `RestClient`.
+- **Elasticsearch (HTTP embedded):** `EmbeddedElasticsearchHttpSupport` starts an in-process `HttpServer` for `POST /_bulk`; `ElasticsearchRowSinkAdapterHttpEmbeddedTests` and `TemplateV2RunnerElasticsearchHttpEmbeddedTests` use a real `RestClient` (no Mockito on `performRequest`).
 
 ## AI / Ollama
 

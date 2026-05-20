@@ -5,11 +5,7 @@
  */
 package org.gensokyo.data.calcite.sink;
 
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.gensokyo.data.calcite.support.EmbeddedKafkaTestSupport;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
@@ -19,15 +15,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.EmbeddedKafkaKraftBroker;
-import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,32 +30,26 @@ import java.util.UUID;
  */
 class KafkaRowSinkAdapterEmbeddedTests {
 
-    private static EmbeddedKafkaBroker embeddedKafka;
-
     private String topic;
 
     @BeforeAll
-    static void startEmbeddedKafka() {
-        embeddedKafka = new EmbeddedKafkaKraftBroker(1, 1);
-        embeddedKafka.afterPropertiesSet();
+    static void acquireBroker() {
+        EmbeddedKafkaTestSupport.acquire();
     }
 
     @BeforeEach
     void createTopic() {
-        topic = "topic-v2-" + UUID.randomUUID().toString().replace("-", "");
-        embeddedKafka.addTopics(new NewTopic(topic, 1, (short) 1));
+        topic = EmbeddedKafkaTestSupport.createTopic("topic-v2");
     }
 
     @AfterAll
-    static void stopEmbeddedKafka() {
-        if (embeddedKafka != null) {
-            embeddedKafka.destroy();
-        }
+    static void releaseBroker() {
+        EmbeddedKafkaTestSupport.release();
     }
 
     @Test
     void writesTemplatedPayloadToEmbeddedTopic() {
-        KafkaTemplate<String, String> kafkaTemplate = kafkaTemplate();
+        KafkaTemplate<String, String> kafkaTemplate = EmbeddedKafkaTestSupport.kafkaTemplate();
         WriterVO writer = writerForTopic();
         writer.setTemplate("device=${device},value=${value}");
 
@@ -73,14 +57,15 @@ class KafkaRowSinkAdapterEmbeddedTests {
                 schema(),
                 List.of(new Row(Map.of("device", "d1", "value", 10))));
 
-        ConsumerRecord<String, String> record = consumeSingleRecord();
-        Assertions.assertEquals(topic, record.topic());
-        Assertions.assertEquals("device=d1,value=10", record.value());
+        List<String> payloads = EmbeddedKafkaTestSupport.consumePayloads(
+                topic, "kafka-sink-single-" + UUID.randomUUID(), Duration.ofSeconds(10));
+        Assertions.assertEquals(1, payloads.size());
+        Assertions.assertEquals("device=d1,value=10", payloads.getFirst());
     }
 
     @Test
     void writesBatchToEmbeddedTopic() {
-        KafkaTemplate<String, String> kafkaTemplate = kafkaTemplate();
+        KafkaTemplate<String, String> kafkaTemplate = EmbeddedKafkaTestSupport.kafkaTemplate();
         WriterVO writer = writerForTopic();
 
         new KafkaRowSinkAdapter(kafkaTemplate, writer).writeBatch(
@@ -90,33 +75,11 @@ class KafkaRowSinkAdapterEmbeddedTests {
                         new Row(Map.of("device", "d2", "value", 20))),
                 2);
 
-        try (Consumer<String, String> consumer = consumer()) {
-            embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
-            ConsumerRecords<String, String> records = KafkaTestUtils.getRecords(consumer, Duration.ofSeconds(10));
-            List<String> payloads = new ArrayList<>();
-            records.forEach(record -> payloads.add(record.value()));
-            Assertions.assertEquals(2, payloads.size());
-            Assertions.assertTrue(payloads.stream().anyMatch(value -> value.contains("\"device\":\"d1\"")));
-            Assertions.assertTrue(payloads.stream().anyMatch(value -> value.contains("\"device\":\"d2\"")));
-        }
-    }
-
-    private static KafkaTemplate<String, String> kafkaTemplate() {
-        Map<String, Object> producerProps = KafkaTestUtils.producerProps(embeddedKafka);
-        return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(producerProps));
-    }
-
-    private static Consumer<String, String> consumer() {
-        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("kafka-sink-embedded-test", "true", embeddedKafka);
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return new DefaultKafkaConsumerFactory<String, String>(consumerProps).createConsumer();
-    }
-
-    private ConsumerRecord<String, String> consumeSingleRecord() {
-        try (Consumer<String, String> consumer = consumer()) {
-            embeddedKafka.consumeFromAnEmbeddedTopic(consumer, topic);
-            return KafkaTestUtils.getSingleRecord(consumer, topic, Duration.ofSeconds(10));
-        }
+        List<String> payloads = EmbeddedKafkaTestSupport.consumePayloads(
+                topic, "kafka-sink-batch-" + UUID.randomUUID(), Duration.ofSeconds(10));
+        Assertions.assertEquals(2, payloads.size());
+        Assertions.assertTrue(payloads.stream().anyMatch(value -> value.contains("\"device\":\"d1\"")));
+        Assertions.assertTrue(payloads.stream().anyMatch(value -> value.contains("\"device\":\"d2\"")));
     }
 
     private WriterVO writerForTopic() {
