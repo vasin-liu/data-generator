@@ -47,7 +47,9 @@ Example: `TemplateControllerMigrationCompareTests` (number iterator dual-run wit
 
 ## Kafka
 
-Calcite writer tests today often use **Mockito** on `KafkaTemplate` for fast adapter tests. When validating producer wiring end-to-end, add `spring-kafka-test` and `@EmbeddedKafka` (or Testcontainers) in the **writer-kafka** or **calcite** module test scope.
+- **Fast unit tests:** `KafkaSinkFactoryTests` uses Mockito on `KafkaTemplate` for adapter contract checks.
+- **Embedded broker:** `KafkaRowSinkAdapterEmbeddedTests` in `data-generator-calcite` uses `spring-kafka-test` `EmbeddedKafkaKraftBroker` (KRaft) and a real `KafkaTemplate` producer/consumer pair.
+- **Writer autoconfig:** `KafkaWriterAutoConfigurationTests` stays on `ApplicationContextRunner` with mocked registry (Spring wiring only).
 
 ## Redis / Elasticsearch
 
