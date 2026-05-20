@@ -94,6 +94,14 @@ curl -s -X POST "http://localhost:8080/template/migration/promote/42"
 
 Runs `TemplateV2Validator`, writes V2 content to the template, updates inventory. **V1 YAML is not deleted** (compatibility with rollback notes in inventory).
 
+## Inventory summary
+
+```bash
+curl -s "http://localhost:8080/template/migration/summary"
+```
+
+Returns totals, `byClassification`, `byScenarioFamily`, `byWave`, `readyToPromote`, `blocked`, and `compatibilityOnly` counts.
+
 ## Inventory list and refresh
 
 List committed + merged inventory rows:

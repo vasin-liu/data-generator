@@ -41,6 +41,8 @@ import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationInventorySummary;
+import org.gensokyo.data.template.migration.MigrationInventorySummaryService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
 import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
@@ -264,6 +266,18 @@ public class TemplateController {
     @GetMapping("/migration/inventory")
     public R<List<MigrationInventoryEntry>> listMigrationInventory() {
         return R.ok("Inventory loaded", migrationInventoryService.listAll());
+    }
+
+    /**
+     * Returns aggregate migration inventory statistics (classification, wave, promote readiness).
+     *
+     * @return inventory summary for operator dashboards
+     */
+    @GetMapping("/migration/summary")
+    public R<MigrationInventorySummary> migrationInventorySummary() {
+        MigrationInventorySummary summary =
+                new MigrationInventorySummaryService().summarize(migrationInventoryService);
+        return R.ok("Inventory summary", summary);
     }
 
     /**

@@ -18,7 +18,8 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Compare reports linked from inventory (`lastCompareReportPath`)
 - [x] Runbook for failed dual-run (`BLOCKED`) remediation — `docs/migration/blocked-dual-run-runbook.md`
 - [x] Batch / scheduled dual-run on DB catalog — `POST /template/migration/compare/batch`, optional `pci.data.generator.migration.batch-compare.scheduled-enabled`
-- [ ] Operator UI for inventory + compare (REST only today)
+- [x] Operator summary API — `GET /template/migration/summary` + `scripts/migration-staging.ps1` + `docs/migration/staging-runbook.md`
+- [ ] Full operator UI (Vaadin) for inventory + compare
 
 ## P3 — Business
 

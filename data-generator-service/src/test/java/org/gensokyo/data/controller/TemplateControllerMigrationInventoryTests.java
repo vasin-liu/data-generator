@@ -12,6 +12,7 @@ import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationInventorySummary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,15 @@ class TemplateControllerMigrationInventoryTests {
         R<List<MigrationInventoryEntry>> response = templateController.listMigrationInventory();
         Assertions.assertTrue(response.isSuccess());
         Assertions.assertFalse(response.getData().isEmpty());
+    }
+
+    @Test
+    void migrationInventorySummaryReturnsAggregates() {
+        R<MigrationInventorySummary> response = templateController.migrationInventorySummary();
+        Assertions.assertTrue(response.isSuccess());
+        MigrationInventorySummary summary = response.getData();
+        Assertions.assertTrue(summary.getTotalTemplates() >= 1);
+        Assertions.assertNotNull(summary.getByClassification());
     }
 
     @Test

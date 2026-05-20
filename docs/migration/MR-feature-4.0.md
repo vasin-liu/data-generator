@@ -29,6 +29,7 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 | POST | `/template/migration/compare/{id}` |
 | POST | `/template/migration/promote/{id}` |
 | GET | `/template/migration/inventory` |
+| GET | `/template/migration/summary` |
 | POST | `/template/migration/inventory/refresh` |
 | POST | `/template/migration/compare/batch` |
 
