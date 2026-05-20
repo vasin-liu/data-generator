@@ -2,13 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Deliver synthetic geospatial row generation via `iterator.type: geo` (boundary points + line sampling) and minimal SpEL, backed by a shared `data-generator-geo` library.
+**Goal:** Deliver synthetic geospatial row generation via `iterator.type: GEO` for **V1 and V2** templates, plus minimal SpEL (`#{geo.pointsInBoundary(...)}`), backed by `data-generator-geo`.
 
-**Architecture:** Extract/move GeoJSON + JTS generation from `data-generator-faker` into new `data-generator-geo`; add `data-generator-iterator-geo` with `GeoIteratorVO` / `GeoIterator`; thin SpEL bridge in faker. No Calcite QuerySource in this plan.
+**Architecture:** Extract GeoJSON/JTS code into `data-generator-geo`; add `data-generator-iterator-geo` (`GeoIteratorVO` + `GeoIterator` → `MapValue`); extend calcite `IteratorRowSource`; register `GeoVariable` in faker. No QuerySource (phase D).
 
-**Tech Stack:** Java 25, Maven, JTS (`jts-core`), Jackson 3, `@AutoService` iterator discovery, existing `AbstractIterator` / `IteratorVO` patterns.
+**Tech Stack:** Java 25, Maven, `jts-core` (centralized **1.19.0**), Jackson 3, `@AutoService` + `@JsonSubType("GEO")`, `AbstractIterator`, `IteratorRowSource`.
 
-**Spec:** `docs/superpowers/specs/2026-05-20-geospatial-phase1-design.md`
+**Spec:** `docs/superpowers/specs/2026-05-20-geospatial-phase1-design.md` (revised 2026-05-20)
+
+**Conventions:** New `.java` files follow repository copyright + Javadoc rules (`.cursor/rules/java-copyright-class-javadoc.mdc`).
 
 ---
 
@@ -16,83 +18,77 @@
 
 | Action | Path | Responsibility |
 |--------|------|----------------|
-| Create | `data-generator-geo/pom.xml` | Module; depends on `jts-core`, Jackson 3 |
-| Create | `data-generator-geo/src/main/java/.../geo/io/*` | GeoJsonLoader, GeoResourceResolver |
-| Create | `data-generator-geo/src/main/java/.../geo/generate/*` | Boundary + line sampling |
-| Create | `data-generator-geo/src/main/java/.../geo/format/*` | Output formatters |
-| Create | `data-generator-iterator-geo/pom.xml` | Depends on geo + core |
-| Create | `.../iterator/GeoIteratorVO.java` | `@AutoService(IteratorVO)` |
-| Create | `.../iterator/GeoIterator.java` | `AbstractIterator` impl |
-| Modify | `data-generator-iterator/pom.xml` | Add module |
-| Modify | `data-generator/pom.xml` (root) | Add `data-generator-geo` module |
-| Modify | `data-generator-faker/pom.xml` | Depend on geo; delegate GeoKit |
-| Modify | `data-generator-faker/.../GeoKit.java` | Delegate to geo-core |
+| Create | `data-generator-geo/pom.xml` | `jts-core`, Jackson 3 |
+| Create | `org/gensokyo/data/geo/**` | io, generate, format, `GeoGenerationRequest` |
+| Create | `data-generator-iterator-geo/**` | `GeoIteratorVO`, `GeoIterator` |
+| Modify | root `pom.xml` | `<module>data-generator-geo</module>`, `jts-core` in `dependencyManagement` |
+| Modify | `data-generator-dependencies/pom.xml` | Managed coords: `data-generator-geo`, `data-generator-iterator-geo` |
+| Modify | `data-generator-iterator/pom.xml` | Add `iterator-geo` submodule |
+| Modify | `data-generator-faker/pom.xml` | Depend on `data-generator-geo`; remove local `jts-core` version pin |
 | Modify | `data-generator-service/pom.xml` | Depend on `iterator-geo` |
-| Create | `docs/geospatial-phase1-usage.md` | Operator YAML + SpEL examples |
-| Test resources | `data-generator-geo/src/test/resources/*.geojson` | Copy from faker test resources |
+| Modify | `data-generator-calcite/pom.xml` | Depend on `iterator-geo` |
+| Modify | `IteratorRowSource.java` | `GeoIteratorVO` materialization + schema |
+| Create | `GeoVariable.java`, `GeoSpelFunctions.java` | SpEL namespace `geo` |
+| Create | `docs/geospatial-phase1-usage.md` | V1/V2 YAML + SpEL |
+| Test resources | `data-generator-geo/src/test/resources/geo/*.geojson` | Classpath fixtures |
 
 ---
 
-### Task 1: Maven module `data-generator-geo`
+### Task 1: Maven modules and BOM
 
 **Files:**
 - Create: `data-generator-geo/pom.xml`
-- Modify: root `pom.xml` (`<modules>`, `dependencyManagement` for geo artifact if needed)
+- Modify: root `pom.xml`, `data-generator-dependencies/pom.xml`
 
-- [ ] **Step 1:** Add parent module `data-generator-geo` with `jts-core` + `jackson-databind` (3.x, align with faker).
-- [ ] **Step 2:** `.\mvnw-jdk25.ps1 -pl data-generator-geo install -DskipTests` — SUCCESS.
+- [ ] **Step 1:** Add `data-generator-geo` module; `dependencyManagement` entry for `org.locationtech.jts:jts-core:1.19.0`.
+- [ ] **Step 2:** Register `data-generator-geo` and (placeholder) `data-generator-iterator-geo` artifacts in `data-generator-dependencies`.
+- [ ] **Step 3:** `.\mvnw-jdk25.ps1 -pl data-generator-geo install -DskipTests` — SUCCESS.
 
 ---
 
 ### Task 2: Move GeoJSON loader + resource resolver
 
 **Files:**
-- Create: `data-generator-geo/src/main/java/org/gensokyo/data/geo/io/GeoJsonLoader.java`
-- Create: `data-generator-geo/src/main/java/org/gensokyo/data/geo/io/GeoResourceResolver.java`
-- Modify: `data-generator-faker/.../GeoJsonLoader.java` — delegate or delete after move
+- Create: `org/gensokyo/data/geo/io/GeoJsonLoader.java`, `GeoResourceResolver.java`
+- Modify: `data-generator-faker` — remove/move old loader; delegate `GeoKit`
 
-- [ ] **Step 1:** Copy `GeoJsonLoader` into geo module (update package); add `GeoResourceResolver` supporting `classpath:` and file paths.
-- [ ] **Step 2:** Write `GeoJsonLoaderTests` (point, polygon, feature collection) — green.
-- [ ] **Step 3:** Point faker `GeoKit` at geo module loader; remove duplicate class from faker.
-- [ ] **Step 4:** `.\mvnw-jdk25.ps1 -pl data-generator-faker -am test -Dtest=GeoKitTests` — pass.
+- [ ] **Step 1:** Implement `GeoResourceResolver` (`classpath:`, file).
+- [ ] **Step 2:** Move `GeoJsonLoader` to geo module; unit tests (Point, Polygon, FeatureCollection).
+- [ ] **Step 3:** Faker `GeoKit` delegates to geo module.
+- [ ] **Step 4:** Fix `GeoKitTests` to use `classpath:geo/南沙区边界.geojson` (remove Windows absolute path).
+- [ ] **Step 5:** `.\mvnw-jdk25.ps1 -pl data-generator-faker,data-generator-geo -am test -Dtest=GeoKitTests,GeoJsonLoaderTests` — pass.
 
 ---
 
-### Task 3: Boundary point generator
+### Task 3: Boundary point generator + normalizer
 
 **Files:**
-- Create: `.../geo/generate/BoundaryPointGenerator.java` (from `RandomPointGenerator`)
-- Create: `.../geo/generate/BoundaryPointGeneratorTest.java`
+- Create: `BoundaryPointGenerator.java`, `BoundaryGeometryNormalizer.java`, tests
 
-- [ ] **Step 1:** Move/refactor `RandomPointGenerator` → `BoundaryPointGenerator` in geo module.
-- [ ] **Step 2:** Unit test: N points inside 南沙 boundary fixture, min distance respected (smoke).
-- [ ] **Step 3:** Faker `GeoKit.generateRandomPointsFromGeoJson` delegates to `BoundaryPointGenerator`.
+- [ ] **Step 1:** Move/refactor `RandomPointGenerator` → `BoundaryPointGenerator`.
+- [ ] **Step 2:** Implement normalizer (Polygon/MultiPolygon; GeometryCollection → union of polygons).
+- [ ] **Step 3:** Unit test: N points inside 南沙 boundary; optional min-distance smoke.
 
 ---
 
 ### Task 4: Line component selector + line sampler
 
 **Files:**
-- Create: `.../geo/generate/LineComponentSelector.java`
-- Create: `.../geo/generate/LineSampleGenerator.java`
-- Create: `.../geo/generate/LineSampleGeneratorTest.java`
+- Create: `LineComponentSelector.java`, `LineSampleGenerator.java`, tests
 
-- [ ] **Step 1:** Test `LineComponentSelector` picks longest line in MultiLineString.
-- [ ] **Step 2:** Implement `LineSampleGenerator` with `BY_COUNT` and `BY_SPACING_METERS` (haversine length).
-- [ ] **Step 3:** Test against `南沙区道路路网.geojson` — count > 0, points on line (distance-to-line < small epsilon).
+- [ ] **Step 1:** Test longest LineString in MultiLineString.
+- [ ] **Step 2:** `BY_COUNT` — exactly `count` points; `BY_SPACING_METERS` — ignore `count`, use `spacingMeters`.
+- [ ] **Step 3:** Test against `classpath:geo/南沙区道路路网.geojson`.
 
 ---
 
 ### Task 5: Output formatters
 
 **Files:**
-- Create: `.../geo/format/GeoOutputFormat.java`
-- Create: `.../geo/format/GeoValueFormatter.java`
-- Create: `GeoValueFormatterTest.java`
+- Create: `GeoOutputFormat.java`, `GeoValueFormatter.java`, `GeoGenerationRequest.java`, tests
 
-- [ ] **Step 1:** Test `COLUMNS` → `lat`/`lon` keys.
-- [ ] **Step 2:** Test `GEOJSON` / `WKT` single `geometry` column.
-- [ ] **Step 3:** Optional custom `columnNames` mapping.
+- [ ] **Step 1:** `COLUMNS` / `GEOJSON` / `WKT` + optional `columnNames`.
+- [ ] **Step 2:** `includeProperties` → `prop.<key>` with collision check.
 
 ---
 
@@ -100,49 +96,70 @@
 
 **Files:**
 - Create: `data-generator-iterator-geo/pom.xml`
-- Create: `GeoIteratorVO.java`, `GeoIterator.java`, `GeoIteratorConfig.java` (if needed)
-- Modify: `data-generator-iterator/pom.xml`
+- Create: `GeoIteratorVO.java`, `GeoIterator.java`
+- Modify: `data-generator-iterator/pom.xml`, `data-generator-service/pom.xml`
 
-- [ ] **Step 1:** Scaffold module mirroring `iterator-constant` (core + auto-service).
-- [ ] **Step 2:** `GeoIteratorVO` fields match spec YAML (`mode`, paths, `output`, `sample`, etc.).
-- [ ] **Step 3:** `GeoIterator` implements `hasNext`/`next` producing `Map` rows via formatters.
-- [ ] **Step 4:** Integration test: `BOUNDARY_POINTS` + `columns` — row count == `count`.
-- [ ] **Step 5:** Integration test: `LINE_SAMPLE` + `wkt` — geometry column present.
-- [ ] **Step 6:** Add dependency to `data-generator-service/pom.xml`.
+- [ ] **Step 1:** Scaffold module (mirror `iterator-constant`: core + auto-service + lombok).
+- [ ] **Step 2:** `GeoIteratorVO` — `@AutoService(IteratorVO.class)`, `@JsonSubType("GEO")`, fields per spec.
+- [ ] **Step 3:** `GeoIterator` — validate config; precompute points; `next()` → **`MapValue.fromMap(formatter.format(point))`**.
+- [ ] **Step 4:** Test YAML/JSON deserialize `type: GEO` → `GeoIteratorVO`.
+- [ ] **Step 5:** Integration tests: `BOUNDARY_POINTS`+`columns` (row count); `LINE_SAMPLE`+`wkt`.
+- [ ] **Step 6:** Add `data-generator-iterator-geo` to service `pom.xml`.
 
 ---
 
-### Task 7: SpEL minimal functions
+### Task 7: Template V2 — `IteratorRowSource`
 
 **Files:**
-- Create: `data-generator-faker/.../geo/GeoSpelFunctions.java` (or extend existing SpEL config)
-- Create: `GeoSpelFunctionsTest.java`
+- Modify: `data-generator-calcite/.../IteratorRowSource.java`
+- Modify: `data-generator-calcite/pom.xml`
+- Create: `IteratorRowSourceGeoTests.java` (or under calcite test tree)
 
-- [ ] **Step 1:** Register `geo.pointsInBoundary` → `List<Map<String,Object>>`.
-- [ ] **Step 2:** Register `geo.randomPointInBoundary` → single map.
-- [ ] **Step 3:** Test via existing SpEL test harness (mirror `SpelTests` pattern).
+- [ ] **Step 1:** Add calcite dependency on `data-generator-iterator-geo`.
+- [ ] **Step 2:** Add `case GeoIteratorVO` — materialize rows (reuse geo formatters or delegate to shared materializer in geo module).
+- [ ] **Step 3:** Build `RowSchema`: `columns` → lat/lon/(alt); `geojson`/`wkt` → `geometry` VARCHAR.
+- [ ] **Step 4:** Test: V2 iterator source with `count: 10`, `SELECT lat, lon FROM geo_input` row count 10.
 
 ---
 
-### Task 8: Documentation + full verification
+### Task 8: SpEL — `GeoVariable`
+
+**Files:**
+- Create: `GeoVariable.java`, `GeoSpelFunctions.java`, `GeoSpelFunctionsTest.java`
+- Modify: `DataFakerConfig` or new `GeoConfig` — register `Variable` bean
+
+- [ ] **Step 1:** `GeoVariable` with `name() = "geo"` (constant in `Const` if desired).
+- [ ] **Step 2:** `pointsInBoundary` / `randomPointInBoundary` delegate to geo-core.
+- [ ] **Step 3:** SpEL test: `#{geo.pointsInBoundary('classpath:geo/...', 5, 0, 1L)}` size 5.
+
+---
+
+### Task 9: Documentation + full verification
 
 **Files:**
 - Create: `docs/geospatial-phase1-usage.md`
-- Modify: `README.md` (one-line link, optional)
 
-- [ ] **Step 1:** Document YAML examples for both modes and three formats.
+- [ ] **Step 1:** Document V1 iterator YAML, V2 `ITERATOR` source YAML, SpEL examples, limitations section.
 - [ ] **Step 2:** `.\mvnw-jdk25.ps1 test` — BUILD SUCCESS.
-- [ ] **Step 3:** Commit: `feat(geo): add phase1 synthetic geospatial iterator and spel`.
+- [ ] **Step 3:** Commit: `feat(geo): add phase1 synthetic geospatial iterator, v2 source, and spel`.
 
 ---
 
 ## Dependency note
 
-Adding a **new top-level module** (`data-generator-geo`) touches root `pom.xml`. Confirm with team policy if required; spec assumes approval as part of feature-4.0 branch work.
+New top-level module `data-generator-geo` requires root + `data-generator-dependencies` updates (see `AGENTS.md`). Align with team if outside `feature-4.0` scope.
 
 ## Out of plan (explicit)
 
-- PostGIS reader/writer
-- Calcite `GeoRowSource` / QuerySource
+- PostGIS / file RowSource (phase B)
+- Calcite GeoJSON QuerySource (phase D)
 - GeoTools dependency
-- Vaadin UI for geo templates
+- `faker.geo()` rich API / trajectory in SpEL
+- Vaadin operator UI
+
+## Revision history
+
+| Date | Change |
+|------|--------|
+| 2026-05-20 | Initial plan |
+| 2026-05-20 | Added Task 7 (V2), `GEO` subtype, `MapValue`, `GeoVariable`, BOM, calcite dep, classpath tests |
