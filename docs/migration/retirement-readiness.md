@@ -25,8 +25,8 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 
 - [ ] Sign-off per scenario family: `synthetic` (Wave 1)
 - [ ] Sign-off per scenario family: `multi_source` (Wave 2)
-- [ ] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
-  - [ ] `regression-v1-with-pause` — PAUSE retained on V1
+- [x] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
+  - [ ] `regression-v1-with-pause` — PAUSE retained on V1 (business acceptance checkbox in P3 checklist)
 - [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED
 
 ## Evidence samples

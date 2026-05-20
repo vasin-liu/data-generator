@@ -2,7 +2,10 @@
 param(
     [string]$BaseUrl = "http://localhost:9876/template",
     [long]$TemplateId = 0,
-    [ValidateSet("summary", "refresh", "batch-compare", "analyze", "draft", "compare", "promote", "workflow")]
+    [string]$InventoryId = "",
+    [string]$Filter = "pending_signoff",
+    [string]$ApprovedBy = "",
+    [ValidateSet("summary", "backlog", "signoff-status", "refresh", "batch-compare", "analyze", "draft", "compare", "promote", "signoff", "workflow")]
     [string]$Action = "summary"
 )
 
@@ -24,6 +27,12 @@ function Invoke-MigrationApi {
 switch ($Action) {
     "summary" {
         Invoke-MigrationApi -Path "/migration/summary" | ConvertTo-Json -Depth 6
+    }
+    "backlog" {
+        Invoke-MigrationApi -Path "/migration/backlog?filter=$Filter" | ConvertTo-Json -Depth 8
+    }
+    "signoff-status" {
+        Invoke-MigrationApi -Path "/migration/signoff-status" | ConvertTo-Json -Depth 6
     }
     "refresh" {
         Invoke-MigrationApi -Method POST -Path "/migration/inventory/refresh" | ConvertTo-Json -Depth 6
@@ -47,6 +56,11 @@ switch ($Action) {
     "promote" {
         if ($TemplateId -le 0) { throw "TemplateId required for promote" }
         Invoke-MigrationApi -Method POST -Path "/migration/promote/$TemplateId" | ConvertTo-Json -Depth 8
+    }
+    "signoff" {
+        if ([string]::IsNullOrWhiteSpace($InventoryId)) { throw "InventoryId required for signoff" }
+        $body = @{ approved = $true; approvedBy = $ApprovedBy } | ConvertTo-Json
+        Invoke-MigrationApi -Method POST -Path "/migration/inventory/$InventoryId/signoff" -Body $body | ConvertTo-Json -Depth 8
     }
     "workflow" {
         if ($TemplateId -le 0) { throw "TemplateId required for workflow" }

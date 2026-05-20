@@ -35,4 +35,9 @@ public class MigrationInventoryEntry {
     private boolean v2DraftPresent;
     private String lastCompareReportPath;
     private String notes;
+    /** Business approval recorded before production promote (P3 gate). */
+    private boolean businessSignoffApproved;
+    private String businessSignoffBy;
+    /** ISO-8601 timestamp when sign-off was recorded. */
+    private String businessSignoffAt;
 }

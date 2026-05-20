@@ -12,7 +12,10 @@ import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
+import org.gensokyo.data.template.migration.MigrationClassification;
 import org.gensokyo.data.template.migration.MigrationInventorySummary;
+import org.gensokyo.data.template.migration.MigrationSignoffFamilyStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -59,6 +62,32 @@ class TemplateControllerMigrationInventoryTests {
         R<List<MigrationInventoryEntry>> response = templateController.listMigrationInventory();
         Assertions.assertTrue(response.isSuccess());
         Assertions.assertFalse(response.getData().isEmpty());
+    }
+
+    @Test
+    void migrationBacklogAndSignoffEndpointsWork() {
+        MigrationInventoryEntry pending = new MigrationInventoryEntry();
+        pending.setId("test-signoff-row");
+        pending.setScenarioFamily("synthetic");
+        pending.setMigrationClass(MigrationClassification.EXACT);
+        pending.setLastCompareReportPath("docs/migration/reports/test-signoff-row.md");
+        migrationInventoryService.saveAll(List.of(pending));
+
+        R<List<MigrationInventoryEntry>> backlog = templateController.migrationBacklog("pending_signoff");
+        Assertions.assertTrue(backlog.isSuccess());
+        Assertions.assertTrue(backlog.getData().stream().anyMatch(e -> "test-signoff-row".equals(e.getId())));
+
+        MigrationBusinessSignoffRequest request = new MigrationBusinessSignoffRequest();
+        request.setApproved(true);
+        request.setApprovedBy("test-operator");
+        R<MigrationInventoryEntry> signoff = templateController.recordMigrationSignoff(
+                "test-signoff-row", request);
+        Assertions.assertTrue(signoff.isSuccess());
+        Assertions.assertTrue(signoff.getData().isBusinessSignoffApproved());
+
+        R<List<MigrationSignoffFamilyStatus>> status = templateController.migrationSignoffStatus();
+        Assertions.assertTrue(status.isSuccess());
+        Assertions.assertFalse(status.getData().isEmpty());
     }
 
     @Test

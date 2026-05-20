@@ -94,6 +94,20 @@ curl -s -X POST "http://localhost:8080/template/migration/promote/42"
 
 Runs `TemplateV2Validator`, writes V2 content to the template, updates inventory. **V1 YAML is not deleted** (compatibility with rollback notes in inventory).
 
+## Backlog and business sign-off (P3)
+
+```bash
+curl -s "http://localhost:8080/template/migration/backlog?filter=pending_signoff"
+curl -s "http://localhost:8080/template/migration/signoff-status"
+curl -s -X POST "http://localhost:8080/template/migration/inventory/regression-v1-constant-five-rows/signoff" \
+  -H "Content-Type: application/json" \
+  -d '{"approved":true,"approvedBy":"owner@example.com","notes":"Wave 1 synthetic approved"}'
+```
+
+Backlog filters: `all`, `ready`, `blocked`, `compatibility_only`, `needs_compare`, `pending_signoff`.
+
+See `docs/migration/p3-business-signoff-checklist.md`.
+
 ## Inventory summary
 
 ```bash

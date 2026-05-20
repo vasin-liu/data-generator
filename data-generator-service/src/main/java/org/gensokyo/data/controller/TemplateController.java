@@ -41,8 +41,13 @@ import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.migration.MigrationBacklogFilter;
+import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
+import org.gensokyo.data.template.migration.MigrationInventoryBacklogService;
 import org.gensokyo.data.template.migration.MigrationInventorySummary;
 import org.gensokyo.data.template.migration.MigrationInventorySummaryService;
+import org.gensokyo.data.template.migration.MigrationSignoffFamilyStatus;
+import org.gensokyo.data.template.migration.MigrationSignoffStatusService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
 import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
@@ -278,6 +283,58 @@ public class TemplateController {
         MigrationInventorySummary summary =
                 new MigrationInventorySummaryService().summarize(migrationInventoryService);
         return R.ok("Inventory summary", summary);
+    }
+
+    /**
+     * Returns a filtered migration work queue (ready, blocked, needs compare, pending sign-off, etc.).
+     *
+     * @param filter optional filter name (default {@code ALL})
+     * @return matching inventory rows
+     */
+    @GetMapping("/migration/backlog")
+    public R<List<MigrationInventoryEntry>> migrationBacklog(
+            @RequestParam(required = false) String filter) {
+        try {
+            MigrationBacklogFilter backlogFilter = MigrationInventoryBacklogService.parseFilter(filter);
+            List<MigrationInventoryEntry> backlog = new MigrationInventoryBacklogService()
+                    .filter(migrationInventoryService.listAll(), backlogFilter);
+            return R.ok("Migration backlog", backlog);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns per-scenario-family business sign-off status for P3 retirement gates.
+     *
+     * @return family rollups with {@code familySignoffComplete} flags
+     */
+    @GetMapping("/migration/signoff-status")
+    public R<List<MigrationSignoffFamilyStatus>> migrationSignoffStatus() {
+        List<MigrationSignoffFamilyStatus> status = new MigrationSignoffStatusService()
+                .summarizeByFamily(migrationInventoryService.listAll());
+        return R.ok("Sign-off status", status);
+    }
+
+    /**
+     * Records business sign-off on an inventory row before production promote.
+     *
+     * @param inventoryId stable inventory id (e.g. {@code regression-v1-constant-five-rows} or {@code db-42})
+     * @param request     approval details
+     * @return updated inventory entry
+     */
+    @PostMapping("/migration/inventory/{inventoryId}/signoff")
+    public R<MigrationInventoryEntry> recordMigrationSignoff(
+            @PathVariable String inventoryId,
+            @RequestBody(required = false) MigrationBusinessSignoffRequest request) {
+        try {
+            MigrationInventoryEntry entry = migrationInventoryService.recordBusinessSignoff(inventoryId, request);
+            return R.ok("Sign-off recorded", entry);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
     }
 
     /**

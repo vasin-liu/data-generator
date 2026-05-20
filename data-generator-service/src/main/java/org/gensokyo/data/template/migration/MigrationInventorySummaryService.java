@@ -55,7 +55,9 @@ public class MigrationInventorySummaryService {
             if (classification == MigrationClassification.BLOCKED) {
                 summary.setBlocked(summary.getBlocked() + 1);
             }
-            if (isReadyToPromote(classification)) {
+            if (isReadyToPromote(classification)
+                    && entry.getLastCompareReportPath() != null
+                    && !entry.getLastCompareReportPath().isBlank()) {
                 summary.setReadyToPromote(summary.getReadyToPromote() + 1);
             }
 

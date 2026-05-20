@@ -14,6 +14,7 @@ import tools.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -133,6 +134,34 @@ public class MigrationInventoryService {
         entry.setLastCompareReportPath(reportPath);
         entry.setV2DraftPresent(true);
         writeToDisk();
+    }
+
+    /**
+     * Records business sign-off on an inventory row (P3 gate before promote).
+     *
+     * @param inventoryId stable inventory id
+     * @param request       sign-off details
+     * @return updated entry
+     * @throws IllegalArgumentException when the inventory id is unknown
+     */
+    public MigrationInventoryEntry recordBusinessSignoff(String inventoryId, MigrationBusinessSignoffRequest request) {
+        if (inventoryId == null || inventoryId.isBlank()) {
+            throw new IllegalArgumentException("inventoryId must be set");
+        }
+        MigrationBusinessSignoffRequest body = request != null ? request : new MigrationBusinessSignoffRequest();
+        MigrationInventoryEntry entry = findById(inventoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown inventory id: " + inventoryId));
+        entry.setBusinessSignoffApproved(body.isApproved());
+        entry.setBusinessSignoffBy(body.getApprovedBy());
+        entry.setBusinessSignoffAt(Instant.now().toString());
+        if (body.getNotes() != null && !body.getNotes().isBlank()) {
+            String existing = entry.getNotes();
+            entry.setNotes(existing == null || existing.isBlank()
+                    ? body.getNotes().strip()
+                    : existing + " | signoff: " + body.getNotes().strip());
+        }
+        writeToDisk();
+        return entry;
     }
 
     /**

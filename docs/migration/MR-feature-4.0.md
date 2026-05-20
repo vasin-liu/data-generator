@@ -32,6 +32,9 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 | GET | `/template/migration/summary` |
 | POST | `/template/migration/inventory/refresh` |
 | POST | `/template/migration/compare/batch` |
+| GET | `/template/migration/backlog` |
+| GET | `/template/migration/signoff-status` |
+| POST | `/template/migration/inventory/{inventoryId}/signoff` |
 
 See `docs/migration/workbench-usage.md`.
 
@@ -63,4 +66,4 @@ See `docs/testing-embedded-components.md`.
 
 ## Commits
 
-29 commits on `feature-4.0` from JDBC policy resolver through migration workbench, embedded integration tests, and MR docs.
+30 commits on `feature-4.0` from JDBC policy resolver through migration workbench, embedded integration tests, P3 sign-off APIs, and MR docs.
