@@ -28,6 +28,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Fast unit tests for Kafka sink adapters (Mockito on {@link KafkaTemplate}).
+ * End-to-end runner coverage uses {@link org.gensokyo.data.calcite.runtime.TemplateV2RunnerKafkaEmbeddedTests}.
+ */
 class KafkaSinkFactoryTests {
 
     @Test
