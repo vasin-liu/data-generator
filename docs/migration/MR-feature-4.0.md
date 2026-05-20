@@ -30,6 +30,7 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 | POST | `/template/migration/promote/{id}` |
 | GET | `/template/migration/inventory` |
 | POST | `/template/migration/inventory/refresh` |
+| POST | `/template/migration/compare/batch` |
 
 See `docs/migration/workbench-usage.md`.
 

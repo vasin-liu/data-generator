@@ -9,7 +9,9 @@ import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.migration.MigrationBatchCompareService;
 import org.gensokyo.data.template.migration.MigrationCompareService;
+import org.gensokyo.data.template.migration.MigrationCompareWorkflow;
 import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
@@ -85,6 +87,50 @@ public class MigrationConfig {
     @ConditionalOnMissingBean(MigrationCompareService.class)
     public MigrationCompareService migrationCompareService(TemplateRunExecutor executor) {
         return new MigrationCompareService(executor);
+    }
+
+    /**
+     * Single-template compare workflow (dual-run, report, inventory update).
+     *
+     * @param yamlParser                YAML parser
+     * @param migrationDraftService     draft builder
+     * @param migrationCompareService   compare service
+     * @param migrationReportWriter     report writer
+     * @param migrationInventoryService inventory
+     * @return compare workflow
+     */
+    @Bean
+    @ConditionalOnMissingBean(MigrationCompareWorkflow.class)
+    public MigrationCompareWorkflow migrationCompareWorkflow(
+            YamlParser yamlParser,
+            MigrationDraftService migrationDraftService,
+            MigrationCompareService migrationCompareService,
+            MigrationReportWriter migrationReportWriter,
+            MigrationInventoryService migrationInventoryService) {
+        return new MigrationCompareWorkflow(
+                yamlParser,
+                migrationDraftService,
+                migrationCompareService,
+                migrationReportWriter,
+                migrationInventoryService);
+    }
+
+    /**
+     * Batch dual-run compare over database-backed inventory rows.
+     *
+     * @param repository              template persistence
+     * @param migrationInventoryService inventory
+     * @param migrationCompareWorkflow  single-template workflow
+     * @return batch compare service
+     */
+    @Bean
+    @ConditionalOnMissingBean(MigrationBatchCompareService.class)
+    public MigrationBatchCompareService migrationBatchCompareService(
+            TemplateRepository repository,
+            MigrationInventoryService migrationInventoryService,
+            MigrationCompareWorkflow migrationCompareWorkflow) {
+        return new MigrationBatchCompareService(
+                repository, migrationInventoryService, migrationCompareWorkflow);
     }
 
     /**

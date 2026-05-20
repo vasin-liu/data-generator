@@ -31,15 +31,17 @@ import org.gensokyo.data.template.TemplateV1Loader;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.template.migration.MigrationBatchCompareOptions;
+import org.gensokyo.data.template.migration.MigrationBatchCompareResult;
+import org.gensokyo.data.template.migration.MigrationBatchCompareService;
 import org.gensokyo.data.template.migration.MigrationCompareOptions;
-import org.gensokyo.data.template.migration.MigrationCompareService;
+import org.gensokyo.data.template.migration.MigrationCompareWorkflow;
 import org.gensokyo.data.template.migration.MigrationComparisonReport;
 import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
-import org.gensokyo.data.template.migration.MigrationReportWriter;
 import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
 import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
 import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
@@ -169,8 +171,8 @@ public class TemplateController {
     private final Templates templates;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
-    private final MigrationCompareService migrationCompareService;
-    private final MigrationReportWriter migrationReportWriter;
+    private final MigrationCompareWorkflow migrationCompareWorkflow;
+    private final MigrationBatchCompareService migrationBatchCompareService;
     private final MigrationInventoryService migrationInventoryService;
     private final MigrationDraftService migrationDraftService;
     private final MigrationPromoteService migrationPromoteService;
@@ -315,26 +317,27 @@ public class TemplateController {
             return R.fail(String.format("Template '%s' does not exist", templateId));
         }
 
-        TemplateVO v1;
         try {
-            v1 = buildV1Template(entity);
+            MigrationComparisonReport report =
+                    migrationCompareWorkflow.compareAndPersist(templateId, entity, options);
+            return R.ok("Compare completed", report);
         }
         catch (IllegalArgumentException e) {
             return R.fail(e.getMessage());
         }
+    }
 
-        TemplateV2VO v2;
-        try {
-            v2 = resolveV2ForCompare(entity);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-
-        MigrationComparisonReport report = migrationCompareService.compare(templateId, v1, v2, options);
-        String reportPath = migrationReportWriter.write(report);
-        migrationInventoryService.updateCompareResult(templateId, report, reportPath);
-        return R.ok("Compare completed", report);
+    /**
+     * Batch dual-run compare for database-backed templates in the migration inventory (catalog sweep).
+     *
+     * @param options optional batch options (refresh inventory, max templates, per-compare options)
+     * @return per-template outcomes and aggregate counts
+     */
+    @PostMapping("/migration/compare/batch")
+    public R<MigrationBatchCompareResult> batchCompareMigration(
+            @RequestBody(required = false) MigrationBatchCompareOptions options) {
+        MigrationBatchCompareResult result = migrationBatchCompareService.runBatch(options);
+        return R.ok("Batch compare completed", result);
     }
 
     /**
@@ -557,27 +560,6 @@ public class TemplateController {
 
     private TemplateV2DraftVO buildMigrationDraft(TemplatePO entity) {
         return migrationDraftService.buildDraft(buildV1Template(entity));
-    }
-
-    private TemplateV2VO resolveV2ForCompare(TemplatePO entity) {
-        TemplateV2DraftVO v2Draft = tryParse(entity.getContentYaml(), TemplateV2DraftVO.class);
-        TemplateVO v1Probe = tryParse(entity.getContentYaml(), TemplateVO.class);
-        TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Probe, v2Draft);
-        TemplateV2DraftVO draft;
-        if (kind == TemplateDefinitionKind.V2 && Objects.nonNull(v2Draft)) {
-            draft = v2Draft;
-        }
-        else {
-            draft = buildQuerySourceDraft(entity);
-        }
-        if (Objects.isNull(draft) || CollectKit.isEmpty(draft.getSources())) {
-            throw new IllegalArgumentException(String.format(
-                    "Template '%s' has no V2 sources for compare (migrate or persist a V2 draft first)",
-                    entity.getId()));
-        }
-        TemplateV2VO normalized = TemplateV2Normalizer.normalize(draft);
-        normalized.setId(entity.getId());
-        return normalized;
     }
 
     private TemplateVO buildV1Template(TemplatePO entity) {

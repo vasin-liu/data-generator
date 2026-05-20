@@ -65,6 +65,25 @@ Optional body fields:
 
 Response includes `classification` (`EXACT`, `APPROXIMATE`, `BLOCKED`, …), `sampleMatchRate`, `v1RowCount`, `v2RowCount`, and `reportPath` under `docs/migration/reports/`.
 
+### 3b. Batch compare (catalog sweep)
+
+```bash
+curl -s -X POST "http://localhost:8080/template/migration/compare/batch" \
+  -H "Content-Type: application/json" \
+  -d "{\"refreshInventoryFirst\":true,\"maxTemplates\":50,\"skipCompatibilityOnly\":true}"
+```
+
+| Field | Default | Meaning |
+|-------|---------|---------|
+| `refreshInventoryFirst` | true | Merge new `db-*` rows before comparing |
+| `maxTemplates` | 50 | Safety cap per request |
+| `skipCompatibilityOnly` | true | Skip inventory rows marked compatibility-only |
+| `compareOptions` | null | Same fields as single compare (`sampleSize`, `keyColumns`, …) |
+
+Returns `comparedCount`, `skippedCount`, `failedCount`, and per-template `items[]`. See `docs/migration/blocked-dual-run-runbook.md` when `failedCount > 0`.
+
+Optional nightly job: set `pci.data.generator.migration.batch-compare.scheduled-enabled: true` (off by default).
+
 ### 4. Promote
 
 Only after reviewing the compare report.

@@ -224,3 +224,13 @@ spring:
       druid:
         filters: stat,slf4j
         validation-query: SELECT 1
+pci:
+  data:
+    generator:
+      migration:
+        batch-compare:
+          scheduled-enabled: false
+          cron: "0 0 2 * * *"
+          refresh-inventory-first: true
+          skip-compatibility-only: true
+          max-templates: 50
