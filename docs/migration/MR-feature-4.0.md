@@ -38,7 +38,8 @@ See `docs/migration/workbench-usage.md`.
 
 | Component | Tests |
 |-----------|--------|
-| H2 / JDBC | `ChunkedPipelineTests`, `TemplateControllerMigrationCompareTests`, `application-phase7-test.yaml` |
+| H2 / JDBC | `ChunkedPipelineTests`, `ChunkedQueryRowSourceTests`, `TemplateControllerMigrationCompareTests`, `application-phase7-test.yaml` |
+| MySQL / PostgreSQL CHUNKED | `ChunkedPipelineMySqlContainerTests`, `ChunkedPipelinePostgresContainerTests` (Testcontainers, requires Docker) |
 | Kafka | `EmbeddedKafkaTestSupport`, `KafkaRowSinkAdapterEmbeddedTests`, `TemplateV2RunnerKafkaEmbeddedTests` |
 | Elasticsearch | `EmbeddedElasticsearchHttpSupport`, `ElasticsearchRowSinkAdapterHttpEmbeddedTests`, `TemplateV2RunnerElasticsearchHttpEmbeddedTests` |
 | Migration dual-run | `PipelineTemplateRunExecutor` + H2 (`MigrationCompareService` / controller tests) |

@@ -11,7 +11,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Promote workflow (`POST /template/migration/promote/{templateId}`)
 - [x] CHUNKED execution policy suggested on single-source JDBC migrate (`executionPolicy.mode: CHUNKED`)
 - [x] Calcite explain / plan diff for operators (bounded — compare reports include execution shape, validation, V1/V2 SQL diff notes; not full control-plane explain)
-- [ ] Full JDBC chunked parity on MySQL/Postgres production datasources
+- [x] Full JDBC chunked parity on MySQL/Postgres — `ChunkedPipelineMySqlContainerTests` (useCursorFetch), `ChunkedPipelinePostgresContainerTests` (Testcontainers; skip when Docker unavailable)
 
 ## P2 — Operational (partial)
 

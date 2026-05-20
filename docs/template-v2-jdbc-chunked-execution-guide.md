@@ -227,7 +227,10 @@ If the dimension source exceeds `broadcastMaxRows` (no `maxRows` cap, or `maxRow
 
 ## Related tests
 
-- `ChunkedPipelineTests` — Pattern S, metrics, batched sink
+- `ChunkedPipelineTests` — Pattern S, metrics, batched sink (H2)
+- `ChunkedPipelineMySqlContainerTests` — MySQL 8 + `useCursorFetch` (Testcontainers, requires Docker)
+- `ChunkedPipelinePostgresContainerTests` — PostgreSQL 16 (Testcontainers, requires Docker)
+- `ChunkedQueryRowSourceTests` — chunked JDBC source reads (H2)
 - `BroadcastJoinExecutorTests` — Pattern B end-to-end
 - `TemplateV2SupportTests` — `CHUNKED` + `GROUP BY` validation
 - `EffectiveExecutionPolicyTests` — default resolution

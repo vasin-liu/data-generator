@@ -45,6 +45,11 @@ Reference this profile from `@SpringBootTest`:
 
 Example: `TemplateControllerMigrationCompareTests` (number iterator dual-run with real `PipelineTemplateRunExecutor`).
 
+## JDBC CHUNKED (MySQL / PostgreSQL)
+
+- **H2 (fast):** `ChunkedPipelineTests`, `ChunkedQueryRowSourceTests` — functional chunked read/write, not production cursor behavior.
+- **Testcontainers (Docker required):** `ChunkedPipelineMySqlContainerTests` (`useCursorFetch=true`), `ChunkedPipelinePostgresContainerTests` — skipped when Docker is unavailable (`@EnabledIf` on `DockerTestSupport`).
+
 ## Kafka
 
 - **Fast unit tests:** `KafkaSinkFactoryTests` uses Mockito on `KafkaTemplate` for adapter contract checks.
