@@ -46,8 +46,8 @@ See `docs/testing-embedded-components.md`.
 
 ## Test plan
 
-- [ ] `.\mvnw-jdk25.ps1 "-pl" "data-generator-service,data-generator-calcite" "-am" "test"`
-- [ ] Review sample reports in `docs/migration/reports/sample-*.md`
+- [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
+- [x] Sample compare reports present under `docs/migration/reports/` (`sample-regression-v1-*.md`, classifications e.g. EXACT)
 - [ ] On staging: pick one production V1 JDBC export template → draft → compare → review classification
 - [ ] MySQL: confirm datasource supports cursor fetch per `docs/template-v2-jdbc-chunked-execution-guide.md`
 - [ ] Do **not** promote `COMPATIBILITY_ONLY` templates (pause, shared, legacy script) — see `docs/migration/compatibility-only-templates.md`
@@ -60,4 +60,4 @@ See `docs/testing-embedded-components.md`.
 
 ## Commits
 
-25 commits on `feature-4.0` from JDBC policy resolver through migration workbench and workbench usage doc.
+29 commits on `feature-4.0` from JDBC policy resolver through migration workbench, embedded integration tests, and MR docs.
