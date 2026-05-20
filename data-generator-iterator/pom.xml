@@ -24,6 +24,7 @@
         <module>data-generator-iterator-excel</module>
         <module>data-generator-iterator-json</module>
         <module>data-generator-iterator-csv</module>
+        <module>data-generator-iterator-geo</module>
     </modules>
 
     <dependencies>

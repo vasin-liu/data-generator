@@ -1,10 +1,21 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
 package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.*;
 import org.gensokyo.data.calcite.parser.*;
 
+import org.gensokyo.data.geo.GeoGenerationRequest;
+import org.gensokyo.data.geo.GeoOutputFormatKind;
+import org.gensokyo.data.geo.format.GeoValueFormatter;
+import org.gensokyo.data.geo.GeoSyntheticGenerator;
 import org.gensokyo.data.iterator.ConstantIteratorVO;
 import org.gensokyo.data.iterator.DateTimeIteratorVO;
+import org.gensokyo.data.iterator.GeoIteratorRequestMapper;
+import org.gensokyo.data.iterator.GeoIteratorVO;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
@@ -13,9 +24,11 @@ import org.gensokyo.data.model.v2.RowSchema;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class IteratorRowSource implements RowSource {
@@ -41,6 +54,16 @@ public class IteratorRowSource implements RowSource {
             case DateTimeIteratorVO iterator -> {
                 this.schema = DATETIME_SCHEMA;
                 this.rows = materialize(iterator);
+            }
+            case GeoIteratorVO iterator -> {
+                GeoGenerationRequest request = GeoIteratorRequestMapper.toRequest(iterator);
+                try {
+                    List<Map<String, Object>> generated = GeoSyntheticGenerator.generateRows(request);
+                    this.schema = geoSchema(request, generated);
+                    this.rows = materializeGeo(generated);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("Failed to materialize GEO iterator for source [" + name + "]", e);
+                }
             }
             case null -> throw new IllegalArgumentException("Iterator source [" + name + "] iterator must not be null");
             default -> throw new IllegalArgumentException("Unsupported Template V2 iterator type ["
@@ -130,6 +153,39 @@ public class IteratorRowSource implements RowSource {
     private static RowSchema valueSchema(String type) {
         RowSchema schema = new RowSchema();
         schema.setColumns(List.of(new ColumnDef("value", type, false)));
+        return schema;
+    }
+
+    private static List<Row> materializeGeo(List<Map<String, Object>> generated) {
+        List<Row> rows = new ArrayList<>(generated.size());
+        for (Map<String, Object> values : generated) {
+            rows.add(new Row(new LinkedHashMap<>(values)));
+        }
+        return rows;
+    }
+
+    private static RowSchema geoSchema(GeoGenerationRequest request, List<Map<String, Object>> generated) {
+        List<ColumnDef> columns = new ArrayList<>();
+        if (generated.isEmpty()) {
+            for (String column : GeoValueFormatter.columnNames(request.getOutputFormat(), request.getColumnNames())) {
+                String sqlType = request.getOutputFormat() == GeoOutputFormatKind.columns ? "DOUBLE" : "VARCHAR";
+                columns.add(new ColumnDef(column, sqlType, false));
+            }
+        } else {
+            for (String key : generated.get(0).keySet()) {
+                Object value = generated.get(0).get(key);
+                boolean nullable = key.startsWith("prop.");
+                String sqlType;
+                if (value instanceof Number) {
+                    sqlType = "DOUBLE";
+                } else {
+                    sqlType = "VARCHAR";
+                }
+                columns.add(new ColumnDef(key, sqlType, nullable));
+            }
+        }
+        RowSchema schema = new RowSchema();
+        schema.setColumns(columns);
         return schema;
     }
 }

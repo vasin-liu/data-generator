@@ -91,6 +91,18 @@
 
             <dependency>
                 <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
                 <artifactId>data-generator-iterator-number</artifactId>
                 <version>${project.version}</version>
             </dependency>

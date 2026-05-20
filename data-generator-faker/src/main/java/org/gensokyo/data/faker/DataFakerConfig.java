@@ -29,6 +29,12 @@ public class DataFakerConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(GeoVariable.class)
+    public GeoVariable geoVariable() {
+        return new GeoVariable();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(DataFaker.class)
     public DataFaker dataFaker() {
         return new DataFaker(Locale.CHINA);

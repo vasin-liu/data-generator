@@ -1,8 +1,9 @@
 /*
- * Copyright 2025 PCI Technology Group Co.,Ltd. All Rights Reserved.
- * Site: http://www.pcitech.com/
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
  */
-package org.gensokyo.data.faker.geo;
+package org.gensokyo.data.geo.io;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -18,11 +19,15 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * GeoJSON loader backed by Jackson 3 and JTS core.
+ *
+ * @author Gensokyo
+ * @since 2026-05-20
  */
 public final class GeoJsonLoader {
 
@@ -32,10 +37,61 @@ public final class GeoJsonLoader {
     private GeoJsonLoader() {
     }
 
-    public static Geometry loadGeometry(Path geoJsonPath, int featureIndex) throws IOException {
-        JsonNode root = MAPPER.readTree(Files.readString(geoJsonPath));
-        JsonNode geometryNode = extractGeometryNode(root, featureIndex);
-        return parseGeometry(geometryNode);
+    /**
+     * Loads a geometry from a GeoJSON resource path.
+     *
+     * @param location     classpath or file path
+     * @param featureIndex feature index when root is a FeatureCollection
+     * @return JTS geometry
+     * @throws IOException when the file cannot be read
+     */
+    public static Geometry loadGeometry(String location, int featureIndex) throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        return parseGeometry(extractGeometryNode(root, featureIndex));
+    }
+
+    /**
+     * Loads one feature (geometry + properties) from a GeoJSON resource.
+     *
+     * @param location      classpath or file path
+     * @param featureIndex  index when not random
+     * @param randomFeature when true, pick a random feature using {@code seed}
+     * @param seed          random seed for feature selection
+     * @return feature payload
+     * @throws IOException when the file cannot be read
+     */
+    public static GeoFeature loadFeature(String location, int featureIndex, boolean randomFeature, long seed)
+            throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        JsonNode featureNode = extractFeatureNode(root, featureIndex, randomFeature, seed);
+        Geometry geometry = parseGeometry(requireNode(featureNode.get("geometry"), "Feature geometry is missing"));
+        Map<String, Object> properties = parseProperties(featureNode.get("properties"));
+        return new GeoFeature(geometry, properties);
+    }
+
+    private static JsonNode extractFeatureNode(JsonNode root, int featureIndex, boolean randomFeature, long seed) {
+        JsonNode typeNode = root.get("type");
+        if (typeNode == null || !typeNode.isTextual()) {
+            throw new IllegalArgumentException("Invalid GeoJSON format: missing 'type' field");
+        }
+        return switch (typeNode.asText()) {
+            case "Feature" -> root;
+            case "FeatureCollection" -> {
+                JsonNode features = requireNode(root.get("features"), "FeatureCollection features are missing");
+                if (features.isEmpty()) {
+                    throw new IllegalArgumentException("FeatureCollection is empty");
+                }
+                int index = randomFeature
+                        ? new Random(seed).nextInt(features.size())
+                        : featureIndex;
+                JsonNode feature = features.get(index);
+                if (feature == null) {
+                    throw new IllegalArgumentException("Feature index out of range: " + index);
+                }
+                yield feature;
+            }
+            default -> throw new IllegalArgumentException("Expected Feature or FeatureCollection, got: " + typeNode.asText());
+        };
     }
 
     private static JsonNode extractGeometryNode(JsonNode root, int featureIndex) {
@@ -56,6 +112,28 @@ public final class GeoJsonLoader {
             }
             default -> root;
         };
+    }
+
+    private static Map<String, Object> parseProperties(JsonNode propertiesNode) {
+        if (propertiesNode == null || propertiesNode.isNull() || !propertiesNode.isObject()) {
+            return Map.of();
+        }
+        Map<String, Object> properties = new LinkedHashMap<>();
+        propertiesNode.properties().forEach(entry -> {
+            JsonNode value = entry.getValue();
+            if (value == null || value.isNull()) {
+                properties.put(entry.getKey(), null);
+            } else if (value.isTextual()) {
+                properties.put(entry.getKey(), value.asText());
+            } else if (value.isBoolean()) {
+                properties.put(entry.getKey(), value.asBoolean());
+            } else if (value.isNumber()) {
+                properties.put(entry.getKey(), value.asDouble());
+            } else {
+                properties.put(entry.getKey(), value.toString());
+            }
+        });
+        return properties;
     }
 
     private static Geometry parseGeometry(JsonNode geometryNode) {

@@ -64,6 +64,11 @@
             <artifactId>data-generator-iterator-json</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-geo</artifactId>
+        </dependency>
+
         <!-- generator -->
         <dependency>
             <groupId>org.gensokyo.data.generator</groupId>
