@@ -119,18 +119,18 @@ public final class GeoJsonLoader {
             return Map.of();
         }
         Map<String, Object> properties = new LinkedHashMap<>();
-        propertiesNode.properties().forEach(entry -> {
-            JsonNode value = entry.getValue();
+        // Use forEachEntry (Jackson 3) instead of deprecated properties() iteration on JsonNode.
+        propertiesNode.forEachEntry((fieldName, value) -> {
             if (value == null || value.isNull()) {
-                properties.put(entry.getKey(), null);
+                properties.put(fieldName, null);
             } else if (value.isTextual()) {
-                properties.put(entry.getKey(), value.asText());
+                properties.put(fieldName, value.asText());
             } else if (value.isBoolean()) {
-                properties.put(entry.getKey(), value.asBoolean());
+                properties.put(fieldName, value.asBoolean());
             } else if (value.isNumber()) {
-                properties.put(entry.getKey(), value.asDouble());
+                properties.put(fieldName, value.asDouble());
             } else {
-                properties.put(entry.getKey(), value.toString());
+                properties.put(fieldName, value.toString());
             }
         });
         return properties;
