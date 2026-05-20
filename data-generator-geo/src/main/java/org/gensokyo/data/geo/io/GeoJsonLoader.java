@@ -71,10 +71,10 @@ public final class GeoJsonLoader {
 
     private static JsonNode extractFeatureNode(JsonNode root, int featureIndex, boolean randomFeature, long seed) {
         JsonNode typeNode = root.get("type");
-        if (typeNode == null || !typeNode.isTextual()) {
+        if (typeNode == null || !typeNode.isString()) {
             throw new IllegalArgumentException("Invalid GeoJSON format: missing 'type' field");
         }
-        return switch (typeNode.asText()) {
+        return switch (typeNode.asString()) {
             case "Feature" -> root;
             case "FeatureCollection" -> {
                 JsonNode features = requireNode(root.get("features"), "FeatureCollection features are missing");
@@ -90,17 +90,17 @@ public final class GeoJsonLoader {
                 }
                 yield feature;
             }
-            default -> throw new IllegalArgumentException("Expected Feature or FeatureCollection, got: " + typeNode.asText());
+            default -> throw new IllegalArgumentException("Expected Feature or FeatureCollection, got: " + typeNode.asString());
         };
     }
 
     private static JsonNode extractGeometryNode(JsonNode root, int featureIndex) {
         JsonNode typeNode = root.get("type");
-        if (typeNode == null || !typeNode.isTextual()) {
+        if (typeNode == null || !typeNode.isString()) {
             throw new IllegalArgumentException("Invalid GeoJSON format: missing 'type' field");
         }
 
-        return switch (typeNode.asText()) {
+        return switch (typeNode.asString()) {
             case "Feature" -> requireNode(root.get("geometry"), "Feature geometry is missing");
             case "FeatureCollection" -> {
                 JsonNode features = requireNode(root.get("features"), "FeatureCollection features are missing");
@@ -123,8 +123,8 @@ public final class GeoJsonLoader {
         propertiesNode.forEachEntry((fieldName, value) -> {
             if (value == null || value.isNull()) {
                 properties.put(fieldName, null);
-            } else if (value.isTextual()) {
-                properties.put(fieldName, value.asText());
+            } else if (value.isString()) {
+                properties.put(fieldName, value.asString());
             } else if (value.isBoolean()) {
                 properties.put(fieldName, value.asBoolean());
             } else if (value.isNumber()) {
@@ -137,7 +137,7 @@ public final class GeoJsonLoader {
     }
 
     private static Geometry parseGeometry(JsonNode geometryNode) {
-        String type = requireNode(geometryNode.get("type"), "Geometry type is missing").asText();
+        String type = requireNode(geometryNode.get("type"), "Geometry type is missing").asString();
         JsonNode coordinates = geometryNode.get("coordinates");
 
         return switch (type) {
