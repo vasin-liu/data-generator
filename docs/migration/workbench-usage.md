@@ -63,7 +63,7 @@ Optional body fields:
 | `keyColumns` | null | Intersection of keys per row when null |
 | `preferChunked` | false | Hint for V2 runner policy when resolving draft |
 
-Response includes `classification` (`EXACT`, `APPROXIMATE`, `BLOCKED`, …), `sampleMatchRate`, `v1RowCount`, `v2RowCount`, and `reportPath` under `docs/migration/reports/`.
+Response includes `classification` (`EXACT`, `APPROXIMATE`, `BLOCKED`, …), `sampleMatchRate`, `v1RowCount`, `v2RowCount`, `planExplain` (execution shape, Calcite validation, V1/V2 diff notes), and `reportPath` under `docs/migration/reports/`.
 
 ### 3b. Batch compare (catalog sweep)
 

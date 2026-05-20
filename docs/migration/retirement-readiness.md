@@ -10,7 +10,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Unified draft migration (`POST /template/migration/draft/{templateId}`) — query-source + iterator
 - [x] Promote workflow (`POST /template/migration/promote/{templateId}`)
 - [x] CHUNKED execution policy suggested on single-source JDBC migrate (`executionPolicy.mode: CHUNKED`)
-- [ ] Calcite explain / plan diff for operators (partial — compare sample match only)
+- [x] Calcite explain / plan diff for operators (bounded — compare reports include execution shape, validation, V1/V2 SQL diff notes; not full control-plane explain)
 - [ ] Full JDBC chunked parity on MySQL/Postgres production datasources
 
 ## P2 — Operational (partial)

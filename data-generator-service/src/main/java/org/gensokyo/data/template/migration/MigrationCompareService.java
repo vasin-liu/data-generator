@@ -24,6 +24,7 @@ import java.util.Objects;
 public class MigrationCompareService {
 
     private final TemplateRunExecutor executor;
+    private final MigrationPlanExplainService planExplainService;
 
     /**
      * Creates the service with the given run executor (production pipeline or test stub).
@@ -31,7 +32,18 @@ public class MigrationCompareService {
      * @param executor template run executor
      */
     public MigrationCompareService(TemplateRunExecutor executor) {
+        this(executor, new MigrationPlanExplainService());
+    }
+
+    /**
+     * Creates the service with executor and plan explain helper (tests may inject a stub).
+     *
+     * @param executor            template run executor
+     * @param planExplainService    plan summary builder
+     */
+    public MigrationCompareService(TemplateRunExecutor executor, MigrationPlanExplainService planExplainService) {
         this.executor = Objects.requireNonNull(executor, "executor");
+        this.planExplainService = Objects.requireNonNull(planExplainService, "planExplainService");
     }
 
     /**
@@ -72,6 +84,7 @@ public class MigrationCompareService {
         report.setClassification(classification);
         report.setWarnings(warnings);
         report.applyRecommendationFromClassification();
+        report.setPlanExplain(planExplainService.explain(v1, v2));
         return report;
     }
 

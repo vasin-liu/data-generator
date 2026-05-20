@@ -84,10 +84,44 @@ public class MigrationReportWriter {
         md.append("- Sample match rate: ").append(String.format("%.4f", report.getSampleMatchRate())).append('\n');
         md.append("\n## Warnings\n\n");
         appendWarnings(md, report.getWarnings());
+        appendPlanExplain(md, report.getPlanExplain());
         md.append("\n## Classification\n\n");
         md.append("Final class **").append(report.getClassification()).append("** — promote guidance: `")
                 .append(report.getRecommendation()).append("`.\n");
         return md.toString();
+    }
+
+    private static void appendPlanExplain(StringBuilder md, MigrationPlanExplain plan) {
+        md.append("\n## Plan explain (bounded)\n\n");
+        if (plan == null) {
+            md.append("_Not available_\n");
+            return;
+        }
+        if (plan.getV2Sql() != null) {
+            md.append("### V2 SQL\n\n```sql\n").append(plan.getV2Sql()).append("\n```\n\n");
+        }
+        md.append("- Execution shape: ").append(nullToDash(plan.getExecutionShape())).append('\n');
+        md.append("- Effective mode: ").append(nullToDash(plan.getEffectiveExecutionMode())).append('\n');
+        md.append("- Calcite validation: ").append(nullToDash(plan.getCalciteValidation())).append('\n');
+        appendBulletSection(md, "Sources", plan.getSourceSummaries());
+        appendBulletSection(md, "SQL features (keyword scan)", plan.getPlanFeatures());
+        appendBulletSection(md, "V1 hints", plan.getV1Hints());
+        appendBulletSection(md, "Plan diff notes", plan.getDiffNotes());
+    }
+
+    private static String nullToDash(String value) {
+        return value == null || value.isBlank() ? "—" : value;
+    }
+
+    private static void appendBulletSection(StringBuilder md, String title, List<String> items) {
+        md.append("\n### ").append(title).append("\n\n");
+        if (items == null || items.isEmpty()) {
+            md.append("_None_\n");
+            return;
+        }
+        for (String item : items) {
+            md.append("- ").append(item == null ? "" : item.strip()).append('\n');
+        }
     }
 
     private static void appendWarnings(StringBuilder md, List<String> warnings) {

@@ -37,6 +37,8 @@ public class MigrationComparisonReport implements Serializable {
     private String recommendation;
     /** Relative path to written markdown report, when persisted. */
     private String reportPath;
+    /** Bounded Calcite plan summary and V1/V2 operator notes. */
+    private MigrationPlanExplain planExplain;
 
     /**
      * Sets {@link #recommendation} from {@link #classification} using {@link MigrationClassificationRules}.
