@@ -1,6 +1,8 @@
-# Geospatial Phase 1 — Usage (synthetic GEO iterator)
+# Geospatial usage (Phases 1, 2B, 2C, 2D)
 
-This note documents **Phase 1** synthetic geospatial generation: `iterator.type: GEO` (V1 + V2) and minimal SpEL.
+**Overview:** [`geospatial-overview.md`](geospatial-overview.md)
+
+This note documents synthetic **`iterator.type: GEO`** (Phase 1), **GEOJSON/POSTGIS** sources (2B), **SQL over geo tables** (2D), and **`V2_GEO_*` functions** (2C).
 
 ## Limitations
 

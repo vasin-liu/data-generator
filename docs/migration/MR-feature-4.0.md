@@ -6,6 +6,7 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 
 1. **JDBC chunked execution** — row-local `CHUNKED` pipeline for large JDBC read → DB/Kafka/ES export, with execution-shape classification, broadcast-join support, scale limits, and service-side validation at template save.
 2. **V1 migration workbench** — analyze / draft / compare / promote APIs, scenario inventory (DB + regression fixtures), dual-run classification, and markdown reports under `docs/migration/reports/`.
+3. **Geospatial (Phases 1, 2B, 2C, 2D)** — synthetic `GEO` iterator, `GEOJSON`/`POSTGIS` V2 sources, Calcite SQL over geo rows, and `V2_GEO_*` in-memory functions. See `docs/geospatial-overview.md`.
 
 ## Why
 
@@ -18,7 +19,9 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 |------|------------|
 | `data-generator-calcite` | `ChunkedPipeline`, `ChunkedQueryRowSource`, `ExecutionShapeClassifier`, `EffectiveExecutionPolicy`, sink `writeBatch`, `broadcastMaxRows` |
 | `data-generator-service` | `org.gensokyo.data.template.migration.*`, REST under `/template/migration/*` |
-| Docs | `docs/template-v2-jdbc-chunked-execution-guide.md`, `docs/migration/*`, `docs/migration/workbench-usage.md` |
+| `data-generator-geo` | GeoJSON I/O, JTS predicates/buffer, synthetic generator |
+| `data-generator-calcite` | `GeoJsonRowSource`, `PostGisQuerySourceSupport`, `TemplateV2GeoSqlFunctions` |
+| Docs | `docs/template-v2-jdbc-chunked-execution-guide.md`, `docs/migration/*`, `docs/geospatial-overview.md` |
 
 ## API (migration)
 
@@ -57,6 +60,14 @@ See `docs/testing-embedded-components.md`.
 - [ ] On staging: pick one production V1 JDBC export template → draft → compare → review classification
 - [ ] MySQL: confirm datasource supports cursor fetch per `docs/template-v2-jdbc-chunked-execution-guide.md`
 - [ ] Do **not** promote `COMPATIBILITY_ONLY` templates (pause, shared, legacy script) — see `docs/migration/compatibility-only-templates.md`
+
+## Geospatial test plan
+
+- [x] `data-generator-geo`, `iterator-geo`, calcite geo tests (runner, row sources, SQL functions)
+- [ ] Staging: one `GEOJSON` fixture template + one `POSTGIS` JDBC template with `CHUNKED` export
+- [ ] Confirm PostGIS extension and `ST_*` projections on target warehouse
+
+Deferred geo: streaming GeoJSON, Shapefile/GeoPackage, Calcite-native `ST_*`, survey-grade buffers — see `docs/geospatial-overview.md`.
 
 ## Out of scope (follow-ups)
 

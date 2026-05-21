@@ -30,6 +30,7 @@ build/
 !**/src/test/**/build/
 db/
 logs/
+uploaded-drivers/
 
 ### VS Code ###
 .vscode/

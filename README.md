@@ -14,7 +14,7 @@
 10. 支持全局缓存数据获取；
 11. 支持复杂阶段处理；
 12. 支持条件判断阶段；
-13. 支持地理空间数据：V1/V2 合成 GEO 迭代器、GeoJSON/PostGIS 源、Template V2 SQL 地理函数（距离/谓词/近似 buffer），用法见 `docs/geospatial-phase1-usage.md`。
+13. 支持地理空间数据：V1/V2 合成 GEO 迭代器、GeoJSON/PostGIS 源、Template V2 SQL 地理函数（距离/谓词/近似 buffer）；总览见 `docs/geospatial-overview.md`，用法见 `docs/geospatial-phase1-usage.md`。
 
 ### 数据源配置
 

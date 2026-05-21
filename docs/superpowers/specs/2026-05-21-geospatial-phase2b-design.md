@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Implemented (file + PostGIS table slices) |
+| Status | Complete (GEOJSON file, POSTGIS table, CHUNKED PostGIS) |
 | Date | 2026-05-21 |
 | Author | Gensokyo |
 | Depends on | Phase 1 (`data-generator-geo`, GEO iterator, SpEL) |
@@ -86,3 +86,4 @@ transforms:
 | 2026-05-21 | Initial Phase 2B file-source design + implementation |
 | 2026-05-21 | PostGIS table source (`POSTGIS`) via generated SQL + QueryRowSource |
 | 2026-05-21 | CHUNKED execution for POSTGIS via ChunkedQueryRowSource |
+| 2026-05-21 | Marked Complete; consolidated in `docs/geospatial-overview.md` |
