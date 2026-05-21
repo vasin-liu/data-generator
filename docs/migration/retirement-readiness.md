@@ -2,6 +2,13 @@
 
 Honest gates for retiring V1 template execution in favor of Template V2 / Calcite. Inventory ids reference `docs/migration/scenario-inventory.yaml`.
 
+**Merge vs retirement:** `feature-4.0` may merge when P1/P2 + CI simulation are green. Full P3 production promote and P4 cutover are **M2** (staging required). See `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`.
+
+| Milestone | Staging | Production promote checkbox | `v1-execution.enabled=false` |
+|-----------|---------|----------------------------|-------------------------------|
+| **M1** (pre-staging) | Not required | Leave **unchecked** — use CI substitutes in spec | No |
+| **M2** (staging-ready) | refresh / batch compare / real promote | Check when `db-{id}` cohort done | Staging trial then prod |
+
 ## P1 — Technical
 
 - [x] Migration scenario inventory maintained (`scenario-inventory.yaml`, ≥10 tracked templates)
@@ -29,7 +36,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Sign-off per scenario family: `multi_source` (Wave 2) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `parking/11` H2 dual-run
 - [x] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
   - [x] `regression-v1-with-pause` — PAUSE retained on V1; excluded from promote/sign-off cohort
-- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (staging DB catalog; CI simulates promote via `StagingSimulatedPromoteWorkflowTests`)
+- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (**M2 only** — staging DB catalog; M1 uses CI `StagingSimulatedPromoteWorkflowTests` as substitute, not this checkbox)
 
 ## Evidence samples
 

@@ -1,6 +1,10 @@
 # Wave freeze schedule (proposal)
 
-Proposed V1 authoring freeze dates for the retirement program. **Finalize dates after R0 staging** completes on the target environment.
+Proposed V1 authoring freeze dates for the retirement program.
+
+**M1 (no staging):** CI evidence only — see `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`. **Do not set W1/W2 calendar dates yet.**
+
+**M2:** Finalize dates after R0 staging completes on the target environment (real `db-{id}` dual-run).
 
 ## R0 staging evidence
 
