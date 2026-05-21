@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Implemented (distance, radius, predicates, approximate buffer) |
+| Status | Complete (in-memory geo SQL function set) |
 | Date | 2026-05-21 |
 | Depends on | Phase 1, Phase 2B/D (geo sources in Calcite) |
 | **Phase 2C scope** | **C (minimal)** — lat/lon SQL helpers backed by `data-generator-geo` |
@@ -36,11 +36,19 @@ Operators filter and enrich geo pipelines in SQL transforms. PostGIS `ST_*` is a
 1. **`GeoBuffer`** — JTS `BufferOp` with meter→degree scaling at centroid latitude.
 2. SQL **`V2_GEO_WKT_BUFFER`**, **`V2_GEO_GEOJSON_BUFFER`** returning VARCHAR geometry text.
 
+## Built-in SQL functions (summary)
+
+| Category | Functions |
+|----------|-----------|
+| Distance | `V2_GEO_DISTANCE_METERS`, `V2_GEO_WITHIN_RADIUS` |
+| WKT | `V2_GEO_POINT_IN_WKT`, `V2_GEO_WKT_CONTAINS`, `V2_GEO_WKT_INTERSECTS`, `V2_GEO_WKT_BUFFER` |
+| GeoJSON | `V2_GEO_POINT_IN_GEOJSON`, `V2_GEO_GEOJSON_CONTAINS`, `V2_GEO_GEOJSON_INTERSECTS`, `V2_GEO_GEOJSON_BUFFER` |
+
 ## Non-goals (remaining)
 
 - Survey-grade geodesic buffer / CRS reprojection
-- CRS reprojection
 - Replacing PostGIS for warehouse-scale spatial joins
+- Chunked streaming GeoJSON file reads
 
 ## Example
 

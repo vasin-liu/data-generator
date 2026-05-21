@@ -118,6 +118,30 @@ class CalciteSqlValidatorTests {
     }
 
     @Test
+    void validatesGeoSqlFunctions() {
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addSchema("geo_in", schema(
+                        new ColumnDef("lat", "DOUBLE", true),
+                        new ColumnDef("lon", "DOUBLE", true),
+                        new ColumnDef("geometry", "VARCHAR", true)
+                ));
+
+        CalciteSqlValidationResult result = new CalciteSqlValidator().validate(
+                """
+                SELECT lat, lon,
+                       V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) AS dist_m,
+                       V2_GEO_WKT_BUFFER(geometry, 500) AS buf
+                FROM geo_in
+                WHERE V2_GEO_WITHIN_RADIUS(lat, lon, 22.2, 113.2, 5000)
+                  AND V2_GEO_POINT_IN_WKT(lat, lon, V2_GEO_WKT_BUFFER('POINT(113.2 22.2)', 1000))
+                """,
+                context
+        );
+
+        Assertions.assertTrue(result.isValid(), result.getMessage());
+    }
+
+    @Test
     void validatesGroupByOrderByAlias() {
         CalciteExecutionContext context = new CalciteExecutionContext()
                 .addSchema("input", schema(

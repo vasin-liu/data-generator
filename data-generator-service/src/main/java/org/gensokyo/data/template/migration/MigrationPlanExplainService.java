@@ -13,7 +13,9 @@ import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.iterator.DatabaseIteratorVO;
 import org.gensokyo.data.model.v2.ColumnDef;
+import org.gensokyo.data.model.v2.GeoJsonSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
+import org.gensokyo.data.model.v2.PostGisQuerySourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.SourceVO;
@@ -150,8 +152,18 @@ public class MigrationPlanExplainService {
                         entry.getKey() + ": QuerySourceVO ds=" + ds
                                 + (query.getMaxRows() != null ? " maxRows=" + query.getMaxRows() : ""));
             }
-            else if (source instanceof IteratorSourceVO) {
-                explain.getSourceSummaries().add(entry.getKey() + ": IteratorSourceVO");
+            else if (source instanceof GeoJsonSourceVO geoJson) {
+                explain.getSourceSummaries().add(entry.getKey() + ": GeoJsonSourceVO path=" + geoJson.getPath());
+            }
+            else if (source instanceof PostGisQuerySourceVO postGis) {
+                explain.getSourceSummaries().add(entry.getKey() + ": PostGisQuerySourceVO table=" + postGis.getTable()
+                        + " geom=" + postGis.getGeometryColumn());
+            }
+            else if (source instanceof IteratorSourceVO iteratorSource) {
+                String iteratorType = iteratorSource.getIterator() != null
+                        ? iteratorSource.getIterator().getType()
+                        : "?";
+                explain.getSourceSummaries().add(entry.getKey() + ": IteratorSourceVO type=" + iteratorType);
             }
             else {
                 explain.getSourceSummaries().add(entry.getKey() + ": " + kind);
