@@ -11,7 +11,15 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 
 Staging prep: `docs/migration/staging-readiness-checklist.md`
 
-Promote requires business sign-off when a `db-{id}` inventory row exists (enforced in `MigrationPromoteService`).
+Promote requires business sign-off when a `db-{id}` inventory row exists (enforced in `MigrationPromoteService`). Staging script: `workflow-promote` action.
+
+### M1 evidence substitutes (no staging)
+
+| Staging intent | M1 substitute |
+|----------------|---------------|
+| Dual-run + report | `StagingSimulatedPromoteWorkflowTests`, `BuiltinClasspathTemplateMigrationWorkflowTests` |
+| Cohort sign-off | `MigrationWaveCohortSignoffTests` + `scenario-inventory.yaml` |
+| End-to-end promote | `StagingSimulatedPromoteWorkflowTests` + `migration-staging.ps1 -Action workflow-promote` (M2) |
 
 ## P1 — Technical
 

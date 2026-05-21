@@ -81,6 +81,7 @@ See `docs/testing-embedded-components.md`.
 - [x] Full reactor test (2026-05-21): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~4m 12s, 0 failures
 - [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
 - [x] Retirement M1 CI slice (2026-05-21): BuiltinClasspath*, MigrationWaveCohort*, StagingSimulatedPromote*, control plane, v1 flag, promote — **BUILD SUCCESS**, 25 tests, 0 failures
+- [x] Staging unsigned promote guard (2026-05-21): `StagingSimulatedPromoteWorkflowTests#stagingWorkflowRejectsPromoteWithoutBusinessSignoffAfterCompare` — **BUILD SUCCESS**
 - [x] Sample compare reports present under `docs/migration/reports/` (`sample-regression-v1-*.md`, classifications e.g. EXACT)
 - [x] Retirement M1: CI simulated promote + cohort sign-off (deferred-ops spec)
 - [ ] **M2** On staging: pick one production V1 JDBC export template → draft → compare → review classification
@@ -102,6 +103,18 @@ Deferred geo: streaming GeoJSON, Shapefile/GeoPackage, Calcite-native `ST_*`, su
 - Vaadin operator UI for migration inventory
 - Wave freeze calendar dates (product owner, after staging R0)
 
+## Reviewer checklist
+
+- [ ] **Scope:** M1 retirement evidence is CI-only; do not require staging promote or P4 flag flip to merge.
+- [ ] **Tests:** `.\mvnw-jdk25.ps1 test` green (or reviewer re-ran 2026-05-21 full reactor SUCCESS).
+- [ ] **Migration:** Promote rejects `COMPATIBILITY_ONLY` / `BLOCKED` and unsigned `db-{id}` inventory rows.
+- [ ] **Config:** Default `pci.data.generator.v1-execution.enabled=true` — no accidental V1 disable in shipped yaml.
+- [ ] **Docs:** `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` read for M2 follow-up.
+- [ ] **Geo / CHUNKED:** Spot-check only if your domain uses geo or large JDBC export (see geospatial + chunked guides).
+
+**Create MR (GitLab):** `feature-4.0` → `master`  
+http://172.25.21.141/gensokyo/data-generator/-/merge_requests/new?merge_request[source_branch]=feature-4.0&merge_request[target_branch]=master
+
 ## Commits
 
-`feature-4.0` includes JDBC chunked execution, migration workbench, geospatial phases, V1 retirement program (control plane, SpEL, v1 flag, CI simulation), and deferred-ops documentation.
+`feature-4.0` includes JDBC chunked execution, migration workbench, geospatial phases, V1 retirement program (control plane, SpEL, v1 flag, CI simulation, promote sign-off guard), and deferred-ops documentation.

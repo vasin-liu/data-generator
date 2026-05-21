@@ -122,6 +122,32 @@ class StagingSimulatedPromoteWorkflowTests {
     }
 
     @Test
+    void stagingWorkflowRejectsPromoteWithoutBusinessSignoffAfterCompare() throws Exception {
+        String yaml = new org.springframework.core.io.ClassPathResource(
+                "migration/regression/v1-iterator-simple.yaml")
+                .getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        TemplatePO entity = new TemplatePO();
+        entity.setId(95104L);
+        entity.setName("staging-sim-unsigned");
+        entity.setContentYaml(yaml);
+        templateRepository.saveAndFlush(entity);
+
+        Assertions.assertTrue(templateController.refreshMigrationInventory().isSuccess());
+        Assertions.assertTrue(templateController.compareMigration(
+                entity.getId(), MigrationCompareOptions.defaults()).isSuccess());
+
+        R<TemplateV2DraftVO> promoted = templateController.promoteMigration(entity.getId());
+        Assertions.assertFalse(promoted.isSuccess());
+        Assertions.assertTrue(
+                promoted.getMessage().toLowerCase().contains("sign-off")
+                        || promoted.getMessage().toLowerCase().contains("signoff"));
+
+        TemplatePO persisted = templateRepository.findById(entity.getId()).orElseThrow();
+        Assertions.assertTrue(persisted.getContentYaml().contains("iterator:"));
+        Assertions.assertFalse(persisted.getContentYaml().contains("sources:"));
+    }
+
+    @Test
     void stagingWorkflowDoesNotPromoteCompatibilityOnlyAfterCompare() {
         TemplatePO entity = new TemplatePO();
         entity.setId(95103L);

@@ -29,7 +29,7 @@
 
 **Files:** None (verification only)
 
-- [ ] **Step 1: Run retirement CI slice**
+- [x] **Step 1: Run retirement CI slice**
 
 ```powershell
 cd D:\Work\99_Code\data-generator
@@ -40,7 +40,7 @@ cd D:\Work\99_Code\data-generator
 
 Expected: `BUILD SUCCESS`, 0 failures.
 
-- [ ] **Step 2: Run calcite + service smoke (broader gate before merge)**
+- [x] **Step 2: Run calcite + service smoke (broader gate before merge)**
 
 ```powershell
 .\mvnw-jdk25.ps1 -pl "data-generator-calcite,data-generator-service" -am test
@@ -48,7 +48,7 @@ Expected: `BUILD SUCCESS`, 0 failures.
 
 Expected: `BUILD SUCCESS`. Note: Testcontainers MySQL/Postgres tests skip when Docker unavailable—acceptable per `docs/testing-embedded-components.md`.
 
-- [ ] **Step 3: Record result in MR**
+- [x] **Step 3: Record result in MR**
 
 Add a line under **Test plan** in `docs/migration/MR-feature-4.0.md`:
 
@@ -65,7 +65,7 @@ Replace `YYYY-MM-DD` with actual run date.
 **Files:**
 - Modify: `docs/migration/MR-feature-4.0.md`
 
-- [ ] **Step 1: Add retirement section after Summary**
+- [x] **Step 1: Add retirement section after Summary**
 
 Insert after the Summary bullet list:
 
@@ -82,7 +82,7 @@ This MR **delivers retirement capabilities**; it does **not** complete productio
 **Do not merge-block on:** production promote checkbox, wave-freeze calendar dates, staging runbook execution.
 ```
 
-- [ ] **Step 2: Update Out of scope — remove stale items**
+- [x] **Step 2: Update Out of scope — remove stale items**
 
 Replace the "Out of scope" bullets that are now delivered:
 
@@ -96,7 +96,7 @@ Replace the "Out of scope" bullets that are now delivered:
 
 Remove lines claiming "Full explain/preview control plane" and "Official non-SQL transformer" as deferred—they are on the branch (control plane REST, `SpelTransformFactory`).
 
-- [ ] **Step 3: Extend API table**
+- [x] **Step 3: Extend API table**
 
 Add to the migration API table:
 
@@ -112,7 +112,7 @@ Add config note:
 | Config | `pci.data.generator.v1-execution.enabled` (default `true`; gates V1 task run when `false`) |
 ```
 
-- [ ] **Step 4: Update Test plan checkboxes**
+- [x] **Step 4: Update Test plan checkboxes**
 
 Change staging items to M2 and check M1:
 
@@ -122,7 +122,7 @@ Change staging items to M2 and check M1:
 - [ ] **M2** Staging trial: `v1-execution.enabled=false` after cohort promote
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/migration/MR-feature-4.0.md
@@ -138,7 +138,7 @@ Footer per repo policy: `AI-Assisted-by: Cursor`, `Co-authored-by: <git user.nam
 **Files:**
 - Modify: `docs/migration/staging-runbook.md`
 
-- [ ] **Step 1: Add front matter after title**
+- [x] **Step 1: Add front matter after title**
 
 After `# Staging migration runbook`, insert:
 
@@ -148,7 +148,7 @@ After `# Staging migration runbook`, insert:
 > **Prerequisite:** Complete `docs/migration/staging-readiness-checklist.md` before first staging sweep.
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add docs/migration/staging-runbook.md
@@ -162,7 +162,7 @@ git commit -m "docs(migration): mark staging runbook as M2-only gate"
 **Files:**
 - Create: `docs/migration/staging-readiness-checklist.md`
 
-- [ ] **Step 1: Create checklist file**
+- [x] **Step 1: Create checklist file**
 
 ```markdown
 # Staging readiness checklist (M2 unlock)
@@ -202,7 +202,7 @@ Complete before first staging migration sweep. Does **not** block `feature-4.0` 
 See `docs/migration/staging-runbook.md` and `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`.
 ```
 
-- [ ] **Step 2: Link from retirement-readiness**
+- [x] **Step 2: Link from retirement-readiness**
 
 In `docs/migration/retirement-readiness.md`, under the M1/M2 table, add:
 
@@ -210,7 +210,7 @@ In `docs/migration/retirement-readiness.md`, under the M1/M2 table, add:
 Staging prep: `docs/migration/staging-readiness-checklist.md`
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/migration/staging-readiness-checklist.md docs/migration/retirement-readiness.md
@@ -227,7 +227,7 @@ Skip this task for minimal merge package. Implement only if team wants ops safet
 - Modify: `data-generator-service/src/main/java/org/gensokyo/data/template/migration/MigrationPromoteService.java`
 - Modify: `data-generator-service/src/test/java/org/gensokyo/data/template/migration/MigrationPromoteServiceTests.java`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Add to `MigrationPromoteServiceTests.java`:
 
@@ -266,7 +266,7 @@ void promoteRejectsWhenInventoryRowExistsWithoutBusinessSignoff() throws Excepti
 }
 ```
 
-- [ ] **Step 2: Run test — expect FAIL**
+- [x] **Step 2: Run test — expect FAIL**
 
 ```powershell
 .\mvnw-jdk25.ps1 -pl data-generator-service `
@@ -274,7 +274,7 @@ void promoteRejectsWhenInventoryRowExistsWithoutBusinessSignoff() throws Excepti
   "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 
-- [ ] **Step 3: Implement guard in `rejectIfInventoryBlocksPromote`**
+- [x] **Step 3: Implement guard in `rejectIfInventoryBlocksPromote`**
 
 After COMPATIBILITY_ONLY/BLOCKED check, add:
 
@@ -286,9 +286,9 @@ if (!entry.isBusinessSignoffApproved()) {
 }
 ```
 
-- [ ] **Step 4: Run full `MigrationPromoteServiceTests` — expect PASS**
+- [x] **Step 4: Run full `MigrationPromoteServiceTests` — expect PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git commit -m "fix(migration): require business sign-off before promote when inventory row exists"
@@ -300,7 +300,7 @@ git commit -m "fix(migration): require business sign-off before promote when inv
 
 **Files:** `docs/migration/retirement-readiness.md`
 
-- [ ] **Step 1: Confirm M1 checkboxes honest**
+- [x] **Step 1: Confirm M1 checkboxes honest**
 
 Verify:
 
@@ -308,7 +308,7 @@ Verify:
 - P3 production promote: **unchecked** with M2 note
 - P4 staging/prod flag: **unchecked**
 
-- [ ] **Step 2: Push branch and open/update MR**
+- [x] **Step 2: Push branch and open/update MR**
 
 ```bash
 git push origin feature-4.0
@@ -319,7 +319,7 @@ MR description should link:
 - `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`
 - `docs/migration/MR-feature-4.0.md`
 
-- [ ] **Step 3: Commit any final doc nits**
+- [x] **Step 3: Commit any final doc nits**
 
 ```bash
 git commit -m "docs(migration): complete M1 merge gate documentation"
@@ -356,3 +356,4 @@ git commit -m "docs(migration): complete M1 merge gate documentation"
 | Date | Change |
 |------|--------|
 | 2026-05-21 | Initial plan from approved deferred-ops spec |
+| 2026-05-21 | Tasks 1–6 and optional Task 5 completed; MR reviewer checklist added |
