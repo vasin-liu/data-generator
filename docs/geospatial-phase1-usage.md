@@ -141,6 +141,7 @@ Built-in Calcite SQL helpers for WGS84 columns (not PostGIS `ST_*`):
 | Function | Args | Returns |
 |----------|------|---------|
 | `V2_GEO_DISTANCE_METERS` | `lat1, lon1, lat2, lon2` | Great-circle distance in meters |
+| `V2_GEO_WITHIN_RADIUS` | `lat, lon, centerLat, centerLon, radiusMeters` | `true` when point is within radius |
 
 ```yaml
 transforms:
@@ -149,7 +150,7 @@ transforms:
       SELECT lat, lon,
              V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) AS dist_m
       FROM geo_in
-      WHERE V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) < 5000
+      WHERE V2_GEO_WITHIN_RADIUS(lat, lon, 22.2, 113.2, 5000)
 ```
 
 See `docs/superpowers/specs/2026-05-21-geospatial-phase2c-design.md`.

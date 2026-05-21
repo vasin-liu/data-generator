@@ -40,4 +40,23 @@ class TemplateV2GeoSqlFunctionsTests {
         args.add(113.2);
         Assertions.assertNull(TemplateV2GeoSqlFunctions.distanceMeters(new TemplateV2SqlFunctionContext(args)));
     }
+
+    @Test
+    void withinRadiusIsTrueAtCenterAndFalseBeyondRadius() {
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.withinRadius(
+                new TemplateV2SqlFunctionContext(List.of(22.2, 113.2, 22.2, 113.2, 1))));
+        Assertions.assertFalse(TemplateV2GeoSqlFunctions.withinRadius(
+                new TemplateV2SqlFunctionContext(List.of(22.1, 113.1, 22.2, 113.2, 5_000))));
+    }
+
+    @Test
+    void withinRadiusReturnsNullWhenAnyArgumentNull() {
+        List<Object> args = new ArrayList<>();
+        args.add(22.1);
+        args.add(113.1);
+        args.add(22.2);
+        args.add(null);
+        args.add(5_000);
+        Assertions.assertNull(TemplateV2GeoSqlFunctions.withinRadius(new TemplateV2SqlFunctionContext(args)));
+    }
 }

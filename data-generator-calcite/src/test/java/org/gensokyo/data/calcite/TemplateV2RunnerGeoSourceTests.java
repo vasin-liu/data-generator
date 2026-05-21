@@ -59,7 +59,7 @@ class TemplateV2RunnerGeoSourceTests {
         transform.setSql("""
                 select lat, lon
                 from geo_in
-                where V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) < 5000
+                where V2_GEO_WITHIN_RADIUS(lat, lon, 22.2, 113.2, 5000)
                 """);
 
         TemplateV2VO template = template("geojson-distance-udf", Map.of("geo_in", source), transform);

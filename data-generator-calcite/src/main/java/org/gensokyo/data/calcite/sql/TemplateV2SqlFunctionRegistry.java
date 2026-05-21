@@ -269,7 +269,19 @@ public final class TemplateV2SqlFunctionRegistry {
                                 ),
                                 count -> count == 4
                         ),
-                        TemplateV2GeoSqlFunctions::distanceMeters)
+                        TemplateV2GeoSqlFunctions::distanceMeters),
+                new TemplateV2SqlFunction("V2_GEO_WITHIN_RADIUS", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC
+                                ),
+                                count -> count == 5
+                        ),
+                        TemplateV2GeoSqlFunctions::withinRadius)
         ));
     }
 

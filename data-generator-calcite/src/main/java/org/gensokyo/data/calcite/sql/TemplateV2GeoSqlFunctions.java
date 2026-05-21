@@ -38,4 +38,26 @@ public final class TemplateV2GeoSqlFunctions {
         double lon2 = context.decimalArgument(3).doubleValue();
         return GeoHaversine.distanceMeters(lat1, lon1, lat2, lon2);
     }
+
+    /**
+     * Whether a WGS84 point lies within a given radius (meters) of a center point.
+     *
+     * @param context SQL function arguments: lat, lon, centerLat, centerLon, radiusMeters
+     * @return {@code true} when distance &lt;= radius, {@code null} when any argument is null
+     * @throws IllegalArgumentException when {@code radiusMeters} is negative
+     */
+    public static Boolean withinRadius(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        double lat = context.decimalArgument(0).doubleValue();
+        double lon = context.decimalArgument(1).doubleValue();
+        double centerLat = context.decimalArgument(2).doubleValue();
+        double centerLon = context.decimalArgument(3).doubleValue();
+        double radiusMeters = context.decimalArgument(4).doubleValue();
+        if (radiusMeters < 0) {
+            throw new IllegalArgumentException("radiusMeters must be >= 0");
+        }
+        return GeoHaversine.distanceMeters(lat, lon, centerLat, centerLon) <= radiusMeters;
+    }
 }
