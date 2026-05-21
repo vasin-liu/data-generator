@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.geo.GeoOutputFormatKind;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistry;
@@ -13,6 +14,7 @@ import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.iterator.GeoIteratorVO;
+import org.gensokyo.data.model.v2.GeoJsonSourceOutputVO;
 import org.gensokyo.data.model.v2.GeoJsonSourceVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
@@ -68,6 +70,52 @@ class TemplateV2RunnerGeoSourceTests {
 
         Assertions.assertEquals(1, result.getRows().size());
         Assertions.assertEquals(22.2, ((Number) result.getRows().get(0).values().get("lat")).doubleValue(), 0.001);
+    }
+
+    @Test
+    void runsTemplateWithGeoJsonSourceAndPointInWktFilter() {
+        GeoJsonSourceVO source = new GeoJsonSourceVO();
+        source.setPath("classpath:geo/two_feature_collection.geojson");
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                select lat, lon
+                from geo_in
+                where V2_GEO_POINT_IN_WKT(lat, lon,
+                  'POLYGON((113.15 22.15, 113.25 22.15, 113.25 22.25, 113.15 22.25, 113.15 22.15))')
+                """);
+
+        TemplateV2VO template = template("geojson-point-in-wkt", Map.of("geo_in", source), transform);
+
+        TemplateV2RunResult result = runner(geoJsonRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals(22.2, ((Number) result.getRows().get(0).values().get("lat")).doubleValue(), 0.001);
+    }
+
+    @Test
+    void runsTemplateWithGeoJsonWktColumnsAndWktContains() {
+        GeoJsonSourceVO source = new GeoJsonSourceVO();
+        source.setPath("classpath:geo/two_feature_collection.geojson");
+        GeoJsonSourceOutputVO output = new GeoJsonSourceOutputVO();
+        output.setFormat(GeoOutputFormatKind.wkt);
+        source.setOutput(output);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                select geometry
+                from geo_wkt
+                where V2_GEO_WKT_CONTAINS(
+                  'POLYGON((113.15 22.15, 113.25 22.15, 113.25 22.25, 113.15 22.25, 113.15 22.15))',
+                  geometry)
+                """);
+
+        TemplateV2VO template = template("geojson-wkt-contains", Map.of("geo_wkt", source), transform);
+
+        TemplateV2RunResult result = runner(geoJsonRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertTrue(result.getRows().get(0).values().get("geometry").toString().contains("POINT"));
     }
 
     @Test

@@ -281,7 +281,29 @@ public final class TemplateV2SqlFunctionRegistry {
                                 ),
                                 count -> count == 5
                         ),
-                        TemplateV2GeoSqlFunctions::withinRadius)
+                        TemplateV2GeoSqlFunctions::withinRadius),
+                new TemplateV2SqlFunction("V2_GEO_WKT_INTERSECTS", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.CHARACTER),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::wktIntersects),
+                new TemplateV2SqlFunction("V2_GEO_WKT_CONTAINS", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.CHARACTER),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::wktContains),
+                new TemplateV2SqlFunction("V2_GEO_POINT_IN_WKT", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.CHARACTER
+                                ),
+                                count -> count == 3
+                        ),
+                        TemplateV2GeoSqlFunctions::pointInWkt)
         ));
     }
 

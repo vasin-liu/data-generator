@@ -142,6 +142,9 @@ Built-in Calcite SQL helpers for WGS84 columns (not PostGIS `ST_*`):
 |----------|------|---------|
 | `V2_GEO_DISTANCE_METERS` | `lat1, lon1, lat2, lon2` | Great-circle distance in meters |
 | `V2_GEO_WITHIN_RADIUS` | `lat, lon, centerLat, centerLon, radiusMeters` | `true` when point is within radius |
+| `V2_GEO_POINT_IN_WKT` | `lat, lon, areaWkt` | `true` when point lies in WKT region |
+| `V2_GEO_WKT_CONTAINS` | `outerWkt, innerWkt` | `true` when outer geometry contains inner |
+| `V2_GEO_WKT_INTERSECTS` | `wkt1, wkt2` | `true` when geometries intersect |
 
 ```yaml
 transforms:

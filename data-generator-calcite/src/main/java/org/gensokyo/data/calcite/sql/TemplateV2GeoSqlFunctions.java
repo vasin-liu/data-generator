@@ -7,6 +7,7 @@ package org.gensokyo.data.calcite.sql;
 
 import org.gensokyo.data.calcite.TemplateV2SqlFunctionContext;
 import org.gensokyo.data.geo.GeoHaversine;
+import org.gensokyo.data.geo.GeoWktPredicates;
 
 import java.util.Objects;
 
@@ -59,5 +60,46 @@ public final class TemplateV2GeoSqlFunctions {
             throw new IllegalArgumentException("radiusMeters must be >= 0");
         }
         return GeoHaversine.distanceMeters(lat, lon, centerLat, centerLon) <= radiusMeters;
+    }
+
+    /**
+     * Whether two WKT geometries intersect (JTS {@code intersects}).
+     *
+     * @param context SQL function arguments: wkt1, wkt2
+     * @return {@code true} when geometries intersect, {@code null} when any argument is null
+     */
+    public static Boolean wktIntersects(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoWktPredicates.intersects(context.stringArgument(0), context.stringArgument(1));
+    }
+
+    /**
+     * Whether the first WKT geometry contains the second (JTS {@code contains}).
+     *
+     * @param context SQL function arguments: outerWkt, innerWkt
+     * @return {@code true} when outer contains inner, {@code null} when any argument is null
+     */
+    public static Boolean wktContains(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoWktPredicates.contains(context.stringArgument(0), context.stringArgument(1));
+    }
+
+    /**
+     * Whether a WGS84 point lies inside a WKT region.
+     *
+     * @param context SQL function arguments: lat, lon, areaWkt
+     * @return {@code true} when the point is inside the region, {@code null} when any argument is null
+     */
+    public static Boolean pointInWkt(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        double lat = context.decimalArgument(0).doubleValue();
+        double lon = context.decimalArgument(1).doubleValue();
+        return GeoWktPredicates.pointInWkt(lat, lon, context.stringArgument(2));
     }
 }

@@ -21,6 +21,9 @@ import java.util.List;
  */
 class TemplateV2GeoSqlFunctionsTests {
 
+    private static final String BOX =
+            "POLYGON((113.15 22.15, 113.25 22.15, 113.25 22.25, 113.15 22.25, 113.15 22.15))";
+
     @Test
     void distanceMetersMatchesGeoHaversine() {
         double expected = GeoHaversine.distanceMeters(22.1, 113.1, 22.2, 113.2);
@@ -58,5 +61,21 @@ class TemplateV2GeoSqlFunctionsTests {
         args.add(null);
         args.add(5_000);
         Assertions.assertNull(TemplateV2GeoSqlFunctions.withinRadius(new TemplateV2SqlFunctionContext(args)));
+    }
+
+    @Test
+    void pointInWktDelegatesToGeoModule() {
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.pointInWkt(
+                new TemplateV2SqlFunctionContext(List.of(22.2, 113.2, BOX))));
+        Assertions.assertFalse(TemplateV2GeoSqlFunctions.pointInWkt(
+                new TemplateV2SqlFunctionContext(List.of(22.1, 113.1, BOX))));
+    }
+
+    @Test
+    void wktContainsAndIntersectsDelegateToGeoModule() {
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.wktContains(
+                new TemplateV2SqlFunctionContext(List.of(BOX, "POINT(113.2 22.2)"))));
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.wktIntersects(
+                new TemplateV2SqlFunctionContext(List.of("POINT(113.2 22.2)", "POINT(113.2 22.2)"))));
     }
 }
