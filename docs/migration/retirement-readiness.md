@@ -29,7 +29,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Sign-off per scenario family: `multi_source` (Wave 2) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `parking/11` H2 dual-run
 - [x] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
   - [x] `regression-v1-with-pause` — PAUSE retained on V1; excluded from promote/sign-off cohort
-- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (staging DB catalog; regression + builtin evidence only in CI)
+- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (staging DB catalog; CI simulates promote via `StagingSimulatedPromoteWorkflowTests`)
 
 ## Evidence samples
 
@@ -40,6 +40,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 | regression-v1-query-lookup | `docs/migration/reports/sample-regression-v1-query-lookup.md` |
 | builtin-demo-28 (see `wave-freeze-schedule.md`) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 | builtin-tocc-parking-11 (H2-adapted) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
+| staging-sim-synthetic / staging-sim-jdbc | `StagingSimulatedPromoteWorkflowTests` (refresh → compare → signoff → promote) |
 
 ## P4 — Runtime cutover
 
