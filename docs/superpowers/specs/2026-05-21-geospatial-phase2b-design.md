@@ -9,7 +9,7 @@
 | Author | Gensokyo |
 | Depends on | Phase 1 (`data-generator-geo`, GEO iterator, SpEL) |
 | **Phase 2B scope** | **B (partial)** — read real GeoJSON files as Template V2 `RowSource` |
-| Deferred | Arbitrary spatial SQL in transforms, Calcite spatial UDFs (Phase C) |
+| Deferred | Arbitrary spatial SQL in transforms; advanced geometry UDFs (Phase C — see phase 2c spec) |
 
 ## Problem statement
 

@@ -134,9 +134,30 @@ transforms:
 
 Requires **`executionPolicy.mode: IN_MEMORY`** (default) so sources are materialized before SQL. See `docs/superpowers/specs/2026-05-21-geospatial-phase2d-design.md`.
 
+## Phase 2C — geo SQL functions (in-memory lat/lon)
+
+Built-in Calcite SQL helpers for WGS84 columns (not PostGIS `ST_*`):
+
+| Function | Args | Returns |
+|----------|------|---------|
+| `V2_GEO_DISTANCE_METERS` | `lat1, lon1, lat2, lon2` | Great-circle distance in meters |
+
+```yaml
+transforms:
+  - type: SQL
+    sql: |
+      SELECT lat, lon,
+             V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) AS dist_m
+      FROM geo_in
+      WHERE V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) < 5000
+```
+
+See `docs/superpowers/specs/2026-05-21-geospatial-phase2c-design.md`.
+
 ## Related
 
 - Design: `docs/superpowers/specs/2026-05-20-geospatial-phase1-design.md`
 - Plan: `docs/superpowers/plans/2026-05-20-geospatial-phase1.md`
 - Phase 2B: `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`
 - Phase 2D: `docs/superpowers/specs/2026-05-21-geospatial-phase2d-design.md`
+- Phase 2C: `docs/superpowers/specs/2026-05-21-geospatial-phase2c-design.md`

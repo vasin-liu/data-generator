@@ -258,7 +258,18 @@ public final class TemplateV2SqlFunctionRegistry {
                                 context.stringArgument(1),
                                 context.argument(2),
                                 context.stringArgument(3)
-                        ))
+                        )),
+                new TemplateV2SqlFunction("V2_GEO_DISTANCE_METERS", ReturnTypes.DOUBLE_NULLABLE,
+                        OperandTypes.family(
+                                List.of(
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC
+                                ),
+                                count -> count == 4
+                        ),
+                        TemplateV2GeoSqlFunctions::distanceMeters)
         ));
     }
 

@@ -51,6 +51,26 @@ class TemplateV2RunnerGeoSourceTests {
     }
 
     @Test
+    void runsTemplateWithGeoJsonSourceAndGeoDistanceUdf() {
+        GeoJsonSourceVO source = new GeoJsonSourceVO();
+        source.setPath("classpath:geo/two_feature_collection.geojson");
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                select lat, lon
+                from geo_in
+                where V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) < 5000
+                """);
+
+        TemplateV2VO template = template("geojson-distance-udf", Map.of("geo_in", source), transform);
+
+        TemplateV2RunResult result = runner(geoJsonRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertEquals(22.2, ((Number) result.getRows().get(0).values().get("lat")).doubleValue(), 0.001);
+    }
+
+    @Test
     void runsTemplateWithGeoIteratorSourceAndSqlProjection() {
         GeoIteratorVO geo = new GeoIteratorVO();
         geo.setType("GEO");
