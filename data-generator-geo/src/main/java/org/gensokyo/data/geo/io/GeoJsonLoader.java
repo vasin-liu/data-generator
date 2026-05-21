@@ -70,6 +70,29 @@ public final class GeoJsonLoader {
     }
 
     /**
+     * Parses a GeoJSON geometry object, or a {@code Feature} with a {@code geometry} field.
+     *
+     * @param geoJson geometry or feature JSON text
+     * @return JTS geometry (WGS84: x=longitude, y=latitude)
+     * @throws IllegalArgumentException when JSON is blank or invalid
+     */
+    public static Geometry parseGeometryJson(String geoJson) {
+        if (geoJson == null || geoJson.isBlank()) {
+            throw new IllegalArgumentException("GeoJSON must not be blank");
+        }
+        JsonNode root;
+        try {
+            root = MAPPER.readTree(geoJson.strip());
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Invalid GeoJSON: " + geoJson, e);
+        }
+        if (root.has("geometry")) {
+            return parseGeometry(requireNode(root.get("geometry"), "Feature geometry is missing"));
+        }
+        return parseGeometry(root);
+    }
+
+    /**
      * Loads every {@code Feature} from a GeoJSON root {@code Feature} or {@code FeatureCollection}.
      *
      * @param location classpath or filesystem location understood by {@link GeoResourceResolver}

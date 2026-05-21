@@ -7,6 +7,7 @@ package org.gensokyo.data.calcite.sql;
 
 import org.gensokyo.data.calcite.TemplateV2SqlFunctionContext;
 import org.gensokyo.data.geo.GeoHaversine;
+import org.gensokyo.data.geo.GeoJsonPredicates;
 import org.gensokyo.data.geo.GeoWktPredicates;
 
 import java.util.Objects;
@@ -101,5 +102,46 @@ public final class TemplateV2GeoSqlFunctions {
         double lat = context.decimalArgument(0).doubleValue();
         double lon = context.decimalArgument(1).doubleValue();
         return GeoWktPredicates.pointInWkt(lat, lon, context.stringArgument(2));
+    }
+
+    /**
+     * Whether two GeoJSON geometry strings intersect.
+     *
+     * @param context SQL function arguments: geoJson1, geoJson2
+     * @return {@code true} when geometries intersect, {@code null} when any argument is null
+     */
+    public static Boolean geoJsonIntersects(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoJsonPredicates.intersects(context.stringArgument(0), context.stringArgument(1));
+    }
+
+    /**
+     * Whether the first GeoJSON geometry contains the second.
+     *
+     * @param context SQL function arguments: outerGeoJson, innerGeoJson
+     * @return {@code true} when outer contains inner, {@code null} when any argument is null
+     */
+    public static Boolean geoJsonContains(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoJsonPredicates.contains(context.stringArgument(0), context.stringArgument(1));
+    }
+
+    /**
+     * Whether a WGS84 point lies inside a GeoJSON region geometry.
+     *
+     * @param context SQL function arguments: lat, lon, areaGeoJson
+     * @return {@code true} when the point is inside the region, {@code null} when any argument is null
+     */
+    public static Boolean pointInGeoJson(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        double lat = context.decimalArgument(0).doubleValue();
+        double lon = context.decimalArgument(1).doubleValue();
+        return GeoJsonPredicates.pointInGeoJson(lat, lon, context.stringArgument(2));
     }
 }

@@ -303,7 +303,29 @@ public final class TemplateV2SqlFunctionRegistry {
                                 ),
                                 count -> count == 3
                         ),
-                        TemplateV2GeoSqlFunctions::pointInWkt)
+                        TemplateV2GeoSqlFunctions::pointInWkt),
+                new TemplateV2SqlFunction("V2_GEO_GEOJSON_INTERSECTS", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.CHARACTER),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::geoJsonIntersects),
+                new TemplateV2SqlFunction("V2_GEO_GEOJSON_CONTAINS", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.CHARACTER),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::geoJsonContains),
+                new TemplateV2SqlFunction("V2_GEO_POINT_IN_GEOJSON", ReturnTypes.BOOLEAN_NULLABLE,
+                        OperandTypes.family(
+                                List.of(
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.NUMERIC,
+                                        SqlTypeFamily.CHARACTER
+                                ),
+                                count -> count == 3
+                        ),
+                        TemplateV2GeoSqlFunctions::pointInGeoJson)
         ));
     }
 

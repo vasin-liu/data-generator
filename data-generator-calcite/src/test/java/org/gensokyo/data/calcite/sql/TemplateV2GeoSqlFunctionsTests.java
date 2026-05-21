@@ -21,8 +21,12 @@ import java.util.List;
  */
 class TemplateV2GeoSqlFunctionsTests {
 
-    private static final String BOX =
+    private static final String BOX_WKT =
             "POLYGON((113.15 22.15, 113.25 22.15, 113.25 22.25, 113.15 22.25, 113.15 22.15))";
+
+    private static final String BOX_GEOJSON = """
+            {"type":"Polygon","coordinates":[[[113.15,22.15],[113.25,22.15],[113.25,22.25],[113.15,22.25],[113.15,22.15]]]}
+            """;
 
     @Test
     void distanceMetersMatchesGeoHaversine() {
@@ -66,16 +70,31 @@ class TemplateV2GeoSqlFunctionsTests {
     @Test
     void pointInWktDelegatesToGeoModule() {
         Assertions.assertTrue(TemplateV2GeoSqlFunctions.pointInWkt(
-                new TemplateV2SqlFunctionContext(List.of(22.2, 113.2, BOX))));
+                new TemplateV2SqlFunctionContext(List.of(22.2, 113.2, BOX_WKT))));
         Assertions.assertFalse(TemplateV2GeoSqlFunctions.pointInWkt(
-                new TemplateV2SqlFunctionContext(List.of(22.1, 113.1, BOX))));
+                new TemplateV2SqlFunctionContext(List.of(22.1, 113.1, BOX_WKT))));
     }
 
     @Test
     void wktContainsAndIntersectsDelegateToGeoModule() {
         Assertions.assertTrue(TemplateV2GeoSqlFunctions.wktContains(
-                new TemplateV2SqlFunctionContext(List.of(BOX, "POINT(113.2 22.2)"))));
+                new TemplateV2SqlFunctionContext(List.of(BOX_WKT, "POINT(113.2 22.2)"))));
         Assertions.assertTrue(TemplateV2GeoSqlFunctions.wktIntersects(
                 new TemplateV2SqlFunctionContext(List.of("POINT(113.2 22.2)", "POINT(113.2 22.2)"))));
+    }
+
+    @Test
+    void pointInGeoJsonDelegatesToGeoModule() {
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.pointInGeoJson(
+                new TemplateV2SqlFunctionContext(List.of(22.2, 113.2, BOX_GEOJSON))));
+        Assertions.assertFalse(TemplateV2GeoSqlFunctions.pointInGeoJson(
+                new TemplateV2SqlFunctionContext(List.of(22.1, 113.1, BOX_GEOJSON))));
+    }
+
+    @Test
+    void geoJsonContainsDelegatesToGeoModule() {
+        String inner = "{\"type\":\"Point\",\"coordinates\":[113.2,22.2]}";
+        Assertions.assertTrue(TemplateV2GeoSqlFunctions.geoJsonContains(
+                new TemplateV2SqlFunctionContext(List.of(BOX_GEOJSON, inner))));
     }
 }

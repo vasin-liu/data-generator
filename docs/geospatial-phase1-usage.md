@@ -145,6 +145,11 @@ Built-in Calcite SQL helpers for WGS84 columns (not PostGIS `ST_*`):
 | `V2_GEO_POINT_IN_WKT` | `lat, lon, areaWkt` | `true` when point lies in WKT region |
 | `V2_GEO_WKT_CONTAINS` | `outerWkt, innerWkt` | `true` when outer geometry contains inner |
 | `V2_GEO_WKT_INTERSECTS` | `wkt1, wkt2` | `true` when geometries intersect |
+| `V2_GEO_POINT_IN_GEOJSON` | `lat, lon, areaGeoJson` | `true` when point lies in GeoJSON geometry |
+| `V2_GEO_GEOJSON_CONTAINS` | `outerGeoJson, innerGeoJson` | `true` when outer contains inner |
+| `V2_GEO_GEOJSON_INTERSECTS` | `geoJson1, geoJson2` | `true` when geometries intersect |
+
+GeoJSON arguments accept a **geometry object** (`{"type":"Polygon",...}`) or a **Feature** with a `geometry` field. Use with `output.format: geojson` so rows expose a `geometry` column.
 
 ```yaml
 transforms:

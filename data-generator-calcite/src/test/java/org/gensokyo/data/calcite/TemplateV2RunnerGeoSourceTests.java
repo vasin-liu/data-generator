@@ -119,6 +119,31 @@ class TemplateV2RunnerGeoSourceTests {
     }
 
     @Test
+    void runsTemplateWithGeoJsonGeometryColumnAndGeoJsonContains() {
+        GeoJsonSourceVO source = new GeoJsonSourceVO();
+        source.setPath("classpath:geo/two_feature_collection.geojson");
+        GeoJsonSourceOutputVO output = new GeoJsonSourceOutputVO();
+        output.setFormat(GeoOutputFormatKind.geojson);
+        source.setOutput(output);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                select geometry
+                from geo_gj
+                where V2_GEO_GEOJSON_CONTAINS(
+                  '{"type":"Polygon","coordinates":[[[113.15,22.15],[113.25,22.15],[113.25,22.25],[113.15,22.25],[113.15,22.15]]]}',
+                  geometry)
+                """);
+
+        TemplateV2VO template = template("geojson-contains-udf", Map.of("geo_gj", source), transform);
+
+        TemplateV2RunResult result = runner(geoJsonRegistry()).run(template);
+
+        Assertions.assertEquals(1, result.getRows().size());
+        Assertions.assertTrue(result.getRows().get(0).values().get("geometry").toString().contains("Point"));
+    }
+
+    @Test
     void runsTemplateWithGeoIteratorSourceAndSqlProjection() {
         GeoIteratorVO geo = new GeoIteratorVO();
         geo.setType("GEO");
