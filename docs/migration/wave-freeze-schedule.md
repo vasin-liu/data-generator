@@ -6,10 +6,12 @@ Proposed V1 authoring freeze dates for the retirement program. **Finalize dates 
 
 | Template id | Scenario family | Classification | Compare report |
 |-------------|-----------------|----------------|----------------|
-| _pending_ | synthetic | _run staging workflow_ | _docs/migration/reports/_ |
-| _pending_ | multi_source / JDBC | _run staging workflow_ | _docs/migration/reports/_ |
+| `builtin-demo-28-常量迭代器重复多次样例` (`demo/28_常量迭代器重复多次样例.yaml`) | synthetic | ADAPTED / APPROXIMATE / BLOCKED (dual-run) | temp dir via `BuiltinClasspathTemplateMigrationWorkflowTests` |
+| `builtin-tocc-parking-11_parking_online_space_record` (`tocc/parking/11_parking_online_space_record.yaml`, H2-adapted) | multi_source | ADAPTED / EXACT / APPROXIMATE (dual-run) | temp dir via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 
-**Commands:** see `docs/migration/staging-runbook.md` and `scripts/migration-staging.ps1 -Action workflow`.
+**Automated (no live server):** `BuiltinClasspathTemplateRegressionTests` + `BuiltinClasspathTemplateMigrationWorkflowTests` scan all `classpath:template/**/*.yaml` (~61 files).
+
+**Manual staging (optional):** see `docs/migration/staging-runbook.md` and `scripts/migration-staging.ps1 -Action workflow`.
 
 ## Proposed freeze waves
 
