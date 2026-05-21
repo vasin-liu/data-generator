@@ -33,7 +33,7 @@ import org.gensokyo.data.calcite.sink.CsvSinkFactory;
 import org.gensokyo.data.calcite.sink.JsonSinkFactory;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
-import org.gensokyo.data.calcite.source.JsonSourceFactory;
+import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
@@ -86,6 +86,12 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "csvSourceFactory")
     public V2SourceFactory csvSourceFactory() {
         return new CsvSourceFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "geoJsonSourceFactory")
+    public V2SourceFactory geoJsonSourceFactory() {
+        return new GeoJsonSourceFactory();
     }
 
     @Bean

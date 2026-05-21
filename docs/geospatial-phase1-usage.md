@@ -72,7 +72,30 @@ For `MultiLineString` features, the **longest** line component is sampled.
 
 Trajectory / line sampling is **not** exposed in SpEL (iterator only).
 
+## Phase 2B — read GeoJSON files (`type: GEOJSON`)
+
+Reads **real** GeoJSON `Feature` / `FeatureCollection` files (not synthetic). Same output knobs as the GEO iterator.
+
+```yaml
+sources:
+  - name: poi_layer
+    type: GEOJSON
+    path: classpath:geo/two_feature_collection.geojson
+    maxRows: 500
+    output:
+      format: columns        # columns | geojson | wkt
+      includeProperties: true
+transforms:
+  - type: SQL
+    sql: SELECT lat, lon, prop.id FROM poi_layer
+```
+
+- **`path`**: `classpath:` or filesystem, resolved by `GeoResourceResolver`.
+- **`columns`**: Point features use coordinates; polygons/lines use an interior representative point (`getInteriorPoint()`).
+- **PostGIS / JDBC spatial sources** are not in this slice; see `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`.
+
 ## Related
 
 - Design: `docs/superpowers/specs/2026-05-20-geospatial-phase1-design.md`
 - Plan: `docs/superpowers/plans/2026-05-20-geospatial-phase1.md`
+- Phase 2B: `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`

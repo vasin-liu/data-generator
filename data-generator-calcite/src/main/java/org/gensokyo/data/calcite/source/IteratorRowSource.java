@@ -9,8 +9,6 @@ import org.gensokyo.data.calcite.*;
 import org.gensokyo.data.calcite.parser.*;
 
 import org.gensokyo.data.geo.GeoGenerationRequest;
-import org.gensokyo.data.geo.GeoOutputFormatKind;
-import org.gensokyo.data.geo.format.GeoValueFormatter;
 import org.gensokyo.data.geo.GeoSyntheticGenerator;
 import org.gensokyo.data.iterator.ConstantIteratorVO;
 import org.gensokyo.data.iterator.DateTimeIteratorVO;
@@ -59,7 +57,7 @@ public class IteratorRowSource implements RowSource {
                 GeoGenerationRequest request = GeoIteratorRequestMapper.toRequest(iterator);
                 try {
                     List<Map<String, Object>> generated = GeoSyntheticGenerator.generateRows(request);
-                    this.schema = geoSchema(request, generated);
+                    this.schema = GeoRowSchemaSupport.schemaForGeoRows(request.getOutputFormat(), request.getColumnNames(), generated);
                     this.rows = materializeGeo(generated);
                 } catch (IOException e) {
                     throw new IllegalArgumentException("Failed to materialize GEO iterator for source [" + name + "]", e);
@@ -162,30 +160,5 @@ public class IteratorRowSource implements RowSource {
             rows.add(new Row(new LinkedHashMap<>(values)));
         }
         return rows;
-    }
-
-    private static RowSchema geoSchema(GeoGenerationRequest request, List<Map<String, Object>> generated) {
-        List<ColumnDef> columns = new ArrayList<>();
-        if (generated.isEmpty()) {
-            for (String column : GeoValueFormatter.columnNames(request.getOutputFormat(), request.getColumnNames())) {
-                String sqlType = request.getOutputFormat() == GeoOutputFormatKind.columns ? "DOUBLE" : "VARCHAR";
-                columns.add(new ColumnDef(column, sqlType, false));
-            }
-        } else {
-            for (String key : generated.get(0).keySet()) {
-                Object value = generated.get(0).get(key);
-                boolean nullable = key.startsWith("prop.");
-                String sqlType;
-                if (value instanceof Number) {
-                    sqlType = "DOUBLE";
-                } else {
-                    sqlType = "VARCHAR";
-                }
-                columns.add(new ColumnDef(key, sqlType, nullable));
-            }
-        }
-        RowSchema schema = new RowSchema();
-        schema.setColumns(columns);
-        return schema;
     }
 }

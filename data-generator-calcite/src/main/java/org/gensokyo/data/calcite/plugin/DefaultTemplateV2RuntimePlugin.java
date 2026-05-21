@@ -20,6 +20,7 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .capability(TemplateV2PluginCapability.source("csv"))
                 .capability(TemplateV2PluginCapability.source("excel"))
                 .capability(TemplateV2PluginCapability.source("json"))
+                .capability(TemplateV2PluginCapability.source("geojson"))
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.sink("console"))
                 .capability(TemplateV2PluginCapability.sink("csv"))
@@ -35,7 +36,8 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 new AiSourceFactory(),
                 new CsvSourceFactory(),
                 new ExcelSourceFactory(),
-                new JsonSourceFactory()
+                new JsonSourceFactory(),
+                new GeoJsonSourceFactory()
         );
     }
 

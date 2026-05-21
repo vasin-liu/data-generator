@@ -19,7 +19,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -64,6 +66,44 @@ public final class GeoJsonLoader {
             throws IOException {
         JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
         JsonNode featureNode = extractFeatureNode(root, featureIndex, randomFeature, seed);
+        return parseGeoFeature(featureNode);
+    }
+
+    /**
+     * Loads every {@code Feature} from a GeoJSON root {@code Feature} or {@code FeatureCollection}.
+     *
+     * @param location classpath or filesystem location understood by {@link GeoResourceResolver}
+     * @return features in GeoJSON array order
+     * @throws IOException when the resource cannot be read
+     */
+    public static List<GeoFeature> loadFeatureCollection(String location) throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        JsonNode typeNode = root.get("type");
+        if (typeNode == null || !typeNode.isString()) {
+            throw new IllegalArgumentException("Invalid GeoJSON format: missing 'type' field");
+        }
+        return switch (typeNode.asString()) {
+            case "Feature" -> List.of(parseGeoFeature(root));
+            case "FeatureCollection" -> {
+                JsonNode features = requireNode(root.get("features"), "FeatureCollection features are missing");
+                List<GeoFeature> list = new ArrayList<>(features.size());
+                // Preserve FeatureCollection index order when iterating Jackson array nodes.
+                for (int i = 0; i < features.size(); i++) {
+                    list.add(parseGeoFeature(features.get(i)));
+                }
+                yield list;
+            }
+            default -> throw new IllegalArgumentException(
+                    "Expected Feature or FeatureCollection root for loadFeatureCollection, got: " + typeNode.asString());
+        };
+    }
+
+    private static GeoFeature parseGeoFeature(JsonNode featureNode) {
+        JsonNode typeNode = featureNode.get("type");
+        if (typeNode == null || !typeNode.isString() || !"Feature".equals(typeNode.asString())) {
+            throw new IllegalArgumentException("GeoJSON Feature expected, got type: "
+                    + (typeNode == null ? "null" : typeNode.asString()));
+        }
         Geometry geometry = parseGeometry(requireNode(featureNode.get("geometry"), "Feature geometry is missing"));
         Map<String, Object> properties = parseProperties(featureNode.get("properties"));
         return new GeoFeature(geometry, properties);

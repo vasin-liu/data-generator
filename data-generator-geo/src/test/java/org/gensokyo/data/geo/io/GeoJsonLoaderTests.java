@@ -12,6 +12,7 @@ import org.locationtech.jts.geom.Point;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Tests for {@link GeoJsonLoader}.
@@ -35,5 +36,12 @@ class GeoJsonLoaderTests {
     void classpathResolverFailsOnMissingResource() {
         Assertions.assertThrows(IllegalArgumentException.class, () ->
                 GeoResourceResolver.readUtf8("classpath:missing-no-such-resource-789.json"));
+    }
+
+    @Test
+    void loadFeatureCollectionFromClasspath() throws Exception {
+        List<GeoFeature> features = GeoJsonLoader.loadFeatureCollection("classpath:geo/two_feature_collection.geojson");
+        Assertions.assertEquals(2, features.size());
+        Assertions.assertInstanceOf(Point.class, features.get(0).geometry());
     }
 }
