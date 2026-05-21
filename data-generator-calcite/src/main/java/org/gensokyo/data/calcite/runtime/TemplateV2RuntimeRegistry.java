@@ -31,7 +31,7 @@ public class TemplateV2RuntimeRegistry {
     }
 
     /**
-     * Creates a row source, passing execution policy to factories that support it (e.g. {@link QuerySourceFactory}).
+     * Creates a row source, passing execution policy to JDBC factories that support chunked reads.
      *
      * @param name   logical source name
      * @param source source configuration
@@ -45,6 +45,8 @@ public class TemplateV2RuntimeRegistry {
                     RowSource rowSource;
                     if (policy != null && factory instanceof QuerySourceFactory queryFactory) {
                         rowSource = queryFactory.create(name, source, policy);
+                    } else if (policy != null && factory instanceof PostGisQuerySourceFactory postGisFactory) {
+                        rowSource = postGisFactory.create(name, source, policy);
                     } else {
                         rowSource = factory.create(name, source);
                     }

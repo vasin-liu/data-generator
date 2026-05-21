@@ -8,7 +8,9 @@ package org.gensokyo.data.calcite.source;
 import org.gensokyo.data.calcite.RowSource;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.V2SourceFactory;
+import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.model.v2.PostGisQuerySourceVO;
+import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -44,18 +46,32 @@ public class PostGisQuerySourceFactory implements V2SourceFactory {
 
     @Override
     public RowSource create(String name, SourceVO source) {
-        PostGisQuerySourceVO postGisSource = (PostGisQuerySourceVO) source;
-        String effectiveDataSourceId = runtimeJdbcEndpointResolver.resolveSourceDataSourceId(wrapAsQuery(postGisSource));
-        if (effectiveDataSourceId != null && !effectiveDataSourceId.isBlank()) {
-            postGisSource.setDataSourceId(effectiveDataSourceId);
-        }
-        return new PostGisQueryRowSource(name, postGisSource, jdbcTemplate);
+        return create(name, source, null);
     }
 
-    private static org.gensokyo.data.model.v2.QuerySourceVO wrapAsQuery(PostGisQuerySourceVO source) {
-        org.gensokyo.data.model.v2.QuerySourceVO query = new org.gensokyo.data.model.v2.QuerySourceVO();
-        query.setDataSourceId(source.getDataSourceId());
-        query.setDataSource(source.getDataSource());
-        return query;
+    /**
+     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED}.
+     *
+     * @param name   logical source name
+     * @param source PostGIS source configuration
+     * @param policy optional effective execution policy
+     * @return in-memory or chunked JDBC row source
+     */
+    public RowSource create(String name, SourceVO source, EffectiveExecutionPolicy policy) {
+        PostGisQuerySourceVO postGisSource = resolveEndpoint((PostGisQuerySourceVO) source);
+        QuerySourceVO query = PostGisQuerySourceSupport.toQuerySource(postGisSource);
+        if (policy != null && "CHUNKED".equals(policy.mode())) {
+            return new ChunkedQueryRowSource(name, query, jdbcTemplate, policy.sourceChunkSize());
+        }
+        return new QueryRowSource(name, query, jdbcTemplate);
+    }
+
+    private PostGisQuerySourceVO resolveEndpoint(PostGisQuerySourceVO source) {
+        String effectiveDataSourceId = runtimeJdbcEndpointResolver.resolveSourceDataSourceId(
+                PostGisQuerySourceSupport.endpointLookup(source));
+        if (effectiveDataSourceId != null && !effectiveDataSourceId.isBlank()) {
+            source.setDataSourceId(effectiveDataSourceId);
+        }
+        return source;
     }
 }

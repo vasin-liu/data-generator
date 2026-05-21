@@ -112,7 +112,9 @@ transforms:
     sql: SELECT lat, lon, prop.id FROM sites_in
 ```
 
-For ad-hoc spatial SQL or chunked export, use **`type: QUERY`** with `ST_AsText(geom)` in your SQL instead.
+For ad-hoc spatial SQL, use **`type: QUERY`** with `ST_AsText(geom)` in your SQL.
+
+**Chunked export:** set `executionPolicy.mode: CHUNKED` on the template; `POSTGIS` sources use the same JDBC chunk reader as `QUERY` (generated `ST_*` SQL).
 
 See `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`.
 

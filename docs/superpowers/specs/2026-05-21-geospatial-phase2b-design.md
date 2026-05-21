@@ -9,7 +9,7 @@
 | Author | Gensokyo |
 | Depends on | Phase 1 (`data-generator-geo`, GEO iterator, SpEL) |
 | **Phase 2B scope** | **B (partial)** — read real GeoJSON files as Template V2 `RowSource` |
-| Deferred | Chunked PostGIS reads, arbitrary spatial SQL, Calcite spatial UDFs (Phase C) |
+| Deferred | Arbitrary spatial SQL in transforms, Calcite spatial UDFs (Phase C) |
 
 ## Problem statement
 
@@ -30,9 +30,12 @@ Phase 1 only **synthesizes** locations (boundary points, line samples). Operator
 3. Delegate execution to existing **`QueryRowSource`** (finite JDBC materialization).
 4. Register factory on **`JdbcTemplateTemplateV2RuntimePluginProvider`** (requires JDBC + PostGIS extension).
 
-## Non-goals (remaining)
+## Goals (Phase 2B — chunked PostGIS)
 
-- Chunked streaming PostGIS source (use `QUERY` + `CHUNKED` policy for raw SQL today)
+1. **`PostGisQuerySourceFactory.create(..., EffectiveExecutionPolicy)`** returns `ChunkedQueryRowSource` when mode is `CHUNKED`.
+2. Registry passes execution policy to PostGIS factory (same as `QuerySourceFactory`).
+
+## Non-goals (remaining)
 - Streaming / NDJSON GeoJSON
 - CRS reprojection
 - Shapefile / GeoPackage
@@ -82,3 +85,4 @@ transforms:
 |------|--------|
 | 2026-05-21 | Initial Phase 2B file-source design + implementation |
 | 2026-05-21 | PostGIS table source (`POSTGIS`) via generated SQL + QueryRowSource |
+| 2026-05-21 | CHUNKED execution for POSTGIS via ChunkedQueryRowSource |

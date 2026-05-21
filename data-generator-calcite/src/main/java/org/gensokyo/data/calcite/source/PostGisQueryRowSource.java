@@ -7,7 +7,6 @@ package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.RowSource;
 import org.gensokyo.data.model.v2.PostGisQuerySourceVO;
-import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -32,13 +31,7 @@ public class PostGisQueryRowSource implements RowSource {
      * @param jdbcTemplate JDBC access to the PostGIS-enabled database
      */
     public PostGisQueryRowSource(String name, PostGisQuerySourceVO source, NamedParameterJdbcTemplate jdbcTemplate) {
-        QuerySourceVO query = new QuerySourceVO();
-        query.setDataSourceId(source.getDataSourceId());
-        query.setDataSource(source.getDataSource());
-        query.setSql(PostGisQuerySqlBuilder.buildSelect(source));
-        query.setMaxRows(source.getMaxRows());
-        query.setSchema(source.getSchema());
-        this.delegate = new QueryRowSource(name, query, jdbcTemplate);
+        this.delegate = new QueryRowSource(name, PostGisQuerySourceSupport.toQuerySource(source), jdbcTemplate);
     }
 
     @Override
