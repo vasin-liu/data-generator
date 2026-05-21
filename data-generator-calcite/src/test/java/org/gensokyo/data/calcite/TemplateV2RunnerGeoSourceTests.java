@@ -144,6 +144,29 @@ class TemplateV2RunnerGeoSourceTests {
     }
 
     @Test
+    void runsTemplateWithWktBufferAndPointInWktFilter() {
+        GeoJsonSourceVO source = new GeoJsonSourceVO();
+        source.setPath("classpath:geo/two_feature_collection.geojson");
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                select lat, lon
+                from geo_in
+                where V2_GEO_POINT_IN_WKT(
+                  lat,
+                  lon,
+                  V2_GEO_WKT_BUFFER('POINT(113.2 22.2)', 20000))
+                """);
+
+        TemplateV2VO template = template("geojson-wkt-buffer", Map.of("geo_in", source), transform);
+
+        TemplateV2RunResult result = runner(geoJsonRegistry()).run(template);
+
+        // ~15 km between fixture points; 20 km buffer around (22.2, 113.2) should include both.
+        Assertions.assertEquals(2, result.getRows().size());
+    }
+
+    @Test
     void runsTemplateWithGeoIteratorSourceAndSqlProjection() {
         GeoIteratorVO geo = new GeoIteratorVO();
         geo.setType("GEO");

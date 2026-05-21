@@ -6,6 +6,7 @@
 package org.gensokyo.data.calcite.sql;
 
 import org.gensokyo.data.calcite.TemplateV2SqlFunctionContext;
+import org.gensokyo.data.geo.GeoBuffer;
 import org.gensokyo.data.geo.GeoHaversine;
 import org.gensokyo.data.geo.GeoJsonPredicates;
 import org.gensokyo.data.geo.GeoWktPredicates;
@@ -143,5 +144,31 @@ public final class TemplateV2GeoSqlFunctions {
         double lat = context.decimalArgument(0).doubleValue();
         double lon = context.decimalArgument(1).doubleValue();
         return GeoJsonPredicates.pointInGeoJson(lat, lon, context.stringArgument(2));
+    }
+
+    /**
+     * Buffers a WKT geometry by approximately {@code distanceMeters} (WGS84 approximation).
+     *
+     * @param context SQL function arguments: wkt, distanceMeters
+     * @return buffered geometry WKT, or {@code null} when any argument is null
+     */
+    public static String wktBuffer(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoBuffer.bufferWkt(context.stringArgument(0), context.decimalArgument(1).doubleValue());
+    }
+
+    /**
+     * Buffers a GeoJSON geometry by approximately {@code distanceMeters} (WGS84 approximation).
+     *
+     * @param context SQL function arguments: geoJson, distanceMeters
+     * @return buffered geometry GeoJSON text, or {@code null} when any argument is null
+     */
+    public static String geoJsonBuffer(TemplateV2SqlFunctionContext context) {
+        if (context.arguments().stream().anyMatch(Objects::isNull)) {
+            return null;
+        }
+        return GeoBuffer.bufferGeoJson(context.stringArgument(0), context.decimalArgument(1).doubleValue());
     }
 }

@@ -151,6 +151,23 @@ Built-in Calcite SQL helpers for WGS84 columns (not PostGIS `ST_*`):
 
 GeoJSON arguments accept a **geometry object** (`{"type":"Polygon",...}`) or a **Feature** with a `geometry` field. Use with `output.format: geojson` so rows expose a `geometry` column.
 
+**Buffer (approximate `ST_Buffer` on WGS84):**
+
+| Function | Args | Returns |
+|----------|------|---------|
+| `V2_GEO_WKT_BUFFER` | `wkt, distanceMeters` | Buffered geometry as WKT |
+| `V2_GEO_GEOJSON_BUFFER` | `geoJson, distanceMeters` | Buffered geometry as GeoJSON |
+
+Meters are converted to degrees at the geometry centroid (engineering accuracy; keep radii modest, e.g. &lt; 10 km).
+
+```sql
+SELECT lat, lon
+FROM geo_in
+WHERE V2_GEO_POINT_IN_WKT(
+  lat, lon,
+  V2_GEO_WKT_BUFFER('POINT(113.2 22.2)', 5000))
+```
+
 ```yaml
 transforms:
   - type: SQL

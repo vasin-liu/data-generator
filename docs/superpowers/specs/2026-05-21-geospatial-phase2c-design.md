@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Implemented (distance, radius, WKT + GeoJSON predicates) |
+| Status | Implemented (distance, radius, predicates, approximate buffer) |
 | Date | 2026-05-21 |
 | Depends on | Phase 1, Phase 2B/D (geo sources in Calcite) |
 | **Phase 2C scope** | **C (minimal)** — lat/lon SQL helpers backed by `data-generator-geo` |
@@ -31,9 +31,14 @@ Operators filter and enrich geo pipelines in SQL transforms. PostGIS `ST_*` is a
 1. **`GeoJsonLoader.parseGeometryJson`** for inline geometry / Feature JSON.
 2. **`GeoJsonPredicates`** + SQL **`V2_GEO_POINT_IN_GEOJSON`**, **`V2_GEO_GEOJSON_CONTAINS`**, **`V2_GEO_GEOJSON_INTERSECTS`**.
 
+## Goals (Phase 2C — buffer slice)
+
+1. **`GeoBuffer`** — JTS `BufferOp` with meter→degree scaling at centroid latitude.
+2. SQL **`V2_GEO_WKT_BUFFER`**, **`V2_GEO_GEOJSON_BUFFER`** returning VARCHAR geometry text.
+
 ## Non-goals (remaining)
 
-- `ST_Buffer`, buffer on geometry columns
+- Survey-grade geodesic buffer / CRS reprojection
 - CRS reprojection
 - Replacing PostGIS for warehouse-scale spatial joins
 
@@ -60,3 +65,4 @@ WHERE V2_GEO_DISTANCE_METERS(lat, lon, 22.2, 113.2) < 5000
 | 2026-05-21 | `V2_GEO_WITHIN_RADIUS` built-in SQL function |
 | 2026-05-21 | WKT predicates: `V2_GEO_POINT_IN_WKT`, `V2_GEO_WKT_CONTAINS`, `V2_GEO_WKT_INTERSECTS` |
 | 2026-05-21 | GeoJSON predicates: `V2_GEO_POINT_IN_GEOJSON`, `V2_GEO_GEOJSON_CONTAINS`, `V2_GEO_GEOJSON_INTERSECTS` |
+| 2026-05-21 | Approximate buffer: `V2_GEO_WKT_BUFFER`, `V2_GEO_GEOJSON_BUFFER` |

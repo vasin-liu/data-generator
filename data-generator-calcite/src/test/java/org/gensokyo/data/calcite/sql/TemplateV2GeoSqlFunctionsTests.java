@@ -97,4 +97,22 @@ class TemplateV2GeoSqlFunctionsTests {
         Assertions.assertTrue(TemplateV2GeoSqlFunctions.geoJsonContains(
                 new TemplateV2SqlFunctionContext(List.of(BOX_GEOJSON, inner))));
     }
+
+    @Test
+    void wktBufferReturnsPolygonWkt() {
+        String buffered = TemplateV2GeoSqlFunctions.wktBuffer(
+                new TemplateV2SqlFunctionContext(List.of("POINT(113.2 22.2)", 500)));
+        Assertions.assertNotNull(buffered);
+        Assertions.assertTrue(buffered.startsWith("POLYGON"));
+    }
+
+    @Test
+    void geoJsonBufferReturnsPolygonGeoJson() {
+        String buffered = TemplateV2GeoSqlFunctions.geoJsonBuffer(
+                new TemplateV2SqlFunctionContext(List.of(
+                        "{\"type\":\"Point\",\"coordinates\":[113.2,22.2]}",
+                        500)));
+        Assertions.assertNotNull(buffered);
+        Assertions.assertTrue(buffered.contains("Polygon"));
+    }
 }

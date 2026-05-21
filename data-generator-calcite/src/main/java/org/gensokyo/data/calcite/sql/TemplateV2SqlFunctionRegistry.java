@@ -325,7 +325,19 @@ public final class TemplateV2SqlFunctionRegistry {
                                 ),
                                 count -> count == 3
                         ),
-                        TemplateV2GeoSqlFunctions::pointInGeoJson)
+                        TemplateV2GeoSqlFunctions::pointInGeoJson),
+                new TemplateV2SqlFunction("V2_GEO_WKT_BUFFER", ReturnTypes.VARCHAR_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::wktBuffer),
+                new TemplateV2SqlFunction("V2_GEO_GEOJSON_BUFFER", ReturnTypes.VARCHAR_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC),
+                                count -> count == 2
+                        ),
+                        TemplateV2GeoSqlFunctions::geoJsonBuffer)
         ));
     }
 
