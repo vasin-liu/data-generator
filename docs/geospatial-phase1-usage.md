@@ -116,8 +116,25 @@ For ad-hoc spatial SQL or chunked export, use **`type: QUERY`** with `ST_AsText(
 
 See `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`.
 
+## Phase 2D — SQL over geo sources (Calcite)
+
+`GEOJSON`, `POSTGIS`, and `ITERATOR`+`GEO` sources are registered in the Calcite execution context like CSV/JSON. Use a normal **`type: SQL`** transform:
+
+```yaml
+sources:
+  - name: geo_in
+    type: GEOJSON
+    path: classpath:geo/two_feature_collection.geojson
+transforms:
+  - type: SQL
+    sql: SELECT lat, lon FROM geo_in WHERE lat > 22.0
+```
+
+Requires **`executionPolicy.mode: IN_MEMORY`** (default) so sources are materialized before SQL. See `docs/superpowers/specs/2026-05-21-geospatial-phase2d-design.md`.
+
 ## Related
 
 - Design: `docs/superpowers/specs/2026-05-20-geospatial-phase1-design.md`
 - Plan: `docs/superpowers/plans/2026-05-20-geospatial-phase1.md`
 - Phase 2B: `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`
+- Phase 2D: `docs/superpowers/specs/2026-05-21-geospatial-phase2d-design.md`
