@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Draft — pending review |
+| Status | Approved (2026-05-21) |
 | Date | 2026-05-21 |
 | Driver | Business constraint **A**: retire or freeze V1 templates on a fixed timeline |
 | Depends on | `feature-4.0` (CHUNKED, migration workbench, Geo complete) |
@@ -92,7 +92,7 @@ flowchart TB
 
 **Scope (minimal):**
 
-1. Define **`ScriptTransformVO`** (or `ExpressionTransformVO`) as the first official non-SQL built-in subtype — row-local deterministic logic only (no `PAUSE` / shared state).
+1. Define **`SpelTransformVO`** (`@JsonSubType("SPEL")`) as the first official non-SQL built-in subtype — row-local SpEL expressions only (no `PAUSE` / shared state / JavaScript).
 2. Register factory on the same `TransformVO` registry + PF4J plugin path as SQL.
 3. Output schema: explicit column declarations or infer-from-sample (bounded preview).
 4. Document decision tree in `docs/template-v2-transformer-strategy.md`: when SQL+UDF vs non-SQL vs compatibility-only.
@@ -209,14 +209,17 @@ Update `docs/template-v2-product-roadmap.md` scenario matrix:
 - Add footnote: Geo delivered as domain extension, not a retirement prerequisite.
 - Elevate control plane MVP and non-SQL transformer from P0 backlog to **in progress / done** when R1/R2 complete.
 
-## Open decisions (resolve in review)
+## Resolved decisions
 
-1. **V1 disable mechanism:** runtime flag vs remove `TaskController` V1 branch — recommend **flag** first.
-2. **SCRIPT semantics:** SpEL subset vs sandboxed expression language — recommend **SpEL row expressions** aligned with existing faker/geo SpEL investment.
-3. **Calendar:** product owner sets wave freeze dates after R0 staging results (not fixed in this spec).
+| Topic | Decision |
+|-------|----------|
+| V1 disable | **Configuration flag first** — `pci.data.generator.v1-execution.enabled` (default `true` until P4); `TaskController` rejects V1 runs when `false`; dual-run compare may still invoke V1 via `PipelineTemplateRunExecutor` until explicitly gated |
+| non-SQL semantics | **Row-level SpEL** via `SpelTransformVO`; reuse Spring `SpelExpressionParser`; row root variable `#row` (map of column → value) |
+| Wave calendar | **W1/W2 freeze dates set after R0 staging** completes; R0 produces a dated freeze proposal in `docs/migration/wave-freeze-schedule.md` |
 
 ## Revision history
 
 | Date | Change |
 |------|--------|
 | 2026-05-21 | Initial design from product/roadmap gap analysis; constraint A (V1 retirement) |
+| 2026-05-21 | Approved: config-flag V1 disable, SpelTransformVO, calendar after R0 |
