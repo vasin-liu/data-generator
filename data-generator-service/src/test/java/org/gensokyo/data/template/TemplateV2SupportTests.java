@@ -9,6 +9,8 @@ import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
+import org.gensokyo.data.model.v2.SpelColumnMapping;
+import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
@@ -257,6 +259,63 @@ class TemplateV2SupportTests {
         Assertions.assertInstanceOf(InlineDataSourceVO.class, source.getDataSource());
         Assertions.assertEquals("seatunnel_orders", source.getDataSource().getName());
         Assertions.assertEquals("jdbc:h2:mem:inline_orders", source.getDataSource().getUrl());
+    }
+
+    @Test
+    void parsesV2DraftYamlWithSpelTransform() {
+        var parser = new JacksonParser();
+        var yaml = """
+                name: spel-demo
+                sources:
+                  input:
+                    type: iterator
+                    iterator:
+                      type: constant
+                      count: 2
+                transform:
+                  type: spel
+                  columns:
+                    - name: label
+                      expression: "#row['id'] + '-x'"
+                sink:
+                  writers:
+                    - type: console
+                """;
+
+        TemplateV2DraftVO draft = parser.parse(yaml, TemplateV2DraftVO.class);
+
+        Assertions.assertNotNull(draft);
+        Assertions.assertInstanceOf(SpelTransformVO.class, draft.getTransform());
+        SpelTransformVO transform = (SpelTransformVO) draft.getTransform();
+        Assertions.assertEquals("spel", transform.getType());
+        Assertions.assertEquals(1, transform.getColumns().size());
+        Assertions.assertEquals("label", transform.getColumns().get(0).getName());
+        Assertions.assertEquals("#row['id'] + '-x'", transform.getColumns().get(0).getExpression());
+    }
+
+    @Test
+    void roundTripsV2DraftJsonWithSpelTransform() {
+        var mapping = new SpelColumnMapping();
+        mapping.setName("label");
+        mapping.setExpression("#row['id'] + '-x'");
+        var transform = new SpelTransformVO();
+        transform.setColumns(List.of(mapping));
+
+        var draft = new TemplateV2DraftVO();
+        draft.setName("spel-demo");
+        draft.setSources(Map.of("input", new IteratorSourceVO()));
+        draft.setTransform(transform);
+        draft.setSink(consoleSink());
+
+        String json = TemplateJsonCodec.write(draft);
+        TemplateV2DraftVO decoded = TemplateJsonCodec.read(json, TemplateV2DraftVO.class);
+
+        Assertions.assertInstanceOf(SpelTransformVO.class, decoded.getTransform());
+        SpelTransformVO decodedTransform = (SpelTransformVO) decoded.getTransform();
+        Assertions.assertEquals("spel", decodedTransform.getType());
+        Assertions.assertEquals(1, decodedTransform.getColumns().size());
+        Assertions.assertEquals("label", decodedTransform.getColumns().get(0).getName());
+        Assertions.assertEquals("#row['id'] + '-x'", decodedTransform.getColumns().get(0).getExpression());
     }
 
     @Test

@@ -75,6 +75,7 @@ public class MigrationPromoteService {
         }
 
         TemplateV2Validator.validate(TemplateV2Normalizer.normalize(draft));
+        rejectIfInventoryBlocksPromote(templateId);
 
         entity.setName(draft.getName());
         entity.setContentYaml(yamlParser.dump(draft));
@@ -83,6 +84,19 @@ public class MigrationPromoteService {
 
         migrationInventoryService.updatePromoteResult(templateId);
         return draft;
+    }
+
+    private void rejectIfInventoryBlocksPromote(Long templateId) {
+        String inventoryId = "db-" + templateId;
+        migrationInventoryService.findById(inventoryId).ifPresent(entry -> {
+            MigrationClassification classification = entry.getMigrationClass();
+            if (classification == MigrationClassification.COMPATIBILITY_ONLY
+                    || classification == MigrationClassification.BLOCKED) {
+                throw new IllegalArgumentException(String.format(
+                        "Template '%s' cannot be promoted: inventory %s is classified %s",
+                        templateId, inventoryId, classification));
+            }
+        });
     }
 
     private TemplateV2DraftVO resolveDraft(TemplatePO entity) {

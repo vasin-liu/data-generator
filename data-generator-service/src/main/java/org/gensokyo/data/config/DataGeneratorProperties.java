@@ -58,5 +58,36 @@ public class DataGeneratorProperties {
 
     private String v2PluginFramework = "PF4J";
 
+    /**
+     * Default row cap for Template V2 control-plane preview when the caller omits {@code maxRows}.
+     */
+    private Integer previewMaxRows = 100;
+
+    /**
+     * V1 runtime toggle (maps to {@code pci.data.generator.v1-execution.enabled}).
+     */
+    private V1Execution v1Execution = new V1Execution();
+
+    /**
+     * Returns whether ad hoc V1 template execution is allowed on {@link org.gensokyo.data.controller.TaskController}.
+     *
+     * @return {@code true} when V1 runs are permitted
+     */
+    public boolean isV1ExecutionEnabled() {
+        return v1Execution == null || v1Execution.isEnabled();
+    }
+
+    /**
+     * Nested binding for {@code pci.data.generator.v1-execution.*}.
+     */
+    @Getter
+    @Setter
+    public static class V1Execution {
+        /**
+         * When {@code false}, TaskController refuses V1 templates (P4 retirement).
+         */
+        private boolean enabled = true;
+    }
+
 }
 

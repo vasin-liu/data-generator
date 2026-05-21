@@ -20,7 +20,9 @@ import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.qo.PreviewTemplateV2QO;
 import org.gensokyo.data.model.qo.UpdateTemplateQO;
+import org.gensokyo.data.model.qo.ValidateTemplateQO;
 import org.gensokyo.data.model.vo.stage.ParamVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
@@ -28,9 +30,13 @@ import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV1Loader;
+import org.gensokyo.data.template.TemplateV2ControlPlaneService;
 import org.gensokyo.data.template.TemplateV2Normalizer;
+import org.gensokyo.data.template.TemplateV2PreviewDTO;
+import org.gensokyo.data.template.TemplateV2ValidationResult;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.template.migration.MigrationPlanExplain;
 import org.gensokyo.data.template.migration.MigrationBatchCompareOptions;
 import org.gensokyo.data.template.migration.MigrationBatchCompareResult;
 import org.gensokyo.data.template.migration.MigrationBatchCompareService;
@@ -183,6 +189,7 @@ public class TemplateController {
     private final MigrationInventoryService migrationInventoryService;
     private final MigrationDraftService migrationDraftService;
     private final MigrationPromoteService migrationPromoteService;
+    private final TemplateV2ControlPlaneService templateV2ControlPlaneService;
 
     @PostMapping("/updateById")
     public R<String> updateById(@Validated @RequestBody UpdateTemplateQO qo) {
@@ -261,6 +268,60 @@ public class TemplateController {
             return R.fail(String.format("Template '%s' has no database-backed sources that can be converted into QuerySourceVO", templateId));
         }
         return R.ok("Preview generated", draft);
+    }
+
+    /**
+     * Validates a Template V2 draft YAML (structural rules and execution-shape warnings).
+     *
+     * @param qo request with draft YAML
+     * @return validation outcome; HTTP wrapper is success when YAML parses and validation runs
+     */
+    @PostMapping("/v2/validate")
+    public R<TemplateV2ValidationResult> validateV2(@Validated @RequestBody ValidateTemplateQO qo) {
+        TemplateV2DraftVO draft = tryParse(qo.getYaml(), TemplateV2DraftVO.class);
+        if (Objects.isNull(draft)) {
+            return R.fail("YAML could not be parsed as Template V2 draft");
+        }
+        TemplateV2ValidationResult result = templateV2ControlPlaneService.validate(draft);
+        return R.ok("Validation completed", result);
+    }
+
+    /**
+     * Explains a persisted template's effective V2 plan (sources, Calcite notes, V1/V2 diff).
+     *
+     * @param templateId persisted template id
+     * @return bounded plan explain block
+     */
+    @GetMapping("/v2/explain/{templateId}")
+    public R<MigrationPlanExplain> explainV2(@NotNull @PathVariable Long templateId) {
+        try {
+            MigrationPlanExplain explain = templateV2ControlPlaneService.explain(templateId);
+            return R.ok("Explain generated", explain);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * Bounded sample run for a persisted Template V2 definition.
+     *
+     * @param templateId persisted template id
+     * @param options    optional row cap (default {@code 50})
+     * @return bounded preview schema and sample rows
+     */
+    @PostMapping("/v2/preview/{templateId}")
+    public R<TemplateV2PreviewDTO> previewV2(
+            @NotNull @PathVariable Long templateId,
+            @RequestBody(required = false) PreviewTemplateV2QO options) {
+        Integer maxRows = options == null ? null : options.getMaxRows();
+        try {
+            TemplateV2PreviewDTO preview = templateV2ControlPlaneService.preview(templateId, maxRows);
+            return R.ok("Preview completed", preview);
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
     }
 
     /**

@@ -18,8 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +63,56 @@ class MigrationPromoteServiceTests {
     }
 
     @Test
+    void promoteRejectsCompatibilityOnlyClassification() throws Exception {
+        MigrationInventoryService inventory = newInventoryService();
+        MigrationPromoteService service = new MigrationPromoteService(
+                repository,
+                new MigrationDraftService(),
+                inventory,
+                new JacksonParser());
+
+        TemplatePO entity = validV1PromotableTemplate(101L);
+        when(repository.findById(101L)).thenReturn(Optional.of(entity));
+
+        MigrationInventoryEntry entry = new MigrationInventoryEntry();
+        entry.setId("db-101");
+        entry.setOrigin("database");
+        entry.setDbTemplateId(101L);
+        entry.setMigrationClass(MigrationClassification.COMPATIBILITY_ONLY);
+        inventory.saveAll(List.of(entry));
+
+        IllegalArgumentException ex =
+                Assertions.assertThrows(IllegalArgumentException.class, () -> service.promote(101L));
+        Assertions.assertTrue(ex.getMessage().contains("COMPATIBILITY_ONLY"));
+        verify(repository, never()).saveAndFlush(ArgumentMatchers.any());
+    }
+
+    @Test
+    void promoteRejectsBlockedClassification() throws Exception {
+        MigrationInventoryService inventory = newInventoryService();
+        MigrationPromoteService service = new MigrationPromoteService(
+                repository,
+                new MigrationDraftService(),
+                inventory,
+                new JacksonParser());
+
+        TemplatePO entity = validV1PromotableTemplate(102L);
+        when(repository.findById(102L)).thenReturn(Optional.of(entity));
+
+        MigrationInventoryEntry entry = new MigrationInventoryEntry();
+        entry.setId("db-102");
+        entry.setOrigin("database");
+        entry.setDbTemplateId(102L);
+        entry.setMigrationClass(MigrationClassification.BLOCKED);
+        inventory.saveAll(List.of(entry));
+
+        IllegalArgumentException ex =
+                Assertions.assertThrows(IllegalArgumentException.class, () -> service.promote(102L));
+        Assertions.assertTrue(ex.getMessage().contains("BLOCKED"));
+        verify(repository, never()).saveAndFlush(ArgumentMatchers.any());
+    }
+
+    @Test
     void promoteUpdatesInventoryClassificationFromLastCompare() throws Exception {
         MigrationInventoryService inventory = newInventoryService();
         MigrationPromoteService service = new MigrationPromoteService(
@@ -97,6 +149,22 @@ class MigrationPromoteServiceTests {
         Assertions.assertEquals(MigrationClassification.EXACT, entry.getMigrationClass());
         Assertions.assertTrue(entry.isV2DraftPresent());
         verify(repository).saveAndFlush(ArgumentMatchers.any(TemplatePO.class));
+    }
+
+    private static TemplatePO validV1PromotableTemplate(long id) {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(id);
+        entity.setContentYaml("""
+                name: promote-candidate
+                iterator:
+                  type: number
+                  from: 1
+                  to: 2
+                output:
+                  writers:
+                    - type: console
+                """);
+        return entity;
     }
 
     private static MigrationInventoryService newInventoryService() throws Exception {

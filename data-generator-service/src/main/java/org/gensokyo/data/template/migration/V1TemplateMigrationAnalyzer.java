@@ -35,6 +35,7 @@ public final class V1TemplateMigrationAnalyzer {
 
     private static final String PATH_SQL = "sql";
     private static final String PATH_SQL_UDF = "sql_udf";
+    private static final String PATH_SPEL = "spel";
     private static final String PATH_COMPATIBILITY_ONLY = "compatibility_only";
 
     private V1TemplateMigrationAnalyzer() {
@@ -52,6 +53,7 @@ public final class V1TemplateMigrationAnalyzer {
         LinkedHashSet<String> blockers = new LinkedHashSet<>();
 
         boolean javascript = false;
+        boolean plainScript = false;
         boolean pause = false;
         boolean shared = false;
         boolean log = false;
@@ -62,6 +64,9 @@ public final class V1TemplateMigrationAnalyzer {
             }
             if (isJavaScriptStage(stage)) {
                 javascript = true;
+            }
+            if (isPlainScriptStage(stage)) {
+                plainScript = true;
             }
             if (isPauseStage(stage)) {
                 pause = true;
@@ -124,6 +129,11 @@ public final class V1TemplateMigrationAnalyzer {
         else {
             analysis.setWave(null);
             analysis.setRecommendedPath(readerPoolApproximation ? PATH_SQL_UDF : "custom");
+        }
+
+        // Plain SCRIPT fields map to V2 SpEL transform, not V1-only compatibility.
+        if (plainScript) {
+            analysis.setRecommendedPath(PATH_SPEL);
         }
 
         return analysis;
@@ -215,6 +225,27 @@ public final class V1TemplateMigrationAnalyzer {
             return false;
         }
         return "JAVASCRIPT".equalsIgnoreCase(language.getType().trim());
+    }
+
+    /**
+     * Detects V1 SCRIPT stages using plain (SpEL-compatible) language, not GraalJS.
+     *
+     * @param stage stage from field or iterator pipeline
+     * @return {@code true} when stage is SCRIPT with plain/default language
+     */
+    private static boolean isPlainScriptStage(StageVO stage) {
+        if (!(stage instanceof ScriptStageVO scriptStage)) {
+            return false;
+        }
+        ScriptVO language = scriptStage.getLanguage();
+        if (language == null || language.getType() == null || language.getType().isBlank()) {
+            return true;
+        }
+        String type = language.getType().trim();
+        if ("JAVASCRIPT".equalsIgnoreCase(type)) {
+            return false;
+        }
+        return "PLAIN".equalsIgnoreCase(type) || "plain".equalsIgnoreCase(type);
     }
 
     private static boolean isPauseStage(StageVO stage) {

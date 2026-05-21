@@ -14,6 +14,8 @@ import org.gensokyo.data.template.migration.MigrationCompareService;
 import org.gensokyo.data.template.migration.MigrationCompareWorkflow;
 import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.MigrationInventoryService;
+import org.gensokyo.data.template.TemplateV2ControlPlaneService;
+import org.gensokyo.data.template.migration.MigrationPlanExplainService;
 import org.gensokyo.data.template.migration.MigrationPromoteService;
 import org.gensokyo.data.template.migration.MigrationReportWriter;
 import org.gensokyo.data.yaml.YamlParser;
@@ -162,5 +164,30 @@ public class MigrationConfig {
             YamlParser yamlParser) {
         return new MigrationPromoteService(
                 repository, migrationDraftService, migrationInventoryService, yamlParser);
+    }
+
+    /**
+     * Template V2 control-plane orchestration (validate, explain, preview).
+     *
+     * @param repository              template persistence
+     * @param yamlParser              YAML parser
+     * @param migrationDraftService   V1 → V2 draft builder
+     * @return control-plane service
+     */
+    @Bean
+    @ConditionalOnMissingBean(TemplateV2ControlPlaneService.class)
+    public TemplateV2ControlPlaneService templateV2ControlPlaneService(
+            TemplateRepository repository,
+            YamlParser yamlParser,
+            MigrationDraftService migrationDraftService,
+            TemplateV2Runner templateV2Runner,
+            DataGeneratorProperties dataGeneratorProperties) {
+        return new TemplateV2ControlPlaneService(
+                repository,
+                yamlParser,
+                migrationDraftService,
+                new MigrationPlanExplainService(),
+                templateV2Runner,
+                dataGeneratorProperties);
     }
 }

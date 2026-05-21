@@ -19,6 +19,8 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 - [x] Runbook for failed dual-run (`BLOCKED`) remediation — `docs/migration/blocked-dual-run-runbook.md`
 - [x] Batch / scheduled dual-run on DB catalog — `POST /template/migration/compare/batch`, optional `pci.data.generator.migration.batch-compare.scheduled-enabled`
 - [x] Operator summary API — `GET /template/migration/summary` + `scripts/migration-staging.ps1` + `docs/migration/staging-runbook.md`
+- [x] Template V2 control-plane validate / explain / preview (`POST|GET /template/v2/*`)
+- [x] First non-SQL transformer: `SpelTransformVO` + `SpelTransformFactory` (row-level SpEL)
 - [ ] Full operator UI (Vaadin) for inventory + compare
 
 ## P3 — Business
@@ -37,4 +39,9 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 | regression-v1-iterator-simple | `docs/migration/reports/sample-regression-v1-iterator-simple.md` |
 | regression-v1-query-lookup | `docs/migration/reports/sample-regression-v1-query-lookup.md` |
 
-When all P1 items and scenario-family P3 items are checked, V1 execution may be deprecated per team policy.
+## P4 — Runtime cutover
+
+- [x] Config flag `pci.data.generator.v1-execution.enabled` gates `TaskController` V1 runs (default `true`)
+- [ ] Staging/prod set `v1-execution.enabled=false` after P3 sign-off and wave-freeze dates (`docs/migration/wave-freeze-schedule.md`)
+
+When all P1 items, scenario-family P3 items, and P4 cutover are checked, V1 execution may be deprecated per team policy.

@@ -47,7 +47,7 @@ class V1TemplateMigrationAnalyzerTests {
 
         Assertions.assertEquals(MigrationClassification.ADAPTED, analysis.getSuggestedClass());
         Assertions.assertEquals(1, analysis.getWave());
-        Assertions.assertEquals("sql", analysis.getRecommendedPath());
+        Assertions.assertEquals("spel", analysis.getRecommendedPath());
         Assertions.assertEquals("synthetic", analysis.getScenarioFamily());
         Assertions.assertTrue(analysis.getBlockers().isEmpty());
     }
@@ -61,6 +61,26 @@ class V1TemplateMigrationAnalyzerTests {
         Assertions.assertEquals(2, analysis.getWave());
         Assertions.assertEquals("sql", analysis.getRecommendedPath());
         Assertions.assertEquals("multi_source", analysis.getScenarioFamily());
+    }
+
+    @Test
+    void recommendsSpelPathForPlainScriptFieldYaml() throws Exception {
+        String yaml = """
+                name: plain-script-field
+                fields:
+                  - name: computed
+                    stages:
+                      - type: SCRIPT
+                        language:
+                          type: plain
+                          content: "1 + 1"
+                """;
+        TemplateVO v1 = yamlParser.parse(yaml, TemplateVO.class);
+        TemplateMigrationAnalysisDTO analysis = V1TemplateMigrationAnalyzer.analyze(v1);
+
+        Assertions.assertNotEquals(MigrationClassification.COMPATIBILITY_ONLY, analysis.getSuggestedClass());
+        Assertions.assertEquals("spel", analysis.getRecommendedPath());
+        Assertions.assertTrue(analysis.getBlockers().isEmpty());
     }
 
     @Test

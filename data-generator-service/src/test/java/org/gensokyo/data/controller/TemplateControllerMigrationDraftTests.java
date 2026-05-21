@@ -127,6 +127,40 @@ class TemplateControllerMigrationDraftTests {
     }
 
     @Test
+    void promoteRejectsCompatibilityOnlyClassification() {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(94005L);
+        entity.setName("compat-only-promote");
+        entity.setContentYaml("""
+                name: compat-only-promote
+                iterator:
+                  type: number
+                  from: 1
+                  to: 2
+                output:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        MigrationComparisonReport report = new MigrationComparisonReport();
+        report.setTemplateId(entity.getId());
+        report.setClassification(MigrationClassification.COMPATIBILITY_ONLY);
+        report.applyRecommendationFromClassification();
+        migrationInventoryService.updateCompareResult(
+                entity.getId(), report, "docs/migration/reports/compat-only.md");
+
+        R<TemplateV2DraftVO> result = templateController.promoteMigration(entity.getId());
+
+        Assertions.assertFalse(result.isSuccess());
+        Assertions.assertTrue(result.getMessage().contains("COMPATIBILITY_ONLY"));
+
+        TemplatePO persisted = templateRepository.findById(entity.getId()).orElseThrow();
+        Assertions.assertTrue(persisted.getContentYaml().contains("iterator:"));
+        Assertions.assertFalse(persisted.getContentYaml().contains("sources:"));
+    }
+
+    @Test
     void promoteUpdatesInventoryClassificationFromLastCompare() throws Exception {
         TemplatePO entity = new TemplatePO();
         entity.setId(94004L);

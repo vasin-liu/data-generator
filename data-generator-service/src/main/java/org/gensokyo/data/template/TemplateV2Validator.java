@@ -5,6 +5,8 @@ import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
+import org.gensokyo.data.model.v2.SpelColumnMapping;
+import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
@@ -55,6 +57,9 @@ public final class TemplateV2Validator {
             if (transformer instanceof SqlTransformVO sqlTransform && StrKit.isBlank(sqlTransform.getSql())) {
                 throw new IllegalArgumentException("SQL transformer SQL must not be blank");
             }
+            if (transformer instanceof SpelTransformVO spelTransform) {
+                validateSpelTransform(spelTransform);
+            }
         }
         validateExecutionPolicy(template);
 
@@ -74,6 +79,17 @@ public final class TemplateV2Validator {
         }
 
         validateSinkExecutionPolicy(template.getSinkExecutionPolicy());
+    }
+
+    private static void validateSpelTransform(SpelTransformVO spelTransform) {
+        if (CollectKit.isEmpty(spelTransform.getColumns())) {
+            throw new IllegalArgumentException("SpEL transformer columns must not be empty");
+        }
+        for (SpelColumnMapping column : spelTransform.getColumns()) {
+            if (column == null || StrKit.isBlank(column.getName()) || StrKit.isBlank(column.getExpression())) {
+                throw new IllegalArgumentException("SpEL transformer column name and expression must not be blank");
+            }
+        }
     }
 
     private static void validateSinkExecutionPolicy(SinkExecutionPolicyVO policy) {

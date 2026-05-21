@@ -116,9 +116,14 @@ public class TaskController {
             return R.fail(String.format("Multiple templates named '%s' exist, use template id instead: %s", templateName, msg));
         }
 
-        var runtime = run(result.get(0));
-        return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
-                runtime.name(), runtime.id(), runtime.instanceId()));
+        try {
+            var runtime = run(result.get(0));
+            return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
+                    runtime.name(), runtime.id(), runtime.instanceId()));
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
     }
 
     @GetMapping("/runById/{templateId}")
@@ -128,9 +133,14 @@ public class TaskController {
             return R.fail(String.format("Template '%s' does not exist", templateId));
         }
 
-        var runtime = run(result);
-        return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
-                runtime.name(), runtime.id(), runtime.instanceId()));
+        try {
+            var runtime = run(result);
+            return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
+                    runtime.name(), runtime.id(), runtime.instanceId()));
+        }
+        catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
     }
 
     private TemplateRuntimeInfo run(TemplatePO entity) {
@@ -140,6 +150,11 @@ public class TaskController {
         TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Template, v2Draft);
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
             return runV2(entity.getId(), v2Draft);
+        }
+
+        if (!properties.isV1ExecutionEnabled()) {
+            throw new IllegalArgumentException(
+                    "V1 template execution is disabled. Migrate to Template V2 or set pci.data.generator.v1-execution.enabled=true.");
         }
 
         TemplateVO template = v1Template != null ? v1Template : TemplateJsonCodec.read(entity.getContentJson());
