@@ -9,6 +9,8 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 | **M1** (pre-staging) | Not required | Leave **unchecked** — use CI substitutes in spec | No |
 | **M2** (staging-ready) | refresh / batch compare / real promote | Check when `db-{id}` cohort done | Staging trial then prod |
 
+Staging prep: `docs/migration/staging-readiness-checklist.md`
+
 ## P1 — Technical
 
 - [x] Migration scenario inventory maintained (`scenario-inventory.yaml`, ≥10 tracked templates)

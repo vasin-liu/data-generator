@@ -1,5 +1,9 @@
 # Staging migration runbook
 
+> **Milestone:** **M2 only** — not required to merge `feature-4.0`.  
+> **M1 substitute:** CI tests and `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` evidence table.  
+> **Prerequisite:** Complete `docs/migration/staging-readiness-checklist.md` before first staging sweep.
+
 Operator checklist for validating one production V1 template on a staging `data-generator-service` instance before promote.
 
 **Base URL:** `http://<host>:9876/template` (adjust port and context path).

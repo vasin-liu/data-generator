@@ -2,25 +2,37 @@
 
 ## Summary
 
-This branch delivers two coordinated capabilities for Template V2 on `feature-4.0`:
+This branch delivers coordinated capabilities for Template V2 on `feature-4.0`:
 
 1. **JDBC chunked execution** — row-local `CHUNKED` pipeline for large JDBC read → DB/Kafka/ES export, with execution-shape classification, broadcast-join support, scale limits, and service-side validation at template save.
-2. **V1 migration workbench** — analyze / draft / compare / promote APIs, scenario inventory (DB + regression fixtures), dual-run classification, and markdown reports under `docs/migration/reports/`.
-3. **Geospatial (Phases 1, 2B, 2C, 2D)** — synthetic `GEO` iterator, `GEOJSON`/`POSTGIS` V2 sources, Calcite SQL over geo rows, and `V2_GEO_*` in-memory functions. See `docs/geospatial-overview.md`.
+2. **V1 migration workbench** — analyze / draft / compare / promote APIs, scenario inventory (DB + regression fixtures), dual-run classification, sign-off, and markdown reports under `docs/migration/reports/`.
+3. **V1 retirement capabilities** — control plane validate/explain/preview, `SpelTransformVO` row-level SpEL, `pci.data.generator.v1-execution.enabled` gate, CI regression over built-in templates.
+4. **Geospatial (Phases 1, 2B, 2C, 2D)** — synthetic `GEO` iterator, `GEOJSON`/`POSTGIS` V2 sources, Calcite SQL over geo rows, and `V2_GEO_*` in-memory functions. See `docs/geospatial-overview.md`.
+
+## V1 retirement (merge vs M2)
+
+This MR **delivers retirement capabilities**; it does **not** complete production retirement.
+
+| Milestone | In this MR? | Evidence |
+|-----------|-------------|----------|
+| **M1** (no staging) | Yes | CI: `BuiltinClasspathTemplate*`, `MigrationWaveCohortSignoffTests`, `StagingSimulatedPromoteWorkflowTests`; spec: `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` |
+| **M2** (staging) | No | Real `db-{id}` promote, batch compare, `v1-execution.enabled=false` — post-merge ops (`docs/migration/staging-readiness-checklist.md`) |
+
+**Do not merge-block on:** production promote checkbox, wave-freeze calendar dates, staging runbook execution.
 
 ## Why
 
 - Roadmap priority **D (big data volume)** → sub-scenario **A (large JDBC export)** required streaming/chunking without loading full result sets in memory.
 - Product gap **A (V1 migration + dual-run acceptance)** needed an operator path before retiring V1 templates.
+- Constraint **A (V1 retire/freeze)** — wave-freeze and runtime disable deferred until staging (M2).
 
 ## Notable changes
 
 | Area | Highlights |
 |------|------------|
-| `data-generator-calcite` | `ChunkedPipeline`, `ChunkedQueryRowSource`, `ExecutionShapeClassifier`, `EffectiveExecutionPolicy`, sink `writeBatch`, `broadcastMaxRows` |
-| `data-generator-service` | `org.gensokyo.data.template.migration.*`, REST under `/template/migration/*` |
+| `data-generator-calcite` | `ChunkedPipeline`, `ChunkedQueryRowSource`, `ExecutionShapeClassifier`, `SpelTransformFactory`, geo row sources |
+| `data-generator-service` | `org.gensokyo.data.template.migration.*`, control plane `/template/v2/*`, migration REST |
 | `data-generator-geo` | GeoJSON I/O, JTS predicates/buffer, synthetic generator |
-| `data-generator-calcite` | `GeoJsonRowSource`, `PostGisQuerySourceSupport`, `TemplateV2GeoSqlFunctions` |
 | Docs | `docs/template-v2-jdbc-chunked-execution-guide.md`, `docs/migration/*`, `docs/geospatial-overview.md` |
 
 ## API (migration)
@@ -39,6 +51,16 @@ This branch delivers two coordinated capabilities for Template V2 on `feature-4.
 | GET | `/template/migration/signoff-status` |
 | POST | `/template/migration/inventory/{inventoryId}/signoff` |
 
+## API (control plane)
+
+| Method | Path |
+|--------|------|
+| POST | `/template/v2/validate` |
+| GET | `/template/v2/explain/{id}` |
+| POST | `/template/v2/preview/{id}` |
+
+| Config | `pci.data.generator.v1-execution.enabled` (default `true`; gates V1 task run when `false`) |
+
 See `docs/migration/workbench-usage.md`.
 
 ## Embedded integration tests (calcite)
@@ -49,32 +71,36 @@ See `docs/migration/workbench-usage.md`.
 | MySQL / PostgreSQL CHUNKED | `ChunkedPipelineMySqlContainerTests`, `ChunkedPipelinePostgresContainerTests` (Testcontainers, requires Docker) |
 | Kafka | `EmbeddedKafkaTestSupport`, `KafkaRowSinkAdapterEmbeddedTests`, `TemplateV2RunnerKafkaEmbeddedTests` |
 | Elasticsearch | `EmbeddedElasticsearchHttpSupport`, `ElasticsearchRowSinkAdapterHttpEmbeddedTests`, `TemplateV2RunnerElasticsearchHttpEmbeddedTests` |
-| Migration dual-run | `PipelineTemplateRunExecutor` + H2 (`MigrationCompareService` / controller tests) |
+| Migration dual-run | `PipelineTemplateRunExecutor` + H2; `StagingSimulatedPromoteWorkflowTests` |
+| Built-in templates | `BuiltinClasspathTemplateRegressionTests`, `BuiltinClasspathTemplateMigrationWorkflowTests` |
 
 See `docs/testing-embedded-components.md`.
 
 ## Test plan
 
 - [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
+- [x] Retirement M1 CI slice (2026-05-21): BuiltinClasspath*, MigrationWaveCohort*, StagingSimulatedPromote*, control plane, v1 flag, promote — **BUILD SUCCESS**, 25 tests, 0 failures
 - [x] Sample compare reports present under `docs/migration/reports/` (`sample-regression-v1-*.md`, classifications e.g. EXACT)
-- [ ] On staging: pick one production V1 JDBC export template → draft → compare → review classification
-- [ ] MySQL: confirm datasource supports cursor fetch per `docs/template-v2-jdbc-chunked-execution-guide.md`
+- [x] Retirement M1: CI simulated promote + cohort sign-off (deferred-ops spec)
+- [ ] **M2** On staging: pick one production V1 JDBC export template → draft → compare → review classification
+- [ ] **M2** MySQL: confirm datasource supports cursor fetch per `docs/template-v2-jdbc-chunked-execution-guide.md`
+- [ ] **M2** Staging trial: `v1-execution.enabled=false` after cohort promote
 - [ ] Do **not** promote `COMPATIBILITY_ONLY` templates (pause, shared, legacy script) — see `docs/migration/compatibility-only-templates.md`
 
 ## Geospatial test plan
 
 - [x] `data-generator-geo`, `iterator-geo`, calcite geo tests (runner, row sources, SQL functions)
-- [ ] Staging: one `GEOJSON` fixture template + one `POSTGIS` JDBC template with `CHUNKED` export
-- [ ] Confirm PostGIS extension and `ST_*` projections on target warehouse
+- [ ] **M2** Staging: one `GEOJSON` fixture template + one `POSTGIS` JDBC template with `CHUNKED` export
+- [ ] **M2** Confirm PostGIS extension and `ST_*` projections on target warehouse
 
 Deferred geo: streaming GeoJSON, Shapefile/GeoPackage, Calcite-native `ST_*`, survey-grade buffers — see `docs/geospatial-overview.md`.
 
-## Out of scope (follow-ups)
+## Out of scope (post-merge / M2)
 
-- Full explain/preview control plane (roadmap P0, deferred)
-- Official non-SQL transformer (blocks Wave 3 script-heavy migrations)
-- Production-wide inventory export (manual refresh via `MigrationInventoryService.refreshFromRepository`)
+- Production-wide `db-{id}` promote and P4 `v1-execution.enabled=false` (requires staging — see `docs/migration/staging-readiness-checklist.md`)
+- Vaadin operator UI for migration inventory
+- Wave freeze calendar dates (product owner, after staging R0)
 
 ## Commits
 
-30 commits on `feature-4.0` from JDBC policy resolver through migration workbench, embedded integration tests, P3 sign-off APIs, and MR docs.
+`feature-4.0` includes JDBC chunked execution, migration workbench, geospatial phases, V1 retirement program (control plane, SpEL, v1 flag, CI simulation), and deferred-ops documentation.

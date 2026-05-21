@@ -39,9 +39,12 @@ class JdbcTemplateTemplateV2RuntimePluginProviderTests {
                         getClass().getClassLoader()
                 ));
 
-        Assertions.assertEquals(1, plugin.sourceFactories().size());
+        Assertions.assertEquals(2, plugin.sourceFactories().size());
         Assertions.assertEquals(1, plugin.sinkFactories().size());
-        Assertions.assertTrue(plugin.sourceFactories().getFirst() instanceof QuerySourceFactory);
+        Assertions.assertTrue(
+                plugin.sourceFactories().stream().anyMatch(QuerySourceFactory.class::isInstance));
+        Assertions.assertTrue(
+                plugin.sourceFactories().stream().anyMatch(PostGisQuerySourceFactory.class::isInstance));
         Assertions.assertTrue(plugin.sinkFactories().getFirst() instanceof JdbcSinkFactory);
     }
 
