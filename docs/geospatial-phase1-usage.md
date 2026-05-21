@@ -92,7 +92,29 @@ transforms:
 
 - **`path`**: `classpath:` or filesystem, resolved by `GeoResourceResolver`.
 - **`columns`**: Point features use coordinates; polygons/lines use an interior representative point (`getInteriorPoint()`).
-- **PostGIS / JDBC spatial sources** are not in this slice; see `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`.
+## Phase 2B — PostGIS table (`type: POSTGIS`)
+
+Requires a **PostGIS-enabled** PostgreSQL datasource (JDBC plugin). Projects geometries with PostGIS functions, then reads via the standard query path.
+
+```yaml
+sources:
+  - name: sites_in
+    type: POSTGIS
+    dataSourceId: postgres_main
+    table: sites
+    geometryColumn: geom
+    attributes: [id]
+    output:
+      format: columns
+      includeProperties: true
+transforms:
+  - type: SQL
+    sql: SELECT lat, lon, prop.id FROM sites_in
+```
+
+For ad-hoc spatial SQL or chunked export, use **`type: QUERY`** with `ST_AsText(geom)` in your SQL instead.
+
+See `docs/superpowers/specs/2026-05-21-geospatial-phase2b-design.md`.
 
 ## Related
 

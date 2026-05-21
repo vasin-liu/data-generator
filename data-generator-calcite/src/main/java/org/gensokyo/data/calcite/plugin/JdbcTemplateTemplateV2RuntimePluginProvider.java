@@ -22,7 +22,9 @@ public final class JdbcTemplateTemplateV2RuntimePluginProvider implements Templa
         return new TemplateV2RuntimePlugin() {
             @Override
             public List<V2SourceFactory> sourceFactories() {
-                return List.of(new QuerySourceFactory(jdbcTemplate, context.runtimeJdbcEndpointResolver()));
+                return List.of(
+                        new QuerySourceFactory(jdbcTemplate, context.runtimeJdbcEndpointResolver()),
+                        new PostGisQuerySourceFactory(jdbcTemplate, context.runtimeJdbcEndpointResolver()));
             }
 
             @Override

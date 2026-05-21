@@ -4,12 +4,12 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Implemented (file source slice) |
+| Status | Implemented (file + PostGIS table slices) |
 | Date | 2026-05-21 |
 | Author | Gensokyo |
 | Depends on | Phase 1 (`data-generator-geo`, GEO iterator, SpEL) |
 | **Phase 2B scope** | **B (partial)** — read real GeoJSON files as Template V2 `RowSource` |
-| Deferred | PostGIS / JDBC spatial query source (Phase B remainder), Calcite GeoJSON QuerySource (Phase D) |
+| Deferred | Chunked PostGIS reads, arbitrary spatial SQL, Calcite GeoJSON QuerySource (Phase D) |
 
 ## Problem statement
 
@@ -23,9 +23,16 @@ Phase 1 only **synthesizes** locations (boundary points, line samples). Operator
 4. Register **`GeoJsonSourceFactory`** in builtin plugin + Spring `CoreConfig`.
 5. Share **`GeoRowSchemaSupport`** with `IteratorRowSource` for schema inference.
 
-## Non-goals (this slice)
+## Goals (Phase 2B — PostGIS table slice)
 
-- PostGIS / `ST_*` / geometry columns from JDBC
+1. Add **`sources[].type: POSTGIS`** (`PostGisQuerySourceVO`).
+2. Generate **`ST_PointOnSurface` / `ST_AsText` / `ST_AsGeoJSON`** projections from `table` + `geometryColumn`.
+3. Delegate execution to existing **`QueryRowSource`** (finite JDBC materialization).
+4. Register factory on **`JdbcTemplateTemplateV2RuntimePluginProvider`** (requires JDBC + PostGIS extension).
+
+## Non-goals (remaining)
+
+- Chunked streaming PostGIS source (use `QUERY` + `CHUNKED` policy for raw SQL today)
 - Streaming / NDJSON GeoJSON
 - CRS reprojection
 - Shapefile / GeoPackage
@@ -74,3 +81,4 @@ transforms:
 | Date | Change |
 |------|--------|
 | 2026-05-21 | Initial Phase 2B file-source design + implementation |
+| 2026-05-21 | PostGIS table source (`POSTGIS`) via generated SQL + QueryRowSource |
