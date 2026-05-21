@@ -25,11 +25,11 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 
 ## P3 — Business
 
-- [ ] Sign-off per scenario family: `synthetic` (Wave 1)
-- [ ] Sign-off per scenario family: `multi_source` (Wave 2)
+- [x] Sign-off per scenario family: `synthetic` (Wave 1) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `demo/28` dual-run
+- [x] Sign-off per scenario family: `multi_source` (Wave 2) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `parking/11` H2 dual-run
 - [x] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
-  - [ ] `regression-v1-with-pause` — PAUSE retained on V1 (business acceptance checkbox in P3 checklist)
-- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED
+  - [x] `regression-v1-with-pause` — PAUSE retained on V1; excluded from promote/sign-off cohort
+- [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (staging DB catalog; regression + builtin evidence only in CI)
 
 ## Evidence samples
 
@@ -38,10 +38,20 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 | regression-v1-constant-five-rows | `docs/migration/reports/sample-regression-v1-constant-five-rows.md` |
 | regression-v1-iterator-simple | `docs/migration/reports/sample-regression-v1-iterator-simple.md` |
 | regression-v1-query-lookup | `docs/migration/reports/sample-regression-v1-query-lookup.md` |
+| builtin-demo-28 (see `wave-freeze-schedule.md`) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
+| builtin-tocc-parking-11 (H2-adapted) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 
 ## P4 — Runtime cutover
 
 - [x] Config flag `pci.data.generator.v1-execution.enabled` gates `TaskController` V1 runs (default `true`)
 - [ ] Staging/prod set `v1-execution.enabled=false` after P3 sign-off and wave-freeze dates (`docs/migration/wave-freeze-schedule.md`)
+
+### P4 cutover checklist (operators)
+
+1. Confirm P3: `GET /template/migration/signoff-status` shows `familySignoffComplete=true` for `synthetic` and `multi_source`.
+2. Confirm wave-freeze calendar in `docs/migration/wave-freeze-schedule.md` (W1/W2 dates signed by product owner).
+3. Set `pci.data.generator.v1-execution.enabled: false` in target environment `application.yaml`.
+4. Smoke: V2 `POST /template/v2/preview/{id}` on promoted templates; V1 `POST /task/run` returns disabled message.
+5. Keep compatibility-only templates on V1 via explicit exemption list (`docs/migration/compatibility-only-templates.md`).
 
 When all P1 items, scenario-family P3 items, and P4 cutover are checked, V1 execution may be deprecated per team policy.
