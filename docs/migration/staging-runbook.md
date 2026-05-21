@@ -74,7 +74,7 @@ From repo root (Windows):
 .\scripts\migration-staging.ps1 -BaseUrl "http://localhost:9876/template" -TemplateId 42 -Action workflow
 ```
 
-Actions: `summary`, `refresh`, `analyze`, `draft`, `compare`, `promote`, `workflow` (analyze → draft → compare only).
+Actions: `summary`, `refresh`, `analyze`, `draft`, `compare`, `promote`, `signoff`, `workflow` (analyze → draft → compare), `workflow-promote` (through signoff + promote when classification allows).
 
 ## 5. Sign-off record
 

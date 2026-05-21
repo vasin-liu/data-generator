@@ -113,6 +113,34 @@ class MigrationPromoteServiceTests {
     }
 
     @Test
+    void promoteRejectsWhenInventoryRowExistsWithoutBusinessSignoff() throws Exception {
+        MigrationInventoryService inventory = newInventoryService();
+        MigrationPromoteService service = new MigrationPromoteService(
+                repository,
+                new MigrationDraftService(),
+                inventory,
+                new JacksonParser());
+
+        TemplatePO entity = validV1PromotableTemplate(103L);
+        when(repository.findById(103L)).thenReturn(Optional.of(entity));
+
+        MigrationInventoryEntry entry = new MigrationInventoryEntry();
+        entry.setId("db-103");
+        entry.setOrigin("database");
+        entry.setDbTemplateId(103L);
+        entry.setMigrationClass(MigrationClassification.EXACT);
+        entry.setLastCompareReportPath("docs/migration/reports/sample.md");
+        entry.setBusinessSignoffApproved(false);
+        inventory.saveAll(List.of(entry));
+
+        IllegalArgumentException ex =
+                Assertions.assertThrows(IllegalArgumentException.class, () -> service.promote(103L));
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("sign-off")
+                || ex.getMessage().toLowerCase().contains("signoff"));
+        verify(repository, never()).saveAndFlush(ArgumentMatchers.any());
+    }
+
+    @Test
     void promoteUpdatesInventoryClassificationFromLastCompare() throws Exception {
         MigrationInventoryService inventory = newInventoryService();
         MigrationPromoteService service = new MigrationPromoteService(
@@ -141,6 +169,9 @@ class MigrationPromoteServiceTests {
         report.setClassification(MigrationClassification.EXACT);
         report.applyRecommendationFromClassification();
         inventory.updateCompareResult(100L, report, "docs/migration/reports/sample-promote.md");
+        MigrationInventoryEntry signedEntry = inventory.findById("db-100").orElseThrow();
+        signedEntry.setBusinessSignoffApproved(true);
+        inventory.saveAll(List.of(signedEntry));
 
         TemplateV2DraftVO draft = service.promote(100L);
 

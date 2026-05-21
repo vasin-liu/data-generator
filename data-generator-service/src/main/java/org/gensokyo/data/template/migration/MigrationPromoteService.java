@@ -60,7 +60,9 @@ public class MigrationPromoteService {
      *
      * @param templateId persisted template id
      * @return promoted draft
-     * @throws IllegalArgumentException when the template is missing or the draft fails validation
+     * @throws IllegalArgumentException when the template is missing, the draft fails validation, inventory blocks
+     *                                  promote ({@link MigrationClassification#COMPATIBILITY_ONLY} / {@link MigrationClassification#BLOCKED}),
+     *                                  or {@code db-{id}} inventory row exists without business sign-off
      */
     public TemplateV2DraftVO promote(Long templateId) {
         Objects.requireNonNull(templateId, "templateId");
@@ -95,6 +97,11 @@ public class MigrationPromoteService {
                 throw new IllegalArgumentException(String.format(
                         "Template '%s' cannot be promoted: inventory %s is classified %s",
                         templateId, inventoryId, classification));
+            }
+            if (!entry.isBusinessSignoffApproved()) {
+                throw new IllegalArgumentException(String.format(
+                        "Template '%s' cannot be promoted: inventory %s lacks business sign-off",
+                        templateId, inventoryId));
             }
         });
     }

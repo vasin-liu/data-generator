@@ -78,6 +78,7 @@ See `docs/testing-embedded-components.md`.
 
 ## Test plan
 
+- [x] Full reactor test (2026-05-21): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~4m 12s, 0 failures
 - [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
 - [x] Retirement M1 CI slice (2026-05-21): BuiltinClasspath*, MigrationWaveCohort*, StagingSimulatedPromote*, control plane, v1 flag, promote — **BUILD SUCCESS**, 25 tests, 0 failures
 - [x] Sample compare reports present under `docs/migration/reports/` (`sample-regression-v1-*.md`, classifications e.g. EXACT)

@@ -11,6 +11,8 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 
 Staging prep: `docs/migration/staging-readiness-checklist.md`
 
+Promote requires business sign-off when a `db-{id}` inventory row exists (enforced in `MigrationPromoteService`).
+
 ## P1 — Technical
 
 - [x] Migration scenario inventory maintained (`scenario-inventory.yaml`, ≥10 tracked templates)

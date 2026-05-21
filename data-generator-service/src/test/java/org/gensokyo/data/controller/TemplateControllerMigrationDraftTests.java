@@ -13,6 +13,7 @@ import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
 import org.gensokyo.data.template.migration.MigrationClassification;
 import org.gensokyo.data.template.migration.MigrationComparisonReport;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
@@ -186,6 +187,11 @@ class TemplateControllerMigrationDraftTests {
         report.setSampleMatchRate(1.0);
         report.applyRecommendationFromClassification();
         migrationInventoryService.updateCompareResult(entity.getId(), report, "docs/migration/reports/sample-promote.md");
+
+        MigrationBusinessSignoffRequest signoff = new MigrationBusinessSignoffRequest();
+        signoff.setApproved(true);
+        signoff.setApprovedBy("draft-test");
+        templateController.recordMigrationSignoff("db-" + entity.getId(), signoff);
 
         R<TemplateV2DraftVO> promoted = templateController.promoteMigration(entity.getId());
 
