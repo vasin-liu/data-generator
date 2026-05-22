@@ -20,7 +20,7 @@
 
 ## Warnings
 
-- V2 draft includes SpEL transform for field `label` (`'row'` literal); compare uses SQL+SpEL on iterator path. JDBC templates may compare with SQL-only V2 — see `docs/migration/script-spel-draft-migration.md`.
+- V2 draft includes SpEL transform for field `label` (`'row'` literal); compare uses SQL+SpEL on iterator and JDBC-shaped paths when SCRIPT fields exist — see `docs/migration/script-spel-draft-migration.md`.
 
 ## Classification
 

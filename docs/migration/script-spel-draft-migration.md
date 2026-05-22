@@ -40,4 +40,4 @@ See `docs/migration/compatibility-only-templates.md`.
   "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 
-Full reactor (2026-05-22): `.\mvnw-jdk25.ps1 test` — BUILD SUCCESS, 43 modules.
+Full reactor (2026-05-22, post JDBC compare SpEL): `.\mvnw-jdk25.ps1 test` — BUILD SUCCESS, 43 modules (~5m 11s).
