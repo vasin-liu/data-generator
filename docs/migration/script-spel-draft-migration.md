@@ -36,7 +36,7 @@ See `docs/migration/compatibility-only-templates.md`.
 
 ```powershell
 .\mvnw-jdk25.ps1 -pl data-generator-service,data-generator-calcite -am `
-  "-Dtest=V1ScriptToSpel*,MigrationDraftServiceSpelTests,BuiltinClasspathTemplateRegressionTests#spelPathBuiltinTemplatesIncludeSpelTransformInDraft" `
+  "-Dtest=V1ScriptToSpel*,MigrationDraftServiceSpelTests,BuiltinClasspathTemplateRegressionTests#spelPathBuiltinTemplatesIncludeSpelTransformInDraft,BuiltinClasspathTemplateRegressionTests#spelPathBuiltinTemplatesIncludeSpelTransformInCompareDraft" `
   "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 

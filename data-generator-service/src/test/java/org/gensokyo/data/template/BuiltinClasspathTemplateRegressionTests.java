@@ -151,6 +151,47 @@ class BuiltinClasspathTemplateRegressionTests {
         Assertions.assertTrue(failures.isEmpty(), () -> String.join("\n", failures));
     }
 
+    @Test
+    void spelPathBuiltinTemplatesIncludeSpelTransformInCompareDraft() {
+        List<String> failures = new ArrayList<>();
+        int[] spelCompareDraftCount = {0};
+
+        for (BuiltinClasspathTemplateCatalog.Fixture fixture : BuiltinClasspathTemplateCatalog.loadAll()) {
+            try {
+                TemplateVO v1 = loadV1(fixture);
+                TemplateMigrationAnalysisDTO analysis = V1TemplateMigrationAnalyzer.analyze(v1);
+                if (analysis.getSuggestedClass() == MigrationClassification.COMPATIBILITY_ONLY) {
+                    continue;
+                }
+                if (!V1ScriptToSpelDraftConverter.hasMigratableScriptFields(v1)) {
+                    continue;
+                }
+                boolean iteratorPath = V1IteratorDraftConverter.supports(v1);
+                boolean queryPath = CollectKit.isNotEmpty(V1QuerySourceExtractor.extract(v1));
+                if (!iteratorPath && !queryPath) {
+                    continue;
+                }
+                // Dual-run compare must use the same SQL+SpEL chain as promote/draft (incl. JDBC-shaped).
+                TemplateV2DraftVO draft = draftService.buildDraftForCompare(v1);
+                TemplateV2VO normalized = TemplateV2Normalizer.normalize(draft);
+                boolean hasSpel = normalized.getTransformers().stream()
+                        .anyMatch(SpelTransformVO.class::isInstance);
+                if (!hasSpel) {
+                    failures.add(fixture.displayName() + ": compare draft missing SpelTransformVO");
+                    continue;
+                }
+                spelCompareDraftCount[0]++;
+                TemplateV2Validator.validate(normalized);
+            }
+            catch (Exception e) {
+                failures.add(fixture.displayName() + ": " + e.getMessage());
+            }
+        }
+        Assertions.assertTrue(spelCompareDraftCount[0] >= 30,
+                () -> "expected >=30 spel-path compare drafts, got " + spelCompareDraftCount[0]);
+        Assertions.assertTrue(failures.isEmpty(), () -> String.join("\n", failures));
+    }
+
     private TemplateVO loadV1(BuiltinClasspathTemplateCatalog.Fixture fixture) {
         TemplatePO entity = new TemplatePO();
         entity.setId(fixture.stableTemplateId());
