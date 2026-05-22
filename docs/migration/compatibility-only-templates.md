@@ -2,6 +2,8 @@
 
 Templates in this category should **remain on V1** (or use a future V2 orchestration layer) until pause, shared state, logging side effects, or JavaScript script stages have an explicit V2 design.
 
+**Census (staging-free):** [`reports/builtin-orchestration-census.md`](reports/builtin-orchestration-census.md) — 2/59 builtins `COMPATIBILITY_ONLY` (2026-05-22). **Boundary summary:** [`orchestration-retirement-boundary.md`](orchestration-retirement-boundary.md).
+
 ## Inventory entries (compatibility-only)
 
 | Inventory id | Name | Scenario family | Blockers |

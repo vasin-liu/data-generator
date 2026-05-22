@@ -21,6 +21,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 | Cohort sign-off | `MigrationWaveCohortSignoffTests` + `scenario-inventory.yaml` |
 | End-to-end promote | `StagingSimulatedPromoteWorkflowTests` + `migration-staging.ps1 -Action workflow-promote` (M2) |
 | SCRIPT → SpEL draft | `V1ScriptToSpelDraftConverter`; JDBC compare uses SQL+SpEL (`BuiltinClasspathTemplateMigrationWorkflowTests` parking/11 H2); `docs/migration/script-spel-draft-migration.md` |
+| W3 orchestration census | `BuiltinTemplateMigrationCensusTest` + `docs/migration/reports/builtin-orchestration-census.md`; policy S1 in `docs/migration/orchestration-retirement-boundary.md` |
 
 ## P1 — Technical
 
@@ -62,6 +63,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 | builtin-demo-28 (see `wave-freeze-schedule.md`) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 | builtin-tocc-parking-11 (H2-adapted) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 | staging-sim-synthetic / staging-sim-jdbc | `StagingSimulatedPromoteWorkflowTests` (refresh → compare → signoff → promote); JDBC sim uses builtin `parking/11` H2-adapted with SQL+SpEL compare |
+| builtin-orchestration-census | `docs/migration/reports/builtin-orchestration-census.md` (2/59 COMPATIBILITY_ONLY; PAUSE/LOG) |
 
 ## P4 — Runtime cutover
 

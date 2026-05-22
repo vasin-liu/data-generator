@@ -23,7 +23,7 @@ Proposed V1 authoring freeze dates for the retirement program.
 |------|-------------------|-------------------------|------|
 | **W1** | `synthetic` | T+14 days after R0 sign-off | P3 `synthetic` family sign-off complete |
 | **W2** | `multi_source`, JDBC export | T+28 days after R0 | P3 `multi_source` sign-off + CHUNKED staging checklist |
-| **W3** | `orchestration_legacy` | No freeze — compatibility-only bucket | Document only; no V2 promote |
+| **W3** | `orchestration_legacy` | No freeze — compatibility-only bucket | Document only; no V2 promote. Builtin census: 2/59 `COMPATIBILITY_ONLY` — see `docs/migration/reports/builtin-orchestration-census.md` |
 
 _T+14 / T+28 are placeholders until product owner sets calendar from R0 results._
 
