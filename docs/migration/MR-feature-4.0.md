@@ -17,8 +17,11 @@ This MR **delivers retirement capabilities**; it does **not** complete productio
 |-----------|-------------|----------|
 | **M1** (no staging) | Yes | CI: `BuiltinClasspathTemplate*`, `MigrationWaveCohortSignoffTests`, `StagingSimulatedPromoteWorkflowTests`; spec: `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` |
 | **M2** (staging) | No | Real `db-{id}` promote, batch compare, `v1-execution.enabled=false` — post-merge ops (`docs/migration/staging-readiness-checklist.md`) |
+| **Path B** (W3 census, no staging) | Yes | `builtin-orchestration-census.md` — **2/59** builtins `COMPATIBILITY_ONLY`; S1 policy in `orchestration-retirement-boundary.md` |
 
 **Do not merge-block on:** production promote checkbox, wave-freeze calendar dates, staging runbook execution.
+
+**Honest retirement:** ~97% of builtins are analyzable for SpEL/SQL migration; **W3** (PAUSE/LOG) stays on V1 with no freeze date.
 
 ## Why
 
@@ -84,6 +87,7 @@ See `docs/testing-embedded-components.md`.
 - [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
 - [x] Retirement M1 CI slice (2026-05-21): BuiltinClasspath*, MigrationWaveCohort*, StagingSimulatedPromote*, control plane, v1 flag, promote — **BUILD SUCCESS**, 25 tests, 0 failures
 - [x] Staging unsigned promote guard (2026-05-21): `StagingSimulatedPromoteWorkflowTests#stagingWorkflowRejectsPromoteWithoutBusinessSignoffAfterCompare` — **BUILD SUCCESS**
+- [x] W3 builtin census (2026-05-22): `BuiltinTemplateMigrationCensusTest` — 2/59 `COMPATIBILITY_ONLY` (demo/18 LOG, demo/27 PAUSE)
 - [x] Sample compare reports present under `docs/migration/reports/` (`sample-regression-v1-*.md`, classifications e.g. EXACT)
 - [x] Retirement M1: CI simulated promote + cohort sign-off (deferred-ops spec)
 - [ ] **M2** On staging: pick one production V1 JDBC export template → draft → compare → review classification

@@ -106,9 +106,38 @@ templates:
   - id: builtin-tocc-parking-11_parking_online_space_record
     name: parking-11-online-space-record
     origin: builtin
-    scenarioFamily: multi_source
+    scenarioFamily: synthetic
     migrationClass: ADAPTED
-    wave: 2
+    wave: 1
     blockers: []
     v2DraftPresent: true
-    notes: R0 CI dual-run H2-adapted; BuiltinClasspathTemplateMigrationWorkflowTests parking/11; JDBC compare SQL+SpEL
+    notes: R0 CI dual-run H2-adapted (database iterator); analyzer family synthetic; compare SQL+SpEL
+  - id: builtin-demo-18_数据库查询迭代器样例
+    name: demo-18-database-iterator-log
+    origin: builtin
+    scenarioFamily: orchestration_legacy
+    migrationClass: COMPATIBILITY_ONLY
+    wave: null
+    blockers:
+      - Template uses LOG orchestration stage; logging side effects are not migrated to V2 SQL.
+    v2DraftPresent: false
+    notes: W3 exempt (S1); see builtin-orchestration-census.md
+  - id: builtin-demo-27_暂停阶段样例
+    name: demo-27-pause-stage
+    origin: builtin
+    scenarioFamily: orchestration_legacy
+    migrationClass: COMPATIBILITY_ONLY
+    wave: null
+    blockers:
+      - Template uses PAUSE orchestration stage; V2 SQL migration cannot preserve pause semantics.
+    v2DraftPresent: false
+    notes: W3 exempt (S1); see builtin-orchestration-census.md
+  - id: evidence-w3-builtin-census
+    name: w3-builtin-orchestration-census
+    origin: repository
+    scenarioFamily: governance
+    migrationClass: EXACT
+    blockers: []
+    v2DraftPresent: false
+    lastCompareReportPath: docs/migration/reports/builtin-orchestration-census.md
+    notes: 2/59 builtins COMPATIBILITY_ONLY (PAUSE/LOG); path B 2026-05-22

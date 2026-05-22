@@ -42,6 +42,7 @@ Commit updated `docs/migration/reports/builtin-orchestration-census.md` when bui
 
 ## References
 
+- [`M2-production-catalog-handoff.md`](M2-production-catalog-handoff.md) — staging-ready production census steps
 - [`compatibility-only-templates.md`](compatibility-only-templates.md)
 - [`wave-freeze-schedule.md`](wave-freeze-schedule.md)
 - [`retirement-readiness.md`](retirement-readiness.md)

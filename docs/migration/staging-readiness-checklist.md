@@ -21,8 +21,10 @@ Complete before first staging migration sweep. Does **not** block `feature-4.0` 
 | Metric | Value |
 |--------|-------|
 | Approximate V1 template count in DB | |
-| Templates marked COMPATIBILITY_ONLY (expected) | |
+| Templates marked COMPATIBILITY_ONLY (expected) | ≥ builtin baseline **2** (see `docs/migration/reports/builtin-orchestration-census.md`; production may differ) |
 | Target batch compare cap (default 50) | |
+
+**M1 complete (no staging):** builtin orchestration census + `docs/migration/orchestration-retirement-boundary.md` (policy **S1** — W3 permanent V1 exemption).
 
 ## Execution (M2 — after checklist complete)
 

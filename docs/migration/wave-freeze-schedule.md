@@ -11,7 +11,7 @@ Proposed V1 authoring freeze dates for the retirement program.
 | Template id | Scenario family | Classification | Compare report |
 |-------------|-----------------|----------------|----------------|
 | `builtin-demo-28_常量迭代器重复多次样例` (`demo/28_常量迭代器重复多次样例.yaml`) | synthetic | ADAPTED / APPROXIMATE / BLOCKED (dual-run) | temp dir via `BuiltinClasspathTemplateMigrationWorkflowTests` |
-| `builtin-tocc-parking-11_parking_online_space_record` (`tocc/parking/11_parking_online_space_record.yaml`, H2-adapted) | multi_source | ADAPTED / EXACT / APPROXIMATE (dual-run) | temp dir via `BuiltinClasspathTemplateMigrationWorkflowTests` |
+| `builtin-tocc-parking-11_parking_online_space_record` (`tocc/parking/11_…`, H2-adapted) | synthetic (DB iterator) | ADAPTED / EXACT / APPROXIMATE (dual-run) | `BuiltinClasspathTemplateMigrationWorkflowTests` |
 
 **Automated (no live server):** `BuiltinClasspathTemplateRegressionTests` + `BuiltinClasspathTemplateMigrationWorkflowTests` scan all `classpath:template/**/*.yaml` (~61 files).
 

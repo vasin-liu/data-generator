@@ -9,7 +9,7 @@ Honest gates for retiring V1 template execution in favor of Template V2 / Calcit
 | **M1** (pre-staging) | Not required | Leave **unchecked** — use CI substitutes in spec | No |
 | **M2** (staging-ready) | refresh / batch compare / real promote | Check when `db-{id}` cohort done | Staging trial then prod |
 
-Staging prep: `docs/migration/staging-readiness-checklist.md`
+Staging prep: `docs/migration/staging-readiness-checklist.md` → M2 ops: `docs/migration/M2-production-catalog-handoff.md`
 
 Promote requires business sign-off when a `db-{id}` inventory row exists (enforced in `MigrationPromoteService`). Staging script: `workflow-promote` action.
 
@@ -48,7 +48,8 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 ## P3 — Business
 
 - [x] Sign-off per scenario family: `synthetic` (Wave 1) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `demo/28` dual-run
-- [x] Sign-off per scenario family: `multi_source` (Wave 2) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests` + builtin `parking/11` H2 dual-run
+- [x] Sign-off per scenario family: `multi_source` (Wave 2) — cohort in `scenario-inventory.yaml`; automated `MigrationWaveCohortSignoffTests`
+- [x] Builtin `parking/11` H2 dual-run (SQL+SpEL) — analyzer family `synthetic` (Wave 1 inventory row); JDBC-shaped R0 evidence
 - [x] Compatibility-only templates documented and accepted (`docs/migration/compatibility-only-templates.md`)
   - [x] `regression-v1-with-pause` — PAUSE retained on V1; excluded from promote/sign-off cohort
 - [ ] Production templates promoted with `migrationClass` EXACT or ADAPTED (**M2 only** — staging DB catalog; M1 uses CI `StagingSimulatedPromoteWorkflowTests` as substitute, not this checkbox)

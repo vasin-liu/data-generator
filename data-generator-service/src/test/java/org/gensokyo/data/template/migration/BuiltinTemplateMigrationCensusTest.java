@@ -71,6 +71,17 @@ class BuiltinTemplateMigrationCensusTest {
         Assertions.assertTrue(Files.size(REPORT_PATH) > 500);
     }
 
+    @Test
+    void committedReportSummaryMatchesCurrentCensus() throws Exception {
+        BuiltinTemplateMigrationCensus.Summary summary = BuiltinTemplateMigrationCensus.run().summary();
+        String committed = Files.readString(REPORT_PATH);
+        Assertions.assertTrue(committed.contains("**Total templates:** " + summary.total()));
+        Assertions.assertTrue(committed.contains(
+                "**COMPATIBILITY_ONLY:** " + summary.compatibilityOnly()));
+        Assertions.assertTrue(committed.contains("demo/18_数据库查询迭代器样例.yaml"));
+        Assertions.assertTrue(committed.contains("demo/27_暂停阶段样例.yaml"));
+    }
+
     private static BuiltinTemplateMigrationCensus.Row findRow(String relativePath) {
         return BuiltinTemplateMigrationCensus.run().rows().stream()
                 .filter(row -> relativePath.equals(row.relativePath()))
