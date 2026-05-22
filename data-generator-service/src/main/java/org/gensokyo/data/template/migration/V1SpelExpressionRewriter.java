@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.template.migration;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
@@ -33,8 +34,11 @@ public final class V1SpelExpressionRewriter {
             return expression;
         }
         // Bracket form before dot form so nested paths stay consistent.
-        String result = DATASET_BRACKET.matcher(expression).replaceAll("#row['$1']");
-        result = DATASET_DOT.matcher(result).replaceAll("#row['$1']");
+        // V2 Calcite rows normalize column keys to lowercase (see QueryRowSourceSupport).
+        String result = DATASET_BRACKET.matcher(expression).replaceAll(
+                match -> "#row['" + match.group(1).toLowerCase(Locale.ROOT) + "']");
+        result = DATASET_DOT.matcher(result).replaceAll(
+                match -> "#row['" + match.group(1).toLowerCase(Locale.ROOT) + "']");
         result = DATASET_BARE.matcher(result).replaceAll("#row");
         return result;
     }

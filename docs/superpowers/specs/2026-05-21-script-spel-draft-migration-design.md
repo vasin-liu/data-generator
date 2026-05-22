@@ -246,7 +246,7 @@ Promote rules unchanged: still reject `COMPATIBILITY_ONLY` / `BLOCKED` and unsig
 
 ## Implementation notes (2026-05-22)
 
-- **Compare path:** `MigrationDraftService.buildDraftForCompare()` omits SpEL on query-source templates until SQL row shape carries field-level inputs. Promote/draft API uses full SQL+SpEL chain.
+- **Compare path:** `MigrationDraftService.buildDraftForCompare()` uses the same SQL+SpEL chain as promote/draft; `dependsOn` bare `#dataset` maps to `#row['<dep>']` (lowercase keys); JDBC compare requires SQL projection of source columns (see `BuiltinClasspathTemplateMigrationWorkflowTests` parking/11).
 - **Docs:** `docs/migration/script-spel-draft-migration.md`
 
 | Date | Change |

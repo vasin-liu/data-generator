@@ -45,6 +45,19 @@ class MigrationDraftServiceSpelTests {
     }
 
     @Test
+    void jdbcCompareDraftIncludesSpelTransformForParkingFixture() {
+        BuiltinClasspathTemplateCatalog.Fixture fixture = BuiltinClasspathTemplateCatalog.loadAll().stream()
+                .filter(f -> f.relativePath().contains("11_parking_online_space_record"))
+                .findFirst()
+                .orElseThrow();
+        TemplateVO v1 = yamlParser.parse(fixture.yaml(), TemplateVO.class);
+        TemplateV2VO normalized = normalizeDraft(draftService.buildDraftForCompare(v1));
+
+        Assertions.assertTrue(normalized.getTransformers().stream().anyMatch(SpelTransformVO.class::isInstance));
+        TemplateV2Validator.validate(normalized);
+    }
+
+    @Test
     void jdbcDraftIncludesSpelTransformForParkingFixture() {
         BuiltinClasspathTemplateCatalog.Fixture fixture = BuiltinClasspathTemplateCatalog.loadAll().stream()
                 .filter(f -> f.relativePath().contains("11_parking_online_space_record"))

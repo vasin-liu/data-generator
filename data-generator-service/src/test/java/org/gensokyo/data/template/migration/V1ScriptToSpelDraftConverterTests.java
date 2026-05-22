@@ -43,7 +43,7 @@ class V1ScriptToSpelDraftConverterTests {
                 .filter(c -> "PARKING_LOT_ID".equals(c.getName()))
                 .findFirst()
                 .orElseThrow();
-        Assertions.assertEquals("#row['ID']", lotId.getExpression());
+        Assertions.assertEquals("#row['id']", lotId.getExpression());
     }
 
     @Test
@@ -60,6 +60,26 @@ class V1ScriptToSpelDraftConverterTests {
         Assertions.assertNotNull(spel);
         Assertions.assertEquals("BASE", spel.getColumns().get(0).getName());
         Assertions.assertEquals("DERIVED", spel.getColumns().get(1).getName());
+    }
+
+    @Test
+    void rewritesBareDatasetToDependedColumnForDependsOnField() {
+        TemplateVO v1 = new TemplateVO();
+        v1.setName("depends-dataset");
+        FieldVO base = scriptField("ONLINE_QUANTITY", "1");
+        FieldVO idle = scriptField("ONLINE_IDLE_QUANTITY", "#faker.number.numberBetween(1,#dataset)");
+        idle.setDependsOn(List.of("ONLINE_QUANTITY"));
+        v1.setFields(List.of(base, idle));
+
+        SpelTransformVO spel = V1ScriptToSpelDraftConverter.convert(v1);
+        Assertions.assertNotNull(spel);
+        SpelColumnMapping idleCol = spel.getColumns().stream()
+                .filter(c -> "ONLINE_IDLE_QUANTITY".equals(c.getName()))
+                .findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(
+                "#faker.number.numberBetween(1,#row['online_quantity'])",
+                idleCol.getExpression());
     }
 
     @Test

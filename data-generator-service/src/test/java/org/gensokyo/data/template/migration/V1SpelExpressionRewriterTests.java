@@ -19,13 +19,13 @@ class V1SpelExpressionRewriterTests {
     @Test
     void rewritesDatasetPropertyAccess() {
         Assertions.assertEquals(
-                "#row['PARKING_LOT_NAME']",
+                "#row['parking_lot_name']",
                 V1SpelExpressionRewriter.rewrite("#dataset.PARKING_LOT_NAME"));
     }
 
     @Test
     void rewritesDatasetBracketAccess() {
-        Assertions.assertEquals("#row['ID']", V1SpelExpressionRewriter.rewrite("#dataset['ID']"));
+        Assertions.assertEquals("#row['id']", V1SpelExpressionRewriter.rewrite("#dataset['ID']"));
     }
 
     @Test

@@ -8,26 +8,26 @@ Design: `docs/superpowers/specs/2026-05-21-script-spel-draft-migration-design.md
 - **Draft API** (`POST /template/migration/draft/{id}`): normalized V2 chain **`migrate-sql`** then **`migrate-spel`** when SCRIPT fields exist.
 - **Runtime:** `SpelTransformFactory` registered in Spring (`CoreConfig`); `#dataset` → `#row`, `#faker` supported.
 
-## Draft vs dual-run compare (important)
+## Draft vs dual-run compare
 
 | Path | V2 draft for promote / API | V2 side used in **compare** |
 |------|---------------------------|-----------------------------|
-| **Iterator / synthetic** (no JDBC readers) | SQL + SpEL | SQL + Spel (same) |
-| **Query-source / JDBC-shaped** | SQL + SpEL | **SQL only** (`buildDraftForCompare`) |
+| **Iterator / synthetic** (no JDBC readers) | SQL + SpEL | SQL + SpEL (same) |
+| **Query-source / JDBC-shaped** | SQL + SpEL | SQL + SpEL (same) |
 
-**Why:** V1 field `SCRIPT` often uses `#dataset` as the **current field input** (including `dependsOn`), while V2 SpEL runs on the **SQL `SELECT *` row**. Running SpEL during JDBC compare caused evaluation errors until SQL projection carries those columns.
+`buildDraftForCompare()` uses the same transform chain as `buildDraft()`. Bare V1 `#dataset` on `dependsOn` fields is rewritten to `#row['<dep>']` in the draft converter; JDBC compare still needs SQL (or iterator SQL) to expose source columns used by `#row['…']` expressions.
 
 **Operator impact:**
 
-- **Promote / saved draft** may list SpEL columns for JDBC templates — expected for 2b inventory.
-- **Compare reports** for JDBC/multi_source may still show APPROXIMATE until SQL row shape matches field SCRIPT inputs (future enhancement).
-- **Iterator cohort** (`demo/28`, `v1-iterator-simple`) compare exercises SpEL in CI.
+- **Promote / compare / saved draft** all list SpEL columns for JDBC templates when SCRIPT fields exist — expected for 2b inventory.
+- **Compare reports** may still be **APPROXIMATE** for faker/non-deterministic or READ-only V1 fields not carried into SpEL.
+- **CI:** `BuiltinClasspathTemplateMigrationWorkflowTests` (`parking/11`, `demo/28`) runs JDBC-shaped compare with embedded H2 and full column projection.
 
 ## Template families (retirement)
 
 | Family | Examples | Draft SpEL | Compare SpEL |
 |--------|----------|------------|--------------|
-| **B — SpEL-migratable SCRIPT** | Most `tocc/parking/*`, `idps/*` field scripts | Yes | JDBC: no (see above) |
+| **B — SpEL-migratable SCRIPT** | Most `tocc/parking/*`, `idps/*` field scripts | Yes | Yes (SQL row must expose inputs) |
 | **C — orchestration_legacy** | PAUSE, LOG, JS | No (`COMPATIBILITY_ONLY`) | No |
 
 See `docs/migration/compatibility-only-templates.md`.
