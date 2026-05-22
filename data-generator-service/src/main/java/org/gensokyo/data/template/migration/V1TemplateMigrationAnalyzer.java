@@ -233,7 +233,7 @@ public final class V1TemplateMigrationAnalyzer {
      * @param stage stage from field or iterator pipeline
      * @return {@code true} when stage is SCRIPT with plain/default language
      */
-    private static boolean isPlainScriptStage(StageVO stage) {
+    static boolean isPlainScriptStage(StageVO stage) {
         if (!(stage instanceof ScriptStageVO scriptStage)) {
             return false;
         }
@@ -245,7 +245,9 @@ public final class V1TemplateMigrationAnalyzer {
         if ("JAVASCRIPT".equalsIgnoreCase(type)) {
             return false;
         }
-        return "PLAIN".equalsIgnoreCase(type) || "plain".equalsIgnoreCase(type);
+        return type.isBlank()
+                || "PLAIN".equalsIgnoreCase(type)
+                || "SPEL".equalsIgnoreCase(type);
     }
 
     private static boolean isPauseStage(StageVO stage) {

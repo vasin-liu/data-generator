@@ -26,6 +26,25 @@ import java.util.Map;
 class SpelTransformFactoryTests {
 
     @Test
+    void evaluatesFakerExpression() {
+        RowSchema schema = schema(new ColumnDef("id", "VARCHAR", false));
+        List<Row> rows = List.of(new Row(Map.of("id", "x")));
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addTable("input", schema, rows);
+
+        SpelTransformVO transform = new SpelTransformVO();
+        transform.setColumns(List.of(mapping("n", "#faker.number.numberBetween(1,5)")));
+
+        SpelTransformFactory factory = new SpelTransformFactory();
+        CalciteRowTransformer.TransformResult result = factory.apply(transform, context);
+
+        Object n = result.rows().getFirst().values().get("n");
+        Assertions.assertInstanceOf(Number.class, n);
+        int value = ((Number) n).intValue();
+        Assertions.assertTrue(value >= 1 && value <= 5);
+    }
+
+    @Test
     void addsComputedColumnFromSpel() {
         RowSchema schema = schema(new ColumnDef("id", "VARCHAR", false));
         List<Row> rows = List.of(new Row(Map.of("id", "a")));

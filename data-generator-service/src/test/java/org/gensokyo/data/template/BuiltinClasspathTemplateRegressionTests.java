@@ -6,6 +6,7 @@
 package org.gensokyo.data.template;
 
 import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.TemplateVO;
@@ -13,6 +14,7 @@ import org.gensokyo.data.template.migration.MigrationClassification;
 import org.gensokyo.data.template.migration.MigrationDraftService;
 import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
 import org.gensokyo.data.template.migration.V1IteratorDraftConverter;
+import org.gensokyo.data.template.migration.V1ScriptToSpelDraftConverter;
 import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
 import org.gensokyo.data.template.querysource.V1QuerySourceExtractor;
 import org.gensokyo.data.yaml.JacksonParser;
@@ -106,6 +108,46 @@ class BuiltinClasspathTemplateRegressionTests {
         }
         final int migratableCount = exercised;
         Assertions.assertTrue(migratableCount >= 20, () -> "expected many migratable built-in templates, got " + migratableCount);
+        Assertions.assertTrue(failures.isEmpty(), () -> String.join("\n", failures));
+    }
+
+    @Test
+    void spelPathBuiltinTemplatesIncludeSpelTransformInDraft() {
+        List<String> failures = new ArrayList<>();
+        int[] spelDraftCount = {0};
+
+        for (BuiltinClasspathTemplateCatalog.Fixture fixture : BuiltinClasspathTemplateCatalog.loadAll()) {
+            try {
+                TemplateVO v1 = loadV1(fixture);
+                TemplateMigrationAnalysisDTO analysis = V1TemplateMigrationAnalyzer.analyze(v1);
+                if (analysis.getSuggestedClass() == MigrationClassification.COMPATIBILITY_ONLY) {
+                    continue;
+                }
+                if (!V1ScriptToSpelDraftConverter.hasMigratableScriptFields(v1)) {
+                    continue;
+                }
+                boolean iteratorPath = V1IteratorDraftConverter.supports(v1);
+                boolean queryPath = CollectKit.isNotEmpty(V1QuerySourceExtractor.extract(v1));
+                if (!iteratorPath && !queryPath) {
+                    continue;
+                }
+                TemplateV2DraftVO draft = draftService.buildDraft(v1);
+                TemplateV2VO normalized = TemplateV2Normalizer.normalize(draft);
+                boolean hasSpel = normalized.getTransformers().stream()
+                        .anyMatch(SpelTransformVO.class::isInstance);
+                if (!hasSpel) {
+                    failures.add(fixture.displayName() + ": missing SpelTransformVO");
+                    continue;
+                }
+                spelDraftCount[0]++;
+                TemplateV2Validator.validate(normalized);
+            }
+            catch (Exception e) {
+                failures.add(fixture.displayName() + ": " + e.getMessage());
+            }
+        }
+        Assertions.assertTrue(spelDraftCount[0] >= 30,
+                () -> "expected >=30 spel-path drafts, got " + spelDraftCount[0]);
         Assertions.assertTrue(failures.isEmpty(), () -> String.join("\n", failures));
     }
 

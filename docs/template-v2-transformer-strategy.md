@@ -80,8 +80,8 @@ Best for:
 
 Current status:
 
-- not implemented yet
-- should be the next official transformer family after SQL
+- **implemented** as `SpelTransformVO` / `SpelTransformFactory` (row-local SpEL, `#row`, `#faker`)
+- migration draft bridge: `V1ScriptToSpelDraftConverter` + `MigrationDraftService` (SQL then SpEL chain)
 
 ### 3. Custom transformer
 

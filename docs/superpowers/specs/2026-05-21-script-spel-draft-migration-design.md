@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Status | Approved (2026-05-21); plan: `docs/superpowers/plans/2026-05-21-script-spel-draft-migration.md` |
+| Status | Implemented (2026-05-22); plan: `docs/superpowers/plans/2026-05-21-script-spel-draft-migration.md` |
 | Date | 2026-05-21 |
 | Driver | Constraint **D** — SCRIPT-heavy templates block honest V1 retirement timeline |
 | Scope choice | **2b** — synthetic **and** JDBC / `multi_source` built-in templates |

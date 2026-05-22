@@ -84,6 +84,25 @@ class V1TemplateMigrationAnalyzerTests {
     }
 
     @Test
+    void recommendsSpelPathForExplicitSpelLanguageType() throws Exception {
+        String yaml = """
+                name: spel-lang-field
+                fields:
+                  - name: PARKING_LOT_ID
+                    stages:
+                      - type: SCRIPT
+                        language:
+                          type: SPEL
+                          content: "#dataset.ID"
+                """;
+        TemplateVO v1 = yamlParser.parse(yaml, TemplateVO.class);
+        TemplateMigrationAnalysisDTO analysis = V1TemplateMigrationAnalyzer.analyze(v1);
+
+        Assertions.assertEquals("spel", analysis.getRecommendedPath());
+        Assertions.assertNotEquals(MigrationClassification.COMPATIBILITY_ONLY, analysis.getSuggestedClass());
+    }
+
+    @Test
     void flagsCompatibilityOnlyForJavaScriptScriptStage() {
         TemplateVO v1 = new TemplateVO();
         v1.setName("js-field");

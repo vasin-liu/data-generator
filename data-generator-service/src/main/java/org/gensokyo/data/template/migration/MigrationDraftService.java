@@ -6,12 +6,15 @@
 package org.gensokyo.data.template.migration;
 
 import org.gensokyo.data.model.v2.QuerySourceVO;
+import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
 import org.gensokyo.data.template.querysource.V1QuerySourceExtractor;
+import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,14 +35,41 @@ public class MigrationDraftService {
      */
     public TemplateV2DraftVO buildDraft(TemplateVO v1) {
         Objects.requireNonNull(v1, "v1");
+        TemplateV2DraftVO draft;
         Map<String, QuerySourceVO> querySources = V1QuerySourceExtractor.extract(v1);
         if (CollectKit.isNotEmpty(querySources)) {
-            return V1QuerySourceDraftConverter.convert(v1);
+            draft = V1QuerySourceDraftConverter.convert(v1);
         }
-        if (V1IteratorDraftConverter.supports(v1)) {
-            return V1IteratorDraftConverter.convert(v1);
+        else if (V1IteratorDraftConverter.supports(v1)) {
+            draft = V1IteratorDraftConverter.convert(v1);
         }
-        throw new IllegalArgumentException(
-                "Template has no database-backed sources or supported iterator for V2 draft migration");
+        else {
+            throw new IllegalArgumentException(
+                    "Template has no database-backed sources or supported iterator for V2 draft migration");
+        }
+        attachSpelTransformIfPresent(v1, draft);
+        return draft;
+    }
+
+    private static void attachSpelTransformIfPresent(TemplateVO v1, TemplateV2DraftVO draft) {
+        SpelTransformVO spel = V1ScriptToSpelDraftConverter.convert(v1);
+        if (spel == null || CollectKit.isEmpty(spel.getColumns())) {
+            return;
+        }
+        if (draft.getTransformers() == null) {
+            draft.setTransformers(new ArrayList<>());
+        }
+        // Normalizer rejects draft when both singular transform and transformers are set.
+        if (draft.getTransform() != null) {
+            if (StrKit.isBlank(draft.getTransform().getName())) {
+                draft.getTransform().setName("migrate-sql");
+            }
+            draft.getTransformers().add(0, draft.getTransform());
+            draft.setTransform(null);
+        }
+        if (StrKit.isBlank(spel.getName())) {
+            spel.setName("migrate-spel");
+        }
+        draft.getTransformers().add(spel);
     }
 }

@@ -5,7 +5,9 @@
  */
 package org.gensokyo.data.calcite.sql;
 
+import net.datafaker.Faker;
 import org.gensokyo.data.calcite.V2TransformFactory;
+import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
@@ -23,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Row-local SpEL transform: reads table {@code input}, evaluates column mappings, merges into output rows.
@@ -36,6 +39,9 @@ public class SpelTransformFactory implements V2TransformFactory {
     private static final String ROW_VARIABLE = "row";
 
     private static final ExpressionParser PARSER = new SpelExpressionParser();
+    // Thread-local faker matches V1 script variable semantics without shared mutable RNG races.
+    private static final ThreadLocal<Faker> FAKER = ThreadLocal.withInitial(
+            () -> new Faker(Locale.CHINA, ThreadLocalRandom.current()));
 
     /**
      * Returns whether this factory handles {@link SpelTransformVO}.
@@ -104,6 +110,7 @@ public class SpelTransformFactory implements V2TransformFactory {
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
         evaluationContext.addPropertyAccessor(new MapAccessor());
         evaluationContext.setVariable(ROW_VARIABLE, values);
+        evaluationContext.setVariable(Const.SCRIPT_VAR_FAKER, FAKER.get());
         for (ParsedMapping mapping : mappings) {
             Object value = mapping.expression().getValue(evaluationContext);
             values.put(mapping.name(), value);

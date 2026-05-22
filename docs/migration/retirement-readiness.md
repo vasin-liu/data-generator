@@ -40,6 +40,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 - [x] Operator summary API — `GET /template/migration/summary` + `scripts/migration-staging.ps1` + `docs/migration/staging-runbook.md`
 - [x] Template V2 control-plane validate / explain / preview (`POST|GET /template/v2/*`)
 - [x] First non-SQL transformer: `SpelTransformVO` + `SpelTransformFactory` (row-level SpEL)
+- [x] SCRIPT → SpEL migration draft bridge (`V1ScriptToSpelDraftConverter`, SQL + SpEL draft chain)
 - [ ] Full operator UI (Vaadin) for inventory + compare
 
 ## P3 — Business
