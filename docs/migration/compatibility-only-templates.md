@@ -11,6 +11,8 @@ Templates in this category should **remain on V1** (or use a future V2 orchestra
 
 > **Note:** `regression-v1-iterator-simple` is **ADAPTED** for Wave 1 draft migration but retains SCRIPT field logic on V1 until rewritten. It is listed here because operators often treat SCRIPT-heavy templates as compatibility-only during dual-run review.
 
+**SpEL-migratable SCRIPT (B 族):** plain / `SPEL` field scripts are **not** compatibility-only; they should receive `SpelTransformVO` in V2 drafts per `docs/superpowers/specs/2026-05-21-script-spel-draft-migration-design.md`.
+
 ## Signals (from `V1TemplateMigrationAnalyzer`)
 
 - JavaScript (`JAVASCRIPT`) script stages
