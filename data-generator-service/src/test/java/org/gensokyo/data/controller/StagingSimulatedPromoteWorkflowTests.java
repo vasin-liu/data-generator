@@ -10,6 +10,7 @@ import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.BuiltinClasspathTemplateCatalog;
 import org.gensokyo.data.template.migration.EmbeddedJdbcCompareFixtureSupport;
 import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
 import org.gensokyo.data.template.migration.MigrationClassification;
@@ -69,7 +70,6 @@ class StagingSimulatedPromoteWorkflowTests {
 
     @BeforeEach
     void seedEmbeddedJdbcData() throws Exception {
-        // Minimal id-only table — staging-sim-jdbc has no SCRIPT fields; parking/11 CI uses full seed via support.
         EmbeddedJdbcCompareFixtureSupport.seedParkingCompareTable();
     }
 
@@ -93,23 +93,22 @@ class StagingSimulatedPromoteWorkflowTests {
 
     @Test
     void jdbcShapedTemplateStagingWorkflowPromotesToV2() {
+        BuiltinClasspathTemplateCatalog.Fixture fixture =
+                BuiltinClasspathTemplateCatalog.require("tocc/parking/11_parking_online_space_record.yaml");
+        String adaptedYaml = EmbeddedJdbcCompareFixtureSupport.adaptParking11ForEmbeddedH2(fixture.yaml());
+
         TemplatePO entity = new TemplatePO();
         entity.setId(95102L);
         entity.setName("staging-sim-jdbc");
-        entity.setContentYaml("""
-                name: staging-sim-jdbc
-                iterator:
-                  type: database
-                  dataSourceId: compare-inline-ds
-                  sql: select id from t_compare order by id
-                  maxRows: 100
-                output:
-                  writers:
-                    - type: console
-                """);
+        entity.setContentYaml(adaptedYaml);
         templateRepository.saveAndFlush(entity);
 
         runStagingWorkflowAndPromote(entity);
+
+        String yaml = templateRepository.findById(entity.getId()).orElseThrow().getContentYaml();
+        Assertions.assertTrue(
+                yaml.contains("spel") || yaml.contains("migrate-spel"),
+                () -> "expected SpEL transform in promoted V2 yaml");
     }
 
     @Test
@@ -232,7 +231,10 @@ class StagingSimulatedPromoteWorkflowTests {
         TemplatePO persisted = templateRepository.findById(entity.getId()).orElseThrow();
         String yaml = persisted.getContentYaml();
         Assertions.assertTrue(yaml.contains("sources:"), () -> "expected V2 sources in:\n" + yaml);
-        Assertions.assertTrue(yaml.contains("transform:"), () -> "expected V2 transform in:\n" + yaml);
+        // SQL-only drafts use transform; SQL+SpEL chain uses transformers (migrate-sql + migrate-spel).
+        Assertions.assertTrue(
+                yaml.contains("transform:") || yaml.contains("transformers:"),
+                () -> "expected V2 transform chain in:\n" + yaml);
         Assertions.assertNotNull(persisted.getContentJson());
         Assertions.assertTrue(persisted.getContentJson().contains("sources"));
 

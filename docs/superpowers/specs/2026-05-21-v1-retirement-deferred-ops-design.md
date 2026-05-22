@@ -72,7 +72,7 @@ When staging is unavailable, the following **stand in** for staging dual-run rep
 | Intended staging evidence | M1 substitute | Location |
 |-------------------------|---------------|----------|
 | 1× synthetic dual-run | Regression `v1-iterator-simple` + `StagingSimulatedPromoteWorkflowTests` synthetic path | `migration/regression/`, CI |
-| 1× JDBC dual-run | `StagingSimulatedPromoteWorkflowTests` JDBC path (H2 `compare-inline-ds`) | CI |
+| 1× JDBC dual-run | `StagingSimulatedPromoteWorkflowTests` JDBC path (builtin `parking/11` H2-adapted, SQL+SpEL compare/promote) | CI |
 | W1/W2 family sign-off | `MigrationWaveCohortSignoffTests` + `scenario-inventory.yaml` cohort | CI + inventory file |
 | Full catalog analyze | `BuiltinClasspathTemplateRegressionTests` (~61 yaml) | CI |
 | Promote workflow | `StagingSimulatedPromoteWorkflowTests` (refresh → compare → signoff → promote) | CI |

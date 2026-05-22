@@ -61,7 +61,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 | regression-v1-query-lookup | `docs/migration/reports/sample-regression-v1-query-lookup.md` |
 | builtin-demo-28 (see `wave-freeze-schedule.md`) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
 | builtin-tocc-parking-11 (H2-adapted) | CI temp report via `BuiltinClasspathTemplateMigrationWorkflowTests` |
-| staging-sim-synthetic / staging-sim-jdbc | `StagingSimulatedPromoteWorkflowTests` (refresh → compare → signoff → promote) |
+| staging-sim-synthetic / staging-sim-jdbc | `StagingSimulatedPromoteWorkflowTests` (refresh → compare → signoff → promote); JDBC sim uses builtin `parking/11` H2-adapted with SQL+SpEL compare |
 
 ## P4 — Runtime cutover
 
