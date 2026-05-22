@@ -10,6 +10,7 @@ import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.migration.EmbeddedJdbcCompareFixtureSupport;
 import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
 import org.gensokyo.data.template.migration.MigrationClassification;
 import org.gensokyo.data.template.migration.MigrationCompareOptions;
@@ -35,9 +36,6 @@ import org.springframework.core.io.ClassPathResource;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 
@@ -55,9 +53,6 @@ import java.util.Set;
 @Import(StagingSimulatedPromoteWorkflowTests.StagingSimulatedConfig.class)
 class StagingSimulatedPromoteWorkflowTests {
 
-    private static final String H2_URL =
-            "jdbc:h2:mem:compare_migration_embedded;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
-
     private static final Set<MigrationClassification> PROMOTABLE_COMPARE_CLASSES = Set.of(
             MigrationClassification.EXACT,
             MigrationClassification.ADAPTED,
@@ -74,12 +69,8 @@ class StagingSimulatedPromoteWorkflowTests {
 
     @BeforeEach
     void seedEmbeddedJdbcData() throws Exception {
-        try (Connection connection = DriverManager.getConnection(H2_URL, "sa", "");
-                Statement statement = connection.createStatement()) {
-            statement.execute("drop table if exists t_compare");
-            statement.execute("create table t_compare(id bigint primary key)");
-            statement.execute("insert into t_compare(id) values (1), (2), (3)");
-        }
+        // Minimal id-only table — staging-sim-jdbc has no SCRIPT fields; parking/11 CI uses full seed via support.
+        EmbeddedJdbcCompareFixtureSupport.seedParkingCompareTable();
     }
 
     @AfterEach

@@ -14,6 +14,7 @@ import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.BuiltinClasspathTemplateCatalog;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
+import org.gensokyo.data.template.migration.EmbeddedJdbcCompareFixtureSupport;
 import org.gensokyo.data.template.migration.MigrationClassification;
 import org.gensokyo.data.template.migration.MigrationCompareOptions;
 import org.gensokyo.data.template.migration.MigrationComparisonReport;
@@ -33,12 +34,8 @@ import org.springframework.context.annotation.Primary;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * REST migration workflow over built-in classpath templates (R0-style evidence without a live staging server).
@@ -53,9 +50,6 @@ import java.util.regex.Pattern;
 @Import(BuiltinClasspathTemplateMigrationWorkflowTests.WorkflowTestConfig.class)
 class BuiltinClasspathTemplateMigrationWorkflowTests {
 
-    private static final String H2_URL =
-            "jdbc:h2:mem:compare_migration_embedded;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
-
     private static final String SYNTHETIC_TEMPLATE = "demo/28_常量迭代器重复多次样例.yaml";
     private static final String JDBC_TEMPLATE = "tocc/parking/11_parking_online_space_record.yaml";
 
@@ -67,22 +61,7 @@ class BuiltinClasspathTemplateMigrationWorkflowTests {
 
     @BeforeEach
     void seedEmbeddedJdbcData() throws Exception {
-        try (Connection connection = DriverManager.getConnection(H2_URL, "sa", "");
-                Statement statement = connection.createStatement()) {
-            statement.execute("drop table if exists t_compare");
-            statement.execute("""
-                    create table t_compare (
-                      id bigint primary key,
-                      parking_lot_name varchar(200),
-                      online_space_scale int,
-                      regular_space_num int
-                    )
-                    """);
-            statement.execute("""
-                    insert into t_compare(id, parking_lot_name, online_space_scale, regular_space_num)
-                    values (1, 'lot-a', 50, 10), (2, 'lot-b', 80, 20), (3, 'lot-c', 100, 5)
-                    """);
-        }
+        EmbeddedJdbcCompareFixtureSupport.seedParkingCompareTable();
     }
 
     @AfterEach
@@ -137,7 +116,7 @@ class BuiltinClasspathTemplateMigrationWorkflowTests {
     void stagingWorkflowJdbcShapedFromParking11WithEmbeddedH2() {
         BuiltinClasspathTemplateCatalog.Fixture fixture =
                 BuiltinClasspathTemplateCatalog.require(JDBC_TEMPLATE);
-        String adaptedYaml = adaptParking11ForEmbeddedH2(fixture.yaml());
+        String adaptedYaml = EmbeddedJdbcCompareFixtureSupport.adaptParking11ForEmbeddedH2(fixture.yaml());
         TemplatePO entity = toEntity(fixture, adaptedYaml);
         templateRepository.saveAndFlush(entity);
 
@@ -197,23 +176,6 @@ class BuiltinClasspathTemplateMigrationWorkflowTests {
         entity.setName(fixture.inventoryId());
         entity.setContentYaml(yaml);
         return entity;
-    }
-
-    /**
-     * Rewires parking/11 database iterator to the embedded H2 table used by migration compare tests.
-     */
-    private static String adaptParking11ForEmbeddedH2(String yaml) {
-        String adapted = yaml.replace("dataSourceId: 'tocc_parking'", "dataSourceId: compare-inline-ds");
-        adapted = adapted.replace("dataSourceId: tocc_parking", "dataSourceId: compare-inline-ds");
-        adapted = Pattern.compile("  sql: >-.*?(?=\\n  pageIndex:)", Pattern.DOTALL)
-                .matcher(adapted)
-                .replaceFirst("""
-  sql: >-
-    select id as ID, parking_lot_name as PARKING_LOT_NAME,
-    online_space_scale as ONLINE_SPACE_SCALE, regular_space_num as REGULAR_SPACE_NUM
-    from t_compare order by id
-""");
-        return adapted;
     }
 
     @TestConfiguration

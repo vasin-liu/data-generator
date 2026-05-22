@@ -13,6 +13,7 @@ Operator checklist for validating one production V1 template on a staging `data-
 - Service running with access to the same metadata DB and JDBC datasources as staging/production targets.
 - For large JDBC exports: datasource URL includes MySQL `useCursorFetch=true` when the source is MySQL (see `docs/template-v2-jdbc-chunked-execution-guide.md`).
 - Inventory file writable: `docs/migration/scenario-inventory.yaml` (or path configured in `MigrationInventoryService`).
+- JDBC templates with field `SCRIPT` / SpEL: dual-run compare uses **SQL + SpEL** (same as draft/promote). Ensure iterator or reader SQL exposes columns referenced in migrated expressions — see `docs/migration/script-spel-draft-migration.md`.
 
 ## 1. Catalog health
 

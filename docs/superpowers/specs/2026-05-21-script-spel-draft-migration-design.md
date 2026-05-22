@@ -181,7 +181,7 @@ Add unit test in `V1TemplateMigrationAnalyzerTests` (or migration test package) 
 |----------------|----------------|
 | `COMPATIBILITY_ONLY` | No SpEL draft (orchestration / JS) |
 | `ADAPTED` / `APPROXIMATE` + `PATH_SPEL` | SQL + SpEL draft |
-| `ADAPTED` + SQL only (no script fields) | SQL only (today) |
+| `ADAPTED` + SQL only (no script fields) | SQL only |
 
 Promote rules unchanged: still reject `COMPATIBILITY_ONLY` / `BLOCKED` and unsigned inventory.
 
