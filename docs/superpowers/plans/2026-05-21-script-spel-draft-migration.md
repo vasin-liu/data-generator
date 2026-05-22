@@ -490,7 +490,7 @@ git commit -m "docs(migration): mark SCRIPT to SpEL draft bridge complete"
 
 **Files:** None (verification)
 
-- [ ] **Step 1: Run epic CI slice**
+- [x] **Step 1: Run epic CI slice**
 
 ```powershell
 cd D:\Work\99_Code\data-generator
@@ -530,3 +530,4 @@ Expected: `BUILD SUCCESS`, 0 failures.
 | Date | Change |
 |------|--------|
 | 2026-05-21 | Initial plan from approved spec (scope 2b) |
+| 2026-05-22 | Implemented; full reactor green; compare draft split documented |

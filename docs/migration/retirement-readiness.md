@@ -20,6 +20,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 | Dual-run + report | `StagingSimulatedPromoteWorkflowTests`, `BuiltinClasspathTemplateMigrationWorkflowTests` |
 | Cohort sign-off | `MigrationWaveCohortSignoffTests` + `scenario-inventory.yaml` |
 | End-to-end promote | `StagingSimulatedPromoteWorkflowTests` + `migration-staging.ps1 -Action workflow-promote` (M2) |
+| SCRIPT → SpEL draft | `V1ScriptToSpelDraftConverter`; compare notes: `docs/migration/script-spel-draft-migration.md` |
 
 ## P1 — Technical
 

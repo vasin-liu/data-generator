@@ -244,6 +244,12 @@ Promote rules unchanged: still reject `COMPATIBILITY_ONLY` / `BLOCKED` and unsig
 
 ## Revision history
 
+## Implementation notes (2026-05-22)
+
+- **Compare path:** `MigrationDraftService.buildDraftForCompare()` omits SpEL on query-source templates until SQL row shape carries field-level inputs. Promote/draft API uses full SQL+SpEL chain.
+- **Docs:** `docs/migration/script-spel-draft-migration.md`
+
 | Date | Change |
 |------|--------|
 | 2026-05-21 | Initial design; scope 2b per brainstorming |
+| 2026-05-22 | Implemented; compare vs promote draft split documented |
