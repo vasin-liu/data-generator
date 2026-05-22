@@ -9,6 +9,8 @@ Templates in this category should **remain on V1** (or use a future V2 orchestra
 | Inventory id | Name | Scenario family | Blockers |
 |--------------|------|-----------------|----------|
 | regression-v1-with-pause | regression-with-pause | orchestration_legacy | PAUSE orchestration on iterator |
+| builtin-demo-18_数据库查询迭代器样例 | demo-18-database-iterator-log | orchestration_legacy | LOG orchestration on iterator |
+| builtin-demo-27_暂停阶段样例 | demo-27-pause-stage | orchestration_legacy | PAUSE orchestration stage |
 | regression-v1-iterator-simple | regression-iterator-simple | synthetic | Field SCRIPT not in SQL (review; not blocked for draft) |
 
 > **Note:** `regression-v1-iterator-simple` is **ADAPTED** for Wave 1 draft migration but retains SCRIPT field logic on V1 until rewritten. It is listed here because operators often treat SCRIPT-heavy templates as compatibility-only during dual-run review.
