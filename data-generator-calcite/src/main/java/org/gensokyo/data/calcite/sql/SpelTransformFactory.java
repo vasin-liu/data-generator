@@ -113,7 +113,8 @@ public class SpelTransformFactory implements V2TransformFactory {
         evaluationContext.setVariable(Const.SCRIPT_VAR_FAKER, FAKER.get());
         for (ParsedMapping mapping : mappings) {
             Object value = mapping.expression().getValue(evaluationContext);
-            values.put(mapping.name(), value);
+            // Lowercase keys match QueryRowSourceSupport and migration #row['col'] references.
+            values.put(mapping.name().toLowerCase(Locale.ROOT), value);
         }
         return new Row(values);
     }

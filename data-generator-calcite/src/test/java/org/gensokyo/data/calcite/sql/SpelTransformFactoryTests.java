@@ -45,6 +45,27 @@ class SpelTransformFactoryTests {
     }
 
     @Test
+    void evaluatesDependsOnColumnFromPriorMapping() {
+        RowSchema schema = schema(
+                new ColumnDef("online_space_scale", "INT", false),
+                new ColumnDef("regular_space_num", "INT", false));
+        List<Row> rows = List.of(new Row(Map.of("online_space_scale", 50, "regular_space_num", 10)));
+        CalciteExecutionContext context = new CalciteExecutionContext()
+                .addTable("input", schema, rows);
+
+        SpelTransformVO transform = new SpelTransformVO();
+        transform.setColumns(List.of(
+                mapping("ONLINE_QUANTITY", "(#row['online_space_scale'] * #row['regular_space_num'])/100"),
+                mapping("ONLINE_IDLE_QUANTITY", "#faker.number.numberBetween(1,#row['online_quantity'])")));
+
+        SpelTransformFactory factory = new SpelTransformFactory();
+        CalciteRowTransformer.TransformResult result = factory.apply(transform, context);
+
+        Assertions.assertEquals(5, result.rows().getFirst().values().get("online_quantity"));
+        Assertions.assertNotNull(result.rows().getFirst().values().get("online_idle_quantity"));
+    }
+
+    @Test
     void addsComputedColumnFromSpel() {
         RowSchema schema = schema(new ColumnDef("id", "VARCHAR", false));
         List<Row> rows = List.of(new Row(Map.of("id", "a")));

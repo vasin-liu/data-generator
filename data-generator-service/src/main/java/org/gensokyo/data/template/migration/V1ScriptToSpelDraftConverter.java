@@ -14,6 +14,7 @@ import org.gensokyo.data.model.vo.stage.ScriptStageVO;
 import org.gensokyo.data.model.vo.stage.StageVO;
 import org.gensokyo.kit.collect.CollectKit;
 
+import java.util.Locale;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -74,7 +75,7 @@ public final class V1ScriptToSpelDraftConverter {
             }
             SpelColumnMapping mapping = new SpelColumnMapping();
             mapping.setName(field.getName());
-            mapping.setExpression(toV2SpelExpression(expression.trim()));
+            mapping.setExpression(toV2SpelExpression(expression.trim(), field));
             columns.add(mapping);
         }
         if (columns.isEmpty()) {
@@ -153,11 +154,21 @@ public final class V1ScriptToSpelDraftConverter {
         return ordered;
     }
 
-    private static String toV2SpelExpression(String expression) {
+    private static String toV2SpelExpression(String expression, FieldVO field) {
         if (expression.matches("[A-Za-z_][A-Za-z0-9_]*")) {
             // V1 bare identifiers such as "row" are string literals in field SCRIPT stages.
             return "'" + expression.replace("'", "''") + "'";
         }
-        return V1SpelExpressionRewriter.rewrite(expression);
+        // V1 bare #dataset on dependsOn fields is the depended column value, not the SQL row — rewrite before #row mapping.
+        String rewritten = expression;
+        if (field != null && CollectKit.isNotEmpty(field.getDependsOn())) {
+            String primaryDep = field.getDependsOn().getFirst();
+            if (primaryDep != null && !primaryDep.isBlank()) {
+                rewritten = rewritten.replaceAll(
+                        "#dataset(?!\\.|\\[)\\b",
+                        "#row['" + primaryDep.toLowerCase(Locale.ROOT) + "']");
+            }
+        }
+        return V1SpelExpressionRewriter.rewrite(rewritten);
     }
 }

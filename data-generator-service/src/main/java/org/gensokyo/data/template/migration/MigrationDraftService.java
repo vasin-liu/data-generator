@@ -38,15 +38,13 @@ public class MigrationDraftService {
     }
 
     /**
-     * Builds a V2 draft for dual-run compare. Query-source templates keep SQL-only V2 execution until
-     * SCRIPT columns can be evaluated on the SQL row shape (field-level {@code #dataset} semantics differ).
+     * Builds a V2 draft for dual-run compare (same transform chain as {@link #buildDraft}).
      *
      * @param v1 V1 template
      * @return draft for compare normalization
      */
     public TemplateV2DraftVO buildDraftForCompare(TemplateVO v1) {
-        boolean querySourcePath = CollectKit.isNotEmpty(V1QuerySourceExtractor.extract(v1));
-        return buildDraftInternal(v1, !querySourcePath);
+        return buildDraftInternal(v1, true);
     }
 
     private TemplateV2DraftVO buildDraftInternal(TemplateVO v1, boolean attachSpel) {
