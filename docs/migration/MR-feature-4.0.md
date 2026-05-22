@@ -6,7 +6,7 @@ This branch delivers coordinated capabilities for Template V2 on `feature-4.0`:
 
 1. **JDBC chunked execution** — row-local `CHUNKED` pipeline for large JDBC read → DB/Kafka/ES export, with execution-shape classification, broadcast-join support, scale limits, and service-side validation at template save.
 2. **V1 migration workbench** — analyze / draft / compare / promote APIs, scenario inventory (DB + regression fixtures), dual-run classification, sign-off, and markdown reports under `docs/migration/reports/`.
-3. **V1 retirement capabilities** — control plane validate/explain/preview, `SpelTransformVO` row-level SpEL, **SCRIPT → SpEL migration draft** (`V1ScriptToSpelDraftConverter`), `pci.data.generator.v1-execution.enabled` gate, CI regression over built-in templates.
+3. **V1 retirement capabilities** — control plane validate/explain/preview, `SpelTransformVO` row-level SpEL, **SCRIPT → SpEL migration draft** (`V1ScriptToSpelDraftConverter`, JDBC **compare** uses same SQL+SpEL chain), `pci.data.generator.v1-execution.enabled` gate, CI regression over built-in templates.
 4. **Geospatial (Phases 1, 2B, 2C, 2D)** — synthetic `GEO` iterator, `GEOJSON`/`POSTGIS` V2 sources, Calcite SQL over geo rows, and `V2_GEO_*` in-memory functions. See `docs/geospatial-overview.md`.
 
 ## V1 retirement (merge vs M2)
@@ -78,7 +78,8 @@ See `docs/testing-embedded-components.md`.
 
 ## Test plan
 
-- [x] Full reactor test (2026-05-22): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~4m 30s, 0 failures (incl. SCRIPT→SpEL draft + compare fixes)
+- [x] Full reactor test (2026-05-22): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~5m 11s, 0 failures (incl. JDBC compare SpEL + `dependsOn` / lowercase row keys)
+- [x] Full reactor test (2026-05-22 earlier): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~4m 30s, 0 failures (incl. SCRIPT→SpEL draft + compare fixes)
 - [x] Full reactor test (2026-05-21): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 43/43 modules, ~4m 12s, 0 failures
 - [x] Full reactor test (2026-05-20): `.\mvnw-jdk25.ps1 test` — **BUILD SUCCESS**, 41/41 modules, ~6m 24s, 0 failures
 - [x] Retirement M1 CI slice (2026-05-21): BuiltinClasspath*, MigrationWaveCohort*, StagingSimulatedPromote*, control plane, v1 flag, promote — **BUILD SUCCESS**, 25 tests, 0 failures
@@ -118,4 +119,4 @@ http://172.25.21.141/gensokyo/data-generator/-/merge_requests/new?merge_request[
 
 ## Commits
 
-`feature-4.0` includes JDBC chunked execution, migration workbench, geospatial phases, V1 retirement program (control plane, SpEL, SCRIPT→SpEL draft, v1 flag, CI simulation, promote sign-off guard), and deferred-ops documentation. See `docs/migration/script-spel-draft-migration.md` for draft vs compare behavior.
+`feature-4.0` includes JDBC chunked execution, migration workbench, geospatial phases, V1 retirement program (control plane, SpEL, SCRIPT→SpEL draft, **JDBC dual-run compare with SpEL**, v1 flag, CI simulation, promote sign-off guard), and deferred-ops documentation. **`master`** at `b93bc3f` merges this line (2026-05-22). See `docs/migration/script-spel-draft-migration.md`.
