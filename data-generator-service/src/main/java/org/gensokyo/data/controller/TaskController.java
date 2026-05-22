@@ -76,10 +76,18 @@ public class TaskController {
         executor.shutdown();
     }
 
+    /**
+     * Lists templates for the operator catalog.
+     *
+     * @param includeArchived when {@code true}, includes archived (soft-deleted) rows
+     * @return template DTO list
+     */
     @GetMapping("/list")
-    public R<List<TemplateDTO>> list() {
-        var all = repository.findAll()
-                .stream()
+    public R<List<TemplateDTO>> list(
+            @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "false")
+            boolean includeArchived) {
+        var source = includeArchived ? repository.findAll() : repository.findByArchivedFalse();
+        var all = source.stream()
                 .map(TemplateDTO::new)
                 .toList();
         return R.ok(all);

@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `template`
     `content_json` CLOB         DEFAULT NULL,
     `content_yaml` CLOB         DEFAULT NULL,
     `status`       VARCHAR(8)   DEFAULT NULL,
+    `archived`     BOOLEAN      DEFAULT FALSE NOT NULL,
+    `archived_at`  TIMESTAMP    DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
 

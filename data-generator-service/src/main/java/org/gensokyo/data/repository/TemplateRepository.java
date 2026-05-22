@@ -30,4 +30,18 @@ public interface TemplateRepository extends JpaRepository<TemplatePO, Long> {
     List<TemplatePO> findByNameStartingWith(String prefix);
 
     List<TemplatePO> findByNameEndingWith(String suffix);
+
+    /**
+     * Active templates for operator catalog (non-archived).
+     *
+     * @return templates with {@code archived = false}
+     */
+    List<TemplatePO> findByArchivedFalse();
+
+    /**
+     * Archived templates only.
+     *
+     * @return templates with {@code archived = true}
+     */
+    List<TemplatePO> findByArchivedTrue();
 }

@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * 模板存储类
@@ -74,4 +75,16 @@ public class TemplatePO implements Serializable {
      */
     @Column(columnDefinition = "CLOB", name = "content_yaml")
     private String contentYaml;
+
+    /**
+     * When true, template is hidden from default operator lists (soft delete).
+     */
+    @Column(name = "archived", nullable = false)
+    private Boolean archived = Boolean.FALSE;
+
+    /**
+     * Timestamp when the template was archived; null when active.
+     */
+    @Column(name = "archived_at")
+    private Instant archivedAt;
 }

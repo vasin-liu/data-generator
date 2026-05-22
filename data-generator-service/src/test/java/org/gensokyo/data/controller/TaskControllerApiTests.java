@@ -58,7 +58,7 @@ class TaskControllerApiTests {
         saveV1Template(97001L, "task-list-a");
         saveV1Template(97002L, "task-list-b");
 
-        R<List<TemplateDTO>> result = taskController.list();
+        R<List<TemplateDTO>> result = taskController.list(false);
 
         Assertions.assertTrue(result.isSuccess());
         Assertions.assertEquals(2, result.getData().size());
