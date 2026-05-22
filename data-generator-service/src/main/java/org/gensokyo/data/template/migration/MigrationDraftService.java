@@ -34,6 +34,22 @@ public class MigrationDraftService {
      * @throws IllegalArgumentException when no supported migration path exists
      */
     public TemplateV2DraftVO buildDraft(TemplateVO v1) {
+        return buildDraftInternal(v1, true);
+    }
+
+    /**
+     * Builds a V2 draft for dual-run compare. Query-source templates keep SQL-only V2 execution until
+     * SCRIPT columns can be evaluated on the SQL row shape (field-level {@code #dataset} semantics differ).
+     *
+     * @param v1 V1 template
+     * @return draft for compare normalization
+     */
+    public TemplateV2DraftVO buildDraftForCompare(TemplateVO v1) {
+        boolean querySourcePath = CollectKit.isNotEmpty(V1QuerySourceExtractor.extract(v1));
+        return buildDraftInternal(v1, !querySourcePath);
+    }
+
+    private TemplateV2DraftVO buildDraftInternal(TemplateVO v1, boolean attachSpel) {
         Objects.requireNonNull(v1, "v1");
         TemplateV2DraftVO draft;
         Map<String, QuerySourceVO> querySources = V1QuerySourceExtractor.extract(v1);
@@ -47,7 +63,9 @@ public class MigrationDraftService {
             throw new IllegalArgumentException(
                     "Template has no database-backed sources or supported iterator for V2 draft migration");
         }
-        attachSpelTransformIfPresent(v1, draft);
+        if (attachSpel) {
+            attachSpelTransformIfPresent(v1, draft);
+        }
         return draft;
     }
 

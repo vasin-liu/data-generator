@@ -62,6 +62,18 @@ class V1ScriptToSpelDraftConverterTests {
         Assertions.assertEquals("DERIVED", spel.getColumns().get(1).getName());
     }
 
+    @Test
+    void quotesBareIdentifierScriptContent() {
+        TemplateVO v1 = new TemplateVO();
+        v1.setName("bare-id");
+        v1.setFields(List.of(scriptField("label", "row")));
+
+        SpelTransformVO spel = V1ScriptToSpelDraftConverter.convert(v1);
+
+        Assertions.assertNotNull(spel);
+        Assertions.assertEquals("'row'", spel.getColumns().getFirst().getExpression());
+    }
+
     private static FieldVO scriptField(String name, String content) {
         ScriptVO language = new ScriptVO();
         language.setType("SPEL");

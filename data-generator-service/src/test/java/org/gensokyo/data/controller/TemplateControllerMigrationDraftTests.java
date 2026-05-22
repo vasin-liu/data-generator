@@ -9,6 +9,7 @@ import org.gensokyo.data.DataGeneratorApplication;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
+import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
@@ -76,7 +77,8 @@ class TemplateControllerMigrationDraftTests {
         Assertions.assertTrue(result.isSuccess());
         Assertions.assertEquals("Draft generated", result.getMessage());
         Assertions.assertInstanceOf(IteratorSourceVO.class, result.getData().getSources().get("input"));
-        Assertions.assertInstanceOf(SqlTransformVO.class, result.getData().getTransform());
+        Assertions.assertTrue(result.getData().getTransformers().stream().anyMatch(SqlTransformVO.class::isInstance));
+        Assertions.assertTrue(result.getData().getTransformers().stream().anyMatch(SpelTransformVO.class::isInstance));
     }
 
     @Test

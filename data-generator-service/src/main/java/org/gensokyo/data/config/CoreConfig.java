@@ -35,6 +35,7 @@ import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
 import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
 import org.gensokyo.data.calcite.source.JsonSourceFactory;
+import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
@@ -102,9 +103,15 @@ public class CoreConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(V2TransformFactory.class)
+    @ConditionalOnMissingBean(name = "sqlTransformFactory")
     public V2TransformFactory sqlTransformFactory() {
         return new SqlTransformFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "spelTransformFactory")
+    public V2TransformFactory spelTransformFactory() {
+        return new SpelTransformFactory();
     }
 
     @Bean

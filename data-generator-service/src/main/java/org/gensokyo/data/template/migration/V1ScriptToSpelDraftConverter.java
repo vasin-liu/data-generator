@@ -74,7 +74,7 @@ public final class V1ScriptToSpelDraftConverter {
             }
             SpelColumnMapping mapping = new SpelColumnMapping();
             mapping.setName(field.getName());
-            mapping.setExpression(V1SpelExpressionRewriter.rewrite(expression.trim()));
+            mapping.setExpression(toV2SpelExpression(expression.trim()));
             columns.add(mapping);
         }
         if (columns.isEmpty()) {
@@ -151,5 +151,13 @@ public final class V1ScriptToSpelDraftConverter {
             throw new IllegalArgumentException("Field dependsOn graph contains a cycle");
         }
         return ordered;
+    }
+
+    private static String toV2SpelExpression(String expression) {
+        if (expression.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+            // V1 bare identifiers such as "row" are string literals in field SCRIPT stages.
+            return "'" + expression.replace("'", "''") + "'";
+        }
+        return V1SpelExpressionRewriter.rewrite(expression);
     }
 }

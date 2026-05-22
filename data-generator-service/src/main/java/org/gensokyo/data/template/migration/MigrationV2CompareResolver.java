@@ -60,7 +60,7 @@ public class MigrationV2CompareResolver {
         }
         else {
             TemplateVO v1 = v1Loader.load(entity);
-            draft = migrationDraftService.buildDraft(v1);
+            draft = migrationDraftService.buildDraftForCompare(v1);
         }
         if (Objects.isNull(draft) || CollectKit.isEmpty(draft.getSources())) {
             throw new IllegalArgumentException(String.format(
