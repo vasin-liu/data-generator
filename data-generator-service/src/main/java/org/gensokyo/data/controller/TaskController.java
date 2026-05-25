@@ -34,8 +34,12 @@ import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
+import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
+import org.gensokyo.data.json.TemplateJsonCodec;
+import org.gensokyo.data.task.TaskExecutionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,6 +59,7 @@ public class TaskController {
     private final YamlParser yamlParser;
     private final TemplateV2Runner templateV2Runner;
     private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
+    private final TaskExecutionService taskExecutionService;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -134,6 +139,17 @@ public class TaskController {
         }
     }
 
+    /**
+     * Starts a template run (POST preferred for operator UI).
+     *
+     * @param templateId template id
+     * @return start message with instance id
+     */
+    @PostMapping("/run/{templateId}")
+    public R<String> postRunById(@NotNull @PathVariable Long templateId) {
+        return runById(templateId);
+    }
+
     @GetMapping("/runById/{templateId}")
     public R<String> runById(@NotNull @PathVariable Long templateId) {
         var result = repository.findById(templateId).orElse(null);
@@ -170,19 +186,51 @@ public class TaskController {
     }
 
     private TemplateRuntimeInfo runV1(TemplateVO template) {
-        template.setInstanceId(RandomKit.snowFlake().nextId());
-        executor.submit(defaultDataPipelineTaskFactory.newInstance(template));
-        return new TemplateRuntimeInfo(template.getId(), template.getName(), template.getInstanceId());
+        Long instanceId = RandomKit.snowFlake().nextId();
+        template.setInstanceId(instanceId);
+        taskExecutionService.queueExecution(template.getId(), template.getName(), instanceId, "V1");
+        executor.submit(() -> runV1Tracked(template, instanceId));
+        return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
+    }
+
+    private void runV1Tracked(TemplateVO template, Long instanceId) {
+        taskExecutionService.markRunning(instanceId);
+        try {
+            defaultDataPipelineTaskFactory.newInstance(template).call();
+            taskExecutionService.markSuccess(instanceId, null, null);
+        } catch (Exception e) {
+            taskExecutionService.markFailed(instanceId, e.getMessage());
+        }
     }
 
     private TemplateRuntimeInfo runV2(Long templateId, TemplateV2DraftVO draft) {
         templateV2RuntimeRegistryProvider.current();
         TemplateV2VO template = TemplateV2Normalizer.normalize(draft);
         template.setId(templateId);
-        template.setInstanceId(RandomKit.snowFlake().nextId());
+        Long instanceId = RandomKit.snowFlake().nextId();
+        template.setInstanceId(instanceId);
         TemplateV2Validator.validate(template);
-        executor.submit(() -> templateV2Runner.run(template));
-        return new TemplateRuntimeInfo(template.getId(), template.getName(), template.getInstanceId());
+        taskExecutionService.queueExecution(templateId, template.getName(), instanceId, "V2");
+        executor.submit(() -> runV2Tracked(template, instanceId));
+        return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
+    }
+
+    private void runV2Tracked(TemplateV2VO template, Long instanceId) {
+        taskExecutionService.markRunning(instanceId);
+        try {
+            TemplateV2RunResult result = templateV2Runner.run(template);
+            long rowCount = 0L;
+            String metricsJson = null;
+            if (result.getMetrics() != null) {
+                rowCount = result.getMetrics().getTotalRowsRead();
+                metricsJson = TemplateJsonCodec.write(result.getMetrics());
+            } else if (result.getRows() != null) {
+                rowCount = result.getRows().size();
+            }
+            taskExecutionService.markSuccess(instanceId, rowCount, metricsJson);
+        } catch (Exception e) {
+            taskExecutionService.markFailed(instanceId, e.getMessage());
+        }
     }
 
     private <T> T tryParse(String yaml, Class<T> clazz) {

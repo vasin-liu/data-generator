@@ -41,3 +41,22 @@ CREATE TABLE IF NOT EXISTS `datasource_config`
     `updated_at`        TIMESTAMP     DEFAULT NULL,
     PRIMARY KEY (`name`)
 );
+
+-- Operator-console template run history (P3)
+CREATE TABLE IF NOT EXISTS `task_execution`
+(
+    `id`               LONG         NOT NULL,
+    `template_id`      LONG         NOT NULL,
+    `template_name`    VARCHAR(128) DEFAULT NULL,
+    `instance_id`      LONG         NOT NULL,
+    `definition_kind`  VARCHAR(8)   DEFAULT NULL,
+    `status`           VARCHAR(16)  NOT NULL,
+    `queued_at`        TIMESTAMP    DEFAULT NULL,
+    `started_at`       TIMESTAMP    DEFAULT NULL,
+    `finished_at`      TIMESTAMP    DEFAULT NULL,
+    `row_count`        LONG         DEFAULT NULL,
+    `error_message`    VARCHAR(4000) DEFAULT NULL,
+    `metrics_json`     CLOB         DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `uk_task_execution_instance` UNIQUE (`instance_id`)
+);

@@ -17,6 +17,7 @@ import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2Normalizer;
@@ -43,6 +44,7 @@ public class TemplateEditorService {
 
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
+    private final TaskExecutionService taskExecutionService;
 
     /**
      * Creates an in-memory empty V2 draft (not persisted until {@link #save(Long, TemplateV2DraftVO)}).
@@ -110,6 +112,9 @@ public class TemplateEditorService {
      */
     public void archive(Long templateId) {
         TemplatePO entity = requireEntity(templateId);
+        if (taskExecutionService.isRunning(templateId)) {
+            throw new IllegalArgumentException("Cannot archive template while a run is active: " + templateId);
+        }
         if (Boolean.TRUE.equals(entity.getArchived())) {
             throw new IllegalArgumentException("Template already archived: " + templateId);
         }
