@@ -17,7 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.List;
 import java.util.Set;
+
+import org.gensokyo.data.datasource.DataSourceConfigSummary;
+import org.gensokyo.data.datasource.DataSourceConfigService;
+import org.gensokyo.data.repository.DataSourceConfigRepository;
 
 /**
  * Integration tests for {@code /datasource/database/*} endpoints.
@@ -37,10 +42,36 @@ class DataSourceControllerTests {
     @Autowired
     private DynamicRoutingDataSource dynamicRoutingDataSource;
 
+    @Autowired
+    private DataSourceConfigService dataSourceConfigService;
+
+    @Autowired
+    private DataSourceConfigRepository dataSourceConfigRepository;
+
     @BeforeEach
     void registerRemovableDatasource() {
         if (!dynamicRoutingDataSource.getDataSources().containsKey("removable-ds")) {
             dynamicRoutingDataSource.addDataSource("removable-ds", buildH2DataSource("removable-ds"));
+        }
+    }
+
+    @Test
+    void listDatabaseConfigsReturnsPersistedRows() {
+        String name = "ctrl-test-h2";
+        try {
+            dataSourceConfigService.save(
+                    name,
+                    "jdbc:h2:mem:ctrl_test;DB_CLOSE_DELAY=-1",
+                    "sa",
+                    "",
+                    "org.h2.Driver",
+                    null);
+            R<List<DataSourceConfigSummary>> result = dataSourceController.listDatabaseConfigs();
+            Assertions.assertTrue(result.isSuccess());
+            Assertions.assertTrue(result.getData().stream().anyMatch(c -> name.equals(c.name())));
+        } finally {
+            dataSourceConfigService.remove(name);
+            dataSourceConfigRepository.findById(name).ifPresent(dataSourceConfigRepository::delete);
         }
     }
 

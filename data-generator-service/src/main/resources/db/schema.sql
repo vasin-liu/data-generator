@@ -26,3 +26,18 @@ CREATE TABLE IF NOT EXISTS `task`
     `reason`     VARCHAR(200) DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+-- Operator-console JDBC datasource registry (D1)
+CREATE TABLE IF NOT EXISTS `datasource_config`
+(
+    `name`              VARCHAR(128)  NOT NULL,
+    `url`               VARCHAR(1024) NOT NULL,
+    `username`          VARCHAR(256)  DEFAULT NULL,
+    `password`          VARCHAR(256)  DEFAULT NULL,
+    `driver_class_name` VARCHAR(512)  NOT NULL,
+    `driver_jar_path`   VARCHAR(1024) DEFAULT NULL,
+    `enabled`           BOOLEAN       DEFAULT TRUE NOT NULL,
+    `created_at`        TIMESTAMP     DEFAULT NULL,
+    `updated_at`        TIMESTAMP     DEFAULT NULL,
+    PRIMARY KEY (`name`)
+);
