@@ -34,6 +34,7 @@ import org.gensokyo.data.ui.template.editor.steps.ReviewStep;
 import org.gensokyo.data.ui.template.editor.steps.SinksStep;
 import org.gensokyo.data.ui.template.editor.steps.SourcesStep;
 import org.gensokyo.data.ui.template.editor.steps.TransformStep;
+import org.gensokyo.data.ui.migration.MigrationConsoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,8 +58,11 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
     private final TemplateEditorYamlSupport yamlSupport;
     private final TemplateV2ControlPlaneService controlPlaneService;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
+    private final MigrationConsoleService migrationConsoleService;
 
     private final VerticalLayout stepContent = new VerticalLayout();
+    private final Tab migrationTab = new Tab("Migration");
+    private MigrationPanel migrationPanel;
     private final Div yamlPanel = new Div();
     private final TextArea yamlArea = new TextArea("YAML advanced");
     private final Checkbox yamlMode = new Checkbox("YAML advanced mode");
@@ -72,16 +76,19 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
      * @param yamlSupport             YAML parse/dump
      * @param controlPlaneService     validate
      * @param dynamicRoutingDataSource optional JDBC name list
+     * @param migrationConsoleService  V1→V2 migration actions
      */
     @Autowired
     public TemplateEditorView(
             TemplateEditorService templateEditorService,
             TemplateEditorYamlSupport yamlSupport,
             TemplateV2ControlPlaneService controlPlaneService,
+            MigrationConsoleService migrationConsoleService,
             @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource) {
         this.templateEditorService = templateEditorService;
         this.yamlSupport = yamlSupport;
         this.controlPlaneService = controlPlaneService;
+        this.migrationConsoleService = migrationConsoleService;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
         setSizeFull();
         setPadding(true);
@@ -138,7 +145,7 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
     private void renderEditor() {
         H2 title = new H2(model.getTemplateId() == null ? "New template" : "Edit template " + model.getTemplateId());
         if (model.getKind() == TemplateDefinitionKind.V1) {
-            add(new Paragraph("V1 legacy template — form is read-only. Use Migration tab (P4) or promote via REST."));
+            add(new Paragraph("V1 legacy template — wizard form is read-only. Use the Migration tab to analyze, compare, and promote."));
             if (model.getV1Yaml() != null) {
                 TextArea v1 = new TextArea("V1 YAML (read-only)");
                 v1.setValue(model.getV1Yaml());
@@ -148,21 +155,70 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
                 add(v1);
             }
         }
-        Tabs tabs = new Tabs(steps.keySet().toArray(Tab[]::new));
+        java.util.List<Tab> tabList = new java.util.ArrayList<>(steps.keySet());
+        if (model.getTemplateId() != null) {
+            tabList.add(migrationTab);
+        }
+        Tabs tabs = new Tabs(tabList.toArray(Tab[]::new));
         stepContent.setPadding(false);
         stepContent.setSpacing(true);
-        tabs.addSelectedChangeListener(e -> showStep(e.getSelectedTab()));
+        tabs.addSelectedChangeListener(e -> showSelectedTab(e.getSelectedTab()));
         add(title, yamlMode, tabs, stepContent, yamlPanel, new RouterLink("Back to templates", TemplateListView.class));
+        if (model.getTemplateId() != null) {
+            migrationPanel = new MigrationPanel(
+                    migrationConsoleService,
+                    yamlSupport,
+                    model.getTemplateId(),
+                    model.getKind(),
+                    this::reloadAfterPromote,
+                    draft -> {
+                        model.setDraft(draft);
+                        refreshAllSteps();
+                        syncYamlFromModel();
+                    });
+        }
         refreshAllSteps();
-        showStep(tabs.getSelectedTab() != null ? tabs.getSelectedTab() : tabs.getTabAt(0));
+        showSelectedTab(tabs.getSelectedTab() != null ? tabs.getSelectedTab() : tabs.getTabAt(0));
         syncYamlFromModel();
     }
 
+    private void showSelectedTab(Tab tab) {
+        if (tab == migrationTab) {
+            stepContent.setVisible(true);
+            yamlPanel.setVisible(false);
+            stepContent.removeAll();
+            if (migrationPanel != null) {
+                stepContent.add(migrationPanel);
+            } else {
+                stepContent.add(new Paragraph("Save the template first to use migration tools."));
+            }
+            return;
+        }
+        yamlMode.setValue(false);
+        showStep(tab);
+    }
+
     private void showStep(Tab tab) {
+        stepContent.setVisible(true);
+        yamlPanel.setVisible(false);
         stepContent.removeAll();
         EditorStep step = steps.get(tab);
         if (step != null) {
             stepContent.add(step.getView());
+        }
+    }
+
+    private void reloadAfterPromote() {
+        if (model.getTemplateId() == null) {
+            return;
+        }
+        try {
+            model = TemplateEditorModel.fromPayload(templateEditorService.loadForEditor(model.getTemplateId()));
+            removeAll();
+            renderEditor();
+            Notification.show("Template promoted to V2 — editor reloaded");
+        } catch (IllegalArgumentException ex) {
+            Notification.show("Reload failed: " + ex.getMessage());
         }
     }
 
