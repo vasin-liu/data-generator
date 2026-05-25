@@ -57,7 +57,7 @@ REST APIs remain available for automation and CI; the UI calls the same Spring s
 | Transform | `sql` / `spel` transform |
 | Sinks | `CONSOLE`, `JDBC`, `KAFKA`, `ELASTICSEARCH` |
 | Execution | `executionPolicy`, chunking |
-| Review | Validate, Save |
+| Review | Validate, Save, **Run** (save draft → navigate to job detail) |
 
 **V1 templates:** wizard fields are read-only; V1 YAML shown read-only. Use the **Migration** tab to analyze, compare, and promote.
 
@@ -124,7 +124,8 @@ Rows survive restart via `DataSourceBootstrap` (`@Order(100)`).
 
 - Grid: instance id, template name, kind (V1/V2), status, finished time.
 - Optional filter by template id.
-- **Detail** link → `/jobs/{instanceId}` (refresh for latest status).
+- **Auto-refresh** every 2s while any visible row is `QUEUED` or `RUNNING`.
+- **Detail** link → `/jobs/{instanceId}` (auto-refresh until terminal state).
 
 Statuses: `QUEUED`, `RUNNING`, `SUCCESS`, `FAILED`, `CANCELLED`.
 
@@ -208,8 +209,7 @@ The console improves day-to-day ops; it does **not** replace M2 staging promote 
 
 ## Known gaps (follow-on)
 
-- **Review → Run** button navigating to job detail (use REST `POST /task/run/{id}` today).
-- Job list auto-poll every 2s while any `RUNNING` (manual Refresh today).
+- Job list polls every 2s only while any row is `QUEUED` or `RUNNING` on the current page (filter-aware).
 - Form source types: `json`, `csv`, `geojson`, etc. (P1.5).
 - Spring Security / roles on Vaadin routes.
 - W3 V2 orchestration spike (P5, deferred under S1).

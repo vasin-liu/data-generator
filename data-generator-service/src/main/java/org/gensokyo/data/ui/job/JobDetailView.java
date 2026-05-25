@@ -5,6 +5,9 @@
  */
 package org.gensokyo.data.ui.job;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Pre;
@@ -14,14 +17,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import org.gensokyo.data.task.TaskExecutionService;
+import org.gensokyo.data.task.TaskExecutionStatus;
 import org.gensokyo.data.task.TaskExecutionSummary;
 import org.gensokyo.data.ui.MainLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Single execution detail with manual refresh (polling can be added later).
+ * Single execution detail with auto-refresh while QUEUED or RUNNING.
  *
  * @author Gensokyo
  * @since 2026-05-23
@@ -31,10 +36,13 @@ import org.springframework.stereotype.Component;
 @PageTitle("Job detail | Data Generator")
 public class JobDetailView extends VerticalLayout implements HasUrlParameter<String> {
 
+    private static final int POLL_MS = 2000;
+
     private final TaskExecutionService taskExecutionService;
     private final Span statusLine = new Span();
     private final Pre metricsBlock = new Pre();
     private Long instanceId;
+    private Registration pollRegistration;
 
     /**
      * @param taskExecutionService execution lookup
@@ -44,6 +52,28 @@ public class JobDetailView extends VerticalLayout implements HasUrlParameter<Str
         this.taskExecutionService = taskExecutionService;
         setPadding(true);
         add(new H2("Job detail"), statusLine, metricsBlock, new Button("Refresh", e -> load()));
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        UI ui = attachEvent.getUI();
+        if (ui != null) {
+            pollRegistration = ui.addPollListener(event -> load());
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (pollRegistration != null) {
+            pollRegistration.remove();
+            pollRegistration = null;
+        }
+        UI ui = detachEvent.getUI();
+        if (ui != null) {
+            ui.setPollInterval(-1);
+        }
+        super.onDetach(detachEvent);
     }
 
     @Override
@@ -57,6 +87,7 @@ public class JobDetailView extends VerticalLayout implements HasUrlParameter<Str
     private void load() {
         if (instanceId == null) {
             statusLine.setText("Missing instance id");
+            updatePolling(false);
             return;
         }
         try {
@@ -69,8 +100,19 @@ public class JobDetailView extends VerticalLayout implements HasUrlParameter<Str
                     row.definitionKind(),
                     row.rowCount()));
             metricsBlock.setText(row.metricsJson() != null ? row.metricsJson() : row.errorMessage());
+            updatePolling(isActive(row.status()));
         } catch (Exception ex) {
             Notification.show(ex.getMessage());
+            updatePolling(false);
         }
+    }
+
+    private void updatePolling(boolean active) {
+        getUI().ifPresent(ui -> ui.setPollInterval(active ? POLL_MS : -1));
+    }
+
+    private static boolean isActive(String status) {
+        return TaskExecutionStatus.QUEUED.name().equals(status)
+                || TaskExecutionStatus.RUNNING.name().equals(status);
     }
 }

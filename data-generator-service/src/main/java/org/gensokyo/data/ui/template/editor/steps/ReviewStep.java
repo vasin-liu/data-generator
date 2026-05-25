@@ -13,12 +13,16 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
+import org.gensokyo.data.ui.job.JobDetailView;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
+import org.gensokyo.data.ui.template.editor.TemplateEditorRunSupport;
 
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 /**
  * Review step: validate draft and trigger save.
@@ -33,28 +37,41 @@ public class ReviewStep implements EditorStep {
     private final TextArea validationOutput = new TextArea("Validation");
     private final Button validateButton = new Button("Validate");
     private final Button saveButton = new Button("Save");
+    private final Button runButton = new Button("Run");
     private final TemplateV2ControlPlaneService controlPlaneService;
+    private final TemplateEditorRunSupport runSupport;
     private final Consumer<TemplateEditorModel> saveHandler;
+    private final LongConsumer onTemplateIdAssigned;
 
     /**
      * @param controlPlaneService validate API
+     * @param runSupport          save draft and start task run
      * @param saveHandler         invoked when Save is clicked (after apply)
+     * @param onTemplateIdAssigned called when run creates a new persisted template id
      */
-    public ReviewStep(TemplateV2ControlPlaneService controlPlaneService, Consumer<TemplateEditorModel> saveHandler) {
+    public ReviewStep(
+            TemplateV2ControlPlaneService controlPlaneService,
+            TemplateEditorRunSupport runSupport,
+            Consumer<TemplateEditorModel> saveHandler,
+            LongConsumer onTemplateIdAssigned) {
         this.controlPlaneService = controlPlaneService;
+        this.runSupport = runSupport;
         this.saveHandler = saveHandler;
+        this.onTemplateIdAssigned = onTemplateIdAssigned;
         validationOutput.setReadOnly(true);
         validationOutput.setMinHeight("200px");
         validationOutput.setWidthFull();
         validateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        runButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         saveButton.addClickListener(e -> {
             if (currentModel != null && currentModel.isSaveAllowed()) {
                 saveHandler.accept(currentModel);
             }
         });
+        runButton.addClickListener(e -> runTemplate());
         validateButton.addClickListener(e -> runValidate());
-        HorizontalLayout actions = new HorizontalLayout(validateButton, saveButton);
+        HorizontalLayout actions = new HorizontalLayout(validateButton, saveButton, runButton);
         root.add(status, actions, validationOutput);
     }
 
@@ -81,13 +98,42 @@ public class ReviewStep implements EditorStep {
         status.setText("Kind: " + model.getKind()
                 + (model.getTemplateId() != null ? " | id=" + model.getTemplateId() : " | new")
                 + (model.isArchived() ? " | ARCHIVED" : ""));
+        boolean canRun = model.isSaveAllowed() && model.getKind() != TemplateDefinitionKind.V1;
         saveButton.setEnabled(model.isSaveAllowed());
         validateButton.setEnabled(model.isSaveAllowed());
+        runButton.setEnabled(canRun);
+        runButton.setTooltipText(canRun ? "Save draft and start run" : "V1 templates: use Migration tab to promote first");
     }
 
     @Override
     public void applyToModel(TemplateEditorModel model) {
         // Review does not mutate draft fields
+    }
+
+    private void runTemplate() {
+        if (currentModel == null || !currentModel.isSaveAllowed()) {
+            return;
+        }
+        if (currentModel.getKind() == TemplateDefinitionKind.V1) {
+            Notification.show("Promote to V2 before running from the editor");
+            return;
+        }
+        if (applyAllSteps != null) {
+            applyAllSteps.run();
+        }
+        try {
+            TemplateEditorRunSupport.RunStartResult started =
+                    runSupport.saveAndRun(currentModel.getTemplateId(), currentModel.getDraft());
+            if (currentModel.getTemplateId() == null) {
+                currentModel.setTemplateId(started.templateId());
+                onTemplateIdAssigned.accept(started.templateId());
+            }
+            Notification.show("Run started — opening job detail");
+            runButton.getUI().ifPresent(
+                    ui -> ui.navigate(JobDetailView.class, String.valueOf(started.instanceId())));
+        } catch (IllegalArgumentException ex) {
+            Notification.show("Run failed: " + ex.getMessage());
+        }
     }
 
     private void runValidate() {

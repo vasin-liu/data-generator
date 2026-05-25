@@ -49,7 +49,8 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
   - [x] P2 `datasource_config` persistence + datasource views
   - [x] P3 `task_execution` history + job center
   - [x] P4 migration tab + `/migration` dashboard (promote disabled for `COMPATIBILITY_ONLY` per S1)
-  - [ ] P1.5 extra source types in forms; Vaadin security roles; editor Review→Run shortcut (see usage guide gaps)
+  - [x] Editor Review→Run + jobs auto-poll (2s while active)
+  - [ ] P1.5 extra source types in forms; Vaadin security roles (see usage guide gaps)
 
 ## P3 — Business
 

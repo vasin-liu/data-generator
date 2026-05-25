@@ -59,6 +59,7 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
     private final TemplateV2ControlPlaneService controlPlaneService;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
     private final MigrationConsoleService migrationConsoleService;
+    private final TemplateEditorRunSupport templateEditorRunSupport;
 
     private final VerticalLayout stepContent = new VerticalLayout();
     private final Tab migrationTab = new Tab("Migration");
@@ -77,6 +78,7 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
      * @param controlPlaneService     validate
      * @param dynamicRoutingDataSource optional JDBC name list
      * @param migrationConsoleService  V1→V2 migration actions
+     * @param templateEditorRunSupport save + run from Review step
      */
     @Autowired
     public TemplateEditorView(
@@ -84,11 +86,13 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
             TemplateEditorYamlSupport yamlSupport,
             TemplateV2ControlPlaneService controlPlaneService,
             MigrationConsoleService migrationConsoleService,
+            TemplateEditorRunSupport templateEditorRunSupport,
             @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource) {
         this.templateEditorService = templateEditorService;
         this.yamlSupport = yamlSupport;
         this.controlPlaneService = controlPlaneService;
         this.migrationConsoleService = migrationConsoleService;
+        this.templateEditorRunSupport = templateEditorRunSupport;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
         setSizeFull();
         setPadding(true);
@@ -127,7 +131,11 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
 
     private void buildSteps(Set<String> jdbcNames) {
         steps.clear();
-        ReviewStep reviewStep = new ReviewStep(controlPlaneService, this::saveTemplate);
+        ReviewStep reviewStep = new ReviewStep(
+                controlPlaneService,
+                templateEditorRunSupport,
+                this::saveTemplate,
+                this::assignTemplateIdAfterRun);
         GeneralStep general = new GeneralStep();
         SourcesStep sources = new SourcesStep(jdbcNames);
         TransformStep transform = new TransformStep();
@@ -206,6 +214,10 @@ public class TemplateEditorView extends VerticalLayout implements HasUrlParamete
         if (step != null) {
             stepContent.add(step.getView());
         }
+    }
+
+    private void assignTemplateIdAfterRun(Long templateId) {
+        model.setTemplateId(templateId);
     }
 
     private void reloadAfterPromote() {
