@@ -44,6 +44,7 @@ REST APIs remain available for automation and CI; the UI calls the same Spring s
 - Columns: id, name, archived flag.
 - **New template** → editor at `/template/editor/new`.
 - **Edit** → `/template/editor/{id}`.
+- **Run** — starts async execution from the grid (archived rows disabled); opens job detail.
 - **Archive** / **Restore** — soft delete (`template.archived`, `archived_at`). Archived templates are hidden from `GET /task/list` by default.
 
 ### Editor (`/template/editor/...`)
@@ -57,7 +58,7 @@ REST APIs remain available for automation and CI; the UI calls the same Spring s
 | Transform | `sql` / `spel` transform |
 | Sinks | `CONSOLE`, `JDBC`, `KAFKA`, `ELASTICSEARCH` |
 | Execution | `executionPolicy`, chunking |
-| Review | Validate, Save, **Run** (save draft → navigate to job detail) |
+| Review | Validate, **Preview**, Save, **Run** (save draft → preview or job detail) |
 
 **V1 templates:** wizard fields are read-only; V1 YAML shown read-only. Use the **Migration** tab to analyze, compare, and promote.
 
@@ -209,10 +210,11 @@ The console improves day-to-day ops; it does **not** replace M2 staging promote 
 
 ## Known gaps (follow-on)
 
-- Job list polls every 2s only while any row is `QUEUED` or `RUNNING` on the current page (filter-aware).
 - Form source types: `json`, `csv`, `geojson`, etc. (P1.5).
 - Spring Security / roles on Vaadin routes.
 - W3 V2 orchestration spike (P5, deferred under S1).
+
+Preview requires **IN_MEMORY** execution mode (CHUNKED/STREAMING templates fail with a clear error).
 
 ## Verify after changes
 

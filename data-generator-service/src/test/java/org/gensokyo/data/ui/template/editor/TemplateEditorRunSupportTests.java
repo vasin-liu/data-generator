@@ -8,6 +8,8 @@ package org.gensokyo.data.ui.template.editor;
 import org.gensokyo.data.controller.TaskController;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.template.TemplateV2ControlPlaneService;
+import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.gensokyo.data.template.editor.TemplateEditorPayload;
 import org.gensokyo.data.template.editor.TemplateEditorService;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +38,9 @@ class TemplateEditorRunSupportTests {
 
     @Mock
     private TaskController taskController;
+
+    @Mock
+    private TemplateV2ControlPlaneService controlPlaneService;
 
     @InjectMocks
     private TemplateEditorRunSupport runSupport;
@@ -67,5 +72,31 @@ class TemplateEditorRunSupportTests {
         Assertions.assertEquals(7L, result.templateId());
         Assertions.assertEquals(7000L, result.instanceId());
         verify(templateEditorService).save(eq(7L), any());
+    }
+
+    @Test
+    void runExistingUsesPersistedTemplate() {
+        when(taskController.runById(9L))
+                .thenReturn(R.ok("Template 't' started. templateId=9, instanceId=9009"));
+
+        TemplateEditorRunSupport.RunStartResult result = runSupport.runExisting(9L);
+
+        Assertions.assertEquals(9L, result.templateId());
+        Assertions.assertEquals(9009L, result.instanceId());
+    }
+
+    @Test
+    void saveAndPreviewPersistsThenPreviews() {
+        TemplateV2DraftVO draft = new TemplateV2DraftVO();
+        TemplateV2PreviewDTO preview = new TemplateV2PreviewDTO();
+        when(templateEditorService.save(3L, draft))
+                .thenReturn(new TemplateEditorPayload(3L, null, draft, null, false));
+        when(controlPlaneService.preview(3L, 5)).thenReturn(preview);
+
+        TemplateEditorRunSupport.PreviewResult result = runSupport.saveAndPreview(3L, draft, 5);
+
+        Assertions.assertEquals(3L, result.templateId());
+        Assertions.assertSame(preview, result.preview());
+        verify(controlPlaneService).preview(3L, 5);
     }
 }

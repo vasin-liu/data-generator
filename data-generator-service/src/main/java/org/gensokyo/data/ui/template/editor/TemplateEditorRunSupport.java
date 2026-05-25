@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.controller.TaskController;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.template.TemplateV2ControlPlaneService;
+import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.gensokyo.data.template.editor.TemplateEditorPayload;
 import org.gensokyo.data.template.editor.TemplateEditorService;
 import org.springframework.stereotype.Component;
@@ -30,6 +33,7 @@ public class TemplateEditorRunSupport {
 
     private final TemplateEditorService templateEditorService;
     private final TaskController taskController;
+    private final TemplateV2ControlPlaneService controlPlaneService;
 
     /**
      * Result of save + async run submission.
@@ -63,6 +67,66 @@ public class TemplateEditorRunSupport {
         }
         String payload = result.getData() != null ? result.getData() : result.getMessage();
         return new RunStartResult(resolvedId, parseInstanceId(payload));
+    }
+
+    /**
+     * Starts a run for an already persisted template (no draft save).
+     *
+     * @param templateId persisted template id
+     * @return template and instance ids
+     * @throws IllegalArgumentException when run fails
+     */
+    public RunStartResult runExisting(long templateId) {
+        R<String> result = taskController.runById(templateId);
+        if (!result.isSuccess()) {
+            throw new IllegalArgumentException(result.getMessage());
+        }
+        String payload = result.getData() != null ? result.getData() : result.getMessage();
+        return new RunStartResult(templateId, parseInstanceId(payload));
+    }
+
+    /**
+     * Persists the draft when needed, then runs a bounded in-memory preview.
+     *
+     * @param templateId persisted id, or null to create first
+     * @param draft      current V2 draft
+     * @param maxRows    optional row cap from execution policy
+     * @return preview DTO and resolved template id
+     * @throws IllegalArgumentException when save or preview fails
+     */
+    public PreviewResult saveAndPreview(Long templateId, TemplateV2DraftVO draft, Integer maxRows) {
+        long resolvedId;
+        if (templateId == null) {
+            TemplateEditorPayload created = templateEditorService.createAndSave(draft);
+            resolvedId = created.templateId();
+        } else {
+            templateEditorService.save(templateId, draft);
+            resolvedId = templateId;
+        }
+        TemplateV2PreviewDTO preview = controlPlaneService.preview(resolvedId, maxRows);
+        return new PreviewResult(resolvedId, preview);
+    }
+
+    /**
+     * @param templateId resolved template id after save
+     * @param preview    bounded preview result
+     */
+    public record PreviewResult(long templateId, TemplateV2PreviewDTO preview) {
+    }
+
+    /**
+     * Reads preview row cap from draft execution policy when set.
+     *
+     * @param draft V2 draft
+     * @return limit or null for service default
+     */
+    public static Integer previewRowLimitFromDraft(TemplateV2DraftVO draft) {
+        if (draft == null || draft.getExecutionPolicy() == null) {
+            return null;
+        }
+        ExecutionPolicyVO policy = draft.getExecutionPolicy();
+        Integer limit = policy.getPreviewRowLimit();
+        return limit != null && limit > 0 ? limit : null;
     }
 
     private static long parseInstanceId(String message) {

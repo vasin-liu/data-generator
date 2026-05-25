@@ -19,6 +19,8 @@ import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.editor.TemplateEditorService;
 import org.gensokyo.data.ui.MainLayout;
+import org.gensokyo.data.ui.job.JobDetailView;
+import org.gensokyo.data.ui.template.editor.TemplateEditorRunSupport;
 import org.gensokyo.data.ui.template.editor.TemplateEditorView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,17 +40,23 @@ public class TemplateListView extends VerticalLayout {
 
     private final TemplateRepository templateRepository;
     private final TemplateEditorService templateEditorService;
+    private final TemplateEditorRunSupport templateEditorRunSupport;
     private final Grid<TemplatePO> grid = new Grid<>(TemplatePO.class, false);
     private final Checkbox includeArchived = new Checkbox("Include archived");
 
     /**
      * @param templateRepository  template persistence
      * @param templateEditorService archive/restore
+     * @param templateEditorRunSupport start runs from the grid
      */
     @Autowired
-    public TemplateListView(TemplateRepository templateRepository, TemplateEditorService templateEditorService) {
+    public TemplateListView(
+            TemplateRepository templateRepository,
+            TemplateEditorService templateEditorService,
+            TemplateEditorRunSupport templateEditorRunSupport) {
         this.templateRepository = templateRepository;
         this.templateEditorService = templateEditorService;
+        this.templateEditorRunSupport = templateEditorRunSupport;
         setSizeFull();
         setPadding(true);
         configureGrid();
@@ -67,15 +75,18 @@ public class TemplateListView extends VerticalLayout {
         grid.addColumn(TemplatePO::getId).setHeader("Id").setSortable(true);
         grid.addColumn(TemplatePO::getName).setHeader("Name").setSortable(true);
         grid.addColumn(row -> Boolean.TRUE.equals(row.getArchived()) ? "yes" : "no").setHeader("Archived");
-        grid.addComponentColumn(row -> new RouterLink(
-                "Edit",
-                TemplateEditorView.class,
-                String.valueOf(row.getId())))
-                .setHeader("Edit");
         grid.addComponentColumn(row -> {
+            RouterLink edit = new RouterLink("Edit", TemplateEditorView.class, String.valueOf(row.getId()));
+            Button run = new Button("Run");
+            run.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+            boolean active = !Boolean.TRUE.equals(row.getArchived());
+            run.setEnabled(active);
+            run.addClickListener(e -> runTemplate(row));
             Button archive = new Button(Boolean.TRUE.equals(row.getArchived()) ? "Restore" : "Archive");
             archive.addClickListener(e -> toggleArchive(row));
-            return archive;
+            HorizontalLayout actions = new HorizontalLayout(edit, run, archive);
+            actions.setAlignItems(Alignment.CENTER);
+            return actions;
         }).setHeader("Actions");
         grid.setSizeFull();
     }
@@ -85,6 +96,16 @@ public class TemplateListView extends VerticalLayout {
                 ? templateRepository.findAll()
                 : templateRepository.findByArchivedFalse();
         grid.setItems(rows);
+    }
+
+    private void runTemplate(TemplatePO row) {
+        try {
+            TemplateEditorRunSupport.RunStartResult started = templateEditorRunSupport.runExisting(row.getId());
+            Notification.show("Run started — opening job detail");
+            getUI().ifPresent(ui -> ui.navigate(JobDetailView.class, String.valueOf(started.instanceId())));
+        } catch (IllegalArgumentException ex) {
+            Notification.show("Run failed: " + ex.getMessage());
+        }
     }
 
     private void toggleArchive(TemplatePO row) {

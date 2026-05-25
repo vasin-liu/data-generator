@@ -8,6 +8,7 @@ package org.gensokyo.data.ui.template.editor.steps;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -15,8 +16,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
+import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
 import org.gensokyo.data.ui.job.JobDetailView;
+import org.gensokyo.data.ui.template.TemplatePreviewFormatter;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 import org.gensokyo.data.ui.template.editor.TemplateEditorRunSupport;
@@ -36,6 +39,7 @@ public class ReviewStep implements EditorStep {
     private final Paragraph status = new Paragraph();
     private final TextArea validationOutput = new TextArea("Validation");
     private final Button validateButton = new Button("Validate");
+    private final Button previewButton = new Button("Preview");
     private final Button saveButton = new Button("Save");
     private final Button runButton = new Button("Run");
     private final TemplateV2ControlPlaneService controlPlaneService;
@@ -69,9 +73,10 @@ public class ReviewStep implements EditorStep {
                 saveHandler.accept(currentModel);
             }
         });
+        previewButton.addClickListener(e -> runPreview());
         runButton.addClickListener(e -> runTemplate());
         validateButton.addClickListener(e -> runValidate());
-        HorizontalLayout actions = new HorizontalLayout(validateButton, saveButton, runButton);
+        HorizontalLayout actions = new HorizontalLayout(validateButton, previewButton, saveButton, runButton);
         root.add(status, actions, validationOutput);
     }
 
@@ -101,7 +106,9 @@ public class ReviewStep implements EditorStep {
         boolean canRun = model.isSaveAllowed() && model.getKind() != TemplateDefinitionKind.V1;
         saveButton.setEnabled(model.isSaveAllowed());
         validateButton.setEnabled(model.isSaveAllowed());
+        previewButton.setEnabled(canRun);
         runButton.setEnabled(canRun);
+        previewButton.setTooltipText(canRun ? "Save draft and run in-memory preview" : "V1 templates: promote first");
         runButton.setTooltipText(canRun ? "Save draft and start run" : "V1 templates: use Migration tab to promote first");
     }
 
@@ -134,6 +141,46 @@ public class ReviewStep implements EditorStep {
         } catch (IllegalArgumentException ex) {
             Notification.show("Run failed: " + ex.getMessage());
         }
+    }
+
+    private void runPreview() {
+        if (currentModel == null || !currentModel.isSaveAllowed()) {
+            return;
+        }
+        if (currentModel.getKind() == TemplateDefinitionKind.V1) {
+            Notification.show("Promote to V2 before preview from the editor");
+            return;
+        }
+        if (applyAllSteps != null) {
+            applyAllSteps.run();
+        }
+        try {
+            Integer maxRows = TemplateEditorRunSupport.previewRowLimitFromDraft(currentModel.getDraft());
+            TemplateEditorRunSupport.PreviewResult result = runSupport.saveAndPreview(
+                    currentModel.getTemplateId(), currentModel.getDraft(), maxRows);
+            if (currentModel.getTemplateId() == null) {
+                currentModel.setTemplateId(result.templateId());
+                onTemplateIdAssigned.accept(result.templateId());
+            }
+            showPreviewDialog(result.preview());
+        } catch (IllegalArgumentException ex) {
+            Notification.show("Preview failed: " + ex.getMessage());
+        }
+    }
+
+    private void showPreviewDialog(TemplateV2PreviewDTO preview) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Preview (in-memory)");
+        TextArea output = new TextArea();
+        output.setValue(TemplatePreviewFormatter.format(preview));
+        output.setReadOnly(true);
+        output.setWidthFull();
+        output.setMinHeight("360px");
+        Button close = new Button("Close", e -> dialog.close());
+        dialog.add(output);
+        dialog.getFooter().add(close);
+        dialog.setWidth("48rem");
+        dialog.open();
     }
 
     private void runValidate() {
