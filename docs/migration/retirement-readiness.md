@@ -34,7 +34,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 - [x] Calcite explain / plan diff for operators (bounded — compare reports include execution shape, validation, V1/V2 SQL diff notes; not full control-plane explain)
 - [x] Full JDBC chunked parity on MySQL/Postgres — `ChunkedPipelineMySqlContainerTests` (useCursorFetch), `ChunkedPipelinePostgresContainerTests` (Testcontainers; skip when Docker unavailable)
 
-## P2 — Operational (partial)
+## P2 — Operational
 
 - [x] Compare reports linked from inventory (`lastCompareReportPath`)
 - [x] Runbook for failed dual-run (`BLOCKED`) remediation — `docs/migration/blocked-dual-run-runbook.md`
@@ -43,7 +43,13 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 - [x] Template V2 control-plane validate / explain / preview (`POST|GET /template/v2/*`)
 - [x] First non-SQL transformer: `SpelTransformVO` + `SpelTransformFactory` (row-level SpEL)
 - [x] SCRIPT → SpEL migration draft bridge (`V1ScriptToSpelDraftConverter`, SQL + SpEL draft chain)
-- [ ] Full operator UI (Vaadin) — spec: `docs/superpowers/specs/2026-05-23-operator-console-design.md` (V2 forms + YAML advanced; jobs/history/datasources)
+- [x] Operator console UI (Vaadin 25) — `docs/operator-console-usage.md`; spec `docs/superpowers/specs/2026-05-23-operator-console-design.md`
+  - [x] P0 shell + nav + V1 execution banner
+  - [x] P1 V2 template editor (forms + YAML advanced) + archived templates
+  - [x] P2 `datasource_config` persistence + datasource views
+  - [x] P3 `task_execution` history + job center
+  - [x] P4 migration tab + `/migration` dashboard (promote disabled for `COMPATIBILITY_ONLY` per S1)
+  - [ ] P1.5 extra source types in forms; Vaadin security roles; editor Review→Run shortcut (see usage guide gaps)
 
 ## P3 — Business
 
