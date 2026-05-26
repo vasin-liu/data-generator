@@ -14,6 +14,8 @@ import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
+import org.gensokyo.data.ui.VaadinFieldSupport;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 import org.gensokyo.data.writer.ElasticsearchWriterVO;
@@ -46,6 +48,13 @@ public class SinksStep implements EditorStep {
         detailForm.add(writerType, dataSourceId, target);
         root.add(detailForm);
         writerType.addValueChangeListener(e -> toggleDetail(e.getValue()));
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        writerType.setLabel(ConsoleI18n.tr("sink.writerType"));
+        dataSourceId.setLabel(ConsoleI18n.tr("sink.datasource"));
+        target.setLabel(ConsoleI18n.tr("sink.target"));
     }
 
     @Override
@@ -60,8 +69,8 @@ public class SinksStep implements EditorStep {
         String type = writer != null && writer.getType() != null ? writer.getType().toLowerCase() : "console";
         writerType.setValue(normalizeType(type));
         if (writer != null) {
-            dataSourceId.setValue(writer.getDataSourceId());
-            target.setValue(writer.getTarget());
+            VaadinFieldSupport.setCombo(dataSourceId, writer.getDataSourceId());
+            VaadinFieldSupport.setText(target, writer.getTarget());
         } else {
             dataSourceId.clear();
             target.clear();

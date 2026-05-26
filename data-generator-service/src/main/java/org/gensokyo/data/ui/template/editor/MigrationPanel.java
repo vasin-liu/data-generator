@@ -42,10 +42,15 @@ public class MigrationPanel extends VerticalLayout {
     private final Runnable onPromoted;
     private final Consumer<TemplateV2DraftVO> onDraftApply;
 
+    private final Paragraph intro = new Paragraph();
     private final Paragraph status = new Paragraph();
     private final Paragraph inventoryStatus = new Paragraph();
-    private final TextArea output = new TextArea("Result");
-    private final Button promoteButton = new Button("Promote to V2");
+    private final TextArea output = new TextArea();
+    private final Button promoteButton = new Button();
+    private final Button analyzeButton = new Button();
+    private final Button draftButton = new Button();
+    private final Button compareButton = new Button();
+    private final Button signoffButton = new Button();
 
     private TemplateMigrationAnalysisDTO lastAnalysis;
 
@@ -74,40 +79,51 @@ public class MigrationPanel extends VerticalLayout {
         output.setReadOnly(true);
         output.setWidthFull();
         output.setMinHeight("240px");
+        applyI18n();
         configureButtons();
+        Anchor docLink = new Anchor(
+                "docs/migration/reports/builtin-orchestration-census.md",
+                getTranslation("migration.panel.docLink"));
+        docLink.setTarget("_blank");
         add(
-                new Paragraph("V1 → V2 migration for template " + templateId + ". "
-                        + "W3 orchestration templates are COMPATIBILITY_ONLY — promote is disabled (policy S1)."),
-                new Anchor(
-                        "docs/migration/reports/builtin-orchestration-census.md",
-                        "builtin-orchestration-census.md"),
+                intro,
+                docLink,
                 status,
                 inventoryStatus,
-                new HorizontalLayout(
-                        new Button("Analyze", e -> analyze()),
-                        new Button("Draft", e -> showDraft()),
-                        new Button("Compare", e -> compare()),
-                        new Button("Sign-off", e -> signoff()),
-                        promoteButton),
+                new HorizontalLayout(analyzeButton, draftButton, compareButton, signoffButton, promoteButton),
                 output);
         refreshInventoryHint();
         updatePromoteEnabled();
     }
 
+    private void applyI18n() {
+        intro.setText(getTranslation("migration.panel.intro", templateId));
+        output.setLabel(getTranslation("migration.panel.result"));
+        promoteButton.setText(getTranslation("migration.panel.promote"));
+        analyzeButton.setText(getTranslation("migration.panel.analyze"));
+        draftButton.setText(getTranslation("migration.panel.draft"));
+        compareButton.setText(getTranslation("migration.panel.compare"));
+        signoffButton.setText(getTranslation("migration.panel.signoff"));
+    }
+
     private void configureButtons() {
         promoteButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         promoteButton.addClickListener(e -> promote());
+        analyzeButton.addClickListener(e -> analyze());
+        draftButton.addClickListener(e -> showDraft());
+        compareButton.addClickListener(e -> compare());
+        signoffButton.addClickListener(e -> signoff());
     }
 
     private void analyze() {
         if (kind == TemplateDefinitionKind.V2) {
-            Notification.show("Template is already V2");
+            Notification.show(getTranslation("migration.panel.alreadyV2"));
             return;
         }
         try {
             lastAnalysis = migrationConsoleService.analyze(templateId);
-            status.setText(String.format(
-                    "Classification: %s | path: %s | family: %s | wave: %s",
+            status.setText(getTranslation(
+                    "migration.panel.status",
                     lastAnalysis.getSuggestedClass(),
                     lastAnalysis.getRecommendedPath(),
                     lastAnalysis.getScenarioFamily(),
@@ -115,7 +131,7 @@ public class MigrationPanel extends VerticalLayout {
             output.setValue(formatAnalysis(lastAnalysis));
             updatePromoteEnabled();
         } catch (Exception ex) {
-            Notification.show("Analyze failed: " + ex.getMessage());
+            Notification.show(getTranslation("migration.panel.analyze.failed", ex.getMessage()));
         }
     }
 
@@ -123,17 +139,17 @@ public class MigrationPanel extends VerticalLayout {
         try {
             TemplateV2DraftVO draft = migrationConsoleService.buildDraft(templateId);
             Dialog dialog = new Dialog();
-            dialog.setHeaderTitle("Migration draft preview");
+            dialog.setHeaderTitle(getTranslation("migration.panel.draft.title"));
             TextArea yaml = new TextArea();
             yaml.setValue(yamlSupport.toYaml(draft));
             yaml.setReadOnly(true);
             yaml.setWidthFull();
             yaml.setMinHeight("360px");
-            Button close = new Button("Close", e -> dialog.close());
-            Button apply = new Button("Apply to editor", e -> {
+            Button close = new Button(getTranslation("common.close"), e -> dialog.close());
+            Button apply = new Button(getTranslation("migration.panel.draft.apply"), e -> {
                 if (onDraftApply != null) {
                     onDraftApply.accept(draft);
-                    Notification.show("Draft applied — review in form or YAML mode");
+                    Notification.show(getTranslation("migration.panel.draft.applied"));
                 }
                 dialog.close();
             });
@@ -143,7 +159,7 @@ public class MigrationPanel extends VerticalLayout {
             dialog.setWidth("48rem");
             dialog.open();
         } catch (Exception ex) {
-            Notification.show("Draft failed: " + ex.getMessage());
+            Notification.show(getTranslation("migration.panel.draft.failed", ex.getMessage()));
         }
     }
 
@@ -163,51 +179,59 @@ public class MigrationPanel extends VerticalLayout {
             refreshInventoryHint();
             updatePromoteEnabled();
         } catch (Exception ex) {
-            Notification.show("Compare failed: " + ex.getMessage());
+            Notification.show(getTranslation("migration.panel.compare.failed", ex.getMessage()));
         }
     }
 
     private void signoff() {
         Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Business sign-off (db-" + templateId + ")");
-        TextField approvedBy = new TextField("Approved by");
-        TextArea notes = new TextArea("Notes");
-        Button save = new Button("Record sign-off", e -> {
+        dialog.setHeaderTitle(getTranslation("migration.panel.signoff.title", templateId));
+        TextField approvedBy = new TextField();
+        approvedBy.setLabel(getTranslation("migration.panel.signoff.approvedBy"));
+        TextArea notes = new TextArea();
+        notes.setLabel(getTranslation("migration.panel.signoff.notes"));
+        Button save = new Button(getTranslation("migration.panel.signoff.record"), e -> {
             try {
                 MigrationBusinessSignoffRequest request = new MigrationBusinessSignoffRequest();
                 request.setApproved(true);
                 request.setApprovedBy(approvedBy.getValue());
                 request.setNotes(notes.getValue());
                 MigrationInventoryEntry entry = migrationConsoleService.signoff(templateId, request);
-                output.setValue("Sign-off recorded for " + entry.getId()
-                        + " at " + entry.getBusinessSignoffAt());
+                output.setValue(getTranslation(
+                        "migration.panel.signoff.done",
+                        entry.getId(),
+                        entry.getBusinessSignoffAt()));
                 dialog.close();
                 refreshInventoryHint();
             } catch (Exception ex) {
-                Notification.show("Sign-off failed: " + ex.getMessage());
+                Notification.show(getTranslation("migration.panel.signoff.failed", ex.getMessage()));
             }
         });
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         dialog.add(approvedBy, notes);
-        dialog.getFooter().add(new Button("Cancel", e -> dialog.close()), save);
+        dialog.getFooter().add(new Button(getTranslation("common.cancel"), e -> dialog.close()), save);
         dialog.open();
     }
 
     private void promote() {
         try {
             migrationConsoleService.promote(templateId);
-            Notification.show("Promote completed");
+            Notification.show(getTranslation("migration.panel.promote.done"));
             onPromoted.run();
         } catch (Exception ex) {
-            Notification.show("Promote failed: " + ex.getMessage());
+            Notification.show(getTranslation("migration.panel.promote.failed", ex.getMessage()));
         }
     }
 
     private void refreshInventoryHint() {
         migrationConsoleService.inventoryForTemplate(templateId).ifPresentOrElse(
-                entry -> inventoryStatus.setText("Inventory: " + entry.getMigrationClass()
-                        + (entry.isBusinessSignoffApproved() ? " (signed off)" : " (sign-off pending)")),
-                () -> inventoryStatus.setText("Inventory: no db-" + templateId + " row (run Compare or refresh inventory)"));
+                entry -> inventoryStatus.setText(getTranslation(
+                        "migration.panel.inventory",
+                        entry.getMigrationClass(),
+                        entry.isBusinessSignoffApproved()
+                                ? getTranslation("migration.panel.inventory.signed")
+                                : getTranslation("migration.panel.inventory.pending"))),
+                () -> inventoryStatus.setText(getTranslation("migration.panel.inventory.missing", templateId)));
     }
 
     private void updatePromoteEnabled() {
@@ -215,7 +239,7 @@ public class MigrationPanel extends VerticalLayout {
         promoteButton.setEnabled(!blocked);
         if (blocked && lastAnalysis != null
                 && lastAnalysis.getSuggestedClass() == MigrationClassification.COMPATIBILITY_ONLY) {
-            promoteButton.setTooltipText("COMPATIBILITY_ONLY — see builtin-orchestration-census.md");
+            promoteButton.setTooltipText(getTranslation("migration.panel.promote.blocked"));
         }
     }
 

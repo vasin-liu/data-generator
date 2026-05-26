@@ -1,0 +1,13 @@
+/* Default / tertiary buttons — ensure label contrast (host color alone is unreliable) */
+:host(:not([theme~="primary"]):not([theme~="success"]):not([theme~="error"]):not([theme~="contrast"]))::part(label) {
+    color: var(--lumo-body-text-color);
+}
+
+:host([theme~="tertiary"])::part(label),
+:host([theme~="tertiary-inline"])::part(label) {
+    color: var(--dg-link-color, var(--lumo-primary-color));
+}
+
+:host([theme~="contrast"])::part(label) {
+    color: var(--lumo-body-text-color);
+}

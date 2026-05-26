@@ -2,14 +2,24 @@
 
 Browser-based operator console for Template V2 authoring, JDBC datasource administration, task execution history, and V1→V2 migration. Implemented on `feature-4.0` (Vaadin **25.0.3** + Spring Boot 4).
 
+**UI theme:** custom Lumo theme `data-generator` (`frontend/themes/data-generator/`, `AppShell.java`) — indigo accent, card layouts, icon navigation, KPI tiles on Migration.
+
+**Locale & theme (navbar):** default language **中文** (`messages_zh_CN.properties`); switch **English** in the language dropdown. Toggle **深色模式** for Lumo dark variant (persisted per browser session). Translations: `OperatorConsoleI18nProvider`, keys in `src/main/resources/org/gensokyo/data/ui/i18n/`.
+
 **Design:** `docs/superpowers/specs/2026-05-23-operator-console-design.md`  
 **Implementation plan:** `docs/superpowers/plans/2026-05-23-operator-console.md`
 
 ## Start the service
 
 ```powershell
-.\mvnw-jdk25.ps1 -pl data-generator-service -am spring-boot:run
+# Build upstream modules, then run only the service module (avoids spring-boot:run on the root POM)
+.\mvnw-jdk25.ps1 -pl data-generator-service -am -DskipTests package
+.\mvnw-jdk25.ps1 -pl data-generator-service spring-boot:run
 ```
+
+From the IDE: run `DataGeneratorApplication` after **Maven reload** so `com.vaadin:vaadin-dev` is on the classpath.
+
+First Vaadin dev-mode start may download Node.js and npm packages (`vaadin-dev` + `prepare-frontend`). `application.yaml` sets `vaadin.servlet.productionMode: false`, which requires `vaadin-dev` at runtime.
 
 Default HTTP port: **9876** (`data-generator-service/src/main/resources/application.yaml`).
 
@@ -20,6 +30,8 @@ Default HTTP port: **9876** (`data-generator-service/src/main/resources/applicat
 | H2 console (dev) | http://localhost:9876/h2 |
 
 The drawer shows **V1 execution: enabled/disabled** from `pci.data.generator.v1-execution.enabled` (default `true`).
+
+**H2 file DB (`jdbc:h2:file:../db/data-generator`):** On first start after upgrading, `db/schema.sql` runs `ALTER TABLE … ADD COLUMN IF NOT EXISTS` for `template.archived` / `archived_at`. If you still see “Column ARCHIVED not found”, stop the app and delete `db/data-generator.mv.db` (and `.trace.db` if present) to recreate from schema, or run the two `ALTER TABLE` lines in the H2 console.
 
 ## UI routes
 

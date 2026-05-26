@@ -9,22 +9,27 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.shared.Registration;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionStatus;
 import org.gensokyo.data.task.TaskExecutionSummary;
+import org.gensokyo.data.ui.ConsoleStyles;
 import org.gensokyo.data.ui.MainLayout;
+import org.gensokyo.data.ui.ViewPageHeader;
+import org.gensokyo.data.ui.template.editor.TemplateEditorView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -34,16 +39,15 @@ import java.util.List;
  * @author Gensokyo
  * @since 2026-05-23
  */
-@Component
 @Route(value = "jobs", layout = MainLayout.class)
-@PageTitle("Jobs | Data Generator")
-public class JobListView extends VerticalLayout {
+@PageTitle("Jobs")
+public class JobListView extends VerticalLayout implements AfterNavigationObserver {
 
     private static final int POLL_MS = 2000;
 
     private final TaskExecutionService taskExecutionService;
     private final Grid<TaskExecutionSummary> grid = new Grid<>(TaskExecutionSummary.class, false);
-    private final TextField templateIdFilter = new TextField("Template id");
+    private final TextField templateIdFilter = new TextField();
     private final Span pollHint = new Span();
     private Registration pollRegistration;
 
@@ -53,16 +57,26 @@ public class JobListView extends VerticalLayout {
     @Autowired
     public JobListView(TaskExecutionService taskExecutionService) {
         this.taskExecutionService = taskExecutionService;
+        ConsoleStyles.applyPage(this);
         setSizeFull();
-        setPadding(true);
+        templateIdFilter.setLabel(getTranslation("jobs.filter.templateId"));
+        templateIdFilter.setPlaceholder(getTranslation("jobs.filter.placeholder"));
         configureGrid();
-        Button refresh = new Button("Refresh", e -> refreshGrid());
-        templateIdFilter.setPlaceholder("optional");
+        Button refresh = new Button(getTranslation("common.refresh"), e -> refreshGrid());
+        refresh.setIcon(VaadinIcon.REFRESH.create());
         templateIdFilter.setWidth("12rem");
+        templateIdFilter.setPrefixComponent(VaadinIcon.SEARCH.create());
         templateIdFilter.addValueChangeListener(e -> refreshGrid());
-        pollHint.addClassNames("text-secondary");
+        pollHint.addClassName(ConsoleStyles.PAGE_SUBTITLE);
         HorizontalLayout toolbar = new HorizontalLayout(templateIdFilter, refresh, pollHint);
-        add(toolbar, grid);
+        ConsoleStyles.applyToolbar(toolbar);
+        ViewPageHeader header = new ViewPageHeader(
+                getTranslation("jobs.title"),
+                getTranslation("jobs.subtitle"));
+        header.setToolbar(toolbar);
+        VerticalLayout gridCard = new VerticalLayout(grid);
+        ConsoleStyles.applyContentCard(gridCard);
+        add(header, gridCard);
         refreshGrid();
     }
 
@@ -89,14 +103,28 @@ public class JobListView extends VerticalLayout {
     }
 
     private void configureGrid() {
-        grid.addColumn(TaskExecutionSummary::instanceId).setHeader("Instance").setSortable(true);
-        grid.addColumn(TaskExecutionSummary::templateName).setHeader("Template");
-        grid.addColumn(TaskExecutionSummary::definitionKind).setHeader("Kind");
-        grid.addColumn(TaskExecutionSummary::status).setHeader("Status");
-        grid.addColumn(TaskExecutionSummary::finishedAt).setHeader("Finished");
-        grid.addComponentColumn(row -> new RouterLink("Detail", JobDetailView.class, String.valueOf(row.instanceId())))
-                .setHeader("Detail");
+        grid.addColumn(TaskExecutionSummary::instanceId).setHeader(getTranslation("jobs.col.instance")).setSortable(true);
+        grid.addComponentColumn(row -> {
+            String label = row.templateName() != null ? row.templateName() : "—";
+            if (row.templateId() == null) {
+                return new Span(label);
+            }
+            Button link = new Button(label, e -> getUI().ifPresent(
+                    ui -> ui.navigate(TemplateEditorView.class, String.valueOf(row.templateId()))));
+            link.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            return link;
+        }).setHeader(getTranslation("jobs.col.template"));
+        grid.addColumn(TaskExecutionSummary::definitionKind).setHeader(getTranslation("jobs.col.kind"));
+        grid.addColumn(TaskExecutionSummary::status).setHeader(getTranslation("jobs.col.status"));
+        grid.addColumn(TaskExecutionSummary::finishedAt).setHeader(getTranslation("jobs.col.finished"));
+        grid.addComponentColumn(row -> {
+            Button detail = new Button(getTranslation("common.detail"), e -> getUI().ifPresent(
+                    ui -> ui.navigate(JobDetailView.class, String.valueOf(row.instanceId()))));
+            detail.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            return detail;
+        }).setHeader(getTranslation("common.detail"));
         grid.setSizeFull();
+        ViewPageHeader.applyGridEmptyState(grid, getTranslation("grid.empty"));
     }
 
     private void refreshGrid() {
@@ -106,7 +134,7 @@ public class JobListView extends VerticalLayout {
             grid.setItems(items);
             updatePolling(items);
         } catch (NumberFormatException ex) {
-            Notification.show("Invalid template id filter");
+            Notification.show(getTranslation("jobs.filter.invalid"));
         }
     }
 
@@ -123,10 +151,10 @@ public class JobListView extends VerticalLayout {
         getUI().ifPresent(ui -> {
             if (active) {
                 ui.setPollInterval(POLL_MS);
-                pollHint.setText("Auto-refresh every 2s (active runs)");
+                pollHint.setText(getTranslation("jobs.poll.active"));
             } else {
                 ui.setPollInterval(-1);
-                pollHint.setText("");
+                pollHint.setText(getTranslation("jobs.poll.idle"));
             }
         });
     }
@@ -135,5 +163,10 @@ public class JobListView extends VerticalLayout {
         String status = row.status();
         return TaskExecutionStatus.QUEUED.name().equals(status)
                 || TaskExecutionStatus.RUNNING.name().equals(status);
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        getUI().ifPresent(ui -> ui.getPage().setTitle(getTranslation("page.jobs")));
     }
 }

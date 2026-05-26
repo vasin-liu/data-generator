@@ -60,3 +60,7 @@ CREATE TABLE IF NOT EXISTS `task_execution`
     PRIMARY KEY (`id`),
     CONSTRAINT `uk_task_execution_instance` UNIQUE (`instance_id`)
 );
+
+-- Upgrade existing file DBs created before operator-console columns (CREATE TABLE IF NOT EXISTS is a no-op).
+ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `archived` BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `archived_at` TIMESTAMP DEFAULT NULL;

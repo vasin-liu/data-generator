@@ -1,0 +1,9 @@
+/* Selected tab: readable in both Lumo variants (overrides primary-text on pale highlight) */
+:host([selected]) {
+    color: var(--dg-tab-selected-color, var(--lumo-primary-color));
+    font-weight: 600;
+}
+
+:host(:not([selected])) {
+    color: var(--lumo-body-text-color);
+}

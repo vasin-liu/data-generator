@@ -18,6 +18,7 @@ import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
 import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.job.JobDetailView;
 import org.gensokyo.data.ui.template.TemplatePreviewFormatter;
 import org.gensokyo.data.ui.template.editor.EditorStep;
@@ -78,6 +79,15 @@ public class ReviewStep implements EditorStep {
         validateButton.addClickListener(e -> runValidate());
         HorizontalLayout actions = new HorizontalLayout(validateButton, previewButton, saveButton, runButton);
         root.add(status, actions, validationOutput);
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        validationOutput.setLabel(ConsoleI18n.tr("review.validation"));
+        validateButton.setText(ConsoleI18n.tr("review.validate"));
+        previewButton.setText(ConsoleI18n.tr("review.preview"));
+        saveButton.setText(ConsoleI18n.tr("review.save"));
+        runButton.setText(ConsoleI18n.tr("review.run"));
     }
 
     private TemplateEditorModel currentModel;
@@ -100,16 +110,22 @@ public class ReviewStep implements EditorStep {
     @Override
     public void refreshFromModel(TemplateEditorModel model) {
         this.currentModel = model;
-        status.setText("Kind: " + model.getKind()
-                + (model.getTemplateId() != null ? " | id=" + model.getTemplateId() : " | new")
-                + (model.isArchived() ? " | ARCHIVED" : ""));
+        String idPart = model.getTemplateId() != null
+                ? ConsoleI18n.tr("review.status.id", model.getTemplateId())
+                : ConsoleI18n.tr("review.status.new");
+        String archivedPart = model.isArchived() ? ConsoleI18n.tr("review.status.archived") : "";
+        status.setText(ConsoleI18n.tr("review.status", model.getKind(), idPart, archivedPart));
         boolean canRun = model.isSaveAllowed() && model.getKind() != TemplateDefinitionKind.V1;
         saveButton.setEnabled(model.isSaveAllowed());
         validateButton.setEnabled(model.isSaveAllowed());
         previewButton.setEnabled(canRun);
         runButton.setEnabled(canRun);
-        previewButton.setTooltipText(canRun ? "Save draft and run in-memory preview" : "V1 templates: promote first");
-        runButton.setTooltipText(canRun ? "Save draft and start run" : "V1 templates: use Migration tab to promote first");
+        previewButton.setTooltipText(canRun
+                ? ConsoleI18n.tr("review.tooltip.preview.ok")
+                : ConsoleI18n.tr("review.tooltip.preview.v1"));
+        runButton.setTooltipText(canRun
+                ? ConsoleI18n.tr("review.tooltip.run.ok")
+                : ConsoleI18n.tr("review.tooltip.run.v1"));
     }
 
     @Override
@@ -122,7 +138,7 @@ public class ReviewStep implements EditorStep {
             return;
         }
         if (currentModel.getKind() == TemplateDefinitionKind.V1) {
-            Notification.show("Promote to V2 before running from the editor");
+            Notification.show(ConsoleI18n.tr("review.promote.beforeRun"));
             return;
         }
         if (applyAllSteps != null) {
@@ -135,11 +151,11 @@ public class ReviewStep implements EditorStep {
                 currentModel.setTemplateId(started.templateId());
                 onTemplateIdAssigned.accept(started.templateId());
             }
-            Notification.show("Run started — opening job detail");
+            Notification.show(ConsoleI18n.tr("review.run.started"));
             runButton.getUI().ifPresent(
                     ui -> ui.navigate(JobDetailView.class, String.valueOf(started.instanceId())));
         } catch (IllegalArgumentException ex) {
-            Notification.show("Run failed: " + ex.getMessage());
+            Notification.show(ConsoleI18n.tr("review.run.failed", ex.getMessage()));
         }
     }
 
@@ -148,7 +164,7 @@ public class ReviewStep implements EditorStep {
             return;
         }
         if (currentModel.getKind() == TemplateDefinitionKind.V1) {
-            Notification.show("Promote to V2 before preview from the editor");
+            Notification.show(ConsoleI18n.tr("review.promote.beforePreview"));
             return;
         }
         if (applyAllSteps != null) {
@@ -164,19 +180,19 @@ public class ReviewStep implements EditorStep {
             }
             showPreviewDialog(result.preview());
         } catch (IllegalArgumentException ex) {
-            Notification.show("Preview failed: " + ex.getMessage());
+            Notification.show(ConsoleI18n.tr("review.preview.failed", ex.getMessage()));
         }
     }
 
     private void showPreviewDialog(TemplateV2PreviewDTO preview) {
         Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Preview (in-memory)");
+        dialog.setHeaderTitle(ConsoleI18n.tr("review.preview.title"));
         TextArea output = new TextArea();
         output.setValue(TemplatePreviewFormatter.format(preview));
         output.setReadOnly(true);
         output.setWidthFull();
         output.setMinHeight("360px");
-        Button close = new Button("Close", e -> dialog.close());
+        Button close = new Button(ConsoleI18n.tr("common.close"), e -> dialog.close());
         dialog.add(output);
         dialog.getFooter().add(close);
         dialog.setWidth("48rem");
@@ -196,13 +212,13 @@ public class ReviewStep implements EditorStep {
                     + System.lineSeparator()
                     + String.join(System.lineSeparator(), result.getWarnings()));
             if (result.isValid()) {
-                Notification.show("Validation passed");
+                Notification.show(ConsoleI18n.tr("review.validation.passed"));
             } else {
-                Notification.show("Validation failed");
+                Notification.show(ConsoleI18n.tr("review.validation.failed"));
             }
         } catch (Exception ex) {
             validationOutput.setValue(ex.getMessage());
-            Notification.show("Validation error: " + ex.getMessage());
+            Notification.show(ConsoleI18n.tr("review.validation.error", ex.getMessage()));
         }
     }
 }

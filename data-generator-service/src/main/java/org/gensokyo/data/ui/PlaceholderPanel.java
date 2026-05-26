@@ -11,7 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 /**
- * Reusable placeholder body for console views not yet implemented in the current phase.
+ * Reusable hero banner for console landing and section intros.
  *
  * @author Gensokyo
  * @since 2026-05-23
@@ -19,18 +19,19 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 public class PlaceholderPanel extends VerticalLayout {
 
     /**
-     * Builds a titled placeholder with optional detail text.
+     * Builds a titled hero with optional detail text.
      *
      * @param title       view title
      * @param description short implementation note
      */
     public PlaceholderPanel(String title, String description) {
+        addClassName(ConsoleStyles.HERO_CARD);
         setPadding(true);
         setSpacing(true);
         H2 heading = new H2(title);
-        heading.addClassNames(LumoUtility.Margin.Top.NONE);
+        heading.addClassNames(ConsoleStyles.PAGE_TITLE, LumoUtility.Margin.Top.NONE);
         Paragraph detail = new Paragraph(description);
-        detail.addClassNames(LumoUtility.TextColor.SECONDARY);
+        detail.addClassNames(ConsoleStyles.PAGE_SUBTITLE, LumoUtility.Margin.Bottom.NONE);
         add(heading, detail);
     }
 }

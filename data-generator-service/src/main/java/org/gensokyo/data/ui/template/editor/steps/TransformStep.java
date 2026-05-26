@@ -16,6 +16,8 @@ import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.ui.VaadinFieldSupport;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 
@@ -48,6 +50,14 @@ public class TransformStep implements EditorStep {
         spelForm.add(spelColumn, spelExpression);
         root.add(transformType, sqlForm, spelForm);
         transformType.addValueChangeListener(e -> toggle(e.getValue()));
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        transformType.setLabel(ConsoleI18n.tr("transform.type"));
+        sqlField.setLabel(ConsoleI18n.tr("transform.sql"));
+        spelColumn.setLabel(ConsoleI18n.tr("transform.spel.column"));
+        spelExpression.setLabel(ConsoleI18n.tr("transform.spel.expr"));
     }
 
     @Override
@@ -58,15 +68,17 @@ public class TransformStep implements EditorStep {
     @Override
     public void refreshFromModel(TemplateEditorModel model) {
         TransformVO transform = model.getDraft().getTransform();
-        if (transform instanceof SpelTransformVO spel && !spel.getColumns().isEmpty()) {
+        if (transform instanceof SpelTransformVO spel
+                && spel.getColumns() != null
+                && !spel.getColumns().isEmpty()) {
             transformType.setValue("spel");
             SpelColumnMapping first = spel.getColumns().getFirst();
-            spelColumn.setValue(first.getName());
-            spelExpression.setValue(first.getExpression());
+            VaadinFieldSupport.setText(spelColumn, first.getName());
+            VaadinFieldSupport.setText(spelExpression, first.getExpression());
         } else {
             transformType.setValue("sql");
             if (transform instanceof SqlTransformVO sql) {
-                sqlField.setValue(sql.getSql());
+                VaadinFieldSupport.setText(sqlField, sql.getSql());
             } else {
                 sqlField.clear();
             }

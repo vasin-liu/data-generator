@@ -6,24 +6,30 @@
 package org.gensokyo.data.ui.migration;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
 import org.gensokyo.data.template.migration.MigrationBacklogFilter;
+
+import java.util.Arrays;
 import org.gensokyo.data.template.migration.MigrationInventoryEntry;
 import org.gensokyo.data.template.migration.MigrationInventorySummary;
+import org.gensokyo.data.ui.ConsoleStyles;
 import org.gensokyo.data.ui.MainLayout;
+import org.gensokyo.data.ui.StatCard;
+import org.gensokyo.data.ui.ViewPageHeader;
 import org.gensokyo.data.ui.template.TemplateListView;
+import org.gensokyo.data.ui.template.editor.TemplateEditorView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Global migration inventory summary and backlog grid.
@@ -31,15 +37,14 @@ import org.springframework.stereotype.Component;
  * @author Gensokyo
  * @since 2026-05-23
  */
-@Component
 @Route(value = "migration", layout = MainLayout.class)
-@PageTitle("Migration | Data Generator")
-public class MigrationDashboardView extends VerticalLayout {
+@PageTitle("Migration")
+public class MigrationDashboardView extends VerticalLayout implements AfterNavigationObserver {
 
     private final MigrationConsoleService migrationConsoleService;
     private final Div summaryCards = new Div();
     private final Grid<MigrationInventoryEntry> grid = new Grid<>(MigrationInventoryEntry.class, false);
-    private final ComboBox<String> filter = new ComboBox<>("Backlog filter");
+    private final ComboBox<String> filter = new ComboBox<>();
 
     /**
      * @param migrationConsoleService migration inventory facade
@@ -47,40 +52,61 @@ public class MigrationDashboardView extends VerticalLayout {
     @Autowired
     public MigrationDashboardView(MigrationConsoleService migrationConsoleService) {
         this.migrationConsoleService = migrationConsoleService;
+        ConsoleStyles.applyPage(this);
         setSizeFull();
-        setPadding(true);
-        filter.setItems(
-                MigrationBacklogFilter.ALL.name(),
-                MigrationBacklogFilter.READY.name(),
-                MigrationBacklogFilter.BLOCKED.name(),
-                MigrationBacklogFilter.COMPATIBILITY_ONLY.name(),
-                MigrationBacklogFilter.NEEDS_COMPARE.name(),
-                MigrationBacklogFilter.PENDING_SIGNOFF.name());
+        filter.setLabel(getTranslation("migration.filter"));
+        filter.setItems(Arrays.stream(MigrationBacklogFilter.values()).map(Enum::name).toList());
+        filter.setItemLabelGenerator(this::migrationFilterLabel);
         filter.setValue(MigrationBacklogFilter.ALL.name());
         filter.addValueChangeListener(e -> refreshBacklog());
         configureGrid();
-        Button refresh = new Button("Refresh", e -> refreshAll());
-        add(
-                new H2("Migration dashboard"),
-                new Span("Promote is disabled for COMPATIBILITY_ONLY templates (W3 policy S1). "
-                        + "See docs/migration/reports/builtin-orchestration-census.md"),
-                summaryCards,
-                new HorizontalLayout(filter, refresh),
-                grid,
-                new RouterLink("Templates", TemplateListView.class));
+        summaryCards.addClassName(ConsoleStyles.STAT_GRID);
+        Button refresh = new Button(getTranslation("common.refresh"), e -> refreshAll());
+        refresh.setIcon(VaadinIcon.REFRESH.create());
+        Button templatesLink = new Button(getTranslation("migration.link.templates"), e ->
+                e.getSource().getUI().ifPresent(ui -> ui.navigate(TemplateListView.class)));
+        templatesLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        templatesLink.setIcon(VaadinIcon.FILE_TEXT.create());
+        HorizontalLayout toolbar = new HorizontalLayout(filter, refresh, templatesLink);
+        ConsoleStyles.applyToolbar(toolbar);
+        ViewPageHeader header = new ViewPageHeader(
+                getTranslation("migration.title"),
+                getTranslation("migration.subtitle"));
+        header.setToolbar(toolbar);
+        VerticalLayout gridCard = new VerticalLayout(grid);
+        ConsoleStyles.applyContentCard(gridCard);
+        gridCard.setPadding(true);
+        add(header, summaryCards, gridCard);
         refreshAll();
     }
 
     private void configureGrid() {
-        grid.addColumn(MigrationInventoryEntry::getId).setHeader("Id").setSortable(true);
-        grid.addColumn(MigrationInventoryEntry::getName).setHeader("Name");
+        grid.addColumn(MigrationInventoryEntry::getId).setHeader(getTranslation("migration.col.id")).setSortable(true);
+        grid.addColumn(MigrationInventoryEntry::getName).setHeader(getTranslation("migration.col.name"));
         grid.addColumn(e -> e.getMigrationClass() != null ? e.getMigrationClass().name() : "")
-                .setHeader("Class");
-        grid.addColumn(MigrationInventoryEntry::getScenarioFamily).setHeader("Family");
-        grid.addColumn(MigrationInventoryEntry::getWave).setHeader("Wave");
-        grid.addColumn(e -> e.isBusinessSignoffApproved() ? "yes" : "no").setHeader("Sign-off");
-        grid.addColumn(MigrationInventoryEntry::getLastCompareReportPath).setHeader("Report");
+                .setHeader(getTranslation("migration.col.class"));
+        grid.addColumn(MigrationInventoryEntry::getScenarioFamily).setHeader(getTranslation("migration.col.family"));
+        grid.addColumn(MigrationInventoryEntry::getWave).setHeader(getTranslation("migration.col.wave"));
+        grid.addColumn(e -> e.isBusinessSignoffApproved()
+                        ? getTranslation("common.yes")
+                        : getTranslation("common.no"))
+                .setHeader(getTranslation("migration.col.signoff"));
+        grid.addColumn(MigrationInventoryEntry::getLastCompareReportPath).setHeader(getTranslation("migration.col.report"));
+        grid.addComponentColumn(row -> {
+            if (row.getDbTemplateId() == null) {
+                return new com.vaadin.flow.component.html.Span("—");
+            }
+            Button open = new Button(getTranslation("migration.openEditor"), e -> getUI().ifPresent(
+                    ui -> ui.navigate(TemplateEditorView.class, String.valueOf(row.getDbTemplateId()))));
+            open.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            return open;
+        }).setHeader(getTranslation("migration.col.actions"));
         grid.setSizeFull();
+        ViewPageHeader.applyGridEmptyState(grid, getTranslation("grid.empty"));
+    }
+
+    private String migrationFilterLabel(String filterName) {
+        return getTranslation("migration.filter." + filterName);
     }
 
     private void refreshAll() {
@@ -88,15 +114,15 @@ public class MigrationDashboardView extends VerticalLayout {
             MigrationInventorySummary summary = migrationConsoleService.summary();
             summaryCards.removeAll();
             summaryCards.add(
-                    card("Total", summary.getTotalTemplates()),
-                    card("DB templates", summary.getDatabaseTemplates()),
-                    card("Ready to promote", summary.getReadyToPromote()),
-                    card("Compatibility only", summary.getCompatibilityOnly()),
-                    card("Blocked", summary.getBlocked()),
-                    card("With compare", summary.getWithCompareReport()));
+                    new StatCard(getTranslation("migration.stat.total"), summary.getTotalTemplates()),
+                    new StatCard(getTranslation("migration.stat.db"), summary.getDatabaseTemplates()),
+                    new StatCard(getTranslation("migration.stat.ready"), summary.getReadyToPromote()),
+                    new StatCard(getTranslation("migration.stat.compat"), summary.getCompatibilityOnly()),
+                    new StatCard(getTranslation("migration.stat.blocked"), summary.getBlocked()),
+                    new StatCard(getTranslation("migration.stat.compare"), summary.getWithCompareReport()));
             refreshBacklog();
         } catch (Exception ex) {
-            Notification.show("Failed to load summary: " + ex.getMessage());
+            Notification.show(getTranslation("migration.summary.failed", ex.getMessage()));
         }
     }
 
@@ -104,16 +130,12 @@ public class MigrationDashboardView extends VerticalLayout {
         try {
             grid.setItems(migrationConsoleService.backlog(filter.getValue()));
         } catch (Exception ex) {
-            Notification.show("Failed to load backlog: " + ex.getMessage());
+            Notification.show(getTranslation("migration.backlog.failed", ex.getMessage()));
         }
     }
 
-    private static Div card(String label, int value) {
-        Div div = new Div(new Span(label + ": " + value));
-        div.getStyle().set("padding", "var(--lumo-space-s)");
-        div.getStyle().set("border", "1px solid var(--lumo-contrast-10pct)");
-        div.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
-        div.getStyle().set("margin-right", "var(--lumo-space-s)");
-        return div;
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        getUI().ifPresent(ui -> ui.getPage().setTitle(getTranslation("page.migration")));
     }
 }

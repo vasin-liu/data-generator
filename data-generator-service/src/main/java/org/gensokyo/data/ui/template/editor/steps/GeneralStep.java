@@ -12,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 
@@ -36,6 +37,12 @@ public class GeneralStep implements EditorStep {
         batchSizeField.setStepButtonsVisible(true);
         form.add(nameField, batchSizeField);
         binder.forField(nameField).bind(TemplateV2DraftVO::getName, TemplateV2DraftVO::setName);
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        nameField.setLabel(ConsoleI18n.tr("general.name"));
+        batchSizeField.setLabel(ConsoleI18n.tr("general.batchSize"));
     }
 
     @Override

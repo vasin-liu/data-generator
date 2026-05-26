@@ -11,6 +11,8 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.ui.VaadinFieldSupport;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 
@@ -34,6 +36,14 @@ public class ExecutionStep implements EditorStep {
     public ExecutionStep() {
         mode.setItems("BOUNDED", "CHUNKED");
         form.add(mode, sourceChunkSize, sinkBatchSize, previewRowLimit);
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        mode.setLabel(ConsoleI18n.tr("execution.mode"));
+        sourceChunkSize.setLabel(ConsoleI18n.tr("execution.sourceChunk"));
+        sinkBatchSize.setLabel(ConsoleI18n.tr("execution.sinkBatch"));
+        previewRowLimit.setLabel(ConsoleI18n.tr("execution.previewLimit"));
     }
 
     @Override
@@ -50,10 +60,10 @@ public class ExecutionStep implements EditorStep {
             sinkBatchSize.clear();
             previewRowLimit.clear();
         } else {
-            mode.setValue(policy.getMode());
-            sourceChunkSize.setValue(policy.getSourceChunkSize());
-            sinkBatchSize.setValue(policy.getSinkBatchSize());
-            previewRowLimit.setValue(policy.getPreviewRowLimit());
+            VaadinFieldSupport.setCombo(mode, policy.getMode());
+            VaadinFieldSupport.setInteger(sourceChunkSize, policy.getSourceChunkSize());
+            VaadinFieldSupport.setInteger(sinkBatchSize, policy.getSinkBatchSize());
+            VaadinFieldSupport.setInteger(previewRowLimit, policy.getPreviewRowLimit());
         }
         boolean enabled = model.isSaveAllowed();
         mode.setReadOnly(!enabled);

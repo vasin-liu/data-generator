@@ -1,0 +1,3 @@
+:host::part(label) {
+    color: var(--dg-field-label-color, var(--lumo-body-text-color));
+}

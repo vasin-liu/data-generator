@@ -17,6 +17,8 @@ import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.ui.VaadinFieldSupport;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.gensokyo.data.ui.template.editor.EditorStep;
 import org.gensokyo.data.ui.template.editor.TemplateEditorModel;
 
@@ -60,6 +62,17 @@ public class SourcesStep implements EditorStep {
         root.add(sourceType, sourceKey, queryForm, iteratorForm);
         root.setSpacing(true);
         sourceType.addValueChangeListener(e -> toggleForms(e.getValue()));
+        applyI18n();
+    }
+
+    private void applyI18n() {
+        sourceType.setLabel(ConsoleI18n.tr("source.type"));
+        sourceKey.setLabel(ConsoleI18n.tr("source.name"));
+        dataSourceId.setLabel(ConsoleI18n.tr("source.datasource"));
+        sql.setLabel(ConsoleI18n.tr("source.sql"));
+        fromField.setLabel(ConsoleI18n.tr("source.from"));
+        toField.setLabel(ConsoleI18n.tr("source.to"));
+        stepField.setLabel(ConsoleI18n.tr("source.step"));
     }
 
     @Override
@@ -82,8 +95,8 @@ public class SourcesStep implements EditorStep {
         sourceType.setValue(type);
         toggleForms(type);
         if (source instanceof QuerySourceVO query) {
-            dataSourceId.setValue(query.getDataSourceId());
-            sql.setValue(query.getSql());
+            VaadinFieldSupport.setCombo(dataSourceId, query.getDataSourceId());
+            VaadinFieldSupport.setText(sql, query.getSql());
         } else if (source instanceof IteratorSourceVO iterator
                 && iterator.getIterator() instanceof NumberIteratorVO number) {
             fromField.setValue((int) number.getFrom());

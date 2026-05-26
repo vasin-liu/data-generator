@@ -7,19 +7,24 @@ package org.gensokyo.data.ui.datasource;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
+import org.gensokyo.data.ui.ConsoleStyles;
 import org.gensokyo.data.ui.MainLayout;
+import org.gensokyo.data.ui.ViewPageHeader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
@@ -29,10 +34,9 @@ import java.util.stream.Collectors;
  * @author Gensokyo
  * @since 2026-05-23
  */
-@Component
 @Route(value = "datasources", layout = MainLayout.class)
-@PageTitle("Datasources | Data Generator")
-public class DataSourceListView extends VerticalLayout {
+@PageTitle("Datasources")
+public class DataSourceListView extends VerticalLayout implements AfterNavigationObserver {
 
     private final DataSourceConfigService dataSourceConfigService;
     private final Grid<DataSourceConfigSummary> grid = new Grid<>(DataSourceConfigSummary.class, false);
@@ -44,31 +48,47 @@ public class DataSourceListView extends VerticalLayout {
     @Autowired
     public DataSourceListView(DataSourceConfigService dataSourceConfigService) {
         this.dataSourceConfigService = dataSourceConfigService;
+        ConsoleStyles.applyPage(this);
         setSizeFull();
-        setPadding(true);
         configureGrid();
-        Button refresh = new Button("Refresh", e -> refresh());
-        Button create = new Button("New datasource", e -> openCreateDialog());
+        Button refresh = new Button(getTranslation("common.refresh"), e -> refresh());
+        refresh.setIcon(VaadinIcon.REFRESH.create());
+        Button create = new Button(getTranslation("datasources.new"), e -> openCreateDialog());
         create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        create.setIcon(VaadinIcon.PLUS.create());
         HorizontalLayout toolbar = new HorizontalLayout(create, refresh);
         toolbar.setAlignItems(Alignment.CENTER);
-        add(toolbar, new H3("Persisted configs"), grid, new H3("Runtime keys (yaml + persisted)"), runtimeKeys);
+        ConsoleStyles.applyToolbar(toolbar);
+        ViewPageHeader header = new ViewPageHeader(
+                getTranslation("datasources.title"),
+                getTranslation("datasources.subtitle"));
+        header.setToolbar(toolbar);
+        H3 persistedTitle = new H3(getTranslation("datasources.section.persisted"));
+        persistedTitle.addClassName(ConsoleStyles.SECTION_TITLE);
+        VerticalLayout gridCard = new VerticalLayout(grid);
+        ConsoleStyles.applyContentCard(gridCard);
+        H3 runtimeTitle = new H3(getTranslation("datasources.section.runtime"));
+        runtimeTitle.addClassName(ConsoleStyles.SECTION_TITLE);
+        runtimeKeys.addClassName(ConsoleStyles.PAGE_SUBTITLE);
+        add(header, persistedTitle, gridCard, runtimeTitle, runtimeKeys);
         refresh();
     }
 
     private void configureGrid() {
-        grid.addColumn(DataSourceConfigSummary::name).setHeader("Name").setSortable(true);
-        grid.addColumn(DataSourceConfigSummary::url).setHeader("JDBC URL");
-        grid.addColumn(DataSourceConfigSummary::driverClassName).setHeader("Driver");
-        grid.addColumn(row -> row.enabled() ? "yes" : "no").setHeader("Enabled");
+        grid.addColumn(DataSourceConfigSummary::name).setHeader(getTranslation("datasources.col.name")).setSortable(true);
+        grid.addColumn(DataSourceConfigSummary::url).setHeader(getTranslation("datasources.col.url"));
+        grid.addColumn(DataSourceConfigSummary::driverClassName).setHeader(getTranslation("datasources.col.driver"));
+        grid.addColumn(row -> row.enabled() ? getTranslation("common.yes") : getTranslation("common.no"))
+                .setHeader(getTranslation("datasources.col.enabled"));
         grid.addComponentColumn(row -> {
-            Button edit = new Button("Edit", e -> openEditDialog(row));
-            Button test = new Button("Test", e -> test(row.name()));
-            Button remove = new Button("Remove", e -> remove(row.name()));
+            Button edit = new Button(getTranslation("common.edit"), e -> openEditDialog(row));
+            Button test = new Button(getTranslation("common.test"), e -> test(row.name()));
+            Button remove = new Button(getTranslation("common.remove"), e -> confirmRemove(row.name()));
             remove.addThemeVariants(ButtonVariant.LUMO_ERROR);
             return new HorizontalLayout(edit, test, remove);
-        }).setHeader("Actions");
+        }).setHeader(getTranslation("datasources.col.actions"));
         grid.setSizeFull();
+        ViewPageHeader.applyGridEmptyState(grid, getTranslation("grid.empty"));
     }
 
     private void openCreateDialog() {
@@ -86,13 +106,24 @@ public class DataSourceListView extends VerticalLayout {
         try {
             Notification.show(dataSourceConfigService.testConnectionByName(name));
         } catch (Exception ex) {
-            Notification.show("Test failed: " + ex.getMessage());
+            Notification.show(getTranslation("datasources.dialog.test.failed", ex.getMessage()));
         }
+    }
+
+    private void confirmRemove(String name) {
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader(getTranslation("datasources.remove.confirm.title", name));
+        dialog.setText(getTranslation("datasources.remove.confirm.text"));
+        dialog.setConfirmText(getTranslation("common.remove"));
+        dialog.setCancelText(getTranslation("common.cancel"));
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.addConfirmListener(e -> remove(name));
+        dialog.open();
     }
 
     private void remove(String name) {
         dataSourceConfigService.remove(name);
-        Notification.show("Removed " + name);
+        Notification.show(getTranslation("datasources.removed", name));
         refresh();
     }
 
@@ -101,5 +132,10 @@ public class DataSourceListView extends VerticalLayout {
         runtimeKeys.setText(dataSourceConfigService.listRuntimeNames().stream()
                 .sorted()
                 .collect(Collectors.joining(", ")));
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        getUI().ifPresent(ui -> ui.getPage().setTitle(getTranslation("page.datasources")));
     }
 }

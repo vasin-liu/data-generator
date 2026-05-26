@@ -16,6 +16,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
+import org.gensokyo.data.ui.i18n.ConsoleI18n;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -34,11 +35,11 @@ public class DataSourceFormDialog extends Dialog {
     private final DataSourceConfigService dataSourceConfigService;
     private final Runnable onSaved;
 
-    private final TextField name = new TextField("Name");
-    private final TextField url = new TextField("JDBC URL");
-    private final TextField username = new TextField("Username");
-    private final PasswordField password = new PasswordField("Password");
-    private final TextField driverClass = new TextField("Driver class");
+    private final TextField name = new TextField();
+    private final TextField url = new TextField();
+    private final TextField username = new TextField();
+    private final PasswordField password = new PasswordField();
+    private final TextField driverClass = new TextField();
     private final AtomicReference<byte[]> uploadedJar = new AtomicReference<>();
 
     /**
@@ -48,7 +49,7 @@ public class DataSourceFormDialog extends Dialog {
     public DataSourceFormDialog(DataSourceConfigService dataSourceConfigService, Runnable onSaved) {
         this.dataSourceConfigService = dataSourceConfigService;
         this.onSaved = onSaved;
-        setHeaderTitle("JDBC datasource");
+        applyI18n();
         FormLayout form = new FormLayout(name, url, username, password, driverClass);
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
@@ -58,16 +59,25 @@ public class DataSourceFormDialog extends Dialog {
             try (InputStream in = buffer.getInputStream()) {
                 uploadedJar.set(in.readAllBytes());
             } catch (IOException ex) {
-                Notification.show("Driver upload failed: " + ex.getMessage());
+                Notification.show(ConsoleI18n.tr("datasources.dialog.upload.failed", ex.getMessage()));
             }
         });
-        Button test = new Button("Test connection", e -> testConnection());
-        Button save = new Button("Save", e -> save());
+        Button test = new Button(ConsoleI18n.tr("datasources.dialog.test"), e -> testConnection());
+        Button save = new Button(ConsoleI18n.tr("common.save"), e -> save());
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancel = new Button("Cancel", e -> close());
+        Button cancel = new Button(ConsoleI18n.tr("common.cancel"), e -> close());
         setWidth("32rem");
         getFooter().add(cancel, test, save);
         add(form, upload);
+    }
+
+    private void applyI18n() {
+        setHeaderTitle(ConsoleI18n.tr("datasources.dialog.title"));
+        name.setLabel(ConsoleI18n.tr("datasources.dialog.name"));
+        url.setLabel(ConsoleI18n.tr("datasources.dialog.url"));
+        username.setLabel(ConsoleI18n.tr("datasources.dialog.username"));
+        password.setLabel(ConsoleI18n.tr("datasources.dialog.password"));
+        driverClass.setLabel(ConsoleI18n.tr("datasources.dialog.driver"));
     }
 
     /**
@@ -93,7 +103,7 @@ public class DataSourceFormDialog extends Dialog {
                     null);
             Notification.show(message);
         } catch (Exception ex) {
-            Notification.show("Test failed: " + ex.getMessage());
+            Notification.show(ConsoleI18n.tr("datasources.dialog.test.failed", ex.getMessage()));
         }
     }
 
@@ -107,11 +117,11 @@ public class DataSourceFormDialog extends Dialog {
                     password.getValue(),
                     driverClass.getValue(),
                     driverFile);
-            Notification.show("Saved " + name.getValue());
+            Notification.show(ConsoleI18n.tr("datasources.dialog.saved", name.getValue()));
             close();
             onSaved.run();
         } catch (Exception ex) {
-            Notification.show("Save failed: " + ex.getMessage());
+            Notification.show(ConsoleI18n.tr("datasources.dialog.save.failed", ex.getMessage()));
         }
     }
 
@@ -151,12 +161,12 @@ public class DataSourceFormDialog extends Dialog {
             }
 
             @Override
-            public java.io.InputStream getInputStream() {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream(bytes);
             }
 
             @Override
-            public void transferTo(java.io.File dest) throws java.io.IOException {
+            public void transferTo(java.io.File dest) throws IOException {
                 java.nio.file.Files.write(dest.toPath(), bytes);
             }
         };
