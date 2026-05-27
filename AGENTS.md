@@ -15,7 +15,7 @@ You are a **Java backend engineer** working on a modular data-generation platfor
 - **Language:** Java **25** (`<java.version>` / `maven.compiler.release` in root `pom.xml`).
 - **Build:** **Maven** (multi-module `pom` packaging); Maven Wrapper in repo (`mvnw.cmd`, `mvnw`, helper `mvnw-jdk25.ps1`).
 - **Service runtime:** **Spring Boot 4.x** (aggregated in `data-generator-service`; main class `org.gensokyo.data.DataGeneratorApplication`).
-- **UI (where used):** Vaadin (version managed in root POM).
+- **Operator console UI:** React SPA in `data-generator-console-web` (Vite, Node **22+**); static assets embedded in `data-generator-service` at `classpath:static/console/`; routes `/console/*`, APIs `/api/*`.
 - **Data & messaging:** Dynamic JDBC (MySQL, PostgreSQL, ClickHouse, H2, etc.), Elasticsearch client stack, Kafka producers, Excel/CSV/JSON adapters — see module list below and root `pom.xml` `<dependencyManagement>`.
 - **Templating & scripting:** GraalJS, Velocity, SpEL, DataFaker, Calcite (see `data-generator-scripter-*`, `data-generator-calcite`).
 - **JSON/YAML:** Jackson 3.x, YAMLBeans, JSON Schema tooling (versions in root POM).
@@ -31,7 +31,8 @@ Paths are relative to the repository root.
 - **`data-generator-common/`**, **`data-generator-datasource/`**, **`data-generator-stage/`**, **`data-generator-faker/`** – shared core, datasource abstractions, pipeline stages, faker integration; **WRITE here** for shared types and infrastructure.
 - **`data-generator-iterator/`**, **`data-generator-reader/`**, **`data-generator-writer/`**, **`data-generator-converter/`**, **`data-generator-generator/`**, **`data-generator-scripter/`** – pluggable iteration, input, output, conversion, generation, and scripting; **WRITE here** for feature work in those concerns (prefer the smallest submodule that owns the behavior).
 - **`data-generator-calcite/`** – Calcite/SQL-related logic; **WRITE here** for SQL engine or validation changes.
-- **`data-generator-service/`** – Spring Boot application packaging REST and orchestration; **WRITE here** for HTTP API, autoconfiguration wiring, and runnable app concerns.
+- **`data-generator-console-web/`** – React operator console (Vite build); **WRITE here** for UI pages, i18n, and console API clients; Maven embeds `target/console-dist` into the service JAR at package time.
+- **`data-generator-service/`** – Spring Boot application packaging REST, `/api/*` console facades, and orchestration; **WRITE here** for HTTP API, `ConsoleWebConfig`, autoconfiguration wiring, and runnable app concerns.
 - **`samples/template-v2-pf4j-plugin/`** – sample PF4J-style plugin; **WRITE here** for sample-only changes.
 - **`docs/`** – phased upgrade and design notes; **WRITE here** only when documenting intentional migrations or decisions the team expects in-repo (avoid drive-by doc churn).
 - **`.mvn/`** – wrapper and repo-local Maven settings (e.g. `settings-jdk25.xml` for HTTP Nexus); **READ carefully**, **WRITE** only with team agreement (affects every build).

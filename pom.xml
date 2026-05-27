@@ -29,7 +29,6 @@
         <!-- thirdpart -->
         <!-- ******************************************** -->
         <spring-boot.version>4.0.5</spring-boot.version>
-        <vaadin.version>25.0.3</vaadin.version>
         <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
         <graal.js.version>24.2.2</graal.js.version>
         <stringtemplate.version>4.0.2</stringtemplate.version>
@@ -71,6 +70,7 @@
         <module>data-generator-dependencies</module>
         <module>data-generator-common</module>
         <module>data-generator-datasource</module>
+        <module>data-generator-console-web</module>
         <module>data-generator-service</module>
         <module>data-generator-stage</module>
         <module>data-generator-faker</module>
@@ -568,13 +568,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -596,13 +589,6 @@
             <releases>
                 <enabled>false</enabled>
             </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

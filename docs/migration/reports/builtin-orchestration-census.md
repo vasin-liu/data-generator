@@ -1,6 +1,6 @@
 # Built-in template migration census
 
-Generated: 2026-05-22 (`BuiltinTemplateMigrationCensus`)
+Generated: 2026-05-27 (`BuiltinTemplateMigrationCensus`)
 
 > Staging-free evidence for W3 orchestration blocking. Production `db-{id}` census is **M2**.
 

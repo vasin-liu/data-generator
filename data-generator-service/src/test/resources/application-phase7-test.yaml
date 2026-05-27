@@ -1,11 +1,7 @@
 server:
   port: 0
 
-# REST/controller tests do not need Vaadin servlet auto-config
 spring:
-  autoconfigure:
-    exclude:
-      - com.vaadin.flow.spring.SpringBootAutoConfiguration
   application:
     name: data-generator-service-phase7-test
   jpa:

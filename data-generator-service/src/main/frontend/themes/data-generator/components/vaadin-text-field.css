@@ -1,4 +1,0 @@
-/* Shared by vaadin-text-field, vaadin-text-area, vaadin-integer-field, etc. */
-:host::part(label) {
-    color: var(--dg-field-label-color, var(--lumo-header-text-color));
-}

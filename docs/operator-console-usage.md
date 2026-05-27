@@ -1,67 +1,78 @@
 # Operator console usage guide
 
-Browser-based operator console for Template V2 authoring, JDBC datasource administration, task execution history, and V1→V2 migration. Implemented on `feature-4.0` (Vaadin **25.0.3** + Spring Boot 4).
+Browser-based operator console for Template V2 authoring, JDBC datasource administration, task execution history, and V1→V2 migration. On `feature-4.0` the UI is a **React SPA** (`data-generator-console-web`) embedded in `data-generator-service` at `/console/*`. Console HTTP APIs live under `/api/*`; legacy REST paths (`/template/…`, `/task/…`, `/datasource/…`) remain for automation.
 
-**UI theme:** custom Lumo theme `data-generator` (`frontend/themes/data-generator/`, `AppShell.java`) — indigo accent, card layouts, icon navigation, KPI tiles on Migration.
+**UI stack:** React 19 + Vite + Ant Design + React Router. i18n: `data-generator-console-web/src/i18n/` (English + 中文). Theme/locale toggles are in the console navbar (client-side).
 
-**Locale & theme (navbar):** default language **中文** (`messages_zh_CN.properties`); switch **English** in the language dropdown. Toggle **深色模式** for Lumo dark variant (persisted per browser session). Translations: `OperatorConsoleI18nProvider`, keys in `src/main/resources/org/gensokyo/data/ui/i18n/`.
+**Design:** `docs/superpowers/specs/2026-05-26-react-console-embedded-design.md`  
+**Legacy Vaadin spec (superseded):** `docs/superpowers/specs/2026-05-23-operator-console-design.md`
 
-**Design:** `docs/superpowers/specs/2026-05-23-operator-console-design.md`  
-**Implementation plan:** `docs/superpowers/plans/2026-05-23-operator-console.md`
-
-## Start the service
+## Start the service (production-style)
 
 ```powershell
-# Build upstream modules, then run only the service module (avoids spring-boot:run on the root POM)
+# Build console assets + service JAR (Node 22+ required for npm in console-web module)
 .\mvnw-jdk25.ps1 -pl data-generator-service -am -DskipTests package
+
+# Run the service
 .\mvnw-jdk25.ps1 -pl data-generator-service spring-boot:run
 ```
 
-From the IDE: run `DataGeneratorApplication` after **Maven reload** so `com.vaadin:vaadin-dev` is on the classpath.
-
-First Vaadin dev-mode start may download Node.js and npm packages (`vaadin-dev` + `prepare-frontend`). `application.yaml` sets `vaadin.servlet.productionMode: false`, which requires `vaadin-dev` at runtime.
+From the IDE: run `DataGeneratorApplication` after a Maven package so `classpath:static/console/index.html` exists.
 
 Default HTTP port: **9876** (`data-generator-service/src/main/resources/application.yaml`).
 
 | Surface | URL |
 |---------|-----|
-| Vaadin UI | http://localhost:9876/ |
-| REST (unchanged paths) | http://localhost:9876/template/…, `/task/…`, `/datasource/… |
+| React console | http://localhost:9876/console/ |
+| Console API | http://localhost:9876/api/… |
+| Legacy REST | http://localhost:9876/template/…, `/task/…`, `/datasource/… |
 | H2 console (dev) | http://localhost:9876/h2 |
 
-The drawer shows **V1 execution: enabled/disabled** from `pci.data.generator.v1-execution.enabled` (default `true`).
+The layout shows **V1 execution: enabled/disabled** from `pci.data.generator.v1-execution.enabled` (default `true`), via `GET /api/console/runtime`.
 
 **H2 file DB (`jdbc:h2:file:../db/data-generator`):** On first start after upgrading, `db/schema.sql` runs `ALTER TABLE … ADD COLUMN IF NOT EXISTS` for `template.archived` / `archived_at`. If you still see “Column ARCHIVED not found”, stop the app and delete `db/data-generator.mv.db` (and `.trace.db` if present) to recreate from schema, or run the two `ALTER TABLE` lines in the H2 console.
+
+## Local UI development (Vite)
+
+Run the Spring Boot backend on port **9876**, then in `data-generator-console-web`:
+
+```powershell
+cd data-generator-console-web
+npm install
+npm run dev
+```
+
+Open http://localhost:5173/console/ — Vite proxies `/api` to `http://localhost:9876`. Production builds use `npm run build` (invoked automatically by Maven during `package`).
 
 ## UI routes
 
 | Area | Route | Purpose |
 |------|-------|---------|
-| Home | `/` | Links to primary areas |
-| Templates | `/templates` | Catalog grid, archive/restore |
-| Template editor | `/template/editor/new` or `/template/editor/{id}` | V2 wizard + YAML advanced |
-| Datasources | `/datasources` | `datasource_config` CRUD + test |
-| Jobs | `/jobs` | `task_execution` history |
-| Job detail | `/jobs/{instanceId}` | Status, error, metrics JSON |
-| Migration | `/migration` | Inventory summary + backlog |
+| Home | `/console/` | Links to primary areas |
+| Templates | `/console/templates` | Catalog grid, archive/restore |
+| Template editor | `/console/templates/new` or `/console/templates/{id}` | V2 wizard + YAML + migration tab |
+| Datasources | `/console/datasources` | `datasource_config` CRUD + test |
+| Jobs | `/console/jobs` | `task_execution` history |
+| Job detail | `/console/jobs/{instanceId}` | Status, error, metrics JSON |
+| Migration | `/console/migration` | Inventory summary + backlog |
 
-REST APIs remain available for automation and CI; the UI calls the same Spring services.
+The React app calls `/api/*` facades; those delegate to the same Spring services as the legacy REST controllers.
 
 ---
 
 ## P1 — Template center
 
-### List (`/templates`)
+### List (`/console/templates`)
 
 - Columns: id, name, archived flag.
-- **New template** → editor at `/template/editor/new`.
-- **Edit** → `/template/editor/{id}`.
-- **Run** — starts async execution from the grid (archived rows disabled); opens job detail.
-- **Archive** / **Restore** — soft delete (`template.archived`, `archived_at`). Archived templates are hidden from `GET /task/list` by default.
+- **New template** → `/console/templates/new`.
+- **Edit** → `/console/templates/{id}`.
+- **Run** — starts async execution (archived rows disabled); opens job detail.
+- **Archive** / **Restore** — soft delete (`template.archived`, `archived_at`). Archived templates are hidden from task list by default.
 
-### Editor (`/template/editor/...`)
+### Editor (`/console/templates/...`)
 
-**Model C:** structured forms (primary) + **YAML advanced** toggle.
+**Model C:** structured forms (primary) + **YAML advanced** panel.
 
 | Tab | Binds to |
 |-----|----------|
@@ -70,100 +81,63 @@ REST APIs remain available for automation and CI; the UI calls the same Spring s
 | Transform | `sql` / `spel` transform |
 | Sinks | `CONSOLE`, `JDBC`, `KAFKA`, `ELASTICSEARCH` |
 | Execution | `executionPolicy`, chunking |
-| Review | Validate, **Preview**, Save, **Run** (save draft → preview or job detail) |
+| Review | Validate, **Preview**, Save, **Run** |
+| Migration | Analyze, compare, sign-off, promote (saved templates only) |
 
-**V1 templates:** wizard fields are read-only; V1 YAML shown read-only. Use the **Migration** tab to analyze, compare, and promote.
+**V1 templates:** wizard fields read-only; V1 YAML shown read-only. Use **Migration** to analyze, compare, and promote.
 
-**YAML advanced:** Apply parses YAML into the draft; Sync from form dumps the current draft. On Apply, form steps refresh from the parsed draft.
+### Console API (templates)
 
-### Template editor REST
-
-Base path: `/template/v2/editor`
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/create` | Create empty V2 draft + persist |
-| GET | `/{templateId}` | Load editor payload (kind, draft, V1 yaml if legacy) |
-| PUT | `/{templateId}` | Save draft (normalize + validate) |
-| POST | `/{templateId}/archive` | Archive (fails if a run is QUEUED/RUNNING) |
-| POST | `/{templateId}/restore` | Restore archived row |
-
-V2 control plane (preview/validate) remains under `/template/v2/validate`, `/template/v2/preview/{id}`, etc.
+Under `/api/console/templates` and `/api/console/templates/{id}/editor/…` — see `ConsoleTemplateController` and `ConsoleTemplateEditorActionsController`. Legacy editor REST remains at `/template/v2/editor/…` for compatibility.
 
 ### P1 acceptance (manual)
 
 1. Create a V2 template with a query source + JDBC sink referencing a datasource from **Datasources**.
 2. **Review → Validate** — expect no blocking errors.
-3. Save; confirm row in `/templates`.
+3. Save; confirm row in `/console/templates`.
 4. Archive; confirm hidden from list (without “Include archived”).
 5. Restore.
 
 ---
 
-## P2 — Datasource center (D1 persistence)
+## P2 — Datasource center
 
-### UI (`/datasources`)
+### UI (`/console/datasources`)
 
-- **Persisted configs** grid: name, JDBC URL, driver, enabled.
-- **Runtime keys** — union of Spring `application.yaml` dynamic datasources and persisted rows loaded at startup.
-- **New / Edit** dialog: name, URL, user, password, driver class, optional driver JAR upload.
+- Persisted configs grid: name, JDBC URL, driver, enabled.
+- Runtime keys — union of Spring `application.yaml` dynamic datasources and persisted rows.
+- New / Edit dialog: name, URL, user, password, driver class, optional driver JAR upload.
 - **Test connection** — validates without saving bad config.
-- **Remove** — drops runtime key and sets `datasource_config.enabled=false`.
+- **Remove** — drops runtime key and disables persisted row.
 
-Rows survive restart via `DataSourceBootstrap` (`@Order(100)`).
-
-### Datasource REST
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/datasource/database/list` | Runtime datasource names |
-| GET | `/datasource/database/configs` | Persisted summaries (no passwords) |
-| POST | `/datasource/database/addDatasource` | Multipart save + register runtime |
-| POST | `/datasource/database/remove/{name}` | Remove runtime + disable row |
-| POST | `/datasource/database/test` | JSON body connection test |
-| POST | `/datasource/database/test/{name}` | Test persisted row |
+Console API: `/api/datasources`. Legacy: `/datasource/database/…`.
 
 ### P2 acceptance (manual)
 
 1. Add an H2 in-memory datasource (driver `org.h2.Driver`).
-2. Restart the app; confirm the source still appears under **Runtime keys** and in the editor Sources dropdown.
+2. Restart the app; confirm the source still appears under runtime keys and in the editor Sources dropdown.
 3. Use that name in a template `dataSourceId` / JDBC sink.
 
 ---
 
 ## P3 — Job center
 
-### UI (`/jobs`)
+### UI (`/console/jobs`)
 
 - Grid: instance id, template name, kind (V1/V2), status, finished time.
 - Optional filter by template id.
-- **Auto-refresh** every 2s while any visible row is `QUEUED` or `RUNNING`.
-- **Detail** link → `/jobs/{instanceId}` (auto-refresh until terminal state).
+- Polling while any visible row is `QUEUED` or `RUNNING`.
+- **Detail** → `/console/jobs/{instanceId}`.
+
+Console API: `/api/console/jobs`. Legacy run: `POST /task/run/{templateId}`.
 
 Statuses: `QUEUED`, `RUNNING`, `SUCCESS`, `FAILED`, `CANCELLED`.
-
-### Run templates
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/task/run/{templateId}` | Preferred for UI/automation |
-| GET | `/task/runById/{templateId}` | Legacy alias |
-| GET | `/task/runByName/{name}` | By name (fails if ambiguous) |
-
-Each run allocates a snowflake `instanceId`, inserts `task_execution`, and submits async work. V2 runs store `metrics_json` from `RunMetrics` when present.
-
-### Execution history REST
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/task/executions?templateId=` | List history (optional filter) |
-| GET | `/task/executions/{instanceId}` | Single row |
 
 ### P3 acceptance (manual)
 
 1. Save a minimal V2 template with a console sink.
-2. `POST /task/run/{templateId}` or trigger via REST client.
-3. Open **Jobs** — row reaches `SUCCESS` after refresh.
+2. Run from the UI or `POST /task/run/{templateId}`.
+3. Open **Jobs** — row reaches `SUCCESS`.
 4. Open detail — confirm timestamps; metrics or error text when applicable.
 5. Archive guard: start a long run, attempt archive in editor — expect rejection while `QUEUED`/`RUNNING`.
 
@@ -173,30 +147,28 @@ Each run allocates a snowflake `instanceId`, inserts `task_execution`, and submi
 
 ### Per-template tab (editor **Migration**)
 
-Available when editing a saved template (`/template/editor/{id}`).
+Available when editing a saved template.
 
-| Action | REST equivalent | Notes |
-|--------|-----------------|-------|
-| Analyze | `GET /template/migration/analyze/{id}` | Classification, path, blockers |
-| Draft | `POST /template/migration/draft/{id}` | Dialog preview; **Apply to editor** |
-| Compare | `POST /template/migration/compare/{id}` | Dual-run + markdown report path |
-| Sign-off | `POST /template/migration/inventory/{inventoryId}/signoff` | Uses `db-{templateId}` |
-| Promote | `POST /template/migration/promote/{id}` | Disabled for `COMPATIBILITY_ONLY` / `BLOCKED` |
+| Action | Console API | Notes |
+|--------|-------------|-------|
+| Analyze | `GET /api/migration/analyze/{id}` | Classification, path, blockers |
+| Draft | `POST /api/migration/draft/{id}` | Preview; apply to editor |
+| Compare | `POST /api/migration/compare/{id}` | Dual-run + report path |
+| Sign-off | `POST /api/migration/inventory/{inventoryId}/signoff` | Uses `db-{templateId}` |
+| Promote | `POST /api/migration/promote/{id}` | Disabled for `COMPATIBILITY_ONLY` / `BLOCKED` |
 
-**W3 policy S1:** templates classified `COMPATIBILITY_ONLY` (e.g. PAUSE/LOG orchestration) cannot promote from the UI. See `docs/migration/reports/builtin-orchestration-census.md` and `docs/migration/orchestration-retirement-boundary.md`.
+**W3 policy S1:** templates classified `COMPATIBILITY_ONLY` cannot promote from the UI. See `docs/migration/reports/builtin-orchestration-census.md` and `docs/migration/orchestration-retirement-boundary.md`.
 
-After promote, the editor reloads as V2.
+### Global dashboard (`/console/migration`)
 
-### Global dashboard (`/migration`)
-
-- Summary cards from `GET /template/migration/summary`.
-- Backlog grid with filters (`ALL`, `READY`, `BLOCKED`, `COMPATIBILITY_ONLY`, `NEEDS_COMPARE`, `PENDING_SIGNOFF`) — `GET /template/migration/backlog?filter=`.
+- Summary cards from `GET /api/migration/summary`.
+- Backlog grid with filters — `GET /api/migration/backlog?filter=`.
 
 Inventory file: `docs/migration/scenario-inventory.yaml`.
 
 ### P4 acceptance (manual)
 
-1. Open a V1 `db-{id}` template (or refresh inventory: `POST /template/migration/inventory/refresh`).
+1. Open a V1 `db-{id}` template (or refresh inventory).
 2. **Migration** tab → Analyze → Compare.
 3. Record sign-off when inventory row exists.
 4. Promote when classification allows; confirm editor switches to V2 wizard.
@@ -207,7 +179,7 @@ Inventory file: `docs/migration/scenario-inventory.yaml`.
 ## Archived templates
 
 - Archive is **soft delete** only (no physical row removal).
-- `GET /task/list?includeArchived=false` (default) omits archived templates.
+- Task list omits archived templates by default.
 - Editor save/archive rejects archived rows until restored.
 - Archive is blocked while `task_execution` has `QUEUED` or `RUNNING` for that template id.
 
@@ -215,15 +187,15 @@ Inventory file: `docs/migration/scenario-inventory.yaml`.
 
 The console improves day-to-day ops; it does **not** replace M2 staging promote gates or P4 production cutover. See:
 
-- `docs/migration/retirement-readiness.md` — checklist (P2 operator UI marked complete)
-- `docs/migration/staging-readiness-checklist.md` — M2 staging
-- `docs/migration/wave-freeze-schedule.md` — family sign-off dates
-- `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` — M1 vs M2 boundaries
+- `docs/migration/retirement-readiness.md`
+- `docs/migration/staging-readiness-checklist.md`
+- `docs/migration/wave-freeze-schedule.md`
+- `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`
 
 ## Known gaps (follow-on)
 
 - Form source types: `json`, `csv`, `geojson`, etc. (P1.5).
-- Spring Security / roles on Vaadin routes.
+- Spring Security / roles on console routes.
 - W3 V2 orchestration spike (P5, deferred under S1).
 
 Preview requires **IN_MEMORY** execution mode (CHUNKED/STREAMING templates fail with a clear error).
@@ -232,4 +204,10 @@ Preview requires **IN_MEMORY** execution mode (CHUNKED/STREAMING templates fail 
 
 ```powershell
 .\mvnw-jdk25.ps1 -pl data-generator-service -am test
+```
+
+Confirm the console bundle is on the classpath:
+
+```powershell
+jar tf data-generator-service\target\data-generator-service-*.jar | findstr static/console/index.html
 ```

@@ -1,9 +1,5 @@
 server:
   port: 9876
-vaadin:
-  # Dev mode for operator console; set productionMode true in release assemblies
-  servlet:
-    productionMode: false
 spring:
   application:
     name: data-generator-service

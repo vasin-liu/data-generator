@@ -1,0 +1,118 @@
+import { apiRequest } from './client';
+import type {
+  PreviewResult,
+  RunStartResult,
+  TemplateEditorPayload,
+  TemplateV2Draft,
+  ValidationResult,
+} from './types';
+
+/**
+ * @returns empty wizard scaffold
+ */
+export function fetchEditorScaffold(): Promise<TemplateEditorPayload> {
+  return apiRequest<TemplateEditorPayload>('/templates/scaffold');
+}
+
+/**
+ * @param templateId persisted id
+ */
+export function fetchEditor(templateId: number): Promise<TemplateEditorPayload> {
+  return apiRequest<TemplateEditorPayload>(`/templates/${templateId}`);
+}
+
+/**
+ * @param draft first save
+ */
+export function createTemplate(draft: TemplateV2Draft): Promise<TemplateEditorPayload> {
+  return apiRequest<TemplateEditorPayload>('/templates', {
+    method: 'POST',
+    body: JSON.stringify(draft),
+  });
+}
+
+/**
+ * @param templateId target id
+ * @param draft body
+ */
+export function saveTemplate(
+  templateId: number,
+  draft: TemplateV2Draft,
+): Promise<TemplateEditorPayload> {
+  return apiRequest<TemplateEditorPayload>(`/templates/${templateId}`, {
+    method: 'PUT',
+    body: JSON.stringify(draft),
+  });
+}
+
+/**
+ * @param draft draft to validate
+ * @param templateId optional persisted id
+ */
+export function validateDraft(
+  draft: TemplateV2Draft,
+  templateId?: number | null,
+): Promise<ValidationResult> {
+  const path =
+    templateId != null
+      ? `/templates/${templateId}/draft/validate`
+      : '/templates/draft/validate';
+  return apiRequest<ValidationResult>(path, {
+    method: 'POST',
+    body: JSON.stringify(draft),
+  });
+}
+
+/**
+ * @param draft draft body
+ * @param templateId optional id
+ * @param maxRows optional preview cap
+ */
+export function previewDraft(
+  draft: TemplateV2Draft,
+  templateId?: number | null,
+  maxRows?: number,
+): Promise<PreviewResult> {
+  const path =
+    templateId != null ? `/templates/${templateId}/draft/preview` : '/templates/draft/preview';
+  return apiRequest<PreviewResult>(path, {
+    method: 'POST',
+    body: JSON.stringify({ draft, maxRows }),
+  });
+}
+
+/**
+ * @param draft draft to save and run
+ * @param templateId optional id
+ */
+export function runDraft(
+  draft: TemplateV2Draft,
+  templateId?: number | null,
+): Promise<RunStartResult> {
+  const path = templateId != null ? `/templates/${templateId}/draft/run` : '/templates/draft/run';
+  return apiRequest<RunStartResult>(path, {
+    method: 'POST',
+    body: JSON.stringify(draft),
+  });
+}
+
+/**
+ * @param templateId template id
+ */
+export function fetchTemplateYaml(templateId: number): Promise<string> {
+  return apiRequest<string>(`/templates/${templateId}/yaml`);
+}
+
+/**
+ * @param templateId template id
+ * @param yaml YAML text
+ */
+export function applyTemplateYaml(
+  templateId: number,
+  yaml: string,
+): Promise<TemplateEditorPayload> {
+  return apiRequest<TemplateEditorPayload>(`/templates/${templateId}/yaml`, {
+    method: 'PUT',
+    body: JSON.stringify({ yaml }),
+  });
+}
