@@ -1,17 +1,28 @@
 package org.gensokyo.data.template;
 
 import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
+import org.gensokyo.data.calcite.runtime.TransformDagExecutor;
+import org.gensokyo.data.calcite.runtime.TransformDagValidationException;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.model.v2.JsTransformVO;
 import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
-import org.gensokyo.data.model.v2.JsTransformVO;
 import org.gensokyo.data.model.v2.SpelColumnMapping;
 import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.v2.TransformGraphVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.v2.workflow.BranchStepVO;
+import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
+import org.gensokyo.data.model.v2.workflow.InvokeComputeBlockStepVO;
+import org.gensokyo.data.model.v2.workflow.LogStepVO;
+import org.gensokyo.data.model.v2.workflow.PauseStepVO;
+import org.gensokyo.data.model.v2.workflow.SharedScopeStepVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowSpecVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
@@ -24,6 +35,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * Structural and semantic validation for Template V2 definitions, including workflow and transform DAG rules.
+ *
+ * @author Gensokyo
+ * @since 2026-05-21
+ */
 public final class TemplateV2Validator {
     private TemplateV2Validator() {
     }
@@ -35,38 +52,25 @@ public final class TemplateV2Validator {
         if (StrKit.isBlank(template.getName())) {
             throw new IllegalArgumentException("Template V2 name must not be blank");
         }
-        if (CollectKit.isEmpty(template.getSources())) {
-            throw new IllegalArgumentException("Template V2 sources must not be empty");
-        }
-        if (CollectKit.isEmpty(template.getTransformers())) {
-            throw new IllegalArgumentException("Template V2 transformers must not be empty");
-        }
-        if (CollectKit.isEmpty(template.getSinks())) {
-            throw new IllegalArgumentException("Template V2 sinks must not be empty");
+
+        boolean workflowMode = template.getWorkflow() != null;
+        if (!workflowMode) {
+            if (CollectKit.isEmpty(template.getSources())) {
+                throw new IllegalArgumentException("Template V2 sources must not be empty");
+            }
+            if (CollectKit.isEmpty(template.getTransformers())) {
+                throw new IllegalArgumentException("Template V2 transformers must not be empty");
+            }
+            if (CollectKit.isEmpty(template.getSinks())) {
+                throw new IllegalArgumentException("Template V2 sinks must not be empty");
+            }
         }
 
-        var names = new HashSet<String>();
-        boolean requireNames = template.getTransformers().size() > 1;
-        for (var transformer : template.getTransformers()) {
-            if (transformer == null) {
-                throw new IllegalArgumentException("Template V2 transformer must not be null");
-            }
-            if (requireNames && StrKit.isBlank(transformer.getName())) {
-                throw new IllegalArgumentException("Template V2 transformers must all be named when more than one transformer is configured");
-            }
-            if (StrKit.isNotBlank(transformer.getName()) && !names.add(transformer.getName())) {
-                throw new IllegalArgumentException("Duplicate transformer name: " + transformer.getName());
-            }
-            if (transformer instanceof SqlTransformVO sqlTransform && StrKit.isBlank(sqlTransform.getSql())) {
-                throw new IllegalArgumentException("SQL transformer SQL must not be blank");
-            }
-            if (transformer instanceof SpelTransformVO spelTransform) {
-                validateSpelTransform(spelTransform);
-            }
-            if (transformer instanceof JsTransformVO jsTransform) {
-                validateJsTransform(jsTransform);
-            }
+        if (workflowMode) {
+            validateWorkflowTemplate(template);
         }
+
+        validateLinearTransformers(template);
         validateExecutionPolicy(template);
 
         for (var entry : template.getSources().entrySet()) {
@@ -79,13 +83,16 @@ public final class TemplateV2Validator {
             validateMaterializationPolicy(entry.getKey(), entry.getValue().getMaterializationPolicy());
         }
 
-        for (var sink : template.getSinks()) {
-            if (sink == null || CollectKit.isEmpty(sink.getWriters())) {
-                throw new IllegalArgumentException("Template V2 sink must contain at least one writer");
+        if (!workflowMode) {
+            for (var sink : template.getSinks()) {
+                if (sink == null || CollectKit.isEmpty(sink.getWriters())) {
+                    throw new IllegalArgumentException("Template V2 sink must contain at least one writer");
+                }
             }
         }
 
         validateSinkExecutionPolicy(template.getSinkExecutionPolicy());
+        validateComputeBlocks(template);
     }
 
     /**
@@ -114,26 +121,157 @@ public final class TemplateV2Validator {
         }
     }
 
-    private static void validateJsTransform(JsTransformVO jsTransform) {
-        if (StrKit.isBlank(jsTransform.getScript())) {
-            throw new IllegalArgumentException("JS transformer script must not be blank");
+    private static void validateLinearTransformers(TemplateV2VO template) {
+        if (CollectKit.isEmpty(template.getTransformers())) {
+            return;
         }
-        if (jsTransform.getScript().getBytes(StandardCharsets.UTF_8).length > JsTransformVO.MAX_SCRIPT_BYTES) {
-            throw new IllegalArgumentException("JS transformer script exceeds maximum size of "
-                    + JsTransformVO.MAX_SCRIPT_BYTES + " bytes");
-        }
-        if (jsTransform.getTimeoutMs() != null && jsTransform.getTimeoutMs() <= 0) {
-            throw new IllegalArgumentException("JS transformer timeoutMs must be positive when set");
+        var names = new HashSet<String>();
+        boolean requireNames = template.getTransformers().size() > 1;
+        for (int index = 0; index < template.getTransformers().size(); index++) {
+            TransformVO transformer = template.getTransformers().get(index);
+            String path = "transformers[" + index + "]";
+            if (transformer == null) {
+                throw new IllegalArgumentException(pathMessage(path, "Template V2 transformer must not be null"));
+            }
+            if (requireNames && StrKit.isBlank(transformer.getName())) {
+                throw new IllegalArgumentException(pathMessage(path,
+                        "Template V2 transformers must all be named when more than one transformer is configured"));
+            }
+            if (StrKit.isNotBlank(transformer.getName()) && !names.add(transformer.getName())) {
+                throw new IllegalArgumentException(pathMessage(path, "Duplicate transformer name: " + transformer.getName()));
+            }
+            validateTransform(transformer, path);
         }
     }
 
-    private static void validateSpelTransform(SpelTransformVO spelTransform) {
-        if (CollectKit.isEmpty(spelTransform.getColumns())) {
-            throw new IllegalArgumentException("SpEL transformer columns must not be empty");
+    private static void validateWorkflowTemplate(TemplateV2VO template) {
+        if (!CollectKit.isEmpty(template.getTransformers()) && CollectKit.isEmpty(template.getComputeBlocks())) {
+            throw new IllegalArgumentException(pathMessage("transformers",
+                    "workflow templates with top-level transformers require computeBlocks"));
         }
-        for (SpelColumnMapping column : spelTransform.getColumns()) {
+
+        WorkflowSpecVO workflow = template.getWorkflow();
+        if (workflow.getSteps() == null || workflow.getSteps().isEmpty()) {
+            throw new IllegalArgumentException(pathMessage("workflow.steps", "workflow steps must not be empty"));
+        }
+        for (int index = 0; index < workflow.getSteps().size(); index++) {
+            validateWorkflowStep(workflow.getSteps().get(index), "workflow.steps[" + index + "]");
+        }
+    }
+
+    private static void validateWorkflowStep(WorkflowStepVO step, String path) {
+        if (step == null) {
+            throw new IllegalArgumentException(pathMessage(path, "workflow step must not be null"));
+        }
+        if (StrKit.isBlank(step.getType())) {
+            throw new IllegalArgumentException(pathMessage(path + ".type", "workflow step type must not be blank"));
+        }
+        if (!(step instanceof PauseStepVO
+                || step instanceof LogStepVO
+                || step instanceof BranchStepVO
+                || step instanceof SharedScopeStepVO
+                || step instanceof InvokeComputeBlockStepVO)) {
+            throw new IllegalArgumentException(pathMessage(path + ".type",
+                    "unsupported workflow step type: " + step.getType()));
+        }
+        if (step instanceof BranchStepVO branchStep) {
+            validateNestedWorkflowSteps(branchStep.getThenSteps(), path + ".thenSteps");
+            validateNestedWorkflowSteps(branchStep.getElseSteps(), path + ".elseSteps");
+        }
+    }
+
+    private static void validateNestedWorkflowSteps(List<WorkflowStepVO> steps, String pathPrefix) {
+        if (steps == null) {
+            return;
+        }
+        for (int index = 0; index < steps.size(); index++) {
+            validateWorkflowStep(steps.get(index), pathPrefix + "[" + index + "]");
+        }
+    }
+
+    private static void validateComputeBlocks(TemplateV2VO template) {
+        if (CollectKit.isEmpty(template.getComputeBlocks())) {
+            return;
+        }
+        for (int blockIndex = 0; blockIndex < template.getComputeBlocks().size(); blockIndex++) {
+            ComputeBlockVO block = template.getComputeBlocks().get(blockIndex);
+            String blockPath = "computeBlocks[" + blockIndex + "]";
+            if (block == null) {
+                throw new IllegalArgumentException(pathMessage(blockPath, "compute block must not be null"));
+            }
+            if (StrKit.isBlank(block.getId())) {
+                throw new IllegalArgumentException(pathMessage(blockPath + ".id", "compute block id must not be blank"));
+            }
+            if (!CollectKit.isEmpty(block.getTransformers())) {
+                for (int index = 0; index < block.getTransformers().size(); index++) {
+                    TransformVO transformer = block.getTransformers().get(index);
+                    validateTransform(transformer, blockPath + ".transformers[" + index + "]");
+                }
+            }
+            TransformGraphVO graph = block.getTransformGraph();
+            if (graph != null && graph.getNodes() != null && !graph.getNodes().isEmpty()) {
+                validateTransformGraph(graph, blockPath + ".transformGraph");
+            }
+        }
+    }
+
+    private static void validateTransformGraph(TransformGraphVO graph, String pathPrefix) {
+        try {
+            new TransformDagExecutor().topologicalSort(graph);
+        }
+        catch (TransformDagValidationException exception) {
+            throw new IllegalArgumentException(pathMessage(pathPrefix, exception.getMessage()));
+        }
+        if (graph.getTransforms() == null) {
+            return;
+        }
+        for (var entry : graph.getTransforms().entrySet()) {
+            validateTransform(entry.getValue(), pathPrefix + ".transforms." + entry.getKey());
+        }
+    }
+
+    private static void validateTransform(TransformVO transformer, String path) {
+        if (transformer == null) {
+            throw new IllegalArgumentException(pathMessage(path, "transform must not be null"));
+        }
+        if (transformer instanceof SqlTransformVO sqlTransform && StrKit.isBlank(sqlTransform.getSql())) {
+            throw new IllegalArgumentException(pathMessage(path + ".sql", "SQL transformer SQL must not be blank"));
+        }
+        if (transformer instanceof SpelTransformVO spelTransform) {
+            validateSpelTransform(spelTransform, path);
+        }
+        if (transformer instanceof JsTransformVO jsTransform) {
+            validateJsTransform(jsTransform, path);
+        }
+    }
+
+    private static String pathMessage(String path, String message) {
+        return path + ": " + message;
+    }
+
+    private static void validateJsTransform(JsTransformVO jsTransform, String path) {
+        if (StrKit.isBlank(jsTransform.getScript())) {
+            throw new IllegalArgumentException(pathMessage(path + ".script", "JS transformer script must not be blank"));
+        }
+        if (jsTransform.getScript().getBytes(StandardCharsets.UTF_8).length > JsTransformVO.MAX_SCRIPT_BYTES) {
+            throw new IllegalArgumentException(pathMessage(path + ".script", "JS transformer script exceeds maximum size of "
+                    + JsTransformVO.MAX_SCRIPT_BYTES + " bytes"));
+        }
+        if (jsTransform.getTimeoutMs() != null && jsTransform.getTimeoutMs() <= 0) {
+            throw new IllegalArgumentException(pathMessage(path + ".timeoutMs",
+                    "JS transformer timeoutMs must be positive when set"));
+        }
+    }
+
+    private static void validateSpelTransform(SpelTransformVO spelTransform, String path) {
+        if (CollectKit.isEmpty(spelTransform.getColumns())) {
+            throw new IllegalArgumentException(pathMessage(path + ".columns", "SpEL transformer columns must not be empty"));
+        }
+        for (int index = 0; index < spelTransform.getColumns().size(); index++) {
+            SpelColumnMapping column = spelTransform.getColumns().get(index);
             if (column == null || StrKit.isBlank(column.getName()) || StrKit.isBlank(column.getExpression())) {
-                throw new IllegalArgumentException("SpEL transformer column name and expression must not be blank");
+                throw new IllegalArgumentException(pathMessage(path + ".columns[" + index + "]",
+                        "SpEL transformer column name and expression must not be blank"));
             }
         }
     }
