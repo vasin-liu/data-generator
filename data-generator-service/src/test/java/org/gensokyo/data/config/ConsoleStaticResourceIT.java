@@ -14,23 +14,23 @@ import org.springframework.core.io.ResourceLoader;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifies the React console bundle is copied into the service classpath at package time.
+ * Ensures the React operator console is packaged into the service JAR.
  *
  * @author Gensokyo
- * @since 2026-05-26
+ * @since 2026-05-28
  */
-@SpringBootTest
+@SpringBootTest(properties = "spring.config.location=classpath:/application-phase7-test.yaml")
 class ConsoleStaticResourceIT {
 
     @Autowired
     private ResourceLoader resourceLoader;
 
     /**
-     * Ensures {@code static/console/index.html} exists after a full package build.
+     * SPA entry must be on the classpath after {@code data-generator-console-web} build.
      */
     @Test
-    void indexHtmlBundledInClasspath() {
-        Resource index = resourceLoader.getResource("classpath:static/console/index.html");
-        assertThat(index.exists()).isTrue();
+    void indexHtmlBundled() {
+        Resource resource = resourceLoader.getResource("classpath:static/console/index.html");
+        assertThat(resource.exists()).isTrue();
     }
 }
