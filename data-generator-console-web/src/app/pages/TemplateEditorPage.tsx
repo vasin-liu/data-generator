@@ -15,8 +15,9 @@ import { GeneralStep } from '../editor/steps/GeneralStep';
 import { SinksStep } from '../editor/steps/SinksStep';
 import { SourcesStep } from '../editor/steps/SourcesStep';
 import { TransformStep } from '../editor/steps/TransformStep';
+import { WorkflowPanel } from '../editor/WorkflowPanel';
 
-const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'review', 'migration'] as const;
+const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'workflow', 'review', 'migration'] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 /**
@@ -142,6 +143,11 @@ export function TemplateEditorPage() {
       key: 'execution',
       label: t('editor.tab.execution'),
       children: <ExecutionStep {...stepProps} />,
+    },
+    {
+      key: 'workflow',
+      label: t('editor.tab.workflow'),
+      children: <WorkflowPanel {...stepProps} jdbcNames={jdbcQuery.data ?? []} />,
     },
     {
       key: 'review',

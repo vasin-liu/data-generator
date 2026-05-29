@@ -51,6 +51,10 @@ public final class TemplateV2Normalizer {
             sinks.addAll(draft.getSinks());
         }
         normalized.setSinks(sinks);
+        normalized.setWorkflow(draft.getWorkflow());
+        if (CollectKit.isNotEmpty(draft.getComputeBlocks())) {
+            normalized.setComputeBlocks(new ArrayList<>(draft.getComputeBlocks()));
+        }
         return normalized;
     }
 }

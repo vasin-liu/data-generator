@@ -3,10 +3,13 @@ package org.gensokyo.data.model.v2;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowSpecVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,4 +29,8 @@ public class TemplateV2DraftVO implements Serializable {
     private List<WriteStageVO> sinks;
     private ExecutionPolicyVO executionPolicy;
     private SinkExecutionPolicyVO sinkExecutionPolicy;
+    /** Optional L2 workflow definition. */
+    private WorkflowSpecVO workflow;
+    /** Compute blocks referenced by workflow invoke steps. */
+    private List<ComputeBlockVO> computeBlocks = new ArrayList<>();
 }

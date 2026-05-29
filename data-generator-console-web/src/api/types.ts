@@ -87,6 +87,8 @@ export interface TemplateV2Draft {
   sink?: SinkDraft;
   executionPolicy?: ExecutionPolicyDraft;
   sinkExecutionPolicy?: SinkExecutionPolicyDraft;
+  workflow?: WorkflowSpecDraft;
+  computeBlocks?: ComputeBlockDraft[];
   [key: string]: unknown;
 }
 
@@ -158,6 +160,53 @@ export interface ExecutionPolicyDraft {
 export interface SinkExecutionPolicyDraft {
   mode?: string;
   [key: string]: unknown;
+}
+
+/** L2 workflow definition on a V2 template draft. */
+export interface WorkflowSpecDraft {
+  steps?: WorkflowStepDraft[];
+}
+
+/** Single workflow step; type-specific fields live on the object or in params JSON in the editor. */
+export interface WorkflowStepDraft {
+  id?: string;
+  name?: string;
+  type?: string;
+  computeBlockId?: string;
+  [key: string]: unknown;
+}
+
+/** Self-contained source → transform → sink unit inside a workflow. */
+export interface ComputeBlockDraft {
+  id?: string;
+  sources?: Record<string, SourceDraft>;
+  transformers?: TransformDraft[];
+  transformGraph?: TransformGraphDraft;
+  sinks?: SinkDraft[];
+  sharedScopeId?: string;
+  [key: string]: unknown;
+}
+
+/** L1 transform DAG inside a compute block. */
+export interface TransformGraphDraft {
+  transforms?: Record<string, TransformDraft>;
+  nodes?: TransformNodeDraft[];
+  edges?: TransformEdgeDraft[];
+}
+
+/** Node in a transform DAG. */
+export interface TransformNodeDraft {
+  id?: string;
+  transformId?: string;
+  outputAlias?: string;
+}
+
+/** Directed edge between transform DAG nodes. */
+export interface TransformEdgeDraft {
+  fromNodeId?: string;
+  fromPort?: string;
+  toNodeId?: string;
+  toPort?: string;
 }
 
 export interface ValidationResult {

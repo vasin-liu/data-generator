@@ -7,6 +7,14 @@ import type {
   ValidationResult,
 } from './types';
 
+export type {
+  ComputeBlockDraft,
+  TransformGraphDraft,
+  TransformNodeDraft,
+  WorkflowSpecDraft,
+  WorkflowStepDraft,
+} from './types';
+
 /**
  * @returns empty wizard scaffold
  */
