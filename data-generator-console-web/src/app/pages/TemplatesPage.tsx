@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Checkbox, Input, Modal, Space, Table, Typography, message } from 'antd';
+import { Alert, Button, Checkbox, Input, Modal, Space, Table, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,7 +58,7 @@ export function TemplatesPage() {
 
   const columns: ColumnsType<TemplateSummary> = useMemo(
     () => [
-      { title: t('templates.col.id'), dataIndex: 'id', sorter: (a, b) => a.id - b.id },
+      { title: t('templates.col.id'), dataIndex: 'id', sorter: (a, b) => a.id.localeCompare(b.id) },
       { title: t('templates.col.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
       {
         title: t('templates.col.archived'),
@@ -118,6 +118,15 @@ export function TemplatesPage() {
     <div>
       <Typography.Title level={3}>{t('templates.title')}</Typography.Title>
       <Typography.Paragraph type="secondary">{t('templates.subtitle')}</Typography.Paragraph>
+      {listQuery.isError ? (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('templates.loadError')}
+          description={(listQuery.error as Error).message}
+        />
+      ) : null}
       <Space wrap style={{ marginBottom: 16 }}>
         <Button type="primary" onClick={() => navigate('/templates/new')}>
           {t('templates.new')}
@@ -135,11 +144,12 @@ export function TemplatesPage() {
         </Checkbox>
       </Space>
       <Table<TemplateSummary>
-        rowKey="id"
+        rowKey={(row) => String(row.id)}
         loading={listQuery.isLoading}
         dataSource={listQuery.data ?? []}
         columns={columns}
         pagination={{ pageSize: 20 }}
+        locale={{ emptyText: t('templates.empty') }}
       />
     </div>
   );

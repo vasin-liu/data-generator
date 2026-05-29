@@ -14,12 +14,12 @@ export function JobDetailPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { instanceId: instanceIdParam } = useParams();
-  const instanceId = Number(instanceIdParam);
+  const instanceId = instanceIdParam?.trim() ?? '';
 
   const jobQuery = useQuery({
     queryKey: ['job', instanceId],
     queryFn: () => fetchJob(instanceId),
-    enabled: Number.isFinite(instanceId),
+    enabled: instanceId.length > 0,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status && ACTIVE.has(status) ? 2000 : false;

@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.api.console.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.gensokyo.data.template.TemplateV2PreviewDTO;
 
 /**
@@ -13,5 +15,7 @@ import org.gensokyo.data.template.TemplateV2PreviewDTO;
  * @author Gensokyo
  * @since 2026-05-26
  */
-public record PreviewResultDto(long templateId, TemplateV2PreviewDTO preview) {
+public record PreviewResultDto(
+        @JsonSerialize(using = ToStringSerializer.class) Long templateId,
+        TemplateV2PreviewDTO preview) {
 }

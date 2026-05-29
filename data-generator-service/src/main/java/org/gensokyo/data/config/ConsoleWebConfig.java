@@ -33,7 +33,8 @@ public class ConsoleWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/console/**")
+        // Include "/console/" explicitly: PathPattern "/console/**" alone may not match the root URL.
+        registry.addResourceHandler("/console", "/console/", "/console/**")
                 .addResourceLocations(CONSOLE_RESOURCE_LOCATION)
                 .resourceChain(true)
                 .addResolver(new SpaFallbackResourceResolver());
@@ -46,12 +47,28 @@ public class ConsoleWebConfig implements WebMvcConfigurer {
 
         @Override
         protected Resource getResource(String resourcePath, Resource location) throws IOException {
-            Resource resolved = super.getResource(resourcePath, location);
-            if (resolved != null) {
-                return resolved;
+            if (resourcePath != null && !resourcePath.isBlank()) {
+                Resource requested = location.createRelative(resourcePath);
+                if (isReadableFile(requested)) {
+                    return requested;
+                }
+                // Client routes such as /console/templates have no file extension.
+                if (!resourcePath.contains(".")) {
+                    return indexHtml(location);
+                }
+                return null;
             }
-            // Deep links such as /console/templates must not 404 before React Router runs.
-            return super.getResource("index.html", location);
+            // GET /console/ resolves to an empty path; classpath folder exists but is not a file.
+            return indexHtml(location);
+        }
+
+        private static Resource indexHtml(Resource location) throws IOException {
+            Resource index = location.createRelative("index.html");
+            return isReadableFile(index) ? index : null;
+        }
+
+        private static boolean isReadableFile(Resource resource) throws IOException {
+            return resource != null && resource.exists() && resource.isReadable() && resource.isFile();
         }
     }
 }

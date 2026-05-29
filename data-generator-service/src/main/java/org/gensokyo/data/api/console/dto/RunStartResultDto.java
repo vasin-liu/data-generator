@@ -5,11 +5,16 @@
  */
 package org.gensokyo.data.api.console.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 /**
  * Async run submission result for template grid actions.
  *
  * @author Gensokyo
  * @since 2026-05-26
  */
-public record RunStartResultDto(long templateId, long instanceId) {
+public record RunStartResultDto(
+        @JsonSerialize(using = ToStringSerializer.class) Long templateId,
+        @JsonSerialize(using = ToStringSerializer.class) Long instanceId) {
 }

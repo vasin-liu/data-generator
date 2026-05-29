@@ -4,7 +4,7 @@ import type { TaskExecutionSummary } from './types';
 /**
  * @param templateId optional filter
  */
-export function fetchJobs(templateId?: number): Promise<TaskExecutionSummary[]> {
+export function fetchJobs(templateId?: string): Promise<TaskExecutionSummary[]> {
   const suffix = templateId != null ? `?templateId=${templateId}` : '';
   return apiRequest<TaskExecutionSummary[]>(`/jobs${suffix}`);
 }
@@ -12,6 +12,6 @@ export function fetchJobs(templateId?: number): Promise<TaskExecutionSummary[]> 
 /**
  * @param instanceId snowflake instance id
  */
-export function fetchJob(instanceId: number): Promise<TaskExecutionSummary> {
+export function fetchJob(instanceId: string): Promise<TaskExecutionSummary> {
   return apiRequest<TaskExecutionSummary>(`/jobs/${instanceId}`);
 }

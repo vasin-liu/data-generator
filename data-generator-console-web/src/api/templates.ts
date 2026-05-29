@@ -17,20 +17,20 @@ export function fetchTemplates(includeArchived: boolean, q?: string): Promise<Te
 /**
  * @param templateId row id
  */
-export function archiveTemplate(templateId: number): Promise<string> {
+export function archiveTemplate(templateId: string): Promise<string> {
   return apiRequest<string>(`/templates/${templateId}/archive`, { method: 'POST' });
 }
 
 /**
  * @param templateId row id
  */
-export function restoreTemplate(templateId: number): Promise<string> {
+export function restoreTemplate(templateId: string): Promise<string> {
   return apiRequest<string>(`/templates/${templateId}/restore`, { method: 'POST' });
 }
 
 /**
  * @param templateId row id
  */
-export function runTemplate(templateId: number): Promise<RunStartResult> {
+export function runTemplate(templateId: string): Promise<RunStartResult> {
   return apiRequest<RunStartResult>(`/templates/${templateId}/run`, { method: 'POST' });
 }

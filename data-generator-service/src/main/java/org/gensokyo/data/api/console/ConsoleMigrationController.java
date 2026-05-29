@@ -54,7 +54,7 @@ public class ConsoleMigrationController {
      */
     @GetMapping("/backlog")
     public R<List<MigrationInventoryEntry>> backlog(
-            @RequestParam(required = false) String filter) {
+            @RequestParam(name = "filter", required = false) String filter) {
         return R.ok(migrationConsoleService.backlog(filter));
     }
 

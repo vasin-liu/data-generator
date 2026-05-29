@@ -5,6 +5,9 @@
  */
 package org.gensokyo.data.task;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -25,10 +28,10 @@ import java.time.Instant;
  * @param metricsJson     serialized V2 metrics
  */
 public record TaskExecutionSummary(
-        Long id,
-        Long templateId,
+        @JsonSerialize(using = ToStringSerializer.class) Long id,
+        @JsonSerialize(using = ToStringSerializer.class) Long templateId,
         String templateName,
-        Long instanceId,
+        @JsonSerialize(using = ToStringSerializer.class) Long instanceId,
         String definitionKind,
         String status,
         Instant queuedAt,

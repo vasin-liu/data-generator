@@ -26,21 +26,21 @@ export function fetchMigrationBacklog(filter?: string): Promise<MigrationInvento
 /**
  * @param templateId persisted id
  */
-export function analyzeMigration(templateId: number): Promise<MigrationAnalysis> {
+export function analyzeMigration(templateId: string): Promise<MigrationAnalysis> {
   return apiRequest<MigrationAnalysis>(`/migration/templates/${templateId}/analyze`);
 }
 
 /**
  * @param templateId persisted id
  */
-export function buildMigrationDraft(templateId: number): Promise<TemplateV2Draft> {
+export function buildMigrationDraft(templateId: string): Promise<TemplateV2Draft> {
   return apiRequest<TemplateV2Draft>(`/migration/templates/${templateId}/draft`, { method: 'POST' });
 }
 
 /**
  * @param templateId persisted id
  */
-export function compareMigration(templateId: number): Promise<MigrationCompareReport> {
+export function compareMigration(templateId: string): Promise<MigrationCompareReport> {
   return apiRequest<MigrationCompareReport>(`/migration/templates/${templateId}/compare`, {
     method: 'POST',
     body: JSON.stringify({}),
@@ -52,7 +52,7 @@ export function compareMigration(templateId: number): Promise<MigrationCompareRe
  * @param request sign-off body
  */
 export function signoffMigration(
-  templateId: number,
+  templateId: string,
   request: MigrationSignoffRequest,
 ): Promise<MigrationInventoryEntry> {
   return apiRequest<MigrationInventoryEntry>(`/migration/templates/${templateId}/signoff`, {
@@ -64,13 +64,13 @@ export function signoffMigration(
 /**
  * @param templateId persisted id
  */
-export function promoteMigration(templateId: number): Promise<TemplateV2Draft> {
+export function promoteMigration(templateId: string): Promise<TemplateV2Draft> {
   return apiRequest<TemplateV2Draft>(`/migration/templates/${templateId}/promote`, { method: 'POST' });
 }
 
 /**
  * @param templateId persisted id
  */
-export function fetchMigrationInventory(templateId: number): Promise<MigrationInventoryEntry> {
+export function fetchMigrationInventory(templateId: string): Promise<MigrationInventoryEntry> {
   return apiRequest<MigrationInventoryEntry>(`/migration/templates/${templateId}/inventory`);
 }

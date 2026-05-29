@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.api.console.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.gensokyo.data.model.po.TemplatePO;
 
 /**
@@ -13,7 +15,10 @@ import org.gensokyo.data.model.po.TemplatePO;
  * @author Gensokyo
  * @since 2026-05-26
  */
-public record TemplateSummaryDto(Long id, String name, Boolean archived) {
+public record TemplateSummaryDto(
+        @JsonSerialize(using = ToStringSerializer.class) Long id,
+        String name,
+        Boolean archived) {
 
     /**
      * @param entity persisted template row

@@ -10,13 +10,9 @@ import { JobStatusTag } from '../../components/JobStatusTag';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING']);
 
-function parseTemplateId(raw: string): number | undefined {
+function parseTemplateId(raw: string): string | undefined {
   const trimmed = raw.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? n : undefined;
+  return trimmed || undefined;
 }
 
 /**
@@ -48,7 +44,7 @@ export function JobsPage() {
       {
         title: t('jobs.col.instance'),
         dataIndex: 'instanceId',
-        sorter: (a, b) => a.instanceId - b.instanceId,
+        sorter: (a, b) => a.instanceId.localeCompare(b.instanceId),
       },
       {
         title: t('jobs.col.template'),

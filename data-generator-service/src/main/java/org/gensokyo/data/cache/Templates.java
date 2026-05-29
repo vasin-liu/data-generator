@@ -30,6 +30,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Slf4j
@@ -49,9 +51,18 @@ public class Templates implements InitializingBean {
     private final YamlParser yamlParser;
     private final TemplateRepository repository;
 
+    /**
+     * Rebuilds the template table from classpath / filesystem YAML (delete then reload).
+     *
+     * @return rows persisted after reload
+     */
     public List<TemplatePO> reloadAll() {
         repository.deleteAll();
-        return parse(loadTemplateResources());
+        List<TemplatePO> loaded = parse(loadTemplateResources());
+        if (!loaded.isEmpty()) {
+            repository.saveAll(loaded);
+        }
+        return loaded;
     }
 
     public FileAlterationObserver createResourceObserver() {
@@ -128,8 +139,8 @@ public class Templates implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        repository.saveAll(reloadAll());
-        log.info("Template cache initialized");
+        List<TemplatePO> loaded = reloadAll();
+        log.info("Template cache initialized ({} template(s))", loaded.size());
         var monitor = new FileAlterationMonitor(1000, createResourceObserver());
         monitor.start();
         log.info("Template file monitor started");
@@ -152,13 +163,7 @@ public class Templates implements InitializingBean {
                     }
                     return true;
                 })
-                .filter(r -> {
-                    try {
-                        return isYamlFile(r.getFile());
-                    } catch (IOException ex) {
-                    }
-                    return false;
-                })
+                .filter(this::isYamlResource)
                 .forEach(resource -> {
                     var template = parse(resource, false);
                     if (Objects.nonNull(template)) {
@@ -183,9 +188,16 @@ public class Templates implements InitializingBean {
     private TemplatePO parse(Resource resource, boolean verbose) {
         try {
             return parse(resource.getFile(), verbose);
-        } catch (IOException e) {
-            if (verbose) {
-                log.warn("Skip template resource {} because it cannot be opened: {}", describe(resource), sanitize(e.getMessage()));
+        } catch (IOException ignored) {
+            try {
+                String yamlContent = resource.getContentAsString(StandardCharsets.UTF_8);
+                String fileName = Objects.requireNonNullElse(resource.getFilename(), "template.yaml");
+                return parseYamlContent(yamlContent, fileName, describe(resource), verbose);
+            } catch (IOException ex) {
+                if (verbose) {
+                    log.warn("Skip template resource {} because it cannot be opened: {}",
+                            describe(resource), sanitize(ex.getMessage()));
+                }
             }
         }
         return null;
@@ -197,9 +209,18 @@ public class Templates implements InitializingBean {
 
     private TemplatePO parse(File file, boolean verbose) {
         try {
+            return parseYamlContent(Files.readString(file.toPath()), file.getName(), file.getPath(), verbose);
+        } catch (Exception e) {
+            if (verbose) {
+                log.warn("Skip template file {} because parsing failed: {}", file.getAbsolutePath(), summarize(e));
+            }
+        }
+        return null;
+    }
+
+    private TemplatePO parseYamlContent(String yamlContent, String fileName, String pathForMd5, boolean verbose) {
+        try {
             var id = RandomKit.snowFlake().nextId();
-            var fileName = file.getName();
-            var yamlContent = Files.readString(file.toPath());
             var template = tryParse(yamlContent, TemplateVO.class);
             var templateV2 = tryParse(yamlContent, TemplateV2DraftVO.class);
             var kind = TemplateDefinitionDetector.detect(template, templateV2);
@@ -217,16 +238,30 @@ public class Templates implements InitializingBean {
             }
             entity.setFileName(fileName);
             entity.setFileExt(FileKit.getExtension(fileName));
-            entity.setPathMd5(Md5Kit.encrypt(file.getPath()));
+            entity.setPathMd5(Md5Kit.encrypt(pathForMd5));
             entity.setContentMd5(Md5Kit.encrypt(yamlContent));
             entity.setContentYaml(yamlContent);
+            entity.setArchived(Boolean.FALSE);
             return entity;
         } catch (Exception e) {
             if (verbose) {
-                log.warn("Skip template file {} because parsing failed: {}", file.getAbsolutePath(), summarize(e));
+                log.warn("Skip template {} because parsing failed: {}", pathForMd5, summarize(e));
             }
         }
         return null;
+    }
+
+    private boolean isYamlResource(Resource resource) {
+        String name = resource.getFilename();
+        if (name != null) {
+            String lower = name.toLowerCase(Locale.ROOT);
+            return lower.endsWith(".yaml") || lower.endsWith(".yml");
+        }
+        try {
+            return isYamlFile(resource.getFile());
+        } catch (IOException ex) {
+            return false;
+        }
     }
 
     private <T> T tryParse(String yamlContent, Class<T> clazz) {
@@ -306,31 +341,71 @@ public class Templates implements InitializingBean {
         return resourceList;
     }
 
-    private List<Resource> fromClasspath(String baseDir) {
-        if (StrKit.isBlank(baseDir)) {
+    private static final String CLASSPATH_TEMPLATE_PATTERN = "classpath*:/template/**/*.yaml";
+
+    private List<Resource> fromClasspath(String pattern) {
+        if (StrKit.isBlank(pattern)) {
             return Collections.emptyList();
         }
         var resourceList = new ArrayList<Resource>();
         try {
             var resolver = new PathMatchingResourcePatternResolver();
-            var resources = resolver.getResources("classpath:" + baseDir);
+            var resources = resolver.getResources(pattern);
             for (var resource : resources) {
                 if (resource.isReadable()) {
                     resourceList.add(resource);
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to read template resources from classpath: {}", baseDir, e);
+            log.error("Failed to read template resources from classpath: {}", pattern, e);
         }
         return resourceList;
     }
 
     private List<Resource> loadTemplateResources() {
-        if (isRunningFromJar()) {
-            String baseDir = Paths.get(System.getProperty("user.dir"), "..", "conf", "template").toString();
-            return fromFileSystem(baseDir);
+        List<Resource> classpath = fromClasspath(CLASSPATH_TEMPLATE_PATTERN);
+        if (!isRunningFromJar()) {
+            if (!classpath.isEmpty()) {
+                return classpath;
+            }
+            List<Resource> devTree = fromDevClasspathTree();
+            if (!devTree.isEmpty()) {
+                log.info("Loading {} template file(s) from dev classpath tree", devTree.size());
+                return devTree;
+            }
+            log.warn("No templates found on classpath ({})", CLASSPATH_TEMPLATE_PATTERN);
+            return classpath;
         }
-        return fromClasspath("/template/**/*.yaml");
+        String externalDir = Paths.get(System.getProperty("user.dir"), "..", "conf", "template").toString();
+        List<Resource> external = fromFileSystem(externalDir);
+        if (!external.isEmpty()) {
+            log.info("Loading {} template file(s) from {}", external.size(), externalDir);
+            return external;
+        }
+        if (!classpath.isEmpty()) {
+            log.info("No templates under {}; loading {} from classpath", externalDir, classpath.size());
+        } else {
+            log.warn("No templates under {} or {}", externalDir, CLASSPATH_TEMPLATE_PATTERN);
+        }
+        return classpath;
+    }
+
+    /**
+     * IDE / {@code mvn compile} layout: {@code target/classes/template} on disk (not always visible to {@code classpath:}).
+     */
+    private List<Resource> fromDevClasspathTree() {
+        try {
+            var codeSource = Templates.class.getProtectionDomain().getCodeSource();
+            if (codeSource == null || codeSource.getLocation() == null) {
+                return Collections.emptyList();
+            }
+            Path classesRoot = Paths.get(codeSource.getLocation().toURI());
+            Path templateDir = classesRoot.resolve("template");
+            return fromFileSystem(templateDir);
+        } catch (Exception e) {
+            log.debug("Dev classpath template tree not available: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     private boolean isRunningFromJar() {

@@ -16,7 +16,7 @@ export async function parseApiResult<T>(res: Response): Promise<T> {
 }
 
 export interface TemplateSummary {
-  id: number;
+  id: string;
   name: string;
   archived: boolean | null;
 }
@@ -26,10 +26,10 @@ export interface ConsoleRuntime {
 }
 
 export interface TaskExecutionSummary {
-  id: number;
-  templateId: number;
+  id: string;
+  templateId: string;
   templateName: string;
-  instanceId: number;
+  instanceId: string;
   definitionKind: string;
   status: string;
   queuedAt: string | null;
@@ -41,14 +41,14 @@ export interface TaskExecutionSummary {
 }
 
 export interface RunStartResult {
-  templateId: number;
-  instanceId: number;
+  templateId: string;
+  instanceId: string;
 }
 
 export type TemplateDefinitionKind = 'V1' | 'V2';
 
 export interface TemplateEditorPayload {
-  templateId: number | null;
+  templateId: string | null;
   kind: TemplateDefinitionKind;
   draft: TemplateV2Draft;
   v1Yaml: string | null;
@@ -60,12 +60,33 @@ export interface TemplateV2Draft {
   id?: number | null;
   instanceId?: number | null;
   name?: string;
-  generator?: { batchSize?: number };
+  generator?: GeneratorDraft;
   sources?: Record<string, SourceDraft>;
   transform?: TransformDraft;
+  transformers?: TransformDraft[];
+  transformerCapabilities?: unknown[];
   sink?: SinkDraft;
   executionPolicy?: ExecutionPolicyDraft;
+  sinkExecutionPolicy?: SinkExecutionPolicyDraft;
   [key: string]: unknown;
+}
+
+export interface GeneratorDraft {
+  type?: string;
+  batchSize?: number;
+  executor?: {
+    coreSize?: number;
+    maxSize?: number;
+    queueCapacity?: number;
+    keepAliveSeconds?: number;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface SpelColumnDraft {
+  name?: string;
+  expression?: string;
 }
 
 export interface SourceDraft {
@@ -73,29 +94,51 @@ export interface SourceDraft {
   dataSourceId?: string;
   sql?: string;
   iterator?: { type?: string; from?: number; to?: number; step?: number };
+  policy?: {
+    inMemory?: boolean;
+    materialization?: string;
+    selectionStrategy?: string;
+    limit?: number;
+  };
+  [key: string]: unknown;
 }
 
 export interface TransformDraft {
+  name?: string;
   type?: string;
   sql?: string;
-  columns?: { name?: string; expression?: string }[];
+  columns?: SpelColumnDraft[];
+  [key: string]: unknown;
 }
 
 export interface SinkDraft {
   writers?: WriterDraft[];
+  [key: string]: unknown;
 }
 
 export interface WriterDraft {
   type?: string;
   dataSourceId?: string;
   target?: string;
+  template?: string;
+  options?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface ExecutionPolicyDraft {
   mode?: string;
+  maxRowsInMemory?: number;
+  previewRowLimit?: number;
   sourceChunkSize?: number;
   sinkBatchSize?: number;
-  previewRowLimit?: number;
+  failOnLimitExceeded?: boolean;
+  broadcastMaxRows?: number;
+  [key: string]: unknown;
+}
+
+export interface SinkExecutionPolicyDraft {
+  mode?: string;
+  [key: string]: unknown;
 }
 
 export interface ValidationResult {
@@ -105,7 +148,7 @@ export interface ValidationResult {
 }
 
 export interface PreviewResult {
-  templateId: number;
+  templateId: string;
   preview: {
     schema?: unknown;
     rows?: unknown[];
@@ -124,9 +167,21 @@ export interface DataSourceSummary {
   updatedAt: string | null;
 }
 
+export interface JdbcDriverPresetDto {
+  id: string;
+  groupKey: string;
+  bundleKey: string;
+  labelKey: string;
+  driverClassName: string;
+  alternateDriverClassNames: string[];
+  urlTemplate: string;
+  bundled: boolean;
+}
+
 export interface DataSourcesOverview {
   persisted: DataSourceSummary[];
   runtimeKeys: string[];
+  driverPresets: JdbcDriverPresetDto[];
 }
 
 export interface DataSourceTestRequest {
