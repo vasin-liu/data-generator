@@ -1,0 +1,35 @@
+# definitionKind: V2
+# scenarioId: GF-WF-B
+# catalogRef: WF-02 — workflow branch step with SpEL condition
+name: scenario-wf-branch
+workflow:
+  steps:
+    - type: branch
+      id: branch-1
+      condition: "true"
+      thenSteps:
+        - type: log
+          id: then-log
+          level: INFO
+          message: then-branch
+      elseSteps:
+        - type: log
+          id: else-log
+          level: INFO
+          message: else-branch
+    - type: invoke_compute_block
+      id: invoke-seed
+      computeBlockId: seed-block
+computeBlocks:
+  - id: seed-block
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 2
+          step: 1
+    transformers:
+      - type: sql
+        sql: SELECT value FROM seed

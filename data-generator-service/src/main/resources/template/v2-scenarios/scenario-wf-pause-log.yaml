@@ -1,0 +1,33 @@
+# definitionKind: V2
+# scenarioId: GF-WF-A
+# catalogRef: WF-01 — workflow pause + log steps with compute block invoke
+name: scenario-wf-pause-log
+workflow:
+  steps:
+    - type: log
+      id: log-start
+      level: INFO
+      message: workflow-start
+    - type: pause
+      id: pause-1
+      durationMs: 50
+    - type: invoke_compute_block
+      id: invoke-seed
+      computeBlockId: seed-block
+    - type: log
+      id: log-end
+      level: INFO
+      message: workflow-end
+computeBlocks:
+  - id: seed-block
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 3
+          step: 1
+    transformers:
+      - type: sql
+        sql: SELECT value FROM seed

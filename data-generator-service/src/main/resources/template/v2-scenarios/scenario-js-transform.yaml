@@ -1,0 +1,24 @@
+# definitionKind: V2
+# scenarioId: GF-JS
+# catalogRef: WF-04 — sandboxed JavaScript transform after SQL projection
+name: scenario-js-transform
+workflow:
+  steps:
+    - type: invoke_compute_block
+      id: invoke-js
+      computeBlockId: js-block
+computeBlocks:
+  - id: js-block
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 3
+          step: 1
+    transformers:
+      - type: sql
+        sql: SELECT value AS amount FROM seed
+      - type: js
+        script: row.amount = row.amount * 2
