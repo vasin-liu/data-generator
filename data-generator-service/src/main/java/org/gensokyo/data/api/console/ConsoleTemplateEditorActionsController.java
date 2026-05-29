@@ -130,6 +130,36 @@ public class ConsoleTemplateEditorActionsController {
     }
 
     /**
+     * @param draft in-memory wizard draft
+     * @return YAML text reflecting current form state
+     */
+    @PostMapping("/draft/yaml")
+    public R<String> exportDraftYaml(@RequestBody TemplateV2DraftVO draft) {
+        return R.ok(yamlSupport.toYaml(draft));
+    }
+
+    /**
+     * @param templateId persisted id (unused; draft body is authoritative)
+     * @param draft      in-memory wizard draft
+     * @return YAML text reflecting current form state
+     */
+    @PostMapping("/{templateId}/draft/yaml")
+    public R<String> exportDraftYamlForId(
+            @NotNull @PathVariable Long templateId,
+            @RequestBody TemplateV2DraftVO draft) {
+        return exportDraftYaml(draft);
+    }
+
+    /**
+     * @param request YAML body
+     * @return parsed draft without persisting (for new-template apply)
+     */
+    @PostMapping("/draft/yaml/parse")
+    public R<TemplateV2DraftVO> parseDraftYaml(@RequestBody YamlApplyRequest request) {
+        return R.ok(yamlSupport.parseYaml(request.yaml()));
+    }
+
+    /**
      * @param templateId template id
      * @param request    YAML body
      * @return updated editor payload

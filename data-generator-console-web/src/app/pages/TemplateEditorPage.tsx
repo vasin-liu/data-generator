@@ -28,8 +28,8 @@ export function TemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const isNew = id === 'new';
-  const parsedId = !isNew && id ? Number(id) : NaN;
-  const invalidId = !isNew && (Number.isNaN(parsedId) || parsedId <= 0);
+  const routeId = !isNew && id ? id.trim() : '';
+  const invalidId = !isNew && routeId.length === 0;
 
   const [draft, setDraft] = useState<TemplateV2Draft | null>(null);
   const [meta, setMeta] = useState<Omit<TemplateEditorPayload, 'draft'> | null>(null);
@@ -41,7 +41,7 @@ export function TemplateEditorPage() {
         const scaffold = await fetchEditorScaffold();
         return scaffold;
       }
-      return isNew ? fetchEditorScaffold() : fetchEditor(parsedId);
+      return isNew ? fetchEditorScaffold() : fetchEditor(routeId);
     },
     enabled: Boolean(id),
   });
@@ -74,7 +74,7 @@ export function TemplateEditorPage() {
     }
   }, [invalidId, id, navigate, t]);
 
-  const templateId = meta?.templateId ?? (isNew ? null : parsedId);
+  const templateId = meta?.templateId ?? (isNew ? null : routeId);
   const saveAllowed = meta != null && meta.kind !== 'V1' && !meta.archived;
   const activeTab = (searchParams.get('tab') as TabKey) || 'general';
 
@@ -82,7 +82,7 @@ export function TemplateEditorPage() {
     setSearchParams({ tab: key }, { replace: true });
   };
 
-  const onSaved = (newId: number) => {
+  const onSaved = (newId: string) => {
     setMeta((m) => (m ? { ...m, templateId: newId } : m));
     if (isNew || invalidId) {
       navigate(`/templates/${newId}?tab=review`, { replace: true });
@@ -93,8 +93,19 @@ export function TemplateEditorPage() {
     if (isNew || invalidId) {
       return t('editor.new');
     }
-    return t('editor.edit', { id: templateId ?? parsedId });
-  }, [isNew, invalidId, templateId, parsedId, t]);
+    return t('editor.edit', { id: templateId ?? routeId });
+  }, [isNew, invalidId, templateId, routeId, t]);
+
+  if (loadQuery.isError) {
+    return (
+      <Alert
+        type="error"
+        showIcon
+        message={t('templates.loadError')}
+        description={(loadQuery.error as Error).message}
+      />
+    );
+  }
 
   if (loadQuery.isLoading || !draft || !meta) {
     return <Spin style={{ display: 'block', margin: '48px auto' }} />;
@@ -187,10 +198,12 @@ export function TemplateEditorPage() {
             label: t('editor.yaml.mode'),
             children: (
               <YamlPanel
+                draft={draft}
                 templateId={templateId}
                 saveAllowed={saveAllowed}
                 v1Yaml={meta.v1Yaml}
                 onApplied={applyPayload}
+                onDraftParsed={(d) => setDraft(cloneDraft(d))}
               />
             ),
           },

@@ -13,7 +13,7 @@ import {
 import type { MigrationAnalysis, TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
 
 type Props = {
-  templateId: number;
+  templateId: string;
   kind: TemplateDefinitionKind;
   onPromoted: () => void;
   onDraftApply: (draft: TemplateV2Draft) => void;

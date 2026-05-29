@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.template.editor;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.template.TemplateDefinitionKind;
 
@@ -20,7 +22,7 @@ import java.io.Serializable;
  * @param archived     whether the row is archived
  */
 public record TemplateEditorPayload(
-        Long templateId,
+        @JsonSerialize(using = ToStringSerializer.class) Long templateId,
         TemplateDefinitionKind kind,
         TemplateV2DraftVO draft,
         String v1Yaml,

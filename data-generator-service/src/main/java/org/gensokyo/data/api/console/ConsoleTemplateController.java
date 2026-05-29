@@ -38,8 +38,8 @@ public class ConsoleTemplateController {
      */
     @GetMapping
     public R<List<TemplateSummaryDto>> list(
-            @RequestParam(defaultValue = "false") boolean includeArchived,
-            @RequestParam(required = false) String q) {
+            @RequestParam(name = "includeArchived", defaultValue = "false") boolean includeArchived,
+            @RequestParam(name = "q", required = false) String q) {
         List<TemplatePO> rows = includeArchived
                 ? templateRepository.findAll()
                 : templateRepository.findByArchivedFalse();

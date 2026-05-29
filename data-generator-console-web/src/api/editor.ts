@@ -17,7 +17,7 @@ export function fetchEditorScaffold(): Promise<TemplateEditorPayload> {
 /**
  * @param templateId persisted id
  */
-export function fetchEditor(templateId: number): Promise<TemplateEditorPayload> {
+export function fetchEditor(templateId: string): Promise<TemplateEditorPayload> {
   return apiRequest<TemplateEditorPayload>(`/templates/${templateId}`);
 }
 
@@ -36,7 +36,7 @@ export function createTemplate(draft: TemplateV2Draft): Promise<TemplateEditorPa
  * @param draft body
  */
 export function saveTemplate(
-  templateId: number,
+  templateId: string,
   draft: TemplateV2Draft,
 ): Promise<TemplateEditorPayload> {
   return apiRequest<TemplateEditorPayload>(`/templates/${templateId}`, {
@@ -51,7 +51,7 @@ export function saveTemplate(
  */
 export function validateDraft(
   draft: TemplateV2Draft,
-  templateId?: number | null,
+  templateId?: string | null,
 ): Promise<ValidationResult> {
   const path =
     templateId != null
@@ -70,7 +70,7 @@ export function validateDraft(
  */
 export function previewDraft(
   draft: TemplateV2Draft,
-  templateId?: number | null,
+  templateId?: string | null,
   maxRows?: number,
 ): Promise<PreviewResult> {
   const path =
@@ -87,7 +87,7 @@ export function previewDraft(
  */
 export function runDraft(
   draft: TemplateV2Draft,
-  templateId?: number | null,
+  templateId?: string | null,
 ): Promise<RunStartResult> {
   const path = templateId != null ? `/templates/${templateId}/draft/run` : '/templates/draft/run';
   return apiRequest<RunStartResult>(path, {
@@ -99,7 +99,7 @@ export function runDraft(
 /**
  * @param templateId template id
  */
-export function fetchTemplateYaml(templateId: number): Promise<string> {
+export function fetchTemplateYaml(templateId: string): Promise<string> {
   return apiRequest<string>(`/templates/${templateId}/yaml`);
 }
 
@@ -108,11 +108,31 @@ export function fetchTemplateYaml(templateId: number): Promise<string> {
  * @param yaml YAML text
  */
 export function applyTemplateYaml(
-  templateId: number,
+  templateId: string,
   yaml: string,
 ): Promise<TemplateEditorPayload> {
   return apiRequest<TemplateEditorPayload>(`/templates/${templateId}/yaml`, {
     method: 'PUT',
+    body: JSON.stringify({ yaml }),
+  });
+}
+
+/**
+ * @param draft in-memory wizard draft
+ */
+export function exportDraftYaml(draft: TemplateV2Draft): Promise<string> {
+  return apiRequest<string>('/templates/draft/yaml', {
+    method: 'POST',
+    body: JSON.stringify(draft),
+  });
+}
+
+/**
+ * @param yaml YAML text
+ */
+export function parseDraftYaml(yaml: string): Promise<TemplateV2Draft> {
+  return apiRequest<TemplateV2Draft>('/templates/draft/yaml/parse', {
+    method: 'POST',
     body: JSON.stringify({ yaml }),
   });
 }

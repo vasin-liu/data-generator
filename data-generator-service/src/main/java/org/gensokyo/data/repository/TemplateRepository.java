@@ -7,6 +7,7 @@ package org.gensokyo.data.repository;
 
 import org.gensokyo.data.model.po.TemplatePO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -37,6 +38,14 @@ public interface TemplateRepository extends JpaRepository<TemplatePO, Long> {
      * @return templates with {@code archived = false}
      */
     List<TemplatePO> findByArchivedFalse();
+
+    /**
+     * Active templates including legacy rows where {@code archived} was never set.
+     *
+     * @return non-archived catalog rows
+     */
+    @Query("select t from TemplatePO t where t.archived = false or t.archived is null")
+    List<TemplatePO> findActiveForCatalog();
 
     /**
      * Archived templates only.

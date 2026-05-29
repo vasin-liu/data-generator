@@ -1,21 +1,36 @@
 import { useMutation } from '@tanstack/react-query';
-import { Alert, Button, Input, Modal, Space, Typography, message } from 'antd';
+import { Alert, Button, Modal, Space, Typography, message } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { applyTemplateYaml, fetchTemplateYaml } from '../../api/editor';
-import type { TemplateEditorPayload } from '../../api/types';
+import {
+  applyTemplateYaml,
+  exportDraftYaml,
+  fetchTemplateYaml,
+  parseDraftYaml,
+} from '../../api/editor';
+import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
+import { YamlEditor } from './YamlEditor';
 
 type Props = {
-  templateId: number | null;
+  draft: TemplateV2Draft;
+  templateId: string | null;
   saveAllowed: boolean;
   v1Yaml: string | null;
   onApplied: (payload: TemplateEditorPayload) => void;
+  onDraftParsed: (draft: TemplateV2Draft) => void;
 };
 
 /**
- * YAML advanced mode (persisted templates only).
+ * YAML advanced mode with CodeMirror and form round-trip.
  */
-export function YamlPanel({ templateId, saveAllowed, v1Yaml, onApplied }: Props) {
+export function YamlPanel({
+  draft,
+  templateId,
+  saveAllowed,
+  v1Yaml,
+  onApplied,
+  onDraftParsed,
+}: Props) {
   const { t } = useTranslation();
   const [yaml, setYaml] = useState('');
   const [dirty, setDirty] = useState(false);
@@ -29,14 +44,24 @@ export function YamlPanel({ templateId, saveAllowed, v1Yaml, onApplied }: Props)
     onError: (err: Error) => message.error(err.message),
   });
 
+  const syncFromFormMutation = useMutation({
+    mutationFn: () => exportDraftYaml(draft),
+    onSuccess: (text) => {
+      setYaml(text);
+      setDirty(false);
+      message.success(t('editor.yaml.synced'));
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
   useEffect(() => {
-    if (templateId != null && saveAllowed && !v1Yaml) {
+    if (templateId != null && saveAllowed && !v1Yaml && yaml === '' && !loadMutation.isPending) {
       loadMutation.mutate();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load when id becomes available
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load when id available
   }, [templateId, saveAllowed, v1Yaml]);
 
-  const applyMutation = useMutation({
+  const applyPersistedMutation = useMutation({
     mutationFn: () => applyTemplateYaml(templateId!, yaml),
     onSuccess: (payload) => {
       message.success(t('review.yaml.applied'));
@@ -46,11 +71,27 @@ export function YamlPanel({ templateId, saveAllowed, v1Yaml, onApplied }: Props)
     onError: (err: Error) => message.error(err.message),
   });
 
+  const applyDraftMutation = useMutation({
+    mutationFn: () => parseDraftYaml(yaml),
+    onSuccess: (parsed) => {
+      message.success(t('review.yaml.applied'));
+      setDirty(false);
+      onDraftParsed(parsed);
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
   const confirmApply = () => {
     Modal.confirm({
       title: t('editor.yaml.confirm.title'),
       content: t('editor.yaml.confirm.text'),
-      onOk: () => applyMutation.mutate(),
+      onOk: () => {
+        if (templateId != null) {
+          applyPersistedMutation.mutate();
+        } else {
+          applyDraftMutation.mutate();
+        }
+      },
     });
   };
 
@@ -59,39 +100,46 @@ export function YamlPanel({ templateId, saveAllowed, v1Yaml, onApplied }: Props)
       <>
         <Alert type="info" message={t('editor.v1.note')} style={{ marginBottom: 16 }} />
         <Typography.Text strong>{t('editor.v1.yaml')}</Typography.Text>
-        <Input.TextArea rows={16} readOnly value={v1Yaml} style={{ marginTop: 8, fontFamily: 'monospace' }} />
+        <div style={{ marginTop: 8 }}>
+          <YamlEditor value={v1Yaml} readOnly />
+        </div>
       </>
     );
   }
 
-  if (templateId == null) {
-    return <Alert type="info" message={t('editor.migration.saveFirst')} />;
-  }
+  const applying = applyPersistedMutation.isPending || applyDraftMutation.isPending;
 
   return (
     <div>
       <Typography.Paragraph type="secondary">{t('editor.yaml.hint')}</Typography.Paragraph>
-      <Space style={{ marginBottom: 8 }}>
-        <Button onClick={() => loadMutation.mutate()} disabled={!saveAllowed}>
+      <Space wrap style={{ marginBottom: 8 }}>
+        <Button
+          loading={syncFromFormMutation.isPending}
+          disabled={!saveAllowed}
+          onClick={() => syncFromFormMutation.mutate()}
+        >
           {t('editor.yaml.sync')}
         </Button>
-        <Button type="primary" disabled={!saveAllowed} loading={applyMutation.isPending} onClick={confirmApply}>
+        {templateId != null ? (
+          <Button disabled={!saveAllowed} onClick={() => loadMutation.mutate()}>
+            {t('editor.yaml.reload')}
+          </Button>
+        ) : null}
+        <Button type="primary" disabled={!saveAllowed} loading={applying} onClick={confirmApply}>
           {t('editor.yaml.apply')}
         </Button>
       </Space>
-      <Input.TextArea
-        rows={20}
-        readOnly={!saveAllowed}
+      <YamlEditor
         value={yaml}
-        style={{ fontFamily: 'monospace' }}
-        onChange={(e) => {
-          setYaml(e.target.value);
+        readOnly={!saveAllowed}
+        onChange={(v) => {
+          setYaml(v);
           setDirty(true);
         }}
       />
       {dirty && (
         <Typography.Text type="warning" style={{ display: 'block', marginTop: 8 }}>
-          {t('editor.yaml.hint')}
+          {t('editor.yaml.unsaved')}
         </Typography.Text>
       )}
     </div>

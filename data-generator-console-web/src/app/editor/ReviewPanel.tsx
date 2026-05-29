@@ -8,11 +8,11 @@ import type { TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
 
 type Props = {
   draft: TemplateV2Draft;
-  templateId: number | null;
+  templateId: string | null;
   kind: TemplateDefinitionKind;
   archived: boolean;
   saveAllowed: boolean;
-  onSaved: (templateId: number) => void;
+  onSaved: (templateId: string) => void;
 };
 
 /**
