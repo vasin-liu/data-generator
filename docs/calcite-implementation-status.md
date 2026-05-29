@@ -30,6 +30,7 @@ Related references:
 - `docs/template-v2-source-endpoint-model-proposal.md`
 - `docs/template-v2-execution-policy-model-proposal.md`
 - `docs/template-v2-jdbc-chunked-execution-guide.md`
+- `docs/template-v2-streaming-execution-guide.md`
 - `docs/template-v2-transformer-capability-metadata-model-proposal.md`
 
 ## Current Status
@@ -43,6 +44,8 @@ As of the current implementation checkpoint:
 - Phase 2 now also includes first-pass Excel source and sink support through `ExcelSourceVO` / `ExcelRowSource` and `ExcelSinkFactory` / `ExcelRowSinkAdapter`
 - Phase 3 transformation migration coverage has a usable baseline through SQL conditional/null/string/conversion/date functions, the shared UDF registry, a first high-frequency faker compatibility batch, and a first repository-backed V1-to-V2 migration example set
 - JDBC chunked execution (`CHUNKED` mode, Pattern S row-local export, Pattern B broadcast join) is delivered with policy wiring, validation, and H2 integration tests; MySQL cursor URL configuration remains operator-documented
+- JDBC streaming execution (`STREAMING` mode, Pattern S row-local export with strict peak-memory tracking) is delivered with `StreamingPipeline`, operator guide, and H2 integration tests
+- structured V2 run reports (`RunReportVO`) are persisted on `task_execution`, aggregated by `RunReportCollector`, and exposed through task and console job APIs
 - the largest remaining gaps are official non-SQL transformer families beyond the current SQL-first path, broader SpEL/faker compatibility coverage beyond the first batch, richer business-family parity validation, exact V1 selection semantics beyond current source-policy aliases, and broader provider/plugin examples around the AI bridge
 
 ### 1. Baseline and scope
@@ -140,7 +143,7 @@ Implemented `data-generator-calcite` module:
 - `TemplateV2Runner`
 - `TemplateV2RunResult`
 - `EffectiveExecutionPolicy`
-- `InMemoryPipeline` / `ChunkedPipeline`
+- `InMemoryPipeline` / `ChunkedPipeline` / `StreamingPipeline`
 - `ChunkedRowSource` / `ChunkedQueryRowSource`
 - `ExecutionShapeClassifier` / `ExecutionShape`
 - `BroadcastJoinSnapshot` / `BroadcastJoinExecutor`
@@ -380,7 +383,7 @@ What is not implemented yet:
 - a repository-owned built-in transformer family beyond `sql`
 - clear authoring guidance for when to use SQL/UDF versus a custom transformer
 - parallel sink execution
-- rich partial-success reporting in `TemplateV2RunResult`
+- richer partial-success reporting beyond the current structured run report baseline
 - source policy semantics beyond model reservation
 
 ### 9. JDBC chunked execution (delivered)
@@ -404,11 +407,44 @@ Evidence:
 
 Not in scope for this delivery:
 
-- `STREAMING` mode runtime
 - chunked CSV/JSON sources
 - multi-transform chunked chains beyond row-local / broadcast-join shapes
 
-### 10. Test status
+### 10. JDBC streaming execution (delivered)
+
+Delivered for large JDBC export with strict peak-memory tracking:
+
+- `executionPolicy.mode: STREAMING` runs `StreamingPipeline` for Pattern S (single `QuerySourceVO`, row-local SQL, JDBC sink)
+- `StreamingPipeline` enforces the same execution-shape preflight as `CHUNKED` Pattern S and tracks `peakRowsInMemory` in run metrics
+- `STREAMING` runs return an empty or capped row list; inspect `metrics.executionMode`, `peakRowsInMemory`, and sink batch counts
+
+Operator guide: `docs/template-v2-streaming-execution-guide.md`.
+
+Evidence:
+
+- `StreamingPipelineTests`, `TemplateV2RunnerTests` (streaming mode)
+- `V2ScenarioTemplateIT` scenario `CV-02` (`template/v2-scenarios/scenario-e-streaming-jdbc.yaml`)
+
+Not in scope for this delivery:
+
+- Pattern B broadcast join under `STREAMING`
+- chunked CSV/JSON sources under `STREAMING`
+
+### 11. Structured run reports (delivered)
+
+Delivered for operator visibility and durable run history:
+
+- `RunReportVO` / `StageMetricVO` model per-source, per-transform, and per-sink counters plus `executionMode`, `durationMs`, and `errorSamples`
+- `RunReportCollector` aggregates `TemplateV2RunResult` metrics after each V2 run
+- `TaskExecutionService` persists report JSON on `task_execution`; `TaskController` and `ConsoleJobController` expose it on job detail APIs
+- console job detail UI renders the structured report when present
+
+Evidence:
+
+- `RunReportPersistenceTests`
+- `V2ScenarioTemplateIT` scenario `CV-02` (`template/v2-scenarios/scenario-e-streaming-jdbc.yaml`)
+
+### 12. Test status
 
 Implemented and passing focused tests include:
 
@@ -492,6 +528,8 @@ The following implementation milestones are complete:
 61. Conservative lookup source rewrites now also cover simple parameterized comparison predicates such as `>= :startTime` and `<= :endTime` in the same `AND` chain, which is enough for first-pass time-window lookup rewrites while still leaving `BETWEEN` and more complex boolean shapes to explicit author review.
 62. The in-memory Calcite V2 runtime now executes `LEFT JOIN` in addition to `INNER JOIN`, including null-padding for unmatched right-side rows, so lookup-style V2 templates are not limited to migration previews and can run end to end in the current runner.
 63. JDBC chunked execution is delivered: `executionPolicy.mode: CHUNKED` runs `ChunkedPipeline` with `ChunkedQueryRowSource`, sink batching, `ExecutionShapeClassifier` preflight, Pattern S row-local export, Pattern B broadcast join, cumulative `maxRowsInMemory` limits, and operator documentation in `docs/template-v2-jdbc-chunked-execution-guide.md`.
+64. JDBC streaming execution is delivered: `executionPolicy.mode: STREAMING` runs `StreamingPipeline` for Pattern S row-local JDBC export with strict peak-memory tracking and operator documentation in `docs/template-v2-streaming-execution-guide.md`.
+65. Structured V2 run reports are delivered: `RunReportCollector` builds `RunReportVO` from runner metrics, persists JSON on `task_execution`, and exposes reports through task and console job APIs.
 
 ## Immediate Next Work
 

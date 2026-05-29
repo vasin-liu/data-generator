@@ -1,5 +1,7 @@
 # V1 retirement boundary (orchestration / staging-free)
 
+> **Historical (pre-2026-05-29).** This document captured the V1 retirement boundary while staging (M2) was unavailable and policy **S1** exempted W3 orchestration templates from wave-freeze dates. It remains useful as census evidence and migration context. For greenfield V2-only policy after the 2026-05-29 program, see [`docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md`](../superpowers/specs/2026-05-29-v2-only-full-capability-design.md).
+
 Operator and product summary while **staging (M2) is unavailable**. Numeric evidence: [`reports/builtin-orchestration-census.md`](reports/builtin-orchestration-census.md) (regenerate via `BuiltinTemplateMigrationCensusTest`).
 
 ## Three buckets

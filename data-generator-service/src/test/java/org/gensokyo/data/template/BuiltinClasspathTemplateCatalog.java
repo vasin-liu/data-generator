@@ -92,6 +92,10 @@ public final class BuiltinClasspathTemplateCatalog {
                     continue;
                 }
                 String relativePath = toRelativePath(resource);
+                // Greenfield V2 scenarios are validated by V2ScenarioTemplateIT, not V1 migration census.
+                if (relativePath.startsWith("v2-scenarios/")) {
+                    continue;
+                }
                 String yaml = resource.getContentAsString(StandardCharsets.UTF_8);
                 fixtures.add(new Fixture(relativePath, yaml));
             }

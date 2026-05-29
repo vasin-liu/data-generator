@@ -89,12 +89,12 @@ class TemplateEditorRunSupportTests {
         TemplateV2PreviewDTO preview = new TemplateV2PreviewDTO();
         when(templateEditorService.save(3L, draft))
                 .thenReturn(new TemplateEditorPayload(3L, null, draft, null, false));
-        when(controlPlaneService.preview(3L, 5)).thenReturn(preview);
+        when(controlPlaneService.preview(3L, 5, null)).thenReturn(preview);
 
         TemplateEditorRunSupport.PreviewResult result = runSupport.saveAndPreview(3L, draft, 5);
 
         Assertions.assertEquals(3L, result.templateId());
         Assertions.assertSame(preview, result.preview());
-        verify(controlPlaneService).preview(3L, 5);
+        verify(controlPlaneService).preview(3L, 5, null);
     }
 }
