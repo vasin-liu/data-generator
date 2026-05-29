@@ -1,0 +1,23 @@
+# definitionKind: V2
+# scenarioId: GF-C
+# catalogRef: CV-01 — CSV ingest, SQL normalize, JDBC sink
+name: scenario-c-csv-export
+sources:
+  incoming:
+    type: csv
+    path: template/v2-scenarios/fixtures/orders.csv
+    header: true
+transform:
+  type: sql
+  sql: SELECT order_id, UPPER(customer) AS customer, amount FROM incoming
+sink:
+  writers:
+    - type: jdbc
+      dataSource:
+        name: gf-c-target
+        type: jdbc
+        url: jdbc:h2:mem:gf_c_target;MODE=MySQL;DB_CLOSE_DELAY=-1
+        username: sa
+        password: ""
+        driverClassName: org.h2.Driver
+      target: exported_orders

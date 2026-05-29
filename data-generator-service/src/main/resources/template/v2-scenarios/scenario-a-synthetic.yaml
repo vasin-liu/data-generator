@@ -1,0 +1,18 @@
+# definitionKind: V2
+# scenarioId: GF-A
+# catalogRef: SG-01 — synthetic number iterator, SQL projection, console sink
+name: scenario-a-synthetic
+sources:
+  seed:
+    type: iterator
+    iterator:
+      type: number
+      from: 1
+      to: 5
+      step: 1
+transform:
+  type: sql
+  sql: SELECT value AS id, value * 10 AS score FROM seed
+sink:
+  writers:
+    - type: console

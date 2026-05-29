@@ -255,6 +255,22 @@ Recommended future artifact shapes:
 - `docs/examples/template-v2-<scenario>-notes.md`
 - test fixture or sample data under the relevant module
 
+## Greenfield V2 Scenario Library
+
+Greenfield Template V2 scenarios live under `data-generator-service/src/main/resources/template/v2-scenarios/`.
+They are authored directly for V2 (`definitionKind: V2` in file comments) and are **not** V1 template conversions.
+
+Automated evidence: `data-generator-service/src/test/java/org/gensokyo/data/template/V2ScenarioTemplateIT.java`
+loads each YAML from the classpath, runs `TemplateV2Validator.validate`, and executes end to end on embedded H2.
+
+| Greenfield Id | Catalog Ref | Template Path | Primary Shape | Acceptance Target | Evidence |
+|---|---|---|---|---|---|
+| `GF-A` | `SG-01` | `template/v2-scenarios/scenario-a-synthetic.yaml` | number iterator + SQL + console | Exact | `V2ScenarioTemplateIT` |
+| `GF-B` | `QE-02` | `template/v2-scenarios/scenario-b-lookup-join.yaml` | multi query source + join + console | Adapted | `V2ScenarioTemplateIT` |
+| `GF-C` | `CV-01` | `template/v2-scenarios/scenario-c-csv-export.yaml` | CSV source + SQL + JDBC sink | Exact | `V2ScenarioTemplateIT`, `fixtures/orders.csv` |
+| `GF-D` | `CV-02` | `template/v2-scenarios/scenario-d-chunked-jdbc.yaml` | query source + SQL + JDBC, `CHUNKED` mode | Adapted | `V2ScenarioTemplateIT` |
+| `GF-E` | `CV-02` | `template/v2-scenarios/scenario-e-streaming-jdbc.yaml` | query source + SQL + JDBC, `STREAMING` mode | Adapted | `V2ScenarioTemplateIT` |
+
 ## Suggested First Catalog Backlog
 
 The first scenario backlog should prioritize business value and migration pressure.
