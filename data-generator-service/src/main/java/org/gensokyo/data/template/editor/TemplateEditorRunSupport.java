@@ -93,6 +93,24 @@ public class TemplateEditorRunSupport {
      * @throws IllegalArgumentException when save or preview fails
      */
     public PreviewResult saveAndPreview(Long templateId, TemplateV2DraftVO draft, Integer maxRows) {
+        return saveAndPreview(templateId, draft, maxRows, null);
+    }
+
+    /**
+     * Persists the draft when needed, then runs a bounded in-memory preview through an optional transform step.
+     *
+     * @param templateId            persisted id, or null to create first
+     * @param draft                 current V2 draft
+     * @param maxRows               optional row cap from execution policy
+     * @param throughTransformIndex optional 0-based inclusive transformer index; when null, runs the full chain
+     * @return preview DTO and resolved template id
+     * @throws IllegalArgumentException when save or preview fails
+     */
+    public PreviewResult saveAndPreview(
+            Long templateId,
+            TemplateV2DraftVO draft,
+            Integer maxRows,
+            Integer throughTransformIndex) {
         long resolvedId;
         if (templateId == null) {
             TemplateEditorPayload created = templateEditorService.createAndSave(draft);
@@ -101,7 +119,7 @@ public class TemplateEditorRunSupport {
             templateEditorService.save(templateId, draft);
             resolvedId = templateId;
         }
-        TemplateV2PreviewDTO preview = controlPlaneService.preview(resolvedId, maxRows);
+        TemplateV2PreviewDTO preview = controlPlaneService.preview(resolvedId, maxRows, throughTransformIndex);
         return new PreviewResult(resolvedId, preview);
     }
 

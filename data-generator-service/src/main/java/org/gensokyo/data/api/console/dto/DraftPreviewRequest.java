@@ -10,8 +10,14 @@ import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 /**
  * Preview request carrying the in-memory draft from the wizard.
  *
+ * @param draft                 current V2 draft from the wizard
+ * @param maxRows               optional row cap; when null, uses draft execution policy or service default
+ * @param throughTransformIndex optional 0-based inclusive transformer index; when null, runs the full chain
  * @author Gensokyo
  * @since 2026-05-26
  */
-public record DraftPreviewRequest(TemplateV2DraftVO draft, Integer maxRows) {
+public record DraftPreviewRequest(
+        TemplateV2DraftVO draft,
+        Integer maxRows,
+        Integer throughTransformIndex) {
 }

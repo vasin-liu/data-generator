@@ -17,6 +17,7 @@ import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.migration.MigrationDraftService;
@@ -149,6 +150,20 @@ public class TemplateV2ControlPlaneService {
      *                                  {@code IN_MEMORY}, or V2 cannot be resolved
      */
     public TemplateV2PreviewDTO preview(Long templateId, Integer maxRows) {
+        return preview(templateId, maxRows, null);
+    }
+
+    /**
+     * Runs a bounded in-memory preview for a persisted template, optionally stopping after a transformer step.
+     *
+     * @param templateId            persisted template id
+     * @param maxRows                 optional row cap; when {@code null} or non-positive, uses {@link DataGeneratorProperties#getPreviewMaxRows()}
+     * @param throughTransformIndex   optional 0-based inclusive transformer index; when {@code null}, runs the full chain
+     * @return preview schema, truncated rows, and warnings; never {@code null}
+     * @throws IllegalArgumentException when the template is missing, content is empty, execution mode is not
+     *                                  {@code IN_MEMORY}, V2 cannot be resolved, or the transform index is out of range
+     */
+    public TemplateV2PreviewDTO preview(Long templateId, Integer maxRows, Integer throughTransformIndex) {
         Objects.requireNonNull(templateId, "templateId");
         int rowCap = resolvePreviewRowCap(maxRows);
 
@@ -169,7 +184,7 @@ public class TemplateV2ControlPlaneService {
                     "Preview supports IN_MEMORY execution only; template mode is " + mode);
         }
 
-        TemplateV2VO runnable = prepareForPreview(v2);
+        TemplateV2VO runnable = prepareForPreview(v2, throughTransformIndex);
         TemplateV2RunResult result = templateV2Runner.run(runnable);
 
         RowSchema schema = result.getSchema();
@@ -193,7 +208,7 @@ public class TemplateV2ControlPlaneService {
         return 100;
     }
 
-    private static TemplateV2VO prepareForPreview(TemplateV2VO template) {
+    private static TemplateV2VO prepareForPreview(TemplateV2VO template, Integer throughTransformIndex) {
         TemplateV2VO copy = copyTemplate(template);
         ExecutionPolicyVO policy = copy.getExecutionPolicy();
         if (policy == null) {
@@ -202,7 +217,24 @@ public class TemplateV2ControlPlaneService {
         }
         // Preview materializes rows in memory regardless of stored policy hints.
         policy.setMode("IN_MEMORY");
+        if (throughTransformIndex != null) {
+            applyThroughTransformIndex(copy, throughTransformIndex);
+        }
         return copy;
+    }
+
+    private static void applyThroughTransformIndex(TemplateV2VO template, int throughTransformIndex) {
+        List<TransformVO> transformers = template.getTransformers();
+        if (transformers == null || transformers.isEmpty()) {
+            throw new IllegalArgumentException("Template has no transformers to preview through");
+        }
+        if (throughTransformIndex < 0 || throughTransformIndex >= transformers.size()) {
+            throw new IllegalArgumentException(String.format(
+                    "throughTransformIndex must be between 0 and %d inclusive",
+                    transformers.size() - 1));
+        }
+        // Staged preview materializes sources, then applies transformers up to the requested step only.
+        template.setTransformers(new ArrayList<>(transformers.subList(0, throughTransformIndex + 1)));
     }
 
     private static TemplateV2VO copyTemplate(TemplateV2VO template) {

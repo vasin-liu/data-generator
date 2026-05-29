@@ -74,7 +74,8 @@ public class ConsoleTemplateEditorActionsController {
                 ? request.maxRows()
                 : TemplateEditorRunSupport.previewRowLimitFromDraft(request.draft());
         TemplateEditorRunSupport.PreviewResult result =
-                templateEditorRunSupport.saveAndPreview(null, request.draft(), maxRows);
+                templateEditorRunSupport.saveAndPreview(
+                        null, request.draft(), maxRows, request.throughTransformIndex());
         return R.ok(new PreviewResultDto(result.templateId(), result.preview()));
     }
 
@@ -91,7 +92,8 @@ public class ConsoleTemplateEditorActionsController {
                 ? request.maxRows()
                 : TemplateEditorRunSupport.previewRowLimitFromDraft(request.draft());
         TemplateEditorRunSupport.PreviewResult result =
-                templateEditorRunSupport.saveAndPreview(templateId, request.draft(), maxRows);
+                templateEditorRunSupport.saveAndPreview(
+                        templateId, request.draft(), maxRows, request.throughTransformIndex());
         return R.ok(new PreviewResultDto(result.templateId(), result.preview()));
     }
 
