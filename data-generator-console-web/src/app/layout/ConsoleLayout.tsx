@@ -7,6 +7,8 @@ import { fetchConsoleRuntime } from '../../api/runtime';
 
 const { Header, Sider, Content } = Layout;
 
+const migrationEnabled = import.meta.env.VITE_ENABLE_MIGRATION === 'true';
+
 /**
  * Shell layout: sidebar navigation, V1 runtime banner, locale switch.
  */
@@ -34,7 +36,7 @@ export function ConsoleLayout() {
     { key: '/templates', label: t('nav.templates') },
     { key: '/datasources', label: t('nav.datasources') },
     { key: '/jobs', label: t('nav.jobs') },
-    { key: '/migration', label: t('nav.migration') },
+    ...(migrationEnabled ? [{ key: '/migration', label: t('nav.migration') }] : []),
   ];
 
   const v1Enabled = runtimeQuery.data?.v1ExecutionEnabled ?? true;

@@ -1,11 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Descriptions, Space, Typography } from 'antd';
+import { Alert, Button, Descriptions, Space, Table, Typography } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchJob } from '../../api/jobs';
+import type { RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING']);
+
+function formatDuration(ms: number | null | undefined): string {
+  if (ms == null) {
+    return '—';
+  }
+  return `${ms} ms`;
+}
 
 /**
  * Single execution detail with polling until finished.
@@ -26,7 +36,30 @@ export function JobDetailPage() {
     },
   });
 
+  const stageColumns: ColumnsType<StageMetric> = useMemo(
+    () => [
+      { title: t('jobDetail.report.col.name'), dataIndex: 'name' },
+      {
+        title: t('jobDetail.report.col.rows'),
+        dataIndex: 'rowsProcessed',
+        render: (value: number | null) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.duration'),
+        dataIndex: 'durationMs',
+        render: (value: number | null) => formatDuration(value),
+      },
+      {
+        title: t('jobDetail.report.col.error'),
+        dataIndex: 'errorSample',
+        render: (value: string | null) => value ?? '—',
+      },
+    ],
+    [t],
+  );
+
   const row = jobQuery.data;
+  const report = row?.report ?? null;
   const body =
     row?.metricsJson && row.metricsJson.length > 0
       ? row.metricsJson
@@ -56,14 +89,100 @@ export function JobDetailPage() {
               {row.templateName} (#{row.templateId})
             </Descriptions.Item>
             <Descriptions.Item label={t('jobs.col.kind')}>{row.definitionKind}</Descriptions.Item>
+            <Descriptions.Item label={t('jobDetail.rowCount')}>{row.rowCount ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.queued')}>{row.queuedAt ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.started')}>{row.startedAt ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.finished')}>{row.finishedAt ?? '—'}</Descriptions.Item>
           </Descriptions>
-          <Typography.Title level={5}>{t('jobDetail.metrics')}</Typography.Title>
-          <pre className="job-metrics">{body}</pre>
+          {report && <RunReportSection report={report} stageColumns={stageColumns} />}
+          {body.length > 0 && (
+            <>
+              <Typography.Title level={5}>{t('jobDetail.metrics')}</Typography.Title>
+              <pre className="job-metrics">{body}</pre>
+            </>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+function RunReportSection({
+  report,
+  stageColumns,
+}: {
+  report: RunReport;
+  stageColumns: ColumnsType<StageMetric>;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Typography.Title level={5}>{t('jobDetail.report.title')}</Typography.Title>
+      <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+        <Descriptions.Item label={t('jobDetail.report.executionMode')}>
+          {report.executionMode ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label={t('jobDetail.report.durationMs')}>
+          {formatDuration(report.durationMs)}
+        </Descriptions.Item>
+      </Descriptions>
+      <StageMetricTable
+        title={t('jobDetail.report.sources')}
+        rows={report.sources}
+        columns={stageColumns}
+      />
+      <StageMetricTable
+        title={t('jobDetail.report.transformers')}
+        rows={report.transformers}
+        columns={stageColumns}
+      />
+      <StageMetricTable
+        title={t('jobDetail.report.sinks')}
+        rows={report.sinks}
+        columns={stageColumns}
+      />
+      {report.errorSamples.length > 0 && (
+        <>
+          <Typography.Title level={5}>{t('jobDetail.report.errorSamples')}</Typography.Title>
+          {report.errorSamples.map((sample, index) => (
+            <Alert
+              key={`${index}-${sample.slice(0, 32)}`}
+              type="warning"
+              message={sample}
+              style={{ marginBottom: 8 }}
+            />
+          ))}
+        </>
+      )}
+    </>
+  );
+}
+
+function StageMetricTable({
+  title,
+  rows,
+  columns,
+}: {
+  title: string;
+  rows: StageMetric[];
+  columns: ColumnsType<StageMetric>;
+}) {
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <Typography.Title level={5}>{title}</Typography.Title>
+      <Table<StageMetric>
+        rowKey={(row, index) => `${row.name}-${index}`}
+        size="small"
+        pagination={false}
+        dataSource={rows}
+        columns={columns}
+        style={{ marginBottom: 16 }}
+      />
+    </>
   );
 }

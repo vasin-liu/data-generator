@@ -25,6 +25,24 @@ export interface ConsoleRuntime {
   v1ExecutionEnabled: boolean;
 }
 
+/** Mirrors {@code StageMetricVO}. */
+export interface StageMetric {
+  name: string;
+  rowsProcessed: number | null;
+  durationMs: number | null;
+  errorSample: string | null;
+}
+
+/** Mirrors {@code RunReportVO}. */
+export interface RunReport {
+  sources: StageMetric[];
+  transformers: StageMetric[];
+  sinks: StageMetric[];
+  executionMode: string | null;
+  durationMs: number | null;
+  errorSamples: string[];
+}
+
 export interface TaskExecutionSummary {
   id: string;
   templateId: string;
@@ -38,6 +56,7 @@ export interface TaskExecutionSummary {
   rowCount: number | null;
   errorMessage: string | null;
   metricsJson: string | null;
+  report: RunReport | null;
 }
 
 export interface RunStartResult {

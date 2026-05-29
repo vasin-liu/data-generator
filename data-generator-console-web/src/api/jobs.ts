@@ -1,6 +1,8 @@
 import { apiRequest } from './client';
 import type { TaskExecutionSummary } from './types';
 
+export type { RunReport, StageMetric } from './types';
+
 /**
  * @param templateId optional filter
  */
@@ -11,6 +13,7 @@ export function fetchJobs(templateId?: string): Promise<TaskExecutionSummary[]> 
 
 /**
  * @param instanceId snowflake instance id
+ * @returns execution summary including structured {@code report} when available
  */
 export function fetchJob(instanceId: string): Promise<TaskExecutionSummary> {
   return apiRequest<TaskExecutionSummary>(`/jobs/${instanceId}`);
