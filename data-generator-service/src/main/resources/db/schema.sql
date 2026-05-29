@@ -64,3 +64,6 @@ CREATE TABLE IF NOT EXISTS `task_execution`
 -- Upgrade existing file DBs created before operator-console columns (CREATE TABLE IF NOT EXISTS is a no-op).
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `archived` BOOLEAN DEFAULT FALSE NOT NULL;
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `archived_at` TIMESTAMP DEFAULT NULL;
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `parent_pipeline_run_id` VARCHAR(64);
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `upstream_artifact_refs_json` CLOB;
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `report_json` CLOB;

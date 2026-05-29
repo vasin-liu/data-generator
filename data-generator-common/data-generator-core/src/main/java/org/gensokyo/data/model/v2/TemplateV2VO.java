@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
 package org.gensokyo.data.model.v2;
 
 import lombok.Getter;
@@ -12,6 +17,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * V2 template definition graph for Calcite-backed runs.
+ * <p>
+ * Optional {@link #metadata} may carry cross-cutting keys; {@code pipelineRef} is reserved for Phase D
+ * pipeline orchestration.
+ *
+ * @author Gensokyo
+ * @since 2026-05-29
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,4 +40,5 @@ public class TemplateV2VO implements Serializable {
     private List<WriteStageVO> sinks = new ArrayList<>();
     private ExecutionPolicyVO executionPolicy;
     private SinkExecutionPolicyVO sinkExecutionPolicy;
+    private Map<String, Object> metadata;
 }

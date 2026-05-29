@@ -6,12 +6,15 @@
 package org.gensokyo.data.task;
 
 import org.gensokyo.data.DataGeneratorApplication;
+import org.gensokyo.data.model.po.TaskExecutionPO;
 import org.gensokyo.data.repository.TaskExecutionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link TaskExecutionService} lifecycle persistence.
@@ -37,6 +40,22 @@ class TaskExecutionServiceTests {
     @AfterEach
     void cleanup() {
         repository.findByInstanceId(INSTANCE_ID).ifPresent(repository::delete);
+        repository.findByInstanceId(99001L).ifPresent(repository::delete);
+    }
+
+    @Test
+    void persistsPipelineReservationFields() {
+        TaskExecutionPO po = new TaskExecutionPO();
+        po.setId(99L);
+        po.setTemplateId(1L);
+        po.setInstanceId(99001L);
+        po.setStatus("SUCCEEDED");
+        po.setParentPipelineRunId("pipe-run-1");
+        po.setUpstreamArtifactRefsJson("[{\"nodeId\":\"a\",\"artifactId\":\"art-1\"}]");
+        repository.save(po);
+        TaskExecutionPO loaded = repository.findById(99L).orElseThrow();
+        assertThat(loaded.getParentPipelineRunId()).isEqualTo("pipe-run-1");
+        assertThat(loaded.getUpstreamArtifactRefsJson()).contains("art-1");
     }
 
     @Test

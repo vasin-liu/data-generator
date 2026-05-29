@@ -63,4 +63,13 @@ public class TaskExecutionPO implements Serializable {
 
     @Column(name = "metrics_json", columnDefinition = "CLOB")
     private String metricsJson;
+
+    @Column(name = "parent_pipeline_run_id", length = 64)
+    private String parentPipelineRunId;
+
+    @Column(name = "upstream_artifact_refs_json", columnDefinition = "CLOB")
+    private String upstreamArtifactRefsJson;
+
+    @Column(name = "report_json", columnDefinition = "CLOB")
+    private String reportJson;
 }
