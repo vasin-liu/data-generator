@@ -4,6 +4,7 @@ import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SpelColumnMapping;
 import org.gensokyo.data.model.v2.SpelTransformVO;
@@ -70,6 +71,7 @@ public final class TemplateV2Validator {
             if (Objects.isNull(entry.getValue())) {
                 throw new IllegalArgumentException("Template V2 source '" + entry.getKey() + "' must not be null");
             }
+            validateMaterializationPolicy(entry.getKey(), entry.getValue().getMaterializationPolicy());
         }
 
         for (var sink : template.getSinks()) {
@@ -114,6 +116,42 @@ public final class TemplateV2Validator {
         for (SpelColumnMapping column : spelTransform.getColumns()) {
             if (column == null || StrKit.isBlank(column.getName()) || StrKit.isBlank(column.getExpression())) {
                 throw new IllegalArgumentException("SpEL transformer column name and expression must not be blank");
+            }
+        }
+    }
+
+    private static void validateMaterializationPolicy(String sourceName, MaterializationPolicyVO policy) {
+        if (policy == null || StrKit.isBlank(policy.getMode())) {
+            return;
+        }
+        String mode = policy.getMode().trim().toUpperCase(Locale.ROOT);
+        if (!"ORDERED".equals(mode)
+                && !"LIMIT".equals(mode)
+                && !"ONCE".equals(mode)
+                && !"EQUAL".equals(mode)
+                && !"WEIGHTED".equals(mode)) {
+            throw new IllegalArgumentException("Unsupported materialization policy mode on source '"
+                    + sourceName + "': " + policy.getMode());
+        }
+        if (policy.getLimit() != null && policy.getLimit() < 0) {
+            throw new IllegalArgumentException("Materialization policy limit on source '"
+                    + sourceName + "' must be greater than or equal to 0");
+        }
+        if ("LIMIT".equals(mode) && (policy.getLimit() == null || policy.getLimit() <= 0)) {
+            throw new IllegalArgumentException("LIMIT materialization policy on source '"
+                    + sourceName + "' requires a positive limit");
+        }
+        if ("WEIGHTED".equals(mode)) {
+            if (CollectKit.isEmpty(policy.getWeights())) {
+                throw new IllegalArgumentException("WEIGHTED materialization policy on source '"
+                        + sourceName + "' requires non-empty weights");
+            }
+            for (int index = 0; index < policy.getWeights().size(); index++) {
+                Integer weight = policy.getWeights().get(index);
+                if (weight == null || weight <= 0) {
+                    throw new IllegalArgumentException("WEIGHTED materialization policy weight at index ["
+                            + index + "] on source '" + sourceName + "' must be positive");
+                }
             }
         }
     }

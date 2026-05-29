@@ -6,6 +6,7 @@ import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
+import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
@@ -185,6 +186,45 @@ class TemplateV2SupportTests {
         template.setSinks(List.of(consoleSink()));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> TemplateV2Validator.validate(template));
+    }
+
+    @Test
+    void rejectsUnknownMaterializationPolicyMode() {
+        var source = new IteratorSourceVO();
+        var materializationPolicy = new MaterializationPolicyVO();
+        materializationPolicy.setMode("MYSTERY");
+        source.setMaterializationPolicy(materializationPolicy);
+
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("input", source));
+        template.setTransformers(List.of(sql("SELECT value FROM input")));
+        template.setSinks(List.of(consoleSink()));
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> TemplateV2Validator.validate(template));
+        Assertions.assertTrue(ex.getMessage().contains("Unsupported materialization policy mode"));
+    }
+
+    @Test
+    void rejectsNegativeMaterializationPolicyWeights() {
+        var source = new IteratorSourceVO();
+        var materializationPolicy = new MaterializationPolicyVO();
+        materializationPolicy.setMode("WEIGHTED");
+        materializationPolicy.setWeights(List.of(1, -2));
+        source.setMaterializationPolicy(materializationPolicy);
+
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("input", source));
+        template.setTransformers(List.of(sql("SELECT value FROM input")));
+        template.setSinks(List.of(consoleSink()));
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> TemplateV2Validator.validate(template));
+        Assertions.assertTrue(ex.getMessage().contains("weight"));
     }
 
     @Test

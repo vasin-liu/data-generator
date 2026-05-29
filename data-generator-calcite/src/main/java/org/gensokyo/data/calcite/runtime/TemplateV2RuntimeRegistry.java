@@ -6,6 +6,7 @@ import org.gensokyo.data.calcite.sink.*;
 import org.gensokyo.data.calcite.source.*;
 import org.gensokyo.data.calcite.sql.*;
 
+import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
@@ -50,10 +51,8 @@ public class TemplateV2RuntimeRegistry {
                     } else {
                         rowSource = factory.create(name, source);
                     }
-                    if (source.getPolicy() == null) {
-                        return rowSource;
-                    }
-                    return new SourcePolicyRowSource(rowSource, source.getPolicy());
+                    rowSource = wrapSourcePolicy(rowSource, source);
+                    return rowSource;
                 } catch (RuntimeException e) {
                     throw runtimeFailure("source", source.getType(), source.getClass(), factory.getClass(), e);
                 }
@@ -86,6 +85,16 @@ public class TemplateV2RuntimeRegistry {
             }
         }
         throw new UnsupportedOperationException("Unsupported V2 sink writer in current runner: " + writer.getClass().getSimpleName());
+    }
+
+    private RowSource wrapSourcePolicy(RowSource rowSource, SourceVO source) {
+        if (source.getMaterializationPolicy() != null) {
+            return new MaterializationPolicyRowSource(rowSource, source.getMaterializationPolicy());
+        }
+        if (source.getPolicy() != null) {
+            return new SourcePolicyRowSource(rowSource, source.getPolicy());
+        }
+        return rowSource;
     }
 
     private IllegalStateException runtimeFailure(String nodeKind,
