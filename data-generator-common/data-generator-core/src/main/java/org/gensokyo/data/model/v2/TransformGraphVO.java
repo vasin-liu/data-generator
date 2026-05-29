@@ -11,7 +11,9 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * L1 transform DAG inside a {@link org.gensokyo.data.model.v2.workflow.ComputeBlockVO}.
@@ -23,6 +25,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class TransformGraphVO implements Serializable {
+    /** Transform definitions keyed by id; nodes reference these via {@link TransformNodeVO#getTransformId()}. */
+    private Map<String, TransformVO> transforms = new LinkedHashMap<>();
     private List<TransformNodeVO> nodes = new ArrayList<>();
     private List<TransformEdgeVO> edges = new ArrayList<>();
 }

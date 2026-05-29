@@ -22,7 +22,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class TransformNodeVO implements Serializable {
     private String id;
-    private TransformVO transform;
+    /** Id of a transform in {@link TransformGraphVO#getTransforms()}. */
+    private String transformId;
     /** Table alias exposed to downstream nodes (for example {@code input}). */
     private String outputAlias;
 }
