@@ -7,6 +7,7 @@ package org.gensokyo.data.task;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.gensokyo.data.model.v2.RunReportVO;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -26,6 +27,7 @@ import java.time.Instant;
  * @param rowCount        rows processed when known
  * @param errorMessage    failure message
  * @param metricsJson     serialized V2 metrics
+ * @param report          structured V2 run report when available
  */
 public record TaskExecutionSummary(
         @JsonSerialize(using = ToStringSerializer.class) Long id,
@@ -39,5 +41,6 @@ public record TaskExecutionSummary(
         Instant finishedAt,
         Long rowCount,
         String errorMessage,
-        String metricsJson) implements Serializable {
+        String metricsJson,
+        RunReportVO report) implements Serializable {
 }

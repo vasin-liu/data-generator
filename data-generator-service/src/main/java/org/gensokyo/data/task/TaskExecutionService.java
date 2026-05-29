@@ -6,7 +6,9 @@
 package org.gensokyo.data.task;
 
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TaskExecutionPO;
+import org.gensokyo.data.model.v2.RunReportVO;
 import org.gensokyo.data.repository.TaskExecutionRepository;
 import org.gensokyo.data.util.RandomKit;
 import org.springframework.stereotype.Service;
@@ -84,11 +86,23 @@ public class TaskExecutionService {
      */
     @Transactional
     public void markSuccess(Long instanceId, Long rowCount, String metricsJson) {
+        markSuccess(instanceId, rowCount, metricsJson, null);
+    }
+
+    /**
+     * @param instanceId  run instance id
+     * @param rowCount    rows processed
+     * @param metricsJson optional V2 metrics JSON
+     * @param reportJson  optional structured V2 run report JSON
+     */
+    @Transactional
+    public void markSuccess(Long instanceId, Long rowCount, String metricsJson, String reportJson) {
         update(instanceId, row -> {
             row.setStatus(TaskExecutionStatus.SUCCESS.name());
             row.setFinishedAt(Instant.now());
             row.setRowCount(rowCount);
             row.setMetricsJson(metricsJson);
+            row.setReportJson(reportJson);
             row.setErrorMessage(null);
         });
     }
@@ -163,6 +177,14 @@ public class TaskExecutionService {
                 row.getFinishedAt(),
                 row.getRowCount(),
                 row.getErrorMessage(),
-                row.getMetricsJson());
+                row.getMetricsJson(),
+                parseReport(row.getReportJson()));
+    }
+
+    private static RunReportVO parseReport(String reportJson) {
+        if (reportJson == null || reportJson.isBlank()) {
+            return null;
+        }
+        return TemplateJsonCodec.read(reportJson, RunReportVO.class);
     }
 }

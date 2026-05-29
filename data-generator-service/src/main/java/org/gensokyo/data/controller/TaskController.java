@@ -35,7 +35,8 @@ import org.gensokyo.kit.collect.CollectKit;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
-import org.gensokyo.data.json.TemplateJsonCodec;
+import org.gensokyo.data.model.v2.RunReportVO;
+import org.gensokyo.data.task.RunReportCollector;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +61,7 @@ public class TaskController {
     private final TemplateV2Runner templateV2Runner;
     private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
     private final TaskExecutionService taskExecutionService;
+    private final RunReportCollector runReportCollector;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -217,17 +219,24 @@ public class TaskController {
 
     private void runV2Tracked(TemplateV2VO template, Long instanceId) {
         taskExecutionService.markRunning(instanceId);
+        long startedAtMs = System.currentTimeMillis();
         try {
             TemplateV2RunResult result = templateV2Runner.run(template);
+            long durationMs = System.currentTimeMillis() - startedAtMs;
             long rowCount = 0L;
             String metricsJson = null;
+            String reportJson = null;
             if (result.getMetrics() != null) {
                 rowCount = result.getMetrics().getTotalRowsRead();
                 metricsJson = TemplateJsonCodec.write(result.getMetrics());
+                RunReportVO report = runReportCollector.collect(template, result, durationMs);
+                if (report != null) {
+                    reportJson = TemplateJsonCodec.write(report);
+                }
             } else if (result.getRows() != null) {
                 rowCount = result.getRows().size();
             }
-            taskExecutionService.markSuccess(instanceId, rowCount, metricsJson);
+            taskExecutionService.markSuccess(instanceId, rowCount, metricsJson, reportJson);
         } catch (Exception e) {
             taskExecutionService.markFailed(instanceId, e.getMessage());
         }
