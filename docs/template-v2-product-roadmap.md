@@ -28,7 +28,9 @@ Related references:
 - `docs/template-v2-policy-to-runtime-mapping-guide.md`
 - `docs/template-v2-plugin-operational-guide.md`
 - `docs/template-v2-scenario-template-catalog.md`
+- `docs/template-v2-workflow-authoring-guide.md`
 - `docs/template-v2-transformer-strategy.md`
+- `docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md`
 - `docs/calcite-v1-parity-scorecard.md`
 - `docs/calcite-v1-v2-mapping.md`
 - `docs/calcite-plugin-framework-evaluation.md`
@@ -336,6 +338,8 @@ Requirements:
 
 These items should be planned and delivered first because they decide whether V2 can become the mainline product path.
 
+- **L2 workflow layer:** pause, log, branch, shared scope, and compute-block invocation for greenfield orchestration (see `docs/template-v2-workflow-authoring-guide.md`)
+- **L1 transform DAG and JavaScript** inside compute blocks, with validation and minimum console authoring
 - official non-SQL transformer family
 - typed custom transformer SPI
 - formal SQL/UDF vs custom transformer decision rules
@@ -347,7 +351,7 @@ These items should be planned and delivered first because they decide whether V2
 
 Acceptance signal:
 
-- the product can support the main V1 replacement scenarios without forcing every residual rule into SQL or every large run into full in-memory materialization
+- the product can support the main replacement scenarios — including orchestration formerly classified `COMPATIBILITY_ONLY` under historical V1 policy — without forcing every residual rule into SQL or every large run into full in-memory materialization
 
 ### P1 - Business delivery readiness
 
@@ -411,7 +415,7 @@ The following should not be expanded prematurely.
 - recreating every V1 stage as a dedicated V2 transformer family
 - unbounded connector proliferation without scenario evidence
 - exposing PF4J-native types directly in business runtime contracts
-- promising exact parity for orchestration-heavy V1 features before a separate V2 orchestration design exists
+- promising byte-for-byte parity with historical V1 orchestration semantics where V2 workflow uses a cleaner L2/L1 model
 
 ## Recommended Next Planning Artifacts
 

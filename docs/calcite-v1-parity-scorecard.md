@@ -1,8 +1,10 @@
 # Calcite / Template V2 V1 Parity Scorecard
 
+> **Reference only (V2-only program).** V1 parity status in this scorecard is historical migration context — **not** acceptance criteria for greenfield Template V2 work after the 2026-05-29 program. For orchestration formerly marked `Compatibility-only`, see [`docs/template-v2-workflow-authoring-guide.md`](template-v2-workflow-authoring-guide.md) and [`docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md`](superpowers/specs/2026-05-29-v2-only-full-capability-design.md).
+
 ## Purpose
 
-This document checks the current Template V2 / Calcite implementation against the V1 feature surface and records what is still missing.
+This document checks the current Template V2 / Calcite implementation against the V1 feature surface and records what is still missing. Use it when migrating or comparing **historical** V1 templates; do not treat `Compatibility-only` rows as blockers for **new** V2 workflow authoring.
 
 Status values:
 

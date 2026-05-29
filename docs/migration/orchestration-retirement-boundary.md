@@ -1,8 +1,12 @@
 # V1 retirement boundary (orchestration / staging-free)
 
-> **Historical (pre-2026-05-29).** This document captured the V1 retirement boundary while staging (M2) was unavailable and policy **S1** exempted W3 orchestration templates from wave-freeze dates. It remains useful as census evidence and migration context. For greenfield V2-only policy after the 2026-05-29 program, see [`docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md`](../superpowers/specs/2026-05-29-v2-only-full-capability-design.md).
+> **Historical (pre-2026-05-29).** This document captured the V1 retirement boundary while staging (M2) was unavailable and policy **S1** exempted W3 orchestration templates from wave-freeze dates. It remains useful as census evidence and migration context. For greenfield V2-only policy after the 2026-05-29 program, see [`docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md`](../superpowers/specs/2026-05-29-v2-only-full-capability-design.md). Author **PAUSE**, **LOG**, branching, and multi-block orchestration in **new** templates via [`docs/template-v2-workflow-authoring-guide.md`](../template-v2-workflow-authoring-guide.md) — **S1 does not apply to greenfield V2 work**.
 
 Operator and product summary while **staging (M2) is unavailable**. Numeric evidence: [`reports/builtin-orchestration-census.md`](reports/builtin-orchestration-census.md) (regenerate via `BuiltinTemplateMigrationCensusTest`).
+
+## Greenfield policy (post-2026-05-29)
+
+Policy **S1** (permanent V1 exemption for PAUSE/LOG orchestration) applied only to **historical** V1 templates and the W3 census below. Greenfield Template V2 definitions should use the **L2 workflow** layer and **L1 transform DAG / JavaScript** inside compute blocks — see [`docs/template-v2-workflow-authoring-guide.md`](../template-v2-workflow-authoring-guide.md).
 
 ## Three buckets
 
@@ -24,7 +28,7 @@ Operator and product summary while **staging (M2) is unavailable**. Numeric evid
 - **SHARED** — cross-row shared state (none in current builtin census).
 - **JAVASCRIPT** — GraalJS script stages (none in current builtin census).
 
-These stay `COMPATIBILITY_ONLY` per `V1TemplateMigrationAnalyzer`. Do **not** promote via migration REST without an explicit future orchestration design.
+These stayed `COMPATIBILITY_ONLY` per `V1TemplateMigrationAnalyzer` under **S1**. Do **not** promote historical V1 rows via migration REST without manual review. For **new** V2 templates, implement equivalent behavior with workflow steps — not SQL transforms — per the workflow authoring guide.
 
 ## Honest retirement narrative
 
@@ -44,6 +48,8 @@ Commit updated `docs/migration/reports/builtin-orchestration-census.md` when bui
 
 ## References
 
+- [`../template-v2-workflow-authoring-guide.md`](../template-v2-workflow-authoring-guide.md) — greenfield PAUSE/LOG/branch via L2 workflow (post-2026-05-29)
+- [`../superpowers/specs/2026-05-29-v2-only-full-capability-design.md`](../superpowers/specs/2026-05-29-v2-only-full-capability-design.md) — V2-only program; retires S1 for greenfield
 - [`M2-production-catalog-handoff.md`](M2-production-catalog-handoff.md) — staging-ready production census steps
 - [`compatibility-only-templates.md`](compatibility-only-templates.md)
 - [`wave-freeze-schedule.md`](wave-freeze-schedule.md)
