@@ -6,6 +6,7 @@ import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
+import org.gensokyo.data.model.v2.JsTransformVO;
 import org.gensokyo.data.model.v2.SpelColumnMapping;
 import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
@@ -14,6 +15,7 @@ import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +63,9 @@ public final class TemplateV2Validator {
             if (transformer instanceof SpelTransformVO spelTransform) {
                 validateSpelTransform(spelTransform);
             }
+            if (transformer instanceof JsTransformVO jsTransform) {
+                validateJsTransform(jsTransform);
+            }
         }
         validateExecutionPolicy(template);
 
@@ -106,6 +111,19 @@ public final class TemplateV2Validator {
         String mode = policy.getMode().trim().toUpperCase(Locale.ROOT);
         if (("CHUNKED".equals(mode) || "STREAMING".equals(mode)) && policy.getMaxTotalRows() == null) {
             warnings.add("CHUNKED/STREAMING mode without maxTotalRows — consider setting a row cap for fail-safe execution");
+        }
+    }
+
+    private static void validateJsTransform(JsTransformVO jsTransform) {
+        if (StrKit.isBlank(jsTransform.getScript())) {
+            throw new IllegalArgumentException("JS transformer script must not be blank");
+        }
+        if (jsTransform.getScript().getBytes(StandardCharsets.UTF_8).length > JsTransformVO.MAX_SCRIPT_BYTES) {
+            throw new IllegalArgumentException("JS transformer script exceeds maximum size of "
+                    + JsTransformVO.MAX_SCRIPT_BYTES + " bytes");
+        }
+        if (jsTransform.getTimeoutMs() != null && jsTransform.getTimeoutMs() <= 0) {
+            throw new IllegalArgumentException("JS transformer timeoutMs must be positive when set");
         }
     }
 

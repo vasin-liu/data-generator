@@ -37,6 +37,7 @@ import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
 import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
+import org.gensokyo.data.calcite.transform.JsTransformFactory;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.repository.TemplateRepository;
@@ -112,6 +113,12 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "spelTransformFactory")
     public V2TransformFactory spelTransformFactory() {
         return new SpelTransformFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "jsTransformFactory")
+    public V2TransformFactory jsTransformFactory() {
+        return new JsTransformFactory();
     }
 
     @Bean
