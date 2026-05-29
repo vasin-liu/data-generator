@@ -24,6 +24,7 @@ public final class RunMetrics {
     private int peakRowsInMemory;
     private int chunksProcessed;
     private final LinkedHashMap<String, Long> rowsReadPerSource;
+    private final LinkedHashMap<String, SinkWriteMetric> sinkMetrics;
     private final ArrayList<String> warnings;
 
     /**
@@ -34,6 +35,7 @@ public final class RunMetrics {
     public RunMetrics(String executionMode) {
         this.executionMode = executionMode;
         this.rowsReadPerSource = new LinkedHashMap<>();
+        this.sinkMetrics = new LinkedHashMap<>();
         this.warnings = new ArrayList<>();
     }
 
@@ -136,5 +138,35 @@ public final class RunMetrics {
      */
     public List<String> getWarnings() {
         return warnings;
+    }
+
+    /**
+     * Per-sink write counters collected when {@code CONTINUE_ON_ERROR} is active.
+     *
+     * @return sink metric map keyed by {@code sink[index].writer[index]}
+     */
+    public Map<String, SinkWriteMetric> getSinkMetrics() {
+        return sinkMetrics;
+    }
+
+    /**
+     * Records successfully written rows for a sink writer under continue-on-error policy.
+     *
+     * @param sinkKey sink metric key
+     * @param count number of rows written
+     */
+    public void recordSinkRowsOk(String sinkKey, long count) {
+        sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsOk(count);
+    }
+
+    /**
+     * Records failed rows and the latest error sample for a sink writer under continue-on-error policy.
+     *
+     * @param sinkKey sink metric key
+     * @param count number of rows that failed
+     * @param errorSample error message sample
+     */
+    public void recordSinkRowsFailed(String sinkKey, long count, String errorSample) {
+        sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsFailed(count, errorSample);
     }
 }

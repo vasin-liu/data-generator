@@ -14,15 +14,11 @@ import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.calcite.source.ChunkedRowSource;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.RowSchema;
-import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
-import org.gensokyo.data.model.vo.stage.WriteStageVO;
-import org.gensokyo.data.model.vo.writer.WriterVO;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -114,8 +110,7 @@ public final class StreamingPipeline {
 
             // Peak tracks the largest transformed chunk held before sink flush completes.
             metrics.recordPeakRowsInMemory(current.rows().size());
-            metrics.addRowsWritten(current.rows().size());
-            writeSinks(registry, template, current, sinkBatchSize);
+            writeSinks(registry, template, current, metrics, sinkBatchSize);
         }
 
         return new TemplateV2RunResult(lastSchema, List.of(), metrics);
@@ -143,26 +138,9 @@ public final class StreamingPipeline {
             TemplateV2RuntimeRegistry registry,
             TemplateV2VO template,
             CalciteRowTransformer.TransformResult result,
+            RunMetrics metrics,
             int sinkBatchSize) {
-        SinkPolicyMode mode = sinkPolicyMode(template.getSinkExecutionPolicy());
-        int sinkIndex = 0;
-        for (WriteStageVO sink : template.getSinks()) {
-            int writerIndex = 0;
-            for (WriterVO writer : sink.getWriters()) {
-                try {
-                    rowSinkFactory.create(registry, writer)
-                            .writeBatch(result.schema(), result.rows(), sinkBatchSize);
-                } catch (RuntimeException e) {
-                    if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
-                        writerIndex++;
-                        continue;
-                    }
-                    throw sinkWriteFailure(sinkIndex, writerIndex, writer, e);
-                }
-                writerIndex++;
-            }
-            sinkIndex++;
-        }
+        SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize);
     }
 
     private static Map.Entry<String, QuerySourceVO> soleQuerySource(TemplateV2VO template) {
@@ -173,30 +151,5 @@ public final class StreamingPipeline {
                             + entry.getValue().getClass().getSimpleName());
         }
         return Map.entry(entry.getKey(), querySource);
-    }
-
-    private static SinkPolicyMode sinkPolicyMode(SinkExecutionPolicyVO policy) {
-        if (policy == null || policy.getMode() == null || policy.getMode().isBlank()) {
-            return SinkPolicyMode.FAIL_FAST;
-        }
-        return SinkPolicyMode.valueOf(policy.getMode().trim().toUpperCase(Locale.ROOT));
-    }
-
-    private static IllegalStateException sinkWriteFailure(
-            int sinkIndex,
-            int writerIndex,
-            WriterVO writer,
-            RuntimeException cause) {
-        return new IllegalStateException("Failed to execute Template V2 sink writer"
-                + " at sink index [" + sinkIndex + "]"
-                + ", writer index [" + writerIndex + "]"
-                + ", type [" + writer.getType() + "]"
-                + ", model [" + writer.getClass().getName() + "]"
-                + ", target [" + writer.getTarget() + "]", cause);
-    }
-
-    private enum SinkPolicyMode {
-        FAIL_FAST,
-        CONTINUE_ON_ERROR
     }
 }

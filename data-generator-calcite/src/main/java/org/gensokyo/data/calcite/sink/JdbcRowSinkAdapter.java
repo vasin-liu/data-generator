@@ -1,15 +1,22 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
 package org.gensokyo.data.calcite.sink;
 
-import org.gensokyo.data.calcite.*;
-import org.gensokyo.data.calcite.codec.*;
-
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
+import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.RowSink;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.v2.RowSchema;
+import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
-import org.springframework.util.StringUtils;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.util.StringUtils;
+
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -17,21 +24,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * JDBC row sink that batch-inserts transformed rows into a configured table.
+ *
+ * @author Gensokyo
+ * @since 2026-05-19
+ */
 public class JdbcRowSinkAdapter implements RowSink {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final JdbcWriterVO writer;
     private final RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver;
+    private final SinkExecutionPolicyVO retryPolicy;
 
+    /**
+     * Creates a JDBC sink without retry policy.
+     *
+     * @param jdbcTemplate JDBC template for batch updates
+     * @param writer JDBC writer configuration
+     */
     public JdbcRowSinkAdapter(NamedParameterJdbcTemplate jdbcTemplate, JdbcWriterVO writer) {
         this(jdbcTemplate, writer, new NoopRuntimeJdbcEndpointResolver());
     }
 
+    /**
+     * Creates a JDBC sink without retry policy.
+     *
+     * @param jdbcTemplate JDBC template for batch updates
+     * @param writer JDBC writer configuration
+     * @param runtimeJdbcEndpointResolver resolves datasource id at runtime
+     */
     public JdbcRowSinkAdapter(NamedParameterJdbcTemplate jdbcTemplate,
                               JdbcWriterVO writer,
                               RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver) {
+        this(jdbcTemplate, writer, runtimeJdbcEndpointResolver, null);
+    }
+
+    /**
+     * Creates a JDBC sink with optional retry policy.
+     *
+     * @param jdbcTemplate JDBC template for batch updates
+     * @param writer JDBC writer configuration
+     * @param runtimeJdbcEndpointResolver resolves datasource id at runtime
+     * @param retryPolicy retry policy for batch writes (may be null)
+     */
+    public JdbcRowSinkAdapter(NamedParameterJdbcTemplate jdbcTemplate,
+                              JdbcWriterVO writer,
+                              RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver,
+                              SinkExecutionPolicyVO retryPolicy) {
         this.jdbcTemplate = jdbcTemplate;
         this.writer = writer;
         this.runtimeJdbcEndpointResolver = runtimeJdbcEndpointResolver;
+        this.retryPolicy = retryPolicy;
+    }
+
+    /**
+     * Returns a copy of this adapter configured with the given retry policy.
+     *
+     * @param retryPolicy retry policy for batch writes (may be null)
+     * @return JDBC sink adapter with retry policy applied
+     */
+    public JdbcRowSinkAdapter withRetryPolicy(SinkExecutionPolicyVO retryPolicy) {
+        return new JdbcRowSinkAdapter(jdbcTemplate, writer, runtimeJdbcEndpointResolver, retryPolicy);
     }
 
     @Override
@@ -57,7 +110,8 @@ public class JdbcRowSinkAdapter implements RowSink {
                 Map<String, ?>[] batch = slice.stream()
                         .map(row -> toSqlParams(row, mappings))
                         .toArray(Map[]::new);
-                jdbcTemplate.batchUpdate(sql, batch);
+                // Retry each JDBC batch independently for transient failures.
+                SinkRetryExecutor.run(retryPolicy, () -> jdbcTemplate.batchUpdate(sql, batch));
             }
         } finally {
             DynamicDataSourceContextHolder.clear();
