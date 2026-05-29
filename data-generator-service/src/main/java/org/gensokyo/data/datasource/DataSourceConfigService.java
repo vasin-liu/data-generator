@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -140,17 +139,16 @@ public class DataSourceConfigService {
             String driverClassName,
             String driverJarPath) {
         try {
-            if (driverJarPath != null && !driverJarPath.isBlank()) {
-                driverSupport.registerDriverFromJar(driverJarPath, driverClassName);
-            } else {
-                Class.forName(driverClassName);
-            }
-            try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            JdbcDriverLoadResult loaded = driverSupport.ensureDriverLoaded(driverClassName, url, driverJarPath);
+            try (Connection connection = driverSupport.openConnection(url, username, password, loaded)) {
                 if (!connection.isValid(5)) {
                     throw new IllegalStateException("Connection invalid");
                 }
             }
-            return "Connection OK";
+            String suffix = buildLoadMessageSuffix(loaded, driverClassName);
+            return "Connection OK" + suffix;
+        } catch (DataGeneratorException e) {
+            throw e;
         } catch (Exception e) {
             throw new DataGeneratorException("Connection test failed: " + e.getMessage(), e);
         }
@@ -194,14 +192,14 @@ public class DataSourceConfigService {
     public void registerToRuntime(DataSourceConfigPO row) {
         DynamicRoutingDataSource routing = requireRouting();
         try {
-            if (row.getDriverJarPath() != null && !row.getDriverJarPath().isBlank()) {
-                driverSupport.registerDriverFromJar(row.getDriverJarPath(), row.getDriverClassName());
-            }
+            JdbcDriverLoadResult loaded = driverSupport.ensureDriverLoaded(
+                    row.getDriverClassName(), row.getUrl(), row.getDriverJarPath());
             DruidDataSource dataSource = new DruidDataSource();
             dataSource.setUrl(row.getUrl());
             dataSource.setUsername(row.getUsername());
             dataSource.setPassword(row.getPassword());
-            dataSource.setDriverClassName(row.getDriverClassName());
+            dataSource.setDriverClassName(loaded.driverClassName());
+            dataSource.setDriverClassLoader(loaded.classLoader());
             if (routing.getDataSources().containsKey(row.getName())) {
                 routing.removeDataSource(row.getName());
             }
@@ -229,5 +227,19 @@ public class DataSourceConfigService {
                 Boolean.TRUE.equals(row.getEnabled()),
                 row.getCreatedAt(),
                 row.getUpdatedAt());
+    }
+
+    private static String buildLoadMessageSuffix(JdbcDriverLoadResult loaded, String requestedClass) {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        if (!loaded.driverClassName().equals(requestedClass)) {
+            parts.add("driver loaded as " + loaded.driverClassName());
+        }
+        if (loaded.bundled()) {
+            parts.add("bundled driver");
+        }
+        if (parts.isEmpty()) {
+            return "";
+        }
+        return " (" + String.join(", ", parts) + ")";
     }
 }

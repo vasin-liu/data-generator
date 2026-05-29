@@ -12,6 +12,8 @@ import {
   upsertDataSource,
 } from '../../api/datasources';
 import type { DataSourceSummary } from '../../api/types';
+import { DriverPresetFields } from '../datasources/DriverPresetFields';
+import { isBundledPreset, resolveDriverPresets } from '../datasources/jdbcDriverPresets';
 
 type FormValues = {
   name: string;
@@ -30,6 +32,8 @@ export function DatasourcesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<DataSourceSummary | null>(null);
   const [jarFile, setJarFile] = useState<File | null>(null);
+  const [dialogKey, setDialogKey] = useState('new');
+  const [selectedPresetId, setSelectedPresetId] = useState<string | undefined>();
   const [form] = Form.useForm<FormValues>();
 
   const overviewQuery = useQuery({
@@ -86,6 +90,7 @@ export function DatasourcesPage() {
   const openCreate = () => {
     setEditing(null);
     setJarFile(null);
+    setDialogKey(`new-${Date.now()}`);
     form.resetFields();
     setModalOpen(true);
   };
@@ -93,6 +98,7 @@ export function DatasourcesPage() {
   const openEdit = (row: DataSourceSummary) => {
     setEditing(row);
     setJarFile(null);
+    setDialogKey(`edit-${row.name}`);
     form.setFieldsValue({
       name: row.name,
       url: row.url,
@@ -113,6 +119,11 @@ export function DatasourcesPage() {
       onOk: () => removeMutation.mutateAsync(name),
     });
   };
+
+  const driverPresets = useMemo(
+    () => resolveDriverPresets(overviewQuery.data?.driverPresets),
+    [overviewQuery.data?.driverPresets],
+  );
 
   const columns: ColumnsType<DataSourceSummary> = useMemo(
     () => [
@@ -202,27 +213,28 @@ export function DatasourcesPage() {
           <Form.Item name="password" label={t('datasources.dialog.password')}>
             <Input.Password placeholder={editing ? '••••••' : undefined} />
           </Form.Item>
-          <Form.Item
-            name="driverClassName"
-            label={t('datasources.dialog.driver')}
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item label={t('datasources.dialog.upload')}>
-            <Upload
-              accept=".jar,application/java-archive"
-              maxCount={1}
-              beforeUpload={(file) => {
-                setJarFile(file);
-                return false;
-              }}
-              onRemove={() => setJarFile(null)}
-              fileList={uploadFileList}
-            >
-              <Button>{t('datasources.dialog.upload')}</Button>
-            </Upload>
-          </Form.Item>
+          <DriverPresetFields
+            form={form}
+            dialogKey={dialogKey}
+            presets={driverPresets}
+            onPresetIdChange={setSelectedPresetId}
+          />
+          {!isBundledPreset(driverPresets, selectedPresetId) ? (
+            <Form.Item label={t('datasources.dialog.upload')} extra={t('datasources.dialog.uploadHint')}>
+              <Upload
+                accept=".jar,application/java-archive"
+                maxCount={1}
+                beforeUpload={(file) => {
+                  setJarFile(file);
+                  return false;
+                }}
+                onRemove={() => setJarFile(null)}
+                fileList={uploadFileList}
+              >
+                <Button>{t('datasources.dialog.upload')}</Button>
+              </Upload>
+            </Form.Item>
+          ) : null}
           <Space>
             <Button onClick={() => testFormMutation.mutate(form.getFieldsValue())} loading={testFormMutation.isPending}>
               {t('datasources.dialog.test')}

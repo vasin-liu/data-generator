@@ -62,6 +62,9 @@
         <clickhouse.version>0.6.2</clickhouse.version>
         <mysql.version>8.0.31</mysql.version>
         <postgresql.version>42.5.1</postgresql.version>
+        <kingbase8.jdbc.version>8.6.1</kingbase8.jdbc.version>
+        <kingbase9.jdbc.version>9.0.0</kingbase9.jdbc.version>
+        <highgo.jdbc.version>6.2.4</highgo.jdbc.version>
         <h2.version>2.2.224</h2.version>
         <!-- ******************************************** -->
     </properties>
@@ -229,6 +232,16 @@
                 <groupId>com.dameng</groupId>
                 <artifactId>dm-jdbc</artifactId>
                 <version>${dm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.kingbase</groupId>
+                <artifactId>kingbase8</artifactId>
+                <version>${kingbase8.jdbc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.highgo</groupId>
+                <artifactId>HgdbJdbc</artifactId>
+                <version>${highgo.jdbc.version}</version>
             </dependency>
 
             <!-- datafaker -->

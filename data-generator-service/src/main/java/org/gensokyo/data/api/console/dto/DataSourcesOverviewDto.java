@@ -6,16 +6,35 @@
 package org.gensokyo.data.api.console.dto;
 
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
+import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
+import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
 
 import java.util.List;
 
 /**
  * Persisted JDBC configs plus runtime registry keys for the datasources page.
  *
- * @param persisted   rows from {@code datasource_config}
- * @param runtimeKeys merged yaml + persisted keys
+ * @param persisted      rows from {@code datasource_config}
+ * @param runtimeKeys    merged yaml + persisted keys
+ * @param driverPresets  built-in JDBC driver catalog for the console form
  */
 public record DataSourcesOverviewDto(
         List<DataSourceConfigSummary> persisted,
-        List<String> runtimeKeys) {
+        List<String> runtimeKeys,
+        List<JdbcDriverPresetDto> driverPresets) {
+
+    /**
+     * @param persisted   persisted rows
+     * @param runtimeKeys runtime keys
+     * @return overview with catalog presets
+     */
+    public static DataSourcesOverviewDto of(
+            List<DataSourceConfigSummary> persisted,
+            List<String> runtimeKeys,
+            BundledJdbcDriverRegistry bundledDrivers) {
+        List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
+                .map(p -> JdbcDriverPresetDto.from(p, bundledDrivers))
+                .toList();
+        return new DataSourcesOverviewDto(persisted, runtimeKeys, presets);
+    }
 }

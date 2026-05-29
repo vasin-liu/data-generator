@@ -5,26 +5,34 @@
  */
 package org.gensokyo.data.datasource;
 
+import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.exception.DataGeneratorException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 
 /**
- * Stores JDBC driver JARs and registers drivers with {@link DriverManager}.
+ * Stores optional uploaded JDBC JARs and loads drivers via isolated class loaders when bundled.
  *
  * @author Gensokyo
  * @since 2026-05-23
  */
 @Component
+@RequiredArgsConstructor
 public class DataSourceDriverSupport {
+
+    private final BundledJdbcDriverRegistry bundledDrivers;
 
     /**
      * Saves an uploaded driver JAR under {@code uploaded-drivers/}.
@@ -48,19 +56,108 @@ public class DataSourceDriverSupport {
     }
 
     /**
-     * Registers a JDBC driver from a JAR path when the path is non-blank.
+     * Loads a JDBC driver using uploaded JAR, bundled preset JARs, or the application classpath (last resort).
      *
-     * @param jarFilePath absolute jar path
-     * @param driverClassName driver class name
-     * @throws Exception when load fails
+     * @param driverClassName preferred driver class
+     * @param jdbcUrl         JDBC URL for preset / bundle matching
+     * @param jarFilePath     optional user-uploaded JAR path
+     * @return load result with isolated loader when bundled or uploaded
      */
-    public void registerDriverFromJar(String jarFilePath, String driverClassName) throws Exception {
-        if (jarFilePath == null || jarFilePath.isBlank()) {
-            return;
+    public JdbcDriverLoadResult ensureDriverLoaded(String driverClassName, String jdbcUrl, String jarFilePath) {
+        List<String> candidates = JdbcDriverPresetCatalog.resolveDriverClassCandidates(driverClassName, jdbcUrl);
+        if (jarFilePath != null && !jarFilePath.isBlank()) {
+            return loadFromUploadedJar(jarFilePath, candidates);
         }
-        URL jarUrl = Path.of(jarFilePath).toUri().toURL();
-        URLClassLoader loader = new URLClassLoader(new URL[] {jarUrl});
+        Optional<String> bundleKey = JdbcDriverPresetCatalog.resolveBundleKey(driverClassName, jdbcUrl);
+        if (bundleKey.isPresent() && bundledDrivers.hasBundle(bundleKey.get())) {
+            return loadFromBundle(bundleKey.get(), candidates);
+        }
+        return loadFromApplicationClasspath(candidates);
+    }
+
+    /**
+     * Opens a JDBC connection without registering drivers on the global {@link java.sql.DriverManager}.
+     *
+     * @param url      JDBC URL
+     * @param username user
+     * @param password password
+     * @param loaded   prior {@link #ensureDriverLoaded} result
+     * @return open connection
+     * @throws Exception when connect fails
+     */
+    public Connection openConnection(String url, String username, String password, JdbcDriverLoadResult loaded)
+            throws Exception {
+        Driver driver = instantiateDriver(loaded);
+        Properties props = new Properties();
+        if (username != null) {
+            props.setProperty("user", username);
+        }
+        if (password != null) {
+            props.setProperty("password", password);
+        }
+        Connection connection = driver.connect(url, props);
+        if (connection == null) {
+            throw new IllegalStateException("Driver returned null connection for URL: " + url);
+        }
+        return connection;
+    }
+
+    private JdbcDriverLoadResult loadFromUploadedJar(String jarFilePath, List<String> candidates) {
+        Exception lastFailure = null;
+        for (String candidate : candidates) {
+            try {
+                URLClassLoader loader = new URLClassLoader(
+                        new URL[] {Path.of(jarFilePath).toUri().toURL()},
+                        ClassLoader.getPlatformClassLoader());
+                instantiateDriver(candidate, loader);
+                return new JdbcDriverLoadResult(candidate, loader, false);
+            } catch (Exception e) {
+                lastFailure = e;
+            }
+        }
+        throw failure(candidates, lastFailure);
+    }
+
+    private JdbcDriverLoadResult loadFromBundle(String bundleKey, List<String> candidates) {
+        URLClassLoader loader = bundledDrivers.classLoaderFor(bundleKey)
+                .orElseThrow(() -> new DataGeneratorException("Bundled JDBC driver missing: " + bundleKey));
+        Exception lastFailure = null;
+        for (String candidate : candidates) {
+            try {
+                instantiateDriver(candidate, loader);
+                return new JdbcDriverLoadResult(candidate, loader, true);
+            } catch (Exception e) {
+                lastFailure = e;
+            }
+        }
+        throw failure(candidates, lastFailure);
+    }
+
+    private JdbcDriverLoadResult loadFromApplicationClasspath(List<String> candidates) {
+        Exception lastFailure = null;
+        for (String candidate : candidates) {
+            try {
+                Class.forName(candidate);
+                return new JdbcDriverLoadResult(candidate, Thread.currentThread().getContextClassLoader(), false);
+            } catch (Exception e) {
+                lastFailure = e;
+            }
+        }
+        throw failure(candidates, lastFailure);
+    }
+
+    private static Driver instantiateDriver(JdbcDriverLoadResult loaded) throws Exception {
+        return instantiateDriver(loaded.driverClassName(), loaded.classLoader());
+    }
+
+    private static Driver instantiateDriver(String driverClassName, ClassLoader loader) throws Exception {
         Class<?> driverClass = Class.forName(driverClassName, true, loader);
-        DriverManager.registerDriver((java.sql.Driver) driverClass.getDeclaredConstructor().newInstance());
+        return (Driver) driverClass.getDeclaredConstructor().newInstance();
+    }
+
+    private static DataGeneratorException failure(List<String> candidates, Exception lastFailure) {
+        String message = "Failed to load JDBC driver"
+                + (candidates.isEmpty() ? "" : " (tried: " + String.join(", ", candidates) + ")");
+        return new DataGeneratorException(message, lastFailure);
     }
 }

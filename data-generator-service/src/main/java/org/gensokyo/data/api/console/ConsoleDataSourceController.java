@@ -8,7 +8,10 @@ package org.gensokyo.data.api.console;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.api.console.dto.DataSourcesOverviewDto;
+import org.gensokyo.data.api.console.dto.JdbcDriverPresetDto;
+import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
+import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
 import org.gensokyo.data.datasource.DataSourceConnectionTestRequest;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.vo.R;
@@ -36,6 +39,7 @@ import java.util.List;
 public class ConsoleDataSourceController {
 
     private final DataSourceConfigService dataSourceConfigService;
+    private final BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
 
     /**
      * @return persisted configs and runtime keys
@@ -43,7 +47,19 @@ public class ConsoleDataSourceController {
     @GetMapping
     public R<DataSourcesOverviewDto> overview() {
         List<String> runtimeKeys = dataSourceConfigService.listRuntimeNames().stream().sorted().toList();
-        return R.ok(new DataSourcesOverviewDto(dataSourceConfigService.listAll(), runtimeKeys));
+        return R.ok(DataSourcesOverviewDto.of(
+                dataSourceConfigService.listAll(), runtimeKeys, bundledJdbcDriverRegistry));
+    }
+
+    /**
+     * @return built-in JDBC driver presets (primary + alternate driver classes per version)
+     */
+    @GetMapping("/driver-presets")
+    public R<List<JdbcDriverPresetDto>> driverPresets() {
+        List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
+                .map(p -> JdbcDriverPresetDto.from(p, bundledJdbcDriverRegistry))
+                .toList();
+        return R.ok(presets);
     }
 
     /**
