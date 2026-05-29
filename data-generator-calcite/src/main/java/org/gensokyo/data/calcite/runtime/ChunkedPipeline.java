@@ -118,6 +118,7 @@ public final class ChunkedPipeline {
                         "SOURCE_READ",
                         sourceName);
             }
+            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
             RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
             CalciteExecutionContext context = new CalciteExecutionContext()
@@ -152,6 +153,7 @@ public final class ChunkedPipeline {
                 policy.broadcastMaxRows(),
                 spec.dimSourceName());
         metrics.addRead(spec.dimSourceName(), dimRowSource.rows().size());
+        ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
         RowSource factRowSource = registry.createSource(spec.factSourceName(), factSourceVo, policy);
         if (!(factRowSource instanceof ChunkedRowSource chunked)) {
@@ -176,6 +178,7 @@ public final class ChunkedPipeline {
                         "SOURCE_READ",
                         spec.factSourceName());
             }
+            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
             CalciteRowTransformer.TransformResult joined =
                     BroadcastJoinExecutor.join(chunk, snapshot, spec);

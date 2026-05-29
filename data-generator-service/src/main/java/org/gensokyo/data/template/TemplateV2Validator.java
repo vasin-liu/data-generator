@@ -81,6 +81,32 @@ public final class TemplateV2Validator {
         validateSinkExecutionPolicy(template.getSinkExecutionPolicy());
     }
 
+    /**
+     * Collects non-fatal validation warnings for a normalized Template V2 definition.
+     *
+     * @param template normalized template
+     * @return warning messages; never {@code null}
+     */
+    public static List<String> collectWarnings(TemplateV2VO template) {
+        List<String> warnings = new ArrayList<>();
+        if (template == null) {
+            return warnings;
+        }
+        appendMaxTotalRowsWarnings(template, warnings);
+        return warnings;
+    }
+
+    private static void appendMaxTotalRowsWarnings(TemplateV2VO template, List<String> warnings) {
+        ExecutionPolicyVO policy = template.getExecutionPolicy();
+        if (policy == null || StrKit.isBlank(policy.getMode())) {
+            return;
+        }
+        String mode = policy.getMode().trim().toUpperCase(Locale.ROOT);
+        if (("CHUNKED".equals(mode) || "STREAMING".equals(mode)) && policy.getMaxTotalRows() == null) {
+            warnings.add("CHUNKED/STREAMING mode without maxTotalRows — consider setting a row cap for fail-safe execution");
+        }
+    }
+
     private static void validateSpelTransform(SpelTransformVO spelTransform) {
         if (CollectKit.isEmpty(spelTransform.getColumns())) {
             throw new IllegalArgumentException("SpEL transformer columns must not be empty");
@@ -115,9 +141,6 @@ public final class TemplateV2Validator {
         if (!"IN_MEMORY".equals(mode) && !"CHUNKED".equals(mode) && !"STREAMING".equals(mode)) {
             throw new IllegalArgumentException("Unsupported execution policy mode: " + policy.getMode());
         }
-        if ("STREAMING".equals(mode)) {
-            throw new IllegalArgumentException("STREAMING execution policy mode is not implemented");
-        }
         if (policy.getMaxRowsInMemory() != null && policy.getMaxRowsInMemory() <= 0) {
             throw new IllegalArgumentException("Execution policy maxRowsInMemory must be positive");
         }
@@ -132,6 +155,9 @@ public final class TemplateV2Validator {
         }
         if (policy.getBroadcastMaxRows() != null && policy.getBroadcastMaxRows() <= 0) {
             throw new IllegalArgumentException("Execution policy broadcastMaxRows must be positive");
+        }
+        if (policy.getMaxTotalRows() != null && policy.getMaxTotalRows() <= 0) {
+            throw new IllegalArgumentException("Execution policy maxTotalRows must be positive");
         }
         if ("CHUNKED".equals(mode)) {
             validateChunkedCompatibility(template);

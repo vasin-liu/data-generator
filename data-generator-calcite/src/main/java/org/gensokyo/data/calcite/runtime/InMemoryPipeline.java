@@ -76,6 +76,7 @@ public final class InMemoryPipeline {
                         "SOURCE_READ",
                         sourceName);
             }
+            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
             context.addSource(rowSource);
         }
 

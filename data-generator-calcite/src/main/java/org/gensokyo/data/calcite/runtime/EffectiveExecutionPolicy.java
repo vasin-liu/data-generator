@@ -27,6 +27,7 @@ public final class EffectiveExecutionPolicy {
 
     private final String mode;
     private final int maxRowsInMemory;
+    private final Integer maxTotalRows;
     private final int sourceChunkSize;
     private final int sinkBatchSize;
     private final int previewRowLimit;
@@ -36,6 +37,7 @@ public final class EffectiveExecutionPolicy {
     private EffectiveExecutionPolicy(
             String mode,
             int maxRowsInMemory,
+            Integer maxTotalRows,
             int sourceChunkSize,
             int sinkBatchSize,
             int previewRowLimit,
@@ -43,6 +45,7 @@ public final class EffectiveExecutionPolicy {
             int broadcastMaxRows) {
         this.mode = mode;
         this.maxRowsInMemory = maxRowsInMemory;
+        this.maxTotalRows = maxTotalRows;
         this.sourceChunkSize = sourceChunkSize;
         this.sinkBatchSize = sinkBatchSize;
         this.previewRowLimit = previewRowLimit;
@@ -59,6 +62,7 @@ public final class EffectiveExecutionPolicy {
     public static EffectiveExecutionPolicy resolve(ExecutionPolicyVO templatePolicy) {
         String mode = DEFAULT_MODE;
         int maxRowsInMemory = DEFAULT_MAX_ROWS_IN_MEMORY;
+        Integer maxTotalRows = null;
         int sourceChunkSize = DEFAULT_SOURCE_CHUNK_SIZE;
         int sinkBatchSize = DEFAULT_SINK_BATCH_SIZE;
         int previewRowLimit = DEFAULT_PREVIEW_ROW_LIMIT;
@@ -71,6 +75,9 @@ public final class EffectiveExecutionPolicy {
             if (templatePolicy.getMaxRowsInMemory() != null) {
                 maxRowsInMemory = templatePolicy.getMaxRowsInMemory();
             }
+            if (templatePolicy.getMaxTotalRows() != null) {
+                maxTotalRows = templatePolicy.getMaxTotalRows();
+            }
             if (templatePolicy.getSourceChunkSize() != null) {
                 sourceChunkSize = templatePolicy.getSourceChunkSize();
             }
@@ -82,6 +89,9 @@ public final class EffectiveExecutionPolicy {
             }
             if (templatePolicy.getFailOnLimitExceeded() != null) {
                 failOnLimitExceeded = templatePolicy.getFailOnLimitExceeded();
+            } else if (maxTotalRows != null) {
+                // maxTotalRows implies fail-fast when the flag is omitted.
+                failOnLimitExceeded = true;
             }
         }
 
@@ -94,6 +104,7 @@ public final class EffectiveExecutionPolicy {
         return new EffectiveExecutionPolicy(
                 mode,
                 maxRowsInMemory,
+                maxTotalRows,
                 sourceChunkSize,
                 sinkBatchSize,
                 previewRowLimit,
@@ -117,6 +128,15 @@ public final class EffectiveExecutionPolicy {
      */
     public int maxRowsInMemory() {
         return maxRowsInMemory;
+    }
+
+    /**
+     * Optional cap on total rows processed in the run; {@code null} when unset.
+     *
+     * @return configured max total rows, or {@code null} when no cap applies
+     */
+    public Integer maxTotalRows() {
+        return maxTotalRows;
     }
 
     /**

@@ -188,6 +188,23 @@ class TemplateV2SupportTests {
     }
 
     @Test
+    void warnsWhenChunkedModeHasNoMaxTotalRows() {
+        var template = new TemplateV2VO();
+        template.setName("demo");
+        template.setSources(Map.of("input", new IteratorSourceVO()));
+        template.setTransformers(List.of(sql("SELECT value FROM input")));
+        template.setSinks(List.of(consoleSink()));
+        var policy = new ExecutionPolicyVO();
+        policy.setMode("CHUNKED");
+        template.setExecutionPolicy(policy);
+
+        var warnings = TemplateV2Validator.collectWarnings(template);
+
+        Assertions.assertEquals(1, warnings.size());
+        Assertions.assertTrue(warnings.getFirst().contains("maxTotalRows"));
+    }
+
+    @Test
     void rowSchemaHelpersWork() {
         var schema = new RowSchema();
         schema.setColumns(List.of(

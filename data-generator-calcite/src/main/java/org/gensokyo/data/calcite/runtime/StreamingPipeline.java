@@ -103,6 +103,7 @@ public final class StreamingPipeline {
                         "SOURCE_READ",
                         sourceName);
             }
+            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
             RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
             CalciteExecutionContext context = new CalciteExecutionContext()

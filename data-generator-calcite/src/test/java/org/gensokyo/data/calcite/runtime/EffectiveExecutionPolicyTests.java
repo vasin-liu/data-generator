@@ -28,6 +28,7 @@ class EffectiveExecutionPolicyTests {
         Assertions.assertEquals(100, policy.previewRowLimit());
         Assertions.assertTrue(policy.failOnLimitExceeded());
         Assertions.assertEquals(50_000, policy.broadcastMaxRows());
+        Assertions.assertNull(policy.maxTotalRows());
     }
 
     @Test
@@ -59,5 +60,15 @@ class EffectiveExecutionPolicyTests {
         EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(vo);
 
         Assertions.assertEquals(25_000, policy.broadcastMaxRows());
+    }
+
+    @Test
+    void exposesMaxTotalRowsWhenConfigured() {
+        ExecutionPolicyVO vo = new ExecutionPolicyVO();
+        vo.setMaxTotalRows(10_000);
+
+        EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(vo);
+
+        Assertions.assertEquals(10_000, policy.maxTotalRows());
     }
 }

@@ -113,6 +113,7 @@ public class TemplateV2ControlPlaneService {
         }
 
         appendChunkedExecutionShapeWarnings(normalized, warnings);
+        warnings.addAll(TemplateV2Validator.collectWarnings(normalized));
         return TemplateV2ValidationResult.from(errors, warnings);
     }
 

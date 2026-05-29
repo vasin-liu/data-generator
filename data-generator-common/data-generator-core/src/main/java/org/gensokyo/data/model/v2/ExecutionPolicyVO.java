@@ -10,6 +10,8 @@ import java.io.Serializable;
 public class ExecutionPolicyVO implements Serializable {
     private String mode;
     private Integer maxRowsInMemory;
+    /** Optional cap on total rows processed in a run; enforced when set. */
+    private Integer maxTotalRows;
     private Integer previewRowLimit;
     private Integer sourceChunkSize;
     private Integer sinkBatchSize;
