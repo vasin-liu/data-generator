@@ -8,6 +8,7 @@ import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.iterator.IteratorVO;
 import org.gensokyo.data.model.vo.reader.ReaderVO;
@@ -65,6 +66,7 @@ public class JacksonParser implements YamlParser {
                 .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WriterVO.class))
                 .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(SourceVO.class))
                 .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(TransformVO.class))
+                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WorkflowStepVO.class))
                 .build();
     }
 

@@ -5,6 +5,7 @@ import org.gensokyo.data.calcite.plugin.Pf4jRuntimeExtensionLocator;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class TemplateModelSubtypeRegistrar {
         for (ClassLoader classLoader : pf4jRuntimeExtensionLocator.pluginClassLoaders()) {
             JsonSubtypeRegistry.registerSubtypes(SourceVO.class, classLoader);
             JsonSubtypeRegistry.registerSubtypes(TransformVO.class, classLoader);
+            JsonSubtypeRegistry.registerSubtypes(WorkflowStepVO.class, classLoader);
             JsonSubtypeRegistry.registerSubtypes(WriterVO.class, classLoader);
         }
     }

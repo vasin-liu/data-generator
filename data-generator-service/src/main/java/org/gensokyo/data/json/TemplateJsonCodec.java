@@ -4,6 +4,7 @@ import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.iterator.IteratorVO;
@@ -74,6 +75,7 @@ public final class TemplateJsonCodec {
                             .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WriterVO.class))
                             .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(SourceVO.class))
                             .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(TransformVO.class))
+                            .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WorkflowStepVO.class))
                             .build();
                     mapperVersion = currentVersion;
                     current = mapper;
