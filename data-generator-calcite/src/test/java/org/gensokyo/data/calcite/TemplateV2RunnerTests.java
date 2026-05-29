@@ -77,12 +77,12 @@ class TemplateV2RunnerTests {
     }
 
     @Test
-    void rejectsStreamingExecutionModeAtRuntime() {
+    void rejectsStreamingModeForNonQuerySource() {
         ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
         executionPolicy.setMode("STREAMING");
 
         TemplateV2VO template = new TemplateV2VO();
-        template.setName("demo-v2-streaming");
+        template.setName("demo-v2-streaming-iterator");
         template.setExecutionPolicy(executionPolicy);
         template.setSources(Map.of("seed", numberSource(1, 2, 1)));
         template.setTransformers(List.of(sql("SELECT value FROM seed")));
@@ -90,7 +90,7 @@ class TemplateV2RunnerTests {
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new TemplateV2Runner(defaultRegistry()).run(template));
-        Assertions.assertEquals("STREAMING execution mode is not implemented", exception.getMessage());
+        Assertions.assertTrue(exception.getMessage().contains("QuerySourceVO"));
     }
 
     @Test

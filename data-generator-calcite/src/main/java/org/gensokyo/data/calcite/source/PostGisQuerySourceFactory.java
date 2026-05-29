@@ -50,7 +50,7 @@ public class PostGisQuerySourceFactory implements V2SourceFactory {
     }
 
     /**
-     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED}.
+     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED} or {@code STREAMING}.
      *
      * @param name   logical source name
      * @param source PostGIS source configuration
@@ -60,7 +60,7 @@ public class PostGisQuerySourceFactory implements V2SourceFactory {
     public RowSource create(String name, SourceVO source, EffectiveExecutionPolicy policy) {
         PostGisQuerySourceVO postGisSource = resolveEndpoint((PostGisQuerySourceVO) source);
         QuerySourceVO query = PostGisQuerySourceSupport.toQuerySource(postGisSource);
-        if (policy != null && "CHUNKED".equals(policy.mode())) {
+        if (policy != null && usesChunkedRead(policy.mode())) {
             return new ChunkedQueryRowSource(name, query, jdbcTemplate, policy.sourceChunkSize());
         }
         return new QueryRowSource(name, query, jdbcTemplate);
@@ -73,5 +73,9 @@ public class PostGisQuerySourceFactory implements V2SourceFactory {
             source.setDataSourceId(effectiveDataSourceId);
         }
         return source;
+    }
+
+    private static boolean usesChunkedRead(String mode) {
+        return "CHUNKED".equals(mode) || "STREAMING".equals(mode);
     }
 }

@@ -20,6 +20,8 @@ public final class RunMetrics {
 
     private final String executionMode;
     private long totalRowsRead;
+    private long rowsWritten;
+    private int peakRowsInMemory;
     private int chunksProcessed;
     private final LinkedHashMap<String, Long> rowsReadPerSource;
     private final ArrayList<String> warnings;
@@ -54,6 +56,26 @@ public final class RunMetrics {
     }
 
     /**
+     * Records rows written to sinks during this increment.
+     *
+     * @param count number of rows written
+     */
+    public void addRowsWritten(int count) {
+        rowsWritten += count;
+    }
+
+    /**
+     * Updates peak concurrent rows held in memory when {@code current} exceeds the prior peak.
+     *
+     * @param current rows currently in memory for the active chunk
+     */
+    public void recordPeakRowsInMemory(int current) {
+        if (current > peakRowsInMemory) {
+            peakRowsInMemory = current;
+        }
+    }
+
+    /**
      * Resolved execution mode for this run.
      *
      * @return execution mode name
@@ -78,6 +100,24 @@ public final class RunMetrics {
      */
     public int getChunksProcessed() {
         return chunksProcessed;
+    }
+
+    /**
+     * Total rows written to all sinks.
+     *
+     * @return cumulative rows written
+     */
+    public long getRowsWritten() {
+        return rowsWritten;
+    }
+
+    /**
+     * Maximum rows held in memory at any point during the run.
+     *
+     * @return peak in-memory row count
+     */
+    public int getPeakRowsInMemory() {
+        return peakRowsInMemory;
     }
 
     /**

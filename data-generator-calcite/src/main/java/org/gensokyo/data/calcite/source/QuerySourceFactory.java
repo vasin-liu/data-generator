@@ -33,7 +33,7 @@ public class QuerySourceFactory implements V2SourceFactory {
     }
 
     /**
-     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED}.
+     * Creates a row source, using {@link ChunkedQueryRowSource} when policy mode is {@code CHUNKED} or {@code STREAMING}.
      *
      * @param name   logical source name
      * @param source source configuration
@@ -46,9 +46,13 @@ public class QuerySourceFactory implements V2SourceFactory {
         if (effectiveDataSourceId != null && !effectiveDataSourceId.isBlank()) {
             querySource.setDataSourceId(effectiveDataSourceId);
         }
-        if (policy != null && "CHUNKED".equals(policy.mode())) {
+        if (policy != null && usesChunkedRead(policy.mode())) {
             return new ChunkedQueryRowSource(name, querySource, jdbcTemplate, policy.sourceChunkSize());
         }
         return new QueryRowSource(name, querySource, jdbcTemplate);
+    }
+
+    private static boolean usesChunkedRead(String mode) {
+        return "CHUNKED".equals(mode) || "STREAMING".equals(mode);
     }
 }
