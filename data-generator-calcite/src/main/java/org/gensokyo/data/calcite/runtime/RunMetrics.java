@@ -141,6 +141,17 @@ public final class RunMetrics {
     }
 
     /**
+     * Appends a diagnostic or log message to the run report warning stream.
+     *
+     * @param message human-readable diagnostic text
+     */
+    public void addWarning(String message) {
+        if (message != null && !message.isBlank()) {
+            warnings.add(message);
+        }
+    }
+
+    /**
      * Per-sink write counters collected when {@code CONTINUE_ON_ERROR} is active.
      *
      * @return sink metric map keyed by {@code sink[index].writer[index]}

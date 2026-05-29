@@ -8,6 +8,7 @@ package org.gensokyo.data.model.v2;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
 import org.gensokyo.data.model.v2.workflow.WorkflowSpecVO;
 import org.gensokyo.data.model.vo.generator.GeneratorVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
@@ -44,4 +45,6 @@ public class TemplateV2VO implements Serializable {
     private Map<String, Object> metadata;
     /** Optional L2 workflow; linear {@link #sources} / {@link #transformers} / {@link #sinks} remain for legacy templates. */
     private WorkflowSpecVO workflow;
+    /** Compute blocks referenced by {@link org.gensokyo.data.model.v2.workflow.InvokeComputeBlockStepVO}. */
+    private List<ComputeBlockVO> computeBlocks = new ArrayList<>();
 }

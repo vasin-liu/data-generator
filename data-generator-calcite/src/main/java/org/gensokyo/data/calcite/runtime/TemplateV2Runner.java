@@ -63,12 +63,16 @@ public class TemplateV2Runner {
         if (template == null) {
             throw new IllegalArgumentException("Template V2 must not be null");
         }
+
+        EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy());
+        TemplateV2RuntimeRegistry registry = runtimeRegistryProvider.current();
+        if (template.getWorkflow() != null) {
+            return new WorkflowRunner(this::createSink).run(template, policy, registry);
+        }
         if (template.getTransformers().isEmpty()) {
             throw new IllegalArgumentException("Current V2 runner requires at least one transformer");
         }
 
-        EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy());
-        TemplateV2RuntimeRegistry registry = runtimeRegistryProvider.current();
         if ("STREAMING".equals(policy.mode())) {
             return new StreamingPipeline(this::createSink).run(template, policy, registry);
         }
