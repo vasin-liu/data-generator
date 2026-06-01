@@ -249,7 +249,7 @@ public class TaskController {
         TemplateV2Validator.validate(template);
         TemplateV2Validator.validateGovernance(
                 template, properties.getGovernance().isRejectPlaintextPasswordsInTemplates());
-        taskExecutionService.queueExecution(
+        Long taskExecutionId = taskExecutionService.queueExecution(
                 entity.getId(),
                 template.getName(),
                 instanceId,
@@ -264,7 +264,7 @@ public class TaskController {
                 java.util.Map.of("templateId", entity.getId(), "name", template.getName()));
         if (distributedExecutionProperties.isEnabled()) {
             distributedJobService.enqueue(
-                    null,
+                    taskExecutionId,
                     entity.getId(),
                     instanceId,
                     null);
