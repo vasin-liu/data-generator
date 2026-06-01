@@ -115,6 +115,21 @@ public class DistributedJobController {
     }
 
     /**
+     * Marks a leased/running row cancelled.
+     *
+     * @param jobId    queue row id
+     * @param workerId worker identity
+     * @return acknowledgement
+     */
+    @PostMapping("/{jobId}/cancelled")
+    public R<String> markCancelled(
+            @NotNull @PathVariable Long jobId,
+            @NotBlank @RequestParam String workerId) {
+        distributedJobService.markCancelled(jobId, workerId);
+        return R.ok("cancelled");
+    }
+
+    /**
      * Marks a leased/running row failed.
      *
      * @param jobId        queue row id

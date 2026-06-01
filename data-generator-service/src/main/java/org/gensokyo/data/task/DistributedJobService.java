@@ -136,6 +136,17 @@ public class DistributedJobService {
     }
 
     /**
+     * Marks a leased/running row cancelled.
+     *
+     * @param jobId    queue row id
+     * @param workerId worker identity
+     */
+    @Transactional
+    public void markCancelled(Long jobId, String workerId) {
+        markTerminal(jobId, workerId, DistributedJobStatus.CANCELLED, null);
+    }
+
+    /**
      * Marks a leased/running row failed with optional error detail.
      *
      * @param jobId        queue row id

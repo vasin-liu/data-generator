@@ -16,6 +16,7 @@ import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistryProvider;
 import org.gensokyo.data.calcite.runtime.WorkflowRunContext;
 import org.gensokyo.data.calcite.runtime.WorkflowRunControl;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.repository.DataSourceConfigRepository;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
@@ -35,6 +36,7 @@ import org.gensokyo.data.task.RunLineageSupport;
 import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
+import org.gensokyo.data.task.DistributedJobService;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.collect.CollectKit;
@@ -73,6 +75,8 @@ public class TaskController {
     private final DataSourceConfigRepository dataSourceConfigRepository;
     private final AuditService auditService;
     private final ObjectProvider<WorkflowRunControl> workflowRunControlProvider;
+    private final DistributedExecutionProperties distributedExecutionProperties;
+    private final DistributedJobService distributedJobService;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -258,7 +262,15 @@ public class TaskController {
                 "TASK",
                 String.valueOf(instanceId),
                 java.util.Map.of("templateId", entity.getId(), "name", template.getName()));
-        executor.submit(() -> runV2Tracked(template, instanceId));
+        if (distributedExecutionProperties.isEnabled()) {
+            distributedJobService.enqueue(
+                    null,
+                    entity.getId(),
+                    instanceId,
+                    null);
+        } else {
+            executor.submit(() -> runV2Tracked(template, instanceId));
+        }
         return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
     }
 
