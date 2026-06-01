@@ -13,6 +13,7 @@ import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.calcite.runtime.WorkflowRunContext;
 import org.gensokyo.data.calcite.runtime.WorkflowRunControl;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.RunReportVO;
@@ -26,6 +27,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Executes one leased distributed queue row (shared by embedded coordinator and standalone workers).
@@ -39,6 +44,7 @@ import java.util.Map;
 public class DistributedJobLeaseRunner {
 
     private final DistributedJobService distributedJobService;
+    private final DistributedExecutionProperties distributedExecutionProperties;
     private final TaskExecutionService taskExecutionService;
     private final TemplateRepository templateRepository;
     private final YamlParser yamlParser;
@@ -73,7 +79,12 @@ public class DistributedJobLeaseRunner {
         } catch (Exception e) {
             log.warn("Distributed worker failed to run job {} instance {}", jobId, instanceId, e);
             taskExecutionService.markFailed(instanceId, e.getMessage());
-            distributedJobService.markFailed(jobId, workerId, e.getMessage());
+            distributedJobService.markFailedWithRetryPolicy(
+                    jobId,
+                    workerId,
+                    e.getMessage(),
+                    distributedExecutionProperties.getMaxAttempts(),
+                    distributedExecutionProperties.isRequeueOnFailure());
             auditService.record(
                     "TASK_RUN_FAILED",
                     "TASK",
@@ -88,6 +99,18 @@ public class DistributedJobLeaseRunner {
         WorkflowRunControl control = workflowRunControlProvider.getIfAvailable(() -> WorkflowRunControl.NO_OP);
         WorkflowRunContext.bind(instanceId, control);
         long startedAtMs = System.currentTimeMillis();
+        ScheduledExecutorService heartbeatExecutor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledFuture<?> heartbeatTask = heartbeatExecutor.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        distributedJobService.heartbeat(jobId, workerId, leaseSeconds);
+                    } catch (Exception ignored) {
+                        // Lease lost — run will fail on next ownership check
+                    }
+                },
+                distributedExecutionProperties.resolvedHeartbeatIntervalMs(),
+                distributedExecutionProperties.resolvedHeartbeatIntervalMs(),
+                TimeUnit.MILLISECONDS);
         try {
             TemplateV2RunResult result = templateV2Runner.run(template);
             distributedJobService.heartbeat(jobId, workerId, leaseSeconds);
@@ -118,6 +141,8 @@ public class DistributedJobLeaseRunner {
                     String.valueOf(instanceId),
                     Map.of("rowCount", rowCount, "distributedJobId", jobId));
         } finally {
+            heartbeatTask.cancel(true);
+            heartbeatExecutor.shutdownNow();
             WorkflowRunContext.clear();
         }
     }

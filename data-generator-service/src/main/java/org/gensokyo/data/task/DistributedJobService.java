@@ -158,6 +158,41 @@ public class DistributedJobService {
         markTerminal(jobId, workerId, DistributedJobStatus.FAILED, errorMessage);
     }
 
+    /**
+     * Marks failure and requeues when policy allows remaining attempts.
+     *
+     * @param jobId            queue row id
+     * @param workerId         worker identity
+     * @param errorMessage     failure detail
+     * @param maxAttempts      maximum lease attempts before terminal failure
+     * @param requeueOnFailure when {@code true}, requeue if attempts are below the limit
+     */
+    @Transactional
+    public void markFailedWithRetryPolicy(
+            Long jobId, String workerId, String errorMessage, int maxAttempts, boolean requeueOnFailure) {
+        validateWorker(workerId);
+        DistributedJobPO row = requireOwned(jobId, workerId);
+        if (!DistributedJobStatus.LEASED.name().equals(row.getStatus())
+                && !DistributedJobStatus.RUNNING.name().equals(row.getStatus())) {
+            throw new IllegalArgumentException("Distributed job is not active: " + jobId);
+        }
+        int attempts = row.getAttempts() == null ? 0 : row.getAttempts();
+        if (requeueOnFailure && attempts < maxAttempts) {
+            Instant now = Instant.now();
+            row.setStatus(DistributedJobStatus.QUEUED.name());
+            row.setWorkerId(null);
+            row.setErrorMessage(trimError(errorMessage));
+            row.setLeaseUntil(null);
+            row.setFinishedAt(null);
+            row.setLeasedAt(null);
+            row.setLastHeartbeatAt(null);
+            row.setUpdatedAt(now);
+            repository.saveAndFlush(row);
+            return;
+        }
+        markTerminal(jobId, workerId, DistributedJobStatus.FAILED, errorMessage);
+    }
+
     private void markTerminal(Long jobId, String workerId, DistributedJobStatus status, String errorMessage) {
         validateWorker(workerId);
         DistributedJobPO row = requireOwned(jobId, workerId);

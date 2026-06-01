@@ -51,5 +51,32 @@ public class DistributedExecutionProperties {
      * Worker identity used by the embedded coordinator/worker process.
      */
     private String workerId = "coordinator-local";
+
+    /**
+     * Heartbeat period during {@code RUNNING} (ms). When {@code <= 0}, derived from {@link #leaseSeconds}.
+     */
+    private long heartbeatIntervalMs = 0;
+
+    /**
+     * Max lease attempts before terminal {@code FAILED}.
+     */
+    private int maxAttempts = 3;
+
+    /**
+     * When {@code true}, failure may return the job to {@code QUEUED} if attempts remain.
+     */
+    private boolean requeueOnFailure = true;
+
+    /**
+     * Resolves the heartbeat interval used during template execution.
+     *
+     * @return heartbeat period in milliseconds
+     */
+    public long resolvedHeartbeatIntervalMs() {
+        if (heartbeatIntervalMs > 0) {
+            return heartbeatIntervalMs;
+        }
+        return Math.max(5_000L, (leaseSeconds * 1000L) / 3);
+    }
 }
 

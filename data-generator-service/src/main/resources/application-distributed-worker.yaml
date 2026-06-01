@@ -6,3 +6,7 @@ data:
       worker-enabled: true
       coordinator-poll-enabled: false
       worker-id: ${HOSTNAME:worker-local}
+      lease-seconds: 30
+      # heartbeat-interval-ms: 10000  # default: leaseSeconds * 1000 / 3
+      max-attempts: 3
+      requeue-on-failure: true
