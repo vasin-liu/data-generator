@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @ConditionalOnProperty(
-        prefix = "pci.data.generator.distributed",
+        prefix = "data.generator.distributed",
         name = "coordinator-poll-enabled",
         havingValue = "true",
         matchIfMissing = true)
@@ -33,7 +33,7 @@ public class DistributedJobCoordinator {
     /**
      * Polls queue rows and executes at most one leased job per iteration.
      */
-    @Scheduled(fixedDelayString = "${pci.data.generator.distributed.poll-delay-ms:2000}")
+    @Scheduled(fixedDelayString = "${data.generator.distributed.poll-delay-ms:2000}")
     public void pollAndRun() {
         if (!distributedExecutionProperties.isEnabled()) {
             return;

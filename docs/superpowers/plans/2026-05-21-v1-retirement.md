@@ -4,7 +4,7 @@
 
 **Goal:** Retire V1 template execution on a wave-freeze schedule by closing P1–P4 gates: SpEL non-SQL transformer, control-plane validate/explain/preview, staging dual-run evidence, and a config flag to disable V1 runtime.
 
-**Architecture:** Three engineering workstreams (WS1 SpEL transform, WS2 control plane REST, WS3 migration evidence) converge at R0/R3 staging; V1 shutdown uses `pci.data.generator.v1-execution.enabled` before any code deletion. Spec: `docs/superpowers/specs/2026-05-21-v1-retirement-alignment-design.md`.
+**Architecture:** Three engineering workstreams (WS1 SpEL transform, WS2 control plane REST, WS3 migration evidence) converge at R0/R3 staging; V1 shutdown uses `data.generator.v1-execution.enabled` before any code deletion. Spec: `docs/superpowers/specs/2026-05-21-v1-retirement-alignment-design.md`.
 
 **Tech Stack:** Java 25, Maven, Spring Boot 4, Calcite V2 runner, Spring SpEL (`SpelExpressionParser`), existing migration workbench REST, H2 phase7-test profile.
 
@@ -292,7 +292,7 @@ void addsComputedColumnFromSpel() {
 private boolean v1ExecutionEnabled = true;
 ```
 
-- [ ] **Step 1: Failing test** — set `pci.data.generator.v1-execution.enabled=false`, `runById` on V1-only template → `R.fail` message contains `V1 execution is disabled`.
+- [ ] **Step 1: Failing test** — set `data.generator.v1-execution.enabled=false`, `runById` on V1-only template → `R.fail` message contains `V1 execution is disabled`.
 
 - [ ] **Step 2:** In `TaskController.run(TemplatePO)` after detect kind V1, if `!properties.isV1ExecutionEnabled()` return fail (do not submit executor).
 
@@ -310,7 +310,7 @@ private boolean v1ExecutionEnabled = true;
 
 - [ ] **Step 1:** Verify P4 metrics from spec (≥90% promoted, family sign-off complete).
 
-- [ ] **Step 2:** Set staging/prod `pci.data.generator.v1-execution.enabled=false`.
+- [ ] **Step 2:** Set staging/prod `data.generator.v1-execution.enabled=false`.
 
 - [ ] **Step 3:** Announce compatibility-only templates still on V1 via dedicated runbook entry.
 

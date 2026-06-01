@@ -6,7 +6,7 @@ This branch delivers coordinated capabilities for Template V2 on `feature-4.0`:
 
 1. **JDBC chunked execution** — row-local `CHUNKED` pipeline for large JDBC read → DB/Kafka/ES export, with execution-shape classification, broadcast-join support, scale limits, and service-side validation at template save.
 2. **V1 migration workbench** — analyze / draft / compare / promote APIs, scenario inventory (DB + regression fixtures), dual-run classification, sign-off, and markdown reports under `docs/migration/reports/`.
-3. **V1 retirement capabilities** — control plane validate/explain/preview, `SpelTransformVO` row-level SpEL, **SCRIPT → SpEL migration draft** (`V1ScriptToSpelDraftConverter`, JDBC **compare** uses same SQL+SpEL chain), `pci.data.generator.v1-execution.enabled` gate, CI regression over built-in templates.
+3. **V1 retirement capabilities** — control plane validate/explain/preview, `SpelTransformVO` row-level SpEL, **SCRIPT → SpEL migration draft** (`V1ScriptToSpelDraftConverter`, JDBC **compare** uses same SQL+SpEL chain), `data.generator.v1-execution.enabled` gate, CI regression over built-in templates.
 4. **Geospatial (Phases 1, 2B, 2C, 2D)** — synthetic `GEO` iterator, `GEOJSON`/`POSTGIS` V2 sources, Calcite SQL over geo rows, and `V2_GEO_*` in-memory functions. See `docs/geospatial-overview.md`.
 
 ## V1 retirement (merge vs M2)
@@ -62,7 +62,7 @@ This MR **delivers retirement capabilities**; it does **not** complete productio
 | GET | `/template/v2/explain/{id}` |
 | POST | `/template/v2/preview/{id}` |
 
-| Config | `pci.data.generator.v1-execution.enabled` (default `true`; gates V1 task run when `false`) |
+| Config | `data.generator.v1-execution.enabled` (default `true`; gates V1 task run when `false`) |
 
 See `docs/migration/workbench-usage.md`.
 
@@ -114,7 +114,7 @@ Deferred geo: streaming GeoJSON, Shapefile/GeoPackage, Calcite-native `ST_*`, su
 - [ ] **Scope:** M1 retirement evidence is CI-only; do not require staging promote or P4 flag flip to merge.
 - [ ] **Tests:** `.\mvnw-jdk25.ps1 test` green (or reviewer re-ran 2026-05-22 full reactor SUCCESS).
 - [ ] **Migration:** Promote rejects `COMPATIBILITY_ONLY` / `BLOCKED` and unsigned `db-{id}` inventory rows.
-- [ ] **Config:** Default `pci.data.generator.v1-execution.enabled=true` — no accidental V1 disable in shipped yaml.
+- [ ] **Config:** Default `data.generator.v1-execution.enabled=true` — no accidental V1 disable in shipped yaml.
 - [ ] **Docs:** `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md` read for M2 follow-up.
 - [ ] **Geo / CHUNKED:** Spot-check only if your domain uses geo or large JDBC export (see geospatial + chunked guides).
 

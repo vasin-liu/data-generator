@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Integration tests for {@code pci.data.generator.v1-execution.enabled}.
+ * Integration tests for {@code data.generator.v1-execution.enabled}.
  *
  * @author Gensokyo
  * @since 2026-05-21
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
         classes = DataGeneratorApplication.class,
         properties = {
                 "spring.config.location=classpath:/application-phase7-test.yaml",
-                "pci.data.generator.v1-execution.enabled=false"
+                "data.generator.v1-execution.enabled=false"
         }
 )
 @Import(TaskControllerV1ExecutionFlagTests.CapturingRunnerConfig.class)

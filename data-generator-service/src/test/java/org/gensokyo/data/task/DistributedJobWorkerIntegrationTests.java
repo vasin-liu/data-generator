@@ -44,10 +44,10 @@ import java.util.concurrent.atomic.AtomicReference;
         classes = DataGeneratorApplication.class,
         properties = {
                 "spring.config.location=classpath:/application-phase7-test.yaml",
-                "pci.data.generator.distributed.enabled=true",
-                "pci.data.generator.distributed.worker-enabled=true",
-                "pci.data.generator.distributed.coordinator-poll-enabled=false",
-                "pci.data.generator.distributed.worker-id=worker-it"
+                "data.generator.distributed.enabled=true",
+                "data.generator.distributed.worker-enabled=true",
+                "data.generator.distributed.coordinator-poll-enabled=false",
+                "data.generator.distributed.worker-id=worker-it"
         }
 )
 @Import(DistributedJobWorkerIntegrationTests.CapturingRunnerTestConfig.class)

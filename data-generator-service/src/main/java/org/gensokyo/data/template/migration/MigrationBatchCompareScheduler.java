@@ -44,7 +44,7 @@ public class MigrationBatchCompareScheduler {
     /**
      * Runs catalog dual-run compare on the configured cron.
      */
-    @Scheduled(cron = "${pci.data.generator.migration.batch-compare.cron:0 0 2 * * *}")
+    @Scheduled(cron = "${data.generator.migration.batch-compare.cron:0 0 2 * * *}")
     public void runScheduledBatchCompare() {
         MigrationBatchCompareOptions options = new MigrationBatchCompareOptions();
         options.setRefreshInventoryFirst(properties.isRefreshInventoryFirst());

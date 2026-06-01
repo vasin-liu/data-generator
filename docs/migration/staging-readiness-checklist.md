@@ -32,6 +32,6 @@ Complete before first staging migration sweep. Does **not** block `feature-4.0` 
 2. `scripts/migration-staging.ps1 -Action batch-compare`
 3. Per-template promote only when classification ∈ {EXACT, ADAPTED, APPROXIMATE}
 4. `GET /template/migration/signoff-status` → both families complete
-5. Staging trial: `pci.data.generator.v1-execution.enabled: false`
+5. Staging trial: `data.generator.v1-execution.enabled: false`
 
 See `docs/migration/staging-runbook.md` and `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`.

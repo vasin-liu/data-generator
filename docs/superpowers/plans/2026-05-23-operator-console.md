@@ -55,7 +55,7 @@
 - Create: stubs: `ui/template/TemplateListView.java`, `ui/datasource/DataSourceListView.java`, `ui/job/JobListView.java`, `ui/migration/MigrationDashboardView.java`
 
 - [ ] **Step 1:** `MainLayout` with side nav: Templates, Datasources, Jobs, Migration.
-- [ ] **Step 2:** Banner showing `pci.data.generator.v1-execution.enabled` from `DataGeneratorProperties`.
+- [ ] **Step 2:** Banner showing `data.generator.v1-execution.enabled` from `DataGeneratorProperties`.
 - [ ] **Step 3:** Each route shows placeholder title; manual smoke: start app, open `/` in browser.
 - [ ] **Step 4:** Commit: `feat(ui): add vaadin operator console shell`
 

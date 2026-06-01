@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "pci.data.generator.distributed", name = "worker-enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "data.generator.distributed", name = "worker-enabled", havingValue = "true")
 public class DistributedJobWorker {
 
     private final DistributedExecutionProperties distributedExecutionProperties;
@@ -29,7 +29,7 @@ public class DistributedJobWorker {
     /**
      * Polls queue rows and executes at most one leased job per iteration.
      */
-    @Scheduled(fixedDelayString = "${pci.data.generator.distributed.poll-delay-ms:2000}")
+    @Scheduled(fixedDelayString = "${data.generator.distributed.poll-delay-ms:2000}")
     public void pollAndRun() {
         if (!distributedExecutionProperties.isEnabled()) {
             return;

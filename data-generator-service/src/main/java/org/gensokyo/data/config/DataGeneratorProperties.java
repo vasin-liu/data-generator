@@ -28,7 +28,7 @@ public class DataGeneratorProperties {
     /**
      * 组件配置的前缀
      */
-    public static final String PREFIX = "pci.data.generator";
+    public static final String PREFIX = "data.generator";
 
     /**
      * 忽略文件前缀集合
@@ -64,7 +64,7 @@ public class DataGeneratorProperties {
     private Integer previewMaxRows = 100;
 
     /**
-     * V1 runtime toggle (maps to {@code pci.data.generator.v1-execution.enabled}).
+     * V1 runtime toggle (maps to {@code data.generator.v1-execution.enabled}).
      */
     private V1Execution v1Execution = new V1Execution();
 
@@ -83,7 +83,7 @@ public class DataGeneratorProperties {
     }
 
     /**
-     * Nested binding for {@code pci.data.generator.v1-execution.*}.
+     * Nested binding for {@code data.generator.v1-execution.*}.
      */
     @Getter
     @Setter
@@ -95,7 +95,7 @@ public class DataGeneratorProperties {
     }
 
     /**
-     * Nested binding for {@code pci.data.generator.governance.*}.
+     * Nested binding for {@code data.generator.governance.*}.
      */
     @Getter
     @Setter

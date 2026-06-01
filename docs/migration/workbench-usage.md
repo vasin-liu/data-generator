@@ -82,7 +82,7 @@ curl -s -X POST "http://localhost:8080/template/migration/compare/batch" \
 
 Returns `comparedCount`, `skippedCount`, `failedCount`, and per-template `items[]`. See `docs/migration/blocked-dual-run-runbook.md` when `failedCount > 0`.
 
-Optional nightly job: set `pci.data.generator.migration.batch-compare.scheduled-enabled: true` (off by default).
+Optional nightly job: set `data.generator.migration.batch-compare.scheduled-enabled: true` (off by default).
 
 ### 4. Promote
 

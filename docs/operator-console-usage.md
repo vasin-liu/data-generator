@@ -28,7 +28,7 @@ Default HTTP port: **9876** (`data-generator-service/src/main/resources/applicat
 | Legacy REST | http://localhost:9876/template/…, `/task/…`, `/datasource/… |
 | H2 console (dev) | http://localhost:9876/h2 |
 
-The layout shows **V1 execution: enabled/disabled** from `pci.data.generator.v1-execution.enabled` (default `true`), via `GET /api/console/runtime`.
+The layout shows **V1 execution: enabled/disabled** from `data.generator.v1-execution.enabled` (default `true`), via `GET /api/console/runtime`.
 
 **H2 file DB (`jdbc:h2:file:../db/data-generator`):** On first start after upgrading, `db/schema.sql` runs `ALTER TABLE … ADD COLUMN IF NOT EXISTS` for `template.archived` / `archived_at`. If you still see “Column ARCHIVED not found”, stop the app and delete `db/data-generator.mv.db` (and `.trace.db` if present) to recreate from schema, or run the two `ALTER TABLE` lines in the H2 console.
 

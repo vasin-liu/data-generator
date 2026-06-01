@@ -81,8 +81,8 @@ Output jar:
 Copy the built jar into one configured plugin directory:
 
 ```properties
-pci.data.generator.v2-plugin-framework=PF4J
-pci.data.generator.v2-plugin-directories[0]=plugins
+data.generator.v2-plugin-framework=PF4J
+data.generator.v2-plugin-directories[0]=plugins
 ```
 
 Then place the jar under:

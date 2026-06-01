@@ -38,7 +38,7 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 
 - [x] Compare reports linked from inventory (`lastCompareReportPath`)
 - [x] Runbook for failed dual-run (`BLOCKED`) remediation — `docs/migration/blocked-dual-run-runbook.md`
-- [x] Batch / scheduled dual-run on DB catalog — `POST /template/migration/compare/batch`, optional `pci.data.generator.migration.batch-compare.scheduled-enabled`
+- [x] Batch / scheduled dual-run on DB catalog — `POST /template/migration/compare/batch`, optional `data.generator.migration.batch-compare.scheduled-enabled`
 - [x] Operator summary API — `GET /template/migration/summary` + `scripts/migration-staging.ps1` + `docs/migration/staging-runbook.md`
 - [x] Template V2 control-plane validate / explain / preview (`POST|GET /template/v2/*`)
 - [x] First non-SQL transformer: `SpelTransformVO` + `SpelTransformFactory` (row-level SpEL)
@@ -75,14 +75,14 @@ Promote requires business sign-off when a `db-{id}` inventory row exists (enforc
 
 ## P4 — Runtime cutover
 
-- [x] Config flag `pci.data.generator.v1-execution.enabled` gates `TaskController` V1 runs (default `true`)
+- [x] Config flag `data.generator.v1-execution.enabled` gates `TaskController` V1 runs (default `true`)
 - [ ] Staging/prod set `v1-execution.enabled=false` after P3 sign-off and wave-freeze dates (`docs/migration/wave-freeze-schedule.md`)
 
 ### P4 cutover checklist (operators)
 
 1. Confirm P3: `GET /template/migration/signoff-status` shows `familySignoffComplete=true` for `synthetic` and `multi_source`.
 2. Confirm wave-freeze calendar in `docs/migration/wave-freeze-schedule.md` (W1/W2 dates signed by product owner).
-3. Set `pci.data.generator.v1-execution.enabled: false` in target environment `application.yaml`.
+3. Set `data.generator.v1-execution.enabled: false` in target environment `application.yaml`.
 4. Smoke: V2 `POST /template/v2/preview/{id}` on promoted templates; V1 `POST /task/run` returns disabled message.
 5. Keep compatibility-only templates on V1 via explicit exemption list (`docs/migration/compatibility-only-templates.md`).
 

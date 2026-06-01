@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
         classes = DataGeneratorApplication.class,
         properties = {
                 "spring.config.location=classpath:/application-phase7-test.yaml",
-                "pci.data.generator.governance.require-published-for-task-run=true"
+                "data.generator.governance.require-published-for-task-run=true"
         })
 class TemplateLifecycleServiceTests {
 

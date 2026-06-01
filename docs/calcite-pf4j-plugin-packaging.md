@@ -198,10 +198,10 @@ A plugin will be rejected if:
 
 ## Operational Notes
 
-- plugin root comes from `pci.data.generator.v2-plugin-directories`
+- plugin root comes from `data.generator.v2-plugin-directories`
 - current recommended framework is `PF4J`
 - framework selection can be controlled by:
-  - `pci.data.generator.v2-plugin-framework=PF4J`
+  - `data.generator.v2-plugin-framework=PF4J`
 
 ## Current Status
 

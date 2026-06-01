@@ -146,7 +146,7 @@ flowchart TB
 - After W2 sign-off: same for JDBC / multi-source families.
 - After W3 documentation: **global V1 freeze** — only compatibility-only templates may execute on V1; all others must be V2 or decommissioned.
 
-**Hard retirement (P4):** Disable V1 branch in `TaskController` / service config flag `pci.data.generator.v1-execution.enabled=false` when:
+**Hard retirement (P4):** Disable V1 branch in `TaskController` / service config flag `data.generator.v1-execution.enabled=false` when:
 
 - inventory summary shows ≥90% of **database-backed** templates are `v2DraftPresent` or `COMPATIBILITY_ONLY`;
 - all scenario families in W1–W2 have `familySignoffComplete` via sign-off status API;
@@ -213,7 +213,7 @@ Update `docs/template-v2-product-roadmap.md` scenario matrix:
 
 | Topic | Decision |
 |-------|----------|
-| V1 disable | **Configuration flag first** — `pci.data.generator.v1-execution.enabled` (default `true` until P4); `TaskController` rejects V1 runs when `false`; dual-run compare may still invoke V1 via `PipelineTemplateRunExecutor` until explicitly gated |
+| V1 disable | **Configuration flag first** — `data.generator.v1-execution.enabled` (default `true` until P4); `TaskController` rejects V1 runs when `false`; dual-run compare may still invoke V1 via `PipelineTemplateRunExecutor` until explicitly gated |
 | non-SQL semantics | **Row-level SpEL** via `SpelTransformVO`; reuse Spring `SpelExpressionParser`; row root variable `#row` (map of column → value) |
 | Wave calendar | **W1/W2 freeze dates set after R0 staging** completes; R0 produces a dated freeze proposal in `docs/migration/wave-freeze-schedule.md` |
 

@@ -51,7 +51,7 @@ Per template: `staging-runbook.md` → sign-off → promote.
 
 After W1/W2 family sign-off on **production** cohort:
 
-1. `pci.data.generator.v1-execution.enabled: false` on staging
+1. `data.generator.v1-execution.enabled: false` on staging
 2. Smoke V2 preview; confirm V1 run rejected
 3. Document date in `wave-freeze-schedule.md`
 

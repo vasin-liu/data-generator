@@ -52,14 +52,13 @@ Only with explicit review:
 Enable in `application.yaml` only on environments that can run dual-load safely:
 
 ```yaml
-pci:
-  data:
-    generator:
-      migration:
-        batch-compare:
-          scheduled-enabled: true
-          cron: "0 0 2 * * *"
-          max-templates: 100
+data:
+  generator:
+    migration:
+      batch-compare:
+        scheduled-enabled: true
+        cron: "0 0 2 * * *"
+        max-templates: 100
 ```
 
 Default is `scheduled-enabled: false`.

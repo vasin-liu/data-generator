@@ -31,7 +31,7 @@ _T+14 / T+28 are placeholders until product owner sets calendar from R0 results.
 
 - **W1:** No new V1 templates in `synthetic` family; existing V1 synthetic runs allowed until promoted or exempted.
 - **W2:** No new V1 templates for JDBC / multi-source families.
-- **Global (P4):** Set `pci.data.generator.v1-execution.enabled=false` when retirement-readiness P3/P4 metrics met.
+- **Global (P4):** Set `data.generator.v1-execution.enabled=false` when retirement-readiness P3/P4 metrics met.
 
 ## Owners
 
@@ -42,7 +42,7 @@ _T+14 / T+28 are placeholders until product owner sets calendar from R0 results.
 
 ## Rollback
 
-- Re-enable V1: `pci.data.generator.v1-execution.enabled=true`
+- Re-enable V1: `data.generator.v1-execution.enabled=true`
 - Revert promoted templates via DB restore or retained V1 yaml on `TemplatePO` (promote keeps V1 content per existing semantics)
 
 ## References

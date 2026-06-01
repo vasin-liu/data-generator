@@ -215,7 +215,7 @@ public class TaskController {
 
         if (!properties.isV1ExecutionEnabled()) {
             throw new IllegalArgumentException(
-                    "V1 template execution is disabled. Migrate to Template V2 or set pci.data.generator.v1-execution.enabled=true.");
+                    "V1 template execution is disabled. Migrate to Template V2 or set data.generator.v1-execution.enabled=true.");
         }
 
         TemplateVO template = v1Template != null ? v1Template : TemplateJsonCodec.read(entity.getContentJson());

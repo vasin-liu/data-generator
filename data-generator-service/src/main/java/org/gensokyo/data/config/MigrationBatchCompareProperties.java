@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class MigrationBatchCompareProperties {
 
     /** Property prefix for batch compare scheduling. */
-    public static final String PREFIX = "pci.data.generator.migration.batch-compare";
+    public static final String PREFIX = "data.generator.migration.batch-compare";
 
     /** When {@code true}, runs {@link org.gensokyo.data.template.migration.MigrationBatchCompareService} on a cron. */
     private boolean scheduledEnabled = false;

@@ -25,7 +25,7 @@ Without an explicit **deferred-ops** model, teams either block the merge on fict
 ## Non-goals
 
 - Real staging `batch compare` / `db-{id}` promote in the merge window
-- Production or staging `pci.data.generator.v1-execution.enabled=false`
+- Production or staging `data.generator.v1-execution.enabled=false`
 - Vaadin operator UI, new Geo phases, remote staging IT in default CI
 - Expanding the 61-template CI suite unless a regression gap is found
 
