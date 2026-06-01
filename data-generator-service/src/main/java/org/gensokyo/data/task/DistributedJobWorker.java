@@ -12,19 +12,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Embedded coordinator poller that leases and executes queue rows on the local service process.
+ * Standalone worker poller for distributed queue execution (Phase C2 multi-node).
  *
  * @author Gensokyo
  * @since 2026-06-01
  */
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(
-        prefix = "pci.data.generator.distributed",
-        name = "coordinator-poll-enabled",
-        havingValue = "true",
-        matchIfMissing = true)
-public class DistributedJobCoordinator {
+@ConditionalOnProperty(prefix = "pci.data.generator.distributed", name = "worker-enabled", havingValue = "true")
+public class DistributedJobWorker {
 
     private final DistributedExecutionProperties distributedExecutionProperties;
     private final DistributedJobService distributedJobService;

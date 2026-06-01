@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Input, Space, Table, Typography } from 'antd';
+import { Button, Descriptions, Input, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+import { fetchDistributedMetrics } from '../../api/distributed';
 import { fetchJobs } from '../../api/jobs';
 import type { TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
@@ -32,6 +33,12 @@ export function JobsPage() {
       const active = rows?.some((r) => ACTIVE.has(r.status)) ?? false;
       return active ? 2000 : false;
     },
+  });
+
+  const distributedQuery = useQuery({
+    queryKey: ['distributed-metrics'],
+    queryFn: fetchDistributedMetrics,
+    refetchInterval: 5000,
   });
 
   const pollHint =
@@ -91,6 +98,35 @@ export function JobsPage() {
         <Button onClick={() => jobsQuery.refetch()}>{t('common.refresh')}</Button>
         <Typography.Text type="secondary">{pollHint}</Typography.Text>
       </Space>
+      {distributedQuery.data?.distributedEnabled && (
+        <>
+          <Typography.Title level={5}>{t('jobs.distributed.title')}</Typography.Title>
+          <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+            <Descriptions.Item label={t('jobs.distributed.workerEnabled')}>
+              {distributedQuery.data.workerEnabled ? t('common.yes') : t('common.no')}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.distributed.coordinatorPoll')}>
+              {distributedQuery.data.coordinatorPollEnabled ? t('common.yes') : t('common.no')}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.distributed.queued')} span={2}>
+              {distributedQuery.data.jobsByStatus.QUEUED ?? 0}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.distributed.leased')}>
+              {distributedQuery.data.jobsByStatus.LEASED ?? 0}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.distributed.running')}>
+              {distributedQuery.data.jobsByStatus.RUNNING ?? 0}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.distributed.activeWorkers')} span={2}>
+              {distributedQuery.data.activeWorkers.length === 0
+                ? '—'
+                : distributedQuery.data.activeWorkers
+                    .map((w) => `${w.workerId} (${w.activeJobs})`)
+                    .join(', ')}
+            </Descriptions.Item>
+          </Descriptions>
+        </>
+      )}
       <Table<TaskExecutionSummary>
         rowKey="instanceId"
         loading={jobsQuery.isLoading}

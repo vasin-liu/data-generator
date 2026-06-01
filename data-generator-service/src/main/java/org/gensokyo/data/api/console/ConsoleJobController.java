@@ -7,7 +7,9 @@ package org.gensokyo.data.api.console;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.api.console.dto.JobExecutionDetail;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.task.JobExecutionDetailService;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionSummary;
 import org.gensokyo.data.task.WorkflowPauseCoordinator;
@@ -32,6 +34,7 @@ import java.util.List;
 public class ConsoleJobController {
 
     private final TaskExecutionService taskExecutionService;
+    private final JobExecutionDetailService jobExecutionDetailService;
     private final WorkflowPauseCoordinator workflowPauseCoordinator;
 
     /**
@@ -56,11 +59,11 @@ public class ConsoleJobController {
      * Fetches a single execution row by its run instance id.
      *
      * @param instanceId run instance id
-     * @return single execution row
+     * @return execution detail with optional distributed and partition metrics
      */
     @GetMapping("/{instanceId}")
-    public R<TaskExecutionSummary> get(@NotNull @PathVariable Long instanceId) {
-        return R.ok(taskExecutionService.getByInstanceId(instanceId));
+    public R<JobExecutionDetail> get(@NotNull @PathVariable Long instanceId) {
+        return R.ok(jobExecutionDetailService.getDetail(instanceId));
     }
 
     /**

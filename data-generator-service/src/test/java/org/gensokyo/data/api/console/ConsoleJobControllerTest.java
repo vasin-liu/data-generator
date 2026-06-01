@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.api.console;
 
+import org.gensokyo.data.api.console.dto.JobExecutionDetail;
+import org.gensokyo.data.task.JobExecutionDetailService;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionSummary;
 import org.gensokyo.data.task.WorkflowPauseCoordinator;
@@ -37,6 +39,9 @@ class ConsoleJobControllerTest {
     private TaskExecutionService taskExecutionService;
 
     @Mock
+    private JobExecutionDetailService jobExecutionDetailService;
+
+    @Mock
     private WorkflowPauseCoordinator workflowPauseCoordinator;
 
     private MockMvc mockMvc;
@@ -44,7 +49,8 @@ class ConsoleJobControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
-                        new ConsoleJobController(taskExecutionService, workflowPauseCoordinator))
+                        new ConsoleJobController(
+                                taskExecutionService, jobExecutionDetailService, workflowPauseCoordinator))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }

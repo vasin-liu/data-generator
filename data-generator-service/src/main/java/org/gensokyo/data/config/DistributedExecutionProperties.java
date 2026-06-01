@@ -28,6 +28,16 @@ public class DistributedExecutionProperties {
     private boolean enabled = false;
 
     /**
+     * When {@code true}, {@link org.gensokyo.data.task.DistributedJobWorker} polls and executes queue rows.
+     */
+    private boolean workerEnabled = false;
+
+    /**
+     * When {@code false}, the embedded coordinator does not poll (remote workers only).
+     */
+    private boolean coordinatorPollEnabled = true;
+
+    /**
      * Fixed-delay polling interval in milliseconds for queue leasing.
      */
     private long pollDelayMs = 2_000L;

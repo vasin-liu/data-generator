@@ -31,7 +31,7 @@ export function JobDetailPage() {
     queryFn: () => fetchJob(instanceId),
     enabled: instanceId.length > 0,
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
+      const status = query.state.data?.execution.status;
       return status && ACTIVE.has(status) ? 2000 : false;
     },
   });
@@ -76,7 +76,9 @@ export function JobDetailPage() {
     [t],
   );
 
-  const row = jobQuery.data;
+  const row = jobQuery.data?.execution;
+  const distributedJob = jobQuery.data?.distributedJob ?? null;
+  const partitionMetrics = jobQuery.data?.partitionMetrics ?? null;
   const report = row?.report ?? null;
   const body =
     row?.metricsJson && row.metricsJson.length > 0
@@ -93,7 +95,7 @@ export function JobDetailPage() {
           </Button>
         )}
         <Button onClick={() => jobQuery.refetch()}>{t('common.refresh')}</Button>
-        {jobQuery.data && ACTIVE.has(jobQuery.data.status) && (
+        {row && ACTIVE.has(row.status) && (
           <Button
             danger
             loading={cancelMutation.isPending}
@@ -102,7 +104,7 @@ export function JobDetailPage() {
             {t('jobDetail.cancel')}
           </Button>
         )}
-        {jobQuery.data?.status === 'PAUSED' && (
+        {row?.status === 'PAUSED' && (
           <Button
             type="primary"
             loading={resumeMutation.isPending}
@@ -130,6 +132,41 @@ export function JobDetailPage() {
             <Descriptions.Item label={t('jobDetail.started')}>{row.startedAt ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.finished')}>{row.finishedAt ?? '—'}</Descriptions.Item>
           </Descriptions>
+          {distributedJob && (
+            <>
+              <Typography.Title level={5}>{t('jobDetail.distributed.title')}</Typography.Title>
+              <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+                <Descriptions.Item label={t('jobDetail.distributed.jobId')}>
+                  {distributedJob.jobId}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('jobDetail.distributed.status')}>
+                  {distributedJob.status}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('jobDetail.distributed.worker')}>
+                  {distributedJob.workerId ?? '—'}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('jobDetail.distributed.attempts')}>
+                  {distributedJob.attempts ?? '—'}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('jobDetail.distributed.leaseUntil')}>
+                  {distributedJob.leaseUntil ?? '—'}
+                </Descriptions.Item>
+              </Descriptions>
+            </>
+          )}
+          {partitionMetrics && (
+            <>
+              <Typography.Title level={5}>{t('jobDetail.partition.title')}</Typography.Title>
+              <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+                <Descriptions.Item label={t('jobDetail.partition.configured')}>
+                  {partitionMetrics.configuredPartitions}
+                </Descriptions.Item>
+                <Descriptions.Item label={t('jobDetail.partition.executed')}>
+                  {partitionMetrics.executedPartitions}
+                </Descriptions.Item>
+              </Descriptions>
+            </>
+          )}
           {report && <RunReportSection report={report} stageColumns={stageColumns} />}
           {body.length > 0 && (
             <>

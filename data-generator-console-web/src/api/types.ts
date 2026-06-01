@@ -60,6 +60,40 @@ export interface TaskExecutionSummary {
   report: RunReport | null;
 }
 
+/** Mirrors {@code DistributedJobView}. */
+export interface DistributedJobView {
+  jobId: string;
+  status: string;
+  workerId: string | null;
+  leaseUntil: string | null;
+  attempts: number | null;
+  queuedAt: string | null;
+  finishedAt: string | null;
+}
+
+/** Mirrors {@code PartitionRunMetrics}. */
+export interface PartitionRunMetrics {
+  configuredPartitions: number;
+  executedPartitions: number;
+}
+
+/** Mirrors {@code JobExecutionDetail}. */
+export interface JobExecutionDetail {
+  execution: TaskExecutionSummary;
+  distributedJob: DistributedJobView | null;
+  partitionMetrics: PartitionRunMetrics | null;
+}
+
+/** Mirrors {@code DistributedQueueMetricsDto}. */
+export interface DistributedQueueMetrics {
+  distributedEnabled: boolean;
+  workerEnabled: boolean;
+  coordinatorPollEnabled: boolean;
+  jobsByStatus: Record<string, number>;
+  activeWorkers: { workerId: string; activeJobs: number }[];
+  collectedAt: string;
+}
+
 export interface RunStartResult {
   templateId: string;
   instanceId: string;

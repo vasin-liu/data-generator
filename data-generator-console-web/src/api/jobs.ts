@@ -1,5 +1,5 @@
 import { apiRequest } from './client';
-import type { TaskExecutionSummary } from './types';
+import type { JobExecutionDetail, TaskExecutionSummary } from './types';
 
 export type { RunReport, StageMetric } from './types';
 
@@ -15,8 +15,8 @@ export function fetchJobs(templateId?: string): Promise<TaskExecutionSummary[]> 
  * @param instanceId snowflake instance id
  * @returns execution summary including structured {@code report} when available
  */
-export function fetchJob(instanceId: string): Promise<TaskExecutionSummary> {
-  return apiRequest<TaskExecutionSummary>(`/jobs/${instanceId}`);
+export function fetchJob(instanceId: string): Promise<JobExecutionDetail> {
+  return apiRequest<JobExecutionDetail>(`/jobs/${instanceId}`);
 }
 
 /** Best-effort cancel for QUEUED, RUNNING, or PAUSED runs. */

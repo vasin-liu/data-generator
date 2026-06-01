@@ -99,5 +99,39 @@ public interface DistributedJobRepository extends JpaRepository<DistributedJobPO
      * @return queue row when present
      */
     Optional<DistributedJobPO> findById(Long id);
+
+    /**
+     * @param instanceId run instance id
+     * @return latest queue row for the instance when present
+     */
+    Optional<DistributedJobPO> findFirstByInstanceIdOrderByQueuedAtDesc(Long instanceId);
+
+    /**
+     * @param status queue status
+     * @return row count
+     */
+    long countByStatus(String status);
+
+    /**
+     * Aggregates queue depth grouped by status.
+     *
+     * @return status/count pairs
+     */
+    @Query("select j.status, count(j) from DistributedJobPO j group by j.status")
+    List<Object[]> countGroupedByStatus();
+
+    /**
+     * Counts active leased/running rows per worker identity.
+     *
+     * @return workerId/count pairs
+     */
+    @Query("""
+            select j.workerId, count(j)
+            from DistributedJobPO j
+            where j.workerId is not null
+              and j.status in ('LEASED', 'RUNNING')
+            group by j.workerId
+            """)
+    List<Object[]> countActiveJobsByWorker();
 }
 
