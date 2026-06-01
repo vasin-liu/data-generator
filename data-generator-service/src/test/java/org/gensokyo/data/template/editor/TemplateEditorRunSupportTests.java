@@ -48,7 +48,7 @@ class TemplateEditorRunSupportTests {
         TemplateV2DraftVO draft = new TemplateV2DraftVO();
         when(templateEditorService.createAndSave(draft))
                 .thenReturn(new TemplateEditorPayload(42L, null, draft, null, false));
-        when(taskController.runById(42L))
+        when(taskController.runByIdAllowDraft(42L))
                 .thenReturn(R.ok("Template 't' started. templateId=42, instanceId=9001"));
 
         TemplateEditorRunSupport.RunStartResult result = runSupport.saveAndRun(null, draft);
@@ -56,13 +56,13 @@ class TemplateEditorRunSupportTests {
         Assertions.assertEquals(42L, result.templateId());
         Assertions.assertEquals(9001L, result.instanceId());
         verify(templateEditorService).createAndSave(draft);
-        verify(taskController).runById(42L);
+        verify(taskController).runByIdAllowDraft(42L);
     }
 
     @Test
     void saveAndRunUpdatesExistingTemplate() {
         TemplateV2DraftVO draft = new TemplateV2DraftVO();
-        when(taskController.runById(7L))
+        when(taskController.runByIdAllowDraft(7L))
                 .thenReturn(R.ok("Template 't' started. templateId=7, instanceId=7000"));
 
         TemplateEditorRunSupport.RunStartResult result = runSupport.saveAndRun(7L, draft);
@@ -74,7 +74,7 @@ class TemplateEditorRunSupportTests {
 
     @Test
     void runExistingUsesPersistedTemplate() {
-        when(taskController.runById(9L))
+        when(taskController.runByIdAllowDraft(9L))
                 .thenReturn(R.ok("Template 't' started. templateId=9, instanceId=9009"));
 
         TemplateEditorRunSupport.RunStartResult result = runSupport.runExisting(9L);

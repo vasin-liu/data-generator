@@ -59,7 +59,7 @@ public class TemplateEditorRunSupport {
             templateEditorService.save(templateId, draft);
             resolvedId = templateId;
         }
-        R<String> result = taskController.runById(resolvedId);
+        R<String> result = taskController.runByIdAllowDraft(resolvedId);
         if (!result.isSuccess()) {
             throw new IllegalArgumentException(result.getMessage());
         }
@@ -75,7 +75,7 @@ public class TemplateEditorRunSupport {
      * @throws IllegalArgumentException when run fails
      */
     public RunStartResult runExisting(long templateId) {
-        R<String> result = taskController.runById(templateId);
+        R<String> result = taskController.runByIdAllowDraft(templateId);
         if (!result.isSuccess()) {
             throw new IllegalArgumentException(result.getMessage());
         }

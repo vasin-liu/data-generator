@@ -61,6 +61,12 @@ export function TemplatesPage() {
       { title: t('templates.col.id'), dataIndex: 'id', sorter: (a, b) => a.id.localeCompare(b.id) },
       { title: t('templates.col.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
       {
+        title: t('templates.col.status'),
+        dataIndex: 'status',
+        render: (status: string | null) =>
+          status ? t(`template.status.${status}`, { defaultValue: status }) : '—',
+      },
+      {
         title: t('templates.col.archived'),
         dataIndex: 'archived',
         render: (v: boolean | null) => (v ? t('common.yes') : t('common.no')),

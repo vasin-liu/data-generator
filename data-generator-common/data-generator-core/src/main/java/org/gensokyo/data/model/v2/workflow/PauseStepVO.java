@@ -37,4 +37,10 @@ public class PauseStepVO extends WorkflowStepVO {
 
     /** SpEL condition evaluated until true; used when duration and until are unset. */
     private String condition;
+
+    /**
+     * When {@code true} and no duration/until/condition is set, the run enters {@code PAUSED}
+     * until an operator calls the resume API.
+     */
+    private Boolean manual;
 }

@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
 package org.gensokyo.data.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
@@ -7,14 +12,23 @@ import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
+import org.gensokyo.data.secret.SecretResolver;
 import org.gensokyo.kit.character.StrKit;
 import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.Objects;
 
+/**
+ * Registers inline JDBC endpoints into the dynamic routing datasource.
+ *
+ * @author Gensokyo
+ * @since 2026-05-19
+ */
 @RequiredArgsConstructor
 public class DefaultRuntimeJdbcEndpointResolver implements RuntimeJdbcEndpointResolver {
+
     private final ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider;
+    private final SecretResolver secretResolver;
 
     @Override
     public String resolveSourceDataSourceId(QuerySourceVO source) {
@@ -62,7 +76,7 @@ public class DefaultRuntimeJdbcEndpointResolver implements RuntimeJdbcEndpointRe
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(inline.getUrl());
         dataSource.setUsername(inline.getUsername());
-        dataSource.setPassword(inline.getPassword());
+        dataSource.setPassword(secretResolver.resolveInlinePassword(inline.getPassword(), inline.getPasswordSecretRef()));
         dataSource.setDriverClassName(inline.getDriverClassName());
         dataSource.setValidationQuery("SELECT 1");
         if (Objects.nonNull(inline.getProperties())) {

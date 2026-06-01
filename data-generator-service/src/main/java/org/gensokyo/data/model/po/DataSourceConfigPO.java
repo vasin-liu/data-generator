@@ -40,6 +40,9 @@ public class DataSourceConfigPO implements Serializable {
     @Column(name = "password", length = 256)
     private String password;
 
+    @Column(name = "password_secret_ref", length = 256)
+    private String passwordSecretRef;
+
     @Column(name = "driver_class_name", length = 512, nullable = false)
     private String driverClassName;
 

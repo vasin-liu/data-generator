@@ -18,3 +18,13 @@ export function fetchJobs(templateId?: string): Promise<TaskExecutionSummary[]> 
 export function fetchJob(instanceId: string): Promise<TaskExecutionSummary> {
   return apiRequest<TaskExecutionSummary>(`/jobs/${instanceId}`);
 }
+
+/** Best-effort cancel for QUEUED, RUNNING, or PAUSED runs. */
+export function cancelJob(instanceId: string): Promise<string> {
+  return apiRequest<string>(`/jobs/${instanceId}/cancel`, { method: 'POST' });
+}
+
+/** Resumes a workflow run blocked on manual pause. */
+export function resumeJob(instanceId: string): Promise<string> {
+  return apiRequest<string>(`/jobs/${instanceId}/resume`, { method: 'POST' });
+}

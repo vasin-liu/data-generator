@@ -10,9 +10,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.audit.AuditService;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistryProvider;
+import org.gensokyo.data.calcite.runtime.WorkflowRunContext;
+import org.gensokyo.data.calcite.runtime.WorkflowRunControl;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.repository.DataSourceConfigRepository;
 import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.generator.BlockWhenQueueFullHandler;
 import org.gensokyo.data.generator.MdcTaskDecorator;
@@ -27,11 +31,14 @@ import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
+import org.gensokyo.data.task.RunLineageSupport;
+import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.collect.CollectKit;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.validation.annotation.Validated;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
@@ -62,6 +69,10 @@ public class TaskController {
     private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
     private final TaskExecutionService taskExecutionService;
     private final RunReportCollector runReportCollector;
+    private final TemplateLifecycleService templateLifecycleService;
+    private final DataSourceConfigRepository dataSourceConfigRepository;
+    private final AuditService auditService;
+    private final ObjectProvider<WorkflowRunControl> workflowRunControlProvider;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -154,28 +165,48 @@ public class TaskController {
 
     @GetMapping("/runById/{templateId}")
     public R<String> runById(@NotNull @PathVariable Long templateId) {
+        return runByIdInternal(templateId, true);
+    }
+
+    /**
+     * Starts a template run without requiring {@code PUBLISHED} status (editor draft run).
+     *
+     * @param templateId template id
+     * @return start message with instance id
+     */
+    public R<String> runByIdAllowDraft(@NotNull Long templateId) {
+        return runByIdInternal(templateId, false);
+    }
+
+    private R<String> runByIdInternal(Long templateId, boolean requirePublished) {
         var result = repository.findById(templateId).orElse(null);
         if (Objects.isNull(result)) {
             return R.fail(String.format("Template '%s' does not exist", templateId));
         }
 
         try {
-            var runtime = run(result);
+            var runtime = run(result, requirePublished);
             return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
                     runtime.name(), runtime.id(), runtime.instanceId()));
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return R.fail(e.getMessage());
         }
     }
 
     private TemplateRuntimeInfo run(TemplatePO entity) {
+        return run(entity, true);
+    }
+
+    private TemplateRuntimeInfo run(TemplatePO entity, boolean requirePublished) {
+        if (requirePublished) {
+            templateLifecycleService.requirePublishedForTaskRun(entity);
+        }
         String yaml = entity.getContentYaml();
         TemplateV2DraftVO v2Draft = tryParse(yaml, TemplateV2DraftVO.class);
         TemplateVO v1Template = tryParse(yaml, TemplateVO.class);
         TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Template, v2Draft);
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
-            return runV2(entity.getId(), v2Draft);
+            return runV2(entity, v2Draft);
         }
 
         if (!properties.isV1ExecutionEnabled()) {
@@ -205,23 +236,47 @@ public class TaskController {
         }
     }
 
-    private TemplateRuntimeInfo runV2(Long templateId, TemplateV2DraftVO draft) {
+    private TemplateRuntimeInfo runV2(TemplatePO entity, TemplateV2DraftVO draft) {
         templateV2RuntimeRegistryProvider.current();
         TemplateV2VO template = TemplateV2Normalizer.normalize(draft);
-        template.setId(templateId);
+        template.setId(entity.getId());
         Long instanceId = RandomKit.snowFlake().nextId();
         template.setInstanceId(instanceId);
         TemplateV2Validator.validate(template);
-        taskExecutionService.queueExecution(templateId, template.getName(), instanceId, "V2");
+        TemplateV2Validator.validateGovernance(
+                template, properties.getGovernance().isRejectPlaintextPasswordsInTemplates());
+        taskExecutionService.queueExecution(
+                entity.getId(),
+                template.getName(),
+                instanceId,
+                "V2",
+                RunLineageSupport.templateVersion(entity),
+                RunLineageSupport.pluginSetJson(properties),
+                RunLineageSupport.datasourceConfigHash(dataSourceConfigRepository.findByEnabledTrue()));
+        auditService.record(
+                "TASK_RUN_START",
+                "TASK",
+                String.valueOf(instanceId),
+                java.util.Map.of("templateId", entity.getId(), "name", template.getName()));
         executor.submit(() -> runV2Tracked(template, instanceId));
         return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
     }
 
     private void runV2Tracked(TemplateV2VO template, Long instanceId) {
+        if (taskExecutionService.isCancelRequested(instanceId)) {
+            taskExecutionService.markCancelled(instanceId);
+            return;
+        }
         taskExecutionService.markRunning(instanceId);
+        WorkflowRunControl control = workflowRunControlProvider.getIfAvailable(() -> WorkflowRunControl.NO_OP);
+        WorkflowRunContext.bind(instanceId, control);
         long startedAtMs = System.currentTimeMillis();
         try {
             TemplateV2RunResult result = templateV2Runner.run(template);
+            if (taskExecutionService.isCancelRequested(instanceId)) {
+                taskExecutionService.markCancelled(instanceId);
+                return;
+            }
             long durationMs = System.currentTimeMillis() - startedAtMs;
             long rowCount = 0L;
             String metricsJson = null;
@@ -237,8 +292,24 @@ public class TaskController {
                 rowCount = result.getRows().size();
             }
             taskExecutionService.markSuccess(instanceId, rowCount, metricsJson, reportJson);
+            auditService.record(
+                    "TASK_RUN_SUCCESS",
+                    "TASK",
+                    String.valueOf(instanceId),
+                    java.util.Map.of("rowCount", rowCount));
         } catch (Exception e) {
-            taskExecutionService.markFailed(instanceId, e.getMessage());
+            if (taskExecutionService.isCancelRequested(instanceId)) {
+                taskExecutionService.markCancelled(instanceId);
+            } else {
+                taskExecutionService.markFailed(instanceId, e.getMessage());
+                auditService.record(
+                        "TASK_RUN_FAILED",
+                        "TASK",
+                        String.valueOf(instanceId),
+                        java.util.Map.of("error", e.getMessage()));
+            }
+        } finally {
+            WorkflowRunContext.clear();
         }
     }
 

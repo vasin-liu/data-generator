@@ -96,6 +96,18 @@ public final class TemplateV2Validator {
     }
 
     /**
+     * Validates governance rules that require Spring configuration (plaintext secrets).
+     *
+     * @param template normalized template
+     * @param rejectPlaintextPasswords when true, inline plaintext passwords are errors
+     */
+    public static void validateGovernance(TemplateV2VO template, boolean rejectPlaintextPasswords) {
+        for (String error : TemplateGovernanceSupport.collectSecretViolations(template, rejectPlaintextPasswords)) {
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    /**
      * Collects non-fatal validation warnings for a normalized Template V2 definition.
      *
      * @param template normalized template

@@ -14,6 +14,7 @@ package org.gensokyo.data.task;
 public enum TaskExecutionStatus {
     QUEUED,
     RUNNING,
+    PAUSED,
     SUCCESS,
     FAILED,
     CANCELLED

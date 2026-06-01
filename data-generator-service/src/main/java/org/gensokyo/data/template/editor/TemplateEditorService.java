@@ -17,9 +17,11 @@ import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.audit.AuditService;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
+import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.util.RandomKit;
@@ -45,6 +47,8 @@ public class TemplateEditorService {
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
     private final TaskExecutionService taskExecutionService;
+    private final TemplateLifecycleService templateLifecycleService;
+    private final AuditService auditService;
 
     /**
      * Creates an in-memory empty V2 draft (not persisted until {@link #save(Long, TemplateV2DraftVO)}).
@@ -82,8 +86,14 @@ public class TemplateEditorService {
         if (Boolean.TRUE.equals(entity.getArchived())) {
             throw new IllegalArgumentException("Cannot save archived template: " + templateId);
         }
+        templateLifecycleService.markDraftAfterEdit(entity);
         persistV2Draft(entity, draft);
         TemplatePO saved = repository.saveAndFlush(entity);
+        auditService.record(
+                "TEMPLATE_SAVE",
+                "TEMPLATE",
+                String.valueOf(saved.getId()),
+                java.util.Map.of("name", saved.getName()));
         return buildPayload(saved);
     }
 
@@ -99,8 +109,14 @@ public class TemplateEditorService {
         entity.setId(RandomKit.snowFlake().nextId());
         entity.setArchived(Boolean.FALSE);
         entity.setArchivedAt(null);
+        templateLifecycleService.ensureDraftOnCreate(entity);
         persistV2Draft(entity, draft);
         TemplatePO saved = repository.saveAndFlush(entity);
+        auditService.record(
+                "TEMPLATE_CREATE",
+                "TEMPLATE",
+                String.valueOf(saved.getId()),
+                java.util.Map.of("name", saved.getName()));
         return buildPayload(saved);
     }
 

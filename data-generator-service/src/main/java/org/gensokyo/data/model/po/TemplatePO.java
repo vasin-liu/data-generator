@@ -87,4 +87,10 @@ public class TemplatePO implements Serializable {
      */
     @Column(name = "archived_at")
     private Instant archivedAt;
+
+    /**
+     * Governance lifecycle: DRAFT, PUBLISHED, or ARCHIVED (Phase B).
+     */
+    @Column(name = "status", length = 16)
+    private String status;
 }

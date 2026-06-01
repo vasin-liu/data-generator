@@ -7,6 +7,7 @@ package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionSummary;
+import org.gensokyo.data.task.WorkflowPauseCoordinator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,11 +36,15 @@ class ConsoleJobControllerTest {
     @Mock
     private TaskExecutionService taskExecutionService;
 
+    @Mock
+    private WorkflowPauseCoordinator workflowPauseCoordinator;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleJobController(taskExecutionService))
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                        new ConsoleJobController(taskExecutionService, workflowPauseCoordinator))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 const COLOR: Record<string, string> = {
   QUEUED: 'gold',
   RUNNING: 'processing',
+  PAUSED: 'warning',
   SUCCESS: 'success',
   FAILED: 'error',
   CANCELLED: 'default',

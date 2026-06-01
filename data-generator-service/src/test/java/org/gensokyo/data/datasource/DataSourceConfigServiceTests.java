@@ -46,6 +46,7 @@ class DataSourceConfigServiceTests {
                 "jdbc:h2:mem:ui_test_ds;DB_CLOSE_DELAY=-1",
                 "sa",
                 "",
+                null,
                 "org.h2.Driver",
                 null);
         Assertions.assertTrue(dataSourceConfigService.listRuntimeNames().contains(DS_NAME));
@@ -60,6 +61,7 @@ class DataSourceConfigServiceTests {
                 "jdbc:h2:mem:ui_test_ds2;DB_CLOSE_DELAY=-1",
                 "sa",
                 "",
+                null,
                 "org.h2.Driver",
                 null);
         dataSourceConfigService.remove(DS_NAME);

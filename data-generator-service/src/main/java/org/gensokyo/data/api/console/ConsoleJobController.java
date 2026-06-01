@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionSummary;
+import org.gensokyo.data.task.WorkflowPauseCoordinator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,7 @@ import java.util.List;
 public class ConsoleJobController {
 
     private final TaskExecutionService taskExecutionService;
+    private final WorkflowPauseCoordinator workflowPauseCoordinator;
 
     /**
      * Lists execution history rows for the console job center.
@@ -58,5 +61,28 @@ public class ConsoleJobController {
     @GetMapping("/{instanceId}")
     public R<TaskExecutionSummary> get(@NotNull @PathVariable Long instanceId) {
         return R.ok(taskExecutionService.getByInstanceId(instanceId));
+    }
+
+    /**
+     * @param instanceId run instance id
+     * @return acknowledgement
+     */
+    @PostMapping("/{instanceId}/cancel")
+    public R<String> cancel(@NotNull @PathVariable Long instanceId) {
+        taskExecutionService.requestCancel(instanceId);
+        workflowPauseCoordinator.cancelPause(instanceId);
+        return R.ok("Cancel requested");
+    }
+
+    /**
+     * @param instanceId run instance id
+     * @return acknowledgement
+     */
+    @PostMapping("/{instanceId}/resume")
+    public R<String> resume(@NotNull @PathVariable Long instanceId) {
+        if (!workflowPauseCoordinator.resume(instanceId)) {
+            return R.fail("No manual pause is active for instance: " + instanceId);
+        }
+        return R.ok("Resume signalled");
     }
 }

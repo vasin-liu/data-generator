@@ -144,3 +144,12 @@ export function parseDraftYaml(yaml: string): Promise<TemplateV2Draft> {
     body: JSON.stringify({ yaml }),
   });
 }
+
+/**
+ * Validates and publishes a persisted template (DRAFT → PUBLISHED).
+ *
+ * @param templateId template id
+ */
+export function publishTemplate(templateId: string): Promise<string> {
+  return apiRequest<string>(`/templates/${templateId}/publish`, { method: 'POST' });
+}

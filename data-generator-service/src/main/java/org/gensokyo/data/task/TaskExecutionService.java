@@ -30,7 +30,8 @@ public class TaskExecutionService {
 
     private static final List<String> ACTIVE_STATUSES = List.of(
             TaskExecutionStatus.QUEUED.name(),
-            TaskExecutionStatus.RUNNING.name());
+            TaskExecutionStatus.RUNNING.name(),
+            TaskExecutionStatus.PAUSED.name());
 
     private final TaskExecutionRepository repository;
 
@@ -53,6 +54,30 @@ public class TaskExecutionService {
      */
     @Transactional
     public Long queueExecution(Long templateId, String templateName, Long instanceId, String definitionKind) {
+        return queueExecution(templateId, templateName, instanceId, definitionKind, null, null, null);
+    }
+
+    /**
+     * Inserts a QUEUED execution row with optional lineage snapshots.
+     *
+     * @param templateId           template id
+     * @param templateName         template name
+     * @param instanceId           snowflake instance id
+     * @param definitionKind       V1 or V2
+     * @param templateVersion      content hash snapshot
+     * @param pluginSetJson        plugin registry snapshot JSON
+     * @param datasourceConfigHash datasource registry hash
+     * @return persisted row id
+     */
+    @Transactional
+    public Long queueExecution(
+            Long templateId,
+            String templateName,
+            Long instanceId,
+            String definitionKind,
+            String templateVersion,
+            String pluginSetJson,
+            String datasourceConfigHash) {
         Instant now = Instant.now();
         TaskExecutionPO row = new TaskExecutionPO();
         row.setId(RandomKit.snowFlake().nextId());
@@ -62,6 +87,10 @@ public class TaskExecutionService {
         row.setDefinitionKind(definitionKind);
         row.setStatus(TaskExecutionStatus.QUEUED.name());
         row.setQueuedAt(now);
+        row.setCancelRequested(Boolean.FALSE);
+        row.setTemplateVersion(templateVersion);
+        row.setPluginSetJson(pluginSetJson);
+        row.setDatasourceConfigHash(datasourceConfigHash);
         repository.saveAndFlush(row);
         return row.getId();
     }
@@ -111,6 +140,57 @@ public class TaskExecutionService {
      * @param instanceId   run instance id
      * @param errorMessage failure detail
      */
+    /**
+     * @param instanceId run instance id
+     */
+    @Transactional
+    public void markPaused(Long instanceId) {
+        update(instanceId, row -> row.setStatus(TaskExecutionStatus.PAUSED.name()));
+    }
+
+    /**
+     * @param instanceId run instance id
+     * @return {@code true} when cancel was requested
+     */
+    public boolean isCancelRequested(Long instanceId) {
+        return repository.findByInstanceId(instanceId)
+                .map(row -> Boolean.TRUE.equals(row.getCancelRequested()))
+                .orElse(false);
+    }
+
+    /**
+     * Best-effort cancel for QUEUED, RUNNING, or PAUSED runs.
+     *
+     * @param instanceId run instance id
+     */
+    @Transactional
+    public void requestCancel(Long instanceId) {
+        update(instanceId, row -> {
+            String status = row.getStatus();
+            if (TaskExecutionStatus.SUCCESS.name().equals(status)
+                    || TaskExecutionStatus.FAILED.name().equals(status)
+                    || TaskExecutionStatus.CANCELLED.name().equals(status)) {
+                throw new IllegalArgumentException("Cannot cancel finished execution: " + instanceId);
+            }
+            row.setCancelRequested(Boolean.TRUE);
+            if (TaskExecutionStatus.QUEUED.name().equals(status)) {
+                row.setStatus(TaskExecutionStatus.CANCELLED.name());
+                row.setFinishedAt(Instant.now());
+            }
+        });
+    }
+
+    /**
+     * @param instanceId run instance id
+     */
+    @Transactional
+    public void markCancelled(Long instanceId) {
+        update(instanceId, row -> {
+            row.setStatus(TaskExecutionStatus.CANCELLED.name());
+            row.setFinishedAt(Instant.now());
+        });
+    }
+
     @Transactional
     public void markFailed(Long instanceId, String errorMessage) {
         update(instanceId, row -> {

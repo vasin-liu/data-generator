@@ -94,7 +94,7 @@ public class DataSourceController {
             @RequestParam String driverClassName,
             @RequestParam(required = false) MultipartFile driverFile) {
         try {
-            dataSourceConfigService.save(name, url, username, password, driverClassName, driverFile);
+            dataSourceConfigService.save(name, url, username, password, null, driverClassName, driverFile);
         } catch (Exception e) {
             throw new DataGeneratorException("添加数据库数据源失败", e);
         }

@@ -8,9 +8,12 @@ package org.gensokyo.data.datasource;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.audit.AuditService;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.po.DataSourceConfigPO;
 import org.gensokyo.data.repository.DataSourceConfigRepository;
+import org.gensokyo.data.secret.SecretResolver;
+import org.gensokyo.kit.character.StrKit;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,8 @@ public class DataSourceConfigService {
     private final DataSourceConfigRepository repository;
     private final ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider;
     private final DataSourceDriverSupport driverSupport;
+    private final SecretResolver secretResolver;
+    private final AuditService auditService;
 
     /**
      * @return summaries of all persisted configs
@@ -68,6 +73,7 @@ public class DataSourceConfigService {
             String url,
             String username,
             String password,
+            String passwordSecretRef,
             String driverClassName,
             MultipartFile driverFile) {
         Objects.requireNonNull(name, "name");
@@ -80,11 +86,17 @@ public class DataSourceConfigService {
         entity.setName(name);
         entity.setUrl(url);
         entity.setUsername(username);
-        // Keep stored password when UI leaves the field blank on edit.
-        if (password != null && !password.isBlank()) {
-            entity.setPassword(password);
-        } else if (isNew) {
-            entity.setPassword(password);
+        if (StrKit.isNotBlank(passwordSecretRef)) {
+            entity.setPasswordSecretRef(passwordSecretRef.trim());
+            entity.setPassword(null);
+        } else {
+            entity.setPasswordSecretRef(null);
+            // Keep stored password when UI leaves the field blank on edit.
+            if (password != null && !password.isBlank()) {
+                entity.setPassword(password);
+            } else if (isNew) {
+                entity.setPassword(password);
+            }
         }
         entity.setDriverClassName(driverClassName);
         entity.setEnabled(Boolean.TRUE);
@@ -101,6 +113,11 @@ public class DataSourceConfigService {
         }
         DataSourceConfigPO saved = repository.saveAndFlush(entity);
         registerToRuntime(saved);
+        auditService.record(
+                isNew ? "DATASOURCE_CREATE" : "DATASOURCE_UPDATE",
+                "DATASOURCE",
+                saved.getName(),
+                java.util.Map.of("url", saved.getUrl()));
         return toSummary(saved);
     }
 
@@ -166,7 +183,7 @@ public class DataSourceConfigService {
         return testConnection(
                 row.getUrl(),
                 row.getUsername(),
-                row.getPassword(),
+                resolvePassword(row),
                 row.getDriverClassName(),
                 row.getDriverJarPath());
     }
@@ -197,7 +214,7 @@ public class DataSourceConfigService {
             DruidDataSource dataSource = new DruidDataSource();
             dataSource.setUrl(row.getUrl());
             dataSource.setUsername(row.getUsername());
-            dataSource.setPassword(row.getPassword());
+            dataSource.setPassword(resolvePassword(row));
             dataSource.setDriverClassName(loaded.driverClassName());
             dataSource.setDriverClassLoader(loaded.classLoader());
             if (routing.getDataSources().containsKey(row.getName())) {
@@ -217,6 +234,10 @@ public class DataSourceConfigService {
         return routing;
     }
 
+    private String resolvePassword(DataSourceConfigPO row) {
+        return secretResolver.resolveInlinePassword(row.getPassword(), row.getPasswordSecretRef());
+    }
+
     private DataSourceConfigSummary toSummary(DataSourceConfigPO row) {
         return new DataSourceConfigSummary(
                 row.getName(),
@@ -224,6 +245,7 @@ public class DataSourceConfigService {
                 row.getUsername(),
                 row.getDriverClassName(),
                 row.getDriverJarPath(),
+                row.getPasswordSecretRef(),
                 Boolean.TRUE.equals(row.getEnabled()),
                 row.getCreatedAt(),
                 row.getUpdatedAt());

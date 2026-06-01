@@ -3,7 +3,7 @@ import { Button, Modal, Space, Typography, message } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { createTemplate, previewDraft, runDraft, saveTemplate, validateDraft } from '../../api/editor';
+import { createTemplate, publishTemplate, previewDraft, runDraft, saveTemplate, validateDraft } from '../../api/editor';
 import type { TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
 
 type Props = {
@@ -94,6 +94,17 @@ export function ReviewPanel({
     onError: (err: Error) => message.error(err.message),
   });
 
+  const publishMutation = useMutation({
+    mutationFn: () => {
+      if (templateId == null) {
+        return Promise.reject(new Error(t('review.publish.needsSave')));
+      }
+      return publishTemplate(templateId);
+    },
+    onSuccess: () => message.success(t('review.publish.done')),
+    onError: (err: Error) => message.error(err.message),
+  });
+
   const statusParts = [
     `kind=${kind}`,
     templateId != null ? `id=${templateId}` : t('review.status.new'),
@@ -129,6 +140,20 @@ export function ReviewPanel({
           onClick={() => saveMutation.mutate(true)}
         >
           {t('review.saveAndReturn')}
+        </Button>
+        <Button
+          type="primary"
+          disabled={!saveAllowed || templateId == null || v1Blocked}
+          loading={publishMutation.isPending}
+          onClick={() =>
+            Modal.confirm({
+              title: t('review.publish'),
+              content: t('review.publish.confirm'),
+              onOk: () => publishMutation.mutateAsync(),
+            })
+          }
+        >
+          {t('review.publish')}
         </Button>
         <Button
           type="primary"

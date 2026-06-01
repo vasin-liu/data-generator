@@ -18,6 +18,7 @@ export async function parseApiResult<T>(res: Response): Promise<T> {
 export interface TemplateSummary {
   id: string;
   name: string;
+  status: string | null;
   archived: boolean | null;
 }
 

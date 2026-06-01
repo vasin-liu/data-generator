@@ -77,10 +77,12 @@ public class ConsoleDataSourceController {
             @RequestParam String url,
             @RequestParam String username,
             @RequestParam String password,
+            @RequestParam(required = false) String passwordSecretRef,
             @RequestParam String driverClassName,
             @RequestParam(required = false) MultipartFile driverFile) {
         try {
-            dataSourceConfigService.save(name, url, username, password, driverClassName, driverFile);
+            dataSourceConfigService.save(
+                    name, url, username, password, passwordSecretRef, driverClassName, driverFile);
         } catch (Exception e) {
             throw new DataGeneratorException("Failed to save datasource", e);
         }

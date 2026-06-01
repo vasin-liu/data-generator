@@ -64,6 +64,7 @@ class DataSourceControllerTests {
                     "jdbc:h2:mem:ctrl_test;DB_CLOSE_DELAY=-1",
                     "sa",
                     "",
+                    null,
                     "org.h2.Driver",
                     null);
             R<List<DataSourceConfigSummary>> result = dataSourceController.listDatabaseConfigs();

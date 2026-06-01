@@ -18,6 +18,7 @@ import org.gensokyo.data.model.po.TemplatePO;
 public record TemplateSummaryDto(
         @JsonSerialize(using = ToStringSerializer.class) Long id,
         String name,
+        String status,
         Boolean archived) {
 
     /**
@@ -25,6 +26,10 @@ public record TemplateSummaryDto(
      * @return API DTO
      */
     public static TemplateSummaryDto from(TemplatePO entity) {
-        return new TemplateSummaryDto(entity.getId(), entity.getName(), entity.getArchived());
+        String status = entity.getStatus();
+        if (status == null || status.isBlank()) {
+            status = Boolean.TRUE.equals(entity.getArchived()) ? "ARCHIVED" : "PUBLISHED";
+        }
+        return new TemplateSummaryDto(entity.getId(), entity.getName(), status, entity.getArchived());
     }
 }

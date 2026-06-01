@@ -67,3 +67,33 @@ ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `archived_at` TIMESTAMP DEFAULT 
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `parent_pipeline_run_id` VARCHAR(64);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `upstream_artifact_refs_json` CLOB;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `report_json` CLOB;
+ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `status` VARCHAR(16) DEFAULT 'PUBLISHED';
+ALTER TABLE `datasource_config` ADD COLUMN IF NOT EXISTS `password_secret_ref` VARCHAR(256);
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `cancel_requested` BOOLEAN DEFAULT FALSE NOT NULL;
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `template_version` VARCHAR(64);
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `plugin_set_json` CLOB;
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `datasource_config_hash` VARCHAR(64);
+
+-- Secret registry for passwordSecretRef resolution (Phase B)
+CREATE TABLE IF NOT EXISTS `secret_entry`
+(
+    `name`        VARCHAR(256) NOT NULL,
+    `secret_value` VARCHAR(2048) NOT NULL,
+    `description` VARCHAR(512) DEFAULT NULL,
+    `created_at`  TIMESTAMP    DEFAULT NULL,
+    `updated_at`  TIMESTAMP    DEFAULT NULL,
+    PRIMARY KEY (`name`)
+);
+
+-- Operator audit trail (Phase B)
+CREATE TABLE IF NOT EXISTS `audit_event`
+(
+    `id`            LONG         NOT NULL,
+    `occurred_at`   TIMESTAMP    NOT NULL,
+    `actor`         VARCHAR(128) DEFAULT NULL,
+    `action`        VARCHAR(64)  NOT NULL,
+    `resource_type` VARCHAR(32)  NOT NULL,
+    `resource_id`   VARCHAR(256) DEFAULT NULL,
+    `detail_json`   CLOB         DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);

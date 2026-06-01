@@ -115,6 +115,7 @@ public final class WorkflowRunner {
 
         List<WorkflowStepVO> steps = workflow.getSteps();
         for (int index = state.getNextStepIndex(); index < steps.size(); index++) {
+            checkCancelled();
             state.setNextStepIndex(index + 1);
             executeStep(steps.get(index), template, policy, registry, blocksById, state, metrics, diagnosticCollector);
         }
@@ -191,6 +192,20 @@ public final class WorkflowRunner {
     }
 
     private void executePauseStep(PauseStepVO step, WorkflowExecutionState state) {
+        checkCancelled();
+        if (Boolean.TRUE.equals(step.getManual())
+                && step.getDurationMs() == null
+                && (step.getUntil() == null || step.getUntil().isBlank())
+                && (step.getCondition() == null || step.getCondition().isBlank())) {
+            Long instanceId = WorkflowRunContext.instanceId();
+            try {
+                WorkflowRunContext.control().awaitManualPause(instanceId);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Workflow manual pause interrupted", e);
+            }
+            return;
+        }
         if (step.getDurationMs() != null && step.getDurationMs() > 0) {
             sleep(Duration.ofMillis(step.getDurationMs()));
             return;
@@ -208,6 +223,16 @@ public final class WorkflowRunner {
             return;
         }
         throw new IllegalArgumentException("Pause step requires durationMs, until, or condition");
+    }
+
+    private static void checkCancelled() {
+        Long instanceId = WorkflowRunContext.instanceId();
+        try {
+            WorkflowRunContext.control().checkCancel(instanceId);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Run cancelled", e);
+        }
     }
 
     private void waitUntilCondition(String condition, WorkflowExecutionState state) {

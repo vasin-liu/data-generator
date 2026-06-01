@@ -13,8 +13,9 @@ import java.time.Instant;
  *
  * @param name            datasource key
  * @param url             JDBC URL
- * @param username        JDBC user
- * @param driverClassName driver class
+ * @param username            JDBC user
+ * @param passwordSecretRef   optional secret reference instead of stored password
+ * @param driverClassName     driver class
  * @param driverJarPath   optional uploaded driver path
  * @param enabled         active flag
  * @param createdAt       created timestamp
@@ -24,6 +25,7 @@ public record DataSourceConfigSummary(
         String name,
         String url,
         String username,
+        String passwordSecretRef,
         String driverClassName,
         String driverJarPath,
         boolean enabled,

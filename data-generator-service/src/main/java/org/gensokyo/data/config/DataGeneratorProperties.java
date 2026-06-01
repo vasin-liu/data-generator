@@ -69,6 +69,11 @@ public class DataGeneratorProperties {
     private V1Execution v1Execution = new V1Execution();
 
     /**
+     * Template and secret governance (Phase B).
+     */
+    private Governance governance = new Governance();
+
+    /**
      * Returns whether ad hoc V1 template execution is allowed on {@link org.gensokyo.data.controller.TaskController}.
      *
      * @return {@code true} when V1 runs are permitted
@@ -87,6 +92,30 @@ public class DataGeneratorProperties {
          * When {@code false}, TaskController refuses V1 templates (P4 retirement).
          */
         private boolean enabled = true;
+    }
+
+    /**
+     * Nested binding for {@code pci.data.generator.governance.*}.
+     */
+    @Getter
+    @Setter
+    public static class Governance {
+        /**
+         * When {@code true}, templates with inline plaintext JDBC passwords fail validation/publish.
+         */
+        private boolean rejectPlaintextPasswordsInTemplates = true;
+
+        /**
+         * When {@code true}, {@code /task/run} requires template status {@code PUBLISHED}.
+         */
+        private boolean requirePublishedForTaskRun = true;
+    }
+
+    /**
+     * @return governance settings (never null)
+     */
+    public Governance getGovernance() {
+        return governance == null ? new Governance() : governance;
     }
 
 }

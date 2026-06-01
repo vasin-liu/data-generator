@@ -13,6 +13,7 @@ import org.gensokyo.data.api.console.dto.RunStartResultDto;
 import org.gensokyo.data.api.console.dto.YamlApplyRequest;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
 import org.gensokyo.data.template.editor.TemplateEditorPayload;
@@ -42,6 +43,7 @@ public class ConsoleTemplateEditorActionsController {
     private final TemplateEditorYamlSupport yamlSupport;
     private final TemplateV2ControlPlaneService controlPlaneService;
     private final TemplateEditorRunSupport templateEditorRunSupport;
+    private final TemplateLifecycleService templateLifecycleService;
 
     /**
      * @param draft draft to validate
@@ -50,6 +52,18 @@ public class ConsoleTemplateEditorActionsController {
     @PostMapping("/draft/validate")
     public R<TemplateV2ValidationResult> validateDraft(@RequestBody TemplateV2DraftVO draft) {
         return R.ok(controlPlaneService.validate(draft));
+    }
+
+    /**
+     * Validates and publishes a persisted template (DRAFT → PUBLISHED).
+     *
+     * @param templateId template id
+     * @return acknowledgement
+     */
+    @PostMapping("/{templateId}/publish")
+    public R<String> publish(@NotNull @PathVariable Long templateId) {
+        templateLifecycleService.publish(templateId);
+        return R.ok("Template published");
     }
 
     /**

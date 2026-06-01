@@ -1,14 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Descriptions, Space, Table, Typography } from 'antd';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Alert, Button, Descriptions, Space, Table, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchJob } from '../../api/jobs';
+import { cancelJob, fetchJob, resumeJob } from '../../api/jobs';
 import type { RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 
-const ACTIVE = new Set(['QUEUED', 'RUNNING']);
+const ACTIVE = new Set(['QUEUED', 'RUNNING', 'PAUSED']);
 
 function formatDuration(ms: number | null | undefined): string {
   if (ms == null) {
@@ -34,6 +34,24 @@ export function JobDetailPage() {
       const status = query.state.data?.status;
       return status && ACTIVE.has(status) ? 2000 : false;
     },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => cancelJob(instanceId),
+    onSuccess: () => {
+      message.success(t('jobDetail.cancel.done'));
+      jobQuery.refetch();
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
+  const resumeMutation = useMutation({
+    mutationFn: () => resumeJob(instanceId),
+    onSuccess: () => {
+      message.success(t('jobDetail.resume.done'));
+      jobQuery.refetch();
+    },
+    onError: (err: Error) => message.error(err.message),
   });
 
   const stageColumns: ColumnsType<StageMetric> = useMemo(
@@ -75,6 +93,24 @@ export function JobDetailPage() {
           </Button>
         )}
         <Button onClick={() => jobQuery.refetch()}>{t('common.refresh')}</Button>
+        {jobQuery.data && ACTIVE.has(jobQuery.data.status) && (
+          <Button
+            danger
+            loading={cancelMutation.isPending}
+            onClick={() => cancelMutation.mutate()}
+          >
+            {t('jobDetail.cancel')}
+          </Button>
+        )}
+        {jobQuery.data?.status === 'PAUSED' && (
+          <Button
+            type="primary"
+            loading={resumeMutation.isPending}
+            onClick={() => resumeMutation.mutate()}
+          >
+            {t('jobDetail.resume')}
+          </Button>
+        )}
       </Space>
       <Typography.Title level={3}>
         {t('jobDetail.title')} #{instanceIdParam}

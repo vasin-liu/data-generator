@@ -72,4 +72,16 @@ public class TaskExecutionPO implements Serializable {
 
     @Column(name = "report_json", columnDefinition = "CLOB")
     private String reportJson;
+
+    @Column(name = "cancel_requested", nullable = false)
+    private Boolean cancelRequested = Boolean.FALSE;
+
+    @Column(name = "template_version", length = 64)
+    private String templateVersion;
+
+    @Column(name = "plugin_set_json", columnDefinition = "CLOB")
+    private String pluginSetJson;
+
+    @Column(name = "datasource_config_hash", length = 64)
+    private String datasourceConfigHash;
 }

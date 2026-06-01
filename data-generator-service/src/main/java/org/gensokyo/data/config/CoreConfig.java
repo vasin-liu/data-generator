@@ -45,6 +45,7 @@ import org.gensokyo.data.yaml.JacksonParser;
 import org.gensokyo.data.yaml.YamlParser;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -253,8 +254,16 @@ public class CoreConfig {
 
     @Bean
     @ConditionalOnMissingBean(RuntimeJdbcEndpointResolver.class)
-    public RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver(ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider) {
-        return new DefaultRuntimeJdbcEndpointResolver(dynamicRoutingDataSourceProvider);
+    public RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver(
+            ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider,
+            org.gensokyo.data.secret.SecretResolver secretResolver) {
+        return new DefaultRuntimeJdbcEndpointResolver(dynamicRoutingDataSourceProvider, secretResolver);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(org.gensokyo.data.secret.SecretResolver.class)
+    public org.gensokyo.data.secret.SecretResolver passthroughSecretResolver() {
+        return new PassthroughSecretResolver();
     }
 
     private boolean usePf4j(DataGeneratorProperties properties) {
