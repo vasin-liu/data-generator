@@ -34,4 +34,10 @@ Complete before first staging migration sweep. Does **not** block `feature-4.0` 
 4. `GET /template/migration/signoff-status` → both families complete
 5. Staging trial: `data.generator.v1-execution.enabled: false`
 
+Pre-flight script (CI slice + config reminder):
+
+```powershell
+.\scripts\v1-retirement-staging-trial.ps1
+```
+
 See `docs/migration/staging-runbook.md` and `docs/superpowers/specs/2026-05-21-v1-retirement-deferred-ops-design.md`.

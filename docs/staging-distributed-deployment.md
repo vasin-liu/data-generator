@@ -86,6 +86,20 @@ Console is served from the Coordinator (or any node with console enabled); metri
 5. Open Console metrics and job detail for the instance id.
 6. (Optional) Set `max-attempts=1` on a test worker and force template failure → `FAILED` without requeue.
 
+## Local pre-flight script
+
+From repository root (embedded IT only):
+
+```powershell
+.\scripts\staging-distributed-smoke.ps1
+```
+
+With coordinator running (optional REST metrics):
+
+```powershell
+.\scripts\staging-distributed-smoke.ps1 -CoordinatorBaseUrl "http://localhost:9876"
+```
+
 ## Automated verification (CI / local)
 
 Run on `master` after merge:
