@@ -7,9 +7,12 @@ import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.gensokyo.data.DataGeneratorApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = "spring.config.location=classpath:/application-phase7-test.yaml")
+@SpringBootTest(
+        classes = DataGeneratorApplication.class,
+        properties = "spring.config.location=classpath:/application-phase7-test.yaml")
 class DefaultDataGeneratorApplicationTests {
 
     @Autowired
