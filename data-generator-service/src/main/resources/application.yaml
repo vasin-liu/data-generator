@@ -226,6 +226,9 @@ spring:
         validation-query: SELECT 1
 data:
   generator:
+    schedule:
+      enabled: false
+      poll-delay-ms: 60000
     migration:
       batch-compare:
         scheduled-enabled: false

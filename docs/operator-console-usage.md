@@ -141,6 +141,22 @@ Statuses: `QUEUED`, `RUNNING`, `SUCCESS`, `FAILED`, `CANCELLED`.
 4. Open detail — confirm timestamps; metrics or error text when applicable.
 5. Archive guard: start a long run, attempt archive in editor — expect rejection while `QUEUED`/`RUNNING`.
 
+### Cron schedules (Phase B schedule hook)
+
+REST API: `/api/console/schedules` (list, create, update, delete). Each row stores a Spring six-field `cronExpression` and `templateId` (published templates only at trigger time).
+
+Enable the poller on the service node:
+
+```yaml
+data:
+  generator:
+    schedule:
+      enabled: true
+      poll-delay-ms: 60000
+```
+
+The poller calls the same path as `POST /task/run/{templateId}` (skips when the template already has a `QUEUED`/`RUNNING` execution). Distributed enqueue applies when `data.generator.distributed.enabled=true`.
+
 ---
 
 ## P4 — Migration

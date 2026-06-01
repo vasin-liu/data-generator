@@ -120,3 +120,33 @@ CREATE TABLE IF NOT EXISTS `distributed_job`
     `updated_at`        TIMESTAMP    DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+-- Cron-driven template run schedules (Phase B schedule hook)
+CREATE TABLE IF NOT EXISTS `task_schedule`
+(
+    `id`                LONG         NOT NULL,
+    `template_id`       LONG         NOT NULL,
+    `cron_expression`   VARCHAR(128) NOT NULL,
+    `enabled`           BOOLEAN      DEFAULT TRUE NOT NULL,
+    `description`       VARCHAR(512) DEFAULT NULL,
+    `last_triggered_at` TIMESTAMP    DEFAULT NULL,
+    `next_trigger_at`   TIMESTAMP    DEFAULT NULL,
+    `created_at`        TIMESTAMP    DEFAULT NULL,
+    `updated_at`        TIMESTAMP    DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
+
+-- Cron-driven template run schedules (Phase B schedule hook)
+CREATE TABLE IF NOT EXISTS `task_schedule`
+(
+    `id`                LONG         NOT NULL,
+    `template_id`       LONG         NOT NULL,
+    `cron_expression`   VARCHAR(128) NOT NULL,
+    `enabled`           BOOLEAN      DEFAULT TRUE NOT NULL,
+    `description`       VARCHAR(512) DEFAULT NULL,
+    `last_triggered_at` TIMESTAMP    DEFAULT NULL,
+    `next_trigger_at`   TIMESTAMP    DEFAULT NULL,
+    `created_at`        TIMESTAMP    DEFAULT NULL,
+    `updated_at`        TIMESTAMP    DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);

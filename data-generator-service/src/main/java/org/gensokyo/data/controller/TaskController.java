@@ -182,6 +182,32 @@ public class TaskController {
         return runByIdInternal(templateId, false);
     }
 
+    /**
+     * Starts a published template run from the schedule poller (internal hook).
+     *
+     * @param templateId template id
+     * @return run identifiers for audit logging
+     */
+    public TemplateRunStartResult triggerScheduledRun(Long templateId) {
+        if (taskExecutionService.isRunning(templateId)) {
+            throw new IllegalStateException("Template already has an active run: " + templateId);
+        }
+        TemplatePO entity = repository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("Template does not exist: " + templateId));
+        TemplateRuntimeInfo runtime = run(entity, true);
+        return new TemplateRunStartResult(runtime.id(), runtime.name(), runtime.instanceId());
+    }
+
+    /**
+     * Result of a schedule-triggered template run start.
+     *
+     * @param templateId   template id
+     * @param templateName template name
+     * @param instanceId   snowflake instance id
+     */
+    public record TemplateRunStartResult(Long templateId, String templateName, Long instanceId) {
+    }
+
     private R<String> runByIdInternal(Long templateId, boolean requirePublished) {
         var result = repository.findById(templateId).orElse(null);
         if (Objects.isNull(result)) {
