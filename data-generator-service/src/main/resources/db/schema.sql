@@ -97,3 +97,26 @@ CREATE TABLE IF NOT EXISTS `audit_event`
     `detail_json`   CLOB         DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+-- Distributed execution queue and lease state (Phase C2)
+CREATE TABLE IF NOT EXISTS `distributed_job`
+(
+    `id`                LONG         NOT NULL,
+    `task_execution_id` LONG         DEFAULT NULL,
+    `template_id`       LONG         DEFAULT NULL,
+    `instance_id`       LONG         NOT NULL,
+    `status`            VARCHAR(16)  NOT NULL,
+    `worker_id`         VARCHAR(128) DEFAULT NULL,
+    `queued_at`         TIMESTAMP    NOT NULL,
+    `leased_at`         TIMESTAMP    DEFAULT NULL,
+    `last_heartbeat_at` TIMESTAMP    DEFAULT NULL,
+    `lease_until`       TIMESTAMP    DEFAULT NULL,
+    `started_at`        TIMESTAMP    DEFAULT NULL,
+    `finished_at`       TIMESTAMP    DEFAULT NULL,
+    `attempts`          INT          DEFAULT 0 NOT NULL,
+    `error_message`     VARCHAR(4000) DEFAULT NULL,
+    `payload_json`      CLOB         DEFAULT NULL,
+    `created_at`        TIMESTAMP    DEFAULT NULL,
+    `updated_at`        TIMESTAMP    DEFAULT NULL,
+    PRIMARY KEY (`id`)
+);
