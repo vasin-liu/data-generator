@@ -26,6 +26,8 @@ public final class RunMetrics {
     private final LinkedHashMap<String, Long> rowsReadPerSource;
     private final LinkedHashMap<String, SinkWriteMetric> sinkMetrics;
     private final ArrayList<String> warnings;
+    private int configuredPartitions;
+    private int executedPartitions;
 
     /**
      * Creates metrics for a run with the given execution mode.
@@ -179,5 +181,34 @@ public final class RunMetrics {
      */
     public void recordSinkRowsFailed(String sinkKey, long count, String errorSample) {
         sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsFailed(count, errorSample);
+    }
+
+    /**
+     * Sets partitioned execution counters for operator run reports.
+     *
+     * @param configured number of configured partitions
+     * @param executed   number of partitions that processed at least one row
+     */
+    public void setPartitionStats(int configured, int executed) {
+        this.configuredPartitions = configured;
+        this.executedPartitions = executed;
+    }
+
+    /**
+     * Configured partition count when partitioned execution was active.
+     *
+     * @return configured partitions, or {@code 0} when not partitioned
+     */
+    public int getConfiguredPartitions() {
+        return configuredPartitions;
+    }
+
+    /**
+     * Number of partitions that executed work during the run.
+     *
+     * @return executed partition count
+     */
+    public int getExecutedPartitions() {
+        return executedPartitions;
     }
 }

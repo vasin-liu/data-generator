@@ -365,6 +365,9 @@ public final class TemplateV2Validator {
         if (policy.getMaxTotalRows() != null && policy.getMaxTotalRows() <= 0) {
             throw new IllegalArgumentException("Execution policy maxTotalRows must be positive");
         }
+        if (policy.getPartitionCount() != null && policy.getPartitionCount() <= 0) {
+            throw new IllegalArgumentException("Execution policy partitionCount must be positive");
+        }
         if ("CHUNKED".equals(mode)) {
             validateChunkedCompatibility(template);
         }

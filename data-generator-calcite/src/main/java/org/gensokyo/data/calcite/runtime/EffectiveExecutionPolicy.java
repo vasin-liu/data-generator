@@ -24,6 +24,7 @@ public final class EffectiveExecutionPolicy {
     private static final int DEFAULT_PREVIEW_ROW_LIMIT = 100;
     private static final boolean DEFAULT_FAIL_ON_LIMIT_EXCEEDED = true;
     private static final int BROADCAST_MAX_ROWS_CAP = 50_000;
+    private static final int DEFAULT_PARTITION_COUNT = 1;
 
     private final String mode;
     private final int maxRowsInMemory;
@@ -33,6 +34,8 @@ public final class EffectiveExecutionPolicy {
     private final int previewRowLimit;
     private final boolean failOnLimitExceeded;
     private final int broadcastMaxRows;
+    private final int partitionCount;
+    private final String partitionKey;
 
     private EffectiveExecutionPolicy(
             String mode,
@@ -42,7 +45,9 @@ public final class EffectiveExecutionPolicy {
             int sinkBatchSize,
             int previewRowLimit,
             boolean failOnLimitExceeded,
-            int broadcastMaxRows) {
+            int broadcastMaxRows,
+            int partitionCount,
+            String partitionKey) {
         this.mode = mode;
         this.maxRowsInMemory = maxRowsInMemory;
         this.maxTotalRows = maxTotalRows;
@@ -51,6 +56,8 @@ public final class EffectiveExecutionPolicy {
         this.previewRowLimit = previewRowLimit;
         this.failOnLimitExceeded = failOnLimitExceeded;
         this.broadcastMaxRows = broadcastMaxRows;
+        this.partitionCount = partitionCount;
+        this.partitionKey = partitionKey;
     }
 
     /**
@@ -101,6 +108,17 @@ public final class EffectiveExecutionPolicy {
         } else {
             broadcastMaxRows = Math.min(BROADCAST_MAX_ROWS_CAP, maxRowsInMemory / 10);
         }
+
+        int partitionCount = DEFAULT_PARTITION_COUNT;
+        String partitionKey = null;
+        if (templatePolicy != null) {
+            if (templatePolicy.getPartitionCount() != null) {
+                partitionCount = templatePolicy.getPartitionCount();
+            }
+            if (templatePolicy.getPartitionKey() != null && !templatePolicy.getPartitionKey().isBlank()) {
+                partitionKey = templatePolicy.getPartitionKey().trim();
+            }
+        }
         return new EffectiveExecutionPolicy(
                 mode,
                 maxRowsInMemory,
@@ -109,7 +127,9 @@ public final class EffectiveExecutionPolicy {
                 sinkBatchSize,
                 previewRowLimit,
                 failOnLimitExceeded,
-                broadcastMaxRows);
+                broadcastMaxRows,
+                partitionCount,
+                partitionKey);
     }
 
     /**
@@ -182,5 +202,23 @@ public final class EffectiveExecutionPolicy {
      */
     public int broadcastMaxRows() {
         return broadcastMaxRows;
+    }
+
+    /**
+     * Number of in-process partitions for compute block execution.
+     *
+     * @return partition count; {@code 1} disables partitioned execution
+     */
+    public int partitionCount() {
+        return partitionCount;
+    }
+
+    /**
+     * Optional column name used to hash rows into partitions.
+     *
+     * @return partition key column, or {@code null} for round-robin assignment
+     */
+    public String partitionKey() {
+        return partitionKey;
     }
 }

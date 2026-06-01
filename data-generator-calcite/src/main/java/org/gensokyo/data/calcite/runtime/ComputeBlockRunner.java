@@ -75,6 +75,10 @@ public final class ComputeBlockRunner {
         if (CollectKit.isEmpty(block.getSources())) {
             throw new IllegalArgumentException("Compute block sources must not be empty");
         }
+        if (policy.partitionCount() > 1) {
+            return new PartitionedComputeBlockRunner(rowSinkFactory, transformDagExecutor)
+                    .run(block, policy, registry);
+        }
 
         RunMetrics metrics = new RunMetrics(policy.mode());
         CalciteExecutionContext context = materializeSources(block, policy, registry, metrics);
