@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Instant;
+
 /**
  * Integration tests for distributed queue lease + heartbeat lifecycle.
  *
@@ -55,6 +57,26 @@ class DistributedJobServiceTests {
         Assertions.assertEquals("worker-a", row.getWorkerId());
         Assertions.assertEquals(1, row.getAttempts());
         Assertions.assertNotNull(row.getFinishedAt());
+    }
+
+    @Test
+    void expiredLeaseCanBeReacquiredByAnotherWorker() {
+        Long jobId = distributedJobService.enqueue(1001L, 2002L, 3003L, null);
+
+        DistributedJobLease firstLease = distributedJobService.leaseNext("worker-a", 30).orElseThrow();
+        Assertions.assertEquals(jobId, firstLease.jobId());
+
+        DistributedJobPO leased = repository.findById(jobId).orElseThrow();
+        leased.setLeaseUntil(Instant.now().minusSeconds(5));
+        repository.saveAndFlush(leased);
+
+        DistributedJobLease secondLease = distributedJobService.leaseNext("worker-b", 30).orElseThrow();
+        Assertions.assertEquals(jobId, secondLease.jobId());
+
+        DistributedJobPO recovered = repository.findById(jobId).orElseThrow();
+        Assertions.assertEquals("worker-b", recovered.getWorkerId());
+        Assertions.assertEquals(2, recovered.getAttempts());
+        Assertions.assertEquals(DistributedJobStatus.LEASED.name(), recovered.getStatus());
     }
 }
 
