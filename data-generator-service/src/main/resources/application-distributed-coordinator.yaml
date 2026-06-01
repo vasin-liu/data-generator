@@ -1,0 +1,8 @@
+# Profile: distributed-coordinator (use with DataGeneratorApplication)
+# Enqueue-only coordinator: workers execute queue rows on separate JVMs sharing the same DB.
+data:
+  generator:
+    distributed:
+      enabled: true
+      worker-enabled: false
+      coordinator-poll-enabled: false

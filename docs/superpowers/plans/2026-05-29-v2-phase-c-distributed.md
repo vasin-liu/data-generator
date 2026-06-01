@@ -15,13 +15,13 @@
 | 3 | C1 | `ComputeBlockRunner` delegates when `partitionCount > 1`; synchronized sink writes |
 | 4 | C1 | Validator + `RunMetrics` partition counters |
 | 5 | C1 | `PartitionedComputeBlockRunnerTests` — multi-partition correctness |
-| 6 | C2 | `distributed_job` queue table, coordinator lease, worker heartbeat (future) |
-| 7 | C2 | Worker process entrypoint + REST contract tests (future) |
-| 8 | — | Console partition metrics (read-only, future) |
+| 6 | C2 | `distributed_job` queue table, coordinator lease, worker heartbeat — **done** on `feature-4.3` |
+| 7 | C2 | Worker process entrypoint + REST contract tests — **done** on `feature-4.3` |
+| 8 | — | Console partition + distributed metrics (read-only) — **done** on `feature-4.3` |
 
 **C1 checkpoint:** Fixed dataset processed correctly across N partitions; metrics aggregate; single-partition path unchanged.
 
-**C2 checkpoint (later):** Coordinator schedules job; worker executes and reports heartbeat; lease recovery on failure.
+**C2 checkpoint:** Coordinator schedules job; worker executes and reports heartbeat; lease recovery on failure. Staging closure spec: `docs/superpowers/specs/2026-06-01-c2-staging-closure-design.md`.
 
 ## File map (C1)
 
