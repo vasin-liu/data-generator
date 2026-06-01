@@ -86,6 +86,26 @@ Console is served from the Coordinator (or any node with console enabled); metri
 5. Open Console metrics and job detail for the instance id.
 6. (Optional) Set `max-attempts=1` on a test worker and force template failure → `FAILED` without requeue.
 
+## Automated verification (CI / local)
+
+Run on `master` after merge:
+
+```powershell
+.\mvnw-jdk25.ps1 -pl "data-generator-service" -am test "-Dtest=DistributedJob*IntegrationTests,DistributedJobServiceTests,DistributedSplitRoleIntegrationTests,ConsoleDistributedControllerTest" "-Dsurefire.failIfNoSpecifiedTests=false"
+```
+
+| AC | Automated coverage |
+|----|-------------------|
+| AC-1 | `DistributedSplitRoleIntegrationTests.coordinatorDoesNotPollWorkerExecutes` |
+| AC-2 | `DistributedJobWorkerIntegrationTests`, `DistributedJobCoordinatorIntegrationTests` |
+| AC-3 | `DistributedJobCoordinatorCancelIntegrationTests` |
+| AC-4 | `DistributedJobServiceTests.expiredLeaseCanBeReacquiredByAnotherWorker` |
+| AC-5 | `DistributedJobHeartbeatIntegrationTests.heartbeatUpdatesDuringSlowRun` |
+| AC-6 | `DistributedJobRequeueIntegrationTests` |
+| AC-7 | Merge `feature-4.3` → `master` (this doc + profiles on `master`) |
+
+Manual staging still required for multi-JVM deployment, shared production DB, and Console UI smoke.
+
 ## References
 
 - Design: `docs/superpowers/specs/2026-06-01-c2-staging-closure-design.md`
