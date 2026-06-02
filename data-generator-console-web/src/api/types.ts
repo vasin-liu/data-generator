@@ -50,6 +50,7 @@ export interface TaskExecutionSummary {
   templateName: string;
   instanceId: string;
   definitionKind: string;
+  triggerType: string;
   status: string;
   queuedAt: string | null;
   startedAt: string | null;

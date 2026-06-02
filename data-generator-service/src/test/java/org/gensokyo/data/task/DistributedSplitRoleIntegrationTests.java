@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
         classes = DataGeneratorApplication.class,
         properties = {
                 "spring.config.location=classpath:/application-phase7-test.yaml",
+                "spring.task.scheduling.enabled=false",
                 "data.generator.distributed.enabled=true",
                 "data.generator.distributed.worker-enabled=true",
                 "data.generator.distributed.coordinator-poll-enabled=false"

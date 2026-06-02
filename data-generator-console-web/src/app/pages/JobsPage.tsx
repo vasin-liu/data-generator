@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Descriptions, Input, Space, Table, Typography } from 'antd';
+import { Button, Descriptions, Input, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,11 +23,12 @@ export function JobsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [templateIdInput, setTemplateIdInput] = useState('');
+  const [triggerType, setTriggerType] = useState<string | undefined>(undefined);
   const templateId = parseTemplateId(templateIdInput);
 
   const jobsQuery = useQuery({
-    queryKey: ['jobs', templateId],
-    queryFn: () => fetchJobs(templateId),
+    queryKey: ['jobs', templateId, triggerType],
+    queryFn: () => fetchJobs(templateId, triggerType),
     refetchInterval: (query) => {
       const rows = query.state.data;
       const active = rows?.some((r) => ACTIVE.has(r.status)) ?? false;
@@ -64,6 +65,7 @@ export function JobsPage() {
           ),
       },
       { title: t('jobs.col.kind'), dataIndex: 'definitionKind' },
+      { title: t('jobs.col.trigger'), dataIndex: 'triggerType' },
       {
         title: t('jobs.col.status'),
         dataIndex: 'status',
@@ -94,6 +96,17 @@ export function JobsPage() {
           value={templateIdInput}
           onChange={(e) => setTemplateIdInput(e.target.value)}
           style={{ width: 160 }}
+        />
+        <Select
+          allowClear
+          style={{ width: 180 }}
+          placeholder={t('jobs.filter.triggerType')}
+          value={triggerType}
+          onChange={(value) => setTriggerType(value)}
+          options={[
+            { value: 'MANUAL', label: t('jobs.trigger.manual') },
+            { value: 'SCHEDULED', label: t('jobs.trigger.scheduled') },
+          ]}
         />
         <Button onClick={() => jobsQuery.refetch()}>{t('common.refresh')}</Button>
         <Typography.Text type="secondary">{pollHint}</Typography.Text>

@@ -40,19 +40,21 @@ public class ConsoleJobController {
     /**
      * Lists execution history rows for the console job center.
      *
-     * @param templateId optional filter; when absent or blank, returns all executions
+     * @param templateId  optional filter; when absent or blank, returns all executions
+     * @param triggerType optional filter (e.g. MANUAL or SCHEDULED)
      * @return execution summaries newest first
      */
     @GetMapping
     public R<List<TaskExecutionSummary>> list(
-            @RequestParam(name = "templateId", required = false) String templateId) {
+            @RequestParam(name = "templateId", required = false) String templateId,
+            @RequestParam(name = "triggerType", required = false) String triggerType) {
         Long parsedTemplateId;
         if (templateId == null || templateId.isBlank()) {
             parsedTemplateId = null;
         } else {
             parsedTemplateId = Long.valueOf(templateId);
         }
-        return R.ok(taskExecutionService.list(parsedTemplateId));
+        return R.ok(taskExecutionService.list(parsedTemplateId, triggerType));
     }
 
     /**

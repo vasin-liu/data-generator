@@ -84,4 +84,7 @@ public class TaskExecutionPO implements Serializable {
 
     @Column(name = "datasource_config_hash", length = 64)
     private String datasourceConfigHash;
+
+    @Column(name = "trigger_type", length = 16)
+    private String triggerType;
 }

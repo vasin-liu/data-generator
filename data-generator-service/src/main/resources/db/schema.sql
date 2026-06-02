@@ -73,6 +73,7 @@ ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `cancel_requested` BOOLEAN
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `template_version` VARCHAR(64);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `plugin_set_json` CLOB;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `datasource_config_hash` VARCHAR(64);
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `trigger_type` VARCHAR(16) DEFAULT 'MANUAL';
 
 -- Secret registry for passwordSecretRef resolution (Phase B)
 CREATE TABLE IF NOT EXISTS `secret_entry`

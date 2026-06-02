@@ -20,6 +20,7 @@ import java.time.Instant;
  * @param templateName    template name
  * @param instanceId      run instance id
  * @param definitionKind  V1 or V2
+ * @param triggerType     MANUAL or SCHEDULED
  * @param status          lifecycle status
  * @param queuedAt        queued timestamp
  * @param startedAt       started timestamp
@@ -35,6 +36,7 @@ public record TaskExecutionSummary(
         String templateName,
         @JsonSerialize(using = ToStringSerializer.class) Long instanceId,
         String definitionKind,
+        String triggerType,
         String status,
         Instant queuedAt,
         Instant startedAt,

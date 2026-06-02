@@ -5,9 +5,18 @@ export type { RunReport, StageMetric } from './types';
 
 /**
  * @param templateId optional filter
+ * @param triggerType optional MANUAL or SCHEDULED filter
  */
-export function fetchJobs(templateId?: string): Promise<TaskExecutionSummary[]> {
-  const suffix = templateId != null ? `?templateId=${templateId}` : '';
+export function fetchJobs(templateId?: string, triggerType?: string): Promise<TaskExecutionSummary[]> {
+  const params = new URLSearchParams();
+  if (templateId != null) {
+    params.set('templateId', templateId);
+  }
+  if (triggerType != null && triggerType.trim()) {
+    params.set('triggerType', triggerType.trim());
+  }
+  const query = params.toString();
+  const suffix = query ? `?${query}` : '';
   return apiRequest<TaskExecutionSummary[]>(`/jobs${suffix}`);
 }
 

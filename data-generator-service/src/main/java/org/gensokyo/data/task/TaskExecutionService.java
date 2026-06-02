@@ -54,7 +54,7 @@ public class TaskExecutionService {
      */
     @Transactional
     public Long queueExecution(Long templateId, String templateName, Long instanceId, String definitionKind) {
-        return queueExecution(templateId, templateName, instanceId, definitionKind, null, null, null);
+        return queueExecution(templateId, templateName, instanceId, definitionKind, "MANUAL", null, null, null);
     }
 
     /**
@@ -78,6 +78,40 @@ public class TaskExecutionService {
             String templateVersion,
             String pluginSetJson,
             String datasourceConfigHash) {
+        return queueExecution(
+                templateId,
+                templateName,
+                instanceId,
+                definitionKind,
+                "MANUAL",
+                templateVersion,
+                pluginSetJson,
+                datasourceConfigHash);
+    }
+
+    /**
+     * Inserts a QUEUED execution row with trigger type and optional lineage snapshots.
+     *
+     * @param templateId           template id
+     * @param templateName         template name
+     * @param instanceId           snowflake instance id
+     * @param definitionKind       V1 or V2
+     * @param triggerType          MANUAL or SCHEDULED
+     * @param templateVersion      content hash snapshot
+     * @param pluginSetJson        plugin registry snapshot JSON
+     * @param datasourceConfigHash datasource registry hash
+     * @return persisted row id
+     */
+    @Transactional
+    public Long queueExecution(
+            Long templateId,
+            String templateName,
+            Long instanceId,
+            String definitionKind,
+            String triggerType,
+            String templateVersion,
+            String pluginSetJson,
+            String datasourceConfigHash) {
         Instant now = Instant.now();
         TaskExecutionPO row = new TaskExecutionPO();
         row.setId(RandomKit.snowFlake().nextId());
@@ -88,6 +122,7 @@ public class TaskExecutionService {
         row.setStatus(TaskExecutionStatus.QUEUED.name());
         row.setQueuedAt(now);
         row.setCancelRequested(Boolean.FALSE);
+        row.setTriggerType(triggerType == null || triggerType.isBlank() ? "MANUAL" : triggerType);
         row.setTemplateVersion(templateVersion);
         row.setPluginSetJson(pluginSetJson);
         row.setDatasourceConfigHash(datasourceConfigHash);
@@ -209,11 +244,26 @@ public class TaskExecutionService {
      * @return summaries newest first (by finished/queued time)
      */
     public List<TaskExecutionSummary> list(Long templateId) {
+        return list(templateId, null);
+    }
+
+    /**
+     * @param templateId optional template filter
+     * @param triggerType optional trigger filter (MANUAL/SCHEDULED)
+     * @return summaries newest first (by finished/queued time)
+     */
+    public List<TaskExecutionSummary> list(Long templateId, String triggerType) {
         List<TaskExecutionPO> rows = templateId == null
                 ? repository.findAll().stream()
                         .sorted((a, b) -> sortKey(b).compareTo(sortKey(a)))
                         .toList()
                 : repository.findByTemplateIdOrderByFinishedAtDesc(templateId);
+        String normalizedTrigger = triggerType == null ? null : triggerType.trim();
+        if (normalizedTrigger != null && !normalizedTrigger.isEmpty()) {
+            rows = rows.stream()
+                    .filter(row -> normalizedTrigger.equalsIgnoreCase(row.getTriggerType()))
+                    .toList();
+        }
         return rows.stream().map(this::toSummary).toList();
     }
 
@@ -251,6 +301,7 @@ public class TaskExecutionService {
                 row.getTemplateName(),
                 row.getInstanceId(),
                 row.getDefinitionKind(),
+                row.getTriggerType(),
                 row.getStatus(),
                 row.getQueuedAt(),
                 row.getStartedAt(),
