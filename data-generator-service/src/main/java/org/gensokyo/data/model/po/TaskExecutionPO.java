@@ -87,4 +87,7 @@ public class TaskExecutionPO implements Serializable {
 
     @Column(name = "trigger_type", length = 16)
     private String triggerType;
+
+    @Column(name = "schedule_id")
+    private Long scheduleId;
 }

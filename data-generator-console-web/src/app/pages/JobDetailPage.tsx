@@ -94,6 +94,11 @@ export function JobDetailPage() {
             {t('jobDetail.openTemplate')}
           </Button>
         )}
+        {row?.triggerType === 'SCHEDULED' && row?.scheduleId && (
+          <Button onClick={() => navigate(`/schedules?templateId=${row.templateId}`)}>
+            {t('jobDetail.openSchedule')}
+          </Button>
+        )}
         <Button onClick={() => jobQuery.refetch()}>{t('common.refresh')}</Button>
         {row && ACTIVE.has(row.status) && (
           <Button
@@ -127,6 +132,8 @@ export function JobDetailPage() {
               {row.templateName} (#{row.templateId})
             </Descriptions.Item>
             <Descriptions.Item label={t('jobs.col.kind')}>{row.definitionKind}</Descriptions.Item>
+            <Descriptions.Item label={t('jobs.col.trigger')}>{row.triggerType ?? '—'}</Descriptions.Item>
+            <Descriptions.Item label={t('jobDetail.scheduleId')}>{row.scheduleId ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.rowCount')}>{row.rowCount ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.queued')}>{row.queuedAt ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.started')}>{row.startedAt ?? '—'}</Descriptions.Item>

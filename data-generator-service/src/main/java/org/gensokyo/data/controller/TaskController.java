@@ -186,15 +186,16 @@ public class TaskController {
      * Starts a published template run from the schedule poller (internal hook).
      *
      * @param templateId template id
+     * @param scheduleId originating schedule id
      * @return run identifiers for audit logging
      */
-    public TemplateRunStartResult triggerScheduledRun(Long templateId) {
+    public TemplateRunStartResult triggerScheduledRun(Long templateId, Long scheduleId) {
         if (taskExecutionService.isRunning(templateId)) {
             throw new IllegalStateException("Template already has an active run: " + templateId);
         }
         TemplatePO entity = repository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Template does not exist: " + templateId));
-        TemplateRuntimeInfo runtime = run(entity, true, "SCHEDULED");
+        TemplateRuntimeInfo runtime = run(entity, true, "SCHEDULED", scheduleId);
         return new TemplateRunStartResult(runtime.id(), runtime.name(), runtime.instanceId());
     }
 
@@ -215,7 +216,7 @@ public class TaskController {
         }
 
         try {
-            var runtime = run(result, requirePublished, "MANUAL");
+            var runtime = run(result, requirePublished, "MANUAL", null);
             return R.ok(String.format("Template '%s' started. templateId=%s, instanceId=%s",
                     runtime.name(), runtime.id(), runtime.instanceId()));
         } catch (IllegalArgumentException e) {
@@ -224,10 +225,10 @@ public class TaskController {
     }
 
     private TemplateRuntimeInfo run(TemplatePO entity) {
-        return run(entity, true, "MANUAL");
+        return run(entity, true, "MANUAL", null);
     }
 
-    private TemplateRuntimeInfo run(TemplatePO entity, boolean requirePublished, String triggerType) {
+    private TemplateRuntimeInfo run(TemplatePO entity, boolean requirePublished, String triggerType, Long scheduleId) {
         if (requirePublished) {
             templateLifecycleService.requirePublishedForTaskRun(entity);
         }
@@ -236,7 +237,7 @@ public class TaskController {
         TemplateVO v1Template = tryParse(yaml, TemplateVO.class);
         TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Template, v2Draft);
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
-            return runV2(entity, v2Draft, triggerType);
+            return runV2(entity, v2Draft, triggerType, scheduleId);
         }
 
         if (!properties.isV1ExecutionEnabled()) {
@@ -245,14 +246,14 @@ public class TaskController {
         }
 
         TemplateVO template = v1Template != null ? v1Template : TemplateJsonCodec.read(entity.getContentJson());
-        return runV1(template, triggerType);
+        return runV1(template, triggerType, scheduleId);
     }
 
-    private TemplateRuntimeInfo runV1(TemplateVO template, String triggerType) {
+    private TemplateRuntimeInfo runV1(TemplateVO template, String triggerType, Long scheduleId) {
         Long instanceId = RandomKit.snowFlake().nextId();
         template.setInstanceId(instanceId);
         taskExecutionService.queueExecution(
-                template.getId(), template.getName(), instanceId, "V1", triggerType, null, null, null);
+                template.getId(), template.getName(), instanceId, "V1", triggerType, null, null, null, scheduleId);
         executor.submit(() -> runV1Tracked(template, instanceId));
         return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
     }
@@ -267,7 +268,7 @@ public class TaskController {
         }
     }
 
-    private TemplateRuntimeInfo runV2(TemplatePO entity, TemplateV2DraftVO draft, String triggerType) {
+    private TemplateRuntimeInfo runV2(TemplatePO entity, TemplateV2DraftVO draft, String triggerType, Long scheduleId) {
         templateV2RuntimeRegistryProvider.current();
         TemplateV2VO template = TemplateV2Normalizer.normalize(draft);
         template.setId(entity.getId());
@@ -284,7 +285,8 @@ public class TaskController {
                 triggerType,
                 RunLineageSupport.templateVersion(entity),
                 RunLineageSupport.pluginSetJson(properties),
-                RunLineageSupport.datasourceConfigHash(dataSourceConfigRepository.findByEnabledTrue()));
+                RunLineageSupport.datasourceConfigHash(dataSourceConfigRepository.findByEnabledTrue()),
+                scheduleId);
         auditService.record(
                 "TASK_RUN_START",
                 "TASK",

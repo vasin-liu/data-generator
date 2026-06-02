@@ -95,6 +95,8 @@
   "jobDetail.resume": "继续",
   "jobDetail.resume.done": "已发送继续信号",
   "jobDetail.openTemplate": "打开模板",
+  "jobDetail.openSchedule": "打开定时任务",
+  "jobDetail.scheduleId": "定时任务编号",
   "jobDetail.metrics": "指标 / 输出",
   "jobDetail.queued": "排队",
   "jobDetail.started": "开始",

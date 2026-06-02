@@ -60,7 +60,7 @@ public class TaskSchedulePoller {
         Long templateId = schedule.getTemplateId();
         Long lastInstanceId = null;
         try {
-            TaskController.TemplateRunStartResult started = taskController.triggerScheduledRun(templateId);
+            TaskController.TemplateRunStartResult started = taskController.triggerScheduledRun(templateId, scheduleId);
             lastInstanceId = started.instanceId();
             auditService.record(
                     "TASK_SCHEDULE_TRIGGER",

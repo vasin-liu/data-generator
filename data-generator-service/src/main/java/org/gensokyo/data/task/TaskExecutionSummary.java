@@ -21,6 +21,7 @@ import java.time.Instant;
  * @param instanceId      run instance id
  * @param definitionKind  V1 or V2
  * @param triggerType     MANUAL or SCHEDULED
+ * @param scheduleId      originating schedule id for SCHEDULED runs
  * @param status          lifecycle status
  * @param queuedAt        queued timestamp
  * @param startedAt       started timestamp
@@ -37,6 +38,7 @@ public record TaskExecutionSummary(
         @JsonSerialize(using = ToStringSerializer.class) Long instanceId,
         String definitionKind,
         String triggerType,
+        @JsonSerialize(using = ToStringSerializer.class) Long scheduleId,
         String status,
         Instant queuedAt,
         Instant startedAt,

@@ -58,7 +58,7 @@ class ConsoleJobControllerTest {
     @Test
     void list_returnsExecutions() throws Exception {
         TaskExecutionSummary row = new TaskExecutionSummary(
-                99L, 10L, "demo", 1L, "V2", "MANUAL", "SUCCESS", null, null, null, 5L, null, null, null);
+                99L, 10L, "demo", 1L, "V2", "MANUAL", null, "SUCCESS", null, null, null, 5L, null, null, null);
         when(taskExecutionService.list(any(), any())).thenReturn(List.of(row));
         mockMvc.perform(get("/api/jobs"))
                 .andExpect(status().isOk())

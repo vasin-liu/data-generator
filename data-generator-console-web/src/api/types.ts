@@ -51,6 +51,7 @@ export interface TaskExecutionSummary {
   instanceId: string;
   definitionKind: string;
   triggerType: string;
+  scheduleId: string | null;
   status: string;
   queuedAt: string | null;
   startedAt: string | null;

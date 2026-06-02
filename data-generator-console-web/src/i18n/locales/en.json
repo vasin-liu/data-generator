@@ -95,6 +95,8 @@
   "jobDetail.resume": "Resume",
   "jobDetail.resume.done": "Resume signalled",
   "jobDetail.openTemplate": "Open template",
+  "jobDetail.openSchedule": "Open schedules",
+  "jobDetail.scheduleId": "Schedule id",
   "jobDetail.metrics": "Metrics / output",
   "jobDetail.queued": "Queued",
   "jobDetail.started": "Started",

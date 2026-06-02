@@ -54,7 +54,7 @@ public class TaskExecutionService {
      */
     @Transactional
     public Long queueExecution(Long templateId, String templateName, Long instanceId, String definitionKind) {
-        return queueExecution(templateId, templateName, instanceId, definitionKind, "MANUAL", null, null, null);
+        return queueExecution(templateId, templateName, instanceId, definitionKind, "MANUAL", null, null, null, null);
     }
 
     /**
@@ -86,7 +86,8 @@ public class TaskExecutionService {
                 "MANUAL",
                 templateVersion,
                 pluginSetJson,
-                datasourceConfigHash);
+                datasourceConfigHash,
+                null);
     }
 
     /**
@@ -100,6 +101,7 @@ public class TaskExecutionService {
      * @param templateVersion      content hash snapshot
      * @param pluginSetJson        plugin registry snapshot JSON
      * @param datasourceConfigHash datasource registry hash
+     * @param scheduleId           originating schedule id for scheduled runs
      * @return persisted row id
      */
     @Transactional
@@ -111,7 +113,8 @@ public class TaskExecutionService {
             String triggerType,
             String templateVersion,
             String pluginSetJson,
-            String datasourceConfigHash) {
+            String datasourceConfigHash,
+            Long scheduleId) {
         Instant now = Instant.now();
         TaskExecutionPO row = new TaskExecutionPO();
         row.setId(RandomKit.snowFlake().nextId());
@@ -123,6 +126,7 @@ public class TaskExecutionService {
         row.setQueuedAt(now);
         row.setCancelRequested(Boolean.FALSE);
         row.setTriggerType(triggerType == null || triggerType.isBlank() ? "MANUAL" : triggerType);
+        row.setScheduleId(scheduleId);
         row.setTemplateVersion(templateVersion);
         row.setPluginSetJson(pluginSetJson);
         row.setDatasourceConfigHash(datasourceConfigHash);
@@ -302,6 +306,7 @@ public class TaskExecutionService {
                 row.getInstanceId(),
                 row.getDefinitionKind(),
                 row.getTriggerType(),
+                row.getScheduleId(),
                 row.getStatus(),
                 row.getQueuedAt(),
                 row.getStartedAt(),

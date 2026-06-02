@@ -56,12 +56,12 @@ class TaskSchedulePollerTests {
         due.setTemplateId(99001L);
         due.setCronExpression("0 * * * * *");
         when(taskScheduleService.findDue(any())).thenReturn(List.of(due));
-        when(taskController.triggerScheduledRun(99001L))
+        when(taskController.triggerScheduledRun(99001L, 501L))
                 .thenReturn(new TaskController.TemplateRunStartResult(99001L, "demo", 88001L));
 
         taskSchedulePoller.pollDueSchedules();
 
-        verify(taskController).triggerScheduledRun(99001L);
+        verify(taskController).triggerScheduledRun(99001L, 501L);
         verify(taskScheduleService).markTriggered(eq(501L), any(Instant.class), eq(88001L));
         verify(auditService).record(eq("TASK_SCHEDULE_TRIGGER"), eq("TASK_SCHEDULE"), eq("501"), any());
     }
