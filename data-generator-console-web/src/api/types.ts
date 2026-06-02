@@ -99,6 +99,25 @@ export interface RunStartResult {
   instanceId: string;
 }
 
+/** Mirrors {@code TaskScheduleView}. */
+export interface TaskScheduleView {
+  id: string | number;
+  templateId: string | number;
+  cronExpression: string;
+  enabled: boolean;
+  description: string | null;
+  lastTriggeredAt: string | null;
+  nextTriggerAt: string | null;
+}
+
+/** Mirrors {@code TaskScheduleUpsertRequest}. */
+export interface TaskScheduleUpsertRequest {
+  templateId: string | number;
+  cronExpression: string;
+  enabled?: boolean;
+  description?: string | null;
+}
+
 export type TemplateDefinitionKind = 'V1' | 'V2';
 
 export interface TemplateEditorPayload {

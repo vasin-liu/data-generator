@@ -26,6 +26,7 @@ export function ConsoleLayout() {
     const p = location.pathname;
     if (p.includes('/templates')) return '/templates';
     if (p.includes('/jobs')) return '/jobs';
+    if (p.includes('/schedules')) return '/schedules';
     if (p.includes('/datasources')) return '/datasources';
     if (p.includes('/migration')) return '/migration';
     return '/';
@@ -36,6 +37,7 @@ export function ConsoleLayout() {
     { key: '/templates', label: t('nav.templates') },
     { key: '/datasources', label: t('nav.datasources') },
     { key: '/jobs', label: t('nav.jobs') },
+    { key: '/schedules', label: t('nav.schedules') },
     ...(migrationEnabled ? [{ key: '/migration', label: t('nav.migration') }] : []),
   ];
 

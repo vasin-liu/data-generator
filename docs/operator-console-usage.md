@@ -157,6 +157,12 @@ data:
 
 The poller calls the same path as `POST /task/run/{templateId}` (skips when the template already has a `QUEUED`/`RUNNING` execution). Distributed enqueue applies when `data.generator.distributed.enabled=true`.
 
+### UI (`/console/schedules`)
+
+- List, create, edit, and delete schedules (published templates only in the picker).
+- Filter by template id; table shows next/last trigger times.
+- Sidebar **Schedules** / **定时任务** (route `/console/schedules`).
+
 ---
 
 ## P4 — Migration

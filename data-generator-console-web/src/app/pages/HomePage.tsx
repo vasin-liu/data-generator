@@ -6,6 +6,7 @@ const AREAS = [
   { path: '/templates', titleKey: 'nav.templates' },
   { path: '/datasources', titleKey: 'nav.datasources' },
   { path: '/jobs', titleKey: 'nav.jobs' },
+  { path: '/schedules', titleKey: 'nav.schedules' },
   { path: '/migration', titleKey: 'nav.migration' },
 ] as const;
 

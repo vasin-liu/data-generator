@@ -1,0 +1,300 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Alert,
+  Button,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Switch,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from '../../api/schedules';
+import { fetchTemplates } from '../../api/templates';
+import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
+
+type ScheduleFormValues = {
+  templateId: string;
+  cronExpression: string;
+  enabled: boolean;
+  description?: string;
+};
+
+function formatId(value: string | number): string {
+  return String(value);
+}
+
+function formatTime(value: string | null | undefined): string {
+  if (!value) {
+    return '—';
+  }
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * Cron schedule administration for automated template runs.
+ */
+export function SchedulesPage() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [templateFilter, setTemplateFilter] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<TaskScheduleView | null>(null);
+  const [dialogKey, setDialogKey] = useState('new');
+  const [form] = Form.useForm<ScheduleFormValues>();
+
+  const filterTemplateId = templateFilter.trim() || undefined;
+
+  const schedulesQuery = useQuery({
+    queryKey: ['schedules', filterTemplateId],
+    queryFn: () => fetchSchedules(filterTemplateId),
+    refetchInterval: 30_000,
+  });
+
+  const templatesQuery = useQuery({
+    queryKey: ['templates', false, ''],
+    queryFn: () => fetchTemplates(false),
+  });
+
+  const templateOptions = useMemo(() => {
+    const rows = templatesQuery.data ?? [];
+    return rows
+      .filter((row) => row.status === 'PUBLISHED' && !row.archived)
+      .map((row) => ({
+        value: formatId(row.id),
+        label: `${row.name} (${row.id})`,
+      }));
+  }, [templatesQuery.data]);
+
+  const templateNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const row of templatesQuery.data ?? []) {
+      map.set(formatId(row.id), row.name);
+    }
+    return map;
+  }, [templatesQuery.data]);
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['schedules'] });
+
+  const saveMutation = useMutation({
+    mutationFn: async (values: ScheduleFormValues) => {
+      const body: TaskScheduleUpsertRequest = {
+        templateId: values.templateId,
+        cronExpression: values.cronExpression.trim(),
+        enabled: values.enabled,
+        description: values.description?.trim() || null,
+      };
+      if (editing) {
+        return updateSchedule(formatId(editing.id), body);
+      }
+      return createSchedule(body);
+    },
+    onSuccess: () => {
+      message.success(t('schedules.dialog.saved'));
+      setModalOpen(false);
+      invalidate();
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteSchedule,
+    onSuccess: () => {
+      message.success(t('schedules.removed'));
+      invalidate();
+    },
+    onError: (err: Error) => message.error(err.message),
+  });
+
+  const openCreate = () => {
+    setEditing(null);
+    setDialogKey(`new-${Date.now()}`);
+    form.setFieldsValue({
+      templateId: filterTemplateId ?? undefined,
+      cronExpression: '0 0 2 * * *',
+      enabled: true,
+      description: '',
+    });
+    setModalOpen(true);
+  };
+
+  const openEdit = (row: TaskScheduleView) => {
+    setEditing(row);
+    setDialogKey(`edit-${formatId(row.id)}`);
+    form.setFieldsValue({
+      templateId: formatId(row.templateId),
+      cronExpression: row.cronExpression,
+      enabled: row.enabled,
+      description: row.description ?? '',
+    });
+    setModalOpen(true);
+  };
+
+  const confirmDelete = (row: TaskScheduleView) => {
+    const id = formatId(row.id);
+    Modal.confirm({
+      title: t('schedules.remove.confirm.title', { id }),
+      content: t('schedules.remove.confirm.text'),
+      okText: t('common.remove'),
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: () => deleteMutation.mutateAsync(id),
+    });
+  };
+
+  const columns: ColumnsType<TaskScheduleView> = useMemo(
+    () => [
+      {
+        title: t('schedules.col.id'),
+        dataIndex: 'id',
+        render: (id: string | number) => formatId(id),
+      },
+      {
+        title: t('schedules.col.template'),
+        key: 'template',
+        render: (_, row) => {
+          const tid = formatId(row.templateId);
+          const name = templateNameById.get(tid) ?? tid;
+          return <Link to={`/templates/${tid}`}>{name}</Link>;
+        },
+      },
+      {
+        title: t('schedules.col.cron'),
+        dataIndex: 'cronExpression',
+        render: (cron: string) => <Typography.Text code>{cron}</Typography.Text>,
+      },
+      {
+        title: t('schedules.col.enabled'),
+        dataIndex: 'enabled',
+        render: (enabled: boolean) =>
+          enabled ? (
+            <Tag color="green">{t('common.yes')}</Tag>
+          ) : (
+            <Tag>{t('common.no')}</Tag>
+          ),
+      },
+      {
+        title: t('schedules.col.next'),
+        dataIndex: 'nextTriggerAt',
+        render: formatTime,
+      },
+      {
+        title: t('schedules.col.last'),
+        dataIndex: 'lastTriggeredAt',
+        render: formatTime,
+      },
+      {
+        title: t('schedules.col.description'),
+        dataIndex: 'description',
+        ellipsis: true,
+        render: (text: string | null) => text ?? '—',
+      },
+      {
+        title: '',
+        key: 'actions',
+        render: (_, row) => (
+          <Space>
+            <Button type="link" onClick={() => openEdit(row)}>
+              {t('common.edit')}
+            </Button>
+            <Button type="link" danger onClick={() => confirmDelete(row)}>
+              {t('common.remove')}
+            </Button>
+          </Space>
+        ),
+      },
+    ],
+    [t, templateNameById],
+  );
+
+  return (
+    <section>
+      <Typography.Title level={3}>{t('schedules.title')}</Typography.Title>
+      <Typography.Paragraph type="secondary">{t('schedules.subtitle')}</Typography.Paragraph>
+
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('schedules.hint.title')}
+        description={t('schedules.hint.body')}
+      />
+
+      <Space style={{ marginBottom: 16 }} wrap>
+        <Input
+          placeholder={t('schedules.filter.templateId')}
+          value={templateFilter}
+          onChange={(e) => setTemplateFilter(e.target.value)}
+          style={{ width: 220 }}
+          allowClear
+        />
+        <Button onClick={() => schedulesQuery.refetch()}>{t('common.refresh')}</Button>
+        <Button type="primary" onClick={openCreate}>
+          {t('schedules.new')}
+        </Button>
+      </Space>
+
+      <Table
+        rowKey={(row) => formatId(row.id)}
+        loading={schedulesQuery.isLoading}
+        dataSource={schedulesQuery.data ?? []}
+        columns={columns}
+        pagination={{ pageSize: 20 }}
+        locale={{ emptyText: t('schedules.empty') }}
+      />
+
+      <Modal
+        key={dialogKey}
+        title={editing ? t('schedules.dialog.edit') : t('schedules.dialog.create')}
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        confirmLoading={saveMutation.isPending}
+        destroyOnClose
+        width={560}
+      >
+        <Form form={form} layout="vertical" onFinish={(v) => saveMutation.mutate(v)}>
+          <Form.Item
+            name="templateId"
+            label={t('schedules.form.templateId')}
+            rules={[{ required: true, message: t('schedules.form.templateIdRequired') }]}
+          >
+            <Select
+              showSearch
+              optionFilterProp="label"
+              options={templateOptions}
+              placeholder={t('schedules.form.templateIdPlaceholder')}
+              loading={templatesQuery.isLoading}
+            />
+          </Form.Item>
+          <Form.Item
+            name="cronExpression"
+            label={t('schedules.form.cron')}
+            rules={[{ required: true, message: t('schedules.form.cronRequired') }]}
+            extra={t('schedules.form.cronHelp')}
+          >
+            <Input placeholder="0 0 2 * * *" />
+          </Form.Item>
+          <Form.Item name="enabled" label={t('schedules.form.enabled')} valuePropName="checked">
+            <Switch />
+          </Form.Item>
+          <Form.Item name="description" label={t('schedules.form.description')}>
+            <Input.TextArea rows={2} />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </section>
+  );
+}
