@@ -84,6 +84,13 @@ export function TemplatesPage() {
               <Button
                 type="link"
                 disabled={!active}
+                onClick={() => navigate(`/schedules?templateId=${encodeURIComponent(String(row.id))}`)}
+              >
+                {t('templates.schedules')}
+              </Button>
+              <Button
+                type="link"
+                disabled={!active}
                 onClick={() =>
                   Modal.confirm({
                     title: t('common.run'),

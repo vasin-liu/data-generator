@@ -3,7 +3,7 @@ import { Button, Descriptions, Input, Select, Space, Table, Typography } from 'a
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchDistributedMetrics } from '../../api/distributed';
 import { fetchJobs } from '../../api/jobs';
 import type { TaskExecutionSummary } from '../../api/types';
@@ -22,8 +22,9 @@ function parseTemplateId(raw: string): string | undefined {
 export function JobsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [templateIdInput, setTemplateIdInput] = useState('');
-  const [triggerType, setTriggerType] = useState<string | undefined>(undefined);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [templateIdInput, setTemplateIdInput] = useState(searchParams.get('templateId') ?? '');
+  const [triggerType, setTriggerType] = useState<string | undefined>(searchParams.get('triggerType') ?? undefined);
   const templateId = parseTemplateId(templateIdInput);
 
   const jobsQuery = useQuery({
@@ -94,7 +95,18 @@ export function JobsPage() {
           allowClear
           placeholder={t('jobs.filter.templateId')}
           value={templateIdInput}
-          onChange={(e) => setTemplateIdInput(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setTemplateIdInput(next);
+            const params = new URLSearchParams(searchParams);
+            const trimmed = next.trim();
+            if (trimmed) {
+              params.set('templateId', trimmed);
+            } else {
+              params.delete('templateId');
+            }
+            setSearchParams(params);
+          }}
           style={{ width: 160 }}
         />
         <Select
@@ -102,7 +114,16 @@ export function JobsPage() {
           style={{ width: 180 }}
           placeholder={t('jobs.filter.triggerType')}
           value={triggerType}
-          onChange={(value) => setTriggerType(value)}
+          onChange={(value) => {
+            setTriggerType(value);
+            const params = new URLSearchParams(searchParams);
+            if (value) {
+              params.set('triggerType', value);
+            } else {
+              params.delete('triggerType');
+            }
+            setSearchParams(params);
+          }}
           options={[
             { value: 'MANUAL', label: t('jobs.trigger.manual') },
             { value: 'SCHEDULED', label: t('jobs.trigger.scheduled') },

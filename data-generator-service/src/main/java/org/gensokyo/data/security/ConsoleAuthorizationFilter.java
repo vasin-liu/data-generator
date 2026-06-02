@@ -100,6 +100,12 @@ public class ConsoleAuthorizationFilter extends OncePerRequestFilter {
             }
             return ConsolePermission.JOB_READ;
         }
+        if (path.startsWith("/api/console/schedules")) {
+            if (HttpMethod.POST.matches(method) || HttpMethod.PUT.matches(method) || HttpMethod.DELETE.matches(method)) {
+                return ConsolePermission.TEMPLATE_RUN;
+            }
+            return ConsolePermission.JOB_READ;
+        }
         return null;
     }
 }

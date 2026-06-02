@@ -16,7 +16,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from '../../api/schedules';
 import { fetchTemplates } from '../../api/templates';
 import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
@@ -49,7 +49,8 @@ function formatTime(value: string | null | undefined): string {
 export function SchedulesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [templateFilter, setTemplateFilter] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [templateFilter, setTemplateFilter] = useState(searchParams.get('templateId') ?? '');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<TaskScheduleView | null>(null);
   const [dialogKey, setDialogKey] = useState('new');
@@ -209,6 +210,16 @@ export function SchedulesPage() {
             <Button type="link" onClick={() => openEdit(row)}>
               {t('common.edit')}
             </Button>
+            <Button
+              type="link"
+              onClick={() =>
+                window.location.assign(
+                  `/console/jobs?templateId=${encodeURIComponent(formatId(row.templateId))}&triggerType=SCHEDULED`,
+                )
+              }
+            >
+              {t('schedules.viewJobs')}
+            </Button>
             <Button type="link" danger onClick={() => confirmDelete(row)}>
               {t('common.remove')}
             </Button>
@@ -236,7 +247,16 @@ export function SchedulesPage() {
         <Input
           placeholder={t('schedules.filter.templateId')}
           value={templateFilter}
-          onChange={(e) => setTemplateFilter(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setTemplateFilter(next);
+            const trimmed = next.trim();
+            if (trimmed) {
+              setSearchParams({ templateId: trimmed });
+            } else {
+              setSearchParams({});
+            }
+          }}
           style={{ width: 220 }}
           allowClear
         />
