@@ -197,6 +197,16 @@ export function SchedulesPage() {
         render: formatTime,
       },
       {
+        title: t('schedules.col.lastInstance'),
+        key: 'lastInstanceId',
+        render: (_, row) =>
+          row.lastInstanceId == null ? (
+            '—'
+          ) : (
+            <Link to={`/jobs/${formatId(row.lastInstanceId)}`}>{formatId(row.lastInstanceId)}</Link>
+          ),
+      },
+      {
         title: t('schedules.col.description'),
         dataIndex: 'description',
         ellipsis: true,

@@ -122,15 +122,17 @@ public class TaskScheduleService {
     }
 
     /**
-     * Advances {@code lastTriggerAt} and {@code nextTriggerAt} after a poll attempt.
+     * Advances trigger timestamps and captures the last started instance id.
      *
-     * @param id          schedule id
-     * @param triggeredAt trigger timestamp
+     * @param id             schedule id
+     * @param triggeredAt    trigger timestamp
+     * @param lastInstanceId started instance id, or null when trigger failed/skipped
      */
     @Transactional
-    public void markTriggered(Long id, Instant triggeredAt) {
+    public void markTriggered(Long id, Instant triggeredAt, Long lastInstanceId) {
         TaskSchedulePO row = requireSchedule(id);
         row.setLastTriggeredAt(triggeredAt);
+        row.setLastInstanceId(lastInstanceId);
         if (Boolean.TRUE.equals(row.getEnabled())) {
             row.setNextTriggerAt(TaskScheduleSupport.nextTriggerAfter(row.getCronExpression(), triggeredAt));
         }
@@ -173,6 +175,7 @@ public class TaskScheduleService {
                 Boolean.TRUE.equals(row.getEnabled()),
                 row.getDescription(),
                 row.getLastTriggeredAt(),
+                row.getLastInstanceId(),
                 row.getNextTriggerAt());
     }
 }

@@ -58,8 +58,10 @@ public class TaskSchedulePoller {
     private void triggerOne(TaskSchedulePO schedule, Instant now) {
         Long scheduleId = schedule.getId();
         Long templateId = schedule.getTemplateId();
+        Long lastInstanceId = null;
         try {
             TaskController.TemplateRunStartResult started = taskController.triggerScheduledRun(templateId);
+            lastInstanceId = started.instanceId();
             auditService.record(
                     "TASK_SCHEDULE_TRIGGER",
                     "TASK_SCHEDULE",
@@ -85,7 +87,7 @@ public class TaskSchedulePoller {
                     Map.of("templateId", templateId, "error", String.valueOf(e.getMessage())));
         } finally {
             // Always advance next fire time to avoid tight loops on persistent errors.
-            taskScheduleService.markTriggered(scheduleId, now);
+            taskScheduleService.markTriggered(scheduleId, now, lastInstanceId);
         }
     }
 }

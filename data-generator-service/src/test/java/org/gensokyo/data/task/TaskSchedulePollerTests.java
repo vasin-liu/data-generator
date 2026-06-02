@@ -62,7 +62,7 @@ class TaskSchedulePollerTests {
         taskSchedulePoller.pollDueSchedules();
 
         verify(taskController).triggerScheduledRun(99001L);
-        verify(taskScheduleService).markTriggered(eq(501L), any(Instant.class));
+        verify(taskScheduleService).markTriggered(eq(501L), any(Instant.class), eq(88001L));
         verify(auditService).record(eq("TASK_SCHEDULE_TRIGGER"), eq("TASK_SCHEDULE"), eq("501"), any());
     }
 }

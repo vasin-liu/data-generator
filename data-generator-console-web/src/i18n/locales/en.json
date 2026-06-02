@@ -71,6 +71,7 @@
   "schedules.col.enabled": "Enabled",
   "schedules.col.next": "Next run",
   "schedules.col.last": "Last trigger",
+  "schedules.col.lastInstance": "Last instance",
   "schedules.col.description": "Description",
   "schedules.dialog.create": "Create schedule",
   "schedules.dialog.edit": "Edit schedule",

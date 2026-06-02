@@ -108,6 +108,7 @@ export interface TaskScheduleView {
   enabled: boolean;
   description: string | null;
   lastTriggeredAt: string | null;
+  lastInstanceId: string | number | null;
   nextTriggerAt: string | null;
 }
 

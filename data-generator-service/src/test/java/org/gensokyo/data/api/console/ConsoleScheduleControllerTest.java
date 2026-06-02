@@ -53,7 +53,7 @@ class ConsoleScheduleControllerTest {
     void list_returnsSchedules() throws Exception {
         Instant next = Instant.parse("2026-06-01T12:00:00Z");
         when(taskScheduleService.listAll())
-                .thenReturn(List.of(new TaskScheduleView(1L, 99L, "0 0 * * * *", true, "nightly", null, next)));
+                .thenReturn(List.of(new TaskScheduleView(1L, 99L, "0 0 * * * *", true, "nightly", null, 123L, next)));
 
         mockMvc.perform(get("/api/console/schedules"))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class ConsoleScheduleControllerTest {
     void create_returnsSchedule() throws Exception {
         Instant next = Instant.parse("2026-06-01T12:00:00Z");
         when(taskScheduleService.create(any(TaskScheduleUpsertRequest.class)))
-                .thenReturn(new TaskScheduleView(2L, 100L, "0 0 * * * *", true, null, null, next));
+                .thenReturn(new TaskScheduleView(2L, 100L, "0 0 * * * *", true, null, null, null, next));
 
         mockMvc.perform(
                         post("/api/console/schedules")

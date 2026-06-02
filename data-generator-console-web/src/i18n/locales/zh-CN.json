@@ -71,6 +71,7 @@
   "schedules.col.enabled": "启用",
   "schedules.col.next": "下次执行",
   "schedules.col.last": "上次触发",
+  "schedules.col.lastInstance": "最近实例",
   "schedules.col.description": "说明",
   "schedules.dialog.create": "新建定时任务",
   "schedules.dialog.edit": "编辑定时任务",

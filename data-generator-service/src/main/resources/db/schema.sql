@@ -131,11 +131,14 @@ CREATE TABLE IF NOT EXISTS `task_schedule`
     `enabled`           BOOLEAN      DEFAULT TRUE NOT NULL,
     `description`       VARCHAR(512) DEFAULT NULL,
     `last_triggered_at` TIMESTAMP    DEFAULT NULL,
+    `last_instance_id`  LONG         DEFAULT NULL,
     `next_trigger_at`   TIMESTAMP    DEFAULT NULL,
     `created_at`        TIMESTAMP    DEFAULT NULL,
     `updated_at`        TIMESTAMP    DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+ALTER TABLE `task_schedule` ADD COLUMN IF NOT EXISTS `last_instance_id` LONG;
 
 -- Cron-driven template run schedules (Phase B schedule hook)
 CREATE TABLE IF NOT EXISTS `task_schedule`

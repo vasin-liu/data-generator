@@ -16,6 +16,7 @@ import java.time.Instant;
  * @param enabled          whether the schedule is active
  * @param description      optional label
  * @param lastTriggeredAt  last successful poll trigger time
+ * @param lastInstanceId   last started task instance id when available
  * @param nextTriggerAt    next planned trigger time
  * @author Gensokyo
  * @since 2026-06-01
@@ -27,5 +28,6 @@ public record TaskScheduleView(
         boolean enabled,
         String description,
         Instant lastTriggeredAt,
+        Long lastInstanceId,
         Instant nextTriggerAt) {
 }

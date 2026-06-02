@@ -46,6 +46,9 @@ public class TaskSchedulePO implements Serializable {
     @Column(name = "last_triggered_at")
     private Instant lastTriggeredAt;
 
+    @Column(name = "last_instance_id")
+    private Long lastInstanceId;
+
     @Column(name = "next_trigger_at")
     private Instant nextTriggerAt;
 
