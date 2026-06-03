@@ -8,8 +8,8 @@ export type BreadcrumbItem = {
 };
 
 type Props = {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   crumbs?: BreadcrumbItem[];
   extra?: ReactNode;
 };

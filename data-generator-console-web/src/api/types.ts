@@ -131,6 +131,7 @@ export interface TemplateEditorPayload {
   draft: TemplateV2Draft;
   v1Yaml: string | null;
   archived: boolean;
+  status: string | null;
 }
 
 /** Mirrors {@code TemplateV2DraftVO} — nested objects stay JSON-polymorphic. */

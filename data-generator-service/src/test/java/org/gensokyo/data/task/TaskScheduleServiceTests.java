@@ -85,4 +85,11 @@ class TaskScheduleServiceTests {
                 () -> taskScheduleService.create(
                         new TaskScheduleUpsertRequest(template.getId(), "not-a-cron", true, null)));
     }
+
+    @Test
+    void previewNextTrigger_returnsFutureInstant() {
+        Instant next = taskScheduleService.previewNextTrigger("0 0 2 * * *");
+        Assertions.assertNotNull(next);
+        Assertions.assertTrue(next.isAfter(Instant.now().minusSeconds(1)));
+    }
 }

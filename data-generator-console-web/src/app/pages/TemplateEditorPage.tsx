@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Collapse, Spin, Tabs, message } from 'antd';
+import { Alert, Button, Collapse, Space, Spin, Tabs, message } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { SourcesStep } from '../editor/steps/SourcesStep';
 import { TransformStep } from '../editor/steps/TransformStep';
 import { WorkflowPanel } from '../editor/WorkflowPanel';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { TemplateStatusTag } from '../../components/TemplateStatusTag';
 
 const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'workflow', 'review', 'migration'] as const;
 type TabKey = (typeof TAB_KEYS)[number];
@@ -37,7 +38,7 @@ export function TemplateEditorPage() {
   const invalidId = !isNew && routeId.length === 0;
 
   const [draft, setDraft] = useState<TemplateV2Draft | null>(null);
-  const [meta, setMeta] = useState<Omit<TemplateEditorPayload, 'draft'> | null>(null);
+  const [meta, setMeta] = useState<(Omit<TemplateEditorPayload, 'draft'> & { status: string | null }) | null>(null);
 
   const loadQuery = useQuery({
     queryKey: ['editor', id],
@@ -63,6 +64,7 @@ export function TemplateEditorPage() {
       kind: payload.kind,
       v1Yaml: payload.v1Yaml,
       archived: payload.archived,
+      status: payload.status,
     });
   }, []);
 
@@ -176,6 +178,7 @@ export function TemplateEditorPage() {
             archived={meta.archived}
             saveAllowed={saveAllowed}
             onSaved={onSaved}
+            onPublished={() => setMeta((m) => (m ? { ...m, status: 'PUBLISHED' } : m))}
           />
         </>
       ),
@@ -221,7 +224,13 @@ export function TemplateEditorPage() {
   return (
     <div>
       <ConsolePageHeader
-        title={title}
+        title={
+          <Space wrap>
+            {title}
+            {meta.status ? <TemplateStatusTag status={meta.status} /> : null}
+          </Space>
+        }
+        subtitle={draft.name?.trim() ? draft.name : undefined}
         crumbs={[
           { label: t('nav.home'), path: '/' },
           { label: t('nav.templates'), path: '/templates' },

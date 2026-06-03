@@ -22,6 +22,8 @@ import { fetchTemplates } from '../../api/templates';
 import { fetchConsoleRuntime } from '../../api/runtime';
 import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { CronPreviewField } from '../schedules/CronPreviewField';
+import { formatDateTime } from '../utils/formatDateTime';
 
 type ScheduleFormValues = {
   templateId: string;
@@ -32,17 +34,6 @@ type ScheduleFormValues = {
 
 function formatId(value: string | number): string {
   return String(value);
-}
-
-function formatTime(value: string | null | undefined): string {
-  if (!value) {
-    return '—';
-  }
-  try {
-    return new Date(value).toLocaleString();
-  } catch {
-    return value;
-  }
 }
 
 /**
@@ -250,12 +241,12 @@ export function SchedulesPage() {
       {
         title: t('schedules.col.next'),
         dataIndex: 'nextTriggerAt',
-        render: formatTime,
+        render: formatDateTime,
       },
       {
         title: t('schedules.col.last'),
         dataIndex: 'lastTriggeredAt',
-        render: formatTime,
+        render: formatDateTime,
       },
       {
         title: t('schedules.col.lastInstance'),
@@ -411,6 +402,7 @@ export function SchedulesPage() {
           >
             <Input placeholder="0 0 2 * * *" />
           </Form.Item>
+          <CronPreviewField form={form} />
           <Form.Item name="enabled" label={t('schedules.form.enabled')} valuePropName="checked">
             <Switch />
           </Form.Item>

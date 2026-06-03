@@ -8,6 +8,7 @@ import { cancelJob, fetchJob, resumeJob } from '../../api/jobs';
 import type { RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { formatDateTime } from '../utils/formatDateTime';
 import { triggerTypeLabel } from '../utils/triggerType';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING', 'PAUSED']);
@@ -174,9 +175,9 @@ export function JobDetailPage() {
             </Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.scheduleId')}>{row.scheduleId ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.rowCount')}>{row.rowCount ?? '—'}</Descriptions.Item>
-            <Descriptions.Item label={t('jobDetail.queued')}>{row.queuedAt ?? '—'}</Descriptions.Item>
-            <Descriptions.Item label={t('jobDetail.started')}>{row.startedAt ?? '—'}</Descriptions.Item>
-            <Descriptions.Item label={t('jobDetail.finished')}>{row.finishedAt ?? '—'}</Descriptions.Item>
+            <Descriptions.Item label={t('jobDetail.queued')}>{formatDateTime(row.queuedAt)}</Descriptions.Item>
+            <Descriptions.Item label={t('jobDetail.started')}>{formatDateTime(row.startedAt)}</Descriptions.Item>
+            <Descriptions.Item label={t('jobDetail.finished')}>{formatDateTime(row.finishedAt)}</Descriptions.Item>
           </Descriptions>
           {distributedJob && (
             <>

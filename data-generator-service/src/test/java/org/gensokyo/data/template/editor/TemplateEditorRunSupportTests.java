@@ -8,6 +8,7 @@ package org.gensokyo.data.template.editor;
 import org.gensokyo.data.controller.TaskController;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
+import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
 import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.junit.jupiter.api.Assertions;
@@ -47,7 +48,7 @@ class TemplateEditorRunSupportTests {
     void saveAndRunCreatesTemplateWhenIdNull() {
         TemplateV2DraftVO draft = new TemplateV2DraftVO();
         when(templateEditorService.createAndSave(draft))
-                .thenReturn(new TemplateEditorPayload(42L, null, draft, null, false));
+                .thenReturn(new TemplateEditorPayload(42L, TemplateDefinitionKind.V2, draft, null, false, "DRAFT"));
         when(taskController.runByIdAllowDraft(42L))
                 .thenReturn(R.ok("Template 't' started. templateId=42, instanceId=9001"));
 
@@ -88,7 +89,7 @@ class TemplateEditorRunSupportTests {
         TemplateV2DraftVO draft = new TemplateV2DraftVO();
         TemplateV2PreviewDTO preview = new TemplateV2PreviewDTO();
         when(templateEditorService.save(3L, draft))
-                .thenReturn(new TemplateEditorPayload(3L, null, draft, null, false));
+                .thenReturn(new TemplateEditorPayload(3L, TemplateDefinitionKind.V2, draft, null, false, "DRAFT"));
         when(controlPlaneService.preview(3L, 5, null)).thenReturn(preview);
 
         TemplateEditorRunSupport.PreviewResult result = runSupport.saveAndPreview(3L, draft, 5);

@@ -20,11 +20,13 @@ import java.io.Serializable;
  * @param draft        editable V2 draft (may be synthesized for V1 rows)
  * @param v1Yaml       original V1 YAML when {@code kind == V1}; otherwise null
  * @param archived     whether the row is archived
+ * @param status       lifecycle status ({@code DRAFT}, {@code PUBLISHED}, etc.)
  */
 public record TemplateEditorPayload(
         @JsonSerialize(using = ToStringSerializer.class) Long templateId,
         TemplateDefinitionKind kind,
         TemplateV2DraftVO draft,
         String v1Yaml,
-        boolean archived) implements Serializable {
+        boolean archived,
+        String status) implements Serializable {
 }

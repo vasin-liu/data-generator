@@ -57,7 +57,7 @@ public class TemplateEditorService {
      */
     public TemplateEditorPayload createEmptyDraft() {
         TemplateV2DraftVO draft = newEmptyV2Draft();
-        return new TemplateEditorPayload(null, TemplateDefinitionKind.V2, draft, null, false);
+        return new TemplateEditorPayload(null, TemplateDefinitionKind.V2, draft, null, false, "DRAFT");
     }
 
     /**
@@ -164,18 +164,26 @@ public class TemplateEditorService {
 
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
             v2Draft.setId(entity.getId());
-            return new TemplateEditorPayload(entity.getId(), kind, v2Draft, null, archived);
+            return new TemplateEditorPayload(entity.getId(), kind, v2Draft, null, archived, resolveStatus(entity));
         }
         if (v1 != null) {
             TemplateV2DraftVO placeholder = v2Draft != null ? v2Draft : newEmptyV2Draft();
             placeholder.setId(entity.getId());
             placeholder.setName(v1.getName());
-            return new TemplateEditorPayload(entity.getId(), TemplateDefinitionKind.V1, placeholder, yaml, archived);
+            return new TemplateEditorPayload(entity.getId(), TemplateDefinitionKind.V1, placeholder, yaml, archived, resolveStatus(entity));
         }
         TemplateV2DraftVO fallback = newEmptyV2Draft();
         fallback.setId(entity.getId());
         fallback.setName(entity.getName());
-        return new TemplateEditorPayload(entity.getId(), TemplateDefinitionKind.UNKNOWN, fallback, yaml, archived);
+        return new TemplateEditorPayload(entity.getId(), TemplateDefinitionKind.UNKNOWN, fallback, yaml, archived, resolveStatus(entity));
+    }
+
+    private String resolveStatus(TemplatePO entity) {
+        String status = entity.getStatus();
+        if (status == null || status.isBlank()) {
+            return Boolean.TRUE.equals(entity.getArchived()) ? "ARCHIVED" : "DRAFT";
+        }
+        return status;
     }
 
     private void persistV2Draft(TemplatePO entity, TemplateV2DraftVO draft) {

@@ -78,4 +78,15 @@ class ConsoleScheduleControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value(2));
     }
+
+    @Test
+    void previewCron_returnsNextTrigger() throws Exception {
+        Instant next = Instant.parse("2026-06-01T12:00:00Z");
+        when(taskScheduleService.previewNextTrigger("0 0 2 * * *")).thenReturn(next);
+
+        mockMvc.perform(get("/api/console/schedules/preview").param("cron", "0 0 2 * * *"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").value(next.toString()));
+    }
 }

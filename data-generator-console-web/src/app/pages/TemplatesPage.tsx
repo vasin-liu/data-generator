@@ -12,6 +12,7 @@ import {
 } from '../../api/templates';
 import type { TemplateSummary } from '../../api/types';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { TemplateStatusTag } from '../../components/TemplateStatusTag';
 
 /**
  * Template catalog grid (parity with Vaadin {@code TemplateListView}).
@@ -74,7 +75,7 @@ export function TemplatesPage() {
         title: t('templates.col.status'),
         dataIndex: 'status',
         render: (status: string | null) =>
-          status ? t(`template.status.${status}`, { defaultValue: status }) : '—',
+          status ? <TemplateStatusTag status={status} /> : '—',
       },
       {
         title: t('templates.col.archived'),

@@ -43,3 +43,12 @@ export function updateSchedule(id: string, body: TaskScheduleUpsertRequest): Pro
 export function deleteSchedule(id: string): Promise<string> {
   return apiRequest<string>(`/console/schedules/${id}`, { method: 'DELETE' });
 }
+
+/**
+ * @param cron Spring six-field cron expression
+ * @returns ISO-8601 instant for next fire after now
+ */
+export function previewScheduleCron(cron: string): Promise<string> {
+  const params = new URLSearchParams({ cron: cron.trim() });
+  return apiRequest<string>(`/console/schedules/preview?${params}`);
+}

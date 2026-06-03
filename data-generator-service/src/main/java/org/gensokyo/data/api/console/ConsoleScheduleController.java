@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.api.console.dto.TaskScheduleUpsertRequest;
 import org.gensokyo.data.api.console.dto.TaskScheduleView;
+import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.task.TaskScheduleService;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,10 +54,26 @@ public class ConsoleScheduleController {
     }
 
     /**
+     * Previews the next cron fire time using the same parser as the schedule poller.
+     *
+     * @param cron Spring six-field cron expression
+     * @return ISO-8601 instant string for the next trigger after now
+     */
+    @GetMapping("/preview")
+    public R<String> previewCron(@RequestParam(name = "cron") String cron) {
+        try {
+            // Two-arg form: R.ok(String) alone is message-only with null data.
+            return R.ok(Const.R_OK, taskScheduleService.previewNextTrigger(cron).toString());
+        } catch (IllegalArgumentException e) {
+            return R.fail(e.getMessage());
+        }
+    }
+
+    /**
      * @param id schedule id
      * @return schedule view
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public R<TaskScheduleView> get(@NotNull @PathVariable Long id) {
         return R.ok(taskScheduleService.getById(id));
     }
@@ -83,7 +100,7 @@ public class ConsoleScheduleController {
      * @param request upsert body
      * @return updated view
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public R<TaskScheduleView> update(
             @NotNull @PathVariable Long id, @Valid @RequestBody TaskScheduleUpsertRequest request) {
         try {
@@ -99,13 +116,14 @@ public class ConsoleScheduleController {
      * @param id schedule id
      * @return acknowledgement
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public R<String> delete(@NotNull @PathVariable Long id) {
         try {
             taskScheduleService.delete(id);
-            return R.ok("Schedule deleted");
+            return R.ok(Const.R_OK, "Schedule deleted");
         } catch (IllegalArgumentException e) {
             return R.fail(e.getMessage());
         }
     }
+
 }

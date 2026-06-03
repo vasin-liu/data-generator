@@ -178,4 +178,15 @@ public class TaskScheduleService {
                 row.getLastInstanceId(),
                 row.getNextTriggerAt());
     }
+
+    /**
+     * Computes the next cron fire time after now (for console preview).
+     *
+     * @param cronExpression Spring six-field cron text
+     * @return next trigger instant
+     * @throws IllegalArgumentException when the expression is invalid or has no next fire
+     */
+    public Instant previewNextTrigger(String cronExpression) {
+        return TaskScheduleSupport.nextTriggerAfter(cronExpression, Instant.now());
+    }
 }

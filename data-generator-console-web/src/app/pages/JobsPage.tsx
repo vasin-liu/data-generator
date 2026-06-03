@@ -9,6 +9,7 @@ import { fetchJobs } from '../../api/jobs';
 import type { TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { formatDateTime } from '../utils/formatDateTime';
 import { triggerTypeLabel } from '../utils/triggerType';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING']);
@@ -93,7 +94,11 @@ export function JobsPage() {
         dataIndex: 'status',
         render: (status: string) => <JobStatusTag status={status} />,
       },
-      { title: t('jobs.col.finished'), dataIndex: 'finishedAt' },
+      {
+        title: t('jobs.col.finished'),
+        dataIndex: 'finishedAt',
+        render: (value: string | null) => formatDateTime(value),
+      },
       {
         title: '',
         key: 'detail',

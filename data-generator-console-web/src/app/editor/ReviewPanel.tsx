@@ -13,6 +13,7 @@ type Props = {
   archived: boolean;
   saveAllowed: boolean;
   onSaved: (templateId: string) => void;
+  onPublished?: () => void;
 };
 
 /**
@@ -25,6 +26,7 @@ export function ReviewPanel({
   archived,
   saveAllowed,
   onSaved,
+  onPublished,
 }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -101,7 +103,10 @@ export function ReviewPanel({
       }
       return publishTemplate(templateId);
     },
-    onSuccess: () => message.success(t('review.publish.done')),
+    onSuccess: () => {
+      message.success(t('review.publish.done'));
+      onPublished?.();
+    },
     onError: (err: Error) => message.error(err.message),
   });
 
