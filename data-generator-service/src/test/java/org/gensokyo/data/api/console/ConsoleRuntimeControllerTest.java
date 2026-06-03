@@ -6,6 +6,8 @@
 package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.config.DistributedExecutionProperties;
+import org.gensokyo.data.config.TaskScheduleProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,30 +33,32 @@ class ConsoleRuntimeControllerTest {
     @Mock
     private DataGeneratorProperties properties;
 
+    @Mock
+    private TaskScheduleProperties scheduleProperties;
+
+    @Mock
+    private DistributedExecutionProperties distributedProperties;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleRuntimeController(properties, null))
+        mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleRuntimeController(
+                        properties, scheduleProperties, distributedProperties, null))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }
 
     @Test
-    void runtime_returnsV1ExecutionFlagWhenEnabled() throws Exception {
-        when(properties.isV1ExecutionEnabled()).thenReturn(true);
-        mockMvc.perform(get("/api/console/runtime"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(true));
-    }
-
-    @Test
-    void runtime_returnsV1ExecutionFlagWhenDisabled() throws Exception {
+    void runtime_returnsFeatureFlags() throws Exception {
         when(properties.isV1ExecutionEnabled()).thenReturn(false);
+        when(scheduleProperties.isEnabled()).thenReturn(true);
+        when(distributedProperties.isEnabled()).thenReturn(false);
         mockMvc.perform(get("/api/console/runtime"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(false));
+                .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(false))
+                .andExpect(jsonPath("$.data.scheduleEnabled").value(true))
+                .andExpect(jsonPath("$.data.distributedEnabled").value(false));
     }
 }

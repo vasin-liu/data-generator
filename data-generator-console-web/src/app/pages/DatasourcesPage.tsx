@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Form, Input, Modal, Space, Table, Typography, Upload, message } from 'antd';
+import { Alert, Button, Form, Input, Modal, Space, Table, Typography, Upload, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useMemo, useState } from 'react';
@@ -14,6 +14,7 @@ import {
 import type { DataSourceSummary } from '../../api/types';
 import { DriverPresetFields } from '../datasources/DriverPresetFields';
 import { isBundledPreset, resolveDriverPresets } from '../datasources/jdbcDriverPresets';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 
 type FormValues = {
   name: string;
@@ -169,12 +170,33 @@ export function DatasourcesPage() {
 
   return (
     <div>
-      <Typography.Title level={3}>{t('datasources.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('datasources.subtitle')}</Typography.Paragraph>
+      <ConsolePageHeader
+        title={t('datasources.title')}
+        subtitle={t('datasources.subtitle')}
+        crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.datasources') }]}
+        extra={
+          <Button type="primary" onClick={openCreate}>
+            {t('datasources.new')}
+          </Button>
+        }
+      />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('datasources.workflow.title')}
+        description={t('datasources.workflow.body')}
+      />
+      {overviewQuery.isError ? (
+        <Alert
+          type="error"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('datasources.loadError')}
+          description={(overviewQuery.error as Error).message}
+        />
+      ) : null}
       <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={openCreate}>
-          {t('datasources.new')}
-        </Button>
         <Button onClick={() => overviewQuery.refetch()}>{t('common.refresh')}</Button>
       </Space>
 

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Button, Collapse, Spin, Tabs, Typography, message } from 'antd';
+import { Alert, Button, Collapse, Spin, Tabs, message } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
 import { fetchJdbcNames } from '../../api/runtime';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
 import { cloneDraft } from '../editor/draftUtils';
+import { EditorTabHint } from '../editor/EditorTabHint';
 import { MigrationTab } from '../editor/MigrationTab';
 import { ReviewPanel } from '../editor/ReviewPanel';
 import { YamlPanel } from '../editor/YamlPanel';
@@ -17,6 +18,7 @@ import { SinksStep } from '../editor/steps/SinksStep';
 import { SourcesStep } from '../editor/steps/SourcesStep';
 import { TransformStep } from '../editor/steps/TransformStep';
 import { WorkflowPanel } from '../editor/WorkflowPanel';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 
 const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'workflow', 'review', 'migration'] as const;
 type TabKey = (typeof TAB_KEYS)[number];
@@ -124,12 +126,22 @@ export function TemplateEditorPage() {
     {
       key: 'general',
       label: t('editor.tab.general'),
-      children: <GeneralStep {...stepProps} />,
+      children: (
+        <>
+          <EditorTabHint tab="general" isNew={isNew} />
+          <GeneralStep {...stepProps} />
+        </>
+      ),
     },
     {
       key: 'sources',
       label: t('editor.tab.sources'),
-      children: <SourcesStep {...stepProps} jdbcNames={jdbcQuery.data ?? []} />,
+      children: (
+        <>
+          <EditorTabHint tab="sources" isNew={isNew} />
+          <SourcesStep {...stepProps} jdbcNames={jdbcQuery.data ?? []} />
+        </>
+      ),
     },
     {
       key: 'transform',
@@ -155,14 +167,17 @@ export function TemplateEditorPage() {
       key: 'review',
       label: t('editor.tab.review'),
       children: (
-        <ReviewPanel
-          draft={draft}
-          templateId={templateId}
-          kind={meta.kind}
-          archived={meta.archived}
-          saveAllowed={saveAllowed}
-          onSaved={onSaved}
-        />
+        <>
+          <EditorTabHint tab="review" isNew={isNew} />
+          <ReviewPanel
+            draft={draft}
+            templateId={templateId}
+            kind={meta.kind}
+            archived={meta.archived}
+            saveAllowed={saveAllowed}
+            onSaved={onSaved}
+          />
+        </>
       ),
     },
     ...(migrationUiEnabled
@@ -186,16 +201,34 @@ export function TemplateEditorPage() {
       : []),
   ];
 
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>
-          {title}
-        </Typography.Title>
+  const editorActions =
+    templateId != null ? (
+      <>
+        <Button onClick={() => navigate(`/jobs?templateId=${templateId}`)}>{t('templates.viewJobs')}</Button>
+        <Button onClick={() => navigate(`/schedules?templateId=${templateId}`)}>
+          {t('templates.schedules')}
+        </Button>
         <Button>
           <Link to="/templates">{t('editor.back')}</Link>
         </Button>
-      </div>
+      </>
+    ) : (
+      <Button>
+        <Link to="/templates">{t('editor.back')}</Link>
+      </Button>
+    );
+
+  return (
+    <div>
+      <ConsolePageHeader
+        title={title}
+        crumbs={[
+          { label: t('nav.home'), path: '/' },
+          { label: t('nav.templates'), path: '/templates' },
+          { label: isNew ? t('editor.new') : String(templateId ?? routeId) },
+        ]}
+        extra={editorActions}
+      />
       {meta.kind === 'V1' && (
         <Alert type="info" message={t('editor.v1.note')} style={{ marginBottom: 16 }} />
       )}

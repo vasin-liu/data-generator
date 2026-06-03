@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Checkbox, Input, Modal, Space, Table, Typography, message } from 'antd';
+import { Alert, Button, Checkbox, Input, Modal, Select, Space, Table, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import {
   runTemplate,
 } from '../../api/templates';
 import type { TemplateSummary } from '../../api/types';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 
 /**
  * Template catalog grid (parity with Vaadin {@code TemplateListView}).
@@ -21,11 +22,20 @@ export function TemplatesPage() {
   const queryClient = useQueryClient();
   const [includeArchived, setIncludeArchived] = useState(false);
   const [filter, setFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>();
 
   const listQuery = useQuery({
     queryKey: ['templates', includeArchived, filter],
     queryFn: () => fetchTemplates(includeArchived, filter),
   });
+
+  const filteredRows = useMemo(() => {
+    const rows = listQuery.data ?? [];
+    if (!statusFilter) {
+      return rows;
+    }
+    return rows.filter((row) => row.status === statusFilter);
+  }, [listQuery.data, statusFilter]);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['templates'] });
 
@@ -84,6 +94,13 @@ export function TemplatesPage() {
               <Button
                 type="link"
                 disabled={!active}
+                onClick={() => navigate(`/jobs?templateId=${encodeURIComponent(String(row.id))}`)}
+              >
+                {t('templates.viewJobs')}
+              </Button>
+              <Button
+                type="link"
+                disabled={!active}
                 onClick={() => navigate(`/schedules?templateId=${encodeURIComponent(String(row.id))}`)}
               >
                 {t('templates.schedules')}
@@ -129,8 +146,16 @@ export function TemplatesPage() {
 
   return (
     <div>
-      <Typography.Title level={3}>{t('templates.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('templates.subtitle')}</Typography.Paragraph>
+      <ConsolePageHeader
+        title={t('templates.title')}
+        subtitle={t('templates.subtitle')}
+        crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.templates') }]}
+        extra={
+          <Button type="primary" onClick={() => navigate('/templates/new')}>
+            {t('templates.new')}
+          </Button>
+        }
+      />
       {listQuery.isError ? (
         <Alert
           type="error"
@@ -141,9 +166,6 @@ export function TemplatesPage() {
         />
       ) : null}
       <Space wrap style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={() => navigate('/templates/new')}>
-          {t('templates.new')}
-        </Button>
         <Button onClick={() => listQuery.refetch()}>{t('common.refresh')}</Button>
         <Input
           allowClear
@@ -152,6 +174,17 @@ export function TemplatesPage() {
           onChange={(e) => setFilter(e.target.value)}
           style={{ width: 200 }}
         />
+        <Select
+          allowClear
+          style={{ width: 140 }}
+          placeholder={t('templates.filter.status')}
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { value: 'DRAFT', label: t('template.status.DRAFT') },
+            { value: 'PUBLISHED', label: t('template.status.PUBLISHED') },
+          ]}
+        />
         <Checkbox checked={includeArchived} onChange={(e) => setIncludeArchived(e.target.checked)}>
           {t('templates.includeArchived')}
         </Checkbox>
@@ -159,10 +192,12 @@ export function TemplatesPage() {
       <Table<TemplateSummary>
         rowKey={(row) => String(row.id)}
         loading={listQuery.isLoading}
-        dataSource={listQuery.data ?? []}
+        dataSource={filteredRows}
         columns={columns}
         pagination={{ pageSize: 20 }}
-        locale={{ emptyText: t('templates.empty') }}
+        locale={{
+          emptyText: listQuery.isLoading ? ' ' : t('templates.empty'),
+        }}
       />
     </div>
   );

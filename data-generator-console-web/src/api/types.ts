@@ -24,6 +24,8 @@ export interface TemplateSummary {
 
 export interface ConsoleRuntime {
   v1ExecutionEnabled: boolean;
+  scheduleEnabled: boolean;
+  distributedEnabled: boolean;
 }
 
 /** Mirrors {@code StageMetricVO}. */

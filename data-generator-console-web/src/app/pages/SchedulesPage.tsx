@@ -16,10 +16,12 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from '../../api/schedules';
 import { fetchTemplates } from '../../api/templates';
+import { fetchConsoleRuntime } from '../../api/runtime';
 import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 
 type ScheduleFormValues = {
   templateId: string;
@@ -48,6 +50,7 @@ function formatTime(value: string | null | undefined): string {
  */
 export function SchedulesPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightScheduleId = searchParams.get('scheduleId')?.trim() ?? '';
@@ -64,6 +67,11 @@ export function SchedulesPage() {
     queryKey: ['schedules', filterTemplateId],
     queryFn: () => fetchSchedules(filterTemplateId),
     refetchInterval: 30_000,
+  });
+
+  const runtimeQuery = useQuery({
+    queryKey: ['console-runtime'],
+    queryFn: fetchConsoleRuntime,
   });
 
   const templatesQuery = useQuery({
@@ -197,7 +205,6 @@ export function SchedulesPage() {
     if (!templateFilter.trim()) {
       setTemplateFilter(templateId);
     }
-    openEdit(match);
     syncSearchParams({
       templateId: templateFilter.trim() || templateId,
       scheduleId: highlightScheduleId,
@@ -277,8 +284,8 @@ export function SchedulesPage() {
             <Button
               type="link"
               onClick={() =>
-                window.location.assign(
-                  `/console/jobs?templateId=${encodeURIComponent(formatId(row.templateId))}&triggerType=SCHEDULED`,
+                navigate(
+                  `/jobs?templateId=${encodeURIComponent(formatId(row.templateId))}&triggerType=SCHEDULED`,
                 )
               }
             >
@@ -291,13 +298,31 @@ export function SchedulesPage() {
         ),
       },
     ],
-    [t, templateNameById],
+    [t, templateNameById, navigate],
   );
 
   return (
     <section>
-      <Typography.Title level={3}>{t('schedules.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('schedules.subtitle')}</Typography.Paragraph>
+      <ConsolePageHeader
+        title={t('schedules.title')}
+        subtitle={t('schedules.subtitle')}
+        crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.schedules') }]}
+        extra={
+          <Button type="primary" onClick={openCreate}>
+            {t('schedules.new')}
+          </Button>
+        }
+      />
+
+      {runtimeQuery.data && !runtimeQuery.data.scheduleEnabled && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('schedules.poller.off.title')}
+          description={t('schedules.poller.off.body')}
+        />
+      )}
 
       <Alert
         type="info"
@@ -338,9 +363,6 @@ export function SchedulesPage() {
           allowClear
         />
         <Button onClick={() => schedulesQuery.refetch()}>{t('common.refresh')}</Button>
-        <Button type="primary" onClick={openCreate}>
-          {t('schedules.new')}
-        </Button>
       </Space>
 
       <Table

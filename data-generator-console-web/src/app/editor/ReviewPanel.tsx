@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Button, Modal, Space, Typography, message } from 'antd';
+import { Alert, Button, Modal, Space, Typography, message } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -165,20 +165,35 @@ export function ReviewPanel({
         >
           {t('review.run')}
         </Button>
+        {templateId != null && (
+          <Button onClick={() => navigate(`/jobs?templateId=${templateId}`)}>
+            {t('templates.viewJobs')}
+          </Button>
+        )}
       </Space>
-      <Typography.Text strong>{t('review.validation')}</Typography.Text>
-      <pre
-        style={{
-          marginTop: 8,
-          minHeight: 200,
-          padding: 12,
-          background: '#f5f5f5',
-          borderRadius: 4,
-          overflow: 'auto',
-        }}
-      >
-        {output || '—'}
-      </pre>
+      {output.length > 0 ? (
+        <Alert
+          type={output.includes('ERROR:') ? 'error' : output.includes('WARN:') ? 'warning' : 'success'}
+          showIcon
+          style={{ marginBottom: 8 }}
+          message={t('review.validation')}
+          description={
+            <pre
+              style={{
+                margin: 0,
+                marginTop: 8,
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'inherit',
+                fontSize: 12,
+              }}
+            >
+              {output}
+            </pre>
+          }
+        />
+      ) : (
+        <Typography.Paragraph type="secondary">{t('review.validation.empty')}</Typography.Paragraph>
+      )}
     </div>
   );
 }

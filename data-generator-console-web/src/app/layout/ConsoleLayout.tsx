@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Layout, Menu, Select, Tag } from 'antd';
+import { Layout, Menu, Select, Space, Tag } from 'antd';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -56,9 +56,17 @@ export function ConsoleLayout() {
       </Sider>
       <Layout>
         <Header className="console-header">
-          <Tag color={v1Enabled ? 'green' : 'default'}>
-            {v1Enabled ? t('runtime.v1Enabled') : t('runtime.v1Disabled')}
-          </Tag>
+          <Space size="small" wrap>
+            <Tag color={v1Enabled ? 'green' : 'default'}>
+              {v1Enabled ? t('runtime.v1Enabled') : t('runtime.v1Disabled')}
+            </Tag>
+            {runtimeQuery.data?.scheduleEnabled && (
+              <Tag color="blue">{t('home.runtime.scheduleOn')}</Tag>
+            )}
+            {runtimeQuery.data?.distributedEnabled && (
+              <Tag color="purple">{t('home.runtime.distributedOn')}</Tag>
+            )}
+          </Space>
           <Select
             size="small"
             style={{ width: 100 }}

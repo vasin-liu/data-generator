@@ -6,10 +6,13 @@
 package org.gensokyo.data.api.console.dto;
 
 /**
- * Runtime flags shown in the console shell (navbar banner).
+ * Runtime flags shown in the console shell (navbar banner and home status).
  *
  * @author Gensokyo
  * @since 2026-05-26
  */
-public record ConsoleRuntimeDto(boolean v1ExecutionEnabled) {
+public record ConsoleRuntimeDto(
+        boolean v1ExecutionEnabled,
+        boolean scheduleEnabled,
+        boolean distributedEnabled) {
 }

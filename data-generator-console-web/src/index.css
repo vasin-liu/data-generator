@@ -37,6 +37,24 @@ body {
   max-height: 480px;
 }
 
+.console-page-header {
+  margin-bottom: 16px;
+}
+
+.console-page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .schedules-row-highlight > td {
   background-color: #e6f4ff !important;
+}
+
+.home-area-card .home-area-card-icon {
+  color: #1677ff;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
 }

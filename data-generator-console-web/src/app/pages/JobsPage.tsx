@@ -8,6 +8,8 @@ import { fetchDistributedMetrics } from '../../api/distributed';
 import { fetchJobs } from '../../api/jobs';
 import type { TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { triggerTypeLabel } from '../utils/triggerType';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING']);
 
@@ -48,6 +50,14 @@ export function JobsPage() {
       ? t('jobs.poll.active')
       : t('jobs.poll.idle');
 
+  const hasFilters = Boolean(templateId || triggerType);
+
+  const clearFilters = () => {
+    setTemplateIdInput('');
+    setTriggerType(undefined);
+    setSearchParams({});
+  };
+
   const columns: ColumnsType<TaskExecutionSummary> = useMemo(
     () => [
       {
@@ -66,7 +76,18 @@ export function JobsPage() {
           ),
       },
       { title: t('jobs.col.kind'), dataIndex: 'definitionKind' },
-      { title: t('jobs.col.trigger'), dataIndex: 'triggerType' },
+      {
+        title: t('jobs.col.trigger'),
+        dataIndex: 'triggerType',
+        render: (value: string, row) => (
+          <Space size="small">
+            {triggerTypeLabel(t, value)}
+            {row.triggerType === 'SCHEDULED' && row.scheduleId && (
+              <Link to={`/schedules?scheduleId=${row.scheduleId}`}>#{row.scheduleId}</Link>
+            )}
+          </Space>
+        ),
+      },
       {
         title: t('jobs.col.status'),
         dataIndex: 'status',
@@ -88,8 +109,11 @@ export function JobsPage() {
 
   return (
     <div>
-      <Typography.Title level={3}>{t('jobs.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('jobs.subtitle')}</Typography.Paragraph>
+      <ConsolePageHeader
+        title={t('jobs.title')}
+        subtitle={t('jobs.subtitle')}
+        crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.jobs') }]}
+      />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear
@@ -130,6 +154,11 @@ export function JobsPage() {
           ]}
         />
         <Button onClick={() => jobsQuery.refetch()}>{t('common.refresh')}</Button>
+        {hasFilters ? (
+          <Button type="link" onClick={clearFilters}>
+            {t('jobs.filter.clear')}
+          </Button>
+        ) : null}
         <Typography.Text type="secondary">{pollHint}</Typography.Text>
       </Space>
       {distributedQuery.data?.distributedEnabled && (
@@ -167,6 +196,7 @@ export function JobsPage() {
         dataSource={jobsQuery.data ?? []}
         columns={columns}
         pagination={{ pageSize: 20 }}
+        locale={{ emptyText: t('jobs.empty') }}
       />
     </div>
   );

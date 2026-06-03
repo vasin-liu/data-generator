@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Alert, Button, Descriptions, Space, Table, Typography, message } from 'antd';
+import { Alert, Button, Descriptions, Space, Spin, Table, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { cancelJob, fetchJob, resumeJob } from '../../api/jobs';
 import type { RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { triggerTypeLabel } from '../utils/triggerType';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING', 'PAUSED']);
 
@@ -85,54 +87,79 @@ export function JobDetailPage() {
       ? row.metricsJson
       : row?.errorMessage ?? '';
 
+  if (jobQuery.isLoading) {
+    return <Spin style={{ display: 'block', margin: '48px auto' }} />;
+  }
+
+  if (jobQuery.isError) {
+    return (
+      <Alert
+        type="error"
+        showIcon
+        message={t('jobDetail.loadError')}
+        description={(jobQuery.error as Error).message}
+        action={
+          <Button onClick={() => navigate('/jobs')}>{t('jobDetail.back')}</Button>
+        }
+      />
+    );
+  }
+
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Button onClick={() => navigate('/jobs')}>{t('jobDetail.back')}</Button>
-        {row?.templateId != null && (
-          <Button onClick={() => navigate(`/templates/${row.templateId}`)}>
-            {t('jobDetail.openTemplate')}
-          </Button>
-        )}
-        {row?.triggerType === 'SCHEDULED' && row?.scheduleId && (
-          <Button
-            onClick={() => {
-              const params = new URLSearchParams({
-                scheduleId: String(row.scheduleId),
-              });
-              if (row.templateId != null) {
-                params.set('templateId', String(row.templateId));
-              }
-              navigate(`/schedules?${params.toString()}`);
-            }}
-          >
-            {t('jobDetail.openSchedule')}
-          </Button>
-        )}
-        <Button onClick={() => jobQuery.refetch()}>{t('common.refresh')}</Button>
-        {row && ACTIVE.has(row.status) && (
-          <Button
-            danger
-            loading={cancelMutation.isPending}
-            onClick={() => cancelMutation.mutate()}
-          >
-            {t('jobDetail.cancel')}
-          </Button>
-        )}
-        {row?.status === 'PAUSED' && (
-          <Button
-            type="primary"
-            loading={resumeMutation.isPending}
-            onClick={() => resumeMutation.mutate()}
-          >
-            {t('jobDetail.resume')}
-          </Button>
-        )}
-      </Space>
-      <Typography.Title level={3}>
-        {t('jobDetail.title')} #{instanceIdParam}
-      </Typography.Title>
-      {row && (
+      <ConsolePageHeader
+        title={`${t('jobDetail.title')} #${instanceIdParam}`}
+        crumbs={[
+          { label: t('nav.home'), path: '/' },
+          { label: t('nav.jobs'), path: '/jobs' },
+          { label: `#${instanceIdParam}` },
+        ]}
+        extra={
+          <Space wrap>
+            <Button onClick={() => navigate('/jobs')}>{t('jobDetail.back')}</Button>
+            {row?.templateId != null && (
+              <Button onClick={() => navigate(`/templates/${row.templateId}`)}>
+                {t('jobDetail.openTemplate')}
+              </Button>
+            )}
+            {row?.triggerType === 'SCHEDULED' && row?.scheduleId && (
+              <Button
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    scheduleId: String(row.scheduleId),
+                  });
+                  if (row.templateId != null) {
+                    params.set('templateId', String(row.templateId));
+                  }
+                  navigate(`/schedules?${params.toString()}`);
+                }}
+              >
+                {t('jobDetail.openSchedule')}
+              </Button>
+            )}
+            <Button onClick={() => jobQuery.refetch()}>{t('common.refresh')}</Button>
+            {row && ACTIVE.has(row.status) && (
+              <Button
+                danger
+                loading={cancelMutation.isPending}
+                onClick={() => cancelMutation.mutate()}
+              >
+                {t('jobDetail.cancel')}
+              </Button>
+            )}
+            {row?.status === 'PAUSED' && (
+              <Button
+                type="primary"
+                loading={resumeMutation.isPending}
+                onClick={() => resumeMutation.mutate()}
+              >
+                {t('jobDetail.resume')}
+              </Button>
+            )}
+          </Space>
+        }
+      />
+      {row ? (
         <>
           <Descriptions bordered size="small" column={1} style={{ marginBottom: 16 }}>
             <Descriptions.Item label={t('jobs.col.status')}>
@@ -142,7 +169,9 @@ export function JobDetailPage() {
               {row.templateName} (#{row.templateId})
             </Descriptions.Item>
             <Descriptions.Item label={t('jobs.col.kind')}>{row.definitionKind}</Descriptions.Item>
-            <Descriptions.Item label={t('jobs.col.trigger')}>{row.triggerType ?? '—'}</Descriptions.Item>
+            <Descriptions.Item label={t('jobs.col.trigger')}>
+              {triggerTypeLabel(t, row.triggerType)}
+            </Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.scheduleId')}>{row.scheduleId ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.rowCount')}>{row.rowCount ?? '—'}</Descriptions.Item>
             <Descriptions.Item label={t('jobDetail.queued')}>{row.queuedAt ?? '—'}</Descriptions.Item>
@@ -192,6 +221,8 @@ export function JobDetailPage() {
             </>
           )}
         </>
+      ) : (
+        <Alert type="warning" showIcon message={t('jobDetail.notFound')} />
       )}
     </div>
   );

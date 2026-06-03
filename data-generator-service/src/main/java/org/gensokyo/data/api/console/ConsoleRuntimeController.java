@@ -8,6 +8,8 @@ package org.gensokyo.data.api.console;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import org.gensokyo.data.api.console.dto.ConsoleRuntimeDto;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.config.DistributedExecutionProperties;
+import org.gensokyo.data.config.TaskScheduleProperties;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,25 +31,36 @@ import java.util.Set;
 public class ConsoleRuntimeController {
 
     private final DataGeneratorProperties properties;
+    private final TaskScheduleProperties scheduleProperties;
+    private final DistributedExecutionProperties distributedProperties;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
 
     /**
      * @param properties              application flags
+     * @param scheduleProperties      cron schedule poller settings
+     * @param distributedProperties   distributed queue settings
      * @param dynamicRoutingDataSource optional JDBC registry for editor dropdowns
      */
     public ConsoleRuntimeController(
             DataGeneratorProperties properties,
+            TaskScheduleProperties scheduleProperties,
+            DistributedExecutionProperties distributedProperties,
             @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource) {
         this.properties = properties;
+        this.scheduleProperties = scheduleProperties;
+        this.distributedProperties = distributedProperties;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
     }
 
     /**
-     * @return flags for navbar / home (e.g. V1 execution enabled)
+     * @return flags for navbar / home (V1, schedule poller, distributed queue)
      */
     @GetMapping("/runtime")
     public R<ConsoleRuntimeDto> runtime() {
-        return R.ok(new ConsoleRuntimeDto(properties.isV1ExecutionEnabled()));
+        return R.ok(new ConsoleRuntimeDto(
+                properties.isV1ExecutionEnabled(),
+                scheduleProperties.isEnabled(),
+                distributedProperties.isEnabled()));
     }
 
     /**
