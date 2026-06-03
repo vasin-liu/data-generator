@@ -3,6 +3,7 @@ import type { FormInstance } from 'antd/es/form';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { previewScheduleCron } from '../../api/schedules';
+import { formatDateTime } from '../utils/formatDateTime';
 
 type Props = {
   /** Parent schedule form; only `cronExpression` is watched. */
@@ -62,7 +63,7 @@ export function CronPreviewField({ form }: Props) {
 
   return (
     <Typography.Text type="success" style={{ display: 'block', marginTop: 4 }}>
-      {t('schedules.form.cronPreview.next', { time: new Date(preview.next).toLocaleString() })}
+      {t('schedules.form.cronPreview.next', { time: formatDateTime(preview.next) })}
     </Typography.Text>
   );
 }

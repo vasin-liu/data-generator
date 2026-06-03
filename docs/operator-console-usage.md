@@ -155,7 +155,7 @@ flowchart LR
 - **Template list** — client-side filter by `DRAFT` / `PUBLISHED` status.
 - **Jobs** — clear URL filters; localized trigger type; schedule id link for scheduled runs.
 - **Template editor** — status tag (`DRAFT` / `PUBLISHED`); updates after Publish on Review tab.
-- **Schedules form** — live next-run preview via `GET /api/console/schedules/preview?cron=…`.
+- **Schedules form** — one-click cron presets (hourly, daily, weekly, monthly) plus live next-run preview via `GET /api/console/schedules/preview?cron=…`.
 - **Timestamps** — jobs and schedules use locale-aware formatting in tables and detail views.
 
 ### Templates (`/console/templates`)

@@ -22,6 +22,7 @@ import { fetchTemplates } from '../../api/templates';
 import { fetchConsoleRuntime } from '../../api/runtime';
 import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { CronPresetButtons } from '../schedules/CronPresetButtons';
 import { CronPreviewField } from '../schedules/CronPreviewField';
 import { formatDateTime } from '../utils/formatDateTime';
 
@@ -402,6 +403,7 @@ export function SchedulesPage() {
           >
             <Input placeholder="0 0 2 * * *" />
           </Form.Item>
+          <CronPresetButtons form={form} />
           <CronPreviewField form={form} />
           <Form.Item name="enabled" label={t('schedules.form.enabled')} valuePropName="checked">
             <Switch />
