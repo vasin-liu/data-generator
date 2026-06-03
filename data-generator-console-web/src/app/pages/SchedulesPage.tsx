@@ -14,7 +14,7 @@ import {
   message,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { createSchedule, deleteSchedule, fetchSchedules, updateSchedule } from '../../api/schedules';
@@ -50,7 +50,9 @@ export function SchedulesPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const highlightScheduleId = searchParams.get('scheduleId')?.trim() ?? '';
   const [templateFilter, setTemplateFilter] = useState(searchParams.get('templateId') ?? '');
+  const highlightHandledRef = useRef<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<TaskScheduleView | null>(null);
   const [dialogKey, setDialogKey] = useState('new');
@@ -131,6 +133,19 @@ export function SchedulesPage() {
     setModalOpen(true);
   };
 
+  const syncSearchParams = (next: { templateId?: string; scheduleId?: string }) => {
+    const params: Record<string, string> = {};
+    const templateId = next.templateId?.trim();
+    const scheduleId = next.scheduleId?.trim();
+    if (templateId) {
+      params.templateId = templateId;
+    }
+    if (scheduleId) {
+      params.scheduleId = scheduleId;
+    }
+    setSearchParams(params);
+  };
+
   const openEdit = (row: TaskScheduleView) => {
     setEditing(row);
     setDialogKey(`edit-${formatId(row.id)}`);
@@ -154,6 +169,45 @@ export function SchedulesPage() {
       onOk: () => deleteMutation.mutateAsync(id),
     });
   };
+
+  const highlightedRow = useMemo(() => {
+    if (!highlightScheduleId) {
+      return undefined;
+    }
+    return (schedulesQuery.data ?? []).find((row) => formatId(row.id) === highlightScheduleId);
+  }, [highlightScheduleId, schedulesQuery.data]);
+
+  useEffect(() => {
+    highlightHandledRef.current = null;
+  }, [highlightScheduleId]);
+
+  useEffect(() => {
+    if (!highlightScheduleId || schedulesQuery.isLoading) {
+      return;
+    }
+    if (highlightHandledRef.current === highlightScheduleId) {
+      return;
+    }
+    const match = highlightedRow;
+    if (!match) {
+      return;
+    }
+    highlightHandledRef.current = highlightScheduleId;
+    const templateId = formatId(match.templateId);
+    if (!templateFilter.trim()) {
+      setTemplateFilter(templateId);
+    }
+    openEdit(match);
+    syncSearchParams({
+      templateId: templateFilter.trim() || templateId,
+      scheduleId: highlightScheduleId,
+    });
+  }, [
+    highlightScheduleId,
+    highlightedRow,
+    schedulesQuery.isLoading,
+    templateFilter,
+  ]);
 
   const columns: ColumnsType<TaskScheduleView> = useMemo(
     () => [
@@ -253,6 +307,21 @@ export function SchedulesPage() {
         description={t('schedules.hint.body')}
       />
 
+      {highlightScheduleId && (
+        <Alert
+          type={highlightedRow ? 'success' : 'warning'}
+          showIcon
+          closable
+          style={{ marginBottom: 16 }}
+          message={
+            highlightedRow
+              ? t('schedules.highlight.found', { id: highlightScheduleId })
+              : t('schedules.highlight.missing', { id: highlightScheduleId })
+          }
+          onClose={() => syncSearchParams({ templateId: templateFilter })}
+        />
+      )}
+
       <Space style={{ marginBottom: 16 }} wrap>
         <Input
           placeholder={t('schedules.filter.templateId')}
@@ -260,12 +329,10 @@ export function SchedulesPage() {
           onChange={(e) => {
             const next = e.target.value;
             setTemplateFilter(next);
-            const trimmed = next.trim();
-            if (trimmed) {
-              setSearchParams({ templateId: trimmed });
-            } else {
-              setSearchParams({});
-            }
+            syncSearchParams({
+              templateId: next,
+              scheduleId: highlightScheduleId,
+            });
           }}
           style={{ width: 220 }}
           allowClear
@@ -281,6 +348,11 @@ export function SchedulesPage() {
         loading={schedulesQuery.isLoading}
         dataSource={schedulesQuery.data ?? []}
         columns={columns}
+        rowClassName={(row) =>
+          highlightScheduleId && formatId(row.id) === highlightScheduleId
+            ? 'schedules-row-highlight'
+            : ''
+        }
         pagination={{ pageSize: 20 }}
         locale={{ emptyText: t('schedules.empty') }}
       />

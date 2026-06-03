@@ -70,11 +70,11 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
     }));
   }, [presets, t]);
 
-  const applyPreset = (preset: JdbcDriverPreset) => {
+  const applyPreset = (preset: JdbcDriverPreset, updateUrl: boolean) => {
     const currentUrl = form.getFieldValue('url');
     form.setFieldsValue({
       driverClassName: preset.driverClassName,
-      url: currentUrl?.trim() ? currentUrl : preset.urlTemplate,
+      url: updateUrl || !currentUrl?.trim() ? preset.urlTemplate : currentUrl,
     });
   };
 
@@ -83,7 +83,7 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
     onPresetIdChange?.(id);
     const preset = findJdbcDriverPreset(presets, id);
     if (preset) {
-      applyPreset(preset);
+      applyPreset(preset, true);
     }
   };
 

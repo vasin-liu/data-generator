@@ -226,6 +226,8 @@ spring:
         validation-query: SELECT 1
 data:
   generator:
+    v1-execution:
+      enabled: false
     schedule:
       enabled: false
       poll-delay-ms: 60000

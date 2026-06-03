@@ -91,7 +91,7 @@ public class DataGeneratorProperties {
         /**
          * When {@code false}, TaskController refuses V1 templates (P4 retirement).
          */
-        private boolean enabled = true;
+        private boolean enabled = false;
     }
 
     /**

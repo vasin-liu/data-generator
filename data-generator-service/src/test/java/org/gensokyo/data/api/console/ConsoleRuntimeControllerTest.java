@@ -41,11 +41,20 @@ class ConsoleRuntimeControllerTest {
     }
 
     @Test
-    void runtime_returnsV1ExecutionFlag() throws Exception {
+    void runtime_returnsV1ExecutionFlagWhenEnabled() throws Exception {
         when(properties.isV1ExecutionEnabled()).thenReturn(true);
         mockMvc.perform(get("/api/console/runtime"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(true));
+    }
+
+    @Test
+    void runtime_returnsV1ExecutionFlagWhenDisabled() throws Exception {
+        when(properties.isV1ExecutionEnabled()).thenReturn(false);
+        mockMvc.perform(get("/api/console/runtime"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(false));
     }
 }

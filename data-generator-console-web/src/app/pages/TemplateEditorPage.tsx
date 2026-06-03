@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Collapse, Spin, Tabs, Typography, message } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { migrationUiEnabled } from '../../config/features';
 import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
 import { fetchJdbcNames } from '../../api/runtime';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
@@ -26,9 +27,10 @@ type TabKey = (typeof TAB_KEYS)[number];
 export function TemplateEditorPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const isNew = id === 'new';
+  const isNew = location.pathname.endsWith('/templates/new');
   const routeId = !isNew && id ? id.trim() : '';
   const invalidId = !isNew && routeId.length === 0;
 
@@ -44,7 +46,7 @@ export function TemplateEditorPage() {
       }
       return isNew ? fetchEditorScaffold() : fetchEditor(routeId);
     },
-    enabled: Boolean(id),
+    enabled: isNew || routeId.length > 0,
   });
 
   const jdbcQuery = useQuery({
@@ -69,11 +71,11 @@ export function TemplateEditorPage() {
   }, [loadQuery.data, applyPayload]);
 
   useEffect(() => {
-    if (invalidId && id) {
+    if (invalidId) {
       message.warning(t('editor.invalidId'));
       navigate('/templates/new', { replace: true });
     }
-  }, [invalidId, id, navigate, t]);
+  }, [invalidId, navigate, t]);
 
   const templateId = meta?.templateId ?? (isNew ? null : routeId);
   const saveAllowed = meta != null && meta.kind !== 'V1' && !meta.archived;
@@ -163,21 +165,25 @@ export function TemplateEditorPage() {
         />
       ),
     },
-    {
-      key: 'migration',
-      label: t('editor.tab.migration'),
-      children:
-        templateId == null ? (
-          <Alert type="info" message={t('editor.migration.saveFirst')} />
-        ) : (
-          <MigrationTab
-            templateId={templateId}
-            kind={meta.kind}
-            onPromoted={() => loadQuery.refetch()}
-            onDraftApply={(d) => setDraft(cloneDraft(d))}
-          />
-        ),
-    },
+    ...(migrationUiEnabled
+      ? [
+          {
+            key: 'migration' as const,
+            label: t('editor.tab.migration'),
+            children:
+              templateId == null ? (
+                <Alert type="info" message={t('editor.migration.saveFirst')} />
+              ) : (
+                <MigrationTab
+                  templateId={templateId}
+                  kind={meta.kind}
+                  onPromoted={() => loadQuery.refetch()}
+                  onDraftApply={(d) => setDraft(cloneDraft(d))}
+                />
+              ),
+          },
+        ]
+      : []),
   ];
 
   return (

@@ -4,10 +4,9 @@ import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { fetchConsoleRuntime } from '../../api/runtime';
+import { migrationUiEnabled } from '../../config/features';
 
 const { Header, Sider, Content } = Layout;
-
-const migrationEnabled = import.meta.env.VITE_ENABLE_MIGRATION === 'true';
 
 /**
  * Shell layout: sidebar navigation, V1 runtime banner, locale switch.
@@ -38,10 +37,10 @@ export function ConsoleLayout() {
     { key: '/datasources', label: t('nav.datasources') },
     { key: '/jobs', label: t('nav.jobs') },
     { key: '/schedules', label: t('nav.schedules') },
-    ...(migrationEnabled ? [{ key: '/migration', label: t('nav.migration') }] : []),
+    ...(migrationUiEnabled ? [{ key: '/migration', label: t('nav.migration') }] : []),
   ];
 
-  const v1Enabled = runtimeQuery.data?.v1ExecutionEnabled ?? true;
+  const v1Enabled = runtimeQuery.data?.v1ExecutionEnabled ?? false;
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

@@ -95,7 +95,17 @@ export function JobDetailPage() {
           </Button>
         )}
         {row?.triggerType === 'SCHEDULED' && row?.scheduleId && (
-          <Button onClick={() => navigate(`/schedules?templateId=${row.templateId}`)}>
+          <Button
+            onClick={() => {
+              const params = new URLSearchParams({
+                scheduleId: String(row.scheduleId),
+              });
+              if (row.templateId != null) {
+                params.set('templateId', String(row.templateId));
+              }
+              navigate(`/schedules?${params.toString()}`);
+            }}
+          >
             {t('jobDetail.openSchedule')}
           </Button>
         )}
