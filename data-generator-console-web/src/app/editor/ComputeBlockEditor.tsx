@@ -1,7 +1,7 @@
 import { Input, Radio, Tabs, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ComputeBlockDraft, TemplateV2Draft } from '../../api/types';
+import type { ComputeBlockDraft, EditorDataSources, TemplateV2Draft } from '../../api/types';
 import { SinksStep } from './steps/SinksStep';
 import { SourcesStep } from './steps/SourcesStep';
 import { TransformStep } from './steps/TransformStep';
@@ -17,14 +17,14 @@ import {
 type Props = {
   block: ComputeBlockDraft;
   readOnly: boolean;
-  jdbcNames: string[];
+  editorDataSources: EditorDataSources;
   onChange: (block: ComputeBlockDraft) => void;
 };
 
 /**
  * Per-compute-block editor reusing Sources, Transform, and Sinks steps.
  */
-export function ComputeBlockEditor({ block, readOnly, jdbcNames, onChange }: Props) {
+export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChange }: Props) {
   const { t } = useTranslation();
   const [transformLayout, setTransformLayout] = useState<'linear' | 'dag'>(
     blockUsesTransformGraph(block) ? 'dag' : 'linear',
@@ -53,7 +53,7 @@ export function ComputeBlockEditor({ block, readOnly, jdbcNames, onChange }: Pro
         <SourcesStep
           draft={scoped}
           readOnly={readOnly}
-          jdbcNames={jdbcNames}
+          editorDataSources={editorDataSources}
           onChange={(scopedDraft) => patchBlock(scopedDraftToComputeBlock(block, scopedDraft))}
         />
       ),
@@ -95,7 +95,7 @@ export function ComputeBlockEditor({ block, readOnly, jdbcNames, onChange }: Pro
         <SinksStep
           draft={scoped}
           readOnly={readOnly}
-          jdbcNames={jdbcNames}
+          editorDataSources={editorDataSources}
           onChange={(scopedDraft) => patchBlock(scopedDraftToComputeBlock(block, scopedDraft))}
         />
       ),

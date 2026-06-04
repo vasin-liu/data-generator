@@ -1,6 +1,8 @@
 import { Checkbox, Divider, Form, InputNumber, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { TemplateV2Draft } from '../../../api/types';
+import { FieldHelp } from '../../../components/FieldHelp';
+import { labeledOptions } from '../../utils/optionLabels';
 import { patchExecutionPolicy, patchSinkExecutionPolicy } from '../draftUtils';
 
 type Props = {
@@ -25,13 +27,13 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
       <Divider orientation="left" plain>
         {t('execution.section.pipeline')}
       </Divider>
-      <Form.Item label={t('execution.mode')}>
+      <Form.Item label={<FieldHelp label={t('execution.mode')} help={t('execution.mode.help')} />}>
         <Select
           disabled={readOnly}
           allowClear
           placeholder={t('execution.mode.default')}
           value={policy.mode}
-          options={EXECUTION_MODES.map((v) => ({ value: v, label: v }))}
+          options={labeledOptions(t, 'execution.mode', EXECUTION_MODES)}
           onChange={(v) => onChange(patchExecutionPolicy(draft, { mode: v }))}
         />
       </Form.Item>
@@ -100,13 +102,13 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
       <Divider orientation="left" plain>
         {t('execution.section.sink')}
       </Divider>
-      <Form.Item label={t('execution.sinkMode')}>
+      <Form.Item label={<FieldHelp label={t('execution.sinkMode')} help={t('execution.sinkMode.help')} />}>
         <Select
           disabled={readOnly}
           allowClear
           placeholder={t('execution.sinkMode.default')}
           value={sinkPolicy.mode}
-          options={SINK_EXEC_MODES.map((v) => ({ value: v, label: v }))}
+          options={labeledOptions(t, 'execution.sinkMode', SINK_EXEC_MODES)}
           onChange={(v) => onChange(patchSinkExecutionPolicy(draft, { mode: v }))}
         />
       </Form.Item>

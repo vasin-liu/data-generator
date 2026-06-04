@@ -306,9 +306,17 @@ export interface JdbcDriverPresetDto {
   bundled: boolean;
 }
 
+export interface EditorDataSources {
+  jdbcNames: string[];
+  kafkaClusters: string[];
+  elasticsearchClusters: string[];
+}
+
 export interface DataSourcesOverview {
   persisted: DataSourceSummary[];
   runtimeKeys: string[];
+  kafkaClusters: string[];
+  elasticsearchClusters: string[];
   driverPresets: JdbcDriverPresetDto[];
 }
 

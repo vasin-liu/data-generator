@@ -1,8 +1,11 @@
-import { Alert, Button, Checkbox, Collapse, Form, Input, InputNumber, Modal, Select, Space } from 'antd';
+import { Alert, Button, Card, Collapse, Form, Input, InputNumber, Modal, Select, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { SourceDraft, TemplateV2Draft } from '../../../api/types';
+import { Link } from 'react-router-dom';
+import type { EditorDataSources, SourceDraft, TemplateV2Draft } from '../../../api/types';
 import { SourceFieldsForm } from '../SourceFieldsForm';
+import { FieldHelp } from '../../../components/FieldHelp';
+import { labeledOptions } from '../../utils/optionLabels';
 import {
   EDITABLE_SOURCE_KINDS,
   addSource,
@@ -31,14 +34,14 @@ const SELECTION_STRATEGIES = [
 type Props = {
   draft: TemplateV2Draft;
   readOnly: boolean;
-  jdbcNames: string[];
+  editorDataSources: EditorDataSources;
   onChange: (draft: TemplateV2Draft) => void;
 };
 
 /**
- * Named source map editor (all V2 source kinds supported in the form).
+ * Named template input sources (query / files / iterators — not JDBC admin).
  */
-export function SourcesStep({ draft, readOnly, jdbcNames, onChange }: Props) {
+export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Props) {
   const { t } = useTranslation();
   const keys = listSourceKeys(draft);
   const [selectedKey, setSelectedKey] = useState(keys[0] ?? '');
@@ -87,9 +90,7 @@ export function SourcesStep({ draft, readOnly, jdbcNames, onChange }: Props) {
     Modal.confirm({
       title: t('source.remove'),
       content: t('source.removeConfirm', { key: selectedKey }),
-      onOk: () => {
-        onChange(removeSourceAt(draft, selectedKey));
-      },
+      onOk: () => onChange(removeSourceAt(draft, selectedKey)),
     });
   };
 
@@ -110,19 +111,31 @@ export function SourcesStep({ draft, readOnly, jdbcNames, onChange }: Props) {
     setRenameOpen(false);
   };
 
-  const kindOptions = EDITABLE_SOURCE_KINDS.map((k) => ({ value: k, label: k }));
+  const kindOptions = labeledOptions(t, 'source.kind', EDITABLE_SOURCE_KINDS);
 
   return (
-    <div style={{ maxWidth: 720 }}>
+    <div>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16, maxWidth: 900 }}
+        message={t('source.page.intro.title')}
+        description={
+          <span>
+            {t('source.page.intro.body')}{' '}
+            <Link to="/datasources">{t('nav.datasources')}</Link>
+          </span>
+        }
+      />
       <Space wrap style={{ marginBottom: 16 }}>
         <Select
-          style={{ minWidth: 180 }}
+          style={{ minWidth: 200 }}
           disabled={keys.length === 0}
           value={selectedKey || undefined}
           options={keys.map((k) => ({ value: k, label: k }))}
           onChange={setSelectedKey}
         />
-        <Button disabled={readOnly} onClick={handleAdd}>
+        <Button disabled={readOnly} type="primary" onClick={handleAdd}>
           {t('source.add')}
         </Button>
         <Button disabled={readOnly || !selectedKey} onClick={openRename}>
@@ -141,60 +154,89 @@ export function SourcesStep({ draft, readOnly, jdbcNames, onChange }: Props) {
           message={t('source.unsupportedType', { type: source?.type ?? 'unknown' })}
         />
       ) : (
-        <Form layout="vertical">
-          <Form.Item label={t('source.type')}>
-            <Select
-              disabled={readOnly}
-              value={sourceKind}
-              options={kindOptions}
-              onChange={(v) => onChange(setSourceKindAt(draft, selectedKey, v as EditableSourceKind))}
+        <Card title={t('source.card.title', { key: selectedKey })} style={{ maxWidth: 760 }}>
+          <Form layout="vertical">
+            <Form.Item
+              label={<FieldHelp label={t('source.type')} help={t('source.type.help')} required />}
+            >
+              <Select
+                disabled={readOnly}
+                value={sourceKind}
+                options={kindOptions}
+                onChange={(v) => onChange(setSourceKindAt(draft, selectedKey, v as EditableSourceKind))}
+              />
+            </Form.Item>
+            <SourceFieldsForm
+              kind={sourceKind}
+              source={source ?? {}}
+              readOnly={readOnly}
+              editorDataSources={editorDataSources}
+              onPatch={patchSource}
             />
-          </Form.Item>
-          <SourceFieldsForm
-            kind={sourceKind}
-            source={source ?? {}}
-            readOnly={readOnly}
-            jdbcNames={jdbcNames}
-            onPatch={patchSource}
-          />
-        </Form>
+          </Form>
+        </Card>
       )}
 
       {selectedKey && source ? (
         <Collapse
-          style={{ marginTop: 16, maxWidth: 720 }}
+          style={{ marginTop: 16, maxWidth: 760 }}
           items={[
             {
               key: 'policy',
               label: t('source.policy.title'),
               children: (
                 <Form layout="vertical">
-                  <Form.Item label={t('source.policy.inMemory')}>
-                    <Checkbox
+                  <Form.Item
+                    label={
+                      <FieldHelp label={t('source.policy.inMemory')} help={t('source.policy.inMemory.help')} />
+                    }
+                  >
+                    <Select
                       disabled={readOnly}
-                      checked={policy.inMemory ?? false}
-                      onChange={(e) => patchPolicy({ inMemory: e.target.checked })}
+                      value={policy.inMemory ?? false}
+                      options={[
+                        { value: true, label: t('common.yes') },
+                        { value: false, label: t('common.no') },
+                      ]}
+                      onChange={(v) => patchPolicy({ inMemory: v })}
                     />
                   </Form.Item>
-                  <Form.Item label={t('source.policy.selectionStrategy')}>
+                  <Form.Item
+                    label={
+                      <FieldHelp
+                        label={t('source.policy.selectionStrategy')}
+                        help={t('source.policy.selectionStrategy.help')}
+                      />
+                    }
+                  >
                     <Select
                       disabled={readOnly}
                       allowClear
                       placeholder={t('source.policy.selectionStrategy.default')}
                       value={policy.selectionStrategy}
-                      options={SELECTION_STRATEGIES.map((v) => ({ value: v, label: v }))}
+                      options={labeledOptions(t, 'source.selectionStrategy', SELECTION_STRATEGIES)}
                       onChange={(v) => patchPolicy({ selectionStrategy: v })}
                     />
                   </Form.Item>
-                  <Form.Item label={t('source.policy.limit')}>
+                  <Form.Item
+                    label={<FieldHelp label={t('source.policy.limit')} help={t('source.policy.limit.help')} />}
+                  >
                     <InputNumber
                       min={0}
                       disabled={readOnly}
+                      style={{ width: '100%' }}
                       value={policy.limit}
                       onChange={(v) => patchPolicy({ limit: v ?? undefined })}
                     />
                   </Form.Item>
-                  <Form.Item label={t('source.policy.materialization')}>
+                  <Form.Item
+                    label={
+                      <FieldHelp
+                        label={t('source.policy.materialization')}
+                        help={t('source.policy.materialization.help')}
+                      />
+                    }
+                  >
                     <Input
                       readOnly={readOnly}
                       value={policy.materialization ?? ''}

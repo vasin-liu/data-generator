@@ -15,13 +15,17 @@ import java.util.List;
  * Persisted JDBC configs plus runtime registry keys for the datasources page.
  *
  * @param persisted      rows from {@code datasource_config}
- * @param runtimeKeys    merged yaml + persisted keys
+ * @param runtimeKeys    merged yaml + persisted JDBC keys
  * @param driverPresets  built-in JDBC driver catalog for the console form
+ * @param kafkaClusters  Kafka cluster ids from application config (read-only)
+ * @param elasticsearchClusters Elasticsearch cluster ids from application config (read-only)
  */
 public record DataSourcesOverviewDto(
         List<DataSourceConfigSummary> persisted,
         List<String> runtimeKeys,
-        List<JdbcDriverPresetDto> driverPresets) {
+        List<JdbcDriverPresetDto> driverPresets,
+        List<String> kafkaClusters,
+        List<String> elasticsearchClusters) {
 
     /**
      * @param persisted   persisted rows
@@ -31,10 +35,13 @@ public record DataSourcesOverviewDto(
     public static DataSourcesOverviewDto of(
             List<DataSourceConfigSummary> persisted,
             List<String> runtimeKeys,
-            BundledJdbcDriverRegistry bundledDrivers) {
+            BundledJdbcDriverRegistry bundledDrivers,
+            List<String> kafkaClusters,
+            List<String> elasticsearchClusters) {
         List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
                 .map(p -> JdbcDriverPresetDto.from(p, bundledDrivers))
                 .toList();
-        return new DataSourcesOverviewDto(persisted, runtimeKeys, presets);
+        return new DataSourcesOverviewDto(
+                persisted, runtimeKeys, presets, kafkaClusters, elasticsearchClusters);
     }
 }

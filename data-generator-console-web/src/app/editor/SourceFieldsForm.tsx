@@ -1,5 +1,8 @@
-import { Checkbox, Form, Input, InputNumber, Select } from 'antd';
+import { Alert, Form, Input, InputNumber, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
+import type { EditorDataSources } from '../../api/types';
+import { FieldHelp } from '../../components/FieldHelp';
+import { SourceFileInput } from '../../components/SourceFileInput';
 import type { SourceDraft } from '../../api/types';
 import type { EditableSourceKind } from './draftUtils';
 
@@ -7,36 +10,77 @@ type Props = {
   kind: EditableSourceKind;
   source: SourceDraft;
   readOnly: boolean;
-  jdbcNames: string[];
+  editorDataSources: EditorDataSources;
   onPatch: (patch: SourceDraft) => void;
 };
 
 /**
- * Type-specific source fields (query, iterator, file, AI, geojson).
+ * Type-specific template input fields (not the JDBC admin page).
  */
-export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }: Props) {
+export function SourceFieldsForm({
+  kind,
+  source,
+  readOnly,
+  editorDataSources,
+  onPatch,
+}: Props) {
   const { t } = useTranslation();
   const iterator = source.iterator;
   const sheetName =
     (source.sheets as { name?: string }[] | undefined)?.[0]?.name ?? 'Sheet1';
+  const jdbcOptions = editorDataSources.jdbcNames.map((n) => ({ value: n, label: n }));
+  const selectedJdbc = source.dataSourceId as string | undefined;
 
   if (kind === 'query') {
     return (
       <>
-        <Form.Item label={t('source.datasource')}>
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 12 }}
+          message={t('source.query.intro')}
+        />
+        <Form.Item
+          label={
+            <FieldHelp
+              label={t('source.jdbcDatasource')}
+              help={t('source.jdbcDatasource.help')}
+              required
+            />
+          }
+        >
           <Select
             disabled={readOnly}
             showSearch
-            value={source.dataSourceId as string | undefined}
-            options={jdbcNames.map((n) => ({ value: n, label: n }))}
+            placeholder={t('source.jdbcDatasource.placeholder')}
+            value={selectedJdbc}
+            options={jdbcOptions}
             onChange={(v) => onPatch({ ...source, dataSourceId: v })}
           />
         </Form.Item>
-        <Form.Item label={t('source.sql')}>
+        {!selectedJdbc ? (
+          <Alert
+            type="warning"
+            showIcon
+            style={{ marginBottom: 12 }}
+            message={t('source.query.pickDatasource')}
+          />
+        ) : (
+          <Alert
+            type="success"
+            showIcon
+            style={{ marginBottom: 12 }}
+            message={t('source.query.sqlHint', { name: selectedJdbc })}
+          />
+        )}
+        <Form.Item
+          label={<FieldHelp label={t('source.sql')} help={t('source.sql.help')} required />}
+        >
           <Input.TextArea
-            rows={6}
+            rows={8}
             readOnly={readOnly}
             value={(source.sql as string) ?? ''}
+            placeholder={t('source.sql.placeholder')}
             onChange={(e) => onPatch({ ...source, sql: e.target.value })}
           />
         </Form.Item>
@@ -47,9 +91,11 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
   if (kind === 'iterator') {
     return (
       <>
-        <Form.Item label={t('source.from')}>
+        <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('source.iterator.intro')} />
+        <Form.Item label={<FieldHelp label={t('source.from')} help={t('source.from.help')} />}>
           <InputNumber
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={iterator?.from ?? 1}
             onChange={(v) =>
               onPatch({
@@ -59,9 +105,10 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
             }
           />
         </Form.Item>
-        <Form.Item label={t('source.to')}>
+        <Form.Item label={<FieldHelp label={t('source.to')} help={t('source.to.help')} />}>
           <InputNumber
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={iterator?.to ?? 3}
             onChange={(v) =>
               onPatch({
@@ -71,9 +118,10 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
             }
           />
         </Form.Item>
-        <Form.Item label={t('source.step')}>
+        <Form.Item label={<FieldHelp label={t('source.step')} help={t('source.step.help')} />}>
           <InputNumber
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={iterator?.step ?? 1}
             onChange={(v) =>
               onPatch({
@@ -90,38 +138,48 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
   if (kind === 'csv') {
     return (
       <>
-        <Form.Item label={t('source.path')}>
-          <Input
+        <Form.Item
+          label={<FieldHelp label={t('source.path')} help={t('source.path.fileHelp')} required />}
+        >
+          <SourceFileInput
+            path={(source.path as string) ?? ''}
             readOnly={readOnly}
-            value={(source.path as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, path: e.target.value })}
+            allowPaste
+            accept=".csv,text/csv"
+            defaultPasteName="source.csv"
+            onPathChange={(p) => onPatch({ ...source, path: p })}
           />
         </Form.Item>
-        <Form.Item label={t('source.charset')}>
+        <Form.Item label={<FieldHelp label={t('source.charset')} help={t('source.charset.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.charset as string) ?? 'UTF-8'}
             onChange={(e) => onPatch({ ...source, charset: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.delimiter')}>
+        <Form.Item label={<FieldHelp label={t('source.delimiter')} help={t('source.delimiter.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.delimiter as string) ?? ','}
             onChange={(e) => onPatch({ ...source, delimiter: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.header')}>
-          <Checkbox
+        <Form.Item label={<FieldHelp label={t('source.header')} help={t('source.header.help')} />}>
+          <Select
             disabled={readOnly}
-            checked={(source.header as boolean) ?? true}
-            onChange={(e) => onPatch({ ...source, header: e.target.checked })}
+            value={(source.header as boolean) ?? true}
+            options={[
+              { value: true, label: t('common.yes') },
+              { value: false, label: t('common.no') },
+            ]}
+            onChange={(v) => onPatch({ ...source, header: v })}
           />
         </Form.Item>
-        <Form.Item label={t('source.maxRows')}>
+        <Form.Item label={<FieldHelp label={t('source.maxRows')} help={t('source.maxRows.help')} />}>
           <InputNumber
             min={0}
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={source.maxRows as number | undefined}
             onChange={(v) => onPatch({ ...source, maxRows: v ?? undefined })}
           />
@@ -133,31 +191,37 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
   if (kind === 'json') {
     return (
       <>
-        <Form.Item label={t('source.path')}>
-          <Input
+        <Form.Item
+          label={<FieldHelp label={t('source.path')} help={t('source.path.fileHelp')} required />}
+        >
+          <SourceFileInput
+            path={(source.path as string) ?? ''}
             readOnly={readOnly}
-            value={(source.path as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, path: e.target.value })}
+            allowPaste
+            accept=".json,application/json"
+            defaultPasteName="source.json"
+            onPathChange={(p) => onPatch({ ...source, path: p })}
           />
         </Form.Item>
-        <Form.Item label={t('source.charset')}>
+        <Form.Item label={<FieldHelp label={t('source.charset')} help={t('source.charset.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.charset as string) ?? 'UTF-8'}
             onChange={(e) => onPatch({ ...source, charset: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.root')}>
+        <Form.Item label={<FieldHelp label={t('source.root')} help={t('source.root.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.root as string) ?? ''}
             onChange={(e) => onPatch({ ...source, root: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.maxRows')}>
+        <Form.Item label={<FieldHelp label={t('source.maxRows')} help={t('source.maxRows.help')} />}>
           <InputNumber
             min={0}
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={source.maxRows as number | undefined}
             onChange={(v) => onPatch({ ...source, maxRows: v ?? undefined })}
           />
@@ -169,14 +233,17 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
   if (kind === 'excel') {
     return (
       <>
-        <Form.Item label={t('source.path')}>
-          <Input
+        <Form.Item
+          label={<FieldHelp label={t('source.path')} help={t('source.path.excelHelp')} required />}
+        >
+          <SourceFileInput
+            path={(source.path as string) ?? ''}
             readOnly={readOnly}
-            value={(source.path as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, path: e.target.value })}
+            accept=".xlsx,.xls"
+            onPathChange={(p) => onPatch({ ...source, path: p })}
           />
         </Form.Item>
-        <Form.Item label={t('source.sheet')}>
+        <Form.Item label={<FieldHelp label={t('source.sheet')} help={t('source.sheet.help')} />}>
           <Input
             readOnly={readOnly}
             value={sheetName}
@@ -188,10 +255,11 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
             }
           />
         </Form.Item>
-        <Form.Item label={t('source.maxRows')}>
+        <Form.Item label={<FieldHelp label={t('source.maxRows')} help={t('source.maxRows.help')} />}>
           <InputNumber
             min={0}
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={source.maxRows as number | undefined}
             onChange={(v) => onPatch({ ...source, maxRows: v ?? undefined })}
           />
@@ -204,14 +272,14 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
     const provider = (source.provider as { type?: string } | undefined) ?? {};
     return (
       <>
-        <Form.Item label={t('source.ai.api')}>
+        <Form.Item label={<FieldHelp label={t('source.ai.api')} help={t('source.ai.api.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.api as string) ?? ''}
             onChange={(e) => onPatch({ ...source, api: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.ai.provider')}>
+        <Form.Item label={<FieldHelp label={t('source.ai.provider')} help={t('source.ai.provider.help')} />}>
           <Input
             readOnly={readOnly}
             value={provider.type ?? ''}
@@ -223,7 +291,7 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
             }
           />
         </Form.Item>
-        <Form.Item label={t('source.ai.prompt')}>
+        <Form.Item label={<FieldHelp label={t('source.ai.prompt')} help={t('source.ai.prompt.help')} />}>
           <Input.TextArea
             rows={4}
             readOnly={readOnly}
@@ -231,7 +299,7 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
             onChange={(e) => onPatch({ ...source, prompt: e.target.value })}
           />
         </Form.Item>
-        <Form.Item label={t('source.ai.parser')}>
+        <Form.Item label={<FieldHelp label={t('source.ai.parser')} help={t('source.ai.parser.help')} />}>
           <Input
             readOnly={readOnly}
             value={(source.parser as string) ?? ''}
@@ -245,17 +313,23 @@ export function SourceFieldsForm({ kind, source, readOnly, jdbcNames, onPatch }:
   if (kind === 'geojson') {
     return (
       <>
-        <Form.Item label={t('source.path')}>
-          <Input
+        <Form.Item
+          label={<FieldHelp label={t('source.path')} help={t('source.path.geoHelp')} required />}
+        >
+          <SourceFileInput
+            path={(source.path as string) ?? ''}
             readOnly={readOnly}
-            value={(source.path as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, path: e.target.value })}
+            allowPaste
+            accept=".json,.geojson"
+            defaultPasteName="source.geojson"
+            onPathChange={(p) => onPatch({ ...source, path: p })}
           />
         </Form.Item>
-        <Form.Item label={t('source.maxRows')}>
+        <Form.Item label={<FieldHelp label={t('source.maxRows')} help={t('source.maxRows.help')} />}>
           <InputNumber
             min={0}
             disabled={readOnly}
+            style={{ width: '100%' }}
             value={source.maxRows as number | undefined}
             onChange={(v) => onPatch({ ...source, maxRows: v ?? undefined })}
           />

@@ -215,6 +215,28 @@ export function DatasourcesPage() {
         {(overviewQuery.data?.runtimeKeys ?? []).join(', ') || '—'}
       </Typography.Paragraph>
 
+      <Typography.Title level={5}>{t('datasources.section.kafka')}</Typography.Title>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 8, maxWidth: 900 }}
+        message={t('datasources.kafka.hint')}
+      />
+      <Typography.Paragraph>
+        {(overviewQuery.data?.kafkaClusters ?? []).join(', ') || '—'}
+      </Typography.Paragraph>
+
+      <Typography.Title level={5}>{t('datasources.section.elasticsearch')}</Typography.Title>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 8, maxWidth: 900 }}
+        message={t('datasources.es.hint')}
+      />
+      <Typography.Paragraph>
+        {(overviewQuery.data?.elasticsearchClusters ?? []).join(', ') || '—'}
+      </Typography.Paragraph>
+
       <Modal
         title={t('datasources.dialog.title')}
         open={modalOpen}

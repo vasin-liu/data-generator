@@ -69,6 +69,10 @@ public class TemplateEditorService {
      */
     public TemplateEditorPayload loadForEditor(Long templateId) {
         TemplatePO entity = requireActiveOrArchivedEntity(templateId);
+        if (detectDefinitionKind(entity) == TemplateDefinitionKind.V1) {
+            throw new IllegalArgumentException(
+                    "Legacy V1 templates are hidden from the console editor. Migrate to Template V2 or use YAML on disk.");
+        }
         return buildPayload(entity);
     }
 
@@ -155,11 +159,24 @@ public class TemplateEditorService {
         repository.saveAndFlush(entity);
     }
 
-    private TemplateEditorPayload buildPayload(TemplatePO entity) {
+    /**
+     * Detects whether a persisted row is legacy V1-only (excluded from console catalog).
+     *
+     * @param entity template row
+     * @return detected kind
+     */
+    public TemplateDefinitionKind detectDefinitionKind(TemplatePO entity) {
         String yaml = entity.getContentYaml();
         TemplateV2DraftVO v2Draft = tryParse(yaml, TemplateV2DraftVO.class);
         TemplateVO v1 = tryParse(yaml, TemplateVO.class);
-        TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1, v2Draft);
+        return TemplateDefinitionDetector.detect(v1, v2Draft);
+    }
+
+    private TemplateEditorPayload buildPayload(TemplatePO entity) {
+        TemplateDefinitionKind kind = detectDefinitionKind(entity);
+        String yaml = entity.getContentYaml();
+        TemplateV2DraftVO v2Draft = tryParse(yaml, TemplateV2DraftVO.class);
+        TemplateVO v1 = tryParse(yaml, TemplateVO.class);
         boolean archived = Boolean.TRUE.equals(entity.getArchived());
 
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {

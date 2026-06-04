@@ -12,6 +12,7 @@ import org.gensokyo.data.api.console.dto.PreviewResultDto;
 import org.gensokyo.data.api.console.dto.RunStartResultDto;
 import org.gensokyo.data.api.console.dto.YamlApplyRequest;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.constant.Const;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2ControlPlaneService;
@@ -142,7 +143,7 @@ public class ConsoleTemplateEditorActionsController {
     @GetMapping("/{templateId}/yaml")
     public R<String> exportYaml(@NotNull @PathVariable Long templateId) {
         TemplateEditorPayload payload = templateEditorService.loadForEditor(templateId);
-        return R.ok(yamlSupport.toYaml(payload.draft()));
+        return R.ok(Const.R_OK, yamlSupport.toYaml(payload.draft()));
     }
 
     /**
@@ -151,7 +152,7 @@ public class ConsoleTemplateEditorActionsController {
      */
     @PostMapping("/draft/yaml")
     public R<String> exportDraftYaml(@RequestBody TemplateV2DraftVO draft) {
-        return R.ok(yamlSupport.toYaml(draft));
+        return R.ok(Const.R_OK, yamlSupport.toYaml(draft));
     }
 
     /**

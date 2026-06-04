@@ -7,6 +7,9 @@ package org.gensokyo.data.api.console;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import org.gensokyo.data.api.console.dto.ConsoleRuntimeDto;
+import org.gensokyo.data.api.console.dto.EditorDataSourcesDto;
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.config.TaskScheduleProperties;
@@ -34,22 +37,30 @@ public class ConsoleRuntimeController {
     private final TaskScheduleProperties scheduleProperties;
     private final DistributedExecutionProperties distributedProperties;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
+    private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
+    private final DynamicElasticsearchClientRegistry elasticsearchClientRegistry;
 
     /**
      * @param properties              application flags
      * @param scheduleProperties      cron schedule poller settings
      * @param distributedProperties   distributed queue settings
      * @param dynamicRoutingDataSource optional JDBC registry for editor dropdowns
+     * @param kafkaTemplateRegistry    optional Kafka runtime registry
+     * @param elasticsearchClientRegistry optional Elasticsearch runtime registry
      */
     public ConsoleRuntimeController(
             DataGeneratorProperties properties,
             TaskScheduleProperties scheduleProperties,
             DistributedExecutionProperties distributedProperties,
-            @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource) {
+            @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource,
+            @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
+            @Autowired(required = false) DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
         this.properties = properties;
         this.scheduleProperties = scheduleProperties;
         this.distributedProperties = distributedProperties;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
+        this.kafkaTemplateRegistry = kafkaTemplateRegistry;
+        this.elasticsearchClientRegistry = elasticsearchClientRegistry;
     }
 
     /**
@@ -68,10 +79,37 @@ public class ConsoleRuntimeController {
      */
     @GetMapping("/jdbc-names")
     public R<List<String>> jdbcNames() {
+        return R.ok(listJdbcNames());
+    }
+
+    /**
+     * @return JDBC, Kafka, and Elasticsearch keys for template editor dropdowns
+     */
+    @GetMapping("/editor-data-sources")
+    public R<EditorDataSourcesDto> editorDataSources() {
+        return R.ok(new EditorDataSourcesDto(
+                listJdbcNames(), listKafkaClusters(), listElasticsearchClusters()));
+    }
+
+    private List<String> listJdbcNames() {
         if (dynamicRoutingDataSource == null || dynamicRoutingDataSource.getDataSources() == null) {
-            return R.ok(Collections.emptyList());
+            return Collections.emptyList();
         }
         Set<String> keys = dynamicRoutingDataSource.getDataSources().keySet();
-        return R.ok(keys.stream().sorted().toList());
+        return keys.stream().sorted().toList();
+    }
+
+    private List<String> listKafkaClusters() {
+        if (kafkaTemplateRegistry == null) {
+            return Collections.emptyList();
+        }
+        return kafkaTemplateRegistry.getTemplates().keySet().stream().sorted().toList();
+    }
+
+    private List<String> listElasticsearchClusters() {
+        if (elasticsearchClientRegistry == null) {
+            return Collections.emptyList();
+        }
+        return elasticsearchClientRegistry.getLowLevelClients().keySet().stream().sorted().toList();
     }
 }

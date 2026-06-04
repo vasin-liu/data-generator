@@ -1,6 +1,8 @@
 import { Form, Input, InputNumber, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { GeneratorDraft, TemplateV2Draft } from '../../../api/types';
+import { FieldHelp } from '../../../components/FieldHelp';
+import { labeledOptions } from '../../utils/optionLabels';
 import { ensureGenerator, patchGenerator } from '../draftUtils';
 
 type Props = {
@@ -27,14 +29,16 @@ export function GeneralStep({ draft, readOnly, onChange }: Props) {
 
   return (
     <Form layout="vertical" style={{ maxWidth: 480 }}>
-      <Form.Item label={t('general.name')} required>
+      <Form.Item label={<FieldHelp label={t('general.name')} help={t('general.name.help')} required />}>
         <Input
           readOnly={readOnly}
           value={withGen.name ?? ''}
           onChange={(e) => onChange({ ...withGen, name: e.target.value })}
         />
       </Form.Item>
-      <Form.Item label={t('general.generatorType')}>
+      <Form.Item
+        label={<FieldHelp label={t('general.generatorType')} help={t('general.generatorType.help')} />}
+      >
         <Select
           disabled={readOnly}
           allowClear
@@ -42,7 +46,7 @@ export function GeneralStep({ draft, readOnly, onChange }: Props) {
           value={GENERATOR_TYPES.includes(generatorType as (typeof GENERATOR_TYPES)[number])
             ? generatorType
             : undefined}
-          options={GENERATOR_TYPES.map((v) => ({ value: v, label: v }))}
+          options={labeledOptions(t, 'general.generatorType', GENERATOR_TYPES)}
           onChange={(v) => {
             if (!v) {
               patchGen({ type: undefined });
@@ -59,7 +63,7 @@ export function GeneralStep({ draft, readOnly, onChange }: Props) {
           }}
         />
       </Form.Item>
-      <Form.Item label={t('general.batchSize')}>
+      <Form.Item label={<FieldHelp label={t('general.batchSize')} help={t('general.batchSize.help')} />}>
         <InputNumber
           min={1}
           disabled={readOnly}

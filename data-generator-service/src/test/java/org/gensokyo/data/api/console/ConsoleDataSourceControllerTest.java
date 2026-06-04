@@ -44,7 +44,8 @@ class ConsoleDataSourceControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
-                        new ConsoleDataSourceController(dataSourceConfigService, bundledJdbcDriverRegistry))
+                        new ConsoleDataSourceController(
+                                dataSourceConfigService, bundledJdbcDriverRegistry, null, null))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }

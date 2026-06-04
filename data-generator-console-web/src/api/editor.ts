@@ -128,11 +128,20 @@ export function applyTemplateYaml(
 /**
  * @param draft in-memory wizard draft
  */
-export function exportDraftYaml(draft: TemplateV2Draft): Promise<string> {
-  return apiRequest<string>('/templates/draft/yaml', {
+export async function exportDraftYaml(draft: TemplateV2Draft): Promise<string> {
+  const res = await fetch('/api/templates/draft/yaml', {
     method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(draft),
   });
+  const body = (await res.json()) as import('./types').ApiResult<string>;
+  if (!body.success) {
+    throw new Error(body.message || `Export failed (${res.status})`);
+  }
+  if (body.data != null && body.data !== '') {
+    return body.data;
+  }
+  throw new Error('Empty YAML export from server');
 }
 
 /**

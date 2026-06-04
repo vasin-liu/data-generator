@@ -10,6 +10,8 @@ import org.gensokyo.data.api.console.dto.TemplateSummaryDto;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.TemplateDefinitionKind;
+import org.gensokyo.data.template.editor.TemplateEditorService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,7 @@ import java.util.Locale;
 public class ConsoleTemplateController {
 
     private final TemplateRepository templateRepository;
+    private final TemplateEditorService templateEditorService;
 
     /**
      * @param includeArchived when true, includes archived templates
@@ -47,7 +50,10 @@ public class ConsoleTemplateController {
             String lower = q.toLowerCase(Locale.ROOT);
             rows = rows.stream().filter(row -> matchesFilter(row, lower)).toList();
         }
-        return R.ok(rows.stream().map(TemplateSummaryDto::from).toList());
+        return R.ok(rows.stream()
+                .filter(row -> templateEditorService.detectDefinitionKind(row) != TemplateDefinitionKind.V1)
+                .map(TemplateSummaryDto::from)
+                .toList());
     }
 
     private static boolean matchesFilter(TemplatePO row, String lower) {

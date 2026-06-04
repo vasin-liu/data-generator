@@ -6,15 +6,17 @@
 package org.gensokyo.data.api.console;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.api.console.dto.DataSourcesOverviewDto;
 import org.gensokyo.data.api.console.dto.JdbcDriverPresetDto;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
 import org.gensokyo.data.datasource.DataSourceConnectionTestRequest;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.vo.R;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,11 +37,29 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/datasources")
-@RequiredArgsConstructor
 public class ConsoleDataSourceController {
 
     private final DataSourceConfigService dataSourceConfigService;
     private final BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
+    private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
+    private final DynamicElasticsearchClientRegistry elasticsearchClientRegistry;
+
+    /**
+     * @param dataSourceConfigService       JDBC persistence
+     * @param bundledJdbcDriverRegistry     driver catalog
+     * @param kafkaTemplateRegistry         optional Kafka clusters
+     * @param elasticsearchClientRegistry   optional Elasticsearch clusters
+     */
+    public ConsoleDataSourceController(
+            DataSourceConfigService dataSourceConfigService,
+            BundledJdbcDriverRegistry bundledJdbcDriverRegistry,
+            @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
+            @Autowired(required = false) DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+        this.dataSourceConfigService = dataSourceConfigService;
+        this.bundledJdbcDriverRegistry = bundledJdbcDriverRegistry;
+        this.kafkaTemplateRegistry = kafkaTemplateRegistry;
+        this.elasticsearchClientRegistry = elasticsearchClientRegistry;
+    }
 
     /**
      * @return persisted configs and runtime keys
@@ -48,7 +68,11 @@ public class ConsoleDataSourceController {
     public R<DataSourcesOverviewDto> overview() {
         List<String> runtimeKeys = dataSourceConfigService.listRuntimeNames().stream().sorted().toList();
         return R.ok(DataSourcesOverviewDto.of(
-                dataSourceConfigService.listAll(), runtimeKeys, bundledJdbcDriverRegistry));
+                dataSourceConfigService.listAll(),
+                runtimeKeys,
+                bundledJdbcDriverRegistry,
+                listKafkaClusters(),
+                listElasticsearchClusters()));
     }
 
     /**
@@ -129,5 +153,19 @@ public class ConsoleDataSourceController {
         } catch (Exception e) {
             return R.fail(e.getMessage());
         }
+    }
+
+    private List<String> listKafkaClusters() {
+        if (kafkaTemplateRegistry == null) {
+            return List.of();
+        }
+        return kafkaTemplateRegistry.getTemplates().keySet().stream().sorted().toList();
+    }
+
+    private List<String> listElasticsearchClusters() {
+        if (elasticsearchClientRegistry == null) {
+            return List.of();
+        }
+        return elasticsearchClientRegistry.getLowLevelClients().keySet().stream().sorted().toList();
     }
 }

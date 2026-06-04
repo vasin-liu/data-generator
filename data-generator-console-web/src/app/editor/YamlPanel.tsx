@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Alert, Button, Modal, Space, Typography, message } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   applyTemplateYaml,
@@ -34,6 +34,7 @@ export function YamlPanel({
   const { t } = useTranslation();
   const [yaml, setYaml] = useState('');
   const [dirty, setDirty] = useState(false);
+  const bootstrappedRef = useRef(false);
 
   const loadMutation = useMutation({
     mutationFn: () => fetchTemplateYaml(templateId!),
@@ -55,10 +56,19 @@ export function YamlPanel({
   });
 
   useEffect(() => {
-    if (templateId != null && saveAllowed && !v1Yaml && yaml === '' && !loadMutation.isPending) {
-      loadMutation.mutate();
+    if (!saveAllowed || v1Yaml || bootstrappedRef.current) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load when id available
+    if (templateId != null && yaml === '' && !loadMutation.isPending) {
+      bootstrappedRef.current = true;
+      loadMutation.mutate();
+      return;
+    }
+    if (templateId == null && yaml === '' && !syncFromFormMutation.isPending) {
+      bootstrappedRef.current = true;
+      syncFromFormMutation.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-time yaml bootstrap
   }, [templateId, saveAllowed, v1Yaml]);
 
   const applyPersistedMutation = useMutation({

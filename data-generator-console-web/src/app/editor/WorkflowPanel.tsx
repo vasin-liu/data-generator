@@ -1,7 +1,7 @@
 import { Button, Input, message, Select, Space, Switch, Table, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TemplateV2Draft, WorkflowStepDraft } from '../../api/types';
+import type { EditorDataSources, TemplateV2Draft, WorkflowStepDraft } from '../../api/types';
 import { ComputeBlockEditor } from './ComputeBlockEditor';
 import {
   WORKFLOW_STEP_TYPES,
@@ -24,14 +24,14 @@ import {
 type Props = {
   draft: TemplateV2Draft;
   readOnly: boolean;
-  jdbcNames: string[];
+  editorDataSources: EditorDataSources;
   onChange: (draft: TemplateV2Draft) => void;
 };
 
 /**
  * Minimal L2 workflow editor with compute block scoped editing.
  */
-export function WorkflowPanel({ draft, readOnly, jdbcNames, onChange }: Props) {
+export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: Props) {
   const { t } = useTranslation();
   const workflowEnabled = hasWorkflow(draft);
   const steps = listWorkflowSteps(draft);
@@ -202,7 +202,7 @@ export function WorkflowPanel({ draft, readOnly, jdbcNames, onChange }: Props) {
             <ComputeBlockEditor
               block={blocks[selectedBlockIndex]}
               readOnly={readOnly}
-              jdbcNames={jdbcNames}
+              editorDataSources={editorDataSources}
               onChange={(block) => onChange(applyComputeBlockAt(draft, selectedBlockIndex, block))}
             />
           ) : (

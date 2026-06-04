@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { migrationUiEnabled } from '../../config/features';
 import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
-import { fetchJdbcNames } from '../../api/runtime';
+import { fetchEditorDataSources } from '../../api/runtime';
+import type { EditorDataSources } from '../../api/types';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
 import { cloneDraft } from '../editor/draftUtils';
 import { EditorTabHint } from '../editor/EditorTabHint';
@@ -52,10 +53,16 @@ export function TemplateEditorPage() {
     enabled: isNew || routeId.length > 0,
   });
 
-  const jdbcQuery = useQuery({
-    queryKey: ['jdbc-names'],
-    queryFn: fetchJdbcNames,
+  const dsQuery = useQuery({
+    queryKey: ['editor-data-sources'],
+    queryFn: fetchEditorDataSources,
   });
+
+  const editorDataSources: EditorDataSources = dsQuery.data ?? {
+    jdbcNames: [],
+    kafkaClusters: [],
+    elasticsearchClusters: [],
+  };
 
   const applyPayload = useCallback((payload: TemplateEditorPayload) => {
     setDraft(cloneDraft(payload.draft));
@@ -104,12 +111,21 @@ export function TemplateEditorPage() {
   }, [isNew, invalidId, templateId, routeId, t]);
 
   if (loadQuery.isError) {
+    const errMsg = (loadQuery.error as Error).message;
+    const v1Hidden = errMsg.includes('Legacy V1');
     return (
       <Alert
         type="error"
         showIcon
-        message={t('templates.loadError')}
-        description={(loadQuery.error as Error).message}
+        message={v1Hidden ? t('editor.v1.hidden') : t('templates.loadError')}
+        description={errMsg}
+        action={
+          v1Hidden ? (
+            <Button type="primary" onClick={() => navigate('/templates')}>
+              {t('editor.back')}
+            </Button>
+          ) : undefined
+        }
       />
     );
   }
@@ -141,7 +157,7 @@ export function TemplateEditorPage() {
       children: (
         <>
           <EditorTabHint tab="sources" isNew={isNew} />
-          <SourcesStep {...stepProps} jdbcNames={jdbcQuery.data ?? []} />
+          <SourcesStep {...stepProps} editorDataSources={editorDataSources} />
         </>
       ),
     },
@@ -153,7 +169,7 @@ export function TemplateEditorPage() {
     {
       key: 'sinks',
       label: t('editor.tab.sinks'),
-      children: <SinksStep {...stepProps} jdbcNames={jdbcQuery.data ?? []} />,
+      children: <SinksStep {...stepProps} editorDataSources={editorDataSources} />,
     },
     {
       key: 'execution',
@@ -163,7 +179,7 @@ export function TemplateEditorPage() {
     {
       key: 'workflow',
       label: t('editor.tab.workflow'),
-      children: <WorkflowPanel {...stepProps} jdbcNames={jdbcQuery.data ?? []} />,
+      children: <WorkflowPanel {...stepProps} editorDataSources={editorDataSources} />,
     },
     {
       key: 'review',
