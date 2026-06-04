@@ -157,6 +157,13 @@ export function TemplatesPage() {
           </Button>
         }
       />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('templates.hint.title')}
+        description={t('templates.hint.body')}
+      />
       {listQuery.isError ? (
         <Alert
           type="error"

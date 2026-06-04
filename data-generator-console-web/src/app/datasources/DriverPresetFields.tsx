@@ -2,6 +2,7 @@ import { Form, Input, Select, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { FieldHelp } from '../../components/FieldHelp';
 import {
   JDBC_DRIVER_GROUP_KEYS,
   findJdbcDriverPreset,
@@ -92,7 +93,14 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
 
   return (
     <>
-      <Form.Item label={t('datasources.dialog.driverPreset')}>
+      <Form.Item
+        label={
+          <FieldHelp
+            label={t('datasources.dialog.driverPreset')}
+            help={t('datasources.dialog.driverPresetHint')}
+          />
+        }
+      >
         <Select
           allowClear
           showSearch
@@ -107,19 +115,20 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
             form.setFieldValue('driverClassName', '');
           }}
         />
-        <Typography.Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
-          {t('datasources.dialog.driverPresetHint')}
-        </Typography.Text>
       </Form.Item>
       <Form.Item
         name="driverClassName"
-        label={t('datasources.dialog.driver')}
-        rules={[{ required: true }]}
-        extra={
-          bundledSelected
-            ? t('datasources.dialog.driverBundledHint')
-            : t('datasources.dialog.driverAlternateHint')
+        label={
+          <FieldHelp
+            label={t('datasources.dialog.driver')}
+            help={
+              bundledSelected
+                ? t('datasources.dialog.driverBundledHint')
+                : t('datasources.dialog.driverAlternateHint')
+            }
+          />
         }
+        rules={[{ required: true }]}
       >
         <Input placeholder={t('datasources.dialog.driverCustomPlaceholder')} />
       </Form.Item>

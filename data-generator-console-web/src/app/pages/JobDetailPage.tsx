@@ -199,7 +199,7 @@ export function JobDetailPage() {
                   {distributedJob.jobId}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('jobDetail.distributed.status')}>
-                  {distributedJob.status}
+                  {enumLabel(t, 'status', distributedJob.status)}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('jobDetail.distributed.worker')}>
                   {distributedJob.workerId ?? '—'}
