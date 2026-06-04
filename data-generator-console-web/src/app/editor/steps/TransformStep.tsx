@@ -1,6 +1,8 @@
 import { Button, Form, Input, Radio, Select, Space, Table, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { SpelColumnDraft, TemplateV2Draft, TransformDraft } from '../../../api/types';
+import { FieldHelp } from '../../../components/FieldHelp';
+import { labeledOptions } from '../../utils/optionLabels';
 import {
   addTransformer,
   applySpelColumns,
@@ -22,6 +24,8 @@ type Props = {
   readOnly: boolean;
   onChange: (draft: TemplateV2Draft) => void;
 };
+
+const TRANSFORM_TYPES = ['sql', 'spel'] as const;
 
 function SpelColumnTable({
   columns,
@@ -140,21 +144,22 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
           {t('transform.chain.step', { index: index + 1 })}
         </Typography.Text>
         <Form layout="vertical" style={{ marginTop: 8 }}>
-          <Form.Item label={t('transform.chain.name')}>
+          <Form.Item
+            label={<FieldHelp label={t('transform.chain.name')} help={t('transform.chain.name.help')} />}
+          >
             <Input
               readOnly={readOnly}
               value={node.name ?? ''}
               onChange={(e) => onChange(applyTransformerAt(draft, index, { name: e.target.value }))}
             />
           </Form.Item>
-          <Form.Item label={t('transform.type')}>
+          <Form.Item
+            label={<FieldHelp label={t('transform.type')} help={t('transform.type.help')} />}
+          >
             <Select
               disabled={readOnly}
               value={nodeType}
-              options={[
-                { value: 'sql', label: 'sql' },
-                { value: 'spel', label: 'spel' },
-              ]}
+              options={labeledOptions(t, 'transform.type', TRANSFORM_TYPES)}
               onChange={(type) => {
                 if (type === 'sql') {
                   onChange(
@@ -178,7 +183,7 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
             />
           </Form.Item>
           {nodeType === 'sql' ? (
-            <Form.Item label={t('transform.sql')}>
+            <Form.Item label={<FieldHelp label={t('transform.sql')} help={t('transform.sql.help')} />}>
               <Input.TextArea
                 rows={6}
                 readOnly={readOnly}
@@ -213,7 +218,9 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
 
   return (
     <Form layout="vertical" style={{ maxWidth: 720 }}>
-      <Form.Item label={t('transform.chain.mode')}>
+      <Form.Item
+        label={<FieldHelp label={t('transform.chain.mode')} help={t('transform.chain.mode.help')} />}
+      >
         <Radio.Group
           disabled={readOnly}
           value={chainMode ? 'chain' : 'single'}
@@ -234,19 +241,18 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
         </>
       ) : (
         <>
-          <Form.Item label={t('transform.type')}>
+          <Form.Item
+            label={<FieldHelp label={t('transform.type')} help={t('transform.type.help')} />}
+          >
             <Select
               disabled={readOnly}
               value={transformType}
-              options={[
-                { value: 'sql', label: 'sql' },
-                { value: 'spel', label: 'spel' },
-              ]}
+              options={labeledOptions(t, 'transform.type', TRANSFORM_TYPES)}
               onChange={setType}
             />
           </Form.Item>
           {transformType === 'sql' ? (
-            <Form.Item label={t('transform.sql')}>
+            <Form.Item label={<FieldHelp label={t('transform.sql')} help={t('transform.sql.help')} />}>
               <Input.TextArea
                 rows={8}
                 readOnly={readOnly}

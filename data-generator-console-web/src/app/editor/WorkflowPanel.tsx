@@ -1,7 +1,9 @@
-import { Button, Input, message, Select, Space, Switch, Table, Typography } from 'antd';
+import { Alert, Button, Input, message, Select, Space, Switch, Table, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { EditorDataSources, TemplateV2Draft, WorkflowStepDraft } from '../../api/types';
+import { FieldHelp } from '../../components/FieldHelp';
+import { labeledOptions } from '../utils/optionLabels';
 import { ComputeBlockEditor } from './ComputeBlockEditor';
 import {
   WORKFLOW_STEP_TYPES,
@@ -91,6 +93,13 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
         <Typography.Paragraph type="secondary">{t('workflow.disabledHint')}</Typography.Paragraph>
       ) : (
         <>
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: 16, maxWidth: 900 }}
+            message={t('workflow.page.intro.title')}
+            description={t('workflow.page.intro.body')}
+          />
           <Typography.Title level={5}>{t('workflow.steps.title')}</Typography.Title>
           <Space style={{ marginBottom: 8 }}>
             <Button disabled={readOnly} onClick={() => onChange(addWorkflowStep(draft, 'log'))}>
@@ -105,15 +114,15 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
             style={{ marginBottom: 24 }}
             columns={[
               {
-                title: t('workflow.steps.type'),
+                title: <FieldHelp label={t('workflow.steps.type')} help={t('workflow.steps.type.help')} />,
                 dataIndex: 'type',
-                width: 180,
+                width: 200,
                 render: (_value, row) => (
                   <Select
                     disabled={readOnly}
                     style={{ width: '100%' }}
                     value={(row.type ?? 'log') as WorkflowStepType}
-                    options={WORKFLOW_STEP_TYPES.map((type) => ({ value: type, label: type }))}
+                    options={labeledOptions(t, 'workflow.steps.type', WORKFLOW_STEP_TYPES)}
                     onChange={(type: WorkflowStepType) =>
                       patchStep(row.index, { ...steps[row.index], type })
                     }
@@ -121,7 +130,12 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
                 ),
               },
               {
-                title: t('workflow.steps.computeBlockId'),
+                title: (
+                  <FieldHelp
+                    label={t('workflow.steps.computeBlockId')}
+                    help={t('workflow.steps.computeBlockId.help')}
+                  />
+                ),
                 dataIndex: 'computeBlockId',
                 width: 160,
                 render: (_value, row) => (
@@ -135,7 +149,7 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
                 ),
               },
               {
-                title: t('workflow.steps.params'),
+                title: <FieldHelp label={t('workflow.steps.params')} help={t('workflow.steps.params.help')} />,
                 dataIndex: 'paramsText',
                 render: (_value, row) => (
                   <Input.TextArea

@@ -168,6 +168,32 @@ export function DatasourcesPage() {
     ? [{ uid: '-1', name: jarFile.name, status: 'done' }]
     : [];
 
+  const copySnippet = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success(t('datasources.snippet.copied'));
+    } catch {
+      message.error(t('datasources.snippet.copyFailed'));
+    }
+  };
+
+  const kafkaSnippet = `spring:
+  kafka:
+    multiple:
+      primary: my-kafka
+      clusters:
+        my-kafka:
+          bootstrap-servers: localhost:9092`;
+
+  const esSnippet = `spring:
+  elasticsearch:
+    multiple:
+      primary: my-es
+      clusters:
+        my-es:
+          uris:
+            - http://localhost:9200`;
+
   return (
     <div>
       <ConsolePageHeader
@@ -222,6 +248,9 @@ export function DatasourcesPage() {
         style={{ marginBottom: 8, maxWidth: 900 }}
         message={t('datasources.kafka.hint')}
       />
+      <Space style={{ marginBottom: 8 }}>
+        <Button onClick={() => copySnippet(kafkaSnippet)}>{t('datasources.snippet.copyKafka')}</Button>
+      </Space>
       <Typography.Paragraph>
         {(overviewQuery.data?.kafkaClusters ?? []).join(', ') || '—'}
       </Typography.Paragraph>
@@ -233,6 +262,9 @@ export function DatasourcesPage() {
         style={{ marginBottom: 8, maxWidth: 900 }}
         message={t('datasources.es.hint')}
       />
+      <Space style={{ marginBottom: 8 }}>
+        <Button onClick={() => copySnippet(esSnippet)}>{t('datasources.snippet.copyEs')}</Button>
+      </Space>
       <Typography.Paragraph>
         {(overviewQuery.data?.elasticsearchClusters ?? []).join(', ') || '—'}
       </Typography.Paragraph>

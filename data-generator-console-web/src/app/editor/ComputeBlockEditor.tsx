@@ -2,6 +2,7 @@ import { Input, Radio, Tabs, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ComputeBlockDraft, EditorDataSources, TemplateV2Draft } from '../../api/types';
+import { FieldHelp } from '../../components/FieldHelp';
 import { SinksStep } from './steps/SinksStep';
 import { SourcesStep } from './steps/SourcesStep';
 import { TransformStep } from './steps/TransformStep';
@@ -104,15 +105,16 @@ export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChang
 
   return (
     <div>
-      <Typography.Paragraph style={{ marginBottom: 12 }}>
-        <Typography.Text>{t('workflow.block.id')} </Typography.Text>
+      <div style={{ marginBottom: 12, maxWidth: 360 }}>
+        <div style={{ marginBottom: 4 }}>
+          <FieldHelp label={t('workflow.block.id')} help={t('workflow.block.id.help')} />
+        </div>
         <Input
           readOnly={readOnly}
-          style={{ width: 240 }}
           value={block.id ?? ''}
           onChange={(e) => patchBlock({ ...block, id: e.target.value })}
         />
-      </Typography.Paragraph>
+      </div>
       <Tabs items={tabItems} />
     </div>
   );
