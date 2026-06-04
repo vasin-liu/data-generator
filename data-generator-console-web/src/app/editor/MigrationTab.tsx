@@ -11,6 +11,7 @@ import {
   signoffMigration,
 } from '../../api/migration';
 import type { MigrationAnalysis, TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
+import { FieldHelp } from '../../components/FieldHelp';
 
 type Props = {
   templateId: string;
@@ -166,23 +167,44 @@ export function MigrationTab({ templateId, kind, onPromoted, onDraftApply }: Pro
 
   return (
     <div>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('migration.panel.workflow.title')}
+        description={t('migration.panel.workflow.body')}
+      />
       <Typography.Paragraph>{t('migration.panel.intro', { id: templateId })}</Typography.Paragraph>
       <Typography.Paragraph type="secondary">{inventoryHint}</Typography.Paragraph>
       <Space wrap style={{ marginBottom: 16 }}>
-        <Button onClick={runAnalyze} loading={analyzeMutation.isPending}>
+        <Button
+          onClick={runAnalyze}
+          loading={analyzeMutation.isPending}
+          title={t('migration.panel.analyze.help')}
+        >
           {t('migration.panel.analyze')}
         </Button>
-        <Button onClick={() => draftMutation.mutate()} loading={draftMutation.isPending}>
+        <Button
+          onClick={() => draftMutation.mutate()}
+          loading={draftMutation.isPending}
+          title={t('migration.panel.draft.help')}
+        >
           {t('migration.panel.draft')}
         </Button>
-        <Button onClick={() => compareMutation.mutate()} loading={compareMutation.isPending}>
+        <Button
+          onClick={() => compareMutation.mutate()}
+          loading={compareMutation.isPending}
+          title={t('migration.panel.compare.help')}
+        >
           {t('migration.panel.compare')}
         </Button>
-        <Button onClick={() => setSignoffOpen(true)}>{t('migration.panel.signoff')}</Button>
+        <Button onClick={() => setSignoffOpen(true)} title={t('migration.panel.signoff.help')}>
+          {t('migration.panel.signoff')}
+        </Button>
         <Button
           type="primary"
           disabled={promoteBlocked}
-          title={promoteBlocked ? t('migration.panel.promote.blocked') : undefined}
+          title={promoteBlocked ? t('migration.panel.promote.blocked') : t('migration.panel.promote.help')}
           loading={promoteMutation.isPending}
           onClick={() => promoteMutation.mutate()}
         >
@@ -215,10 +237,23 @@ export function MigrationTab({ templateId, kind, onPromoted, onDraftApply }: Pro
         okText={t('migration.panel.signoff.record')}
       >
         <Form form={signoffForm} layout="vertical" onFinish={(v) => signoffMutation.mutate(v)}>
-          <Form.Item name="approvedBy" label={t('migration.panel.signoff.approvedBy')}>
+          <Form.Item
+            name="approvedBy"
+            label={
+              <FieldHelp
+                label={t('migration.panel.signoff.approvedBy')}
+                help={t('migration.panel.signoff.approvedBy.help')}
+              />
+            }
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="notes" label={t('migration.panel.signoff.notes')}>
+          <Form.Item
+            name="notes"
+            label={
+              <FieldHelp label={t('migration.panel.signoff.notes')} help={t('migration.panel.signoff.notes.help')} />
+            }
+          >
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Descriptions, Input, Select, Space, Table, Typography } from 'antd';
+import { Alert, Button, Descriptions, Input, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { fetchJobs } from '../../api/jobs';
 import type { TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { enumLabel } from '../utils/optionLabels';
 import { formatDateTime } from '../utils/formatDateTime';
 import { triggerTypeLabel } from '../utils/triggerType';
 
@@ -76,7 +77,7 @@ export function JobsPage() {
             row.templateName ?? '—'
           ),
       },
-      { title: t('jobs.col.kind'), dataIndex: 'definitionKind' },
+      { title: t('jobs.col.kind'), dataIndex: 'definitionKind', render: (v: string) => enumLabel(t, 'jobs.kind', v) },
       {
         title: t('jobs.col.trigger'),
         dataIndex: 'triggerType',
@@ -118,6 +119,13 @@ export function JobsPage() {
         title={t('jobs.title')}
         subtitle={t('jobs.subtitle')}
         crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.jobs') }]}
+      />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('jobs.hint.title')}
+        description={t('jobs.hint.body')}
       />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input

@@ -15,6 +15,7 @@ import type { DataSourceSummary } from '../../api/types';
 import { DriverPresetFields } from '../datasources/DriverPresetFields';
 import { isBundledPreset, resolveDriverPresets } from '../datasources/jdbcDriverPresets';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { FieldHelp } from '../../components/FieldHelp';
 
 type FormValues = {
   name: string;
@@ -277,16 +278,30 @@ export function DatasourcesPage() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={(v) => saveMutation.mutate(v)}>
-          <Form.Item name="name" label={t('datasources.dialog.name')} rules={[{ required: true }]}>
+          <Form.Item
+            name="name"
+            label={<FieldHelp label={t('datasources.dialog.name')} help={t('datasources.dialog.name.help')} />}
+            rules={[{ required: true }]}
+          >
             <Input readOnly={Boolean(editing)} />
           </Form.Item>
-          <Form.Item name="url" label={t('datasources.dialog.url')} rules={[{ required: true }]}>
+          <Form.Item
+            name="url"
+            label={<FieldHelp label={t('datasources.dialog.url')} help={t('datasources.dialog.url.help')} />}
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="username" label={t('datasources.dialog.username')}>
+          <Form.Item
+            name="username"
+            label={<FieldHelp label={t('datasources.dialog.username')} help={t('datasources.dialog.username.help')} />}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="password" label={t('datasources.dialog.password')}>
+          <Form.Item
+            name="password"
+            label={<FieldHelp label={t('datasources.dialog.password')} help={t('datasources.dialog.password.help')} />}
+          >
             <Input.Password placeholder={editing ? '••••••' : undefined} />
           </Form.Item>
           <DriverPresetFields
@@ -296,7 +311,11 @@ export function DatasourcesPage() {
             onPresetIdChange={setSelectedPresetId}
           />
           {!isBundledPreset(driverPresets, selectedPresetId) ? (
-            <Form.Item label={t('datasources.dialog.upload')} extra={t('datasources.dialog.uploadHint')}>
+            <Form.Item
+              label={
+                <FieldHelp label={t('datasources.dialog.upload')} help={t('datasources.dialog.uploadHint')} />
+              }
+            >
               <Upload
                 accept=".jar,application/java-archive"
                 maxCount={1}

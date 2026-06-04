@@ -23,3 +23,13 @@ export function yesNoOptions(t: TFunction): { value: boolean; label: string }[] 
     { value: false, label: t('common.no') },
   ];
 }
+
+/**
+ * Human-readable label for a stored enum value (falls back to raw value).
+ */
+export function enumLabel(t: TFunction, prefix: string, value: string | null | undefined): string {
+  if (value == null || value === '') {
+    return '—';
+  }
+  return t(`${prefix}.${value}`, { defaultValue: value });
+}

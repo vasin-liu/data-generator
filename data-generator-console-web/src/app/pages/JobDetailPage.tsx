@@ -8,6 +8,7 @@ import { cancelJob, fetchJob, resumeJob } from '../../api/jobs';
 import type { RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { enumLabel } from '../utils/optionLabels';
 import { formatDateTime } from '../utils/formatDateTime';
 import { triggerTypeLabel } from '../utils/triggerType';
 
@@ -162,6 +163,15 @@ export function JobDetailPage() {
       />
       {row ? (
         <>
+          {ACTIVE.has(row.status) ? (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('jobDetail.poll.active')}
+              description={t('jobDetail.poll.active.body')}
+            />
+          ) : null}
           <Descriptions bordered size="small" column={1} style={{ marginBottom: 16 }}>
             <Descriptions.Item label={t('jobs.col.status')}>
               <JobStatusTag status={row.status} />
@@ -169,7 +179,9 @@ export function JobDetailPage() {
             <Descriptions.Item label={t('jobs.col.template')}>
               {row.templateName} (#{row.templateId})
             </Descriptions.Item>
-            <Descriptions.Item label={t('jobs.col.kind')}>{row.definitionKind}</Descriptions.Item>
+            <Descriptions.Item label={t('jobs.col.kind')}>
+              {enumLabel(t, 'jobs.kind', row.definitionKind)}
+            </Descriptions.Item>
             <Descriptions.Item label={t('jobs.col.trigger')}>
               {triggerTypeLabel(t, row.triggerType)}
             </Descriptions.Item>
@@ -240,10 +252,17 @@ function RunReportSection({
 
   return (
     <>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 12 }}
+        message={t('jobDetail.report.hint.title')}
+        description={t('jobDetail.report.hint.body')}
+      />
       <Typography.Title level={5}>{t('jobDetail.report.title')}</Typography.Title>
       <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
         <Descriptions.Item label={t('jobDetail.report.executionMode')}>
-          {report.executionMode ?? '—'}
+          {enumLabel(t, 'execution.mode', report.executionMode ?? undefined)}
         </Descriptions.Item>
         <Descriptions.Item label={t('jobDetail.report.durationMs')}>
           {formatDuration(report.durationMs)}
