@@ -1,4 +1,4 @@
-import { Input, Radio, Tabs, Typography } from 'antd';
+import { Input, Radio, Tabs } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ComputeBlockDraft, EditorDataSources, TemplateV2Draft } from '../../api/types';
@@ -64,9 +64,12 @@ export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChang
       label: t('editor.tab.transform'),
       children: (
         <>
-          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-            {t('workflow.block.transformLayout')}
-          </Typography.Text>
+          <div style={{ marginBottom: 8 }}>
+            <FieldHelp
+              label={t('workflow.block.transformLayout')}
+              help={t('workflow.block.transformLayout.help')}
+            />
+          </div>
           <Radio.Group
             disabled={readOnly}
             value={transformLayout}

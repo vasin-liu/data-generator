@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import type { EditorDataSources, SourceDraft, TemplateV2Draft } from '../../../api/types';
 import { SourceFieldsForm } from '../SourceFieldsForm';
 import { FieldHelp } from '../../../components/FieldHelp';
-import { labeledOptions } from '../../utils/optionLabels';
+import { labeledOptions, yesNoOptions } from '../../utils/optionLabels';
 import {
   EDITABLE_SOURCE_KINDS,
   addSource,
@@ -194,10 +194,7 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                     <Select
                       disabled={readOnly}
                       value={policy.inMemory ?? false}
-                      options={[
-                        { value: true, label: t('common.yes') },
-                        { value: false, label: t('common.no') },
-                      ]}
+                      options={yesNoOptions(t)}
                       onChange={(v) => patchPolicy({ inMemory: v })}
                     />
                   </Form.Item>

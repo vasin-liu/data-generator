@@ -2,6 +2,7 @@ import { Alert, Form, Input, InputNumber, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { EditorDataSources } from '../../api/types';
 import { FieldHelp } from '../../components/FieldHelp';
+import { yesNoOptions } from '../utils/optionLabels';
 import { SourceFileInput } from '../../components/SourceFileInput';
 import type { SourceDraft } from '../../api/types';
 import type { EditableSourceKind } from './draftUtils';
@@ -168,10 +169,7 @@ export function SourceFieldsForm({
           <Select
             disabled={readOnly}
             value={(source.header as boolean) ?? true}
-            options={[
-              { value: true, label: t('common.yes') },
-              { value: false, label: t('common.no') },
-            ]}
+            options={yesNoOptions(t)}
             onChange={(v) => onPatch({ ...source, header: v })}
           />
         </Form.Item>

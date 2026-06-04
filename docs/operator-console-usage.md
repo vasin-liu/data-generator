@@ -150,9 +150,11 @@ flowchart LR
 ### Shared UI patterns (2026-06)
 
 - **Breadcrumbs** — list and detail pages use `ConsolePageHeader` (home → section → item).
+- **Field help (`?`)** — key wizard fields (sources, sinks, transform, workflow, execution) show tooltips.
+- **Localized dropdown labels** — enum values (writer type, execution mode, workflow step type, transform type, etc.) use i18n labels instead of raw constants.
 - **Editor tab hints** — contextual info on General (new), Sources, and Review tabs.
 - **Schedules poller warning** — yellow alert when `schedule.enabled=false` on the server.
-- **Template list** — client-side filter by `DRAFT` / `PUBLISHED` status.
+- **Template list** — client-side filter by `DRAFT` / `PUBLISHED` status; **legacy V1 templates are hidden** from the catalog.
 - **Jobs** — clear URL filters; localized trigger type; schedule id link for scheduled runs.
 - **Template editor** — status tag (`DRAFT` / `PUBLISHED`); updates after Publish on Review tab.
 - **Schedules form** — one-click cron presets (hourly, daily, weekly, monthly) plus live next-run preview via `GET /api/console/schedules/preview?cron=…`.
@@ -181,19 +183,23 @@ flowchart LR
 | Tab | Content |
 |-----|---------|
 | General | Name, generator settings |
-| Sources | Query / iterator sources; JDBC keys from `/api/console/jdbc-names` |
-| Transform | SQL or SpEL transform |
-| Sinks | CONSOLE, JDBC, KAFKA, ELASTICSEARCH |
-| Execution | `executionPolicy`, chunking |
-| Workflow | Optional multi-step workflow |
+| Sources | Query (JDBC), iterator, csv/json/excel/geojson; file **upload** or **paste**; JDBC/Kafka/ES keys from editor data sources API |
+| Transform | SQL or SpEL; single step or transformer chain; compute blocks may use linear or **DAG** layout |
+| Sinks | CONSOLE, JDBC, KAFKA, ELASTICSEARCH with labeled writer types and cluster dropdowns |
+| Execution | `executionPolicy`, chunking (labeled modes) |
+| Workflow | Optional L2 steps + compute blocks (each block reuses Sources / Transform / Sinks) |
 | Review | Validate, Preview, Save, Publish, Run |
 | Migration | Analyze / compare / promote (optional; saved templates only) |
 
-**V1 templates:** wizard read-only; execution retired unless `v1-execution.enabled=true`. YAML shows read-only V1 content.
+**V1 templates:** excluded from `GET /api/templates` catalog. Opening a V1 row in the editor returns an error with guidance to migrate or edit YAML on disk. V1 **execution** remains gated by `v1-execution.enabled` (default off).
+
+**YAML advanced:** **Sync from form** exports the in-memory draft (`POST /api/templates/draft/yaml`); new templates auto-sync once on first open. **Reload from server** uses `GET /api/templates/{id}/yaml`.
+
+**File sources:** `POST /api/console/uploads/file` (multipart) and `POST /api/console/uploads/inline` (JSON body) write under `{user.dir}/../uploaded-sources/` and return the absolute path for the source `path` field.
 
 **New template fix:** route `/templates/new` uses pathname detection (not `:id` param) so scaffold loads immediately.
 
-**API:** `/api/templates/scaffold`, `/api/templates/{id}`, editor actions under `/api/templates/{id}/draft/…` and `/api/templates/{id}/yaml`.
+**API:** `/api/templates/scaffold`, `/api/templates/{id}`, editor actions under `/api/templates/{id}/draft/…` and `/api/templates/{id}/yaml`, `GET /api/console/editor-data-sources`.
 
 Preview requires **IN_MEMORY** execution mode; CHUNKED/STREAMING templates fail with a clear error.
 
@@ -203,10 +209,14 @@ Preview requires **IN_MEMORY** execution mode; CHUNKED/STREAMING templates fail 
 |---------|-------------|
 | Persisted grid | Name, JDBC URL, driver class, enabled |
 | Runtime keys | Union of `application.yaml` dynamic datasources + persisted rows |
+| Kafka clusters | Ids from `spring.kafka.multiple.clusters` (read-only); **Copy Kafka config snippet** for `application.yaml` |
+| Elasticsearch clusters | Ids from `spring.elasticsearch.multiple.clusters` (read-only); **Copy ES config snippet** |
 | New / Edit | Name, URL, credentials, driver preset or custom class, optional JAR upload |
 | Driver preset | Fills driver class + URL template; **switching preset always updates URL** |
 | Test | Validates without save |
 | Remove | Drops runtime registration and disables persisted row |
+
+Kafka and Elasticsearch cluster ids are **not** created in the UI — add them in `application.yaml` and restart the service, then use the id as the writer `dataSourceId`.
 
 **API:** `/api/datasources` (Console facade). Legacy: `/datasource/database/…`.
 
@@ -269,15 +279,17 @@ See `docs/migration/orchestration-retirement-boundary.md` for W3 `COMPATIBILITY_
 | UI area | Primary console API | Legacy REST |
 |---------|---------------------|-------------|
 | Runtime flags | `GET /api/console/runtime` | — |
-| JDBC names (editor) | `GET /api/console/jdbc-names` | — |
+| Editor data sources | `GET /api/console/editor-data-sources` (JDBC + Kafka + ES ids) | — |
+| JDBC names (legacy) | `GET /api/console/jdbc-names` | — |
+| Source file upload | `POST /api/console/uploads/file`, `POST /api/console/uploads/inline` | — |
 | Templates | `/api/templates`, `/api/templates/{id}/…` | `/template/…` |
 | Datasources | `/api/datasources` | `/datasource/database/…` |
 | Jobs | `/api/console/jobs` | `POST /task/run/{id}` |
 | Distributed metrics | `/api/console/distributed/metrics` | — |
-| Schedules | `/api/console/schedules` | — |
+| Schedules | `/api/console/schedules`, `GET /api/console/schedules/preview?cron=` | — |
 | Migration | `/api/migration/…` | — |
 
-Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleDistributedController`, `ConsoleRuntimeController`, `ConsoleMigrationController`.
+Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleUploadController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleDistributedController`, `ConsoleRuntimeController`, `ConsoleMigrationController`.
 
 ---
 
@@ -336,10 +348,9 @@ Distributed staging: `docs/staging-distributed-deployment.md`.
 
 ## Known gaps (follow-on)
 
-- Additional source types in wizard: json, csv, geojson (P1.5).
+- In-console registration of Kafka / Elasticsearch clusters (today: `application.yaml` + restart only).
 - Fine-grained Spring Security roles on all console routes (partial RBAC on schedules).
 - W3 V2 orchestration spike (P5, deferred).
-- Cron expression live preview in schedule form.
 
 ---
 

@@ -44,7 +44,7 @@ class ConsoleRuntimeControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleRuntimeController(
-                        properties, scheduleProperties, distributedProperties, null))
+                        properties, scheduleProperties, distributedProperties, null, null, null))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }
@@ -60,5 +60,15 @@ class ConsoleRuntimeControllerTest {
                 .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(false))
                 .andExpect(jsonPath("$.data.scheduleEnabled").value(true))
                 .andExpect(jsonPath("$.data.distributedEnabled").value(false));
+    }
+
+    @Test
+    void editorDataSources_returnsEmptyListsWhenRegistriesAbsent() throws Exception {
+        mockMvc.perform(get("/api/console/editor-data-sources"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.jdbcNames").isArray())
+                .andExpect(jsonPath("$.data.kafkaClusters").isArray())
+                .andExpect(jsonPath("$.data.elasticsearchClusters").isArray());
     }
 }

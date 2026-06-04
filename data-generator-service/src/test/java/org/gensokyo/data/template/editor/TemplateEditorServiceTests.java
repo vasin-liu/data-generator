@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Tests for {@link TemplateEditorService} archive and V2 round-trip.
@@ -74,6 +77,24 @@ class TemplateEditorServiceTests {
         Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> templateEditorService.save(created.templateId(), draft));
+    }
+
+    @Test
+    void loadForEditor_rejectsV1Template() throws Exception {
+        String yaml = new ClassPathResource("migration/regression/v1-iterator-simple.yaml")
+                .getContentAsString(StandardCharsets.UTF_8);
+        TemplatePO entity = new TemplatePO();
+        entity.setId(88001L);
+        entity.setName("legacy-v1");
+        entity.setContentYaml(yaml);
+        entity.setArchived(false);
+        TemplatePO saved = templateRepository.saveAndFlush(entity);
+        Long templateId = saved.getId();
+
+        Assertions.assertEquals(TemplateDefinitionKind.V1, templateEditorService.detectDefinitionKind(saved));
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> templateEditorService.loadForEditor(templateId));
     }
 
     @Test

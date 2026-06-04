@@ -13,3 +13,13 @@ export function labeledOptions(
     label: t(`${prefix}.${value}`, { defaultValue: value }),
   }));
 }
+
+/**
+ * Boolean Select options with localized yes/no labels.
+ */
+export function yesNoOptions(t: TFunction): { value: boolean; label: string }[] {
+  return [
+    { value: true, label: t('common.yes') },
+    { value: false, label: t('common.no') },
+  ];
+}

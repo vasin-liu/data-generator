@@ -1,6 +1,7 @@
-import { Button, Input, Select, Space, Table } from 'antd';
+import { Alert, Button, Input, Select, Space, Table } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { ComputeBlockDraft } from '../../api/types';
+import { FieldHelp } from '../../components/FieldHelp';
 import {
   addTransformGraphNode,
   applyNodeDependsOnAt,
@@ -36,6 +37,13 @@ export function TransformDagEditor({ block, readOnly, onChange }: Props) {
 
   return (
     <>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 12, maxWidth: 900 }}
+        message={t('workflow.dag.intro.title')}
+        description={t('workflow.dag.intro.body')}
+      />
       <Space style={{ marginBottom: 8 }}>
         <Button disabled={readOnly} onClick={() => onChange(addTransformGraphNode(block))}>
           {t('workflow.dag.addNode')}
@@ -48,7 +56,7 @@ export function TransformDagEditor({ block, readOnly, onChange }: Props) {
         locale={{ emptyText: t('workflow.dag.empty') }}
         columns={[
           {
-            title: t('workflow.dag.nodeId'),
+            title: <FieldHelp label={t('workflow.dag.nodeId')} help={t('workflow.dag.nodeId.help')} />,
             dataIndex: 'id',
             render: (_value, row) => (
               <Input
@@ -61,7 +69,9 @@ export function TransformDagEditor({ block, readOnly, onChange }: Props) {
             ),
           },
           {
-            title: t('workflow.dag.transformId'),
+            title: (
+              <FieldHelp label={t('workflow.dag.transformId')} help={t('workflow.dag.transformId.help')} />
+            ),
             dataIndex: 'transformId',
             render: (_value, row) => (
               <Input
@@ -74,7 +84,9 @@ export function TransformDagEditor({ block, readOnly, onChange }: Props) {
             ),
           },
           {
-            title: t('workflow.dag.outputAlias'),
+            title: (
+              <FieldHelp label={t('workflow.dag.outputAlias')} help={t('workflow.dag.outputAlias.help')} />
+            ),
             dataIndex: 'outputAlias',
             render: (_value, row) => (
               <Input
@@ -87,7 +99,7 @@ export function TransformDagEditor({ block, readOnly, onChange }: Props) {
             ),
           },
           {
-            title: t('workflow.dag.dependsOn'),
+            title: <FieldHelp label={t('workflow.dag.dependsOn')} help={t('workflow.dag.dependsOn.help')} />,
             dataIndex: 'dependsOn',
             render: (_value, row) => (
               <Select
