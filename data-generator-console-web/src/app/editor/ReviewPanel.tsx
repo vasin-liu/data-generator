@@ -10,6 +10,7 @@ type Props = {
   draft: TemplateV2Draft;
   templateId: string | null;
   kind: TemplateDefinitionKind;
+  status: string | null;
   archived: boolean;
   saveAllowed: boolean;
   onSaved: (templateId: string) => void;
@@ -23,6 +24,7 @@ export function ReviewPanel({
   draft,
   templateId,
   kind,
+  status,
   archived,
   saveAllowed,
   onSaved,
@@ -116,9 +118,20 @@ export function ReviewPanel({
     archived ? t('review.status.archived') : '',
   ].filter(Boolean);
 
+  const needsPublish = status !== 'PUBLISHED' && templateId != null && !v1Blocked;
+
   return (
     <div>
       <Typography.Paragraph type="secondary">{statusParts.join(' | ')}</Typography.Paragraph>
+      {needsPublish ? (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('review.publish.required.title')}
+          description={t('review.publish.required.body')}
+        />
+      ) : null}
       <Space wrap style={{ marginBottom: 16 }}>
         <Button onClick={() => validateMutation.mutate()} loading={validateMutation.isPending}>
           {t('review.validate')}

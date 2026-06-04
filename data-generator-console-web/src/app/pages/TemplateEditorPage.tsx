@@ -164,22 +164,42 @@ export function TemplateEditorPage() {
     {
       key: 'transform',
       label: t('editor.tab.transform'),
-      children: <TransformStep {...stepProps} />,
+      children: (
+        <>
+          <EditorTabHint tab="transform" isNew={isNew} />
+          <TransformStep {...stepProps} />
+        </>
+      ),
     },
     {
       key: 'sinks',
       label: t('editor.tab.sinks'),
-      children: <SinksStep {...stepProps} editorDataSources={editorDataSources} />,
+      children: (
+        <>
+          <EditorTabHint tab="sinks" isNew={isNew} />
+          <SinksStep {...stepProps} editorDataSources={editorDataSources} />
+        </>
+      ),
     },
     {
       key: 'execution',
       label: t('editor.tab.execution'),
-      children: <ExecutionStep {...stepProps} />,
+      children: (
+        <>
+          <EditorTabHint tab="execution" isNew={isNew} />
+          <ExecutionStep {...stepProps} />
+        </>
+      ),
     },
     {
       key: 'workflow',
       label: t('editor.tab.workflow'),
-      children: <WorkflowPanel {...stepProps} editorDataSources={editorDataSources} />,
+      children: (
+        <>
+          <EditorTabHint tab="workflow" isNew={isNew} />
+          <WorkflowPanel {...stepProps} editorDataSources={editorDataSources} />
+        </>
+      ),
     },
     {
       key: 'review',
@@ -191,6 +211,7 @@ export function TemplateEditorPage() {
             draft={draft}
             templateId={templateId}
             kind={meta.kind}
+            status={meta.status}
             archived={meta.archived}
             saveAllowed={saveAllowed}
             onSaved={onSaved}

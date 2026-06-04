@@ -22,6 +22,7 @@ import { fetchTemplates } from '../../api/templates';
 import { fetchConsoleRuntime } from '../../api/runtime';
 import type { TaskScheduleUpsertRequest, TaskScheduleView } from '../../api/types';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { FieldHelp } from '../../components/FieldHelp';
 import { CronPresetButtons } from '../schedules/CronPresetButtons';
 import { CronPreviewField } from '../schedules/CronPreviewField';
 import { formatDateTime } from '../utils/formatDateTime';
@@ -384,7 +385,9 @@ export function SchedulesPage() {
         <Form form={form} layout="vertical" onFinish={(v) => saveMutation.mutate(v)}>
           <Form.Item
             name="templateId"
-            label={t('schedules.form.templateId')}
+            label={
+              <FieldHelp label={t('schedules.form.templateId')} help={t('schedules.form.templateId.help')} />
+            }
             rules={[{ required: true, message: t('schedules.form.templateIdRequired') }]}
           >
             <Select
@@ -397,18 +400,24 @@ export function SchedulesPage() {
           </Form.Item>
           <Form.Item
             name="cronExpression"
-            label={t('schedules.form.cron')}
+            label={<FieldHelp label={t('schedules.form.cron')} help={t('schedules.form.cron.help')} />}
             rules={[{ required: true, message: t('schedules.form.cronRequired') }]}
-            extra={t('schedules.form.cronHelp')}
           >
             <Input placeholder="0 0 2 * * *" />
           </Form.Item>
           <CronPresetButtons form={form} />
           <CronPreviewField form={form} />
-          <Form.Item name="enabled" label={t('schedules.form.enabled')} valuePropName="checked">
+          <Form.Item
+            name="enabled"
+            label={<FieldHelp label={t('schedules.form.enabled')} help={t('schedules.form.enabled.help')} />}
+            valuePropName="checked"
+          >
             <Switch />
           </Form.Item>
-          <Form.Item name="description" label={t('schedules.form.description')}>
+          <Form.Item
+            name="description"
+            label={<FieldHelp label={t('schedules.form.description')} help={t('schedules.form.description.help')} />}
+          >
             <Input.TextArea rows={2} />
           </Form.Item>
         </Form>
