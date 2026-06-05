@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import { Button, Card, Col, Row, Select, Space, Table, Typography } from 'antd';
+import { Alert, Button, Card, Col, Row, Select, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { fetchMigrationBacklog, fetchMigrationSummary } from '../../api/migration';
 import type { MigrationInventoryEntry } from '../../api/types';
+import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { FieldHelp } from '../../components/FieldHelp';
+import { enumLabel } from '../utils/optionLabels';
 
 const FILTERS = [
   'ALL',
@@ -52,7 +55,11 @@ export function MigrationPage() {
     () => [
       { title: t('migration.col.id'), dataIndex: 'id', sorter: (a, b) => a.id.localeCompare(b.id) },
       { title: t('migration.col.name'), dataIndex: 'name' },
-      { title: t('migration.col.class'), dataIndex: 'migrationClass' },
+      {
+        title: t('migration.col.class'),
+        dataIndex: 'migrationClass',
+        render: (v: string | null) => enumLabel(t, 'migration.class', v),
+      },
       { title: t('migration.col.family'), dataIndex: 'scenarioFamily' },
       { title: t('migration.col.wave'), dataIndex: 'wave' },
       {
@@ -80,20 +87,41 @@ export function MigrationPage() {
   );
 
   return (
-    <div>
-      <Typography.Title level={3}>{t('migration.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('migration.subtitle')}</Typography.Paragraph>
+    <section>
+      <ConsolePageHeader
+        title={t('migration.title')}
+        subtitle={t('migration.subtitle')}
+        crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.migration') }]}
+        extra={
+          <Space wrap>
+            <Button onClick={refresh}>{t('common.refresh')}</Button>
+            <Link to="/templates">
+              <Button>{t('migration.link.templates')}</Button>
+            </Link>
+          </Space>
+        }
+      />
+
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('migration.hint.title')}
+        description={t('migration.hint.body')}
+      />
+
       <Space wrap style={{ marginBottom: 16 }}>
-        <Select
-          style={{ minWidth: 220 }}
-          value={filter}
-          options={FILTERS.map((f) => ({ value: f, label: t(`migration.filter.${f}`) }))}
-          onChange={setFilter}
-        />
-        <Button onClick={refresh}>{t('common.refresh')}</Button>
-        <Link to="/templates">
-          <Button>{t('migration.link.templates')}</Button>
-        </Link>
+        <span>
+          <Typography.Text type="secondary" style={{ marginRight: 8 }}>
+            <FieldHelp label={t('migration.filter.label')} help={t('migration.filter.help')} />
+          </Typography.Text>
+          <Select
+            style={{ minWidth: 220 }}
+            value={filter}
+            options={FILTERS.map((f) => ({ value: f, label: t(`migration.filter.${f}`) }))}
+            onChange={setFilter}
+          />
+        </span>
       </Space>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -116,6 +144,6 @@ export function MigrationPage() {
         columns={columns}
         scroll={{ x: true }}
       />
-    </div>
+    </section>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from '../../api/migration';
 import type { MigrationAnalysis, TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
 import { FieldHelp } from '../../components/FieldHelp';
+import { enumLabel } from '../utils/optionLabels';
 
 type Props = {
   templateId: string;
@@ -44,7 +45,7 @@ export function MigrationTab({ templateId, kind, onPromoted, onDraftApply }: Pro
       setAnalysis(result);
       const lines = [
         t('migration.panel.status', {
-          class: result.suggestedClass,
+          class: enumLabel(t, 'migration.class', result.suggestedClass),
           path: result.recommendedPath ?? '—',
           family: result.scenarioFamily ?? '—',
           wave: result.wave ?? '—',
@@ -89,7 +90,7 @@ export function MigrationTab({ templateId, kind, onPromoted, onDraftApply }: Pro
         report.warnings?.length > 0 ? `\n${report.warnings.join('\n')}` : '';
       setOutput(
         t('migration.panel.compare.summary', {
-          class: report.classification,
+          class: enumLabel(t, 'migration.class', report.classification),
           recommendation: report.recommendation ?? '—',
           v1Rows: report.v1RowCount,
           v2Rows: report.v2RowCount,
@@ -150,7 +151,7 @@ export function MigrationTab({ templateId, kind, onPromoted, onDraftApply }: Pro
 
   const inventoryHint = inventoryQuery.isSuccess
     ? t('migration.panel.inventory', {
-        class: inventoryQuery.data.migrationClass ?? '—',
+        class: enumLabel(t, 'migration.class', inventoryQuery.data.migrationClass),
         signoff: inventoryQuery.data.businessSignoffApproved
           ? t('migration.panel.inventory.signed')
           : t('migration.panel.inventory.pending'),

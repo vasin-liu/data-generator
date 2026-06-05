@@ -121,21 +121,35 @@ export function YamlPanel({
 
   return (
     <div>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('editor.yaml.ops.title')}
+        description={t('editor.yaml.ops.body')}
+      />
       <Typography.Paragraph type="secondary">{t('editor.yaml.hint')}</Typography.Paragraph>
       <Space wrap style={{ marginBottom: 8 }}>
         <Button
           loading={syncFromFormMutation.isPending}
           disabled={!saveAllowed}
+          title={t('editor.yaml.sync.help')}
           onClick={() => syncFromFormMutation.mutate()}
         >
           {t('editor.yaml.sync')}
         </Button>
         {templateId != null ? (
-          <Button disabled={!saveAllowed} onClick={() => loadMutation.mutate()}>
+          <Button disabled={!saveAllowed} title={t('editor.yaml.reload.help')} onClick={() => loadMutation.mutate()}>
             {t('editor.yaml.reload')}
           </Button>
         ) : null}
-        <Button type="primary" disabled={!saveAllowed} loading={applying} onClick={confirmApply}>
+        <Button
+          type="primary"
+          disabled={!saveAllowed}
+          loading={applying}
+          title={t('editor.yaml.apply.help')}
+          onClick={confirmApply}
+        >
           {t('editor.yaml.apply')}
         </Button>
       </Space>
