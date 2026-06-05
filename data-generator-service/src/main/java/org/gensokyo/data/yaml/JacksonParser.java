@@ -6,17 +6,7 @@ package org.gensokyo.data.yaml;
 
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.json.JsonSubtypeRegistry;
-import org.gensokyo.data.model.v2.SourceVO;
-import org.gensokyo.data.model.v2.TransformVO;
-import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
-import org.gensokyo.data.model.vo.generator.GeneratorVO;
-import org.gensokyo.data.model.vo.iterator.IteratorVO;
-import org.gensokyo.data.model.vo.reader.ReaderVO;
-import org.gensokyo.data.model.vo.scripter.ScriptVO;
-import org.gensokyo.data.model.vo.selector.reader.ReaderSelectStrategyVO;
-import org.gensokyo.data.model.vo.selector.value.ValueSelectStrategyVO;
-import org.gensokyo.data.model.vo.stage.StageVO;
-import org.gensokyo.data.model.vo.writer.WriterVO;
+import org.gensokyo.data.json.TemplateObjectMapperFactory;
 import org.gensokyo.kit.character.StrKit;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -52,21 +42,11 @@ public class JacksonParser implements YamlParser {
     }
 
     private ObjectMapper buildMapper() {
-        return new ObjectMapper(new YAMLFactory())
-                .rebuild()
+        var builder = new ObjectMapper(new YAMLFactory()).rebuild();
+        TemplateObjectMapperFactory.registerTemplateSubtypes(builder);
+        return builder
                 .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
                 .findAndAddModules()
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(GeneratorVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(IteratorVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ReaderVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ScriptVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ReaderSelectStrategyVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(ValueSelectStrategyVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(StageVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WriterVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(SourceVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(TransformVO.class))
-                .registerSubtypes(JsonSubtypeRegistry.loadSubtypes(WorkflowStepVO.class))
                 .build();
     }
 
