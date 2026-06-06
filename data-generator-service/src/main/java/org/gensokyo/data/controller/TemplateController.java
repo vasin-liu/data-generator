@@ -36,27 +36,8 @@ import org.gensokyo.data.template.TemplateV2PreviewDTO;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.model.v2.TemplateV2VO;
-import org.gensokyo.data.template.migration.MigrationPlanExplain;
-import org.gensokyo.data.template.migration.MigrationBatchCompareOptions;
-import org.gensokyo.data.template.migration.MigrationBatchCompareResult;
-import org.gensokyo.data.template.migration.MigrationBatchCompareService;
-import org.gensokyo.data.template.migration.MigrationCompareOptions;
-import org.gensokyo.data.template.migration.MigrationCompareWorkflow;
-import org.gensokyo.data.template.migration.MigrationComparisonReport;
 import org.gensokyo.data.template.migration.MigrationDraftService;
-import org.gensokyo.data.template.migration.MigrationInventoryRefreshResult;
-import org.gensokyo.data.template.migration.MigrationInventoryEntry;
-import org.gensokyo.data.template.migration.MigrationInventoryService;
-import org.gensokyo.data.template.migration.MigrationBacklogFilter;
-import org.gensokyo.data.template.migration.MigrationBusinessSignoffRequest;
-import org.gensokyo.data.template.migration.MigrationInventoryBacklogService;
-import org.gensokyo.data.template.migration.MigrationInventorySummary;
-import org.gensokyo.data.template.migration.MigrationInventorySummaryService;
-import org.gensokyo.data.template.migration.MigrationSignoffFamilyStatus;
-import org.gensokyo.data.template.migration.MigrationSignoffStatusService;
-import org.gensokyo.data.template.migration.MigrationPromoteService;
-import org.gensokyo.data.template.migration.TemplateMigrationAnalysisDTO;
-import org.gensokyo.data.template.migration.V1TemplateMigrationAnalyzer;
+import org.gensokyo.data.template.migration.MigrationPlanExplain;
 import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
 import org.gensokyo.data.template.querysource.V1QuerySourceMigrationWarningAnalyzer;
 import org.gensokyo.data.template.querysource.dto.QuerySourceCandidatePreflightDTO;
@@ -184,11 +165,7 @@ public class TemplateController {
     private final Templates templates;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final TemplateV2RuntimeRegistryProvider templateV2RuntimeRegistryProvider;
-    private final MigrationCompareWorkflow migrationCompareWorkflow;
-    private final MigrationBatchCompareService migrationBatchCompareService;
-    private final MigrationInventoryService migrationInventoryService;
     private final MigrationDraftService migrationDraftService;
-    private final MigrationPromoteService migrationPromoteService;
     private final TemplateV2ControlPlaneService templateV2ControlPlaneService;
 
     @PostMapping("/updateById")
@@ -318,197 +295,6 @@ public class TemplateController {
         try {
             TemplateV2PreviewDTO preview = templateV2ControlPlaneService.preview(templateId, maxRows);
             return R.ok("Preview completed", preview);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-    }
-
-    /**
-     * Lists all rows in the migration scenario inventory ({@code scenario-inventory.yaml}).
-     *
-     * @return inventory entries (regression fixtures and {@code db-*} templates)
-     */
-    @GetMapping("/migration/inventory")
-    public R<List<MigrationInventoryEntry>> listMigrationInventory() {
-        return R.ok("Inventory loaded", migrationInventoryService.listAll());
-    }
-
-    /**
-     * Returns aggregate migration inventory statistics (classification, wave, promote readiness).
-     *
-     * @return inventory summary for operator dashboards
-     */
-    @GetMapping("/migration/summary")
-    public R<MigrationInventorySummary> migrationInventorySummary() {
-        MigrationInventorySummary summary =
-                new MigrationInventorySummaryService().summarize(migrationInventoryService);
-        return R.ok("Inventory summary", summary);
-    }
-
-    /**
-     * Returns a filtered migration work queue (ready, blocked, needs compare, pending sign-off, etc.).
-     *
-     * @param filter optional filter name (default {@code ALL})
-     * @return matching inventory rows
-     */
-    @GetMapping("/migration/backlog")
-    public R<List<MigrationInventoryEntry>> migrationBacklog(
-            @RequestParam(required = false) String filter) {
-        try {
-            MigrationBacklogFilter backlogFilter = MigrationInventoryBacklogService.parseFilter(filter);
-            List<MigrationInventoryEntry> backlog = new MigrationInventoryBacklogService()
-                    .filter(migrationInventoryService.listAll(), backlogFilter);
-            return R.ok("Migration backlog", backlog);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-    }
-
-    /**
-     * Returns per-scenario-family business sign-off status for P3 retirement gates.
-     *
-     * @return family rollups with {@code familySignoffComplete} flags
-     */
-    @GetMapping("/migration/signoff-status")
-    public R<List<MigrationSignoffFamilyStatus>> migrationSignoffStatus() {
-        List<MigrationSignoffFamilyStatus> status = new MigrationSignoffStatusService()
-                .summarizeByFamily(migrationInventoryService.listAll());
-        return R.ok("Sign-off status", status);
-    }
-
-    /**
-     * Records business sign-off on an inventory row before production promote.
-     *
-     * @param inventoryId stable inventory id (e.g. {@code regression-v1-constant-five-rows} or {@code db-42})
-     * @param request     approval details
-     * @return updated inventory entry
-     */
-    @PostMapping("/migration/inventory/{inventoryId}/signoff")
-    public R<MigrationInventoryEntry> recordMigrationSignoff(
-            @PathVariable String inventoryId,
-            @RequestBody(required = false) MigrationBusinessSignoffRequest request) {
-        try {
-            MigrationInventoryEntry entry = migrationInventoryService.recordBusinessSignoff(inventoryId, request);
-            return R.ok("Sign-off recorded", entry);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-    }
-
-    /**
-     * Merges V1 templates from the database into the scenario inventory (new {@code db-{id}} rows only).
-     *
-     * @return merge counts and inventory file path
-     */
-    @PostMapping("/migration/inventory/refresh")
-    public R<MigrationInventoryRefreshResult> refreshMigrationInventory() {
-        MigrationInventoryRefreshResult result = migrationInventoryService.refreshFromRepository(repository);
-        return R.ok("Inventory refresh completed", result);
-    }
-
-    /**
-     * Full-template V1 migration analysis (scenario family, wave, blockers, recommended path).
-     *
-     * @param templateId persisted template id
-     * @return migration analysis for the V1 definition
-     */
-    @GetMapping("/migration/analyze/{templateId}")
-    public R<TemplateMigrationAnalysisDTO> analyzeMigration(@NotNull @PathVariable Long templateId) {
-        var entity = repository.findById(templateId).orElse(null);
-        if (Objects.isNull(entity)) {
-            return R.fail(String.format("Template '%s' does not exist", templateId));
-        }
-
-        TemplateVO v1;
-        try {
-            v1 = buildV1Template(entity);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-        return R.ok("Analysis generated", V1TemplateMigrationAnalyzer.analyze(v1));
-    }
-
-    /**
-     * Dual-run compare of V1 against V2 (persisted draft or query-source migration draft), writes a report,
-     * and updates the migration inventory entry.
-     *
-     * @param templateId persisted template id
-     * @param options    optional compare options (sample size, key columns, chunked hint)
-     * @return comparison report including classification and report path
-     */
-    @PostMapping("/migration/compare/{templateId}")
-    public R<MigrationComparisonReport> compareMigration(
-            @NotNull @PathVariable Long templateId,
-            @RequestBody(required = false) MigrationCompareOptions options) {
-        var entity = repository.findById(templateId).orElse(null);
-        if (Objects.isNull(entity)) {
-            return R.fail(String.format("Template '%s' does not exist", templateId));
-        }
-
-        try {
-            MigrationComparisonReport report =
-                    migrationCompareWorkflow.compareAndPersist(templateId, entity, options);
-            return R.ok("Compare completed", report);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-    }
-
-    /**
-     * Batch dual-run compare for database-backed templates in the migration inventory (catalog sweep).
-     *
-     * @param options optional batch options (refresh inventory, max templates, per-compare options)
-     * @return per-template outcomes and aggregate counts
-     */
-    @PostMapping("/migration/compare/batch")
-    public R<MigrationBatchCompareResult> batchCompareMigration(
-            @RequestBody(required = false) MigrationBatchCompareOptions options) {
-        MigrationBatchCompareResult result = migrationBatchCompareService.runBatch(options);
-        return R.ok("Batch compare completed", result);
-    }
-
-    /**
-     * Builds a unified V2 migration draft (query-source JDBC or simple iterator) without persisting.
-     *
-     * @param templateId persisted template id
-     * @return migration draft for preview or compare
-     */
-    @PostMapping("/migration/draft/{templateId}")
-    public R<TemplateV2DraftVO> buildMigrationDraft(@NotNull @PathVariable Long templateId) {
-        var entity = repository.findById(templateId).orElse(null);
-        if (Objects.isNull(entity)) {
-            return R.fail(String.format("Template '%s' does not exist", templateId));
-        }
-
-        TemplateV2DraftVO draft;
-        try {
-            draft = buildMigrationDraft(entity);
-        }
-        catch (IllegalArgumentException e) {
-            return R.fail(e.getMessage());
-        }
-        if (Objects.isNull(draft) || CollectKit.isEmpty(draft.getSources())) {
-            return R.fail(String.format("Template '%s' could not be converted into a V2 draft", templateId));
-        }
-        return R.ok("Draft generated", draft);
-    }
-
-    /**
-     * Promotes a validated V2 draft onto the template and updates migration inventory (V1 yaml retained).
-     *
-     * @param templateId persisted template id
-     * @return promoted draft
-     */
-    @PostMapping("/migration/promote/{templateId}")
-    public R<TemplateV2DraftVO> promoteMigration(@NotNull @PathVariable Long templateId) {
-        try {
-            TemplateV2DraftVO draft = migrationPromoteService.promote(templateId);
-            return R.ok("Promote completed", draft);
         }
         catch (IllegalArgumentException e) {
             return R.fail(e.getMessage());
