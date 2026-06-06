@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.api.console;
 
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.config.TaskScheduleProperties;
@@ -39,12 +40,21 @@ class ConsoleRuntimeControllerTest {
     @Mock
     private DistributedExecutionProperties distributedProperties;
 
+    @Mock
+    private MessagingClusterConfigService messagingClusterConfigService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleRuntimeController(
-                        properties, scheduleProperties, distributedProperties, null, null, null))
+                        properties,
+                        scheduleProperties,
+                        distributedProperties,
+                        null,
+                        messagingClusterConfigService,
+                        null,
+                        null))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }
@@ -64,6 +74,8 @@ class ConsoleRuntimeControllerTest {
 
     @Test
     void editorDataSources_returnsEmptyListsWhenRegistriesAbsent() throws Exception {
+        when(messagingClusterConfigService.listKafkaClusterKeys()).thenReturn(java.util.List.of());
+        when(messagingClusterConfigService.listElasticsearchClusterKeys()).thenReturn(java.util.List.of());
         mockMvc.perform(get("/api/console/editor-data-sources"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))

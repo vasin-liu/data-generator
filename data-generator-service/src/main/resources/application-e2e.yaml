@@ -1,0 +1,28 @@
+server:
+  port: 9876
+
+spring:
+  application:
+    name: data-generator-service-e2e
+  jpa:
+    open-in-view: false
+  datasource:
+    dynamic:
+      primary: data-generator
+      datasource:
+        data-generator:
+          url: jdbc:h2:mem:data-generator-e2e;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          username: sa
+          password:
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          init:
+            schema: classpath:db/schema.sql
+      druid:
+        filters: stat,slf4j
+        validation-query: SELECT 1
+
+data:
+  generator:
+    console-security:
+      enabled: false

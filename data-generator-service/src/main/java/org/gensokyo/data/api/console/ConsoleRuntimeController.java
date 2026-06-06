@@ -10,6 +10,7 @@ import org.gensokyo.data.api.console.dto.ConsoleRuntimeDto;
 import org.gensokyo.data.api.console.dto.EditorDataSourcesDto;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.config.TaskScheduleProperties;
@@ -37,6 +38,7 @@ public class ConsoleRuntimeController {
     private final TaskScheduleProperties scheduleProperties;
     private final DistributedExecutionProperties distributedProperties;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
+    private final MessagingClusterConfigService messagingClusterConfigService;
     private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
     private final DynamicElasticsearchClientRegistry elasticsearchClientRegistry;
 
@@ -45,6 +47,7 @@ public class ConsoleRuntimeController {
      * @param scheduleProperties      cron schedule poller settings
      * @param distributedProperties   distributed queue settings
      * @param dynamicRoutingDataSource optional JDBC registry for editor dropdowns
+     * @param messagingClusterConfigService console-managed messaging clusters
      * @param kafkaTemplateRegistry    optional Kafka runtime registry
      * @param elasticsearchClientRegistry optional Elasticsearch runtime registry
      */
@@ -53,12 +56,14 @@ public class ConsoleRuntimeController {
             TaskScheduleProperties scheduleProperties,
             DistributedExecutionProperties distributedProperties,
             @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource,
+            MessagingClusterConfigService messagingClusterConfigService,
             @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
             @Autowired(required = false) DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
         this.properties = properties;
         this.scheduleProperties = scheduleProperties;
         this.distributedProperties = distributedProperties;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
+        this.messagingClusterConfigService = messagingClusterConfigService;
         this.kafkaTemplateRegistry = kafkaTemplateRegistry;
         this.elasticsearchClientRegistry = elasticsearchClientRegistry;
     }
@@ -88,7 +93,9 @@ public class ConsoleRuntimeController {
     @GetMapping("/editor-data-sources")
     public R<EditorDataSourcesDto> editorDataSources() {
         return R.ok(new EditorDataSourcesDto(
-                listJdbcNames(), listKafkaClusters(), listElasticsearchClusters()));
+                listJdbcNames(),
+                messagingClusterConfigService.listKafkaClusterKeys(),
+                messagingClusterConfigService.listElasticsearchClusterKeys()));
     }
 
     private List<String> listJdbcNames() {

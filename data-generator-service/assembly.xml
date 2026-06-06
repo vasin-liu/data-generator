@@ -5,6 +5,7 @@
     <id>maven-assembly</id>
     <formats>
         <format>tar.gz</format>
+        <format>zip</format>
     </formats>
     <fileSets>
         <fileSet>
@@ -15,7 +16,9 @@
                 <include>META-INF/**/*</include>
                 <include>template/**/*</include>
                 <include>application.yaml</include>
+                <include>application-e2e.yaml</include>
                 <include>logback-spring.xml</include>
+                <include>service.env.example</include>
             </includes>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0644</fileMode>
@@ -24,14 +27,21 @@
         <fileSet>
             <directory>${project.basedir}/script</directory>
             <includes>
-                <include>run.sh</include>
-                <include>healthz-check.sh</include>
-                <include>keepalive.sh</include>
-                <include>system-install.sh</include>
+                <include>**/*.sh</include>
             </includes>
             <outputDirectory>/bin</outputDirectory>
             <fileMode>0755</fileMode>
             <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/script</directory>
+            <includes>
+                <include>**/*.ps1</include>
+                <include>**/*.bat</include>
+            </includes>
+            <outputDirectory>/bin</outputDirectory>
+            <fileMode>0755</fileMode>
+            <lineEnding>keep</lineEnding>
         </fileSet>
         <fileSet>
             <!--指定jar包和输出位置-->

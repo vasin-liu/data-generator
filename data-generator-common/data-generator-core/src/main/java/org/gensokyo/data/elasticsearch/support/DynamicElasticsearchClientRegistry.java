@@ -7,15 +7,46 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicElasticsearchClientRegistry implements DisposableBean {
 
-    private final String primary;
-    private final Map<String, RestClient> lowLevelClients;
+    private volatile String primary;
+    private final ConcurrentHashMap<String, RestClient> lowLevelClients;
 
     public DynamicElasticsearchClientRegistry(String primary, Map<String, RestClient> lowLevelClients) {
         this.primary = primary;
-        this.lowLevelClients = Map.copyOf(lowLevelClients);
+        this.lowLevelClients = new ConcurrentHashMap<>(lowLevelClients);
+    }
+
+    /**
+     * Registers or replaces a low-level REST client (closes the previous client for the same key).
+     *
+     * @param cluster cluster key
+     * @param client  REST client
+     */
+    public void register(String cluster, RestClient client) throws IOException {
+        Objects.requireNonNull(cluster, "cluster");
+        Objects.requireNonNull(client, "client");
+        RestClient previous = lowLevelClients.put(cluster, client);
+        if (previous != null && previous != client) {
+            previous.close();
+        }
+    }
+
+    /**
+     * Removes and closes a cluster client.
+     *
+     * @param cluster cluster key
+     */
+    public void unregister(String cluster) throws IOException {
+        if (cluster == null || cluster.isBlank()) {
+            return;
+        }
+        RestClient removed = lowLevelClients.remove(cluster);
+        if (removed != null) {
+            removed.close();
+        }
     }
 
     public RestClient llc(String cluster) {

@@ -8,6 +8,7 @@ package org.gensokyo.data.api.console.dto;
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
 
 import java.util.List;
 
@@ -17,15 +18,19 @@ import java.util.List;
  * @param persisted      rows from {@code datasource_config}
  * @param runtimeKeys    merged yaml + persisted JDBC keys
  * @param driverPresets  built-in JDBC driver catalog for the console form
- * @param kafkaClusters  Kafka cluster ids from application config (read-only)
- * @param elasticsearchClusters Elasticsearch cluster ids from application config (read-only)
+ * @param kafkaClusters  merged Kafka cluster ids (yaml + console-managed)
+ * @param elasticsearchClusters merged Elasticsearch cluster ids
+ * @param kafkaPersisted console-managed Kafka rows
+ * @param elasticsearchPersisted console-managed Elasticsearch rows
  */
 public record DataSourcesOverviewDto(
         List<DataSourceConfigSummary> persisted,
         List<String> runtimeKeys,
         List<JdbcDriverPresetDto> driverPresets,
         List<String> kafkaClusters,
-        List<String> elasticsearchClusters) {
+        List<String> elasticsearchClusters,
+        List<MessagingClusterSummaryDto> kafkaPersisted,
+        List<MessagingClusterSummaryDto> elasticsearchPersisted) {
 
     /**
      * @param persisted   persisted rows
@@ -36,12 +41,19 @@ public record DataSourcesOverviewDto(
             List<DataSourceConfigSummary> persisted,
             List<String> runtimeKeys,
             BundledJdbcDriverRegistry bundledDrivers,
-            List<String> kafkaClusters,
-            List<String> elasticsearchClusters) {
+            MessagingClusterConfigService messagingClusterConfigService) {
         List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
                 .map(p -> JdbcDriverPresetDto.from(p, bundledDrivers))
                 .toList();
         return new DataSourcesOverviewDto(
-                persisted, runtimeKeys, presets, kafkaClusters, elasticsearchClusters);
+                persisted,
+                runtimeKeys,
+                presets,
+                messagingClusterConfigService.listKafkaClusterKeys(),
+                messagingClusterConfigService.listElasticsearchClusterKeys(),
+                messagingClusterConfigService.listKafka().stream().map(MessagingClusterSummaryDto::from).toList(),
+                messagingClusterConfigService.listElasticsearch().stream()
+                        .map(MessagingClusterSummaryDto::from)
+                        .toList());
     }
 }

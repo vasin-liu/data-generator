@@ -19,6 +19,8 @@ import org.gensokyo.data.model.vo.writer.WriterVO;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 import static tools.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS;
 
@@ -37,10 +39,14 @@ public final class TemplateObjectMapperFactory {
      * @return JSON mapper with template model subtypes registered from {@link JsonSubtypeRegistry}.
      */
     public static JsonMapper buildJsonMapper() {
+        SimpleModule longAsString = new SimpleModule();
+        longAsString.addSerializer(Long.class, ToStringSerializer.instance);
+        longAsString.addSerializer(Long.TYPE, ToStringSerializer.instance);
         JsonMapper.Builder builder = JsonMapper.builder();
         registerTemplateSubtypes(builder);
         return builder
                 .enable(ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .addModule(longAsString)
                 .findAndAddModules()
                 .build();
     }

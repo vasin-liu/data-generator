@@ -7,6 +7,7 @@ package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,13 +40,18 @@ class ConsoleDataSourceControllerTest {
     @Mock
     private BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
 
+    @Mock
+    private MessagingClusterConfigService messagingClusterConfigService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new ConsoleDataSourceController(
-                                dataSourceConfigService, bundledJdbcDriverRegistry, null, null))
+                                dataSourceConfigService,
+                                bundledJdbcDriverRegistry,
+                                messagingClusterConfigService))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }
@@ -58,6 +64,10 @@ class ConsoleDataSourceControllerTest {
             String key = invocation.getArgument(0, String.class);
             return "mysql".equals(key) || "dm".equals(key);
         });
+        when(messagingClusterConfigService.listKafkaClusterKeys()).thenReturn(List.of());
+        when(messagingClusterConfigService.listElasticsearchClusterKeys()).thenReturn(List.of());
+        when(messagingClusterConfigService.listKafka()).thenReturn(List.of());
+        when(messagingClusterConfigService.listElasticsearch()).thenReturn(List.of());
         mockMvc.perform(get("/api/datasources"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))

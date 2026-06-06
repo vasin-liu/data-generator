@@ -1,44 +1,57 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Install a systemd unit for the packaged Data Generator service (Linux, root required).
 
-#----------------------------------------------------------
-# arg
-#----------------------------------------------------------
-base_dir=`cd $(dirname $0); pwd`
+set -euo pipefail
 
-SERVICE_NAME="data-generator-service"
-#----------------------------------------------------------
+if [[ "$(id -u)" -ne 0 ]]; then
+  echo "[ERROR] Run as root: sudo $0" >&2
+  exit 1
+fi
 
-if [ -r "/etc/systemd/system/$SERVICE_NAME.service" ]; then
-  echo "error: /etc/systemd/system/$SERVICE_NAME.service already exists"
-else
-cat > /etc/systemd/system/$SERVICE_NAME.service <<EOF
+BIN_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "${BIN_DIR}/.." && pwd)"
+UNIT_NAME="${DG_SERVICE_NAME:-data-generator-service}"
+UNIT_PATH="/etc/systemd/system/${UNIT_NAME}.service"
+RUN_USER="${DG_SERVICE_USER:-${SVC_USER:-root}}"
+ENV_FILE="${ROOT_DIR}/conf/service.env"
+
+if [[ -f "$UNIT_PATH" ]]; then
+  echo "[ERROR] Unit already exists: ${UNIT_PATH}" >&2
+  echo "        Remove it first or use a different DG_SERVICE_NAME." >&2
+  exit 1
+fi
+
+cat > "$UNIT_PATH" <<EOF
 [Unit]
-Description=$SERVICE_NAME
+Description=Data Generator (${UNIT_NAME})
+Documentation=file://${ROOT_DIR}/conf/service.env.example
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=forking
-WorkingDirectory=$base_dir
-ExecStart=/bin/bash -c "source /etc/profile && /bin/sh $base_dir/run.sh start"
-ExecStop=/bin/bash -c "source /etc/profile  && /bin/sh $base_dir/run.sh stop"
-ExecStartPost=/usr/bin/sleep 5
-Restart=always
-RestartSec=10s
+WorkingDirectory=${BIN_DIR}
+Environment=DG_DAEMON=1
+Environment=DG_JAVA_PROMPT=0
+EnvironmentFile=-${ENV_FILE}
+PIDFile=${ROOT_DIR}/${UNIT_NAME}.pid
+ExecStart=/bin/bash ${BIN_DIR}/run.sh start 1
+ExecStop=/bin/bash ${BIN_DIR}/run.sh stop
+ExecReload=/bin/bash ${BIN_DIR}/run.sh restart
+TimeoutStartSec=180
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=10
+User=${RUN_USER}
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-  echo "created /etc/systemd/system/$SERVICE_NAME.service"
-  systemctl daemon-reload;
-  # 修改为 restart 是无效的
-  # 执行本脚本前先执行 ./shutdown.sh
-  systemctl start $SERVICE_NAME.service;
-  systemctl enable $SERVICE_NAME.service;
-  echo "开机自启动功能:"
-  systemctl is-enabled $SERVICE_NAME.service;
-  echo "------------------------------------------------------------------------------------------------------------"
-  echo "systemctl status $SERVICE_NAME.service"
-  systemctl status $SERVICE_NAME.service;
-fi
+systemctl daemon-reload
+systemctl enable "${UNIT_NAME}.service"
+echo "[INFO] Created ${UNIT_PATH}"
+echo "[INFO] Edit ${ENV_FILE} (copy from service.env.example) then:"
+echo "       systemctl start ${UNIT_NAME}"
+echo "       systemctl status ${UNIT_NAME}"
+echo "       journalctl -u ${UNIT_NAME} -f"

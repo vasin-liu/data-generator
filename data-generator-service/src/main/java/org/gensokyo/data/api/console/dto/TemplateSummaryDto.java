@@ -8,6 +8,9 @@ package org.gensokyo.data.api.console.dto;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.template.editor.TemplateMetadataSupport;
+
+import java.util.List;
 
 /**
  * Template row for the operator catalog grid.
@@ -19,7 +22,9 @@ public record TemplateSummaryDto(
         @JsonSerialize(using = ToStringSerializer.class) Long id,
         String name,
         String status,
-        Boolean archived) {
+        Boolean archived,
+        String category,
+        List<String> tags) {
 
     /**
      * @param entity persisted template row
@@ -30,6 +35,12 @@ public record TemplateSummaryDto(
         if (status == null || status.isBlank()) {
             status = Boolean.TRUE.equals(entity.getArchived()) ? "ARCHIVED" : "PUBLISHED";
         }
-        return new TemplateSummaryDto(entity.getId(), entity.getName(), status, entity.getArchived());
+        return new TemplateSummaryDto(
+                entity.getId(),
+                entity.getName(),
+                status,
+                entity.getArchived(),
+                entity.getCategory(),
+                TemplateMetadataSupport.splitTags(entity.getTags()));
     }
 }

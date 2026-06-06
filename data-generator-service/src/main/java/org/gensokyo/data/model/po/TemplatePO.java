@@ -93,4 +93,16 @@ public class TemplatePO implements Serializable {
      */
     @Column(name = "status", length = 16)
     private String status;
+
+    /**
+     * Operator catalog category (denormalized from V2 draft for list filters).
+     */
+    @Column(name = "category", length = 128)
+    private String category;
+
+    /**
+     * Comma-separated tags (denormalized from V2 draft for list filters).
+     */
+    @Column(name = "tags", length = 1024)
+    private String tags;
 }

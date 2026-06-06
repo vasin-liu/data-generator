@@ -49,7 +49,7 @@ public class ConsoleWebConfig implements WebMvcConfigurer {
         protected Resource getResource(String resourcePath, Resource location) throws IOException {
             if (resourcePath != null && !resourcePath.isBlank()) {
                 Resource requested = location.createRelative(resourcePath);
-                if (isReadableFile(requested)) {
+                if (isReadableResource(requested)) {
                     return requested;
                 }
                 // Client routes such as /console/templates have no file extension.
@@ -62,13 +62,14 @@ public class ConsoleWebConfig implements WebMvcConfigurer {
             return indexHtml(location);
         }
 
-        private static Resource indexHtml(Resource location) throws IOException {
-            Resource index = location.createRelative("index.html");
-            return isReadableFile(index) ? index : null;
+        private static boolean isReadableResource(Resource resource) throws IOException {
+            // Do not use isFile(): classpath entries inside a JAR are readable but not "files" on disk.
+            return resource != null && resource.exists() && resource.isReadable();
         }
 
-        private static boolean isReadableFile(Resource resource) throws IOException {
-            return resource != null && resource.exists() && resource.isReadable() && resource.isFile();
+        private static Resource indexHtml(Resource location) throws IOException {
+            Resource index = location.createRelative("index.html");
+            return isReadableResource(index) ? index : null;
         }
     }
 }

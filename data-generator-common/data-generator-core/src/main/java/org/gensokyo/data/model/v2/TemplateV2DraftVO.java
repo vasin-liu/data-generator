@@ -33,4 +33,8 @@ public class TemplateV2DraftVO implements Serializable {
     private WorkflowSpecVO workflow;
     /** Compute blocks referenced by workflow invoke steps. */
     private List<ComputeBlockVO> computeBlocks = new ArrayList<>();
+    /** Operator-defined category for catalog grouping. */
+    private String category;
+    /** Operator-defined tags for search and filtering. */
+    private List<String> tags = new ArrayList<>();
 }

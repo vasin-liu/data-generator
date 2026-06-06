@@ -9,14 +9,14 @@ import jakarta.validation.constraints.NotBlank;
 import org.gensokyo.data.api.console.dto.DataSourcesOverviewDto;
 import org.gensokyo.data.api.console.dto.JdbcDriverPresetDto;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
+import org.gensokyo.data.api.console.dto.KafkaClusterUpsertRequest;
+import org.gensokyo.data.api.console.dto.ElasticsearchClusterUpsertRequest;
 import org.gensokyo.data.datasource.DataSourceConnectionTestRequest;
 import org.gensokyo.data.exception.DataGeneratorException;
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
 import org.gensokyo.data.model.vo.R;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,24 +41,20 @@ public class ConsoleDataSourceController {
 
     private final DataSourceConfigService dataSourceConfigService;
     private final BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
-    private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
-    private final DynamicElasticsearchClientRegistry elasticsearchClientRegistry;
+    private final MessagingClusterConfigService messagingClusterConfigService;
 
     /**
      * @param dataSourceConfigService       JDBC persistence
      * @param bundledJdbcDriverRegistry     driver catalog
-     * @param kafkaTemplateRegistry         optional Kafka clusters
-     * @param elasticsearchClientRegistry   optional Elasticsearch clusters
+     * @param messagingClusterConfigService Kafka/ES console persistence
      */
     public ConsoleDataSourceController(
             DataSourceConfigService dataSourceConfigService,
             BundledJdbcDriverRegistry bundledJdbcDriverRegistry,
-            @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
-            @Autowired(required = false) DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+            MessagingClusterConfigService messagingClusterConfigService) {
         this.dataSourceConfigService = dataSourceConfigService;
         this.bundledJdbcDriverRegistry = bundledJdbcDriverRegistry;
-        this.kafkaTemplateRegistry = kafkaTemplateRegistry;
-        this.elasticsearchClientRegistry = elasticsearchClientRegistry;
+        this.messagingClusterConfigService = messagingClusterConfigService;
     }
 
     /**
@@ -71,8 +67,47 @@ public class ConsoleDataSourceController {
                 dataSourceConfigService.listAll(),
                 runtimeKeys,
                 bundledJdbcDriverRegistry,
-                listKafkaClusters(),
-                listElasticsearchClusters()));
+                messagingClusterConfigService));
+    }
+
+    /**
+     * @param request cluster definition
+     * @return saved summary message
+     */
+    @PostMapping("/kafka-clusters")
+    public R<String> upsertKafkaCluster(@RequestBody KafkaClusterUpsertRequest request) {
+        messagingClusterConfigService.saveKafka(request);
+        return R.ok("Kafka cluster saved");
+    }
+
+    /**
+     * @param name cluster id
+     * @return success message
+     */
+    @DeleteMapping("/kafka-clusters/{name}")
+    public R<String> removeKafkaCluster(@PathVariable String name) {
+        messagingClusterConfigService.remove(name);
+        return R.ok("Kafka cluster removed");
+    }
+
+    /**
+     * @param request cluster definition
+     * @return saved summary message
+     */
+    @PostMapping("/elasticsearch-clusters")
+    public R<String> upsertElasticsearchCluster(@RequestBody ElasticsearchClusterUpsertRequest request) {
+        messagingClusterConfigService.saveElasticsearch(request);
+        return R.ok("Elasticsearch cluster saved");
+    }
+
+    /**
+     * @param name cluster id
+     * @return success message
+     */
+    @DeleteMapping("/elasticsearch-clusters/{name}")
+    public R<String> removeElasticsearchCluster(@PathVariable String name) {
+        messagingClusterConfigService.remove(name);
+        return R.ok("Elasticsearch cluster removed");
     }
 
     /**
@@ -153,19 +188,5 @@ public class ConsoleDataSourceController {
         } catch (Exception e) {
             return R.fail(e.getMessage());
         }
-    }
-
-    private List<String> listKafkaClusters() {
-        if (kafkaTemplateRegistry == null) {
-            return List.of();
-        }
-        return kafkaTemplateRegistry.getTemplates().keySet().stream().sorted().toList();
-    }
-
-    private List<String> listElasticsearchClusters() {
-        if (elasticsearchClientRegistry == null) {
-            return List.of();
-        }
-        return elasticsearchClientRegistry.getLowLevelClients().keySet().stream().sorted().toList();
     }
 }

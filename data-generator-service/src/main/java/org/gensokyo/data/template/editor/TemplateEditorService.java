@@ -181,6 +181,7 @@ public class TemplateEditorService {
 
         if (kind == TemplateDefinitionKind.V2 && v2Draft != null) {
             v2Draft.setId(entity.getId());
+            TemplateMetadataSupport.mergeFromEntity(entity, v2Draft);
             return new TemplateEditorPayload(entity.getId(), kind, v2Draft, null, archived, resolveStatus(entity));
         }
         if (v1 != null) {
@@ -207,6 +208,7 @@ public class TemplateEditorService {
         TemplateV2VO normalized = TemplateV2Normalizer.normalize(draft);
         TemplateV2Validator.validate(normalized);
         entity.setName(normalized.getName());
+        TemplateMetadataSupport.syncToEntity(entity, draft);
         entity.setContentYaml(yamlParser.dump(draft));
         entity.setContentJson(TemplateJsonCodec.write(draft));
     }

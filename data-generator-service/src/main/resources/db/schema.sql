@@ -42,6 +42,18 @@ CREATE TABLE IF NOT EXISTS `datasource_config`
     PRIMARY KEY (`name`)
 );
 
+-- Operator-console Kafka / Elasticsearch cluster registry
+CREATE TABLE IF NOT EXISTS `messaging_cluster_config`
+(
+    `name`          VARCHAR(128) NOT NULL,
+    `cluster_type`  VARCHAR(32)  NOT NULL,
+    `config_json`   CLOB         NOT NULL,
+    `enabled`       BOOLEAN      DEFAULT TRUE NOT NULL,
+    `created_at`    TIMESTAMP    DEFAULT NULL,
+    `updated_at`    TIMESTAMP    DEFAULT NULL,
+    PRIMARY KEY (`name`)
+);
+
 -- Operator-console template run history (P3)
 CREATE TABLE IF NOT EXISTS `task_execution`
 (
@@ -68,6 +80,8 @@ ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `parent_pipeline_run_id` V
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `upstream_artifact_refs_json` CLOB;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `report_json` CLOB;
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `status` VARCHAR(16) DEFAULT 'PUBLISHED';
+ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `category` VARCHAR(128);
+ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `tags` VARCHAR(1024);
 ALTER TABLE `datasource_config` ADD COLUMN IF NOT EXISTS `password_secret_ref` VARCHAR(256);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `cancel_requested` BOOLEAN DEFAULT FALSE NOT NULL;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `template_version` VARCHAR(64);
