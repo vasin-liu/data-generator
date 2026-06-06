@@ -69,4 +69,25 @@ class ConsoleTemplateControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].name").value("v2-demo"));
     }
+
+    @Test
+    void list_withQuery_excludesV1EvenWhenNameMatches() throws Exception {
+        TemplatePO v2 = new TemplatePO();
+        v2.setId(42L);
+        v2.setName("v2-demo");
+        v2.setArchived(Boolean.FALSE);
+        TemplatePO v1 = new TemplatePO();
+        v1.setId(99L);
+        v1.setName("legacy-v1");
+        v1.setArchived(Boolean.FALSE);
+        when(templateRepository.findByArchivedFalse()).thenReturn(List.of(v2, v1));
+        // Only the V1 row survives the q filter; detectDefinitionKind is not invoked for v2 here.
+        when(templateEditorService.detectDefinitionKind(v1)).thenReturn(TemplateDefinitionKind.V1);
+
+        // Query matches the V1 row name, but catalog must still omit legacy templates.
+        mockMvc.perform(get("/api/templates").param("q", "legacy"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(0));
+    }
 }
