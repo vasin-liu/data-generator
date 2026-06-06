@@ -10,6 +10,9 @@ sources:
       from: 1
       to: 5
       step: 1
+    materializationPolicy:
+      mode: LIMIT
+      limit: 3
 transform:
   type: sql
   sql: SELECT value AS id, value * 10 AS score FROM seed

@@ -179,14 +179,27 @@ export interface SpelColumnDraft {
   expression?: string;
 }
 
+/** Mirrors {@code MaterializationPolicyVO} — V2-native source row materialization. */
+export type MaterializationMode = 'ORDERED' | 'LIMIT' | 'ONCE' | 'EQUAL' | 'WEIGHTED';
+
+export interface MaterializationPolicyDraft {
+  mode?: MaterializationMode | string;
+  /** Maximum rows after mode-specific ordering/expansion; required for {@code LIMIT}. */
+  limit?: number;
+  /** Deterministic shuffle seed for {@code EQUAL} / {@code WEIGHTED}; defaults to 0 on the server. */
+  seed?: number;
+  /** Per-row weights aligned with pre-policy row order; required for {@code WEIGHTED}. */
+  weights?: number[];
+}
+
 export interface SourceDraft {
   type?: string;
   dataSourceId?: string;
   sql?: string;
   iterator?: { type?: string; from?: number; to?: number; step?: number };
+  materializationPolicy?: MaterializationPolicyDraft;
   policy?: {
     inMemory?: boolean;
-    materialization?: string;
     selectionStrategy?: string;
     limit?: number;
   };

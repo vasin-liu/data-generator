@@ -1,6 +1,7 @@
 import type {
   ExecutionPolicyDraft,
   GeneratorDraft,
+  MaterializationPolicyDraft,
   SinkExecutionPolicyDraft,
   SourceDraft,
   SpelColumnDraft,
@@ -87,6 +88,11 @@ export function isEditableSource(source?: SourceDraft): boolean {
 /** Default optional source policy for new sources (non-blocking fields). */
 export function defaultSourcePolicy(): NonNullable<SourceDraft['policy']> {
   return { inMemory: false, selectionStrategy: 'ORDER' };
+}
+
+/** Empty materialization policy (omit from draft until the operator sets a mode). */
+export function defaultMaterializationPolicy(): MaterializationPolicyDraft {
+  return {};
 }
 
 export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
@@ -293,6 +299,37 @@ export function applySourcePolicyAt(
       policy: { ...(source.policy ?? {}), ...partial },
     },
   };
+  return next;
+}
+
+/**
+ * @param draft template draft
+ * @param key source map key
+ * @param partial materialization policy fields to merge; {@code undefined} values remove keys
+ */
+export function applySourceMaterializationPolicyAt(
+  draft: TemplateV2Draft,
+  key: string,
+  partial: MaterializationPolicyDraft,
+): TemplateV2Draft {
+  const next = cloneDraft(draft);
+  const source = next.sources?.[key];
+  if (!source) {
+    return draft;
+  }
+  const merged: MaterializationPolicyDraft = { ...(source.materializationPolicy ?? {}), ...partial };
+  for (const field of ['mode', 'limit', 'seed', 'weights'] as const) {
+    if (field in partial && partial[field] === undefined) {
+      delete merged[field];
+    }
+  }
+  const updated: SourceDraft = { ...source };
+  if (!merged.mode) {
+    delete updated.materializationPolicy;
+  } else {
+    updated.materializationPolicy = merged;
+  }
+  next.sources = { ...(next.sources ?? {}), [key]: updated };
   return next;
 }
 

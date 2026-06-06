@@ -3,15 +3,23 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import type { EditorDataSources, SourceDraft, TemplateV2Draft } from '../../../api/types';
+import type {
+  EditorDataSources,
+  MaterializationMode,
+  MaterializationPolicyDraft,
+  SourceDraft,
+  TemplateV2Draft,
+} from '../../../api/types';
 import { SourceFieldsForm } from '../SourceFieldsForm';
 import { FieldHelp } from '../../../components/FieldHelp';
 import { labeledOptions, yesNoOptions } from '../../utils/optionLabels';
 import {
   EDITABLE_SOURCE_KINDS,
   addSource,
+  applySourceMaterializationPolicyAt,
   applySourceMergeAt,
   applySourcePolicyAt,
+  defaultMaterializationPolicy,
   defaultSourcePolicy,
   inferSourceKind,
   listSourceKeys,
@@ -21,6 +29,8 @@ import {
   suggestSourceKey,
   type EditableSourceKind,
 } from '../draftUtils';
+
+const MATERIALIZATION_MODES = ['ORDERED', 'LIMIT', 'ONCE', 'EQUAL', 'WEIGHTED'] as const;
 
 const SELECTION_STRATEGIES = [
   'ORDER',
@@ -67,12 +77,41 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
   const source = selectedKey ? draft.sources?.[selectedKey] : undefined;
   const sourceKind = inferSourceKind(source);
   const policy = { ...defaultSourcePolicy(), ...source?.policy };
+  const materializationPolicy = {
+    ...defaultMaterializationPolicy(),
+    ...source?.materializationPolicy,
+  };
+  const materializationMode = materializationPolicy.mode?.toUpperCase() as
+    | MaterializationMode
+    | undefined;
 
   const patchPolicy = (partial: SourceDraft['policy']) => {
     if (!selectedKey) {
       return;
     }
     onChange(applySourcePolicyAt(draft, selectedKey, { ...policy, ...partial }));
+  };
+
+  const patchMaterializationPolicy = (partial: MaterializationPolicyDraft) => {
+    if (!selectedKey) {
+      return;
+    }
+    onChange(applySourceMaterializationPolicyAt(draft, selectedKey, partial));
+  };
+
+  const formatWeights = (weights?: number[]): string => (weights?.length ? weights.join(', ') : '');
+
+  const parseWeights = (text: string): number[] | undefined => {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    const parts = trimmed.split(/[,;\s]+/).filter(Boolean);
+    const nums = parts.map((part) => Number.parseInt(part, 10));
+    if (nums.some((n) => Number.isNaN(n))) {
+      return undefined;
+    }
+    return nums;
   };
 
   const openAdd = () => {
@@ -268,7 +307,12 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                     />
                   </Form.Item>
                   <Form.Item
-                    label={<FieldHelp label={t('source.policy.limit')} help={t('source.policy.limit.help')} />}
+                    label={
+                      <FieldHelp
+                        label={t('source.policy.limit')}
+                        help={t('source.policy.limit.help')}
+                      />
+                    }
                   >
                     <InputNumber
                       min={0}
@@ -282,20 +326,100 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                   <Form.Item
                     label={
                       <FieldHelp
-                        label={t('source.policy.materialization')}
-                        help={t('source.policy.materialization.help')}
+                        label={t('source.materialization.mode')}
+                        help={t('source.materialization.mode.help')}
                       />
                     }
                   >
-                    <Input
-                      readOnly={readOnly}
-                      placeholder={t('source.policy.materialization.placeholder')}
-                      value={policy.materialization ?? ''}
-                      onChange={(e) =>
-                        patchPolicy({ materialization: e.target.value || undefined })
-                      }
+                    <Select
+                      allowClear
+                      disabled={readOnly}
+                      placeholder={t('source.materialization.mode.placeholder')}
+                      value={materializationMode}
+                      options={labeledOptions(t, 'source.materialization.mode', MATERIALIZATION_MODES)}
+                      onChange={(v) => {
+                        const nextMode = (v ?? undefined) as MaterializationMode | undefined;
+                        if (!nextMode) {
+                          patchMaterializationPolicy({
+                            mode: undefined,
+                            limit: undefined,
+                            seed: undefined,
+                            weights: undefined,
+                          });
+                          return;
+                        }
+                        const patch: MaterializationPolicyDraft = { mode: nextMode };
+                        if (nextMode !== 'LIMIT' && nextMode !== 'ORDERED') {
+                          patch.limit = undefined;
+                        }
+                        if (nextMode !== 'EQUAL' && nextMode !== 'WEIGHTED') {
+                          patch.seed = undefined;
+                        }
+                        if (nextMode !== 'WEIGHTED') {
+                          patch.weights = undefined;
+                        }
+                        patchMaterializationPolicy(patch);
+                      }}
                     />
                   </Form.Item>
+                  {materializationMode === 'LIMIT' || materializationMode === 'ORDERED' ? (
+                    <Form.Item
+                      label={
+                        <FieldHelp
+                          label={t('source.materialization.limit')}
+                          help={t('source.materialization.limit.help')}
+                        />
+                      }
+                    >
+                      <InputNumber
+                        min={materializationMode === 'LIMIT' ? 1 : 0}
+                        disabled={readOnly}
+                        style={{ width: '100%' }}
+                        placeholder={t('source.materialization.limit.placeholder')}
+                        value={materializationPolicy.limit}
+                        onChange={(v) => patchMaterializationPolicy({ limit: v ?? undefined })}
+                      />
+                    </Form.Item>
+                  ) : null}
+                  {materializationMode === 'EQUAL' || materializationMode === 'WEIGHTED' ? (
+                    <Form.Item
+                      label={
+                        <FieldHelp
+                          label={t('source.materialization.seed')}
+                          help={t('source.materialization.seed.help')}
+                        />
+                      }
+                    >
+                      <InputNumber
+                        disabled={readOnly}
+                        style={{ width: '100%' }}
+                        placeholder={t('source.materialization.seed.placeholder')}
+                        value={materializationPolicy.seed}
+                        onChange={(v) => patchMaterializationPolicy({ seed: v ?? undefined })}
+                      />
+                    </Form.Item>
+                  ) : null}
+                  {materializationMode === 'WEIGHTED' ? (
+                    <Form.Item
+                      label={
+                        <FieldHelp
+                          label={t('source.materialization.weights')}
+                          help={t('source.materialization.weights.help')}
+                        />
+                      }
+                    >
+                      <Input
+                        readOnly={readOnly}
+                        placeholder={t('source.materialization.weights.placeholder')}
+                        value={formatWeights(materializationPolicy.weights)}
+                        onChange={(e) =>
+                          patchMaterializationPolicy({
+                            weights: parseWeights(e.target.value),
+                          })
+                        }
+                      />
+                    </Form.Item>
+                  ) : null}
                 </Form>
               ),
             },
