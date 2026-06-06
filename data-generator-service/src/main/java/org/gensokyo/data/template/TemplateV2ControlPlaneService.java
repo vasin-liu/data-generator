@@ -20,10 +20,6 @@ import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.vo.TemplateVO;
 import org.gensokyo.data.repository.TemplateRepository;
-import org.gensokyo.data.template.migration.MigrationDraftService;
-import org.gensokyo.data.template.migration.MigrationPlanExplain;
-import org.gensokyo.data.template.migration.MigrationPlanExplainService;
-import org.gensokyo.data.template.migration.MigrationV2CompareResolver;
 import org.gensokyo.data.yaml.YamlParser;
 import org.gensokyo.kit.character.StrKit;
 
@@ -42,36 +38,32 @@ public class TemplateV2ControlPlaneService {
 
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
-    private final MigrationDraftService migrationDraftService;
-    private final MigrationPlanExplainService planExplainService;
-    private final TemplateV1Loader templateV1Loader;
-    private final MigrationV2CompareResolver v2CompareResolver;
+    private final TemplateV2DefinitionResolver definitionResolver;
+    private final TemplateV2PlanExplainService planExplainService;
     private final TemplateV2Runner templateV2Runner;
     private final DataGeneratorProperties properties;
 
     /**
-     * Creates the control-plane service with persistence and migration helpers.
+     * Creates the control-plane service with persistence and V2 resolution helpers.
      *
      * @param repository              template persistence
      * @param yamlParser              YAML parser for definition probes
-     * @param migrationDraftService   V1 → V2 draft builder when content is V1
-     * @param planExplainService      Calcite plan summary and V1/V2 diff notes
+     * @param definitionResolver      persisted V2 definition resolver
+     * @param planExplainService      Calcite plan summary builder
      * @param templateV2Runner        V2 runtime runner for bounded preview
      * @param properties              service properties (default preview row cap)
      */
     public TemplateV2ControlPlaneService(
             TemplateRepository repository,
             YamlParser yamlParser,
-            MigrationDraftService migrationDraftService,
-            MigrationPlanExplainService planExplainService,
+            TemplateV2DefinitionResolver definitionResolver,
+            TemplateV2PlanExplainService planExplainService,
             TemplateV2Runner templateV2Runner,
             DataGeneratorProperties properties) {
         this.repository = Objects.requireNonNull(repository, "repository");
         this.yamlParser = Objects.requireNonNull(yamlParser, "yamlParser");
-        this.migrationDraftService = Objects.requireNonNull(migrationDraftService, "migrationDraftService");
+        this.definitionResolver = Objects.requireNonNull(definitionResolver, "definitionResolver");
         this.planExplainService = Objects.requireNonNull(planExplainService, "planExplainService");
-        this.templateV1Loader = new TemplateV1Loader(yamlParser);
-        this.v2CompareResolver = new MigrationV2CompareResolver(yamlParser, migrationDraftService);
         this.templateV2Runner = Objects.requireNonNull(templateV2Runner, "templateV2Runner");
         this.properties = Objects.requireNonNull(properties, "properties");
     }
@@ -119,14 +111,13 @@ public class TemplateV2ControlPlaneService {
     }
 
     /**
-     * Loads a persisted template, resolves normalized V2 (from content or V1 migration draft),
-     * and returns a bounded plan explain with source summaries and V1/V2 diff notes.
+     * Loads a persisted Template V2 definition and returns a bounded plan explain block.
      *
      * @param templateId persisted template id
-     * @return migration plan explain block; never {@code null}
-     * @throws IllegalArgumentException when the template is missing, content is empty, or V2 cannot be resolved
+     * @return plan explain block; never {@code null}
+     * @throws IllegalArgumentException when the template is missing, content is empty, or not V2
      */
-    public MigrationPlanExplain explain(Long templateId) {
+    public TemplateV2PlanExplain explain(Long templateId) {
         Objects.requireNonNull(templateId, "templateId");
         TemplatePO entity = repository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -135,9 +126,9 @@ public class TemplateV2ControlPlaneService {
             throw new IllegalArgumentException(String.format("Template '%s' has empty content", templateId));
         }
 
-        TemplateVO v1 = resolveV1ForExplain(entity);
-        TemplateV2VO v2 = v2CompareResolver.resolveForCompare(entity);
-        return planExplainService.explain(v1, v2);
+        TemplateV2VO v2 = definitionResolver.resolve(entity);
+        TemplateVO v1Probe = tryParse(entity.getContentYaml(), TemplateVO.class);
+        return planExplainService.explain(v1Probe, v2);
     }
 
     /**
@@ -174,7 +165,7 @@ public class TemplateV2ControlPlaneService {
             throw new IllegalArgumentException(String.format("Template '%s' has empty content", templateId));
         }
 
-        TemplateV2VO v2 = v2CompareResolver.resolveForCompare(entity);
+        TemplateV2VO v2 = definitionResolver.resolve(entity);
         var warnings = new ArrayList<String>();
 
         EffectiveExecutionPolicy effective = EffectiveExecutionPolicy.resolve(v2.getExecutionPolicy());
@@ -251,17 +242,6 @@ public class TemplateV2ControlPlaneService {
         copy.setTransformers(new ArrayList<>(template.getTransformers()));
         copy.setSinks(new ArrayList<>(template.getSinks()));
         return copy;
-    }
-
-    private TemplateVO resolveV1ForExplain(TemplatePO entity) {
-        TemplateV2DraftVO v2Draft = tryParse(entity.getContentYaml(), TemplateV2DraftVO.class);
-        TemplateVO v1Probe = tryParse(entity.getContentYaml(), TemplateVO.class);
-        TemplateDefinitionKind kind = TemplateDefinitionDetector.detect(v1Probe, v2Draft);
-        // V2-only persisted yaml cannot be loaded as V1; use probe when present for diff hints.
-        if (kind == TemplateDefinitionKind.V2) {
-            return v1Probe;
-        }
-        return templateV1Loader.load(entity);
     }
 
     private <T> T tryParse(String yaml, Class<T> clazz) {

@@ -11,7 +11,7 @@ import org.gensokyo.data.model.qo.ValidateTemplateQO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateV2ValidationResult;
-import org.gensokyo.data.template.migration.MigrationPlanExplain;
+import org.gensokyo.data.template.TemplateV2PlanExplain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -74,27 +74,26 @@ class TemplateControllerControlPlaneTests {
         entity.setName("control-plane-explain-rest");
         entity.setContentYaml("""
                 name: control-plane-explain-rest
-                iterator:
-                  type: number
-                  from: 1
-                  to: 3
-                fields:
-                  - name: label
-                    stages:
-                      - type: SCRIPT
-                        language:
-                          type: plain
-                          content: "row"
-                output:
+                sources:
+                  input:
+                    type: iterator
+                    iterator:
+                      type: number
+                      from: 1
+                      to: 3
+                transform:
+                  type: sql
+                  sql: SELECT value FROM input
+                sink:
                   writers:
                     - type: console
                 """);
         templateRepository.saveAndFlush(entity);
 
-        R<MigrationPlanExplain> result = templateController.explainV2(entity.getId());
+        R<TemplateV2PlanExplain> result = templateController.explainV2(entity.getId());
 
         Assertions.assertTrue(result.isSuccess());
-        MigrationPlanExplain explain = result.getData();
+        TemplateV2PlanExplain explain = result.getData();
         Assertions.assertNotNull(explain);
         Assertions.assertFalse(explain.getSourceSummaries().isEmpty());
     }

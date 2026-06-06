@@ -27,7 +27,6 @@ import org.gensokyo.data.model.vo.stage.StageVO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.reader.JdbcReaderVO;
 import org.gensokyo.data.template.querysource.V1DatabaseSourceAdapter;
-import org.gensokyo.data.template.querysource.V1QuerySourceDraftConverter;
 import org.gensokyo.data.template.querysource.V1QuerySourceExtractor;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.yaml.JacksonParser;
@@ -525,47 +524,6 @@ class TemplateV2SupportTests {
     }
 
     @Test
-    void convertsV1TemplateIntoQuerySourceDraft() {
-        DatabaseIteratorVO iterator = new DatabaseIteratorVO();
-        iterator.setDataSourceId("iterator-db");
-        iterator.setSql("select * from t_order");
-
-        JdbcReaderVO reader = new JdbcReaderVO();
-        reader.setDataSourceId("reader-db");
-        reader.setContent("select id from t_customer");
-
-        ReadStageVO readStage = new ReadStageVO();
-        readStage.setReaders(List.of(reader));
-
-        FieldVO field = new FieldVO();
-        field.setName("customer_lookup");
-        field.setStages(List.of(readStage));
-
-        WriteStageVO output = consoleSink();
-
-        TemplateVO template = new TemplateVO();
-        template.setId(1001L);
-        template.setName("v1-query-source-convert");
-        template.setIterator(iterator);
-        template.setFields(List.of(field));
-        template.setOutput(output);
-
-        TemplateV2DraftVO draft = V1QuerySourceDraftConverter.convert(template);
-
-        Assertions.assertNotNull(draft);
-        Assertions.assertEquals(1001L, draft.getId());
-        Assertions.assertEquals("v1-query-source-convert", draft.getName());
-        Assertions.assertEquals(2, draft.getSources().size());
-        Assertions.assertTrue(draft.getSources().get("iterator") instanceof QuerySourceVO);
-        Assertions.assertTrue(draft.getSources().get("customer_lookup") instanceof QuerySourceVO);
-        Assertions.assertNull(draft.getTransform());
-        Assertions.assertNotNull(draft.getSinkExecutionPolicy());
-        Assertions.assertEquals("FAIL_FAST", draft.getSinkExecutionPolicy().getMode());
-        Assertions.assertNotNull(draft.getSink());
-        Assertions.assertEquals(1, draft.getSink().getWriters().size());
-    }
-
-    @Test
     void extractsMultipleJdbcReadersFromOneFieldWithoutOverwriting() {
         JdbcReaderVO readerA = new JdbcReaderVO();
         readerA.setDataSourceId("reader-db-a");
@@ -590,28 +548,6 @@ class TemplateV2SupportTests {
         Assertions.assertEquals(2, sources.size());
         Assertions.assertEquals("reader-db-a", sources.get("customer_lookup").getDataSourceId());
         Assertions.assertEquals("reader-db-b", sources.get("customer_lookup_2").getDataSourceId());
-    }
-
-    @Test
-    void createsMinimalExecutableTransformForSingleQuerySourceDraft() {
-        DatabaseIteratorVO iterator = new DatabaseIteratorVO();
-        iterator.setDataSourceId("iterator-db");
-        iterator.setSql("select * from t_order");
-
-        TemplateVO template = new TemplateVO();
-        template.setId(1002L);
-        template.setName("single-source");
-        template.setIterator(iterator);
-        template.setOutput(consoleSink());
-
-        TemplateV2DraftVO draft = V1QuerySourceDraftConverter.convert(template);
-
-        Assertions.assertNotNull(draft);
-        Assertions.assertNotNull(draft.getTransform());
-        Assertions.assertInstanceOf(SqlTransformVO.class, draft.getTransform());
-        Assertions.assertEquals("SELECT * FROM iterator", ((SqlTransformVO) draft.getTransform()).getSql());
-        Assertions.assertNotNull(draft.getSinkExecutionPolicy());
-        Assertions.assertEquals("FAIL_FAST", draft.getSinkExecutionPolicy().getMode());
     }
 
     private SqlTransformVO sql(String content) {

@@ -3,7 +3,7 @@
  * Site: https://www.pcitech.com/
  * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
  */
-package org.gensokyo.data.template.migration;
+package org.gensokyo.data.template;
 
 import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.calcite.sql.CalciteExecutionContext;
@@ -33,12 +33,12 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
- * Builds a bounded V2 Calcite plan summary and V1/V2 diff notes for migration compare reports.
+ * Builds a bounded V2 Calcite plan summary for control-plane explain responses.
  *
  * @author Gensokyo
  * @since 2026-05-20
  */
-public class MigrationPlanExplainService {
+public class TemplateV2PlanExplainService {
 
     private static final int SQL_SNIPPET_MAX = 500;
     private static final Pattern WORD_GROUP_BY = Pattern.compile("(?i)\\bgroup\\s+by\\b");
@@ -50,17 +50,17 @@ public class MigrationPlanExplainService {
     private final CalciteSqlValidator sqlValidator = new CalciteSqlValidator();
 
     /**
-     * Explains the V2 draft and contrasts it with the V1 definition for operators.
+     * Explains the normalized V2 template for operators.
      *
-     * @param v1 V1 template
-     * @param v2 normalized V2 template used in dual-run
+     * @param v1Probe optional V1-shaped YAML probe for legacy diff hints; may be {@code null}
+     * @param v2      normalized V2 template
      * @return plan explain block; never {@code null}
      */
-    public MigrationPlanExplain explain(TemplateVO v1, TemplateV2VO v2) {
-        MigrationPlanExplain explain = new MigrationPlanExplain();
+    public TemplateV2PlanExplain explain(TemplateVO v1Probe, TemplateV2VO v2) {
+        TemplateV2PlanExplain explain = new TemplateV2PlanExplain();
         Objects.requireNonNull(v2, "v2");
 
-        appendV1Hints(explain, v1);
+        appendLegacyHints(explain, v1Probe);
         appendSourceSummaries(explain, v2);
 
         EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(v2.getExecutionPolicy());
@@ -69,19 +69,19 @@ public class MigrationPlanExplainService {
         String sql = firstSql(v2);
         if (sql == null) {
             explain.setCalciteValidation("No SQL transform on V2 template");
-            explain.getDiffNotes().add("V2 has no SQL transform — compare used pipeline output only");
+            explain.getDiffNotes().add("V2 has no SQL transform — preview used pipeline output only");
             return explain;
         }
 
         explain.setV2Sql(truncate(sql));
         validateAndClassify(explain, v2, sql, policy);
         explain.getPlanFeatures().addAll(describePlanFeatures(sql));
-        appendDiffNotes(explain, v1, sql);
+        appendDiffNotes(explain, v1Probe, sql);
         return explain;
     }
 
     private void validateAndClassify(
-            MigrationPlanExplain explain,
+            TemplateV2PlanExplain explain,
             TemplateV2VO v2,
             String sql,
             EffectiveExecutionPolicy policy) {
@@ -114,32 +114,25 @@ public class MigrationPlanExplainService {
         }
     }
 
-    private static void appendV1Hints(MigrationPlanExplain explain, TemplateVO v1) {
-        if (v1 == null) {
+    private static void appendLegacyHints(TemplateV2PlanExplain explain, TemplateVO v1Probe) {
+        if (v1Probe == null) {
             return;
         }
-        TemplateMigrationAnalysisDTO analysis = V1TemplateMigrationAnalyzer.analyze(v1);
-        if (analysis.getScenarioFamily() != null) {
-            explain.getV1Hints().add("Scenario family: " + analysis.getScenarioFamily());
-        }
-        if (analysis.getRecommendedPath() != null) {
-            explain.getV1Hints().add("Recommended path: " + analysis.getRecommendedPath());
-        }
-        IteratorVO iterator = v1.getIterator();
+        IteratorVO iterator = v1Probe.getIterator();
         if (iterator instanceof DatabaseIteratorVO database) {
             if (database.getDataSourceId() != null) {
-                explain.getV1Hints().add("V1 JDBC datasource: " + database.getDataSourceId());
+                explain.getV1Hints().add("Legacy JDBC datasource: " + database.getDataSourceId());
             }
             if (database.getSql() != null && !database.getSql().isBlank()) {
-                explain.getV1Hints().add("V1 JDBC SQL: " + truncate(database.getSql()));
+                explain.getV1Hints().add("Legacy JDBC SQL: " + truncate(database.getSql()));
             }
         }
         else if (iterator != null && iterator.getType() != null) {
-            explain.getV1Hints().add("V1 iterator type: " + iterator.getType());
+            explain.getV1Hints().add("Legacy iterator type: " + iterator.getType());
         }
     }
 
-    private static void appendSourceSummaries(MigrationPlanExplain explain, TemplateV2VO v2) {
+    private static void appendSourceSummaries(TemplateV2PlanExplain explain, TemplateV2VO v2) {
         if (v2.getSources() == null) {
             return;
         }
@@ -171,10 +164,10 @@ public class MigrationPlanExplainService {
         }
     }
 
-    private static void appendDiffNotes(MigrationPlanExplain explain, TemplateVO v1, String v2Sql) {
-        String v1Sql = extractV1JdbcSql(v1);
+    private static void appendDiffNotes(TemplateV2PlanExplain explain, TemplateVO v1Probe, String v2Sql) {
+        String v1Sql = extractV1JdbcSql(v1Probe);
         if (v1Sql != null && !normalizeForCompare(v1Sql).equals(normalizeForCompare(v2Sql))) {
-            explain.getDiffNotes().add("V1 JDBC SQL text differs from V2 transform SQL — review join/projection rewrite");
+            explain.getDiffNotes().add("Legacy JDBC SQL text differs from V2 transform SQL — review join/projection rewrite");
         }
     }
 
