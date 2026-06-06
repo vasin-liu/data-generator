@@ -64,6 +64,19 @@ Alternative: point `JAVA_HOME` at JDK 25 yourself, then use the wrapper with pro
 Focused builds (examples from internal upgrade docs):
 
 ```bash
+# Operator console: unit + frontend build + Podman Playwright UI/E2E (fixed pipeline)
+.\scripts\verify-console.ps1
+
+# Unit tests only (console REST, health, static resources)
+.\scripts\verify-console-unit.ps1 -IncludeWebBuild
+
+# Podman E2E only (after package exists)
+.\scripts\e2e-podman.ps1 -SkipBuild
+```
+
+Other focused builds:
+
+```bash
 # Service and its dependencies only
 .\mvnw-jdk25.ps1 -pl data-generator-service -am test
 

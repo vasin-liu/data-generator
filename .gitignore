@@ -35,5 +35,16 @@ uploaded-sources/
 .playwright-mcp/
 templates-light.png
 
+# Console web / Playwright
+data-generator-console-web/test-results/
+data-generator-console-web/playwright-report/
+data-generator-console-web/blob-report/
+data-generator-console-web/playwright/.cache/
+
+# Local verify/debug scratch (do not commit)
+.verify-*.log
+.debug-maven-exit.*
+.run-verify-*.ps1
+
 ### VS Code ###
 .vscode/
