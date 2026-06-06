@@ -5,7 +5,6 @@ import { HomePage } from './pages/HomePage';
 import { JobDetailPage } from './pages/JobDetailPage';
 import { JobsPage } from './pages/JobsPage';
 import { SchedulesPage } from './pages/SchedulesPage';
-import { MigrationPage } from './pages/MigrationPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
 import { TemplatesPage } from './pages/TemplatesPage';
 
@@ -24,7 +23,6 @@ export function App() {
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/:instanceId" element={<JobDetailPage />} />
         <Route path="schedules" element={<SchedulesPage />} />
-        <Route path="migration" element={<MigrationPage />} />
       </Route>
     </Routes>
   );

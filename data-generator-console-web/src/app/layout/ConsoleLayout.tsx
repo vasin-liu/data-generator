@@ -8,13 +8,11 @@ import {
   HomeOutlined,
   MoonOutlined,
   SunOutlined,
-  SwapOutlined,
 } from '@ant-design/icons';
 import { Segmented, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { fetchConsoleRuntime } from '../../api/runtime';
-import { migrationUiEnabled } from '../../config/features';
 import { useConsoleTheme } from '../../theme/ThemeProvider';
 import type { ConsoleThemeMode } from '../../theme/types';
 
@@ -45,7 +43,6 @@ export function ConsoleLayout() {
     if (p.includes('/jobs')) return '/jobs';
     if (p.includes('/schedules')) return '/schedules';
     if (p.includes('/datasources')) return '/datasources';
-    if (p.includes('/migration')) return '/migration';
     return '/';
   })();
 
@@ -55,9 +52,6 @@ export function ConsoleLayout() {
     { key: '/datasources', testId: 'nav-datasources', label: t('nav.datasources'), icon: <DatabaseOutlined /> },
     { key: '/jobs', testId: 'nav-jobs', label: t('nav.jobs'), icon: <HistoryOutlined /> },
     { key: '/schedules', testId: 'nav-schedules', label: t('nav.schedules'), icon: <ClockCircleOutlined /> },
-    ...(migrationUiEnabled
-      ? [{ key: '/migration', testId: 'nav-migration', label: t('nav.migration'), icon: <SwapOutlined /> }]
-      : []),
   ];
 
   const v1Enabled = runtimeQuery.data?.v1ExecutionEnabled ?? false;

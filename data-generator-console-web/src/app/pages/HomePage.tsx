@@ -6,19 +6,16 @@ import {
   DatabaseOutlined,
   FileTextOutlined,
   HistoryOutlined,
-  SwapOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { fetchConsoleRuntime } from '../../api/runtime';
-import { migrationUiEnabled } from '../../config/features';
 
 type AreaCard = {
   path: string;
   titleKey: string;
   descKey: string;
   icon: ReactNode;
-  migrationOnly?: boolean;
 };
 
 const AREAS: AreaCard[] = [
@@ -46,13 +43,6 @@ const AREAS: AreaCard[] = [
     descKey: 'home.area.schedules',
     icon: <ClockCircleOutlined />,
   },
-  {
-    path: '/migration',
-    titleKey: 'nav.migration',
-    descKey: 'home.area.migration',
-    icon: <SwapOutlined />,
-    migrationOnly: true,
-  },
 ];
 
 /**
@@ -68,7 +58,6 @@ export function HomePage() {
   });
 
   const runtime = runtimeQuery.data;
-  const visibleAreas = AREAS.filter((area) => !area.migrationOnly || migrationUiEnabled);
 
   return (
     <section data-testid="console-home">
@@ -126,7 +115,7 @@ export function HomePage() {
         {t('home.areas.title')}
       </Typography.Title>
       <Row gutter={[16, 16]}>
-        {visibleAreas.map((area) => (
+        {AREAS.map((area) => (
           <Col xs={24} sm={12} md={8} lg={6} key={area.path}>
             <Card hoverable className="home-area-card" onClick={() => navigate(area.path)}>
               <div className="home-area-card-icon">{area.icon}</div>

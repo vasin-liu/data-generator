@@ -34,8 +34,6 @@ export function ReviewPanel({
   const navigate = useNavigate();
   const [output, setOutput] = useState('');
 
-  const v1Blocked = kind === 'V1';
-
   const validateMutation = useMutation({
     mutationFn: () => validateDraft(draft, templateId),
     onSuccess: (result) => {
@@ -118,7 +116,7 @@ export function ReviewPanel({
     archived ? t('review.status.archived') : '',
   ].filter(Boolean);
 
-  const needsPublish = status !== 'PUBLISHED' && templateId != null && !v1Blocked;
+  const needsPublish = status !== 'PUBLISHED' && templateId != null;
 
   return (
     <div>
@@ -139,8 +137,7 @@ export function ReviewPanel({
         <Button
           onClick={() => previewMutation.mutate()}
           loading={previewMutation.isPending}
-          disabled={v1Blocked}
-          title={v1Blocked ? t('review.tooltip.preview.v1') : t('review.tooltip.preview.ok')}
+          title={t('review.tooltip.preview.ok')}
         >
           {t('review.preview')}
         </Button>
@@ -163,7 +160,7 @@ export function ReviewPanel({
         </Button>
         <Button
           type="primary"
-          disabled={!saveAllowed || templateId == null || v1Blocked}
+          disabled={!saveAllowed || templateId == null}
           loading={publishMutation.isPending}
           onClick={() =>
             Modal.confirm({
@@ -178,10 +175,10 @@ export function ReviewPanel({
         <Button
           type="primary"
           danger
-          disabled={!saveAllowed || v1Blocked}
+          disabled={!saveAllowed}
           loading={runMutation.isPending}
           onClick={() => runMutation.mutate()}
-          title={v1Blocked ? t('review.tooltip.run.v1') : t('review.tooltip.run.ok')}
+          title={t('review.tooltip.run.ok')}
         >
           {t('review.run')}
         </Button>

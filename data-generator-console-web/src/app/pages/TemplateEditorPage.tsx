@@ -3,14 +3,12 @@ import { Alert, Button, Collapse, Space, Spin, Tabs, message } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { migrationUiEnabled } from '../../config/features';
 import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
 import { fetchEditorDataSources } from '../../api/runtime';
 import type { EditorDataSources } from '../../api/types';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
 import { cloneDraft } from '../editor/draftUtils';
 import { EditorTabHint } from '../editor/EditorTabHint';
-import { MigrationTab } from '../editor/MigrationTab';
 import { ReviewPanel } from '../editor/ReviewPanel';
 import { YamlPanel } from '../editor/YamlPanel';
 import { ExecutionStep } from '../editor/steps/ExecutionStep';
@@ -22,7 +20,7 @@ import { WorkflowPanel } from '../editor/WorkflowPanel';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 import { TemplateStatusTag } from '../../components/TemplateStatusTag';
 
-const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'workflow', 'review', 'migration'] as const;
+const TAB_KEYS = ['general', 'sources', 'transform', 'sinks', 'execution', 'workflow', 'review'] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 /**
@@ -89,7 +87,7 @@ export function TemplateEditorPage() {
   }, [invalidId, navigate, t]);
 
   const templateId = meta?.templateId ?? (isNew ? null : routeId);
-  const saveAllowed = meta != null && meta.kind !== 'V1' && !meta.archived;
+  const saveAllowed = meta != null && !meta.archived;
   const activeTab = (searchParams.get('tab') as TabKey) || 'general';
 
   const setTab = (key: string) => {
@@ -220,25 +218,6 @@ export function TemplateEditorPage() {
         </>
       ),
     },
-    ...(migrationUiEnabled
-      ? [
-          {
-            key: 'migration' as const,
-            label: t('editor.tab.migration'),
-            children:
-              templateId == null ? (
-                <Alert type="info" message={t('editor.migration.saveFirst')} />
-              ) : (
-                <MigrationTab
-                  templateId={templateId}
-                  kind={meta.kind}
-                  onPromoted={() => loadQuery.refetch()}
-                  onDraftApply={(d) => setDraft(cloneDraft(d))}
-                />
-              ),
-          },
-        ]
-      : []),
   ];
 
   const editorActions =
@@ -275,9 +254,6 @@ export function TemplateEditorPage() {
         ]}
         extra={editorActions}
       />
-      {meta.kind === 'V1' && (
-        <Alert type="info" message={t('editor.v1.note')} style={{ marginBottom: 16 }} />
-      )}
       {meta.archived && (
         <Alert type="warning" message={t('review.status.archived')} style={{ marginBottom: 16 }} />
       )}
