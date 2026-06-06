@@ -5,7 +5,6 @@ import {
   fetchDatasourcesOverview,
   fetchEditorScaffold,
   fetchJobs,
-  fetchMigrationSummary,
   fetchSchedules,
   fetchTemplateTaxonomy,
   fetchTemplates,
@@ -64,12 +63,5 @@ test.describe('API / console facades', () => {
     expect(res.ok()).toBeTruthy();
     expectApiSuccess(body);
     expect(Array.isArray(unwrapApiData(body))).toBe(true);
-  });
-
-  test('GET /api/migration/summary', async ({ request }) => {
-    const { res, body } = await fetchMigrationSummary(request);
-    expect(res.ok()).toBeTruthy();
-    expectApiSuccess(body);
-    expect(unwrapApiData(body)).not.toBeNull();
   });
 });

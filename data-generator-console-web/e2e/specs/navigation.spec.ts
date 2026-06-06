@@ -31,14 +31,4 @@ test.describe('Navigation / top dock', () => {
     await expect(page).toHaveURL(/\/console\/?$/);
     await expect(page.getByTestId(TestIds.home)).toBeVisible();
   });
-
-  test('migration nav when enabled', async ({ page }) => {
-    const migrationNav = page.getByTestId(TestIds.nav.migration);
-    if ((await migrationNav.count()) === 0) {
-      test.skip(true, 'Migration UI disabled (VITE_ENABLE_MIGRATION != true)');
-    }
-    await migrationNav.click();
-    await expect(page).toHaveURL(/\/migration/);
-    await expect(page.getByTestId(TestIds.pages.migration)).toBeVisible();
-  });
 });

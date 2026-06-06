@@ -39,11 +39,6 @@ export async function fetchEditorScaffold(request: APIRequestContext) {
   return { res, body: res.ok() ? await res.json() : null };
 }
 
-export async function fetchMigrationSummary(request: APIRequestContext) {
-  const res = await request.get(`${apiBaseUrl()}/api/migration/summary`);
-  return { res, body: res.ok() ? await res.json() : null };
-}
-
 export async function fetchTemplateTaxonomy(request: APIRequestContext) {
   const res = await request.get(`${apiBaseUrl()}/api/templates/taxonomy`);
   return { res, body: res.ok() ? await res.json() : null };

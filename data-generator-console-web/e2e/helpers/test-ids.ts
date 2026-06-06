@@ -12,7 +12,6 @@ export const TestIds = {
     datasources: 'nav-datasources',
     jobs: 'nav-jobs',
     schedules: 'nav-schedules',
-    migration: 'nav-migration',
   },
   pages: {
     templates: 'templates-page',
@@ -22,7 +21,6 @@ export const TestIds = {
     jobs: 'jobs-page',
     jobDetail: 'job-detail-page',
     schedules: 'schedules-page',
-    migration: 'migration-page',
   },
   actions: {
     templatesNew: 'templates-new-button',
