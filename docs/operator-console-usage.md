@@ -1,6 +1,8 @@
 # Operator console — UI feature guide
 
-Browser-based operator console for **Template V2** authoring, JDBC datasource administration, task execution history, cron schedules, and (optional) V1→V2 migration. The UI is a **React SPA** (`data-generator-console-web`) embedded in `data-generator-service` at `/console/*`. Console HTTP APIs live under `/api/*`; legacy REST paths (`/template/…`, `/task/…`, `/datasource/…`) remain for automation.
+Browser-based operator console for **Template V2** authoring, JDBC datasource administration, task execution history, and cron schedules. The UI is a **React SPA** (`data-generator-console-web`) embedded in `data-generator-service` at `/console/*`. Console HTTP APIs live under `/api/*`; legacy REST paths (`/template/…`, `/task/…`, `/datasource/…`) remain for automation.
+
+**V2-only:** Legacy V1 templates and the migration workbench are no longer available in the console. Create and operate Template V2 only. Historical migration runbooks live under `docs/archive/migration/`.
 
 **UI stack:** React 19 + Vite + Ant Design + React Router + TanStack Query.  
 **i18n:** English + 中文 (`data-generator-console-web/src/i18n/`).  
@@ -46,15 +48,10 @@ Open http://localhost:5173/console/ — Vite proxies `/api` to the backend.
 
 | Field | Config property | Default | UI meaning |
 |-------|-----------------|---------|------------|
-| `v1ExecutionEnabled` | `data.generator.v1-execution.enabled` | **false** | V1 template runs via `/task/run` |
 | `scheduleEnabled` | `data.generator.schedule.enabled` | false | Cron poller evaluates `task_schedule` |
 | `distributedEnabled` | `data.generator.distributed.enabled` | false | Queue-backed multi-node execution |
 
-The **home page** shows these flags and a four-step recommended workflow. The **navbar** shows V1 status plus optional tags when schedule or distributed mode is on.
-
-**V1 retirement:** V1 execution is **off by default**. Only Template V2 should be created and run in normal operations. To re-enable legacy V1 runs (emergency only): `data.generator.v1-execution.enabled: true`.
-
-**Migration UI:** Hidden unless the console build sets `VITE_ENABLE_MIGRATION=true` (nav item + editor Migration tab).
+The **home page** shows these flags and a four-step recommended workflow. The **navbar** shows optional tags when schedule or distributed mode is on.
 
 ---
 
@@ -67,13 +64,11 @@ flowchart LR
   D["Datasources"]
   J["Jobs"]
   S["Schedules"]
-  M["Migration optional"]
 
   Home --> T
   Home --> D
   Home --> J
   Home --> S
-  Home --> M
 
   T -->|New / Edit| TE["Template editor"]
   T -->|Schedules| S
@@ -96,7 +91,6 @@ flowchart LR
 | `/console/jobs` | Execution history (`?templateId=`, `?triggerType=`) |
 | `/console/jobs/{instanceId}` | Single run detail |
 | `/console/schedules` | Cron CRUD (`?templateId=`, `?scheduleId=`) |
-| `/console/migration` | Global migration dashboard (optional) |
 
 ---
 
@@ -143,9 +137,9 @@ flowchart LR
 
 ### Home (`/console/`)
 
-- **Server capabilities** — V1 / schedule / distributed flags from runtime API.
+- **Server capabilities** — schedule / distributed flags from runtime API.
 - **Recommended workflow** — four vertical steps (datasource → template → run/schedule → monitor).
-- **Area cards** — short description per module; migration card only when `VITE_ENABLE_MIGRATION=true`.
+- **Area cards** — short description per module.
 
 ### Shared UI patterns (2026-06)
 
@@ -154,7 +148,7 @@ flowchart LR
 - **Localized dropdown labels** — enum values (writer type, execution mode, workflow step type, transform type, etc.) use i18n labels instead of raw constants.
 - **Editor tab hints** — contextual info on General (new), Sources, and Review tabs.
 - **Schedules poller warning** — yellow alert when `schedule.enabled=false` on the server.
-- **Template list** — client-side filter by `DRAFT` / `PUBLISHED` status; **legacy V1 templates are hidden** from the catalog.
+- **Template list** — client-side filter by `DRAFT` / `PUBLISHED` status; only Template V2 rows appear in the catalog.
 - **Jobs** — clear URL filters; localized trigger type; schedule id link for scheduled runs.
 - **Template editor** — status tag (`DRAFT` / `PUBLISHED`); updates after Publish on Review tab.
 - **Schedules form** — one-click cron presets (hourly, daily, weekly, monthly) plus live next-run preview via `GET /api/console/schedules/preview?cron=…`.
@@ -168,7 +162,7 @@ flowchart LR
 | Filter | Name or id substring |
 | Include archived | Shows soft-deleted rows |
 | **New template** | Opens empty V2 scaffold |
-| **Edit** | Wizard + YAML + optional Migration tab |
+| **Edit** | Wizard + YAML advanced panel |
 | **View jobs** | `/jobs?templateId=` |
 | **Schedules** | `/schedules?templateId=` |
 | **Run** | Starts async execution; opens job detail |
@@ -189,9 +183,8 @@ flowchart LR
 | Execution | `executionPolicy`, chunking (labeled modes) |
 | Workflow | Optional L2 steps + compute blocks (each block reuses Sources / Transform / Sinks) |
 | Review | Validate, Preview, Save, Publish, Run |
-| Migration | Analyze / compare / promote (optional; saved templates only) |
 
-**V1 templates:** excluded from `GET /api/templates` catalog. Opening a V1 row in the editor returns an error with guidance to migrate or edit YAML on disk. V1 **execution** remains gated by `v1-execution.enabled` (default off).
+**Legacy V1 templates:** excluded from `GET /api/templates` catalog. Opening a V1 row in the editor returns an error — create a new Template V2 instead. V1 execution via `/task/run` is retired.
 
 **YAML advanced:** **Sync from form** exports the in-memory draft (`POST /api/templates/draft/yaml`); new templates auto-sync once on first open. **Reload from server** uses `GET /api/templates/{id}/yaml`.
 
@@ -226,7 +219,7 @@ Kafka and Elasticsearch cluster ids are **not** created in the UI — add them i
 |------------------|-------------|
 | Instance id | Sortable |
 | Template | Link to editor |
-| Kind | V1 / V2 |
+| Kind | Template kind (V2 in normal operations) |
 | Trigger | Localized Manual / Scheduled; scheduled rows link `#scheduleId` |
 | Status | Tag with color |
 | Finished | Timestamp |
@@ -265,15 +258,6 @@ Requires server `data.generator.schedule.enabled=true` for actual triggers; UI a
 
 **API:** `/api/console/schedules` (GET list, POST create, PUT/DELETE by id). RBAC: GET → `JOB_READ`, mutations → `TEMPLATE_RUN`.
 
-### Migration (optional)
-
-**Per-template tab** (editor): analyze, draft, compare, sign-off, promote.  
-**Global** `/console/migration`: inventory summary + backlog grid.
-
-See `docs/migration/orchestration-retirement-boundary.md` for W3 `COMPATIBILITY_ONLY` policy.
-
----
-
 ## Backend API summary
 
 | UI area | Primary console API | Legacy REST |
@@ -287,9 +271,8 @@ See `docs/migration/orchestration-retirement-boundary.md` for W3 `COMPATIBILITY_
 | Jobs | `/api/console/jobs` | `POST /task/run/{id}` |
 | Distributed metrics | `/api/console/distributed/metrics` | — |
 | Schedules | `/api/console/schedules`, `GET /api/console/schedules/preview?cron=` | — |
-| Migration | `/api/migration/…` | — |
 
-Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleUploadController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleDistributedController`, `ConsoleRuntimeController`, `ConsoleMigrationController`.
+Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleUploadController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleDistributedController`, `ConsoleRuntimeController`.
 
 ---
 
@@ -298,8 +281,6 @@ Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `Co
 ```yaml
 data:
   generator:
-    v1-execution:
-      enabled: false          # V1 run gate (default retired)
     schedule:
       enabled: false          # Cron poller
       poll-delay-ms: 60000
@@ -365,5 +346,4 @@ jar tf data-generator-service\target\data-generator-service-*.jar | findstr stat
 ## Related docs
 
 - `docs/staging-distributed-deployment.md` — C2 dual-JVM staging
-- `docs/migration/staging-readiness-checklist.md` — V1 retirement M2
-- `docs/migration/retirement-readiness.md` — cutover gates
+- `docs/archive/migration/` — archived V1→V2 migration runbooks (historical reference only)
