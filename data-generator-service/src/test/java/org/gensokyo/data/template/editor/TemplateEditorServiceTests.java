@@ -93,7 +93,7 @@ class TemplateEditorServiceTests {
 
         Assertions.assertEquals(TemplateDefinitionKind.V1, templateEditorService.detectDefinitionKind(saved));
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                IllegalStateException.class,
                 () -> templateEditorService.loadForEditor(templateId));
     }
 

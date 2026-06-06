@@ -66,13 +66,11 @@ public class TemplateEditorService {
      * @param templateId persisted template id
      * @return editor payload with draft and kind
      * @throws IllegalArgumentException when the id is unknown
+     * @throws IllegalStateException when the template is legacy V1
      */
     public TemplateEditorPayload loadForEditor(Long templateId) {
         TemplatePO entity = requireActiveOrArchivedEntity(templateId);
-        if (detectDefinitionKind(entity) == TemplateDefinitionKind.V1) {
-            throw new IllegalArgumentException(
-                    "Legacy V1 templates are hidden from the console editor. Migrate to Template V2 or use YAML on disk.");
-        }
+        rejectV1Template(entity);
         return buildPayload(entity);
     }
 
@@ -82,11 +80,13 @@ public class TemplateEditorService {
      * @param templateId target id (created when null in draft — caller must use {@link #createAndSave})
      * @param draft      draft from form or YAML advanced panel
      * @return saved payload
+     * @throws IllegalStateException when the template is legacy V1
      */
     public TemplateEditorPayload save(Long templateId, TemplateV2DraftVO draft) {
         Objects.requireNonNull(templateId, "templateId");
         Objects.requireNonNull(draft, "draft");
         TemplatePO entity = requireEntity(templateId);
+        rejectV1Template(entity);
         if (Boolean.TRUE.equals(entity.getArchived())) {
             throw new IllegalArgumentException("Cannot save archived template: " + templateId);
         }
@@ -170,6 +170,13 @@ public class TemplateEditorService {
         TemplateV2DraftVO v2Draft = tryParse(yaml, TemplateV2DraftVO.class);
         TemplateVO v1 = tryParse(yaml, TemplateVO.class);
         return TemplateDefinitionDetector.detect(v1, v2Draft);
+    }
+
+    private void rejectV1Template(TemplatePO entity) {
+        if (detectDefinitionKind(entity) == TemplateDefinitionKind.V1) {
+            throw new IllegalStateException(
+                    "Legacy V1 templates are no longer supported; create a Template V2.");
+        }
     }
 
     private TemplateEditorPayload buildPayload(TemplatePO entity) {
