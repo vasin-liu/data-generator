@@ -114,7 +114,7 @@ export function JobsPage() {
   );
 
   return (
-    <div>
+    <div className="console-page-panel" data-testid="jobs-page">
       <ConsolePageHeader
         title={t('jobs.title')}
         subtitle={t('jobs.subtitle')}

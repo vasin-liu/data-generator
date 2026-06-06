@@ -108,7 +108,7 @@ export function JobDetailPage() {
   }
 
   return (
-    <div>
+    <div className="console-page-panel" data-testid="job-detail-page">
       <ConsolePageHeader
         title={`${t('jobDetail.title')} #${instanceIdParam}`}
         crumbs={[

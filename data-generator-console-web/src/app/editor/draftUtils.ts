@@ -84,27 +84,34 @@ export function isEditableSource(source?: SourceDraft): boolean {
 /**
  * @param kind source kind for a new node
  */
+/** Default optional source policy for new sources (non-blocking fields). */
+export function defaultSourcePolicy(): NonNullable<SourceDraft['policy']> {
+  return { inMemory: false, selectionStrategy: 'ORDER' };
+}
+
 export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
+  const policy = defaultSourcePolicy();
   switch (kind) {
     case 'query':
-      return { type: 'query', dataSourceId: '', sql: 'SELECT 1' };
+      return { type: 'query', dataSourceId: '', sql: 'SELECT 1', policy };
     case 'iterator':
       return {
         type: 'iterator',
         iterator: { type: 'number', from: 1, to: 3, step: 1 },
+        policy,
       };
     case 'csv':
-      return { type: 'csv', path: '', charset: 'UTF-8', delimiter: ',', header: true };
+      return { type: 'csv', path: '', charset: 'UTF-8', delimiter: ',', header: true, policy };
     case 'json':
-      return { type: 'json', path: '', charset: 'UTF-8', root: '' };
+      return { type: 'json', path: '', charset: 'UTF-8', root: '', policy };
     case 'excel':
-      return { type: 'excel', path: '', sheets: [{ name: 'Sheet1' }] };
+      return { type: 'excel', path: '', sheets: [{ name: 'Sheet1' }], policy };
     case 'ai':
-      return { type: 'ai', api: '', prompt: '', parser: '' };
+      return { type: 'ai', api: '', prompt: '', parser: '', policy };
     case 'geojson':
-      return { type: 'geojson', path: '' };
+      return { type: 'geojson', path: '', policy };
     default:
-      return { type: kind };
+      return { type: kind, policy };
   }
 }
 
@@ -655,7 +662,7 @@ export function patchGenerator(draft: TemplateV2Draft, partial: GeneratorDraft):
 export function ensureGenerator(draft: TemplateV2Draft): TemplateV2Draft {
   const next = cloneDraft(draft);
   if (!next.generator) {
-    next.generator = { batchSize: 100 };
+    next.generator = { type: 'SYNC', batchSize: 100 };
   }
   return next;
 }

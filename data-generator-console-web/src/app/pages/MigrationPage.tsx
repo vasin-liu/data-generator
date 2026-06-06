@@ -87,7 +87,7 @@ export function MigrationPage() {
   );
 
   return (
-    <section>
+    <section className="console-page-panel" data-testid="migration-page">
       <ConsolePageHeader
         title={t('migration.title')}
         subtitle={t('migration.subtitle')}

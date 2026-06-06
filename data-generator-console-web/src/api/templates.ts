@@ -1,17 +1,37 @@
 import { apiRequest } from './client';
-import type { RunStartResult, TemplateSummary } from './types';
+import type { RunStartResult, TemplateSummary, TemplateTaxonomy } from './types';
 
 /**
  * @param includeArchived include soft-deleted rows
  * @param q optional name/id filter
+ * @param category optional category filter
+ * @param tag optional tag filter
  */
-export function fetchTemplates(includeArchived: boolean, q?: string): Promise<TemplateSummary[]> {
+export function fetchTemplates(
+  includeArchived: boolean,
+  q?: string,
+  category?: string,
+  tag?: string,
+): Promise<TemplateSummary[]> {
   const params = new URLSearchParams();
   params.set('includeArchived', String(includeArchived));
   if (q?.trim()) {
     params.set('q', q.trim());
   }
+  if (category?.trim()) {
+    params.set('category', category.trim());
+  }
+  if (tag?.trim()) {
+    params.set('tag', tag.trim());
+  }
   return apiRequest<TemplateSummary[]>(`/templates?${params}`);
+}
+
+/**
+ * @returns distinct categories and tags for catalog filters
+ */
+export function fetchTemplateTaxonomy(): Promise<TemplateTaxonomy> {
+  return apiRequest<TemplateTaxonomy>('/templates/taxonomy');
 }
 
 /**

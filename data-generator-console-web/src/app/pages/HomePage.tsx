@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Col, Descriptions, Row, Steps, Tag, Typography } from 'antd';
+import { Card, Col, Row, Steps, Tag, Typography } from 'antd';
 import {
   ClockCircleOutlined,
   DatabaseOutlined,
@@ -71,43 +71,60 @@ export function HomePage() {
   const visibleAreas = AREAS.filter((area) => !area.migrationOnly || migrationUiEnabled);
 
   return (
-    <section>
-      <Typography.Title level={3}>{t('home.title')}</Typography.Title>
-      <Typography.Paragraph type="secondary">{t('home.subtitle')}</Typography.Paragraph>
+    <section data-testid="console-home">
+      <div className="home-hero">
+        <div className="home-hero-kicker">{t('home.runtime.title')}</div>
+        <Typography.Title level={2} className="home-hero-title">
+          {t('home.title')}
+        </Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 0, maxWidth: 720 }}>
+          {t('home.subtitle')}
+        </Typography.Paragraph>
+      </div>
 
-      <Typography.Title level={5}>{t('home.runtime.title')}</Typography.Title>
-      <Descriptions bordered size="small" column={3} style={{ marginBottom: 24 }}>
-        <Descriptions.Item label={t('home.runtime.v1')}>
-          <Tag color={runtime?.v1ExecutionEnabled ? 'green' : 'default'}>
+      <Typography.Title level={5} className="home-section-title">
+        {t('home.runtime.title')}
+      </Typography.Title>
+      <div className="home-runtime-grid">
+        <div className="home-runtime-card">
+          <div className="home-runtime-label">{t('home.runtime.v1')}</div>
+          <Tag color={runtime?.v1ExecutionEnabled ? 'cyan' : 'default'}>
             {runtime?.v1ExecutionEnabled ? t('runtime.v1Enabled') : t('runtime.v1Disabled')}
           </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label={t('home.runtime.schedule')}>
+        </div>
+        <div className="home-runtime-card">
+          <div className="home-runtime-label">{t('home.runtime.schedule')}</div>
           <Tag color={runtime?.scheduleEnabled ? 'blue' : 'default'}>
             {runtime?.scheduleEnabled ? t('home.runtime.on') : t('home.runtime.off')}
           </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label={t('home.runtime.distributed')}>
+        </div>
+        <div className="home-runtime-card">
+          <div className="home-runtime-label">{t('home.runtime.distributed')}</div>
           <Tag color={runtime?.distributedEnabled ? 'purple' : 'default'}>
             {runtime?.distributedEnabled ? t('home.runtime.on') : t('home.runtime.off')}
           </Tag>
-        </Descriptions.Item>
-      </Descriptions>
+        </div>
+      </div>
 
-      <Typography.Title level={5}>{t('home.workflow.title')}</Typography.Title>
-      <Steps
-        direction="vertical"
-        size="small"
-        style={{ marginBottom: 24, maxWidth: 720 }}
-        items={[
-          { title: t('home.workflow.step1.title'), description: t('home.workflow.step1.desc') },
-          { title: t('home.workflow.step2.title'), description: t('home.workflow.step2.desc') },
-          { title: t('home.workflow.step3.title'), description: t('home.workflow.step3.desc') },
-          { title: t('home.workflow.step4.title'), description: t('home.workflow.step4.desc') },
-        ]}
-      />
+      <Typography.Title level={5} className="home-section-title">
+        {t('home.workflow.title')}
+      </Typography.Title>
+      <div className="home-workflow">
+        <Steps
+          direction="vertical"
+          size="small"
+          items={[
+            { title: t('home.workflow.step1.title'), description: t('home.workflow.step1.desc') },
+            { title: t('home.workflow.step2.title'), description: t('home.workflow.step2.desc') },
+            { title: t('home.workflow.step3.title'), description: t('home.workflow.step3.desc') },
+            { title: t('home.workflow.step4.title'), description: t('home.workflow.step4.desc') },
+          ]}
+        />
+      </div>
 
-      <Typography.Title level={5}>{t('home.areas.title')}</Typography.Title>
+      <Typography.Title level={5} className="home-section-title">
+        {t('home.areas.title')}
+      </Typography.Title>
       <Row gutter={[16, 16]}>
         {visibleAreas.map((area) => (
           <Col xs={24} sm={12} md={8} lg={6} key={area.path}>

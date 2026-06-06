@@ -235,7 +235,7 @@ export function SchedulesPage() {
         dataIndex: 'enabled',
         render: (enabled: boolean) =>
           enabled ? (
-            <Tag color="green">{t('common.yes')}</Tag>
+            <Tag color="cyan">{t('common.yes')}</Tag>
           ) : (
             <Tag>{t('common.no')}</Tag>
           ),
@@ -295,13 +295,13 @@ export function SchedulesPage() {
   );
 
   return (
-    <section>
+    <section className="console-page-panel" data-testid="schedules-page">
       <ConsolePageHeader
         title={t('schedules.title')}
         subtitle={t('schedules.subtitle')}
         crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.schedules') }]}
         extra={
-          <Button type="primary" onClick={openCreate}>
+          <Button type="primary" data-testid="schedules-new-button" onClick={openCreate}>
             {t('schedules.new')}
           </Button>
         }

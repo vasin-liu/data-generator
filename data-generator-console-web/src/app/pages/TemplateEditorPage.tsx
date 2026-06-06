@@ -117,7 +117,7 @@ export function TemplateEditorPage() {
       <Alert
         type="error"
         showIcon
-        message={v1Hidden ? t('editor.v1.hidden') : t('templates.loadError')}
+        message={v1Hidden ? t('editor.v1.hidden') : t('editor.loadError')}
         description={errMsg}
         action={
           v1Hidden ? (
@@ -259,7 +259,7 @@ export function TemplateEditorPage() {
     );
 
   return (
-    <div>
+    <div data-testid="template-editor-page">
       <ConsolePageHeader
         title={
           <Space wrap>
@@ -300,7 +300,7 @@ export function TemplateEditorPage() {
           },
         ]}
       />
-      <Tabs activeKey={activeTab} onChange={setTab} items={tabItems} />
+      <Tabs activeKey={activeTab} onChange={setTab} items={tabItems} data-testid="template-editor-tabs" />
     </div>
   );
 }

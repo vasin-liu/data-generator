@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   archiveTemplate,
+  fetchTemplateTaxonomy,
   fetchTemplates,
   restoreTemplate,
   runTemplate,
@@ -24,10 +25,17 @@ export function TemplatesPage() {
   const [includeArchived, setIncludeArchived] = useState(false);
   const [filter, setFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+  const [tagFilter, setTagFilter] = useState<string | undefined>();
+
+  const taxonomyQuery = useQuery({
+    queryKey: ['template-taxonomy'],
+    queryFn: fetchTemplateTaxonomy,
+  });
 
   const listQuery = useQuery({
-    queryKey: ['templates', includeArchived, filter],
-    queryFn: () => fetchTemplates(includeArchived, filter),
+    queryKey: ['templates', includeArchived, filter, categoryFilter, tagFilter],
+    queryFn: () => fetchTemplates(includeArchived, filter, categoryFilter, tagFilter),
   });
 
   const filteredRows = useMemo(() => {
@@ -71,6 +79,12 @@ export function TemplatesPage() {
     () => [
       { title: t('templates.col.id'), dataIndex: 'id', sorter: (a, b) => a.id.localeCompare(b.id) },
       { title: t('templates.col.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
+      { title: t('templates.col.category'), dataIndex: 'category', render: (v: string | null) => v ?? '—' },
+      {
+        title: t('templates.col.tags'),
+        dataIndex: 'tags',
+        render: (tags: string[] | undefined) => (tags?.length ? tags.join(', ') : '—'),
+      },
       {
         title: t('templates.col.status'),
         dataIndex: 'status',
@@ -146,13 +160,13 @@ export function TemplatesPage() {
   );
 
   return (
-    <div>
+    <div data-testid="templates-page">
       <ConsolePageHeader
         title={t('templates.title')}
         subtitle={t('templates.subtitle')}
         crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.templates') }]}
         extra={
-          <Button type="primary" onClick={() => navigate('/templates/new')}>
+          <Button type="primary" data-testid="templates-new-button" onClick={() => navigate('/templates/new')}>
             {t('templates.new')}
           </Button>
         }
@@ -192,6 +206,24 @@ export function TemplatesPage() {
             { value: 'DRAFT', label: t('template.status.DRAFT') },
             { value: 'PUBLISHED', label: t('template.status.PUBLISHED') },
           ]}
+        />
+        <Select
+          allowClear
+          showSearch
+          style={{ width: 160 }}
+          placeholder={t('templates.filter.category')}
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+          options={(taxonomyQuery.data?.categories ?? []).map((c) => ({ value: c, label: c }))}
+        />
+        <Select
+          allowClear
+          showSearch
+          style={{ width: 160 }}
+          placeholder={t('templates.filter.tag')}
+          value={tagFilter}
+          onChange={setTagFilter}
+          options={(taxonomyQuery.data?.tags ?? []).map((tag) => ({ value: tag, label: tag }))}
         />
         <Checkbox checked={includeArchived} onChange={(e) => setIncludeArchived(e.target.checked)}>
           {t('templates.includeArchived')}

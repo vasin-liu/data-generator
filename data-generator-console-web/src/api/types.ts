@@ -20,6 +20,13 @@ export interface TemplateSummary {
   name: string;
   status: string | null;
   archived: boolean | null;
+  category?: string | null;
+  tags?: string[];
+}
+
+export interface TemplateTaxonomy {
+  categories: string[];
+  tags: string[];
 }
 
 export interface ConsoleRuntime {
@@ -139,6 +146,8 @@ export interface TemplateV2Draft {
   id?: number | null;
   instanceId?: number | null;
   name?: string;
+  category?: string;
+  tags?: string[];
   generator?: GeneratorDraft;
   sources?: Record<string, SourceDraft>;
   transform?: TransformDraft;
@@ -317,7 +326,58 @@ export interface DataSourcesOverview {
   runtimeKeys: string[];
   kafkaClusters: string[];
   elasticsearchClusters: string[];
+  kafkaPersisted: MessagingClusterSummary[];
+  elasticsearchPersisted: MessagingClusterSummary[];
   driverPresets: JdbcDriverPresetDto[];
+}
+
+export interface MessagingClusterSummary {
+  name: string;
+  clusterType: string;
+  enabled: boolean;
+  updatedAt: string | null;
+  bootstrapServers?: string[] | null;
+  uris?: string[] | null;
+  username?: string | null;
+  clientId?: string | null;
+  acks?: string | null;
+  compressionType?: string | null;
+  retries?: number | null;
+  securityProtocol?: string | null;
+  saslMechanism?: string | null;
+  properties?: Record<string, string> | null;
+  pathPrefix?: string | null;
+  connectionTimeoutMs?: number | null;
+  socketTimeoutMs?: number | null;
+  socketKeepAlive?: boolean | null;
+  hasSaslJaasConfig?: boolean | null;
+  hasPassword?: boolean | null;
+  hasApiKey?: boolean | null;
+}
+
+export interface KafkaClusterUpsertPayload {
+  name: string;
+  bootstrapServers: string[];
+  clientId?: string;
+  acks?: string;
+  compressionType?: string;
+  retries?: number;
+  securityProtocol?: string;
+  saslMechanism?: string;
+  saslJaasConfig?: string;
+  properties?: Record<string, string>;
+}
+
+export interface ElasticsearchClusterUpsertPayload {
+  name: string;
+  uris: string[];
+  username?: string;
+  password?: string;
+  apiKey?: string;
+  pathPrefix?: string;
+  connectionTimeoutMs?: number;
+  socketTimeoutMs?: number;
+  socketKeepAlive?: boolean;
 }
 
 export interface DataSourceTestRequest {

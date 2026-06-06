@@ -146,6 +146,7 @@ export function ReviewPanel({
         </Button>
         <Button
           type="primary"
+          data-testid="review-save"
           disabled={!saveAllowed}
           loading={saveMutation.isPending}
           onClick={() => saveMutation.mutate(false)}
@@ -153,6 +154,7 @@ export function ReviewPanel({
           {t('review.save')}
         </Button>
         <Button
+          data-testid="review-save-and-return"
           disabled={!saveAllowed}
           loading={saveMutation.isPending}
           onClick={() => saveMutation.mutate(true)}

@@ -1,4 +1,5 @@
-import { Alert, Button, Card, Collapse, Form, Input, InputNumber, Modal, Select, Space } from 'antd';
+import { Alert, Button, Card, Collapse, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Typography } from 'antd';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -11,6 +12,7 @@ import {
   addSource,
   applySourceMergeAt,
   applySourcePolicyAt,
+  defaultSourcePolicy,
   inferSourceKind,
   listSourceKeys,
   removeSourceAt,
@@ -45,6 +47,9 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
   const { t } = useTranslation();
   const keys = listSourceKeys(draft);
   const [selectedKey, setSelectedKey] = useState(keys[0] ?? '');
+  const [addOpen, setAddOpen] = useState(false);
+  const [addKey, setAddKey] = useState('');
+  const [addKind, setAddKind] = useState<EditableSourceKind>('iterator');
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameValue, setRenameValue] = useState('');
 
@@ -61,37 +66,39 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
 
   const source = selectedKey ? draft.sources?.[selectedKey] : undefined;
   const sourceKind = inferSourceKind(source);
-  const policy = source?.policy ?? {};
+  const policy = { ...defaultSourcePolicy(), ...source?.policy };
 
   const patchPolicy = (partial: SourceDraft['policy']) => {
     if (!selectedKey) {
       return;
     }
-    onChange(applySourcePolicyAt(draft, selectedKey, partial ?? {}));
+    onChange(applySourcePolicyAt(draft, selectedKey, { ...policy, ...partial }));
   };
 
-  const patchSource = (patch: SourceDraft) => {
-    if (!selectedKey) {
+  const openAdd = () => {
+    setAddKey(suggestSourceKey(draft));
+    setAddKind('iterator');
+    setAddOpen(true);
+  };
+
+  const submitAdd = () => {
+    const key = addKey.trim();
+    if (!key) {
       return;
     }
-    onChange(applySourceMergeAt(draft, selectedKey, patch));
-  };
-
-  const handleAdd = () => {
-    const key = suggestSourceKey(draft);
-    onChange(addSource(draft, key, 'iterator'));
+    if (draft.sources?.[key]) {
+      return;
+    }
+    onChange(addSource(draft, key, addKind));
     setSelectedKey(key);
+    setAddOpen(false);
   };
 
-  const handleRemove = () => {
-    if (!selectedKey) {
-      return;
-    }
-    Modal.confirm({
-      title: t('source.remove'),
-      content: t('source.removeConfirm', { key: selectedKey }),
-      onOk: () => onChange(removeSourceAt(draft, selectedKey)),
-    });
+  const handleRemove = (key: string) => {
+    const next = removeSourceAt(draft, key);
+    onChange(next);
+    const remaining = listSourceKeys(next);
+    setSelectedKey(remaining[0] ?? '');
   };
 
   const openRename = () => {
@@ -127,57 +134,104 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
           </span>
         }
       />
+
       <Space wrap style={{ marginBottom: 16 }}>
-        <Select
-          style={{ minWidth: 200 }}
-          disabled={keys.length === 0}
-          value={selectedKey || undefined}
-          options={keys.map((k) => ({ value: k, label: k }))}
-          onChange={setSelectedKey}
-        />
-        <Button disabled={readOnly} type="primary" onClick={handleAdd}>
+        <Button disabled={readOnly} type="primary" icon={<PlusOutlined />} onClick={openAdd}>
           {t('source.add')}
         </Button>
-        <Button disabled={readOnly || !selectedKey} onClick={openRename}>
-          {t('source.rename')}
-        </Button>
-        <Button disabled={readOnly || !selectedKey} danger onClick={handleRemove}>
-          {t('source.remove')}
-        </Button>
+        {selectedKey ? (
+          <Button disabled={readOnly} onClick={openRename}>
+            {t('source.rename')}
+          </Button>
+        ) : null}
       </Space>
 
-      {!selectedKey ? (
+      {keys.length === 0 ? (
         <Alert type="info" message={t('source.empty')} />
-      ) : sourceKind === 'other' ? (
-        <Alert
-          type="warning"
-          message={t('source.unsupportedType', { type: source?.type ?? 'unknown' })}
-        />
       ) : (
-        <Card title={t('source.card.title', { key: selectedKey })} style={{ maxWidth: 760 }}>
-          <Form layout="vertical">
-            <Form.Item
-              label={<FieldHelp label={t('source.type')} help={t('source.type.help')} required />}
-            >
-              <Select
-                disabled={readOnly}
-                value={sourceKind}
-                options={kindOptions}
-                onChange={(v) => onChange(setSourceKindAt(draft, selectedKey, v as EditableSourceKind))}
-              />
-            </Form.Item>
-            <SourceFieldsForm
-              kind={sourceKind}
-              source={source ?? {}}
-              readOnly={readOnly}
-              editorDataSources={editorDataSources}
-              onPatch={patchSource}
-            />
-          </Form>
-        </Card>
+        <Space direction="vertical" size="middle" style={{ width: '100%', maxWidth: 900 }}>
+          {keys.map((key) => {
+            const node = draft.sources?.[key];
+            const kind = inferSourceKind(node);
+            const active = key === selectedKey;
+            return (
+              <Card
+                key={key}
+                size="small"
+                style={{
+                  borderColor: active ? '#1677ff' : undefined,
+                  cursor: 'pointer',
+                }}
+                onClick={() => setSelectedKey(key)}
+                title={
+                  <Space>
+                    <Typography.Text strong>{key}</Typography.Text>
+                    <Typography.Text type="secondary">
+                      ({t(`source.kind.${kind === 'other' ? 'other' : kind}`)})
+                    </Typography.Text>
+                  </Space>
+                }
+                extra={
+                  readOnly ? null : (
+                    <Popconfirm
+                      title={t('source.remove')}
+                      description={t('source.removeConfirm', { key })}
+                      onConfirm={(e) => {
+                        e?.stopPropagation();
+                        handleRemove(key);
+                      }}
+                      onCancel={(e) => e?.stopPropagation()}
+                    >
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </Popconfirm>
+                  )
+                }
+              >
+                {active ? (
+                  kind === 'other' ? (
+                    <Alert
+                      type="warning"
+                      message={t('source.unsupportedType', { type: node?.type ?? 'unknown' })}
+                    />
+                  ) : (
+                    <Form layout="vertical" onClick={(e) => e.stopPropagation()}>
+                      <Form.Item
+                        label={
+                          <FieldHelp label={t('source.type')} help={t('source.type.help')} required />
+                        }
+                      >
+                        <Select
+                          disabled={readOnly}
+                          value={sourceKind === 'other' ? undefined : sourceKind}
+                          options={kindOptions}
+                          onChange={(v) => onChange(setSourceKindAt(draft, key, v as EditableSourceKind))}
+                        />
+                      </Form.Item>
+                      <SourceFieldsForm
+                        kind={sourceKind === 'other' ? 'iterator' : sourceKind}
+                        source={node ?? {}}
+                        readOnly={readOnly}
+                        editorDataSources={editorDataSources}
+                        onPatch={(patch) => onChange(applySourceMergeAt(draft, key, patch))}
+                      />
+                    </Form>
+                  )
+                ) : (
+                  <Typography.Text type="secondary">{t('source.card.selectHint')}</Typography.Text>
+                )}
+              </Card>
+            );
+          })}
+        </Space>
       )}
 
-      {selectedKey && source ? (
+      {selectedKey && source && sourceKind !== 'other' ? (
         <Collapse
           style={{ marginTop: 16, maxWidth: 760 }}
           items={[
@@ -208,9 +262,7 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                   >
                     <Select
                       disabled={readOnly}
-                      allowClear
-                      placeholder={t('source.policy.selectionStrategy.default')}
-                      value={policy.selectionStrategy}
+                      value={policy.selectionStrategy ?? 'ORDER'}
                       options={labeledOptions(t, 'source.selectionStrategy', SELECTION_STRATEGIES)}
                       onChange={(v) => patchPolicy({ selectionStrategy: v })}
                     />
@@ -222,6 +274,7 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                       min={0}
                       disabled={readOnly}
                       style={{ width: '100%' }}
+                      placeholder={t('source.policy.limit.placeholder')}
                       value={policy.limit}
                       onChange={(v) => patchPolicy({ limit: v ?? undefined })}
                     />
@@ -236,6 +289,7 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                   >
                     <Input
                       readOnly={readOnly}
+                      placeholder={t('source.policy.materialization.placeholder')}
                       value={policy.materialization ?? ''}
                       onChange={(e) =>
                         patchPolicy({ materialization: e.target.value || undefined })
@@ -248,6 +302,27 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
           ]}
         />
       ) : null}
+
+      <Modal
+        title={t('source.addModal.title')}
+        open={addOpen}
+        onOk={submitAdd}
+        onCancel={() => setAddOpen(false)}
+        okButtonProps={{ disabled: !addKey.trim() || Boolean(draft.sources?.[addKey.trim()]) }}
+      >
+        <Form layout="vertical">
+          <Form.Item
+            label={<FieldHelp label={t('source.key')} help={t('source.key.help')} required />}
+          >
+            <Input value={addKey} onChange={(e) => setAddKey(e.target.value)} />
+          </Form.Item>
+          <Form.Item
+            label={<FieldHelp label={t('source.type')} help={t('source.addModal.kindHelp')} required />}
+          >
+            <Select value={addKind} options={kindOptions} onChange={setAddKind} />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Modal
         title={t('source.rename')}

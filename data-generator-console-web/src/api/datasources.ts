@@ -2,6 +2,8 @@ import { apiFormRequest, apiRequest } from './client';
 import type {
   DataSourceTestRequest,
   DataSourcesOverview,
+  ElasticsearchClusterUpsertPayload,
+  KafkaClusterUpsertPayload,
 } from './types';
 
 /**
@@ -9,6 +11,44 @@ import type {
  */
 export function fetchDataSources(): Promise<DataSourcesOverview> {
   return apiRequest<DataSourcesOverview>('/datasources');
+}
+
+/**
+ * @param payload cluster definition
+ */
+export function upsertKafkaCluster(payload: KafkaClusterUpsertPayload): Promise<string> {
+  return apiRequest<string>('/datasources/kafka-clusters', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * @param name cluster id
+ */
+export function removeKafkaCluster(name: string): Promise<string> {
+  return apiRequest<string>(`/datasources/kafka-clusters/${encodeURIComponent(name)}`, {
+    method: 'DELETE',
+  });
+}
+
+/**
+ * @param payload Elasticsearch cluster definition
+ */
+export function upsertElasticsearchCluster(payload: ElasticsearchClusterUpsertPayload): Promise<string> {
+  return apiRequest<string>('/datasources/elasticsearch-clusters', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * @param name cluster id
+ */
+export function removeElasticsearchCluster(name: string): Promise<string> {
+  return apiRequest<string>(`/datasources/elasticsearch-clusters/${encodeURIComponent(name)}`, {
+    method: 'DELETE',
+  });
 }
 
 /**

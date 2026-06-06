@@ -38,7 +38,7 @@ export function ConsolePageHeader({ title, subtitle, crumbs, extra }: Props) {
       )}
       <div className="console-page-header-row">
         <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
+          <Typography.Title level={3} className="console-page-title" style={{ margin: 0 }}>
             {title}
           </Typography.Title>
           {subtitle ? (
