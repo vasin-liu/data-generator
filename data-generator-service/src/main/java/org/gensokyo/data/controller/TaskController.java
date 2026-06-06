@@ -28,7 +28,6 @@ import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.model.vo.TemplateVO;
-import org.gensokyo.data.pipeline.DefaultDataPipelineTaskFactory;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
@@ -64,7 +63,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskController {
     private final DataGeneratorProperties properties;
-    private final DefaultDataPipelineTaskFactory defaultDataPipelineTaskFactory;
     private final TemplateRepository repository;
     private final YamlParser yamlParser;
     private final TemplateV2Runner templateV2Runner;
@@ -240,32 +238,9 @@ public class TaskController {
             return runV2(entity, v2Draft, triggerType, scheduleId);
         }
 
-        if (!properties.isV1ExecutionEnabled()) {
-            throw new IllegalArgumentException(
-                    "V1 template execution is disabled. Migrate to Template V2 or set data.generator.v1-execution.enabled=true.");
-        }
-
-        TemplateVO template = v1Template != null ? v1Template : TemplateJsonCodec.read(entity.getContentJson());
-        return runV1(template, triggerType, scheduleId);
-    }
-
-    private TemplateRuntimeInfo runV1(TemplateVO template, String triggerType, Long scheduleId) {
-        Long instanceId = RandomKit.snowFlake().nextId();
-        template.setInstanceId(instanceId);
-        taskExecutionService.queueExecution(
-                template.getId(), template.getName(), instanceId, "V1", triggerType, null, null, null, scheduleId);
-        executor.submit(() -> runV1Tracked(template, instanceId));
-        return new TemplateRuntimeInfo(template.getId(), template.getName(), instanceId);
-    }
-
-    private void runV1Tracked(TemplateVO template, Long instanceId) {
-        taskExecutionService.markRunning(instanceId);
-        try {
-            defaultDataPipelineTaskFactory.newInstance(template).call();
-            taskExecutionService.markSuccess(instanceId, null, null);
-        } catch (Exception e) {
-            taskExecutionService.markFailed(instanceId, e.getMessage());
-        }
+        // Wave 0: V1 task execution is permanently retired; flag no longer gates this path.
+        throw new IllegalArgumentException(
+                "Legacy V1 template execution is no longer supported; create a Template V2.");
     }
 
     private TemplateRuntimeInfo runV2(TemplatePO entity, TemplateV2DraftVO draft, String triggerType, Long scheduleId) {

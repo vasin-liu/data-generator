@@ -64,8 +64,10 @@ public class DataGeneratorProperties {
     private Integer previewMaxRows = 100;
 
     /**
-     * V1 runtime toggle (maps to {@code data.generator.v1-execution.enabled}).
+     * Deprecated V1 runtime toggle (maps to {@code data.generator.v1-execution.enabled}).
+     * Ignored for task runs after Wave 0 retirement; retained for config binding and console banner.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     private V1Execution v1Execution = new V1Execution();
 
     /**
@@ -74,23 +76,28 @@ public class DataGeneratorProperties {
     private Governance governance = new Governance();
 
     /**
-     * Returns whether ad hoc V1 template execution is allowed on {@link org.gensokyo.data.controller.TaskController}.
+     * Returns whether legacy V1 template execution is advertised as enabled.
+     * Task runs always reject V1 templates after Wave 0 retirement; this reflects config only.
      *
-     * @return {@code true} when V1 runs are permitted
+     * @return always {@code false} (V1 execution path removed from {@link org.gensokyo.data.controller.TaskController})
+     * @deprecated V1 task execution was retired in Wave 0; property is ignored for runs.
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     public boolean isV1ExecutionEnabled() {
-        return v1Execution == null || v1Execution.isEnabled();
+        return false;
     }
 
     /**
-     * Nested binding for {@code data.generator.v1-execution.*}.
+     * Nested binding for {@code data.generator.v1-execution.*} (deprecated; ignored for task runs).
      */
+    @Deprecated(since = "3.0.0", forRemoval = true)
     @Getter
     @Setter
     public static class V1Execution {
         /**
-         * When {@code false}, TaskController refuses V1 templates (P4 retirement).
+         * Legacy flag; no longer gates {@link org.gensokyo.data.controller.TaskController} V1 runs.
          */
+        @Deprecated(since = "3.0.0", forRemoval = true)
         private boolean enabled = false;
     }
 
