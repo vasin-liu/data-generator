@@ -199,7 +199,7 @@ public final class WorkflowRunner {
                 && (step.getCondition() == null || step.getCondition().isBlank())) {
             Long instanceId = WorkflowRunContext.instanceId();
             try {
-                WorkflowRunContext.control().awaitManualPause(instanceId);
+                WorkflowRunContext.control().awaitManualPause(instanceId, formatManualPauseReason(step));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Workflow manual pause interrupted", e);
@@ -390,6 +390,14 @@ public final class WorkflowRunner {
                 metrics.addWarning(diagnostic);
             }
         }
+    }
+
+    private static String formatManualPauseReason(PauseStepVO step) {
+        String stepId = step.getId() != null && !step.getId().isBlank() ? step.getId() : "pause";
+        if (step.getName() != null && !step.getName().isBlank()) {
+            return "Manual pause at step " + stepId + " (" + step.getName() + ")";
+        }
+        return "Manual pause at step " + stepId;
     }
 
     private static void sleep(Duration duration) {

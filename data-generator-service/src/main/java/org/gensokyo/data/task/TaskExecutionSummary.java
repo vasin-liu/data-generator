@@ -30,6 +30,7 @@ import java.time.Instant;
  * @param errorMessage    failure message
  * @param metricsJson     serialized V2 metrics
  * @param report          structured V2 run report when available
+ * @param pauseReason     operator-visible reason when status is {@code PAUSED}
  */
 public record TaskExecutionSummary(
         @JsonSerialize(using = ToStringSerializer.class) Long id,
@@ -46,5 +47,6 @@ public record TaskExecutionSummary(
         Long rowCount,
         String errorMessage,
         String metricsJson,
-        RunReportVO report) implements Serializable {
+        RunReportVO report,
+        String pauseReason) implements Serializable {
 }

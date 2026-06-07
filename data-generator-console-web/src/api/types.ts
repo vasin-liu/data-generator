@@ -69,6 +69,7 @@ export interface TaskExecutionSummary {
   errorMessage: string | null;
   metricsJson: string | null;
   report: RunReport | null;
+  pauseReason: string | null;
 }
 
 /** Mirrors {@code DistributedJobView}. */
@@ -210,6 +211,8 @@ export interface TransformDraft {
   name?: string;
   type?: string;
   sql?: string;
+  script?: string;
+  timeoutMs?: number;
   columns?: SpelColumnDraft[];
   [key: string]: unknown;
 }

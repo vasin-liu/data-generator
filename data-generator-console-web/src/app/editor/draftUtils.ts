@@ -365,20 +365,44 @@ export function usesTransformerChain(draft: TemplateV2Draft): boolean {
   return (draft.transformers?.length ?? 0) > 0;
 }
 
+export type TransformKind = 'sql' | 'spel' | 'js';
+
 /**
  * @param transform transform draft node
  */
-export function inferTransformType(transform?: TransformDraft): 'sql' | 'spel' {
-  if (transform?.type?.toLowerCase() === 'spel' || (transform?.columns?.length ?? 0) > 0) {
+export function inferTransformType(transform?: TransformDraft): TransformKind {
+  const type = transform?.type?.toLowerCase();
+  if (type === 'js' || (transform?.script != null && transform.script !== '')) {
+    return 'js';
+  }
+  if (type === 'spel' || (transform?.columns?.length ?? 0) > 0) {
     return 'spel';
   }
   return 'sql';
 }
 
+function normalizeTransformFields(transform: TransformDraft): TransformDraft {
+  const kind = inferTransformType(transform);
+  const next: TransformDraft = { ...transform, type: kind };
+  if (kind === 'sql') {
+    delete next.columns;
+    delete next.script;
+    delete next.timeoutMs;
+  } else if (kind === 'spel') {
+    delete next.sql;
+    delete next.script;
+    delete next.timeoutMs;
+  } else {
+    delete next.sql;
+    delete next.columns;
+  }
+  return next;
+}
+
 /**
  * @param draft template draft
  */
-export function readTransformType(draft: TemplateV2Draft): 'sql' | 'spel' {
+export function readTransformType(draft: TemplateV2Draft): TransformKind {
   const node = usesTransformerChain(draft) ? draft.transformers?.[0] : draft.transform;
   return inferTransformType(node);
 }
@@ -457,15 +481,7 @@ export function applyTransformerAt(
   while (nextList.length <= index) {
     nextList.push(defaultSqlTransform(`step${nextList.length + 1}`));
   }
-  const merged: TransformDraft = { ...nextList[index], ...patch };
-  if (inferTransformType(merged) === 'spel') {
-    merged.type = 'spel';
-    delete merged.sql;
-  } else {
-    merged.type = 'sql';
-    delete merged.columns;
-  }
-  nextList[index] = merged;
+  nextList[index] = normalizeTransformFields({ ...nextList[index], ...patch });
   const base = usesTransformerChain(draft) ? draft : switchToChainTransform(draft);
   return setTransformers(base, nextList);
 }
@@ -474,13 +490,19 @@ export function applyTransformerAt(
  * @param draft template draft
  * @param type initial transform kind
  */
-export function addTransformer(draft: TemplateV2Draft, type: 'sql' | 'spel' = 'sql'): TemplateV2Draft {
+export function addTransformer(draft: TemplateV2Draft, type: TransformKind = 'sql'): TemplateV2Draft {
   const base = usesTransformerChain(draft) ? draft : switchToChainTransform(draft);
   const list = listTransformers(base);
   const node: TransformDraft =
     type === 'spel'
       ? { name: `step${list.length + 1}`, type: 'spel', columns: [{ name: 'value', expression: '#input' }] }
-      : defaultSqlTransform(`step${list.length + 1}`);
+      : type === 'js'
+        ? {
+            name: `step${list.length + 1}`,
+            type: 'js',
+            script: 'row.value = row.value',
+          }
+        : defaultSqlTransform(`step${list.length + 1}`);
   return setTransformers(base, [...list, node]);
 }
 
@@ -536,11 +558,38 @@ export function applySpelColumns(draft: TemplateV2Draft, columns: SpelColumnDraf
  */
 export function applyTransformType(
   draft: TemplateV2Draft,
-  type: 'sql' | 'spel',
+  type: TransformKind,
   sql: string,
   columns: SpelColumnDraft[],
+  script = 'row.value = row.value',
 ): TemplateV2Draft {
-  return type === 'sql' ? applyTransformSql(draft, sql) : applySpelColumns(draft, columns);
+  if (type === 'sql') {
+    return applyTransformSql(draft, sql);
+  }
+  if (type === 'js') {
+    return applyTransformJs(draft, script);
+  }
+  return applySpelColumns(draft, columns);
+}
+
+/**
+ * @param draft template draft
+ * @param script JavaScript body
+ * @param timeoutMs optional per-row timeout
+ */
+export function applyTransformJs(
+  draft: TemplateV2Draft,
+  script: string,
+  timeoutMs?: number,
+): TemplateV2Draft {
+  if (usesTransformerChain(draft)) {
+    const existing = draft.transformers?.[0] ?? {};
+    return applyTransformerAt(draft, 0, { ...existing, type: 'js', script, timeoutMs });
+  }
+  const next = cloneDraft(draft);
+  const existing = next.transform ?? {};
+  next.transform = normalizeTransformFields({ ...existing, type: 'js', script, timeoutMs });
+  return next;
 }
 
 /** @deprecated use {@link applyTransformType} */

@@ -6,6 +6,7 @@ import { labeledOptions } from '../../utils/optionLabels';
 import {
   addTransformer,
   applySpelColumns,
+  applyTransformJs,
   applyTransformSql,
   applyTransformType,
   applyTransformerAt,
@@ -16,8 +17,10 @@ import {
   removeTransformerAt,
   switchToChainTransform,
   switchToSingleTransform,
+  type TransformKind,
   usesTransformerChain,
 } from '../draftUtils';
+import { TransformJsFields } from '../TransformJsFields';
 
 type Props = {
   draft: TemplateV2Draft;
@@ -25,7 +28,7 @@ type Props = {
   onChange: (draft: TemplateV2Draft) => void;
 };
 
-const TRANSFORM_TYPES = ['sql', 'spel'] as const;
+const TRANSFORM_TYPES = ['sql', 'spel', 'js'] as const;
 
 function SpelColumnTable({
   columns,
@@ -123,14 +126,46 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
     onChange(chain ? switchToChainTransform(draft) : switchToSingleTransform(draft));
   };
 
-  const setType = (type: 'sql' | 'spel') => {
+  const setType = (type: TransformKind) => {
     onChange(
       applyTransformType(
         draft,
         type,
         (chainMode ? transformers[0]?.sql : singleTransform?.sql) ?? 'SELECT * FROM input',
         columns.length > 0 ? columns : [{ name: 'value', expression: '#input' }],
+        typeof singleTransform?.script === 'string' ? singleTransform.script : 'row.value = row.value',
       ),
+    );
+  };
+
+  const patchTransformerType = (index: number, node: TransformDraft, type: TransformKind) => {
+    if (type === 'sql') {
+      onChange(
+        applyTransformerAt(draft, index, {
+          type: 'sql',
+          sql: node.sql ?? 'SELECT * FROM input',
+        }),
+      );
+      return;
+    }
+    if (type === 'js') {
+      onChange(
+        applyTransformerAt(draft, index, {
+          type: 'js',
+          script: typeof node.script === 'string' ? node.script : 'row.value = row.value',
+          timeoutMs: typeof node.timeoutMs === 'number' ? node.timeoutMs : undefined,
+        }),
+      );
+      return;
+    }
+    onChange(
+      applyTransformerAt(draft, index, {
+        type: 'spel',
+        columns:
+          node.columns && node.columns.length > 0
+            ? node.columns
+            : [{ name: 'value', expression: '#input' }],
+      }),
     );
   };
 
@@ -139,7 +174,11 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
     const nodeColumns = node.columns ? [...node.columns] : [];
 
     return (
-      <div key={index} style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #f0f0f0' }}>
+      <div
+        key={index}
+        data-testid="transform-chain-step"
+        style={{ marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #f0f0f0' }}
+      >
         <Typography.Text strong>
           {t('transform.chain.step', { index: index + 1 })}
         </Typography.Text>
@@ -159,27 +198,9 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
             <Select
               disabled={readOnly}
               value={nodeType}
+              data-testid={`transform-type-select-${index}`}
               options={labeledOptions(t, 'transform.type', TRANSFORM_TYPES)}
-              onChange={(type) => {
-                if (type === 'sql') {
-                  onChange(
-                    applyTransformerAt(draft, index, {
-                      type: 'sql',
-                      sql: node.sql ?? 'SELECT * FROM input',
-                    }),
-                  );
-                } else {
-                  onChange(
-                    applyTransformerAt(draft, index, {
-                      type: 'spel',
-                      columns:
-                        nodeColumns.length > 0
-                          ? nodeColumns
-                          : [{ name: 'value', expression: '#input' }],
-                    }),
-                  );
-                }
-              }}
+              onChange={(type) => patchTransformerType(index, node, type as TransformKind)}
             />
           </Form.Item>
           {nodeType === 'sql' ? (
@@ -193,6 +214,18 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
                 }
               />
             </Form.Item>
+          ) : nodeType === 'js' ? (
+            <TransformJsFields
+              script={typeof node.script === 'string' ? node.script : ''}
+              timeoutMs={typeof node.timeoutMs === 'number' ? node.timeoutMs : undefined}
+              readOnly={readOnly}
+              onScriptChange={(script) =>
+                onChange(applyTransformerAt(draft, index, { type: 'js', script }))
+              }
+              onTimeoutChange={(timeoutMs) =>
+                onChange(applyTransformerAt(draft, index, { type: 'js', timeoutMs }))
+              }
+            />
           ) : (
             <SpelColumnTable
               columns={nodeColumns}
@@ -235,7 +268,11 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
       {chainMode ? (
         <>
           {transformers.map((node, index) => renderTransformerFields(node, index))}
-          <Button disabled={readOnly} onClick={() => onChange(addTransformer(draft, 'sql'))}>
+          <Button
+            disabled={readOnly}
+            data-testid="transform-add-step"
+            onClick={() => onChange(addTransformer(draft, 'sql'))}
+          >
             {t('transform.chain.add')}
           </Button>
         </>
@@ -260,6 +297,30 @@ export function TransformStep({ draft, readOnly, onChange }: Props) {
                 onChange={(e) => onChange(applyTransformSql(draft, e.target.value))}
               />
             </Form.Item>
+          ) : transformType === 'js' ? (
+            <TransformJsFields
+              script={typeof singleTransform?.script === 'string' ? singleTransform.script : ''}
+              timeoutMs={typeof singleTransform?.timeoutMs === 'number' ? singleTransform.timeoutMs : undefined}
+              readOnly={readOnly}
+              onScriptChange={(script) =>
+                onChange(
+                  applyTransformJs(
+                    draft,
+                    script,
+                    typeof singleTransform?.timeoutMs === 'number' ? singleTransform.timeoutMs : undefined,
+                  ),
+                )
+              }
+              onTimeoutChange={(timeoutMs) =>
+                onChange(
+                  applyTransformJs(
+                    draft,
+                    typeof singleTransform?.script === 'string' ? singleTransform.script : '',
+                    timeoutMs,
+                  ),
+                )
+              }
+            />
           ) : (
             <SpelColumnTable
               columns={columns}

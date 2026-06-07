@@ -27,10 +27,15 @@ public class TaskWorkflowRunControl implements WorkflowRunControl {
 
     @Override
     public void awaitManualPause(Long instanceId) throws InterruptedException {
+        awaitManualPause(instanceId, null);
+    }
+
+    @Override
+    public void awaitManualPause(Long instanceId, String pauseReason) throws InterruptedException {
         if (instanceId == null) {
             return;
         }
-        taskExecutionService.markPaused(instanceId);
+        taskExecutionService.markPaused(instanceId, pauseReason);
         try {
             pauseCoordinator.awaitResume(instanceId);
         } finally {

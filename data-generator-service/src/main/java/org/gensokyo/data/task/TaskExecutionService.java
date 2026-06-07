@@ -141,6 +141,7 @@ public class TaskExecutionService {
     public void markRunning(Long instanceId) {
         update(instanceId, row -> {
             row.setStatus(TaskExecutionStatus.RUNNING.name());
+            row.setPauseReason(null);
             if (row.getStartedAt() == null) {
                 row.setStartedAt(Instant.now());
             }
@@ -172,6 +173,7 @@ public class TaskExecutionService {
             row.setMetricsJson(metricsJson);
             row.setReportJson(reportJson);
             row.setErrorMessage(null);
+            row.setPauseReason(null);
         });
     }
 
@@ -184,7 +186,19 @@ public class TaskExecutionService {
      */
     @Transactional
     public void markPaused(Long instanceId) {
-        update(instanceId, row -> row.setStatus(TaskExecutionStatus.PAUSED.name()));
+        markPaused(instanceId, null);
+    }
+
+    /**
+     * @param instanceId  run instance id
+     * @param pauseReason operator-visible pause reason
+     */
+    @Transactional
+    public void markPaused(Long instanceId, String pauseReason) {
+        update(instanceId, row -> {
+            row.setStatus(TaskExecutionStatus.PAUSED.name());
+            row.setPauseReason(trimPauseReason(pauseReason));
+        });
     }
 
     /**
@@ -227,6 +241,7 @@ public class TaskExecutionService {
         update(instanceId, row -> {
             row.setStatus(TaskExecutionStatus.CANCELLED.name());
             row.setFinishedAt(Instant.now());
+            row.setPauseReason(null);
         });
     }
 
@@ -235,6 +250,7 @@ public class TaskExecutionService {
         update(instanceId, row -> {
             row.setStatus(TaskExecutionStatus.FAILED.name());
             row.setFinishedAt(Instant.now());
+            row.setPauseReason(null);
             String message = errorMessage;
             if (message != null && message.length() > 4000) {
                 message = message.substring(0, 4000);
@@ -314,7 +330,16 @@ public class TaskExecutionService {
                 row.getRowCount(),
                 row.getErrorMessage(),
                 row.getMetricsJson(),
-                parseReport(row.getReportJson()));
+                parseReport(row.getReportJson()),
+                row.getPauseReason());
+    }
+
+    private static String trimPauseReason(String pauseReason) {
+        if (pauseReason == null || pauseReason.isBlank()) {
+            return null;
+        }
+        String trimmed = pauseReason.trim();
+        return trimmed.length() > 512 ? trimmed.substring(0, 512) : trimmed;
     }
 
     private static RunReportVO parseReport(String reportJson) {

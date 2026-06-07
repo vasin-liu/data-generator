@@ -51,7 +51,9 @@ class V2WorkflowScenarioIT {
                 "scenario-wf-pause-log.yaml",
                 "scenario-wf-branch.yaml",
                 "scenario-dag-join.yaml",
-                "scenario-js-transform.yaml"
+                "scenario-dag-fanout.yaml",
+                "scenario-js-transform.yaml",
+                "scenario-wf-shared-state.yaml"
         ).map(name -> SCENARIO_ROOT + name);
     }
 
@@ -105,6 +107,20 @@ class V2WorkflowScenarioIT {
                 assertThat(result.getRows().get(0).getString("shifted")).isEqualTo("14");
                 assertThat(result.getRows().get(1).getString("value")).isEqualTo("5");
                 assertThat(result.getRows().get(1).getString("shifted")).isEqualTo("15");
+            }
+            case "scenario-dag-fanout" -> {
+                assertThat(result.getRows()).hasSize(3);
+                assertThat(toLong(result.getRows().get(0).values().get("value"))).isEqualTo(1L);
+                assertThat(toLong(result.getRows().get(0).values().get("doubled"))).isEqualTo(2L);
+                assertThat(toLong(result.getRows().get(1).values().get("value"))).isEqualTo(2L);
+                assertThat(toLong(result.getRows().get(1).values().get("doubled"))).isEqualTo(4L);
+                assertThat(toLong(result.getRows().get(2).values().get("value"))).isEqualTo(3L);
+                assertThat(toLong(result.getRows().get(2).values().get("doubled"))).isEqualTo(6L);
+            }
+            case "scenario-wf-shared-state" -> {
+                assertThat(warnings).anyMatch(entry -> entry.contains("shared-state-ok"));
+                assertThat(warnings).noneMatch(entry -> entry.contains("shared-state-fail"));
+                assertThat(result.getRows()).hasSize(3);
             }
             case "scenario-js-transform" -> {
                 assertThat(result.getRows()).hasSize(3);

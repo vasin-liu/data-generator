@@ -2,12 +2,13 @@ import type {
   ComputeBlockDraft,
   SinkDraft,
   TemplateV2Draft,
+  TransformDraft,
   TransformGraphDraft,
   TransformNodeDraft,
   WorkflowSpecDraft,
   WorkflowStepDraft,
 } from '../../api/types';
-import { cloneDraft } from './draftUtils';
+import { cloneDraft, inferTransformType, type TransformKind } from './draftUtils';
 
 /** Supported workflow step types in the minimal editor. */
 export const WORKFLOW_STEP_TYPES = [
@@ -20,7 +21,32 @@ export const WORKFLOW_STEP_TYPES = [
 
 export type WorkflowStepType = (typeof WORKFLOW_STEP_TYPES)[number];
 
-const RESERVED_STEP_KEYS = new Set(['id', 'name', 'type', 'computeBlockId']);
+/** Log levels supported by the workflow log step editor. */
+export const LOG_LEVELS = ['DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
+
+/** Shared scope lifecycle actions in the workflow editor. */
+export const SHARED_SCOPE_ACTIONS = ['open', 'write', 'read', 'close'] as const;
+
+const RESERVED_STEP_KEYS = new Set([
+  'id',
+  'name',
+  'type',
+  'computeBlockId',
+  'level',
+  'message',
+  'fields',
+  'durationMs',
+  'until',
+  'condition',
+  'manual',
+  'scopeId',
+  'action',
+  'entries',
+  'thenSteps',
+  'elseSteps',
+  'thenComputeBlockId',
+  'elseComputeBlockId',
+]);
 
 /**
  * @param draft template draft
@@ -41,6 +67,16 @@ export function listWorkflowSteps(draft: TemplateV2Draft): WorkflowStepDraft[] {
  */
 export function listComputeBlocks(draft: TemplateV2Draft): ComputeBlockDraft[] {
   return draft.computeBlocks ? [...draft.computeBlocks] : [];
+}
+
+/**
+ * @param draft template draft
+ */
+export function listComputeBlockIdOptions(draft: TemplateV2Draft): { value: string; label: string }[] {
+  return listComputeBlocks(draft).map((block, index) => {
+    const id = block.id ?? `block-${index + 1}`;
+    return { value: id, label: id };
+  });
 }
 
 /**
@@ -400,6 +436,222 @@ export function applyNodeDependsOnAt(
   }
   const graph = block.transformGraph ?? { nodes, edges: [] };
   return applyTransformGraph(block, applyDependsOn(graph, node.id, dependsOn));
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ */
+export function readGraphTransform(
+  block: ComputeBlockDraft,
+  transformId: string | undefined,
+): TransformDraft | undefined {
+  if (!transformId) {
+    return undefined;
+  }
+  return block.transformGraph?.transforms?.[transformId];
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ */
+export function readGraphTransformType(block: ComputeBlockDraft, transformId: string | undefined): TransformKind {
+  return inferTransformType(readGraphTransform(block, transformId));
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ * @param patch merged transform fields
+ */
+export function applyGraphTransformAt(
+  block: ComputeBlockDraft,
+  transformId: string,
+  patch: TransformDraft,
+): ComputeBlockDraft {
+  const graph = block.transformGraph ?? { transforms: {}, nodes: [], edges: [] };
+  const existing = graph.transforms?.[transformId] ?? { type: 'sql', name: transformId };
+  const transforms = {
+    ...(graph.transforms ?? {}),
+    [transformId]: { ...existing, ...patch, name: existing.name ?? transformId },
+  };
+  return applyTransformGraph(block, { ...graph, transforms });
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ */
+export function readTransformScript(block: ComputeBlockDraft, transformId: string | undefined): string {
+  const transform = readGraphTransform(block, transformId);
+  return typeof transform?.script === 'string' ? transform.script : '';
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ * @param script replacement JavaScript
+ */
+export function applyTransformScriptAt(
+  block: ComputeBlockDraft,
+  transformId: string,
+  script: string,
+): ComputeBlockDraft {
+  return applyGraphTransformAt(block, transformId, { type: 'js', script });
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ */
+export function readTransformTimeoutMs(
+  block: ComputeBlockDraft,
+  transformId: string | undefined,
+): number | undefined {
+  const transform = readGraphTransform(block, transformId);
+  return typeof transform?.timeoutMs === 'number' ? transform.timeoutMs : undefined;
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ * @param timeoutMs optional per-row timeout
+ */
+export function applyTransformTimeoutMsAt(
+  block: ComputeBlockDraft,
+  transformId: string,
+  timeoutMs: number | undefined,
+): ComputeBlockDraft {
+  return applyGraphTransformAt(block, transformId, { type: 'js', timeoutMs });
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ * @param type transform kind
+ */
+export function applyGraphTransformTypeAt(
+  block: ComputeBlockDraft,
+  transformId: string,
+  type: TransformKind,
+): ComputeBlockDraft {
+  const existing = readGraphTransform(block, transformId);
+  if (type === 'js') {
+    return applyGraphTransformAt(block, transformId, {
+      type: 'js',
+      script: typeof existing?.script === 'string' ? existing.script : 'row.value = row.value',
+      timeoutMs: typeof existing?.timeoutMs === 'number' ? existing.timeoutMs : undefined,
+    });
+  }
+  if (type === 'spel') {
+    return applyGraphTransformAt(block, transformId, {
+      type: 'spel',
+      columns: existing?.columns?.length
+        ? existing.columns
+        : [{ name: 'value', expression: '#input' }],
+    });
+  }
+  return applyGraphTransformAt(block, transformId, {
+    type: 'sql',
+    sql: typeof existing?.sql === 'string' ? existing.sql : 'SELECT * FROM input',
+  });
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ */
+export function readTransformSql(block: ComputeBlockDraft, transformId: string | undefined): string {
+  if (!transformId) {
+    return '';
+  }
+  const transform = block.transformGraph?.transforms?.[transformId];
+  return typeof transform?.sql === 'string' ? transform.sql : '';
+}
+
+/**
+ * @param block compute block
+ * @param transformId transform definition id
+ * @param sql replacement SQL
+ */
+export function applyTransformSqlAt(
+  block: ComputeBlockDraft,
+  transformId: string,
+  sql: string,
+): ComputeBlockDraft {
+  const graph = block.transformGraph ?? { transforms: {}, nodes: [], edges: [] };
+  const existing = graph.transforms?.[transformId] ?? { type: 'sql', name: transformId };
+  const transforms = {
+    ...(graph.transforms ?? {}),
+    [transformId]: { ...existing, type: 'sql', sql },
+  };
+  return applyTransformGraph(block, { ...graph, transforms });
+}
+
+/**
+ * Returns a cycle path when the block's transform DAG contains a cycle.
+ *
+ * @param block compute block
+ */
+export function findTransformGraphCyclePath(block: ComputeBlockDraft): string[] {
+  const graph = block.transformGraph;
+  if (!graph?.nodes?.length) {
+    return [];
+  }
+  const outgoing = new Map<string, string[]>();
+  for (const node of graph.nodes) {
+    if (node.id) {
+      outgoing.set(node.id, []);
+    }
+  }
+  for (const edge of graph.edges ?? []) {
+    if (edge.fromNodeId && edge.toNodeId) {
+      const next = outgoing.get(edge.fromNodeId) ?? [];
+      next.push(edge.toNodeId);
+      outgoing.set(edge.fromNodeId, next);
+    }
+  }
+
+  const state = new Map<string, 0 | 1 | 2>();
+  const stack: string[] = [];
+
+  const dfs = (nodeId: string): string[] => {
+    const visited = state.get(nodeId);
+    if (visited === 1) {
+      const start = stack.indexOf(nodeId);
+      return [...stack.slice(start), nodeId];
+    }
+    if (visited === 2) {
+      return [];
+    }
+    state.set(nodeId, 1);
+    stack.push(nodeId);
+    for (const next of outgoing.get(nodeId) ?? []) {
+      const cycle = dfs(next);
+      if (cycle.length > 0) {
+        return cycle;
+      }
+    }
+    stack.pop();
+    state.set(nodeId, 2);
+    return [];
+  };
+
+  for (const nodeId of outgoing.keys()) {
+    const cycle = dfs(nodeId);
+    if (cycle.length > 0) {
+      return cycle;
+    }
+  }
+  return [];
+}
+
+/**
+ * @param block compute block
+ */
+export function hasTransformGraphCycle(block: ComputeBlockDraft): boolean {
+  return findTransformGraphCyclePath(block).length > 0;
 }
 
 /**

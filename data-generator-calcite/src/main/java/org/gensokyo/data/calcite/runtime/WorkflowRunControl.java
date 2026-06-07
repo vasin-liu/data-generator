@@ -32,7 +32,18 @@ public interface WorkflowRunControl {
      * @throws InterruptedException when the waiting thread is interrupted
      */
     default void awaitManualPause(Long instanceId) throws InterruptedException {
-        // default: no manual pause support
+        awaitManualPause(instanceId, null);
+    }
+
+    /**
+     * Blocks until resume or cancel when a manual pause step is reached.
+     *
+     * @param instanceId  current run instance id
+     * @param pauseReason operator-visible pause reason persisted on the execution row
+     * @throws InterruptedException when the waiting thread is interrupted
+     */
+    default void awaitManualPause(Long instanceId, String pauseReason) throws InterruptedException {
+        awaitManualPause(instanceId);
     }
 
     /**

@@ -90,4 +90,8 @@ public class TaskExecutionPO implements Serializable {
 
     @Column(name = "schedule_id")
     private Long scheduleId;
+
+    /** Human-readable reason when status is {@code PAUSED} (manual workflow gate). */
+    @Column(name = "pause_reason", length = 512)
+    private String pauseReason;
 }

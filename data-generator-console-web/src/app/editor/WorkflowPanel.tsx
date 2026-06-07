@@ -5,6 +5,7 @@ import type { EditorDataSources, TemplateV2Draft, WorkflowStepDraft } from '../.
 import { FieldHelp } from '../../components/FieldHelp';
 import { labeledOptions } from '../utils/optionLabels';
 import { ComputeBlockEditor } from './ComputeBlockEditor';
+import { WorkflowStepFields } from './WorkflowStepFields';
 import {
   WORKFLOW_STEP_TYPES,
   addComputeBlock,
@@ -30,8 +31,16 @@ type Props = {
   onChange: (draft: TemplateV2Draft) => void;
 };
 
+function stepFieldsText(step: WorkflowStepDraft): string {
+  if (step.type === 'shared_scope' && step.action === 'write') {
+    const entries = step.entries;
+    return entries && typeof entries === 'object' ? JSON.stringify(entries, null, 2) : '';
+  }
+  return stepParamsJson(step);
+}
+
 /**
- * Minimal L2 workflow editor with compute block scoped editing.
+ * L2 workflow editor with structured step fields and compute block scoped editing.
  */
 export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: Props) {
   const { t } = useTranslation();
@@ -55,13 +64,18 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
     key: step.id ?? index,
     index,
     ...step,
-    paramsText: paramsDraft[index] ?? stepParamsJson(step),
+    paramsText: paramsDraft[index] ?? stepFieldsText(step),
   }));
 
   const applyParams = (index: number, jsonText: string) => {
     setParamsDraft((prev) => ({ ...prev, [index]: jsonText }));
     try {
       const step = steps[index] ?? {};
+      if (step.type === 'shared_scope' && step.action === 'write') {
+        const entries = jsonText.trim() ? (JSON.parse(jsonText) as Record<string, unknown>) : {};
+        onChange(applyWorkflowStepAt(draft, index, { ...step, entries }));
+        return;
+      }
       const merged = applyStepParamsJson(step, jsonText);
       onChange(applyWorkflowStepAt(draft, index, merged));
     } catch {
@@ -79,10 +93,11 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
   };
 
   return (
-    <div style={{ maxWidth: 960 }}>
+    <div style={{ maxWidth: 960 }} data-testid="workflow-panel">
       <Space style={{ marginBottom: 16 }}>
         <Typography.Text>{t('workflow.enabled')}</Typography.Text>
         <Switch
+          data-testid="workflow-enabled-switch"
           disabled={readOnly}
           checked={workflowEnabled}
           onChange={(checked) => onChange(checked ? enableWorkflow(draft) : disableWorkflow(draft))}
@@ -100,19 +115,43 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
             message={t('workflow.page.intro.title')}
             description={t('workflow.page.intro.body')}
           />
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: 16, maxWidth: 900 }}
+            message={t('workflow.sharedScope.hint.title')}
+            description={t('workflow.sharedScope.hint.body')}
+          />
           <Typography.Title level={5}>{t('workflow.steps.title')}</Typography.Title>
           <Space style={{ marginBottom: 8 }}>
-            <Button disabled={readOnly} onClick={() => onChange(addWorkflowStep(draft, 'log'))}>
+            <Button
+              data-testid="workflow-add-step"
+              disabled={readOnly}
+              onClick={() => onChange(addWorkflowStep(draft, 'log'))}
+            >
               {t('workflow.steps.add')}
             </Button>
           </Space>
           <Table
+            data-testid="workflow-steps-table"
             size="small"
             pagination={false}
             dataSource={stepRows}
             locale={{ emptyText: t('workflow.steps.empty') }}
             style={{ marginBottom: 24 }}
             columns={[
+              {
+                title: <FieldHelp label={t('workflow.steps.id')} help={t('workflow.steps.id.help')} />,
+                dataIndex: 'id',
+                width: 140,
+                render: (_value, row) => (
+                  <Input
+                    readOnly={readOnly}
+                    value={row.id ?? ''}
+                    onChange={(e) => patchStep(row.index, { ...steps[row.index], id: e.target.value })}
+                  />
+                ),
+              },
               {
                 title: <FieldHelp label={t('workflow.steps.type')} help={t('workflow.steps.type.help')} />,
                 dataIndex: 'type',
@@ -130,37 +169,19 @@ export function WorkflowPanel({ draft, readOnly, editorDataSources, onChange }: 
                 ),
               },
               {
-                title: (
-                  <FieldHelp
-                    label={t('workflow.steps.computeBlockId')}
-                    help={t('workflow.steps.computeBlockId.help')}
-                  />
-                ),
-                dataIndex: 'computeBlockId',
-                width: 160,
-                render: (_value, row) => (
-                  <Input
-                    readOnly={readOnly}
-                    disabled={row.type !== 'invoke_compute_block'}
-                    value={row.computeBlockId ?? ''}
-                    placeholder={row.type === 'invoke_compute_block' ? 'block-1' : '—'}
-                    onChange={(e) => patchStep(row.index, { ...row, computeBlockId: e.target.value })}
-                  />
-                ),
-              },
-              {
-                title: <FieldHelp label={t('workflow.steps.params')} help={t('workflow.steps.params.help')} />,
+                title: <FieldHelp label={t('workflow.steps.fields')} help={t('workflow.steps.fields.help')} />,
                 dataIndex: 'paramsText',
                 render: (_value, row) => (
-                  <Input.TextArea
-                    rows={2}
+                  <WorkflowStepFields
+                    draft={draft}
+                    step={steps[row.index] ?? {}}
                     readOnly={readOnly}
-                    value={row.paramsText}
-                    placeholder='{"level":"INFO","message":"..."}'
-                    onChange={(e) =>
-                      setParamsDraft((prev) => ({ ...prev, [row.index]: e.target.value }))
+                    paramsText={row.paramsText}
+                    onPatch={(patch) => patchStep(row.index, patch)}
+                    onParamsTextChange={(text) =>
+                      setParamsDraft((prev) => ({ ...prev, [row.index]: text }))
                     }
-                    onBlur={(e) => applyParams(row.index, e.target.value)}
+                    onParamsBlur={(text) => applyParams(row.index, text)}
                   />
                 ),
               },

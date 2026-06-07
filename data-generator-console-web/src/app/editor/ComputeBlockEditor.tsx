@@ -79,6 +79,7 @@ export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChang
               { value: 'dag', label: t('workflow.block.transformDag') },
             ]}
             style={{ marginBottom: 16 }}
+            data-testid="transform-layout-radio"
           />
           {transformLayout === 'dag' ? (
             <TransformDagEditor block={block} readOnly={readOnly} onChange={patchBlock} />
@@ -116,6 +117,18 @@ export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChang
           readOnly={readOnly}
           value={block.id ?? ''}
           onChange={(e) => patchBlock({ ...block, id: e.target.value })}
+        />
+      </div>
+      <div style={{ marginBottom: 12, maxWidth: 360 }}>
+        <div style={{ marginBottom: 4 }}>
+          <FieldHelp label={t('workflow.block.sharedScopeId')} help={t('workflow.block.sharedScopeId.help')} />
+        </div>
+        <Input
+          data-testid="compute-block-shared-scope-id"
+          readOnly={readOnly}
+          value={block.sharedScopeId ?? ''}
+          placeholder={t('workflow.block.sharedScopeIdPlaceholder')}
+          onChange={(e) => patchBlock({ ...block, sharedScopeId: e.target.value || undefined })}
         />
       </div>
       <Tabs items={tabItems} />

@@ -130,7 +130,7 @@ Validation rejects cyclic graphs at author time (`TemplateV2Validator` + topolog
 
 ## JavaScript transform
 
-Use GraalJS row-local scripts inside a compute block. Scripts receive a `row` map binding only (sandboxed; no arbitrary IO).
+Use GraalJS row-local scripts inside a compute block. Scripts receive a `row` map binding only (sandboxed; no arbitrary IO). See also [`docs/js-transform-sandbox.md`](js-transform-sandbox.md).
 
 See `template/v2-scenarios/scenario-js-transform.yaml` (`GF-JS`):
 

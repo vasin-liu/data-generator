@@ -143,6 +143,7 @@ export function JobDetailPage() {
             {row && ACTIVE.has(row.status) && (
               <Button
                 danger
+                data-testid="job-cancel-button"
                 loading={cancelMutation.isPending}
                 onClick={() => cancelMutation.mutate()}
               >
@@ -152,6 +153,7 @@ export function JobDetailPage() {
             {row?.status === 'PAUSED' && (
               <Button
                 type="primary"
+                data-testid="job-resume-button"
                 loading={resumeMutation.isPending}
                 onClick={() => resumeMutation.mutate()}
               >
@@ -170,6 +172,16 @@ export function JobDetailPage() {
               style={{ marginBottom: 16 }}
               message={t('jobDetail.poll.active')}
               description={t('jobDetail.poll.active.body')}
+            />
+          ) : null}
+          {row.status === 'PAUSED' && row.pauseReason ? (
+            <Alert
+              type="warning"
+              showIcon
+              data-testid="job-pause-reason"
+              style={{ marginBottom: 16 }}
+              message={t('jobDetail.pauseReason.title')}
+              description={row.pauseReason}
             />
           ) : null}
           <Descriptions bordered size="small" column={1} style={{ marginBottom: 16 }}>

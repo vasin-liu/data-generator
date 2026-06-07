@@ -11,7 +11,10 @@ import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.model.v2.RunReportVO;
 import org.gensokyo.data.model.v2.StageMetricVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.v2.TransformGraphVO;
+import org.gensokyo.data.model.v2.TransformNodeVO;
 import org.gensokyo.data.model.v2.TransformVO;
+import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -61,14 +64,56 @@ public class RunReportCollector {
 
     private static List<StageMetricVO> buildTransformerMetrics(TemplateV2VO template, long outputRows) {
         List<StageMetricVO> transformers = new ArrayList<>();
-        if (template.getTransformers() == null) {
-            return transformers;
+        if (template.getTransformers() != null) {
+            for (int index = 0; index < template.getTransformers().size(); index++) {
+                TransformVO transformer = template.getTransformers().get(index);
+                transformers.add(new StageMetricVO(transformName(transformer, index), outputRows, null, null));
+            }
         }
-        for (int index = 0; index < template.getTransformers().size(); index++) {
-            TransformVO transformer = template.getTransformers().get(index);
-            transformers.add(new StageMetricVO(transformName(transformer, index), outputRows, null, null));
-        }
+        appendComputeBlockTransformMetrics(template, outputRows, transformers);
         return transformers;
+    }
+
+    private static void appendComputeBlockTransformMetrics(
+            TemplateV2VO template,
+            long outputRows,
+            List<StageMetricVO> transformers) {
+        if (template.getComputeBlocks() == null) {
+            return;
+        }
+        for (ComputeBlockVO block : template.getComputeBlocks()) {
+            TransformGraphVO graph = block.getTransformGraph();
+            if (graph == null || graph.getNodes() == null || graph.getNodes().isEmpty()) {
+                continue;
+            }
+            String blockPrefix = block.getId() != null && !block.getId().isBlank()
+                    ? block.getId()
+                    : "computeBlock";
+            for (TransformNodeVO node : graph.getNodes()) {
+                transformers.add(new StageMetricVO(
+                        dagNodeMetricName(blockPrefix, node, graph),
+                        outputRows,
+                        null,
+                        null));
+            }
+        }
+    }
+
+    private static String dagNodeMetricName(
+            String blockPrefix,
+            TransformNodeVO node,
+            TransformGraphVO graph) {
+        String nodeId = node.getId() != null && !node.getId().isBlank() ? node.getId() : "node";
+        TransformVO transform = graph.getTransforms() != null && node.getTransformId() != null
+                ? graph.getTransforms().get(node.getTransformId())
+                : null;
+        if (transform != null && transform.getName() != null && !transform.getName().isBlank()) {
+            return blockPrefix + "/" + nodeId + " (" + transform.getName() + ")";
+        }
+        if (node.getTransformId() != null && !node.getTransformId().isBlank()) {
+            return blockPrefix + "/" + nodeId + " [" + node.getTransformId() + "]";
+        }
+        return blockPrefix + "/" + nodeId;
     }
 
     private static List<StageMetricVO> buildSinkMetrics(TemplateV2VO template, RunMetrics metrics, long outputRows) {
