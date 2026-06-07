@@ -13,6 +13,7 @@ import {
 } from '../../api/templates';
 import type { TemplateSummary } from '../../api/types';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
+import { ScenarioCatalogModal } from '../components/ScenarioCatalogModal';
 import { TemplateStatusTag } from '../../components/TemplateStatusTag';
 
 /**
@@ -27,6 +28,7 @@ export function TemplatesPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
   const [tagFilter, setTagFilter] = useState<string | undefined>();
+  const [scenarioModalOpen, setScenarioModalOpen] = useState(false);
 
   const taxonomyQuery = useQuery({
     queryKey: ['template-taxonomy'],
@@ -166,10 +168,23 @@ export function TemplatesPage() {
         subtitle={t('templates.subtitle')}
         crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.templates') }]}
         extra={
-          <Button type="primary" data-testid="templates-new-button" onClick={() => navigate('/templates/new')}>
-            {t('templates.new')}
-          </Button>
+          <Space>
+            <Button data-testid="templates-from-scenario-button" onClick={() => setScenarioModalOpen(true)}>
+              {t('templates.fromScenario')}
+            </Button>
+            <Button type="primary" data-testid="templates-new-button" onClick={() => navigate('/templates/new')}>
+              {t('templates.new')}
+            </Button>
+          </Space>
         }
+      />
+      <ScenarioCatalogModal
+        open={scenarioModalOpen}
+        onClose={() => setScenarioModalOpen(false)}
+        onSelect={(scenarioId: string) => {
+          setScenarioModalOpen(false);
+          navigate(`/templates/new?scenario=${encodeURIComponent(scenarioId)}`);
+        }}
       />
       <Alert
         type="info"

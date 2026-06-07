@@ -75,7 +75,7 @@ public class TemplateEditorRunSupport {
      * @throws IllegalArgumentException when run fails
      */
     public RunStartResult runExisting(long templateId) {
-        R<String> result = taskController.runByIdAllowDraft(templateId);
+        R<String> result = taskController.runById(templateId);
         if (!result.isSuccess()) {
             throw new IllegalArgumentException(result.getMessage());
         }

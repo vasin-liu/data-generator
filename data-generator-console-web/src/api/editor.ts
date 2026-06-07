@@ -1,4 +1,5 @@
 import { apiRequest } from './client';
+import { getConsoleRole } from './consoleRole';
 import type {
   PreviewResult,
   RunStartResult,
@@ -75,17 +76,19 @@ export function validateDraft(
  * @param draft draft body
  * @param templateId optional id
  * @param maxRows optional preview cap
+ * @param throughTransformIndex optional 0-based inclusive transformer index for staged preview
  */
 export function previewDraft(
   draft: TemplateV2Draft,
   templateId?: string | null,
   maxRows?: number,
+  throughTransformIndex?: number,
 ): Promise<PreviewResult> {
   const path =
     templateId != null ? `/templates/${templateId}/draft/preview` : '/templates/draft/preview';
   return apiRequest<PreviewResult>(path, {
     method: 'POST',
-    body: JSON.stringify({ draft, maxRows }),
+    body: JSON.stringify({ draft, maxRows, throughTransformIndex }),
   });
 }
 
@@ -131,7 +134,11 @@ export function applyTemplateYaml(
 export async function exportDraftYaml(draft: TemplateV2Draft): Promise<string> {
   const res = await fetch('/api/templates/draft/yaml', {
     method: 'POST',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Console-Role': getConsoleRole(),
+    },
     body: JSON.stringify(draft),
   });
   const body = (await res.json()) as import('./types').ApiResult<string>;

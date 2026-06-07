@@ -6,6 +6,7 @@
 package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.messaging.MessagingClusterConfigService;
+import org.gensokyo.data.config.ConsoleSecurityProperties;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.config.TaskScheduleProperties;
@@ -41,6 +42,9 @@ class ConsoleRuntimeControllerTest {
     private DistributedExecutionProperties distributedProperties;
 
     @Mock
+    private ConsoleSecurityProperties consoleSecurityProperties;
+
+    @Mock
     private MessagingClusterConfigService messagingClusterConfigService;
 
     private MockMvc mockMvc;
@@ -51,6 +55,7 @@ class ConsoleRuntimeControllerTest {
                         properties,
                         scheduleProperties,
                         distributedProperties,
+                        consoleSecurityProperties,
                         null,
                         messagingClusterConfigService,
                         null,
@@ -64,12 +69,17 @@ class ConsoleRuntimeControllerTest {
         when(properties.isV1ExecutionEnabled()).thenReturn(false);
         when(scheduleProperties.isEnabled()).thenReturn(true);
         when(distributedProperties.isEnabled()).thenReturn(false);
+        when(consoleSecurityProperties.isEnabled()).thenReturn(true);
+        when(consoleSecurityProperties.getRoleHeader()).thenReturn("X-Console-Role");
         mockMvc.perform(get("/api/console/runtime"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.v1ExecutionEnabled").value(false))
                 .andExpect(jsonPath("$.data.scheduleEnabled").value(true))
-                .andExpect(jsonPath("$.data.distributedEnabled").value(false));
+                .andExpect(jsonPath("$.data.distributedEnabled").value(false))
+                .andExpect(jsonPath("$.data.consoleSecurityEnabled").value(true))
+                .andExpect(jsonPath("$.data.consoleRoleHeader").value("X-Console-Role"))
+                .andExpect(jsonPath("$.data.consoleRoles").isArray());
     }
 
     @Test

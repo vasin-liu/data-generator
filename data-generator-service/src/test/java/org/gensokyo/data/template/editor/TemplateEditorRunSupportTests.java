@@ -75,13 +75,14 @@ class TemplateEditorRunSupportTests {
 
     @Test
     void runExistingUsesPersistedTemplate() {
-        when(taskController.runByIdAllowDraft(9L))
+        when(taskController.runById(9L))
                 .thenReturn(R.ok("Template 't' started. templateId=9, instanceId=9009"));
 
         TemplateEditorRunSupport.RunStartResult result = runSupport.runExisting(9L);
 
         Assertions.assertEquals(9L, result.templateId());
         Assertions.assertEquals(9009L, result.instanceId());
+        verify(taskController).runById(9L);
     }
 
     @Test

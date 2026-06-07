@@ -33,6 +33,9 @@ export interface ConsoleRuntime {
   v1ExecutionEnabled: boolean;
   scheduleEnabled: boolean;
   distributedEnabled: boolean;
+  consoleSecurityEnabled: boolean;
+  consoleRoleHeader: string;
+  consoleRoles: string[];
 }
 
 /** Mirrors {@code StageMetricVO}. */
@@ -151,6 +154,15 @@ export interface TemplateEditorPayload {
   v1Yaml: string | null;
   archived: boolean;
   status: string | null;
+}
+
+/** Official V2 scenario catalog row for create-from-scenario wizard. */
+export interface ScenarioCatalogEntry {
+  scenarioId: string;
+  family: string;
+  name: string;
+  catalogRef: string;
+  resourceFile: string;
 }
 
 /** Mirrors {@code TemplateV2DraftVO} — nested objects stay JSON-polymorphic. */

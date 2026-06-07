@@ -111,6 +111,65 @@ export function applyStepParamsJson(step: WorkflowStepDraft, jsonText: string): 
   return { ...base, ...parsed };
 }
 
+type BranchLogBranch = {
+  level: string;
+  message: string;
+};
+
+/**
+ * @param steps branch thenSteps or elseSteps
+ */
+export function readBranchLogBranch(steps: WorkflowStepDraft[] | undefined): BranchLogBranch {
+  const first = steps?.[0];
+  if (first?.type === 'log') {
+    return {
+      level: typeof first.level === 'string' ? first.level : 'INFO',
+      message: typeof first.message === 'string' ? first.message : '',
+    };
+  }
+  return { level: 'INFO', message: '' };
+}
+
+/**
+ * @param step branch workflow step
+ * @param patch fields to merge into structured branch arms
+ */
+export function patchBranchStep(
+  step: WorkflowStepDraft,
+  patch: {
+    condition?: string;
+    thenLevel?: string;
+    thenMessage?: string;
+    elseLevel?: string;
+    elseMessage?: string;
+  },
+): WorkflowStepDraft {
+  const stepId = step.id ?? 'branch';
+  const thenCurrent = readBranchLogBranch(step.thenSteps as WorkflowStepDraft[] | undefined);
+  const elseCurrent = readBranchLogBranch(step.elseSteps as WorkflowStepDraft[] | undefined);
+  return {
+    ...step,
+    type: 'branch',
+    condition: patch.condition ?? (typeof step.condition === 'string' ? step.condition : 'true'),
+    thenSteps: [
+      {
+        id: `${stepId}-then`,
+        type: 'log',
+        level: patch.thenLevel ?? thenCurrent.level,
+        message: patch.thenMessage ?? thenCurrent.message,
+      },
+    ],
+    elseSteps: [
+      {
+        id: `${stepId}-else`,
+        type: 'log',
+        level: patch.elseLevel ?? elseCurrent.level,
+        message: patch.elseMessage ?? elseCurrent.message,
+      },
+    ],
+  };
+}
+
 /**
  * @param type step type
  */
@@ -124,7 +183,13 @@ export function defaultStepForType(type: WorkflowStepType, index: number): Workf
     case 'invoke_compute_block':
       return { id, type, computeBlockId: '' };
     case 'branch':
-      return { id, type, condition: 'true' };
+      return {
+        id,
+        type,
+        condition: 'true',
+        thenSteps: [{ id: `${id}-then`, type: 'log', level: 'INFO', message: 'then-branch' }],
+        elseSteps: [{ id: `${id}-else`, type: 'log', level: 'INFO', message: 'else-branch' }],
+      };
     case 'shared_scope':
       return { id, type, scopeId: 'scope1', action: 'open' };
     default:

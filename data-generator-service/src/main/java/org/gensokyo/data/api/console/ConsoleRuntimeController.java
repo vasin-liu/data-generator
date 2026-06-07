@@ -11,9 +11,11 @@ import org.gensokyo.data.api.console.dto.EditorDataSourcesDto;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.messaging.MessagingClusterConfigService;
+import org.gensokyo.data.config.ConsoleSecurityProperties;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.config.TaskScheduleProperties;
+import org.gensokyo.data.security.ConsoleRole;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +39,7 @@ public class ConsoleRuntimeController {
     private final DataGeneratorProperties properties;
     private final TaskScheduleProperties scheduleProperties;
     private final DistributedExecutionProperties distributedProperties;
+    private final ConsoleSecurityProperties consoleSecurityProperties;
     private final DynamicRoutingDataSource dynamicRoutingDataSource;
     private final MessagingClusterConfigService messagingClusterConfigService;
     private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
@@ -46,6 +49,7 @@ public class ConsoleRuntimeController {
      * @param properties              application flags
      * @param scheduleProperties      cron schedule poller settings
      * @param distributedProperties   distributed queue settings
+     * @param consoleSecurityProperties optional console RBAC settings
      * @param dynamicRoutingDataSource optional JDBC registry for editor dropdowns
      * @param messagingClusterConfigService console-managed messaging clusters
      * @param kafkaTemplateRegistry    optional Kafka runtime registry
@@ -55,6 +59,7 @@ public class ConsoleRuntimeController {
             DataGeneratorProperties properties,
             TaskScheduleProperties scheduleProperties,
             DistributedExecutionProperties distributedProperties,
+            ConsoleSecurityProperties consoleSecurityProperties,
             @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource,
             MessagingClusterConfigService messagingClusterConfigService,
             @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
@@ -62,6 +67,7 @@ public class ConsoleRuntimeController {
         this.properties = properties;
         this.scheduleProperties = scheduleProperties;
         this.distributedProperties = distributedProperties;
+        this.consoleSecurityProperties = consoleSecurityProperties;
         this.dynamicRoutingDataSource = dynamicRoutingDataSource;
         this.messagingClusterConfigService = messagingClusterConfigService;
         this.kafkaTemplateRegistry = kafkaTemplateRegistry;
@@ -76,7 +82,10 @@ public class ConsoleRuntimeController {
         return R.ok(new ConsoleRuntimeDto(
                 properties.isV1ExecutionEnabled(),
                 scheduleProperties.isEnabled(),
-                distributedProperties.isEnabled()));
+                distributedProperties.isEnabled(),
+                consoleSecurityProperties.isEnabled(),
+                consoleSecurityProperties.getRoleHeader(),
+                java.util.Arrays.stream(ConsoleRole.values()).map(Enum::name).toList()));
     }
 
     /**

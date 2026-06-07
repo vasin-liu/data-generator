@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AuditOutlined,
   ClockCircleOutlined,
@@ -14,6 +15,7 @@ import { Segmented, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { fetchConsoleRuntime } from '../../api/runtime';
+import { CONSOLE_ROLES, getConsoleRole, setConsoleRole, type ConsoleRoleName } from '../../api/consoleRole';
 import { useConsoleTheme } from '../../theme/ThemeProvider';
 import type { ConsoleThemeMode } from '../../theme/types';
 
@@ -32,6 +34,13 @@ export function ConsoleLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { mode, setMode } = useConsoleTheme();
+  const [consoleRole, setConsoleRoleState] = useState<ConsoleRoleName>(() => getConsoleRole());
+
+  useEffect(() => {
+    const syncRole = () => setConsoleRoleState(getConsoleRole());
+    window.addEventListener('console-role-changed', syncRole);
+    return () => window.removeEventListener('console-role-changed', syncRole);
+  }, []);
 
   const runtimeQuery = useQuery({
     queryKey: ['console-runtime'],
@@ -130,9 +139,25 @@ export function ConsoleLayout() {
               ]}
             />
 
+            {runtimeQuery.data?.consoleSecurityEnabled ? (
+              <Select
+                size="small"
+                className="console-role-select"
+                data-testid="console-role-select"
+                value={consoleRole}
+                options={(runtimeQuery.data.consoleRoles ?? [...CONSOLE_ROLES]).map((role) => ({
+                  value: role,
+                  label: role,
+                }))}
+                onChange={(role) => {
+                  setConsoleRole(role as ConsoleRoleName);
+                  setConsoleRoleState(role as ConsoleRoleName);
+                  window.dispatchEvent(new Event('console-role-changed'));
+                }}
+              />
+            ) : null}
+
             <Select
-              size="small"
-              className="console-locale-select"
               value={i18n.language.startsWith('zh') ? 'zh-CN' : 'en'}
               onChange={(lng) => {
                 void i18n.changeLanguage(lng);

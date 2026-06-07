@@ -10,9 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.api.console.dto.RunStartResultDto;
+import org.gensokyo.data.api.console.dto.ScenarioCatalogEntryDto;
+import org.gensokyo.data.template.V2ScenarioCatalogService;
 import org.gensokyo.data.template.editor.TemplateEditorPayload;
 import org.gensokyo.data.template.editor.TemplateEditorService;
 import org.gensokyo.data.template.editor.TemplateEditorRunSupport;
+
+import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +40,7 @@ public class ConsoleTemplateEditorController {
 
     private final TemplateEditorService templateEditorService;
     private final TemplateEditorRunSupport templateEditorRunSupport;
+    private final V2ScenarioCatalogService scenarioCatalogService;
 
     /**
      * @return empty draft scaffold for create wizard
@@ -43,6 +48,23 @@ public class ConsoleTemplateEditorController {
     @GetMapping("/scaffold")
     public R<TemplateEditorPayload> scaffold() {
         return R.ok("Draft created", templateEditorService.createEmptyDraft());
+    }
+
+    /**
+     * @return official V2 scenario catalog for create-from-scenario wizard
+     */
+    @GetMapping("/scenarios")
+    public R<List<ScenarioCatalogEntryDto>> listScenarios() {
+        return R.ok(scenarioCatalogService.listOfficial());
+    }
+
+    /**
+     * @param scenarioId official catalog id (e.g. {@code GF-A})
+     * @return editor payload seeded from classpath scenario YAML
+     */
+    @GetMapping("/scenarios/{scenarioId}/scaffold")
+    public R<TemplateEditorPayload> scaffoldFromScenario(@NotNull @PathVariable String scenarioId) {
+        return R.ok("Scenario draft loaded", templateEditorService.createDraftFromScenario(scenarioId));
     }
 
     /**

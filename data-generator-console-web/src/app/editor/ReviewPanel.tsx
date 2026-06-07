@@ -1,10 +1,14 @@
-import { useMutation } from '@tanstack/react-query';
-import { Alert, Button, Modal, Space, Typography, message } from 'antd';
-import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Alert, Button, Modal, Select, Space, Typography, message } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { canPublishWithRole, getConsoleRole } from '../../api/consoleRole';
+import { fetchConsoleRuntime } from '../../api/runtime';
 import { createTemplate, publishTemplate, previewDraft, runDraft, saveTemplate, validateDraft } from '../../api/editor';
 import type { TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
+import { listTransformers } from '../editor/draftUtils';
+import { hasWorkflow } from '../editor/workflowUtils';
 
 type Props = {
   draft: TemplateV2Draft;
@@ -33,6 +37,35 @@ export function ReviewPanel({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [output, setOutput] = useState('');
+  const [throughTransformIndex, setThroughTransformIndex] = useState<number | undefined>(undefined);
+  const [consoleRole, setConsoleRoleState] = useState(() => getConsoleRole());
+
+  useEffect(() => {
+    const syncRole = () => setConsoleRoleState(getConsoleRole());
+    window.addEventListener('console-role-changed', syncRole);
+    return () => window.removeEventListener('console-role-changed', syncRole);
+  }, []);
+
+  const runtimeQuery = useQuery({
+    queryKey: ['console-runtime'],
+    queryFn: fetchConsoleRuntime,
+  });
+  const publishAllowed =
+    !runtimeQuery.data?.consoleSecurityEnabled || canPublishWithRole(consoleRole);
+
+  const transformerSteps = useMemo(() => listTransformers(draft), [draft]);
+  const stagedPreviewAvailable = !hasWorkflow(draft) && transformerSteps.length > 0;
+  const stagedPreviewOptions = useMemo(
+    () =>
+      transformerSteps.map((step, index) => ({
+        value: index,
+        label: t('review.preview.throughStep', {
+          index: index + 1,
+          name: step.name?.trim() || step.type || `step-${index + 1}`,
+        }),
+      })),
+    [transformerSteps, t],
+  );
 
   const validateMutation = useMutation({
     mutationFn: () => validateDraft(draft, templateId),
@@ -48,7 +81,7 @@ export function ReviewPanel({
   });
 
   const previewMutation = useMutation({
-    mutationFn: () => previewDraft(draft, templateId),
+    mutationFn: () => previewDraft(draft, templateId, undefined, throughTransformIndex),
     onSuccess: (result) => {
       if (result.templateId && !templateId) {
         onSaved(result.templateId);
@@ -122,6 +155,24 @@ export function ReviewPanel({
   return (
     <div>
       <Typography.Paragraph type="secondary">{statusParts.join(' | ')}</Typography.Paragraph>
+      {stagedPreviewAvailable ? (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('review.preview.staged.title')}
+          description={t('review.preview.staged.body')}
+        />
+      ) : null}
+      {!publishAllowed && runtimeQuery.data?.consoleSecurityEnabled ? (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message={t('review.publish.rbac.title')}
+          description={t('review.publish.rbac.body')}
+        />
+      ) : null}
       {needsPublish ? (
         <Alert
           type="warning"
@@ -145,10 +196,22 @@ export function ReviewPanel({
         <Button onClick={() => validateMutation.mutate()} loading={validateMutation.isPending}>
           {t('review.validate')}
         </Button>
+        {stagedPreviewAvailable ? (
+          <Select
+            allowClear
+            style={{ minWidth: 220 }}
+            placeholder={t('review.preview.throughPlaceholder')}
+            value={throughTransformIndex}
+            options={stagedPreviewOptions}
+            onChange={(value) => setThroughTransformIndex(value ?? undefined)}
+            data-testid="review-preview-through-select"
+          />
+        ) : null}
         <Button
           onClick={() => previewMutation.mutate()}
           loading={previewMutation.isPending}
           title={t('review.tooltip.preview.ok')}
+          data-testid="review-preview"
         >
           {t('review.preview')}
         </Button>
@@ -171,8 +234,9 @@ export function ReviewPanel({
         </Button>
         <Button
           type="primary"
-          disabled={!saveAllowed || templateId == null}
+          disabled={!saveAllowed || templateId == null || !publishAllowed}
           loading={publishMutation.isPending}
+          data-testid="review-publish"
           onClick={() =>
             Modal.confirm({
               title: t('review.publish'),

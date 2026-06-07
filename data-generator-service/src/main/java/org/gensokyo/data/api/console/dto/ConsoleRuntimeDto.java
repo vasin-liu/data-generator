@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.api.console.dto;
 
+import java.util.List;
+
 /**
  * Runtime flags shown in the console shell (navbar banner and home status).
  *
@@ -14,5 +16,8 @@ package org.gensokyo.data.api.console.dto;
 public record ConsoleRuntimeDto(
         boolean v1ExecutionEnabled,
         boolean scheduleEnabled,
-        boolean distributedEnabled) {
+        boolean distributedEnabled,
+        boolean consoleSecurityEnabled,
+        String consoleRoleHeader,
+        List<String> consoleRoles) {
 }

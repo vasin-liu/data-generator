@@ -7,6 +7,8 @@ import {
   LOG_LEVELS,
   SHARED_SCOPE_ACTIONS,
   listComputeBlockIdOptions,
+  patchBranchStep,
+  readBranchLogBranch,
   type WorkflowStepType,
 } from './workflowUtils';
 
@@ -155,6 +157,64 @@ export function WorkflowStepFields({
             />
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (stepType === 'branch') {
+    const thenSteps = Array.isArray(step.thenSteps) ? (step.thenSteps as WorkflowStepDraft[]) : undefined;
+    const elseSteps = Array.isArray(step.elseSteps) ? (step.elseSteps as WorkflowStepDraft[]) : undefined;
+    const thenBranch = readBranchLogBranch(thenSteps);
+    const elseBranch = readBranchLogBranch(elseSteps);
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="workflow-branch-fields">
+        <div>
+          <FieldHelp label={t('workflow.steps.branch.condition')} help={t('workflow.steps.branch.condition.help')} />
+          <Input
+            readOnly={readOnly}
+            value={typeof step.condition === 'string' ? step.condition : 'true'}
+            placeholder="true"
+            onChange={(e) => onPatch(patchBranchStep(step, { condition: e.target.value }))}
+          />
+        </div>
+        <div>
+          <FieldHelp label={t('workflow.steps.branch.thenLevel')} help={t('workflow.steps.branch.thenLevel.help')} />
+          <Select
+            disabled={readOnly}
+            style={{ width: '100%' }}
+            value={thenBranch.level}
+            options={LOG_LEVELS.map((level) => ({ value: level, label: level }))}
+            onChange={(level) => onPatch(patchBranchStep(step, { thenLevel: level }))}
+          />
+        </div>
+        <div>
+          <FieldHelp label={t('workflow.steps.branch.thenMessage')} help={t('workflow.steps.branch.thenMessage.help')} />
+          <Input
+            readOnly={readOnly}
+            value={thenBranch.message}
+            placeholder="then-branch"
+            onChange={(e) => onPatch(patchBranchStep(step, { thenMessage: e.target.value }))}
+          />
+        </div>
+        <div>
+          <FieldHelp label={t('workflow.steps.branch.elseLevel')} help={t('workflow.steps.branch.elseLevel.help')} />
+          <Select
+            disabled={readOnly}
+            style={{ width: '100%' }}
+            value={elseBranch.level}
+            options={LOG_LEVELS.map((level) => ({ value: level, label: level }))}
+            onChange={(level) => onPatch(patchBranchStep(step, { elseLevel: level }))}
+          />
+        </div>
+        <div>
+          <FieldHelp label={t('workflow.steps.branch.elseMessage')} help={t('workflow.steps.branch.elseMessage.help')} />
+          <Input
+            readOnly={readOnly}
+            value={elseBranch.message}
+            placeholder="else-branch"
+            onChange={(e) => onPatch(patchBranchStep(step, { elseMessage: e.target.value }))}
+          />
+        </div>
       </div>
     );
   }

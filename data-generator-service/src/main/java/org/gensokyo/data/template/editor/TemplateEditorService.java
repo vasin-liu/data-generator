@@ -24,6 +24,7 @@ import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
+import org.gensokyo.data.template.V2ScenarioCatalogService;
 import org.gensokyo.data.util.RandomKit;
 import org.gensokyo.data.yaml.YamlParser;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class TemplateEditorService {
     private final TaskExecutionService taskExecutionService;
     private final TemplateLifecycleService templateLifecycleService;
     private final AuditService auditService;
+    private final V2ScenarioCatalogService scenarioCatalogService;
 
     /**
      * Creates an in-memory empty V2 draft (not persisted until {@link #save(Long, TemplateV2DraftVO)}).
@@ -57,6 +59,18 @@ public class TemplateEditorService {
      */
     public TemplateEditorPayload createEmptyDraft() {
         TemplateV2DraftVO draft = newEmptyV2Draft();
+        return new TemplateEditorPayload(null, TemplateDefinitionKind.V2, draft, null, false, "DRAFT");
+    }
+
+    /**
+     * Creates an in-memory V2 draft seeded from an official scenario catalog entry.
+     *
+     * @param scenarioId official catalog id (e.g. {@code GF-A})
+     * @return editor payload without template id
+     * @throws IllegalArgumentException when the scenario id is unknown
+     */
+    public TemplateEditorPayload createDraftFromScenario(String scenarioId) {
+        TemplateV2DraftVO draft = scenarioCatalogService.loadDraft(scenarioId);
         return new TemplateEditorPayload(null, TemplateDefinitionKind.V2, draft, null, false, "DRAFT");
     }
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
+import { fetchScenarioScaffold } from '../../api/scenarios';
 import { fetchEditorDataSources } from '../../api/runtime';
 import type { EditorDataSources } from '../../api/types';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
@@ -33,6 +34,7 @@ export function TemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const isNew = location.pathname.endsWith('/templates/new');
+  const scenarioId = searchParams.get('scenario')?.trim() ?? '';
   const routeId = !isNew && id ? id.trim() : '';
   const invalidId = !isNew && routeId.length === 0;
 
@@ -40,11 +42,14 @@ export function TemplateEditorPage() {
   const [meta, setMeta] = useState<(Omit<TemplateEditorPayload, 'draft'> & { status: string | null }) | null>(null);
 
   const loadQuery = useQuery({
-    queryKey: ['editor', id],
+    queryKey: ['editor', id, scenarioId],
     queryFn: async () => {
       if (invalidId) {
         const scaffold = await fetchEditorScaffold();
         return scaffold;
+      }
+      if (isNew && scenarioId) {
+        return fetchScenarioScaffold(scenarioId);
       }
       return isNew ? fetchEditorScaffold() : fetchEditor(routeId);
     },

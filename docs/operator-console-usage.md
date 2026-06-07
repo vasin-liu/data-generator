@@ -300,6 +300,8 @@ data:
 
 When `console-security.enabled=true`, every `/api/**` request must include a valid `X-Console-Role` header. Publish requires `ADMIN`; template edits require `EDITOR` or higher; draft runs require `TEMPLATE_RUN` (`OPERATOR`+). Audit log reads require `AUDIT_READ` (all standard roles).
 
+Staging sample profile: `data-generator-service/src/main/resources/application-staging.yaml` (`spring.profiles.active=staging`).
+
 Distributed staging: `docs/staging-distributed-deployment.md`.
 
 ---

@@ -1,7 +1,14 @@
 import type { ApiResult } from './types';
 import { parseApiResult } from './types';
+import { getConsoleRole } from './consoleRole';
 
 const API_BASE = '/api';
+
+function consoleRoleHeaders(): Record<string, string> {
+  return {
+    'X-Console-Role': getConsoleRole(),
+  };
+}
 
 /**
  * @param path path after {@code /api} (e.g. {@code /jobs})
@@ -10,6 +17,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   const res = await fetch(`${API_BASE}${path}`, {
     headers: {
       Accept: 'application/json',
+      ...consoleRoleHeaders(),
       ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
       ...init?.headers,
     },
@@ -38,6 +46,10 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
  * @param form multipart body (Content-Type omitted)
  */
 export async function apiFormRequest<T>(path: string, form: FormData, method = 'POST'): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, { method, body: form });
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    body: form,
+    headers: consoleRoleHeaders(),
+  });
   return parseApiResult<T>(res);
 }
