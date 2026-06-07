@@ -12,6 +12,7 @@ import org.gensokyo.data.model.po.TaskSchedulePO;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.repository.TaskScheduleRepository;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.template.TemplateLifecycleService;
 import org.gensokyo.data.util.RandomKit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class TaskScheduleService {
 
     private final TaskScheduleRepository repository;
     private final TemplateRepository templateRepository;
+    private final TemplateLifecycleService templateLifecycleService;
 
     /**
      * @return all schedules newest first
@@ -165,6 +167,8 @@ public class TaskScheduleService {
         if (Boolean.TRUE.equals(template.getArchived())) {
             throw new IllegalArgumentException("Template is archived: " + templateId);
         }
+        // Scheduled runs follow the same publish gate as manual production runs.
+        templateLifecycleService.requirePublishedForTaskRun(template);
     }
 
     private TaskScheduleView toView(TaskSchedulePO row) {

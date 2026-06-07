@@ -92,4 +92,19 @@ class TaskScheduleServiceTests {
         Assertions.assertNotNull(next);
         Assertions.assertTrue(next.isAfter(Instant.now().minusSeconds(1)));
     }
+
+    @Test
+    void draftTemplateRejectedForSchedule() {
+        TemplatePO template = new TemplatePO();
+        template.setId(77003L);
+        template.setName("schedule-draft");
+        template.setStatus("DRAFT");
+        template.setContentYaml("name: schedule-draft\nsources: {}\n");
+        templateRepository.saveAndFlush(template);
+
+        Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> taskScheduleService.create(
+                        new TaskScheduleUpsertRequest(template.getId(), "0 0 * * * *", true, null)));
+    }
 }

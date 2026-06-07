@@ -18,6 +18,7 @@ public enum ConsolePermission {
     TEMPLATE_RUN,
     JOB_READ,
     JOB_CANCEL,
+    AUDIT_READ,
     DATASOURCE_ADMIN,
     SECRET_ADMIN
 }

@@ -271,8 +271,9 @@ Requires server `data.generator.schedule.enabled=true` for actual triggers; UI a
 | Jobs | `/api/console/jobs` | `POST /task/run/{id}` |
 | Distributed metrics | `/api/console/distributed/metrics` | — |
 | Schedules | `/api/console/schedules`, `GET /api/console/schedules/preview?cron=` | — |
+| Audit | `GET /api/console/audit?action=&resourceType=&limit=` | — |
 
-Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleUploadController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleDistributedController`, `ConsoleRuntimeController`.
+Controllers: `ConsoleTemplateController`, `ConsoleTemplateEditorController`, `ConsoleTemplateEditorActionsController`, `ConsoleUploadController`, `ConsoleDataSourceController`, `ConsoleJobController`, `ConsoleScheduleController`, `ConsoleAuditController`, `ConsoleDistributedController`, `ConsoleRuntimeController`.
 
 ---
 
@@ -291,7 +292,13 @@ data:
     governance:
       require-published-for-task-run: true
       reject-plaintext-passwords-in-templates: true
+    console-security:
+      enabled: false          # Set true in staging/prod for header RBAC
+      role-header: X-Console-Role   # VIEWER | EDITOR | OPERATOR | DATASOURCE_ADMIN | ADMIN
+      actor-header: X-Console-Actor   # Optional audit actor label
 ```
+
+When `console-security.enabled=true`, every `/api/**` request must include a valid `X-Console-Role` header. Publish requires `ADMIN`; template edits require `EDITOR` or higher; draft runs require `TEMPLATE_RUN` (`OPERATOR`+). Audit log reads require `AUDIT_READ` (all standard roles).
 
 Distributed staging: `docs/staging-distributed-deployment.md`.
 
@@ -324,6 +331,12 @@ Distributed staging: `docs/staging-distributed-deployment.md`.
 2. Create schedule for published template.
 3. Confirm scheduled job with `triggerType=SCHEDULED` and schedule id link.
 4. Job detail → Open schedule highlights correct row.
+
+### Audit
+
+1. Publish a template from Review.
+2. Open **Audit** nav — `TEMPLATE_PUBLISH` row with template id and name (no secrets in detail).
+3. Filter by action `TEMPLATE_PUBLISH`.
 
 ---
 

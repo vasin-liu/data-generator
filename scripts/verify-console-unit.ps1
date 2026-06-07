@@ -25,9 +25,12 @@ try {
         'ConsoleDataSourceControllerTest',
         'ConsoleJobControllerTest',
         'ConsoleScheduleControllerTest',
+        'ConsoleAuditControllerTest',
         'ConsoleDistributedControllerTest',
         'ConsoleUploadControllerTest',
-        'TemplateObjectMapperFactoryTests'
+        'TemplateObjectMapperFactoryTests',
+        'ConsoleRoleTests',
+        'TaskScheduleServiceTests'
     ) -join ','
     $code = Invoke-RepoMaven -RepoRoot $RepoRoot -pl data-generator-service -am `
         "-Dtest=$testList" `

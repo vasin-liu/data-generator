@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
+import { AuditPage } from './pages/AuditPage';
 import { ConsoleLayout } from './layout/ConsoleLayout';
 import { DatasourcesPage } from './pages/DatasourcesPage';
 import { HomePage } from './pages/HomePage';
@@ -23,6 +24,7 @@ export function App() {
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/:instanceId" element={<JobDetailPage />} />
         <Route path="schedules" element={<SchedulesPage />} />
+        <Route path="audit" element={<AuditPage />} />
       </Route>
     </Routes>
   );

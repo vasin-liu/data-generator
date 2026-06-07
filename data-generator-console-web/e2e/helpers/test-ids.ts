@@ -12,6 +12,7 @@ export const TestIds = {
     datasources: 'nav-datasources',
     jobs: 'nav-jobs',
     schedules: 'nav-schedules',
+    audit: 'nav-audit',
   },
   pages: {
     templates: 'templates-page',
@@ -21,6 +22,7 @@ export const TestIds = {
     jobs: 'jobs-page',
     jobDetail: 'job-detail-page',
     schedules: 'schedules-page',
+    audit: 'audit-page',
   },
   actions: {
     templatesNew: 'templates-new-button',

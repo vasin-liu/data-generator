@@ -76,6 +76,9 @@ public class ConsoleAuthorizationFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/secrets")) {
             return ConsolePermission.SECRET_ADMIN;
         }
+        if (path.startsWith("/api/console/audit")) {
+            return ConsolePermission.AUDIT_READ;
+        }
         if (path.startsWith("/api/datasources")) {
             if (HttpMethod.POST.matches(method) || HttpMethod.DELETE.matches(method) || HttpMethod.PUT.matches(method)) {
                 return ConsolePermission.DATASOURCE_ADMIN;
@@ -97,6 +100,9 @@ public class ConsoleAuthorizationFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/jobs")) {
             if (path.contains("/cancel")) {
                 return ConsolePermission.JOB_CANCEL;
+            }
+            if (path.contains("/resume")) {
+                return ConsolePermission.TEMPLATE_RUN;
             }
             return ConsolePermission.JOB_READ;
         }

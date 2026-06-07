@@ -131,6 +131,17 @@ export interface TaskScheduleUpsertRequest {
   description?: string | null;
 }
 
+/** Mirrors {@code AuditEventView}. */
+export interface AuditEventView {
+  id: string | number;
+  occurredAt: string;
+  actor: string | null;
+  action: string;
+  resourceType: string;
+  resourceId: string | null;
+  detail: Record<string, unknown>;
+}
+
 export type TemplateDefinitionKind = 'V1' | 'V2';
 
 export interface TemplateEditorPayload {

@@ -117,6 +117,7 @@ export function ReviewPanel({
   ].filter(Boolean);
 
   const needsPublish = status !== 'PUBLISHED' && templateId != null;
+  const isDraftRun = needsPublish;
 
   return (
     <div>
@@ -128,6 +129,16 @@ export function ReviewPanel({
           style={{ marginBottom: 16 }}
           message={t('review.publish.required.title')}
           description={t('review.publish.required.body')}
+        />
+      ) : null}
+      {isDraftRun ? (
+        <Alert
+          type="info"
+          showIcon
+          data-testid="review-run-draft-hint"
+          style={{ marginBottom: 16 }}
+          message={t('review.run.draft.title')}
+          description={t('review.run.draft.body')}
         />
       ) : null}
       <Space wrap style={{ marginBottom: 16 }}>
@@ -178,9 +189,9 @@ export function ReviewPanel({
           disabled={!saveAllowed}
           loading={runMutation.isPending}
           onClick={() => runMutation.mutate()}
-          title={t('review.tooltip.run.ok')}
+          title={isDraftRun ? t('review.run.draft.title') : t('review.tooltip.run.ok')}
         >
-          {t('review.run')}
+          {isDraftRun ? t('review.run.draft') : t('review.run')}
         </Button>
         {templateId != null && (
           <Button onClick={() => navigate(`/jobs?templateId=${templateId}`)}>

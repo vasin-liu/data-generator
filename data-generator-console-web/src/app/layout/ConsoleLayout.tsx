@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import {
+  AuditOutlined,
   ClockCircleOutlined,
   DatabaseOutlined,
   FileTextOutlined,
@@ -42,6 +43,7 @@ export function ConsoleLayout() {
     if (p.includes('/templates')) return '/templates';
     if (p.includes('/jobs')) return '/jobs';
     if (p.includes('/schedules')) return '/schedules';
+    if (p.includes('/audit')) return '/audit';
     if (p.includes('/datasources')) return '/datasources';
     return '/';
   })();
@@ -52,6 +54,7 @@ export function ConsoleLayout() {
     { key: '/datasources', testId: 'nav-datasources', label: t('nav.datasources'), icon: <DatabaseOutlined /> },
     { key: '/jobs', testId: 'nav-jobs', label: t('nav.jobs'), icon: <HistoryOutlined /> },
     { key: '/schedules', testId: 'nav-schedules', label: t('nav.schedules'), icon: <ClockCircleOutlined /> },
+    { key: '/audit', testId: 'nav-audit', label: t('nav.audit'), icon: <AuditOutlined /> },
   ];
 
   const v1Enabled = runtimeQuery.data?.v1ExecutionEnabled ?? false;

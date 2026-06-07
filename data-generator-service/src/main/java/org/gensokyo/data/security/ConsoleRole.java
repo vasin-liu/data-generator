@@ -16,14 +16,22 @@ import java.util.Set;
  * @since 2026-05-29
  */
 public enum ConsoleRole {
-    VIEWER(ConsolePermission.TEMPLATE_READ, ConsolePermission.JOB_READ),
-    EDITOR(ConsolePermission.TEMPLATE_READ, ConsolePermission.TEMPLATE_EDIT, ConsolePermission.JOB_READ),
+    VIEWER(ConsolePermission.TEMPLATE_READ, ConsolePermission.JOB_READ, ConsolePermission.AUDIT_READ),
+    EDITOR(
+            ConsolePermission.TEMPLATE_READ,
+            ConsolePermission.TEMPLATE_EDIT,
+            ConsolePermission.JOB_READ,
+            ConsolePermission.AUDIT_READ),
     OPERATOR(
             ConsolePermission.TEMPLATE_READ,
             ConsolePermission.TEMPLATE_EDIT,
             ConsolePermission.TEMPLATE_RUN,
-            ConsolePermission.JOB_READ),
-    DATASOURCE_ADMIN(ConsolePermission.DATASOURCE_ADMIN, ConsolePermission.TEMPLATE_READ),
+            ConsolePermission.JOB_READ,
+            ConsolePermission.AUDIT_READ),
+    DATASOURCE_ADMIN(
+            ConsolePermission.DATASOURCE_ADMIN,
+            ConsolePermission.TEMPLATE_READ,
+            ConsolePermission.AUDIT_READ),
     ADMIN(EnumSet.allOf(ConsolePermission.class));
 
     private final Set<ConsolePermission> permissions;

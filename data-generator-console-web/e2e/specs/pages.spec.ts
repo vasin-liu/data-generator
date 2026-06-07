@@ -39,4 +39,11 @@ test.describe('Feature pages / primary actions', () => {
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.keyboard.press('Escape');
   });
+
+  test('audit log table', async ({ page }) => {
+    await gotoConsoleHome(page);
+    await navigateViaTopNav(page, TestIds.nav.audit);
+    await expect(page.getByTestId(TestIds.pages.audit)).toBeVisible();
+    await expect(page.getByRole('table')).toBeVisible();
+  });
 });

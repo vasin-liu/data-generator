@@ -6,15 +6,19 @@
 package org.gensokyo.data.audit;
 
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.api.console.dto.AuditEventView;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.AuditEventPO;
 import org.gensokyo.data.repository.AuditEventRepository;
 import org.gensokyo.data.security.ConsoleActorHolder;
 import org.gensokyo.data.util.RandomKit;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,5 +54,43 @@ public class AuditService {
             row.setDetailJson(TemplateJsonCodec.write(detail));
         }
         repository.saveAndFlush(row);
+    }
+
+    /**
+     * Lists recent audit events for the console audit page.
+     *
+     * @param action       optional action filter
+     * @param resourceType optional resource type filter
+     * @param limit        max rows (capped at 500)
+     * @return sanitized views newest first
+     */
+    @Transactional(readOnly = true)
+    public List<AuditEventView> listRecent(String action, String resourceType, int limit) {
+        int capped = Math.min(Math.max(limit, 1), 500);
+        Pageable pageable = PageRequest.of(0, capped);
+        List<AuditEventPO> rows;
+        if (action != null && !action.isBlank() && resourceType != null && !resourceType.isBlank()) {
+            rows = repository
+                    .findByActionAndResourceTypeOrderByOccurredAtDesc(action.trim(), resourceType.trim(), pageable)
+                    .getContent();
+        } else if (action != null && !action.isBlank()) {
+            rows = repository.findByActionOrderByOccurredAtDesc(action.trim(), pageable).getContent();
+        } else if (resourceType != null && !resourceType.isBlank()) {
+            rows = repository.findByResourceTypeOrderByOccurredAtDesc(resourceType.trim(), pageable).getContent();
+        } else {
+            rows = repository.findAllByOrderByOccurredAtDesc(pageable).getContent();
+        }
+        return rows.stream().map(this::toView).toList();
+    }
+
+    private AuditEventView toView(AuditEventPO row) {
+        return new AuditEventView(
+                row.getId(),
+                row.getOccurredAt(),
+                row.getActor(),
+                row.getAction(),
+                row.getResourceType(),
+                row.getResourceId(),
+                AuditDetailSanitizer.sanitizeJson(row.getDetailJson()));
     }
 }

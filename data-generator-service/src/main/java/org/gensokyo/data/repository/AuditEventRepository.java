@@ -6,6 +6,8 @@
 package org.gensokyo.data.repository;
 
 import org.gensokyo.data.model.po.AuditEventPO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -15,4 +17,33 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @since 2026-05-29
  */
 public interface AuditEventRepository extends JpaRepository<AuditEventPO, Long> {
+
+    /**
+     * @param pageable page request
+     * @return newest events first
+     */
+    Page<AuditEventPO> findAllByOrderByOccurredAtDesc(Pageable pageable);
+
+    /**
+     * @param action   action filter (exact match)
+     * @param pageable page request
+     * @return matching events newest first
+     */
+    Page<AuditEventPO> findByActionOrderByOccurredAtDesc(String action, Pageable pageable);
+
+    /**
+     * @param resourceType resource type filter
+     * @param pageable     page request
+     * @return matching events newest first
+     */
+    Page<AuditEventPO> findByResourceTypeOrderByOccurredAtDesc(String resourceType, Pageable pageable);
+
+    /**
+     * @param action       action filter
+     * @param resourceType resource type filter
+     * @param pageable     page request
+     * @return matching events newest first
+     */
+    Page<AuditEventPO> findByActionAndResourceTypeOrderByOccurredAtDesc(
+            String action, String resourceType, Pageable pageable);
 }
