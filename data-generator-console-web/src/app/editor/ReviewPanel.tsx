@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Alert, Button, Modal, Select, Space, Typography, message } from 'antd';
+import { Alert, App, Button, Select, Space, Typography, message } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -36,6 +36,7 @@ export function ReviewPanel({
 }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { modal } = App.useApp();
   const [output, setOutput] = useState('');
   const [throughTransformIndex, setThroughTransformIndex] = useState<number | undefined>(undefined);
   const [consoleRole, setConsoleRoleState] = useState(() => getConsoleRole());
@@ -87,7 +88,7 @@ export function ReviewPanel({
         onSaved(result.templateId);
       }
       setOutput(JSON.stringify(result.preview, null, 2));
-      Modal.info({
+      modal.info({
         title: t('review.preview.title'),
         width: 720,
         content: (
@@ -238,7 +239,7 @@ export function ReviewPanel({
           loading={publishMutation.isPending}
           data-testid="review-publish"
           onClick={() =>
-            Modal.confirm({
+            modal.confirm({
               title: t('review.publish'),
               content: t('review.publish.confirm'),
               onOk: () => publishMutation.mutateAsync(),
@@ -252,6 +253,7 @@ export function ReviewPanel({
           danger
           disabled={!saveAllowed}
           loading={runMutation.isPending}
+          data-testid="review-run"
           onClick={() => runMutation.mutate()}
           title={isDraftRun ? t('review.run.draft.title') : t('review.tooltip.run.ok')}
         >

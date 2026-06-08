@@ -67,8 +67,8 @@ export function ScenarioCatalogModal({ open, onClose, onSelect }: Props) {
       footer={null}
       width={880}
       destroyOnClose
-      data-testid="scenario-catalog-modal"
     >
+      <div data-testid="scenario-catalog-modal">
       <Alert
         type="info"
         showIcon
@@ -85,6 +85,7 @@ export function ScenarioCatalogModal({ open, onClose, onSelect }: Props) {
         pagination={false}
         locale={{ emptyText: catalogQuery.isError ? t('scenarios.loadError') : t('scenarios.empty') }}
       />
+      </div>
     </Modal>
   );
 }

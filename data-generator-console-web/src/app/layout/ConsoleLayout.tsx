@@ -158,6 +158,7 @@ export function ConsoleLayout() {
             ) : null}
 
             <Select
+              className="console-locale-select"
               value={i18n.language.startsWith('zh') ? 'zh-CN' : 'en'}
               onChange={(lng) => {
                 void i18n.changeLanguage(lng);

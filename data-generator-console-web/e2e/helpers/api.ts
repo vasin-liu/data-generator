@@ -39,6 +39,18 @@ export async function fetchEditorScaffold(request: APIRequestContext) {
   return { res, body: res.ok() ? await res.json() : null };
 }
 
+export async function fetchScenarioCatalog(request: APIRequestContext) {
+  const res = await request.get(`${apiBaseUrl()}/api/templates/scenarios`);
+  return { res, body: res.ok() ? await res.json() : null };
+}
+
+export async function fetchScenarioScaffold(request: APIRequestContext, scenarioId: string) {
+  const res = await request.get(
+    `${apiBaseUrl()}/api/templates/scenarios/${encodeURIComponent(scenarioId)}/scaffold`,
+  );
+  return { res, body: res.ok() ? await res.json() : null };
+}
+
 export async function fetchTemplateEditor(request: APIRequestContext, templateId: string) {
   const res = await request.get(`${apiBaseUrl()}/api/templates/${templateId}`);
   return { res, body: res.ok() ? await res.json() : null };

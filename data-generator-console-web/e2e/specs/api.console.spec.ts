@@ -4,6 +4,8 @@ import {
   fetchConsoleRuntime,
   fetchDatasourcesOverview,
   fetchEditorScaffold,
+  fetchScenarioCatalog,
+  fetchScenarioScaffold,
   fetchJobs,
   fetchSchedules,
   fetchTemplateTaxonomy,
@@ -42,6 +44,24 @@ test.describe('API / console facades', () => {
     expectApiSuccess(body);
     const data = unwrapApiData<{ draft?: unknown }>(body);
     expect(data?.draft).toBeTruthy();
+  });
+
+  test('GET /api/templates/scenarios lists official catalog', async ({ request }) => {
+    const { res, body } = await fetchScenarioCatalog(request);
+    expect(res.ok()).toBeTruthy();
+    expectApiSuccess(body);
+    const rows = unwrapApiData<Array<{ scenarioId: string }>>(body);
+    expect(rows?.map((row) => row.scenarioId)).toEqual(
+      expect.arrayContaining(['GF-A', 'GF-B', 'GF-WF', 'GF-JS']),
+    );
+  });
+
+  test('GET /api/templates/scenarios/GF-A/scaffold seeds draft', async ({ request }) => {
+    const { res, body } = await fetchScenarioScaffold(request, 'GF-A');
+    expect(res.ok()).toBeTruthy();
+    expectApiSuccess(body);
+    const data = unwrapApiData<{ draft?: { sources?: unknown } }>(body);
+    expect(data?.draft?.sources).toBeTruthy();
   });
 
   test('GET /api/datasources', async ({ request }) => {
