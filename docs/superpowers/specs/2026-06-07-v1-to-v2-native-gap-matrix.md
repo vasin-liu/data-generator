@@ -69,8 +69,8 @@
 | Field `dependsOn` graph | SQL projection + L1 DAG edges | **Done** | |
 | Linear transformer chain | `transformers[]` or compute block | **Done** | |
 | Transform DAG | `transformGraph` in compute block | **Done** | Console `TransformDagEditor` |
-| Staged preview (partial chain) | `throughTransformIndex` (linear) | **Partial** | API + Review UI for linear only |
-| Staged preview per DAG node | `throughTransformNodeId` (proposed) | **Planned** | Needs API + UI |
+| Staged preview (partial chain) | `throughTransformIndex` (linear) | **Done** | API + Review UI |
+| Staged preview per DAG node | `throughTransformNodeId` + `computeBlockId` | **Done** | API + Review DAG select |
 
 ---
 
@@ -127,11 +127,11 @@
 2. Console exposes **executionPolicy** for batching/scale (generator fields removed).
 3. Shared-scope E2E: catalog entry `GF-WFS` + `workflow-shared-scope.spec.ts`.
 
-### Pack V3 — Transform & preview depth
+### Pack V3 — Transform & preview depth (shipped 2026-06-10)
 
-1. DAG node staged preview API + Review UI.
-2. Official **lookup join** scenario in catalog (GF-B variant using `scenario-b-lookup-join.yaml`).
-3. Custom transform PF4J sample in docs.
+1. DAG node staged preview API + Review UI (`throughTransformNodeId`).
+2. Official **lookup join** scenario in catalog (`GF-BJ` → `scenario-b-lookup-join.yaml`).
+3. Custom transform operator guide: `docs/template-v2-pf4j-custom-transform-guide.md`.
 
 ### Pack V4 — Sink & runtime polish
 

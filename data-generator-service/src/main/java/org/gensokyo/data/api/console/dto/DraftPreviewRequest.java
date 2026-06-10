@@ -10,14 +10,18 @@ import org.gensokyo.data.model.v2.TemplateV2DraftVO;
 /**
  * Preview request carrying the in-memory draft from the wizard.
  *
- * @param draft                 current V2 draft from the wizard
- * @param maxRows               optional row cap; when null, uses draft execution policy or service default
- * @param throughTransformIndex optional 0-based inclusive transformer index; when null, runs the full chain
+ * @param draft                  current V2 draft from the wizard
+ * @param maxRows                optional row cap; when null, uses draft execution policy or service default
+ * @param throughTransformIndex  optional 0-based inclusive linear transformer index
+ * @param computeBlockId         optional compute block id for DAG staged preview
+ * @param throughTransformNodeId optional DAG node id inclusive cutoff
  * @author Gensokyo
  * @since 2026-05-26
  */
 public record DraftPreviewRequest(
         TemplateV2DraftVO draft,
         Integer maxRows,
-        Integer throughTransformIndex) {
+        Integer throughTransformIndex,
+        String computeBlockId,
+        String throughTransformNodeId) {
 }

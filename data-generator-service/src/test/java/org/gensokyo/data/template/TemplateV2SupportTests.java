@@ -64,6 +64,14 @@ class TemplateV2SupportTests {
     }
 
     @Test
+    void detectsWorkflowOnlyTemplateAsV2() {
+        var draft = new TemplateV2DraftVO();
+        draft.setWorkflow(new org.gensokyo.data.model.v2.workflow.WorkflowSpecVO());
+
+        Assertions.assertEquals(TemplateDefinitionKind.V2, TemplateDefinitionDetector.detect(new TemplateVO(), draft));
+    }
+
+    @Test
     void normalizesSingularTransformAndSink() {
         var draft = new TemplateV2DraftVO();
         draft.setName("demo");

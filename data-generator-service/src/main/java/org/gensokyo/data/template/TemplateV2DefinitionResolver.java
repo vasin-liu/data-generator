@@ -38,7 +38,7 @@ public class TemplateV2DefinitionResolver {
      *
      * @param entity persisted template row
      * @return normalized V2 template with id set
-     * @throws IllegalArgumentException when content is not V2 or has no sources
+     * @throws IllegalArgumentException when content is not V2 or has no sources (non-workflow templates)
      */
     public TemplateV2VO resolve(TemplatePO entity) {
         Objects.requireNonNull(entity, "entity");
@@ -50,7 +50,8 @@ public class TemplateV2DefinitionResolver {
                     "Template '%s' is not a Template V2 definition; legacy V1 templates are no longer supported",
                     entity.getId()));
         }
-        if (CollectKit.isEmpty(v2Draft.getSources())) {
+        boolean workflowMode = v2Draft.getWorkflow() != null;
+        if (!workflowMode && CollectKit.isEmpty(v2Draft.getSources())) {
             throw new IllegalArgumentException(String.format(
                     "Template '%s' has no V2 sources", entity.getId()));
         }

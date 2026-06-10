@@ -8,7 +8,7 @@ import { fetchConsoleRuntime } from '../../api/runtime';
 import { createTemplate, publishTemplate, previewDraft, runDraft, saveTemplate, validateDraft } from '../../api/editor';
 import type { TemplateDefinitionKind, TemplateV2Draft } from '../../api/types';
 import { listTransformers } from '../editor/draftUtils';
-import { hasWorkflow } from '../editor/workflowUtils';
+import { hasWorkflow, listDagPreviewTargets } from '../editor/workflowUtils';
 
 type Props = {
   draft: TemplateV2Draft;
@@ -39,6 +39,7 @@ export function ReviewPanel({
   const { modal } = App.useApp();
   const [output, setOutput] = useState('');
   const [throughTransformIndex, setThroughTransformIndex] = useState<number | undefined>(undefined);
+  const [dagPreviewKey, setDagPreviewKey] = useState<string | undefined>(undefined);
   const [consoleRole, setConsoleRoleState] = useState(() => getConsoleRole());
 
   useEffect(() => {
@@ -55,7 +56,10 @@ export function ReviewPanel({
     !runtimeQuery.data?.consoleSecurityEnabled || canPublishWithRole(consoleRole);
 
   const transformerSteps = useMemo(() => listTransformers(draft), [draft]);
-  const stagedPreviewAvailable = !hasWorkflow(draft) && transformerSteps.length > 0;
+  const dagPreviewTargets = useMemo(() => listDagPreviewTargets(draft), [draft]);
+  const stagedLinearAvailable = !hasWorkflow(draft) && transformerSteps.length > 0;
+  const stagedDagAvailable = dagPreviewTargets.length > 0;
+  const stagedPreviewAvailable = stagedLinearAvailable || stagedDagAvailable;
   const stagedPreviewOptions = useMemo(
     () =>
       transformerSteps.map((step, index) => ({
@@ -66,6 +70,14 @@ export function ReviewPanel({
         }),
       })),
     [transformerSteps, t],
+  );
+  const dagPreviewOptions = useMemo(
+    () =>
+      dagPreviewTargets.map((target) => ({
+        value: `${target.computeBlockId}|${target.nodeId}`,
+        label: t('review.preview.throughDagNode', { label: target.label }),
+      })),
+    [dagPreviewTargets, t],
   );
 
   const validateMutation = useMutation({
@@ -82,7 +94,17 @@ export function ReviewPanel({
   });
 
   const previewMutation = useMutation({
-    mutationFn: () => previewDraft(draft, templateId, undefined, throughTransformIndex),
+    mutationFn: () => {
+      const dagTarget = dagPreviewKey?.split('|');
+      return previewDraft(
+        draft,
+        templateId,
+        undefined,
+        dagPreviewKey ? undefined : throughTransformIndex,
+        dagTarget?.[1],
+        dagTarget?.[0],
+      );
+    },
     onSuccess: (result) => {
       if (result.templateId && !templateId) {
         onSaved(result.templateId);
@@ -197,15 +219,32 @@ export function ReviewPanel({
         <Button onClick={() => validateMutation.mutate()} loading={validateMutation.isPending}>
           {t('review.validate')}
         </Button>
-        {stagedPreviewAvailable ? (
+        {stagedLinearAvailable ? (
           <Select
             allowClear
             style={{ minWidth: 220 }}
             placeholder={t('review.preview.throughPlaceholder')}
-            value={throughTransformIndex}
+            value={dagPreviewKey ? undefined : throughTransformIndex}
             options={stagedPreviewOptions}
-            onChange={(value) => setThroughTransformIndex(value ?? undefined)}
+            onChange={(value) => {
+              setDagPreviewKey(undefined);
+              setThroughTransformIndex(value ?? undefined);
+            }}
             data-testid="review-preview-through-select"
+          />
+        ) : null}
+        {stagedDagAvailable ? (
+          <Select
+            allowClear
+            style={{ minWidth: 260 }}
+            placeholder={t('review.preview.throughDagPlaceholder')}
+            value={dagPreviewKey}
+            options={dagPreviewOptions}
+            onChange={(value) => {
+              setThroughTransformIndex(undefined);
+              setDagPreviewKey(value ?? undefined);
+            }}
+            data-testid="review-preview-dag-select"
           />
         ) : null}
         <Button

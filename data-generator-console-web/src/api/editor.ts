@@ -77,18 +77,28 @@ export function validateDraft(
  * @param templateId optional id
  * @param maxRows optional preview cap
  * @param throughTransformIndex optional 0-based inclusive transformer index for staged preview
+ * @param throughTransformNodeId optional DAG node id inclusive cutoff
+ * @param computeBlockId optional compute block id for DAG staged preview
  */
 export function previewDraft(
   draft: TemplateV2Draft,
   templateId?: string | null,
   maxRows?: number,
   throughTransformIndex?: number,
+  throughTransformNodeId?: string,
+  computeBlockId?: string,
 ): Promise<PreviewResult> {
   const path =
     templateId != null ? `/templates/${templateId}/draft/preview` : '/templates/draft/preview';
   return apiRequest<PreviewResult>(path, {
     method: 'POST',
-    body: JSON.stringify({ draft, maxRows, throughTransformIndex }),
+    body: JSON.stringify({
+      draft,
+      maxRows,
+      throughTransformIndex,
+      throughTransformNodeId,
+      computeBlockId,
+    }),
   });
 }
 

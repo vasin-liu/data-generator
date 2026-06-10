@@ -759,3 +759,74 @@ export function scopedDraftToComputeBlock(
     transformGraph: block.transformGraph,
   };
 }
+
+/** DAG staged preview target for Review tab. */
+export type DagPreviewTarget = {
+  computeBlockId: string;
+  nodeId: string;
+  label: string;
+};
+
+/**
+ * @param draft template draft
+ */
+export function listDagPreviewTargets(draft: TemplateV2Draft): DagPreviewTarget[] {
+  const targets: DagPreviewTarget[] = [];
+  for (const block of listComputeBlocks(draft)) {
+    if (!block.id || !blockUsesTransformGraph(block)) {
+      continue;
+    }
+    const graph = block.transformGraph;
+    for (const nodeId of topologicalDagNodeIds(graph)) {
+      const node = graph?.nodes?.find((entry) => entry.id === nodeId);
+      const transform =
+        node?.transformId && graph?.transforms ? graph.transforms[node.transformId] : undefined;
+      const nodeLabel =
+        node?.outputAlias || (transform?.name as string | undefined) || nodeId;
+      targets.push({
+        computeBlockId: block.id,
+        nodeId,
+        label: `${block.id} → ${nodeLabel}`,
+      });
+    }
+  }
+  return targets;
+}
+
+function topologicalDagNodeIds(graph: TransformGraphDraft | undefined): string[] {
+  const nodes = graph?.nodes ?? [];
+  const edges = graph?.edges ?? [];
+  const indegree = new Map<string, number>();
+  const outgoing = new Map<string, string[]>();
+  for (const node of nodes) {
+    if (!node.id) {
+      continue;
+    }
+    indegree.set(node.id, 0);
+    outgoing.set(node.id, []);
+  }
+  for (const edge of edges) {
+    if (!edge.fromNodeId || !edge.toNodeId) {
+      continue;
+    }
+    indegree.set(edge.toNodeId, (indegree.get(edge.toNodeId) ?? 0) + 1);
+    outgoing.get(edge.fromNodeId)?.push(edge.toNodeId);
+  }
+  const ready = [...indegree.entries()].filter(([, count]) => count === 0).map(([id]) => id);
+  const order: string[] = [];
+  while (ready.length > 0) {
+    const current = ready.shift();
+    if (!current) {
+      break;
+    }
+    order.push(current);
+    for (const next of outgoing.get(current) ?? []) {
+      const updated = (indegree.get(next) ?? 0) - 1;
+      indegree.set(next, updated);
+      if (updated === 0) {
+        ready.push(next);
+      }
+    }
+  }
+  return order;
+}

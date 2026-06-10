@@ -8,6 +8,12 @@ package org.gensokyo.data.template;
 import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
+import org.gensokyo.data.calcite.runtime.TransformGraphPreviewSupport;
+import org.gensokyo.data.model.v2.TransformEdgeVO;
+import org.gensokyo.data.model.v2.TransformGraphVO;
+import org.gensokyo.data.model.v2.TransformNodeVO;
+import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
+import org.gensokyo.data.model.v2.workflow.WorkflowSpecVO;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.config.DataGeneratorProperties;
@@ -141,7 +147,7 @@ public class TemplateV2ControlPlaneService {
      *                                  {@code IN_MEMORY}, or V2 cannot be resolved
      */
     public TemplateV2PreviewDTO preview(Long templateId, Integer maxRows) {
-        return preview(templateId, maxRows, null);
+        return preview(templateId, maxRows, null, null, null);
     }
 
     /**
@@ -155,6 +161,25 @@ public class TemplateV2ControlPlaneService {
      *                                  {@code IN_MEMORY}, V2 cannot be resolved, or the transform index is out of range
      */
     public TemplateV2PreviewDTO preview(Long templateId, Integer maxRows, Integer throughTransformIndex) {
+        return preview(templateId, maxRows, throughTransformIndex, null, null);
+    }
+
+    /**
+     * Runs a bounded in-memory preview, optionally stopping after a linear transformer step or a DAG node.
+     *
+     * @param templateId              persisted template id
+     * @param maxRows                   optional row cap
+     * @param throughTransformIndex     optional linear transformer index (mutually exclusive with node id)
+     * @param computeBlockId            optional compute block for DAG staged preview
+     * @param throughTransformNodeId    optional DAG node id inclusive cutoff
+     * @return preview schema, truncated rows, and warnings
+     */
+    public TemplateV2PreviewDTO preview(
+            Long templateId,
+            Integer maxRows,
+            Integer throughTransformIndex,
+            String computeBlockId,
+            String throughTransformNodeId) {
         Objects.requireNonNull(templateId, "templateId");
         int rowCap = resolvePreviewRowCap(maxRows);
 
@@ -175,7 +200,8 @@ public class TemplateV2ControlPlaneService {
                     "Preview supports IN_MEMORY execution only; template mode is " + mode);
         }
 
-        TemplateV2VO runnable = prepareForPreview(v2, throughTransformIndex);
+        TemplateV2VO runnable = prepareForPreview(
+                v2, throughTransformIndex, computeBlockId, throughTransformNodeId);
         TemplateV2RunResult result = templateV2Runner.run(runnable);
 
         RowSchema schema = result.getSchema();
@@ -199,7 +225,11 @@ public class TemplateV2ControlPlaneService {
         return 100;
     }
 
-    private static TemplateV2VO prepareForPreview(TemplateV2VO template, Integer throughTransformIndex) {
+    private static TemplateV2VO prepareForPreview(
+            TemplateV2VO template,
+            Integer throughTransformIndex,
+            String computeBlockId,
+            String throughTransformNodeId) {
         TemplateV2VO copy = copyTemplate(template);
         ExecutionPolicyVO policy = copy.getExecutionPolicy();
         if (policy == null) {
@@ -208,10 +238,51 @@ public class TemplateV2ControlPlaneService {
         }
         // Preview materializes rows in memory regardless of stored policy hints.
         policy.setMode("IN_MEMORY");
-        if (throughTransformIndex != null) {
+        boolean hasNodeCutoff = throughTransformNodeId != null && !throughTransformNodeId.isBlank();
+        if (hasNodeCutoff && throughTransformIndex != null) {
+            throw new IllegalArgumentException(
+                    "Use either throughTransformIndex or throughTransformNodeId for staged preview, not both");
+        }
+        if (hasNodeCutoff) {
+            applyThroughTransformNode(copy, computeBlockId, throughTransformNodeId);
+        } else if (throughTransformIndex != null) {
             applyThroughTransformIndex(copy, throughTransformIndex);
         }
         return copy;
+    }
+
+    private static void applyThroughTransformNode(
+            TemplateV2VO template, String computeBlockId, String throughTransformNodeId) {
+        ComputeBlockVO block = resolveComputeBlockForPreview(template, computeBlockId);
+        if (block.getTransformGraph() == null || block.getTransformGraph().getNodes() == null
+                || block.getTransformGraph().getNodes().isEmpty()) {
+            throw new IllegalArgumentException("Compute block '" + block.getId() + "' has no transformGraph to preview");
+        }
+        block.setTransformGraph(
+                TransformGraphPreviewSupport.truncateThroughNode(block.getTransformGraph(), throughTransformNodeId));
+    }
+
+    private static ComputeBlockVO resolveComputeBlockForPreview(TemplateV2VO template, String computeBlockId) {
+        List<ComputeBlockVO> blocks = template.getComputeBlocks();
+        if (blocks == null || blocks.isEmpty()) {
+            throw new IllegalArgumentException("Template has no compute blocks for DAG staged preview");
+        }
+        if (computeBlockId != null && !computeBlockId.isBlank()) {
+            for (ComputeBlockVO block : blocks) {
+                if (computeBlockId.equals(block.getId())) {
+                    return block;
+                }
+            }
+            throw new IllegalArgumentException("Compute block not found: " + computeBlockId);
+        }
+        for (ComputeBlockVO block : blocks) {
+            if (block.getTransformGraph() != null
+                    && block.getTransformGraph().getNodes() != null
+                    && !block.getTransformGraph().getNodes().isEmpty()) {
+                return block;
+            }
+        }
+        throw new IllegalArgumentException("No compute block with transformGraph found");
     }
 
     private static void applyThroughTransformIndex(TemplateV2VO template, int throughTransformIndex) {
@@ -241,6 +312,80 @@ public class TemplateV2ControlPlaneService {
         }
         copy.setTransformers(new ArrayList<>(template.getTransformers()));
         copy.setSinks(new ArrayList<>(template.getSinks()));
+        copy.setWorkflow(copyWorkflow(template.getWorkflow()));
+        copy.setComputeBlocks(copyComputeBlocks(template.getComputeBlocks()));
+        return copy;
+    }
+
+    private static WorkflowSpecVO copyWorkflow(WorkflowSpecVO workflow) {
+        if (workflow == null) {
+            return null;
+        }
+        WorkflowSpecVO copy = new WorkflowSpecVO();
+        copy.setSteps(workflow.getSteps() != null ? new ArrayList<>(workflow.getSteps()) : null);
+        return copy;
+    }
+
+    private static List<ComputeBlockVO> copyComputeBlocks(List<ComputeBlockVO> blocks) {
+        if (blocks == null) {
+            return new ArrayList<>();
+        }
+        List<ComputeBlockVO> copies = new ArrayList<>(blocks.size());
+        for (ComputeBlockVO block : blocks) {
+            if (block == null) {
+                continue;
+            }
+            ComputeBlockVO copy = new ComputeBlockVO();
+            copy.setId(block.getId());
+            copy.setSharedScopeId(block.getSharedScopeId());
+            if (block.getSources() != null) {
+                copy.setSources(new java.util.LinkedHashMap<>(block.getSources()));
+            }
+            copy.setTransformers(block.getTransformers() != null ? new ArrayList<>(block.getTransformers()) : null);
+            copy.setTransformGraph(copyTransformGraph(block.getTransformGraph()));
+            copy.setSinks(block.getSinks() != null ? new ArrayList<>(block.getSinks()) : null);
+            copies.add(copy);
+        }
+        return copies;
+    }
+
+    private static TransformGraphVO copyTransformGraph(TransformGraphVO graph) {
+        if (graph == null) {
+            return null;
+        }
+        TransformGraphVO copy = new TransformGraphVO();
+        if (graph.getTransforms() != null) {
+            copy.setTransforms(new java.util.LinkedHashMap<>(graph.getTransforms()));
+        }
+        if (graph.getNodes() != null) {
+            List<TransformNodeVO> nodes = new ArrayList<>(graph.getNodes().size());
+            for (TransformNodeVO node : graph.getNodes()) {
+                if (node == null) {
+                    continue;
+                }
+                TransformNodeVO nodeCopy = new TransformNodeVO();
+                nodeCopy.setId(node.getId());
+                nodeCopy.setTransformId(node.getTransformId());
+                nodeCopy.setOutputAlias(node.getOutputAlias());
+                nodes.add(nodeCopy);
+            }
+            copy.setNodes(nodes);
+        }
+        if (graph.getEdges() != null) {
+            List<TransformEdgeVO> edges = new ArrayList<>(graph.getEdges().size());
+            for (TransformEdgeVO edge : graph.getEdges()) {
+                if (edge == null) {
+                    continue;
+                }
+                TransformEdgeVO edgeCopy = new TransformEdgeVO();
+                edgeCopy.setFromNodeId(edge.getFromNodeId());
+                edgeCopy.setFromPort(edge.getFromPort());
+                edgeCopy.setToNodeId(edge.getToNodeId());
+                edgeCopy.setToPort(edge.getToPort());
+                edges.add(edgeCopy);
+            }
+            copy.setEdges(edges);
+        }
         return copy;
     }
 

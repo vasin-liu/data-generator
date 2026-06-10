@@ -52,5 +52,6 @@ test.describe('Official scenario catalog', () => {
       await expect(page.getByTestId(`scenario-use-${scenario.id}`)).toBeVisible();
     }
     await expect(page.getByTestId('scenario-use-GF-WFS')).toBeVisible();
+    await expect(page.getByTestId('scenario-use-GF-BJ')).toBeVisible();
   });
 });

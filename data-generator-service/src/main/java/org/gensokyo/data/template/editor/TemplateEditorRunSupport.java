@@ -93,7 +93,7 @@ public class TemplateEditorRunSupport {
      * @throws IllegalArgumentException when save or preview fails
      */
     public PreviewResult saveAndPreview(Long templateId, TemplateV2DraftVO draft, Integer maxRows) {
-        return saveAndPreview(templateId, draft, maxRows, null);
+        return saveAndPreview(templateId, draft, maxRows, null, null, null);
     }
 
     /**
@@ -111,6 +111,27 @@ public class TemplateEditorRunSupport {
             TemplateV2DraftVO draft,
             Integer maxRows,
             Integer throughTransformIndex) {
+        return saveAndPreview(templateId, draft, maxRows, throughTransformIndex, null, null);
+    }
+
+    /**
+     * Persists the draft when needed, then runs preview with optional linear or DAG staged cutoff.
+     *
+     * @param templateId             persisted id, or null to create first
+     * @param draft                  current V2 draft
+     * @param maxRows                optional row cap from execution policy
+     * @param throughTransformIndex  optional linear transformer index
+     * @param computeBlockId         optional compute block for DAG preview
+     * @param throughTransformNodeId optional DAG node inclusive cutoff
+     * @return preview DTO and resolved template id
+     */
+    public PreviewResult saveAndPreview(
+            Long templateId,
+            TemplateV2DraftVO draft,
+            Integer maxRows,
+            Integer throughTransformIndex,
+            String computeBlockId,
+            String throughTransformNodeId) {
         long resolvedId;
         if (templateId == null) {
             TemplateEditorPayload created = templateEditorService.createAndSave(draft);
@@ -119,7 +140,8 @@ public class TemplateEditorRunSupport {
             templateEditorService.save(templateId, draft);
             resolvedId = templateId;
         }
-        TemplateV2PreviewDTO preview = controlPlaneService.preview(resolvedId, maxRows, throughTransformIndex);
+        TemplateV2PreviewDTO preview = controlPlaneService.preview(
+                resolvedId, maxRows, throughTransformIndex, computeBlockId, throughTransformNodeId);
         return new PreviewResult(resolvedId, preview);
     }
 

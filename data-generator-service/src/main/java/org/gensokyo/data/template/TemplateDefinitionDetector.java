@@ -17,7 +17,9 @@ public final class TemplateDefinitionDetector {
                 || Objects.nonNull(v2.getTransform())
                 || CollectKit.isNotEmpty(v2.getTransformers())
                 || Objects.nonNull(v2.getSink())
-                || CollectKit.isNotEmpty(v2.getSinks()));
+                || CollectKit.isNotEmpty(v2.getSinks())
+                || Objects.nonNull(v2.getWorkflow())
+                || CollectKit.isNotEmpty(v2.getComputeBlocks()));
         if (looksV1 && !looksV2) {
             return TemplateDefinitionKind.V1;
         }
