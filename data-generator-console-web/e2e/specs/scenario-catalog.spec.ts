@@ -42,7 +42,7 @@ test.describe('Official scenario catalog', () => {
     });
   }
 
-  test('scenario catalog modal lists four official families', async ({ page }) => {
+  test('scenario catalog modal lists official families', async ({ page }) => {
     await gotoConsoleHome(page);
     await navigateViaTopNav(page, TestIds.nav.templates);
     await page.getByTestId('templates-from-scenario-button').click();
@@ -51,5 +51,6 @@ test.describe('Official scenario catalog', () => {
     for (const scenario of OFFICIAL_SCENARIOS) {
       await expect(page.getByTestId(`scenario-use-${scenario.id}`)).toBeVisible();
     }
+    await expect(page.getByTestId('scenario-use-GF-WFS')).toBeVisible();
   });
 });

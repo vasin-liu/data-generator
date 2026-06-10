@@ -1,4 +1,4 @@
-import { Checkbox, Divider, Form, InputNumber, Select } from 'antd';
+import { Alert, Checkbox, Divider, Form, Input, InputNumber, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { TemplateV2Draft } from '../../../api/types';
 import { FieldHelp } from '../../../components/FieldHelp';
@@ -11,7 +11,7 @@ type Props = {
   onChange: (draft: TemplateV2Draft) => void;
 };
 
-const EXECUTION_MODES = ['IN_MEMORY', 'CHUNKED'] as const;
+const EXECUTION_MODES = ['IN_MEMORY', 'CHUNKED', 'STREAMING'] as const;
 const SINK_EXEC_MODES = ['FAIL_FAST', 'CONTINUE_ON_ERROR'] as const;
 
 /**
@@ -27,6 +27,13 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
       <Divider orientation="left" plain>
         {t('execution.section.pipeline')}
       </Divider>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={t('execution.intro.title')}
+        description={t('execution.intro.body')}
+      />
       <Form.Item label={<FieldHelp label={t('execution.mode')} help={t('execution.mode.help')} />}>
         <Select
           disabled={readOnly}
@@ -35,6 +42,36 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
           value={policy.mode}
           options={labeledOptions(t, 'execution.mode', EXECUTION_MODES)}
           onChange={(v) => onChange(patchExecutionPolicy(draft, { mode: v }))}
+        />
+      </Form.Item>
+      <Form.Item label={t('execution.maxTotalRows')}>
+        <InputNumber
+          min={1}
+          disabled={readOnly}
+          value={policy.maxTotalRows as number | undefined}
+          onChange={(v) =>
+            onChange(patchExecutionPolicy(draft, { maxTotalRows: v ?? undefined }))
+          }
+        />
+      </Form.Item>
+      <Form.Item label={t('execution.partitionCount')}>
+        <InputNumber
+          min={1}
+          disabled={readOnly}
+          value={policy.partitionCount as number | undefined}
+          onChange={(v) =>
+            onChange(patchExecutionPolicy(draft, { partitionCount: v ?? undefined }))
+          }
+        />
+      </Form.Item>
+      <Form.Item label={t('execution.partitionKey')}>
+        <Input
+          readOnly={readOnly}
+          value={(policy.partitionKey as string | undefined) ?? ''}
+          placeholder={t('execution.partitionKey.placeholder')}
+          onChange={(e) =>
+            onChange(patchExecutionPolicy(draft, { partitionKey: e.target.value || undefined }))
+          }
         />
       </Form.Item>
       <Form.Item label={t('execution.maxRowsInMemory')}>

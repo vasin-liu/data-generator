@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | Status | **Living document** (2026-06-07) |
-| Policy | V2-only greenfield; **no** V1 YAML compatibility or V1 stage reuse |
+| Policy | V2-only greenfield; **no** V1 YAML compatibility, legacy UI, or V1 stage reuse |
 | Parent | `docs/superpowers/specs/2026-05-29-v2-only-full-capability-design.md` |
 | Historical reference | `docs/calcite-v1-parity-scorecard.md` (migration context only) |
 
@@ -29,10 +29,10 @@
 |---------------|----------------------|--------|-------|
 | PAUSE stage | `pause` workflow step + `PAUSED` job status | **Done** | Manual pause + duration pause |
 | LOG stage | `log` workflow step + run report | **Done** | |
-| SHARED stage | `shared_scope` step + `#shared` in SpEL/SQL | **Partial** | Engine + editor fields; thin E2E/docs |
+| SHARED stage | `shared_scope` step + `#shared` in SpEL/SQL | **Done** | Engine + editor + GF-WFS E2E |
 | Iterator choose/otherwise | `branch` workflow step (SpEL condition) | **Done** | Not SQL transform |
 | Multi-block orchestration | `invoke_compute_block` + `computeBlocks[]` | **Done** | |
-| Generator scheduling (async batch) | `executionPolicy` (`partitionCount`, `sinkBatchSize`, `CHUNKED`/`STREAMING`) | **Partial** | `GeneratorVO` on draft unused at runtime; use execution policy |
+| Generator scheduling (async batch) | `executionPolicy` (`partitionCount`, `sinkBatchSize`, `CHUNKED`/`STREAMING`) | **Done** | Console execution step only |
 | Iterator pause (throttle) | `pause` step with `durationMs` | **Done** | |
 
 ---
@@ -49,7 +49,7 @@
 | AI reader | `ai` source | **Done** | |
 | Reader EQUAL / WEIGHT dispatch | `materializationPolicy` `EQUAL` / `WEIGHTED` | **Done** | Engine + console |
 | Value select ONCE / REPEAT / MULTIPLE | `materializationPolicy` `ONCE` / `ORDERED` / `LIMIT` | **Partial** | V2 semantics differ from V1 byte-for-byte |
-| Legacy `SourcePolicyVO` | Deprecated; prefer `materializationPolicy` | **Partial** | Still in runtime for old drafts |
+| Legacy `SourcePolicyVO` | **Removed from console**; use `materializationPolicy` only | **Done** | Runtime may still read old YAML if present |
 | Inline JDBC endpoint | `dataSource` on `query` / sink writer | **Done** | `InlineDataSourceVO` |
 | PostGIS query | `postgis_query` source | **Done** | Engine |
 | Kafka/ES cluster registry | Console datasources API + `DatasourcesPage` | **Done** | Not `application.yaml`-only |
@@ -84,7 +84,7 @@
 | Parallel multi-sink | Sequential fan-out only | **Planned** | Defer unless product requires |
 | CHUNKED JDBC | `executionPolicy.mode: CHUNKED` | **Done** | Scenarios C/D |
 | STREAMING JDBC | `executionPolicy.mode: STREAMING` | **Done** | Scenario E |
-| V1 `template.generator` batching | `executionPolicy.sinkBatchSize` + `partitionCount` | **Partial** | Document mapping; no `GeneratorVO` runner |
+| V1 `template.generator` | **Removed from console**; use `executionPolicy` | **Done** | `sinkBatchSize`, `partitionCount`, CHUNKED/STREAMING |
 
 ---
 
@@ -121,11 +121,11 @@
 2. Scenario `scenario-inline-rows.yaml` + IT.
 3. Console source kind `inline_rows` (JSON rows editor).
 
-### Pack V2 — Selection & scale clarity
+### Pack V2 — Selection & scale clarity (V2-only UI)
 
-1. Deprecation note in UI for legacy `SourcePolicyVO` fields.
-2. Execution step copy: map V1 generator batching → `executionPolicy`.
-3. Shared-scope E2E (`scenario-wf-shared-state.yaml`).
+1. Console exposes **materializationPolicy** only (legacy `SourcePolicyVO` fields removed).
+2. Console exposes **executionPolicy** for batching/scale (generator fields removed).
+3. Shared-scope E2E: catalog entry `GF-WFS` + `workflow-shared-scope.spec.ts`.
 
 ### Pack V3 — Transform & preview depth
 

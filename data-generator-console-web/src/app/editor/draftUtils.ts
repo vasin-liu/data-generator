@@ -1,6 +1,5 @@
 import type {
   ExecutionPolicyDraft,
-  GeneratorDraft,
   MaterializationPolicyDraft,
   SinkExecutionPolicyDraft,
   SourceDraft,
@@ -87,45 +86,37 @@ export function isEditableSource(source?: SourceDraft): boolean {
 /**
  * @param kind source kind for a new node
  */
-/** Default optional source policy for new sources (non-blocking fields). */
-export function defaultSourcePolicy(): NonNullable<SourceDraft['policy']> {
-  return { inMemory: false, selectionStrategy: 'ORDER' };
-}
-
 /** Empty materialization policy (omit from draft until the operator sets a mode). */
 export function defaultMaterializationPolicy(): MaterializationPolicyDraft {
   return {};
 }
 
 export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
-  const policy = defaultSourcePolicy();
   switch (kind) {
     case 'query':
-      return { type: 'query', dataSourceId: '', sql: 'SELECT 1', policy };
+      return { type: 'query', dataSourceId: '', sql: 'SELECT 1' };
     case 'iterator':
       return {
         type: 'iterator',
         iterator: { type: 'number', from: 1, to: 3, step: 1 },
-        policy,
       };
     case 'inline_rows':
       return {
         type: 'inline_rows',
         rows: [{ id: 1, label: 'example' }],
-        policy,
       };
     case 'csv':
-      return { type: 'csv', path: '', charset: 'UTF-8', delimiter: ',', header: true, policy };
+      return { type: 'csv', path: '', charset: 'UTF-8', delimiter: ',', header: true };
     case 'json':
-      return { type: 'json', path: '', charset: 'UTF-8', root: '', policy };
+      return { type: 'json', path: '', charset: 'UTF-8', root: '' };
     case 'excel':
-      return { type: 'excel', path: '', sheets: [{ name: 'Sheet1' }], policy };
+      return { type: 'excel', path: '', sheets: [{ name: 'Sheet1' }] };
     case 'ai':
-      return { type: 'ai', api: '', prompt: '', parser: '', policy };
+      return { type: 'ai', api: '', prompt: '', parser: '' };
     case 'geojson':
-      return { type: 'geojson', path: '', policy };
+      return { type: 'geojson', path: '' };
     default:
-      return { type: kind, policy };
+      return { type: kind };
   }
 }
 
@@ -151,19 +142,14 @@ export function applySourceMergeAt(
 /**
  * @param draft template draft
  * @param key source map key
- * @param kind new source kind (replaces node, preserves policy)
+ * @param kind new source kind (replaces node)
  */
 export function setSourceKindAt(
   draft: TemplateV2Draft,
   key: string,
   kind: EditableSourceKind,
 ): TemplateV2Draft {
-  const policy = draft.sources?.[key]?.policy;
-  const node = defaultSourceForKind(kind);
-  if (policy) {
-    node.policy = policy;
-  }
-  return applySourceMergeAt(draft, key, node);
+  return applySourceMergeAt(draft, key, defaultSourceForKind(kind));
 }
 
 /**
@@ -282,31 +268,6 @@ export function renameSourceKey(
   delete sources[oldKey];
   sources[trimmed] = entry;
   next.sources = sources;
-  return next;
-}
-
-/**
- * @param draft template draft
- * @param key source map key
- * @param partial policy fields to merge
- */
-export function applySourcePolicyAt(
-  draft: TemplateV2Draft,
-  key: string,
-  partial: NonNullable<SourceDraft['policy']>,
-): TemplateV2Draft {
-  const next = cloneDraft(draft);
-  const source = next.sources?.[key];
-  if (!source) {
-    return draft;
-  }
-  next.sources = {
-    ...(next.sources ?? {}),
-    [key]: {
-      ...source,
-      policy: { ...(source.policy ?? {}), ...partial },
-    },
-  };
   return next;
 }
 
@@ -737,26 +698,5 @@ export function patchSinkExecutionPolicy(
 ): TemplateV2Draft {
   const next = cloneDraft(draft);
   next.sinkExecutionPolicy = { ...(next.sinkExecutionPolicy ?? {}), ...partial };
-  return next;
-}
-
-/**
- * @param draft template draft
- * @param partial generator fields to merge
- */
-export function patchGenerator(draft: TemplateV2Draft, partial: GeneratorDraft): TemplateV2Draft {
-  const next = cloneDraft(draft);
-  next.generator = { ...(next.generator ?? {}), ...partial };
-  return next;
-}
-
-/**
- * @param draft template draft
- */
-export function ensureGenerator(draft: TemplateV2Draft): TemplateV2Draft {
-  const next = cloneDraft(draft);
-  if (!next.generator) {
-    next.generator = { type: 'SYNC', batchSize: 100 };
-  }
   return next;
 }

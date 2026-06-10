@@ -40,6 +40,7 @@ public class V2ScenarioCatalogService {
             new CatalogBinding("GF-A", "A", "scenario-a-synthetic.yaml"),
             new CatalogBinding("GF-B", "B", "scenario-dag-join.yaml"),
             new CatalogBinding("GF-WF", "WF", "scenario-wf-branch.yaml"),
+            new CatalogBinding("GF-WFS", "WF", "scenario-wf-shared-state.yaml"),
             new CatalogBinding("GF-JS", "JS", "scenario-js-transform.yaml"));
 
     private final YamlParser yamlParser;

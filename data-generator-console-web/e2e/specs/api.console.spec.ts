@@ -52,7 +52,7 @@ test.describe('API / console facades', () => {
     expectApiSuccess(body);
     const rows = unwrapApiData<Array<{ scenarioId: string }>>(body);
     expect(rows?.map((row) => row.scenarioId)).toEqual(
-      expect.arrayContaining(['GF-A', 'GF-B', 'GF-WF', 'GF-JS']),
+      expect.arrayContaining(['GF-A', 'GF-B', 'GF-WF', 'GF-WFS', 'GF-JS']),
     );
   });
 

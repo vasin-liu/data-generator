@@ -7,20 +7,17 @@ import type {
   EditorDataSources,
   MaterializationMode,
   MaterializationPolicyDraft,
-  SourceDraft,
   TemplateV2Draft,
 } from '../../../api/types';
 import { SourceFieldsForm } from '../SourceFieldsForm';
 import { FieldHelp } from '../../../components/FieldHelp';
-import { labeledOptions, yesNoOptions } from '../../utils/optionLabels';
+import { labeledOptions } from '../../utils/optionLabels';
 import {
   EDITABLE_SOURCE_KINDS,
   addSource,
   applySourceMaterializationPolicyAt,
   applySourceMergeAt,
-  applySourcePolicyAt,
   defaultMaterializationPolicy,
-  defaultSourcePolicy,
   inferSourceKind,
   listSourceKeys,
   removeSourceAt,
@@ -31,17 +28,6 @@ import {
 } from '../draftUtils';
 
 const MATERIALIZATION_MODES = ['ORDERED', 'LIMIT', 'ONCE', 'EQUAL', 'WEIGHTED'] as const;
-
-const SELECTION_STRATEGIES = [
-  'ORDER',
-  'FIRST',
-  'RANDOM',
-  'REPEAT_ORDER',
-  'ONCE_ORDER',
-  'MULTIPLE_ORDER',
-  'REPEAT_RANDOM',
-  'ONCE_RANDOM',
-] as const;
 
 type Props = {
   draft: TemplateV2Draft;
@@ -76,7 +62,6 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
 
   const source = selectedKey ? draft.sources?.[selectedKey] : undefined;
   const sourceKind = inferSourceKind(source);
-  const policy = { ...defaultSourcePolicy(), ...source?.policy };
   const materializationPolicy = {
     ...defaultMaterializationPolicy(),
     ...source?.materializationPolicy,
@@ -84,13 +69,6 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
   const materializationMode = materializationPolicy.mode?.toUpperCase() as
     | MaterializationMode
     | undefined;
-
-  const patchPolicy = (partial: SourceDraft['policy']) => {
-    if (!selectedKey) {
-      return;
-    }
-    onChange(applySourcePolicyAt(draft, selectedKey, { ...policy, ...partial }));
-  };
 
   const patchMaterializationPolicy = (partial: MaterializationPolicyDraft) => {
     if (!selectedKey) {
@@ -275,54 +253,16 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
           style={{ marginTop: 16, maxWidth: 760 }}
           items={[
             {
-              key: 'policy',
-              label: t('source.policy.title'),
+              key: 'materialization',
+              label: t('source.materialization.title'),
               children: (
                 <Form layout="vertical">
-                  <Form.Item
-                    label={
-                      <FieldHelp label={t('source.policy.inMemory')} help={t('source.policy.inMemory.help')} />
-                    }
-                  >
-                    <Select
-                      disabled={readOnly}
-                      value={policy.inMemory ?? false}
-                      options={yesNoOptions(t)}
-                      onChange={(v) => patchPolicy({ inMemory: v })}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={
-                      <FieldHelp
-                        label={t('source.policy.selectionStrategy')}
-                        help={t('source.policy.selectionStrategy.help')}
-                      />
-                    }
-                  >
-                    <Select
-                      disabled={readOnly}
-                      value={policy.selectionStrategy ?? 'ORDER'}
-                      options={labeledOptions(t, 'source.selectionStrategy', SELECTION_STRATEGIES)}
-                      onChange={(v) => patchPolicy({ selectionStrategy: v })}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label={
-                      <FieldHelp
-                        label={t('source.policy.limit')}
-                        help={t('source.policy.limit.help')}
-                      />
-                    }
-                  >
-                    <InputNumber
-                      min={0}
-                      disabled={readOnly}
-                      style={{ width: '100%' }}
-                      placeholder={t('source.policy.limit.placeholder')}
-                      value={policy.limit}
-                      onChange={(v) => patchPolicy({ limit: v ?? undefined })}
-                    />
-                  </Form.Item>
+                  <Alert
+                    type="info"
+                    showIcon
+                    style={{ marginBottom: 12 }}
+                    message={t('source.materialization.intro')}
+                  />
                   <Form.Item
                     label={
                       <FieldHelp
