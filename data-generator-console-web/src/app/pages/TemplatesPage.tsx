@@ -103,6 +103,7 @@ export function TemplatesPage() {
         key: 'actions',
         render: (_, row) => {
           const active = !row.archived;
+          const published = row.status === 'PUBLISHED';
           return (
             <Space wrap>
               <Button type="link" onClick={() => navigate(`/templates/${row.id}`)}>
@@ -124,7 +125,9 @@ export function TemplatesPage() {
               </Button>
               <Button
                 type="link"
-                disabled={!active}
+                disabled={!active || !published}
+                title={!published ? t('templates.run.draftDisabled') : undefined}
+                data-testid={`templates-run-${row.id}`}
                 onClick={() =>
                   Modal.confirm({
                     title: t('common.run'),

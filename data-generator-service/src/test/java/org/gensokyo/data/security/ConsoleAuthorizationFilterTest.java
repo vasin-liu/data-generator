@@ -70,6 +70,22 @@ class ConsoleAuthorizationFilterTest {
     }
 
     @Test
+    void editorCannotPublishWhenEnabled() throws Exception {
+        ConsoleSecurityProperties properties = new ConsoleSecurityProperties();
+        properties.setEnabled(true);
+        ConsoleAuthorizationFilter filter = new ConsoleAuthorizationFilter(properties);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/templates/42/publish");
+        request.addHeader("X-Console-Role", "EDITOR");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = (req, res) -> Assertions.fail("Filter chain must not run for EDITOR publish");
+
+        filter.doFilterInternal(request, response, chain);
+
+        Assertions.assertEquals(403, response.getStatus());
+    }
+
+    @Test
     void disabledFilterSkipsAuthorization() throws Exception {
         ConsoleSecurityProperties properties = new ConsoleSecurityProperties();
         properties.setEnabled(false);

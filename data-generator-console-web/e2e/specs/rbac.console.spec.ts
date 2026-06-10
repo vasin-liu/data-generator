@@ -82,4 +82,34 @@ async function fetchGfAScaffoldDraft(request: import('@playwright/test').APIRequ
     expect(adminPublishRes.ok()).toBeTruthy();
     expectApiSuccess(adminPublishBody);
   });
+
+  test('OPERATOR cannot run DRAFT template from catalog run API', async ({ request }) => {
+    const draft = await fetchGfAScaffoldDraft(request, 'EDITOR');
+    draft.name = `e2e-rbac-draft-run-${Date.now()}`;
+
+    const { res: createRes, body: createBody } = await apiPostWithRole(
+      request,
+      '/api/templates',
+      draft,
+      'EDITOR',
+    );
+    expect(createRes.ok()).toBeTruthy();
+    expectApiSuccess(createBody);
+    const created = unwrapApiData<TemplateEditorPayload>(createBody);
+    const templateId = created?.templateId ?? created?.draft?.id;
+    expect(templateId).toBeTruthy();
+
+    const { res: runRes, body: runBody } = await apiPostWithRole(
+      request,
+      `/api/templates/${templateId}/run`,
+      {},
+      'OPERATOR',
+    );
+    expect(runRes.status()).toBe(400);
+    const message =
+      runBody && typeof runBody === 'object' && 'message' in runBody
+        ? String((runBody as { message?: string }).message ?? '')
+        : '';
+    expect(message).toMatch(/PUBLISHED/i);
+  });
 });

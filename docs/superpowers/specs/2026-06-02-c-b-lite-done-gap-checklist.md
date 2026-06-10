@@ -16,12 +16,12 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 
 **C Done** is **~85%**: all four official scenario families have **backend IT coverage** and **partial console E2E**, but the roadmap’s **“create from scenario”** wizard, **Scenario B full console loop**, **DAG staged preview in UI**, and **structured `branch` workflow editor** are still open.
 
-**B-lite Done** is **~75%**: backend gates and audit UI exist, but **staging RBAC is docs-only** (no shipped `application-staging.yaml`), the **browser never sends role headers**, **Publish is not role-gated in UI**, and **filter/integration tests with `console-security.enabled=true`** are missing.
+**B-lite Done** is **shipped** (2026-06-10): `application-staging.yaml`, console role headers + picker, publish UI gate, catalog run requires `PUBLISHED`, RBAC filter unit + integration ITs, and Playwright RBAC E2E (`DG_E2E_RBAC=true`).
 
 | Gate | Verdict on `26f7ade` | Block C2? |
 |------|----------------------|-----------|
 | **C Done** | **Not yet** — polish gaps below | Yes (per roadmap) |
-| **B-lite Done** | **Not yet** — staging RBAC + UX gaps | Yes (per roadmap) |
+| **B-lite Done** | **Done** — staging RBAC + publish gates | No |
 | **C2 start** | Deferred until both above | — |
 
 ---
@@ -169,12 +169,12 @@ Prioritized **small** epics to close gates without starting C2.
 
 **Closes:** C-A2, C-B2, C-WF4/5, C-JS2, C-X1, W2 staged preview, Scenario B console parity.
 
-### Pack 2 — **B-lite staging closure** (~0.5–1 sprint)
+### Pack 2 — **B-lite staging closure** (shipped 2026-06-10)
 
-1. Ship `application-staging.yaml` with `console-security.enabled=true` + governance flags.
-2. Console dev/staging **role header** injection (or documented proxy).
-3. Hide/disable Publish for non-ADMIN; enforce published-only on **catalog Run**.
-4. `ConsoleAuthorizationFilter` MockMvc / `@SpringBootTest` ITs (VIEWER save → 403).
+1. `application-staging.yaml` + `application-e2e-rbac.yaml` with `console-security.enabled=true` + governance flags.
+2. Console **role header** injection + in-app role picker when RBAC enabled.
+3. Publish disabled for non-ADMIN in Review; catalog **Run** disabled for DRAFT + API publish gate.
+4. `ConsoleAuthorizationFilterTest` + `ConsoleAuthorizationIntegrationIT`; Playwright `rbac.*.spec.ts`.
 
 **Closes:** B1-3/4, B3-2/4/5/6.
 

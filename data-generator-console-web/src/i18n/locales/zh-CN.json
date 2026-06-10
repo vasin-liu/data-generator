@@ -58,6 +58,7 @@
   "template.status.PUBLISHED": "已发布",
   "template.status.ARCHIVED": "已归档",
   "templates.run.confirm": "将为该模板启动新的任务执行，是否继续？",
+  "templates.run.draftDisabled": "请先从目录发布模板后再运行",
   "templates.schedules": "定时任务",
   "templates.viewJobs": "查看任务",
   "templates.archive.confirm": "归档模板 {{name}}？",

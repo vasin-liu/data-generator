@@ -58,6 +58,7 @@
   "template.status.PUBLISHED": "Published",
   "template.status.ARCHIVED": "Archived",
   "templates.run.confirm": "Start a new task execution for this template?",
+  "templates.run.draftDisabled": "Publish the template before running from the catalog",
   "templates.schedules": "Schedules",
   "templates.viewJobs": "View jobs",
   "templates.archive.confirm": "Archive template {{name}}?",

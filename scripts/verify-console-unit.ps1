@@ -29,6 +29,7 @@ try {
         'ConsoleScenarioCatalogControllerTest',
         'V2ScenarioCatalogServiceTest',
         'ConsoleAuthorizationFilterTest',
+        'ConsoleAuthorizationIntegrationIT',
         'ConsoleDistributedControllerTest',
         'ConsoleUploadControllerTest',
         'TemplateObjectMapperFactoryTests',

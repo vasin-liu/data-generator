@@ -93,7 +93,7 @@
 | V1 capability | V2-native replacement | Status | Notes |
 |---------------|----------------------|--------|-------|
 | Template publish | DRAFT → PUBLISHED lifecycle | **Done** | |
-| RBAC | `X-Console-Role` + `ConsoleAuthorizationFilter` | **Partial** | Staging profile + E2E in progress |
+| RBAC | `X-Console-Role` + `ConsoleAuthorizationFilter` | **Done** | Staging profile, role picker, RBAC E2E + integration ITs |
 | Audit trail | `audit_event` + Audit page | **Done** | |
 | Cron schedules | `task_schedule` + Schedules page | **Done** | Requires PUBLISHED |
 | Workflow job pause/resume | Job detail + API | **Done** | `pause_reason` column (schema migration) |
@@ -146,7 +146,7 @@
 | Product gate | Remaining V1-gap work |
 |--------------|----------------------|
 | **C Done** | Scenario wizard (Done), branch editor (Done), catalog E2E (Done), DAG staged preview UI, shared-state E2E |
-| **B-lite Done** | RBAC staging E2E (in progress), catalog run publish gate |
+| **B-lite Done** | Staging RBAC + catalog publish gate + audit UI (shipped 2026-06-10) |
 | **V2 parity (operator trust)** | Pack V1–V2 above |
 
 ---

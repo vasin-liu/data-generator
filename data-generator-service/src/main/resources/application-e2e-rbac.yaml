@@ -24,6 +24,9 @@ spring:
 
 data:
   generator:
+    governance:
+      require-published-for-task-run: true
+      reject-plaintext-passwords-in-templates: true
     console-security:
       enabled: true
       role-header: X-Console-Role

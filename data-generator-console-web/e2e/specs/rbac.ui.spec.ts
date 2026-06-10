@@ -49,6 +49,15 @@ async function createTemplateFromGfA(
     await expect(page.getByTestId('console-role-select')).toBeVisible();
   });
 
+  test('catalog run is disabled for DRAFT templates', async ({ page, request }) => {
+    const templateId = await createTemplateFromGfA(request);
+
+    await primeConsoleRole(page, 'OPERATOR');
+    await page.goto('./templates');
+    await page.getByTestId('templates-page').waitFor({ state: 'visible', timeout: 30_000 });
+    await expect(page.getByTestId(`templates-run-${templateId}`)).toBeDisabled({ timeout: 30_000 });
+  });
+
   test('VIEWER disables review-publish for an existing template', async ({ page, request }) => {
     const templateId = await createTemplateFromGfA(request);
 
