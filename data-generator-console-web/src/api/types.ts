@@ -44,6 +44,8 @@ export interface StageMetric {
   rowsProcessed: number | null;
   durationMs: number | null;
   errorSample: string | null;
+  rowsOk?: number | null;
+  rowsFailed?: number | null;
 }
 
 /** Mirrors {@code RunReportVO}. */
@@ -267,6 +269,9 @@ export interface ExecutionPolicyDraft {
 
 export interface SinkExecutionPolicyDraft {
   mode?: string;
+  maxRetries?: number;
+  retryBackoffMs?: number;
+  parallelSinks?: boolean;
   [key: string]: unknown;
 }
 

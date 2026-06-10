@@ -101,7 +101,8 @@ public class JdbcRowSinkAdapter implements RowSink {
             throw new IllegalArgumentException("batchSize must be positive");
         }
         List<ColumnMapping> mappings = resolveMappings(schema);
-        String sql = buildSql(mappings);
+        List<String> targetColumns = mappings.stream().map(ColumnMapping::target).toList();
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, targetColumns);
         String dataSourceId = runtimeJdbcEndpointResolver.resolveSinkDataSourceId(writer);
         try {
             DynamicDataSourceContextHolder.push(Objects.requireNonNull(dataSourceId));
@@ -149,19 +150,6 @@ public class JdbcRowSinkAdapter implements RowSink {
             throw new IllegalArgumentException("JDBC sink template resolved to no columns");
         }
         return mappings;
-    }
-
-    private String buildSql(List<ColumnMapping> mappings) {
-        String table = Objects.requireNonNull(writer.getTarget(), "JDBC sink target must not be null");
-        String columns = mappings.stream()
-                .map(ColumnMapping::target)
-                .reduce((left, right) -> left + ", " + right)
-                .orElseThrow();
-        String values = mappings.stream()
-                .map(mapping -> ":" + mapping.target())
-                .reduce((left, right) -> left + ", " + right)
-                .orElseThrow();
-        return "insert into " + table + " (" + columns + ") values (" + values + ")";
     }
 
     private Map<String, Object> toSqlParams(Row row, List<ColumnMapping> mappings) {

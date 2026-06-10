@@ -85,4 +85,34 @@ class RunReportCollectorTests {
                 "dag-block/n2 (shift-values)");
         assertThat(report.transformers().get(1).rowsProcessed()).isEqualTo(2L);
     }
+
+    /**
+     * CONTINUE_ON_ERROR sink metrics expose per-writer ok/failed row counts in the run report.
+     */
+    @Test
+    void exposesPartialSuccessSinkMetrics() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("partial-sink-report");
+
+        RunMetrics metrics = new RunMetrics("IN_MEMORY");
+        metrics.recordSinkRowsOk("sink[0].writer[0]", 3L);
+        metrics.recordSinkRowsFailed("sink[0].writer[0]", 2L, "duplicate key");
+        metrics.recordSinkRowsOk("sink[1].writer[0]", 5L);
+        TemplateV2RunResult result = new TemplateV2RunResult(null, List.of(), metrics);
+
+        RunReportVO report = collector.collect(template, result, 10L);
+        assertThat(report).isNotNull();
+        assertThat(report.sinks()).hasSize(2);
+
+        StageMetricVO failingWriter = report.sinks().get(0);
+        assertThat(failingWriter.name()).isEqualTo("sink[0].writer[0]");
+        assertThat(failingWriter.rowsProcessed()).isEqualTo(5L);
+        assertThat(failingWriter.rowsOk()).isEqualTo(3L);
+        assertThat(failingWriter.rowsFailed()).isEqualTo(2L);
+        assertThat(failingWriter.errorSample()).isEqualTo("duplicate key");
+
+        StageMetricVO okWriter = report.sinks().get(1);
+        assertThat(okWriter.rowsOk()).isEqualTo(5L);
+        assertThat(okWriter.rowsFailed()).isEqualTo(0L);
+    }
 }

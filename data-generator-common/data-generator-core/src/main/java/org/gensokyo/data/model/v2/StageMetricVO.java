@@ -14,6 +14,8 @@ import java.io.Serializable;
  * @param rowsProcessed  rows read or written at this stage when known
  * @param durationMs     stage duration in milliseconds when measured
  * @param errorSample    truncated failure sample for sinks under continue-on-error
+ * @param rowsOk         rows successfully written when partial-success metrics are collected
+ * @param rowsFailed     rows that failed to write when partial-success metrics are collected
  * @author Gensokyo
  * @since 2026-05-29
  */
@@ -21,5 +23,7 @@ public record StageMetricVO(
         String name,
         Long rowsProcessed,
         Long durationMs,
-        String errorSample) implements Serializable {
+        String errorSample,
+        Long rowsOk,
+        Long rowsFailed) implements Serializable {
 }

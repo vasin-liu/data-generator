@@ -23,6 +23,9 @@ public final class WriterOptionResolver {
         if (value == null) {
             return null;
         }
+        if (row == null) {
+            return value.toString();
+        }
         return resolve(value.toString(), row);
     }
 

@@ -80,6 +80,33 @@ export function JobDetailPage() {
     [t],
   );
 
+  const sinkStageColumns: ColumnsType<StageMetric> = useMemo(
+    () => [
+      { title: t('jobDetail.report.col.name'), dataIndex: 'name' },
+      {
+        title: t('jobDetail.report.col.rowsOk'),
+        dataIndex: 'rowsOk',
+        render: (value: number | null | undefined) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.rowsFailed'),
+        dataIndex: 'rowsFailed',
+        render: (value: number | null | undefined) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.rows'),
+        dataIndex: 'rowsProcessed',
+        render: (value: number | null) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.error'),
+        dataIndex: 'errorSample',
+        render: (value: string | null) => value ?? '—',
+      },
+    ],
+    [t],
+  );
+
   const row = jobQuery.data?.execution;
   const distributedJob = jobQuery.data?.distributedJob ?? null;
   const partitionMetrics = jobQuery.data?.partitionMetrics ?? null;
@@ -238,7 +265,13 @@ export function JobDetailPage() {
               </Descriptions>
             </>
           )}
-          {report && <RunReportSection report={report} stageColumns={stageColumns} />}
+          {report && (
+            <RunReportSection
+              report={report}
+              stageColumns={stageColumns}
+              sinkStageColumns={sinkStageColumns}
+            />
+          )}
           {body.length > 0 && (
             <>
               <Typography.Title level={5}>{t('jobDetail.metrics')}</Typography.Title>
@@ -256,9 +289,11 @@ export function JobDetailPage() {
 function RunReportSection({
   report,
   stageColumns,
+  sinkStageColumns,
 }: {
   report: RunReport;
   stageColumns: ColumnsType<StageMetric>;
+  sinkStageColumns: ColumnsType<StageMetric>;
 }) {
   const { t } = useTranslation();
 
@@ -293,7 +328,7 @@ function RunReportSection({
       <StageMetricTable
         title={t('jobDetail.report.sinks')}
         rows={report.sinks}
-        columns={stageColumns}
+        columns={sinkStageColumns}
       />
       {report.errorSamples.length > 0 && (
         <>

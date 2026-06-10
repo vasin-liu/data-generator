@@ -122,6 +122,39 @@ class SinkRetryPolicyTests {
     }
 
     @Test
+    void parallelSinksWritesAllConfiguredWriters() {
+        RunMetrics metrics = new RunMetrics("IN_MEMORY");
+
+        WriteStageVO sinkA = new WriteStageVO();
+        sinkA.setWriters(List.of(new OkWriterVO()));
+
+        WriteStageVO sinkB = new WriteStageVO();
+        sinkB.setWriters(List.of(new OkWriterVO()));
+
+        SinkExecutionPolicyVO policy = new SinkExecutionPolicyVO();
+        policy.setParallelSinks(true);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setSinkExecutionPolicy(policy);
+        template.setSinks(List.of(sinkA, sinkB));
+
+        RowSchema schema = schema(new ColumnDef("value", "BIGINT", false));
+        List<Row> rows = List.of(new Row(Map.of("value", 1L)));
+        CalciteRowTransformer.TransformResult result =
+                new CalciteRowTransformer.TransformResult(schema, rows);
+
+        SinkWriteExecutor.writeSinks(
+                (registry, writer) -> createSink(writer),
+                null,
+                template,
+                result,
+                metrics,
+                0);
+
+        Assertions.assertEquals(2L, metrics.getRowsWritten());
+    }
+
+    @Test
     void lastErrorSampleIsTruncatedToFiveHundredCharacters() {
         RunMetrics metrics = new RunMetrics("IN_MEMORY");
 

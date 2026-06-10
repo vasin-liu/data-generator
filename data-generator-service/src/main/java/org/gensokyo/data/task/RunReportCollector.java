@@ -47,7 +47,7 @@ public class RunReportCollector {
 
         List<StageMetricVO> sources = new ArrayList<>();
         for (Map.Entry<String, Long> entry : metrics.getRowsReadPerSource().entrySet()) {
-            sources.add(new StageMetricVO(entry.getKey(), entry.getValue(), null, null));
+            sources.add(new StageMetricVO(entry.getKey(), entry.getValue(), null, null, null, null));
         }
 
         List<StageMetricVO> transformers = buildTransformerMetrics(template, outputRows);
@@ -67,7 +67,7 @@ public class RunReportCollector {
         if (template.getTransformers() != null) {
             for (int index = 0; index < template.getTransformers().size(); index++) {
                 TransformVO transformer = template.getTransformers().get(index);
-                transformers.add(new StageMetricVO(transformName(transformer, index), outputRows, null, null));
+                transformers.add(new StageMetricVO(transformName(transformer, index), outputRows, null, null, null, null));
             }
         }
         appendComputeBlockTransformMetrics(template, outputRows, transformers);
@@ -93,6 +93,8 @@ public class RunReportCollector {
                 transformers.add(new StageMetricVO(
                         dagNodeMetricName(blockPrefix, node, graph),
                         outputRows,
+                        null,
+                        null,
                         null,
                         null));
             }
@@ -125,7 +127,9 @@ public class RunReportCollector {
                     entry.getKey(),
                     processed,
                     null,
-                    sinkMetric.getLastErrorSample()));
+                    sinkMetric.getLastErrorSample(),
+                    sinkMetric.getRowsOk(),
+                    sinkMetric.getRowsFailed()));
         }
         if (!sinks.isEmpty()) {
             return sinks;
@@ -135,7 +139,7 @@ public class RunReportCollector {
         }
         long written = metrics.getRowsWritten() > 0 ? metrics.getRowsWritten() : outputRows;
         for (int index = 0; index < template.getSinks().size(); index++) {
-            sinks.add(new StageMetricVO("sink[" + index + "]", written, null, null));
+            sinks.add(new StageMetricVO("sink[" + index + "]", written, null, null, null, null));
         }
         return sinks;
     }

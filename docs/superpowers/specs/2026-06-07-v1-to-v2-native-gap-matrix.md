@@ -79,9 +79,9 @@
 | V1 capability | V2-native replacement | Status | Notes |
 |---------------|----------------------|--------|-------|
 | Console / JDBC / Kafka / ES / file sinks | V2 sink adapters | **Done** | |
-| MySQL / Postgres / ClickHouse dialect writers | Generic JDBC sink | **Partial** | No dialect-specific bulk/COPY yet |
-| Sink failure policy | `sinkExecutionPolicy` FAIL_FAST / CONTINUE | **Done** | Partial-success reporting thin |
-| Parallel multi-sink | Sequential fan-out only | **Planned** | Defer unless product requires |
+| MySQL / Postgres / ClickHouse dialect writers | Generic JDBC sink + dialect `options` | **Partial** | Postgres/MySQL upsert options; no COPY/bulk yet |
+| Sink failure policy | `sinkExecutionPolicy` FAIL_FAST / CONTINUE | **Done** | Per-sink `rowsOk`/`rowsFailed` in run report UI |
+| Parallel multi-sink | `sinkExecutionPolicy.parallelSinks` | **Partial** | Experimental parallel fan-out spike |
 | CHUNKED JDBC | `executionPolicy.mode: CHUNKED` | **Done** | Scenarios C/D |
 | STREAMING JDBC | `executionPolicy.mode: STREAMING` | **Done** | Scenario E |
 | V1 `template.generator` | **Removed from console**; use `executionPolicy` | **Done** | `sinkBatchSize`, `partitionCount`, CHUNKED/STREAMING |
@@ -133,11 +133,11 @@
 2. Official **lookup join** scenario in catalog (`GF-BJ` → `scenario-b-lookup-join.yaml`).
 3. Custom transform operator guide: `docs/template-v2-pf4j-custom-transform-guide.md`.
 
-### Pack V4 — Sink & runtime polish
+### Pack V4 — Sink & runtime polish (shipped 2026-06-10)
 
-1. Partial-success metrics on CONTINUE_ON_ERROR.
-2. Dialect JDBC sink options (or documented generic JDBC limits).
-3. Optional parallel sink execution spike.
+1. Partial-success metrics on CONTINUE_ON_ERROR — run report `rowsOk`/`rowsFailed` + job detail UI.
+2. JDBC dialect writer options (`postgres`/`mysql` upsert) + `docs/template-v2-jdbc-sink-guide.md`.
+3. Optional `parallelSinks` execution spike + console execution step fields.
 
 ---
 

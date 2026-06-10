@@ -343,6 +343,12 @@ public final class TemplateV2Validator {
         if (!"FAIL_FAST".equals(mode) && !"CONTINUE_ON_ERROR".equals(mode)) {
             throw new IllegalArgumentException("Unsupported sink execution policy mode: " + policy.getMode());
         }
+        if (policy.getMaxRetries() != null && policy.getMaxRetries() <= 0) {
+            throw new IllegalArgumentException("Sink execution policy maxRetries must be positive");
+        }
+        if (policy.getRetryBackoffMs() != null && policy.getRetryBackoffMs() < 0) {
+            throw new IllegalArgumentException("Sink execution policy retryBackoffMs must not be negative");
+        }
     }
 
     private static final Pattern SQL_JOIN = Pattern.compile("\\bJOIN\\b", Pattern.CASE_INSENSITIVE);

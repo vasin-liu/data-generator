@@ -25,4 +25,6 @@ public class SinkExecutionPolicyVO implements Serializable {
     private Integer maxRetries;
     /** Backoff in milliseconds between retry attempts. */
     private Integer retryBackoffMs;
+    /** When true, independent sink writers may run in parallel (experimental). */
+    private Boolean parallelSinks;
 }

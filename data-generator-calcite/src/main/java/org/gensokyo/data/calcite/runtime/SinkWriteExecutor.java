@@ -14,6 +14,8 @@ import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -46,37 +48,107 @@ public final class SinkWriteExecutor {
             int sinkBatchSize) {
         SinkExecutionPolicyVO policy = template.getSinkExecutionPolicy();
         SinkPolicyMode mode = sinkPolicyMode(policy);
+        boolean parallelSinks = policy != null && Boolean.TRUE.equals(policy.getParallelSinks());
         int rowCount = result.rows().size();
+        List<SinkWriteJob> jobs = collectSinkWriteJobs(template);
+        if (parallelSinks && jobs.size() > 1) {
+            Object metricsLock = metrics == null ? null : new Object();
+            jobs.parallelStream().forEach(job -> executeSinkWriteJob(
+                    rowSinkFactory,
+                    registry,
+                    policy,
+                    result,
+                    metrics,
+                    metricsLock,
+                    sinkBatchSize,
+                    mode,
+                    rowCount,
+                    job));
+            return;
+        }
+        for (SinkWriteJob job : jobs) {
+            executeSinkWriteJob(
+                    rowSinkFactory,
+                    registry,
+                    policy,
+                    result,
+                    metrics,
+                    null,
+                    sinkBatchSize,
+                    mode,
+                    rowCount,
+                    job);
+        }
+    }
+
+    private static List<SinkWriteJob> collectSinkWriteJobs(TemplateV2VO template) {
+        List<SinkWriteJob> jobs = new ArrayList<>();
+        if (template.getSinks() == null) {
+            return jobs;
+        }
         int sinkIndex = 0;
         for (WriteStageVO sink : template.getSinks()) {
+            if (sink.getWriters() == null) {
+                sinkIndex++;
+                continue;
+            }
             int writerIndex = 0;
             for (WriterVO writer : sink.getWriters()) {
-                String sinkKey = sinkMetricKey(sinkIndex, writerIndex);
-                RowSink rowSink = prepareSink(rowSinkFactory.create(registry, writer), policy);
-                try {
-                    writeRows(rowSink, result.schema(), result.rows(), sinkBatchSize);
-                    if (mode == SinkPolicyMode.CONTINUE_ON_ERROR && metrics != null) {
-                        metrics.recordSinkRowsOk(sinkKey, rowCount);
-                    }
-                    if (metrics != null) {
-                        metrics.addRowsWritten(rowCount);
-                    }
-                } catch (RuntimeException ex) {
-                    if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
-                        if (metrics != null) {
-                            metrics.recordSinkRowsFailed(sinkKey, rowCount, errorMessage(ex));
-                        }
-                    } else {
-                        throw sinkWriteFailure(sinkIndex, writerIndex, writer, ex);
-                    }
-                }
+                jobs.add(new SinkWriteJob(sinkIndex, writerIndex, writer, sinkMetricKey(sinkIndex, writerIndex)));
                 writerIndex++;
             }
             sinkIndex++;
         }
+        return jobs;
     }
 
-    private static void writeRows(RowSink rowSink, RowSchema schema, java.util.List<org.gensokyo.data.model.v2.Row> rows, int sinkBatchSize) {
+    private static void executeSinkWriteJob(
+            InMemoryPipeline.RowSinkFactory rowSinkFactory,
+            TemplateV2RuntimeRegistry registry,
+            SinkExecutionPolicyVO policy,
+            CalciteRowTransformer.TransformResult result,
+            RunMetrics metrics,
+            Object metricsLock,
+            int sinkBatchSize,
+            SinkPolicyMode mode,
+            int rowCount,
+            SinkWriteJob job) {
+        RowSink rowSink = prepareSink(rowSinkFactory.create(registry, job.writer()), policy);
+        try {
+            writeRows(rowSink, result.schema(), result.rows(), sinkBatchSize);
+            if (mode == SinkPolicyMode.CONTINUE_ON_ERROR && metrics != null) {
+                synchronizedMetric(metricsLock, () -> metrics.recordSinkRowsOk(job.sinkKey(), rowCount));
+            }
+            if (metrics != null) {
+                synchronizedMetric(metricsLock, () -> metrics.addRowsWritten(rowCount));
+            }
+        } catch (RuntimeException ex) {
+            if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
+                if (metrics != null) {
+                    synchronizedMetric(metricsLock, () ->
+                            metrics.recordSinkRowsFailed(job.sinkKey(), rowCount, errorMessage(ex)));
+                }
+            } else {
+                throw sinkWriteFailure(job.sinkIndex(), job.writerIndex(), job.writer(), ex);
+            }
+        }
+    }
+
+    private static void synchronizedMetric(Object metricsLock, Runnable action) {
+        if (metricsLock == null) {
+            action.run();
+            return;
+        }
+        synchronized (metricsLock) {
+            action.run();
+        }
+    }
+
+    private static void writeRows(
+            RowSink rowSink,
+            RowSchema schema,
+            java.util.List<org.gensokyo.data.model.v2.Row> rows,
+            int sinkBatchSize) {
         if (sinkBatchSize > 0) {
             rowSink.writeBatch(schema, rows, sinkBatchSize);
         } else {
@@ -121,6 +193,9 @@ public final class SinkWriteExecutor {
                 + ", type [" + writer.getType() + "]"
                 + ", model [" + writer.getClass().getName() + "]"
                 + ", target [" + writer.getTarget() + "]", cause);
+    }
+
+    private record SinkWriteJob(int sinkIndex, int writerIndex, WriterVO writer, String sinkKey) {
     }
 
     private enum SinkPolicyMode {

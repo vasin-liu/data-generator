@@ -149,6 +149,39 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
           onChange={(v) => onChange(patchSinkExecutionPolicy(draft, { mode: v }))}
         />
       </Form.Item>
+      <Form.Item label={t('execution.sinkMaxRetries')}>
+        <InputNumber
+          disabled={readOnly}
+          min={1}
+          style={{ width: '100%' }}
+          value={sinkPolicy.maxRetries}
+          onChange={(v) =>
+            onChange(patchSinkExecutionPolicy(draft, { maxRetries: v ?? undefined }))
+          }
+        />
+      </Form.Item>
+      <Form.Item label={t('execution.sinkRetryBackoffMs')}>
+        <InputNumber
+          disabled={readOnly}
+          min={0}
+          style={{ width: '100%' }}
+          value={sinkPolicy.retryBackoffMs}
+          onChange={(v) =>
+            onChange(patchSinkExecutionPolicy(draft, { retryBackoffMs: v ?? undefined }))
+          }
+        />
+      </Form.Item>
+      <Form.Item label={t('execution.parallelSinks')}>
+        <Checkbox
+          disabled={readOnly}
+          checked={sinkPolicy.parallelSinks ?? false}
+          onChange={(e) =>
+            onChange(patchSinkExecutionPolicy(draft, { parallelSinks: e.target.checked }))
+          }
+        >
+          {t('execution.parallelSinks.hint')}
+        </Checkbox>
+      </Form.Item>
     </Form>
   );
 }
