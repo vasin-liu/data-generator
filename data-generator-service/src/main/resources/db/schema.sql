@@ -89,6 +89,7 @@ ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `plugin_set_json` CLOB;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `datasource_config_hash` VARCHAR(64);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `trigger_type` VARCHAR(16) DEFAULT 'MANUAL';
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `schedule_id` LONG;
+ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `pause_reason` VARCHAR(512);
 
 -- Secret registry for passwordSecretRef resolution (Phase B)
 CREATE TABLE IF NOT EXISTS `secret_entry`

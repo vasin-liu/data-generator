@@ -1,5 +1,13 @@
 import type { Page } from '@playwright/test';
+import type { ConsoleRoleHeader } from './api';
 import { TestIds, type NavTestId } from './test-ids';
+
+
+export async function primeConsoleRole(page: Page, role: ConsoleRoleHeader): Promise<void> {
+  await page.addInitScript((storedRole) => {
+    localStorage.setItem('data-generator.console.role', storedRole);
+  }, role);
+}
 
 export async function gotoConsoleHome(page: Page): Promise<void> {
   await page.goto('./');

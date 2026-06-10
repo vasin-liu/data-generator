@@ -1,4 +1,5 @@
 import { Alert, Form, Input, InputNumber, Select } from 'antd';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { EditorDataSources } from '../../api/types';
 import { FieldHelp } from '../../components/FieldHelp';
@@ -133,6 +134,12 @@ export function SourceFieldsForm({
           />
         </Form.Item>
       </>
+    );
+  }
+
+  if (kind === 'inline_rows') {
+    return (
+      <InlineRowsEditor source={source} readOnly={readOnly} onPatch={onPatch} t={t} />
     );
   }
 
@@ -337,4 +344,60 @@ export function SourceFieldsForm({
   }
 
   return null;
+}
+
+function InlineRowsEditor({
+  source,
+  readOnly,
+  onPatch,
+  t,
+}: {
+  source: SourceDraft;
+  readOnly: boolean;
+  onPatch: (patch: SourceDraft) => void;
+  t: (key: string) => string;
+}) {
+  const defaultRows = [{ id: 1, label: 'example' }];
+  const [rowsJson, setRowsJson] = useState(() =>
+    JSON.stringify(source.rows ?? defaultRows, null, 2),
+  );
+
+  useEffect(() => {
+    setRowsJson(JSON.stringify(source.rows ?? defaultRows, null, 2));
+  }, [source.rows]);
+
+  const commitRows = () => {
+    try {
+      const parsed = JSON.parse(rowsJson) as unknown;
+      if (Array.isArray(parsed)) {
+        onPatch({ ...source, rows: parsed as SourceDraft['rows'] });
+      }
+    } catch {
+      // Invalid JSON stays in the editor until the operator fixes it.
+    }
+  };
+
+  return (
+    <>
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 12 }}
+        message={t('source.inlineRows.intro')}
+      />
+      <Form.Item
+        label={
+          <FieldHelp label={t('source.inlineRows.rows')} help={t('source.inlineRows.rows.help')} required />
+        }
+      >
+        <Input.TextArea
+          rows={10}
+          readOnly={readOnly}
+          value={rowsJson}
+          onChange={(e) => setRowsJson(e.target.value)}
+          onBlur={readOnly ? undefined : commitRows}
+        />
+      </Form.Item>
+    </>
+  );
 }

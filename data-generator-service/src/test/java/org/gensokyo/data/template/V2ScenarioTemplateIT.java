@@ -70,7 +70,8 @@ class V2ScenarioTemplateIT {
                 "scenario-b-lookup-join.yaml",
                 "scenario-c-csv-export.yaml",
                 "scenario-d-chunked-jdbc.yaml",
-                "scenario-e-streaming-jdbc.yaml"
+                "scenario-e-streaming-jdbc.yaml",
+                "scenario-inline-rows.yaml"
         ).map(name -> SCENARIO_ROOT + name);
     }
 
@@ -105,6 +106,9 @@ class V2ScenarioTemplateIT {
         switch (template.getName()) {
             case "scenario-a-synthetic" -> {
                 // Iterator-only scenario needs no JDBC seed data.
+            }
+            case "scenario-inline-rows" -> {
+                // Inline rows are embedded in the template YAML.
             }
             case "scenario-b-lookup-join" -> {
                 registerInlineSources(template);
@@ -145,8 +149,12 @@ class V2ScenarioTemplateIT {
         assertThat(result).isNotNull();
         switch (template.getName()) {
             case "scenario-a-synthetic" -> {
-                assertThat(result.getRows()).hasSize(5);
+                assertThat(result.getRows()).hasSize(3);
                 assertThat(result.getRows().getFirst().getString("score")).isEqualTo("10");
+            }
+            case "scenario-inline-rows" -> {
+                assertThat(result.getRows()).hasSize(1);
+                assertThat(result.getRows().getFirst().getString("label")).isEqualTo("United States");
             }
             case "scenario-b-lookup-join" -> {
                 assertThat(result.getRows()).hasSize(3);

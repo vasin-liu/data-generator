@@ -17,6 +17,7 @@ const EDITABLE_WRITER_TYPES = new Set(['console', 'jdbc', 'kafka', 'elasticsearc
 export type EditableSourceKind =
   | 'query'
   | 'iterator'
+  | 'inline_rows'
   | 'csv'
   | 'json'
   | 'excel'
@@ -26,6 +27,7 @@ export type EditableSourceKind =
 export const EDITABLE_SOURCE_KINDS: EditableSourceKind[] = [
   'query',
   'iterator',
+  'inline_rows',
   'csv',
   'json',
   'excel',
@@ -104,6 +106,12 @@ export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
       return {
         type: 'iterator',
         iterator: { type: 'number', from: 1, to: 3, step: 1 },
+        policy,
+      };
+    case 'inline_rows':
+      return {
+        type: 'inline_rows',
+        rows: [{ id: 1, label: 'example' }],
         policy,
       };
     case 'csv':

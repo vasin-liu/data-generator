@@ -6,6 +6,7 @@ import org.gensokyo.data.calcite.runtime.TransformDagValidationException;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.model.v2.InlineRowsSourceVO;
 import org.gensokyo.data.model.v2.JsTransformVO;
 import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
@@ -81,6 +82,9 @@ public final class TemplateV2Validator {
                 throw new IllegalArgumentException("Template V2 source '" + entry.getKey() + "' must not be null");
             }
             validateMaterializationPolicy(entry.getKey(), entry.getValue().getMaterializationPolicy());
+            if (entry.getValue() instanceof InlineRowsSourceVO inlineRows) {
+                validateInlineRowsSource(entry.getKey(), inlineRows);
+            }
         }
 
         if (!workflowMode) {
@@ -321,6 +325,13 @@ public final class TemplateV2Validator {
                             + index + "] on source '" + sourceName + "' must be positive");
                 }
             }
+        }
+    }
+
+    private static void validateInlineRowsSource(String sourceName, InlineRowsSourceVO source) {
+        if (CollectKit.isEmpty(source.getRows())) {
+            throw new IllegalArgumentException("Template V2 source '" + sourceName
+                    + "' (inline_rows) must contain at least one row");
         }
     }
 

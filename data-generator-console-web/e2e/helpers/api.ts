@@ -4,6 +4,49 @@ export function apiBaseUrl(): string {
   return (process.env.DG_E2E_API_URL ?? 'http://127.0.0.1:9876').replace(/\/$/, '');
 }
 
+
+export type ConsoleRoleHeader = 'VIEWER' | 'EDITOR' | 'OPERATOR' | 'DATASOURCE_ADMIN' | 'ADMIN';
+
+export function consoleRoleHeaders(role?: ConsoleRoleHeader): Record<string, string> {
+  if (!role) {
+    return {};
+  }
+  return {
+    'X-Console-Role': role,
+  };
+}
+
+export async function apiGetWithRole(
+  request: APIRequestContext,
+  path: string,
+  role?: ConsoleRoleHeader,
+) {
+  const res = await request.get(`${apiBaseUrl()}${path}`, {
+    headers: consoleRoleHeaders(role),
+  });
+  const contentType = res.headers()['content-type'] ?? '';
+  const body = contentType.includes('json') ? await res.json().catch(() => null) : null;
+  return { res, body };
+}
+
+export async function apiPostWithRole(
+  request: APIRequestContext,
+  path: string,
+  data: unknown,
+  role?: ConsoleRoleHeader,
+) {
+  const res = await request.post(`${apiBaseUrl()}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...consoleRoleHeaders(role),
+    },
+    data,
+  });
+  const contentType = res.headers()['content-type'] ?? '';
+  const body = contentType.includes('json') ? await res.json().catch(() => null) : null;
+  return { res, body };
+}
+
 export async function fetchHealth(request: APIRequestContext) {
   const res = await request.get(`${apiBaseUrl()}/healthz`);
   return { res, body: res.ok() ? await res.json() : null };

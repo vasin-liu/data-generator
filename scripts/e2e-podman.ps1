@@ -84,6 +84,24 @@ try {
         Pop-Location
     }
 
+
+    Write-Step "Restarting container for RBAC E2E profile"
+    podman rm -f $ContainerName 2>$null | Out-Null
+    podman run -d --name $ContainerName -p "${HostPort}:9876" -e DG_SPRING_PROFILES_ACTIVE=e2e-rbac $ImageTag | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "podman run failed for RBAC profile" }
+    Wait-Health "http://127.0.0.1:${HostPort}/healthz"
+
+    Write-Step "Running Playwright RBAC E2E"
+    Push-Location $WebDir
+    try {
+        $env:DG_E2E_RBAC = 'true'
+        npx playwright test e2e/specs/rbac.console.spec.ts e2e/specs/rbac.ui.spec.ts
+        if ($LASTEXITCODE -ne 0) { throw "Playwright RBAC E2E failed" }
+    } finally {
+        Remove-Item Env:DG_E2E_RBAC -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
     Write-Host ""
     Write-Host "[SUCCESS] Podman E2E completed." -ForegroundColor Green
 } finally {

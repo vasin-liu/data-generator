@@ -24,6 +24,7 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .capability(TemplateV2PluginCapability.source("excel"))
                 .capability(TemplateV2PluginCapability.source("json"))
                 .capability(TemplateV2PluginCapability.source("geojson"))
+                .capability(TemplateV2PluginCapability.source("inline_rows"))
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.transform("spel"))
                 .capability(TemplateV2PluginCapability.transform("js"))
@@ -42,7 +43,8 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 new CsvSourceFactory(),
                 new ExcelSourceFactory(),
                 new JsonSourceFactory(),
-                new GeoJsonSourceFactory()
+                new GeoJsonSourceFactory(),
+                new InlineRowsSourceFactory()
         );
     }
 

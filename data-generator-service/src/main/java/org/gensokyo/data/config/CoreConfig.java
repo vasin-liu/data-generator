@@ -34,6 +34,7 @@ import org.gensokyo.data.calcite.sink.JsonSinkFactory;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
 import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
+import org.gensokyo.data.calcite.source.InlineRowsSourceFactory;
 import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
@@ -102,6 +103,12 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "jsonSourceFactory")
     public V2SourceFactory jsonSourceFactory() {
         return new JsonSourceFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "inlineRowsSourceFactory")
+    public V2SourceFactory inlineRowsSourceFactory() {
+        return new InlineRowsSourceFactory();
     }
 
     @Bean
