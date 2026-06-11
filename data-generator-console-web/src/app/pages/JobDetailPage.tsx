@@ -233,7 +233,13 @@ export function JobDetailPage() {
           {distributedJob && (
             <>
               <Typography.Title level={5}>{t('jobDetail.distributed.title')}</Typography.Title>
-              <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+              <Descriptions
+                bordered
+                size="small"
+                column={2}
+                style={{ marginBottom: 16 }}
+                data-testid="job-detail-distributed"
+              >
                 <Descriptions.Item label={t('jobDetail.distributed.jobId')}>
                   {distributedJob.jobId}
                 </Descriptions.Item>

@@ -355,8 +355,9 @@ See `docs/template-v2-jdbc-sink-guide.md` for dialect options (`postgres` / `mys
 
 Multi-node queue execution is **off by default**. Enable on coordinator and worker JVMs per `docs/staging-distributed-deployment.md`:
 
-- Coordinator: `spring.profiles.active=distributed-coordinator`
-- Worker: `spring.profiles.active=distributed-worker` with unique `data.generator.distributed.worker-id`
+- Coordinator: `spring.profiles.active=distributed-staging,distributed-coordinator`
+- Worker: `spring.profiles.active=distributed-staging,distributed-worker` with unique `data.generator.distributed.worker-id`
+- Local dual-JVM drill: `.\scripts\e2e-distributed-podman.ps1` (see `docs/staging-distributed-deployment.md`)
 
 The console **Jobs** detail page shows lease, worker, and attempt metadata when distributed mode is active.
 

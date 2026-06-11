@@ -19,6 +19,9 @@
                 <include>application-e2e.yaml</include>
                 <include>application-e2e-rbac.yaml</include>
                 <include>application-e2e-distributed.yaml</include>
+                <include>application-distributed-staging.yaml</include>
+                <include>application-distributed-coordinator.yaml</include>
+                <include>application-distributed-worker.yaml</include>
                 <include>logback-spring.xml</include>
                 <include>service.env.example</include>
             </includes>

@@ -1,14 +1,16 @@
 # Phase C2 distributed staging smoke helper.
-# Pre-flight: runs embedded integration tests. Optional: REST checks when service is up.
+# Pre-flight: runs embedded integration tests. Optional: REST enqueue smoke when coordinator is up.
 param(
     [string]$CoordinatorBaseUrl = "",
     [string]$WorkerMetricsUrl = "",
     [switch]$SkipMaven,
-    [switch]$SkipRest
+    [switch]$SkipRest,
+    [switch]$EnqueueSmoke
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'lib\distributed-staging-rest.ps1')
 
 function Write-Step {
     param([string]$Message)
@@ -33,22 +35,30 @@ if (-not $SkipMaven) {
     Write-Host "Maven pre-flight: SKIPPED" -ForegroundColor Yellow
 }
 
-if (-not $SkipRest -and $CoordinatorBaseUrl) {
+$runEnqueue = $EnqueueSmoke -or ($CoordinatorBaseUrl -and -not $SkipRest)
+if ($runEnqueue -and $CoordinatorBaseUrl) {
     Write-Step "REST: coordinator metrics"
-    $metricsUri = "$CoordinatorBaseUrl.TrimEnd('/')/api/console/distributed/metrics"
+    $metricsUri = "$($CoordinatorBaseUrl.TrimEnd('/'))/api/console/distributed/metrics"
     $metrics = Invoke-RestMethod -Method GET -Uri $metricsUri
     $metrics | ConvertTo-Json -Depth 6 | Write-Host
 
-    Write-Step "Manual staging steps (see docs/staging-distributed-deployment.md)"
-    Write-Host @"
-1. Start Coordinator: DataGeneratorApplication --spring.profiles.active=distributed-coordinator
-2. Start Worker(s): DataGeneratorWorkerApplication --spring.profiles.active=distributed-worker
+    if ($EnqueueSmoke) {
+        Invoke-DistributedEnqueueSmoke -BaseUrl $CoordinatorBaseUrl | Out-Null
+    } else {
+        Write-Step "Manual staging steps (see docs/staging-distributed-deployment.md)"
+        Write-Host @"
+1. Start Coordinator: DataGeneratorApplication --spring.profiles.active=distributed-staging,distributed-coordinator
+2. Start Worker(s): DataGeneratorWorkerApplication --spring.profiles.active=distributed-staging,distributed-worker
 3. POST /task/run/{templateId} on coordinator (V2 published template)
 4. Confirm worker logs show lease + SUCCESS; Console job detail shows distributedJob
 5. Optional cancel-before-run and long-run heartbeat on staging DB
+
+Automated enqueue smoke: .\scripts\staging-distributed-smoke.ps1 -CoordinatorBaseUrl http://host:port -EnqueueSmoke
+Dual-container Podman drill: .\scripts\e2e-distributed-podman.ps1
 "@ -ForegroundColor Yellow
+    }
 } elseif (-not $SkipRest) {
-    Write-Host "REST checks skipped (pass -CoordinatorBaseUrl http://host:port)." -ForegroundColor Yellow
+    Write-Host "REST checks skipped (pass -CoordinatorBaseUrl http://host:port or run .\scripts\e2e-distributed-podman.ps1)." -ForegroundColor Yellow
 }
 
 if ($WorkerMetricsUrl) {

@@ -139,8 +139,15 @@ public class Templates implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        List<TemplatePO> loaded = reloadAll();
-        log.info("Template cache initialized ({} template(s))", loaded.size());
+        // Shared DB (C2 multi-JVM): only seed from classpath when empty — reloadAll() deletes all rows.
+        List<TemplatePO> loaded;
+        if (repository.count() == 0) {
+            loaded = reloadAll();
+            log.info("Template cache initialized from filesystem ({} template(s))", loaded.size());
+        } else {
+            loaded = repository.findAll();
+            log.info("Template cache using {} persisted template(s); skipped filesystem reload", loaded.size());
+        }
         var monitor = new FileAlterationMonitor(1000, createResourceObserver());
         monitor.start();
         log.info("Template file monitor started");

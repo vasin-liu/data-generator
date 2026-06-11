@@ -12,14 +12,16 @@ Coordinator (DataGeneratorApplication)  →  distributed_job (DB)  ←  Worker(s
 
 | Role | Main class | Spring profile / config |
 |------|------------|-------------------------|
-| Coordinator | `org.gensokyo.data.DataGeneratorApplication` | `distributed-coordinator` → `application-distributed-coordinator.yaml` |
-| Worker | `org.gensokyo.data.DataGeneratorWorkerApplication` | `distributed-worker` → `application-distributed-worker.yaml` |
+| Coordinator | `org.gensokyo.data.DataGeneratorApplication` | `distributed-staging,distributed-coordinator` |
+| Worker | `org.gensokyo.data.DataGeneratorWorkerApplication` | `distributed-staging,distributed-worker` |
+
+`distributed-staging` provides the **shared H2 file** datasource (`./db/distributed-staging` with `AUTO_SERVER=TRUE`). Mount the same `db/` directory on every JVM (volume or shared filesystem).
 
 ### Coordinator
 
 ```bash
 java -jar data-generator-service.jar \
-  --spring.profiles.active=distributed-coordinator
+  --spring.profiles.active=distributed-staging,distributed-coordinator
 ```
 
 Required properties (from profile):
@@ -33,8 +35,10 @@ V2 `/task/run` enqueues `task_execution` + `distributed_job` without running tem
 ### Worker
 
 ```bash
-java -jar data-generator-service.jar \
-  --spring.profiles.active=distributed-worker
+java -cp conf:lib/*:data-generator-service.jar \
+  org.gensokyo.data.DataGeneratorWorkerApplication \
+  --spring.profiles.active=distributed-staging,distributed-worker \
+  --data.generator.distributed.worker-id=worker-1
 ```
 
 Set a **unique** `data.generator.distributed.worker-id` per JVM (profile uses `${HOSTNAME:worker-local}`).
@@ -94,10 +98,30 @@ From repository root (embedded IT only):
 .\scripts\staging-distributed-smoke.ps1
 ```
 
-With coordinator running (optional REST metrics):
+With coordinator running (metrics + manual checklist):
 
 ```powershell
 .\scripts\staging-distributed-smoke.ps1 -CoordinatorBaseUrl "http://localhost:9876"
+```
+
+Automated enqueue → worker SUCCESS REST smoke (coordinator + worker already running):
+
+```powershell
+.\scripts\staging-distributed-smoke.ps1 -CoordinatorBaseUrl "http://localhost:9876" -EnqueueSmoke
+```
+
+## Podman dual-JVM drill (AC-1 + AC-2)
+
+Starts **two containers** (coordinator + worker) sharing a Podman volume on `db/`, seeds a published GF-A template, enqueues on the coordinator, waits for worker `SUCCESS`, and runs Playwright job-detail checks.
+
+```powershell
+.\scripts\e2e-distributed-podman.ps1
+```
+
+Keep containers for inspection:
+
+```powershell
+.\scripts\e2e-distributed-podman.ps1 -KeepContainers
 ```
 
 ## Automated verification (CI / local)

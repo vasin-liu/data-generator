@@ -1,0 +1,36 @@
+# Shared staging profile for multi-JVM C2 drills (coordinator + worker on one DB).
+# Combine with distributed-coordinator or distributed-worker.
+server:
+  port: 9876
+
+spring:
+  application:
+    name: data-generator-service-distributed-staging
+  jpa:
+    open-in-view: false
+  datasource:
+    dynamic:
+      primary: data-generator
+      datasource:
+        data-generator:
+          # AUTO_SERVER allows coordinator + worker JVMs to share the same H2 file (mount ./db).
+          url: jdbc:h2:file:./db/distributed-staging;MODE=PostgreSQL;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+          username: sa
+          password:
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          init:
+            schema: classpath:db/schema.sql
+      druid:
+        filters: stat,slf4j
+        validation-query: SELECT 1
+
+data:
+  generator:
+    console-security:
+      enabled: false
+    governance:
+      require-published-for-task-run: true
+    distributed:
+      poll-delay-ms: 1000
+      lease-seconds: 60

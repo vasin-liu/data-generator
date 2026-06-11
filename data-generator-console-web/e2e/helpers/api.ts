@@ -67,6 +67,16 @@ export async function fetchDatasourcesOverview(request: APIRequestContext) {
   return { res, body: res.ok() ? await res.json() : null };
 }
 
+export async function fetchDistributedMetrics(request: APIRequestContext) {
+  const res = await request.get(`${apiBaseUrl()}/api/console/distributed/metrics`);
+  return { res, body: res.ok() ? await res.json() : null };
+}
+
+export async function fetchJobDetail(request: APIRequestContext, instanceId: string) {
+  const res = await request.get(`${apiBaseUrl()}/api/jobs/${encodeURIComponent(instanceId)}`);
+  return { res, body: res.ok() ? await res.json() : null };
+}
+
 export async function fetchJobs(request: APIRequestContext) {
   const res = await request.get(`${apiBaseUrl()}/api/jobs`);
   return { res, body: res.ok() ? await res.json() : null };

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `template`
     `content_md5`  VARCHAR(64)  DEFAULT NULL,
     `content_json` CLOB         DEFAULT NULL,
     `content_yaml` CLOB         DEFAULT NULL,
-    `status`       VARCHAR(8)   DEFAULT NULL,
+    `status`       VARCHAR(16)  DEFAULT NULL,
     `archived`     BOOLEAN      DEFAULT FALSE NOT NULL,
     `archived_at`  TIMESTAMP    DEFAULT NULL,
     PRIMARY KEY (`id`)
@@ -80,6 +80,7 @@ ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `parent_pipeline_run_id` V
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `upstream_artifact_refs_json` CLOB;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `report_json` CLOB;
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `status` VARCHAR(16) DEFAULT 'PUBLISHED';
+ALTER TABLE `template` ALTER COLUMN `status` VARCHAR(16);
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `category` VARCHAR(128);
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `tags` VARCHAR(1024);
 ALTER TABLE `datasource_config` ADD COLUMN IF NOT EXISTS `password_secret_ref` VARCHAR(256);
