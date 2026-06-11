@@ -93,6 +93,20 @@ class ConsoleAuthorizationIntegrationIT {
     }
 
     @Test
+    void editorCannotPublishWhenSecurityEnabled() throws Exception {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(99101L);
+        entity.setName("rbac-editor-publish");
+        entity.setStatus("DRAFT");
+        entity.setContentYaml(loadScenarioYaml());
+        templateRepository.saveAndFlush(entity);
+
+        mockMvc.perform(post("/api/templates/" + entity.getId() + "/publish")
+                        .header("X-Console-Role", "EDITOR"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void operatorCannotRunDraftTemplateFromCatalogApi() throws Exception {
         TemplatePO entity = new TemplatePO();
         entity.setId(99100L);

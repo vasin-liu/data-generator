@@ -81,6 +81,18 @@ async function fetchGfAScaffoldDraft(request: import('@playwright/test').APIRequ
     );
     expect(adminPublishRes.ok()).toBeTruthy();
     expectApiSuccess(adminPublishBody);
+
+    const { res: auditRes, body: auditBody } = await apiGetWithRole(
+      request,
+      `/api/console/audit?action=TEMPLATE_PUBLISH&resourceType=TEMPLATE&limit=20`,
+      'VIEWER',
+    );
+    expect(auditRes.ok()).toBeTruthy();
+    expectApiSuccess(auditBody);
+    const events = unwrapApiData<Array<{ action?: string; resourceId?: string }>>(auditBody) ?? [];
+    expect(events.some((event) => event.action === 'TEMPLATE_PUBLISH' && event.resourceId === String(templateId))).toBe(
+      true,
+    );
   });
 
   test('OPERATOR cannot run DRAFT template from catalog run API', async ({ request }) => {

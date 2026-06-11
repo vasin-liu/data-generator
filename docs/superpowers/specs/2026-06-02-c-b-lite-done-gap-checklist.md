@@ -99,26 +99,26 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 |----|---------|-----------|--------|----------------------|-----------------|
 | B1-1 | B1 | `requirePublishedForTaskRun` enforced for **scheduled** runs | **Done** | `TaskScheduleService.requirePublishedForTaskRun`; `TaskScheduleServiceTests.draftTemplateRejectedForSchedule` | — |
 | B1-2 | B1 | DRAFT run **labeled** on Review | **Done** | `ReviewPanel.tsx` `review-run-draft-hint`, draft run button copy | — |
-| B1-3 | B1 | `requirePublished=true` in prod for **non-editor** task runs | **Partial** | Default `DataGeneratorProperties.Governance.requirePublishedForTaskRun=true`; `TaskController.runById` requires publish | Console **`POST /templates/{id}/run`** and **`runExisting`** use `runByIdAllowDraft` — catalog run skips publish gate |
-| B1-4 | B1 | OPERATOR runs **PUBLISHED** only (role matrix) | **Partial** | `ConsoleRole.OPERATOR` lacks `TEMPLATE_PUBLISH`; no runtime enforcement when security off | With security on: enforce publish on catalog run; keep explicit draft/run endpoints for editor |
+| B1-3 | B1 | `requirePublished=true` in prod for **non-editor** task runs | **Done** | `TaskController.runById`; catalog `POST /templates/{id}/run` → `runExisting` → `runById`; draft runs only via `/draft/run` | — |
+| B1-4 | B1 | OPERATOR runs **PUBLISHED** only (role matrix) | **Done** | `TemplatesPage` disables Run for DRAFT; `ConsoleAuthorizationIntegrationIT.operatorCannotRunDraftTemplateFromCatalogApi`; `rbac.*.spec.ts` | — |
 | B2-1 | B2 | `GET /api/console/audit` | **Done** | `ConsoleAuditController`, `ConsoleAuditControllerTest` | — |
 | B2-2 | B2 | Console audit page; publish events searchable | **Done** | `AuditPage.tsx`, nav route, `pages.spec.ts` audit smoke | Optional: filter E2E by `TEMPLATE_PUBLISH` |
 | B2-3 | B2 | No secrets in audit detail | **Done** | `AuditDetailSanitizer.java` | — |
-| B3-1 | B3 | RBAC enforced on mutating APIs | **Partial** | `ConsoleAuthorizationFilter`, permission map incl. `AUDIT_READ`, `/publish` → `TEMPLATE_PUBLISH` | **Default off** in dev/E2E (`application-e2e.yaml`); no HTTP IT with filter enabled |
-| B3-2 | B3 | Staging sample config (`console-security.enabled=true`) | **Missing** | Documented snippet in `operator-console-usage.md` only | Add `application-staging.yaml` (or profile) in repo |
-| B3-3 | B3 | 403 UX | **Partial** | `api/client.ts` 403 message | No E2E 403 cases (roadmap: optional) |
-| B3-4 | B3 | Role ITs — VIEWER cannot save | **Missing** (integration) | `ConsoleRoleTests` unit matrix only | `@SpringBootTest` + MockMvc with security enabled |
-| B3-5 | B3 | Console RBAC UX (role headers from browser) | **Missing** | No `X-Console-Role` in console-web | Dev role picker or ingress doc + integration test doubles |
-| B3-6 | B3 | Publish hidden/disabled for non-ADMIN in UI | **Missing** | `ReviewPanel` always shows Publish | Gate button on `ConsoleRole` / runtime flags |
+| B3-1 | B3 | RBAC enforced on mutating APIs | **Done** | `ConsoleAuthorizationFilter`; `application-e2e-rbac.yaml` + `rbac.*.spec.ts` | Default off in dev (`application-e2e.yaml`) |
+| B3-2 | B3 | Staging sample config (`console-security.enabled=true`) | **Done** | `application-staging.yaml` in assembly `conf/`; `spring.profiles.active=staging` | — |
+| B3-3 | B3 | 403 UX | **Done** | `api/client.ts` 403 message; `rbac.console.spec.ts` missing-header 403 | — |
+| B3-4 | B3 | Role ITs — VIEWER cannot save | **Done** | `ConsoleAuthorizationIntegrationIT`, `ConsoleAuthorizationFilterTest` | — |
+| B3-5 | B3 | Console RBAC UX (role headers from browser) | **Done** | `ConsoleLayout` role picker; `api/client.ts` + `api/consoleRole.ts` | — |
+| B3-6 | B3 | Publish hidden/disabled for non-ADMIN in UI | **Done** | `ReviewPanel` `publishAllowed`; `rbac.ui.spec.ts` | — |
 | B4-1 | B4 | PAUSED / Resume / Cancel in Job detail | **Done** | `JobDetailPage.tsx`, `workflow-pause.spec.ts` | — |
 
 ### 2.2 B-lite Done verdict
 
 | Required for B-lite Done | Met? |
 |--------------------------|------|
-| Publish gate (schedules + prod policy) | **Mostly** — schedule gate done; catalog run bypass |
+| Publish gate (schedules + prod policy) | **Yes** |
 | Audit UI | **Yes** |
-| Staging RBAC | **No** — config + browser + integration tests |
+| Staging RBAC | **Yes** — `application-staging.yaml`, role picker, `rbac.*.spec.ts`, `staging-blite-smoke.ps1` |
 | Workflow job states | **Yes** |
 
 ---
