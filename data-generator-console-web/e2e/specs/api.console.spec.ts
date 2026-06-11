@@ -68,7 +68,15 @@ test.describe('API / console facades', () => {
     const { res, body } = await fetchDatasourcesOverview(request);
     expect(res.ok()).toBeTruthy();
     expectApiSuccess(body);
-    expect(unwrapApiData(body)).not.toBeNull();
+    const overview = unwrapApiData<{
+      kafkaPersisted?: unknown[];
+      elasticsearchPersisted?: unknown[];
+      kafkaClusters?: unknown[];
+      elasticsearchClusters?: unknown[];
+    }>(body);
+    expect(overview).not.toBeNull();
+    expect(Array.isArray(overview?.kafkaPersisted)).toBe(true);
+    expect(Array.isArray(overview?.elasticsearchPersisted)).toBe(true);
   });
 
   test('GET /api/jobs', async ({ request }) => {

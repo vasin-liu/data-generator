@@ -1,0 +1,36 @@
+# Podman E2E profile: embedded coordinator + worker on one JVM (shared in-memory H2).
+server:
+  port: 9876
+
+spring:
+  application:
+    name: data-generator-service-e2e-distributed
+  jpa:
+    open-in-view: false
+  datasource:
+    dynamic:
+      primary: data-generator
+      datasource:
+        data-generator:
+          url: jdbc:h2:mem:data-generator-e2e-distributed;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          username: sa
+          password:
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          init:
+            schema: classpath:db/schema.sql
+      druid:
+        filters: stat,slf4j
+        validation-query: SELECT 1
+
+data:
+  generator:
+    console-security:
+      enabled: false
+    distributed:
+      enabled: true
+      worker-enabled: true
+      coordinator-poll-enabled: false
+      worker-id: e2e-podman-worker
+      poll-delay-ms: 1000
+      lease-seconds: 60

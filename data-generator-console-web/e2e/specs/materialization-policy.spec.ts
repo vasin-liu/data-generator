@@ -19,6 +19,7 @@ function materializationLimitItem(page: Page) {
 
 test.describe('Materialization policy editor', () => {
   test('persists LIMIT materializationPolicy on iterator source', async ({ page, request }) => {
+    test.setTimeout(120_000);
     const uniqueName = `e2e-matpol-${Date.now()}`;
 
     await gotoConsoleHome(page);
@@ -28,8 +29,15 @@ test.describe('Materialization policy editor', () => {
 
     await selectEditorTab(page, /sources|数据源/i);
 
-    await page.getByText('input', { exact: true }).first().click();
-    await page.locator('.ant-collapse-header').filter({ hasText: /source policy|数据源策略/i }).click();
+    const inputSourceCard = page.locator('.ant-card').filter({
+      has: page.locator('.ant-typography strong', { hasText: 'input' }),
+    });
+    await inputSourceCard.first().waitFor({ state: 'visible', timeout: 30_000 });
+    await inputSourceCard.first().click();
+    await page
+      .locator('.ant-collapse-header')
+      .filter({ hasText: /row materialization|行物化策略/i })
+      .click();
 
     const modeItem = materializationModeItem(page);
     await modeItem.scrollIntoViewIfNeeded();
@@ -53,7 +61,10 @@ test.describe('Materialization policy editor', () => {
     await page.reload();
     await page.getByTestId('template-editor-page').waitFor({ state: 'visible', timeout: 30_000 });
     await selectEditorTab(page, /sources|数据源/i);
-    await page.locator('.ant-collapse-header').filter({ hasText: /source policy|数据源策略/i }).click();
+    await page
+      .locator('.ant-collapse-header')
+      .filter({ hasText: /row materialization|行物化策略/i })
+      .click();
 
     const reloadedModeItem = materializationModeItem(page);
     await reloadedModeItem.scrollIntoViewIfNeeded();

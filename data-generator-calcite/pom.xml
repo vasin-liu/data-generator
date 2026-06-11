@@ -151,7 +151,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>test</scope>
         </dependency>
         <!-- Align with commons-compress pulled by Testcontainers (POI / EasyExcel need FileTimes.isUnixTime). -->
         <dependency>

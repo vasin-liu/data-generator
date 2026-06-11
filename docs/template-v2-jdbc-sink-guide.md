@@ -9,6 +9,7 @@ V2 JDBC sinks use `JdbcRowSinkAdapter` with a generic `INSERT` statement by defa
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `dialect` | string | `generic` | `generic`, `postgres`, `mysql`, or `clickhouse` |
+| `bulkMode` | string | `jdbc_batch` | `jdbc_batch`, `postgres_copy` (alias `copy`), or `clickhouse_insert` (alias `clickhouse`) |
 | `upsert` | boolean | `false` | Enable dialect-specific duplicate handling |
 | `conflictColumns` | string | — | Required for `postgres` upsert; comma-separated conflict key columns |
 
@@ -66,9 +67,40 @@ sinks:
           upsert: true
 ```
 
+### PostgreSQL COPY bulk load
+
+Use `bulkMode: postgres_copy` for `COPY ... FROM STDIN` CSV streaming. Requires a PostgreSQL JDBC datasource; `upsert` is not supported on this path.
+
+```yaml
+sinks:
+  - writers:
+      - type: JDBC
+        target: orders_out
+        template: id:value, amount:amount
+        options:
+          dialect: postgres
+          bulkMode: postgres_copy
+```
+
+### ClickHouse multi-row INSERT bulk load
+
+Use `bulkMode: clickhouse_insert` to emit one `INSERT ... VALUES (...), (...)` statement per batch slice.
+
+```yaml
+sinks:
+  - writers:
+      - type: JDBC
+        target: orders_out
+        template: id:value, amount:amount
+        options:
+          dialect: clickhouse
+          bulkMode: clickhouse_insert
+```
+
 ## Limitations
 
-- **ClickHouse bulk loaders**: no native `FORMAT CSV` / COPY path in the V2 JDBC adapter yet; use plain `INSERT` batches.
+- **Bulk modes and upsert**: `postgres_copy` and `clickhouse_insert` reject `upsert: true`; use `jdbc_batch` when duplicate handling is required.
+- **ClickHouse FORMAT CSV**: not implemented; `clickhouse_insert` uses JDBC multi-value `INSERT` only.
 - **Generic dialect + upsert**: `upsert` is ignored unless `postgres`, `mysql`, or `clickhouse` is set.
 - **ON DUPLICATE KEY UPDATE**: not generated; MySQL path uses `INSERT IGNORE` only.
 - **Parallel sinks**: optional `sinkExecutionPolicy.parallelSinks` runs writers concurrently when more than one writer is configured; targets must be independent (no shared connection assumptions).

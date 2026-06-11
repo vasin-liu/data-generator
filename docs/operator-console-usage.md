@@ -203,14 +203,14 @@ Preview requires **IN_MEMORY** execution mode; CHUNKED/STREAMING templates fail 
 |---------|-------------|
 | Persisted grid | Name, JDBC URL, driver class, enabled |
 | Runtime keys | Union of `application.yaml` dynamic datasources + persisted rows |
-| Kafka clusters | Ids from `spring.kafka.multiple.clusters` (read-only); **Copy Kafka config snippet** for `application.yaml` |
-| Elasticsearch clusters | Ids from `spring.elasticsearch.multiple.clusters` (read-only); **Copy ES config snippet** |
-| New / Edit | Name, URL, credentials, driver preset or custom class, optional JAR upload |
+| Kafka clusters | Console-managed grid + runtime keys; **Add Kafka cluster** hot-registers producer templates |
+| Elasticsearch clusters | Console-managed grid + runtime keys; **Add Elasticsearch cluster** hot-registers REST clients |
+| JDBC New / Edit | Name, URL, credentials, driver preset or custom class, optional JAR upload |
 | Driver preset | Fills driver class + URL template; **switching preset always updates URL** |
-| Test | Validates without save |
+| Test | Validates JDBC without save |
 | Remove | Drops runtime registration and disables persisted row |
 
-Kafka and Elasticsearch cluster ids are **not** created in the UI — add them in `application.yaml` and restart the service, then use the id as the writer `dataSourceId`.
+Kafka and Elasticsearch cluster ids can be created in the console (`POST /api/datasources/kafka-clusters`, `POST /api/datasources/elasticsearch-clusters`) without restart. YAML-defined clusters remain merged into the runtime key list.
 
 **API:** `/api/datasources` (Console facade). Legacy: `/datasource/database/…`.
 
@@ -364,9 +364,8 @@ The console **Jobs** detail page shows lease, worker, and attempt metadata when 
 
 ## Known gaps (follow-on)
 
-- In-console registration of Kafka / Elasticsearch clusters (today: `application.yaml` + restart only).
 - Phase D inter-template pipeline DAG (deferred).
-- C2 multi-node distributed product gate (code + staging doc exist; not default-on).
+- C2 multi-node distributed product gate (code + staging doc + Podman E2E profile exist; not default-on in production).
 
 ---
 

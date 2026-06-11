@@ -102,6 +102,33 @@ try {
         Pop-Location
     }
 
+    Write-Step "Restarting container for distributed staging E2E profile"
+    podman rm -f $ContainerName 2>$null | Out-Null
+    podman run -d --name $ContainerName -p "${HostPort}:9876" -e DG_SPRING_PROFILES_ACTIVE=e2e-distributed $ImageTag | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "podman run failed for distributed profile" }
+    Wait-Health "http://127.0.0.1:${HostPort}/healthz"
+
+    Write-Step "REST: distributed metrics smoke"
+    $distMetricsUri = "http://127.0.0.1:${HostPort}/api/console/distributed/metrics"
+    $distMetrics = Invoke-RestMethod -Method GET -Uri $distMetricsUri
+    if (-not $distMetrics.data.distributedEnabled -or -not $distMetrics.data.workerEnabled) {
+        throw "Distributed metrics expected enabled worker on e2e-distributed profile"
+    }
+    Write-Host "[OK] Distributed metrics: enabled=$($distMetrics.data.distributedEnabled) worker=$($distMetrics.data.workerEnabled)"
+
+    Write-Step "Running Playwright distributed E2E"
+    Push-Location $WebDir
+    try {
+        $env:DG_E2E_DISTRIBUTED = 'true'
+        $env:DG_E2E_BASE_URL = "http://127.0.0.1:${HostPort}/console/"
+        $env:DG_E2E_API_URL = "http://127.0.0.1:${HostPort}"
+        npx playwright test e2e/specs/distributed.spec.ts
+        if ($LASTEXITCODE -ne 0) { throw "Playwright distributed E2E failed" }
+    } finally {
+        Remove-Item Env:DG_E2E_DISTRIBUTED -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+
     Write-Host ""
     Write-Host "[SUCCESS] Podman E2E completed." -ForegroundColor Green
 } finally {

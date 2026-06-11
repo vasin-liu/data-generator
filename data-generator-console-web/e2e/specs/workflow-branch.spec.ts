@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { gotoConsoleHome, navigateViaTopNav } from '../helpers/navigation';
 import {
   openNewTemplateEditor,
+  publishAndRunFromReview,
   selectEditorTab,
   setTemplateName,
 } from '../helpers/editor';
@@ -59,9 +60,10 @@ test.describe('Workflow branch editor', () => {
 
     const branchFields = page.getByTestId('workflow-branch-fields');
     await expect(branchFields).toBeVisible();
-    await branchFields.locator('input').first().fill('true');
-    await branchFields.locator('input').nth(1).fill('then-branch');
-    await branchFields.locator('input').nth(2).fill('else-branch');
+    // Branch form mixes Input + Select; target placeholders, not input indices.
+    await branchFields.getByPlaceholder('true').fill('true');
+    await branchFields.getByPlaceholder('then-branch').fill('then-branch');
+    await branchFields.getByPlaceholder('else-branch').fill('else-branch');
 
     // Default scaffold already has invoke_compute_block as step 2 after enabling workflow.
     await bindInvokeBlock(page, 1, 'block-1');
@@ -69,10 +71,7 @@ test.describe('Workflow branch editor', () => {
     await selectEditorTab(page, /review|审阅/i);
     await page.getByTestId('review-save').click();
     await page.waitForURL(/\/templates\/\d+/, { timeout: 30_000 });
-
-    await page.getByRole('button', { name: /发\s*布|^publish$/i }).click();
-    await page.getByRole('button', { name: /运\s*行|^run$/i }).click();
-    await page.waitForURL(/\/jobs\/\d+/, { timeout: 60_000 });
+    await publishAndRunFromReview(page);
 
     await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 90_000 });
   });

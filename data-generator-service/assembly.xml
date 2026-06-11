@@ -17,6 +17,8 @@
                 <include>template/**/*</include>
                 <include>application.yaml</include>
                 <include>application-e2e.yaml</include>
+                <include>application-e2e-rbac.yaml</include>
+                <include>application-e2e-distributed.yaml</include>
                 <include>logback-spring.xml</include>
                 <include>service.env.example</include>
             </includes>
