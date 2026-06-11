@@ -18,6 +18,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Integration tests for {@link PostGisQueryRowSource} against a PostGIS-enabled PostgreSQL container.
@@ -29,9 +30,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class PostGisQueryRowSourceContainerTests {
 
+    // PostGIS image is postgres-compatible; declare substitute so Testcontainers accepts it.
+    private static final DockerImageName POSTGIS_IMAGE = DockerImageName.parse("postgis/postgis:16-3.4")
+            .asCompatibleSubstituteFor("postgres");
+
     @Container
     @SuppressWarnings("resource")
-    private static final PostgreSQLContainer<?> POSTGIS = new PostgreSQLContainer<>("postgis/postgis:16-3.4")
+    private static final PostgreSQLContainer<?> POSTGIS = new PostgreSQLContainer<>(POSTGIS_IMAGE)
             .withDatabaseName("postgis_test")
             .withUsername("test")
             .withPassword("test");
