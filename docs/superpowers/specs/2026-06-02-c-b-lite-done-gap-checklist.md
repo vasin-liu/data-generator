@@ -102,7 +102,7 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 | B1-3 | B1 | `requirePublished=true` in prod for **non-editor** task runs | **Done** | `TaskController.runById`; catalog `POST /templates/{id}/run` → `runExisting` → `runById`; draft runs only via `/draft/run` | — |
 | B1-4 | B1 | OPERATOR runs **PUBLISHED** only (role matrix) | **Done** | `TemplatesPage` disables Run for DRAFT; `ConsoleAuthorizationIntegrationIT.operatorCannotRunDraftTemplateFromCatalogApi`; `rbac.*.spec.ts` | — |
 | B2-1 | B2 | `GET /api/console/audit` | **Done** | `ConsoleAuditController`, `ConsoleAuditControllerTest` | — |
-| B2-2 | B2 | Console audit page; publish events searchable | **Done** | `AuditPage.tsx`, nav route, `pages.spec.ts` audit smoke | Optional: filter E2E by `TEMPLATE_PUBLISH` |
+| B2-2 | B2 | Console audit page; publish events searchable | **Done** | `AuditPage.tsx`, `pages.spec.ts`, `rbac.console.spec.ts` `TEMPLATE_PUBLISH` filter after admin publish | — |
 | B2-3 | B2 | No secrets in audit detail | **Done** | `AuditDetailSanitizer.java` | — |
 | B3-1 | B3 | RBAC enforced on mutating APIs | **Done** | `ConsoleAuthorizationFilter`; `application-e2e-rbac.yaml` + `rbac.*.spec.ts` | Default off in dev (`application-e2e.yaml`) |
 | B3-2 | B3 | Staging sample config (`console-security.enabled=true`) | **Done** | `application-staging.yaml` in assembly `conf/`; `spring.profiles.active=staging` | — |
