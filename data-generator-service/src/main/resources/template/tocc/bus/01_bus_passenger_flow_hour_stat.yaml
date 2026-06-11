@@ -1,0 +1,77 @@
+# 数据集名称，各个文件中唯一
+name: bus_passenger_flow_hour_stat
+# 迭代器配置
+iterator:
+  type: datetime
+  from: 2024-11-12 00:00:00
+  to: 2024-11-23 00:00:00
+  unit: Hours
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: STAT_HOUR
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]"
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset,'yyMMddHH')
+  - name: FLOW
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(800,8800)"
+  - name: STATUS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'S0A' ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'TOCC_BUS_MANAGEMENT'
+      target: 'bus_passenger_flow_hour_stat'
+      template: >-
+        STAT_HOUR,FLOW,STATUS,CREATE_TIME,UPDATE_TIME

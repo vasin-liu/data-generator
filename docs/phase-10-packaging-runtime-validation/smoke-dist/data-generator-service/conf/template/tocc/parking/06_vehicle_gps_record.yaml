@@ -1,0 +1,113 @@
+# 数据集名称，各个文件中唯一
+name: vehicle_gps_record
+# 迭代器配置
+iterator:
+  type: CONSTANT
+  dataset: [
+    { "HPHM": "粤A11112","HPZL": 2,"CLLX": 24,"CSYS": 1,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X3","CAR_YEAR": "2021","NO_PLATE_CAR": 0,"PHONE": "13811111111" },
+    { "HPHM": "粤A33332","HPZL": 1,"CLLX": 21,"CSYS": 3,"HPYS": 2,"CAR_LOGO": "东风","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13822222222" },
+    { "HPHM": "粤A44441","HPZL": 2,"CLLX": 24,"CSYS": 4,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "A8","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13833333333" },
+    { "HPHM": "粤A55552","HPZL": 2,"CLLX": 24,"CSYS": 5,"HPYS": 0,"CAR_LOGO": "奔驰","CAR_SERIES": "S200","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13844444444" },
+    { "HPHM": "粤A66661","HPZL": 2,"CLLX": 24,"CSYS": 6,"HPYS": 0,"CAR_LOGO": "丰田","CAR_SERIES": "凯美瑞","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13855555555" },
+    { "HPHM": "粤A77772","HPZL": 1,"CLLX": 22,"CSYS": 7,"HPYS": 2,"CAR_LOGO": "解放","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13866666666" },
+    { "HPHM": "粤A88881","HPZL": 2,"CLLX": 24,"CSYS": 8,"HPYS": 0,"CAR_LOGO": "日产","CAR_SERIES": "奇骏","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13877777777" },
+    { "HPHM": "粤A99992","HPZL": 2,"CLLX": 24,"CSYS": 9,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X1","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13888888888" },
+    { "HPHM": "粤A12341","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q5","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13899999999" },
+    { "HPHM": "粤A88888","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q7","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13812345678" },
+    { "HPHM": "粤A379T7","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X5","CAR_YEAR": "2024","NO_PLATE_CAR": 0,"PHONE": "13898765432" },
+  ]
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: PLATE_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0].HPHM"
+  - name: LONGTITUDE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ [ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.41000783360504,23.07519846531121 ],[ 113.41138399965796,23.074413660231517 ],[ 113.41283732525187,23.073714959789275 ],[ 113.40990371336989,23.07521170236646 ],[ 113.41024011292654,23.07500537913056 ],[ 113.41064058859126,23.07475484334654 ],[ 113.41151763029552,23.074275876579946 ],[ 113.41290327609437,23.07360900462477 ] ]
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]"
+  - name: LATITUDE
+    dependsOn:
+      - LONGTITUDE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[1]"
+  - name: UPLOAD_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}")
+  - name: SPEED
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(60,120)"
+  - name: ANGLE
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(1,360)"
+  - name: STATUS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'S0A' ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'tocc_parking'
+      target: 'VEHICLE_GPS_RECORD'
+      template: >-
+        ID,PLATE_NUMBER,LONGTITUDE,LATITUDE,UPLOAD_TIME,SPEED,ANGLE,STATUS,CREATE_TIME,UPDATE_TIME

@@ -1,0 +1,131 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.api.console;
+
+import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
+import org.gensokyo.data.api.console.dto.ConsoleRuntimeDto;
+import org.gensokyo.data.api.console.dto.EditorDataSourcesDto;
+import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.messaging.MessagingClusterConfigService;
+import org.gensokyo.data.config.ConsoleSecurityProperties;
+import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.config.DistributedExecutionProperties;
+import org.gensokyo.data.config.TaskScheduleProperties;
+import org.gensokyo.data.security.ConsoleRole;
+import org.gensokyo.data.model.vo.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Console shell runtime metadata (feature flags for the React UI).
+ *
+ * @author Gensokyo
+ * @since 2026-05-26
+ */
+@RestController
+@RequestMapping("/api/console")
+public class ConsoleRuntimeController {
+
+    private final DataGeneratorProperties properties;
+    private final TaskScheduleProperties scheduleProperties;
+    private final DistributedExecutionProperties distributedProperties;
+    private final ConsoleSecurityProperties consoleSecurityProperties;
+    private final DynamicRoutingDataSource dynamicRoutingDataSource;
+    private final MessagingClusterConfigService messagingClusterConfigService;
+    private final DynamicKafkaTemplateRegistry kafkaTemplateRegistry;
+    private final DynamicElasticsearchClientRegistry elasticsearchClientRegistry;
+
+    /**
+     * @param properties              application flags
+     * @param scheduleProperties      cron schedule poller settings
+     * @param distributedProperties   distributed queue settings
+     * @param consoleSecurityProperties optional console RBAC settings
+     * @param dynamicRoutingDataSource optional JDBC registry for editor dropdowns
+     * @param messagingClusterConfigService console-managed messaging clusters
+     * @param kafkaTemplateRegistry    optional Kafka runtime registry
+     * @param elasticsearchClientRegistry optional Elasticsearch runtime registry
+     */
+    public ConsoleRuntimeController(
+            DataGeneratorProperties properties,
+            TaskScheduleProperties scheduleProperties,
+            DistributedExecutionProperties distributedProperties,
+            ConsoleSecurityProperties consoleSecurityProperties,
+            @Autowired(required = false) DynamicRoutingDataSource dynamicRoutingDataSource,
+            MessagingClusterConfigService messagingClusterConfigService,
+            @Autowired(required = false) DynamicKafkaTemplateRegistry kafkaTemplateRegistry,
+            @Autowired(required = false) DynamicElasticsearchClientRegistry elasticsearchClientRegistry) {
+        this.properties = properties;
+        this.scheduleProperties = scheduleProperties;
+        this.distributedProperties = distributedProperties;
+        this.consoleSecurityProperties = consoleSecurityProperties;
+        this.dynamicRoutingDataSource = dynamicRoutingDataSource;
+        this.messagingClusterConfigService = messagingClusterConfigService;
+        this.kafkaTemplateRegistry = kafkaTemplateRegistry;
+        this.elasticsearchClientRegistry = elasticsearchClientRegistry;
+    }
+
+    /**
+     * @return flags for navbar / home (V1, schedule poller, distributed queue)
+     */
+    @GetMapping("/runtime")
+    public R<ConsoleRuntimeDto> runtime() {
+        return R.ok(new ConsoleRuntimeDto(
+                properties.isV1ExecutionEnabled(),
+                scheduleProperties.isEnabled(),
+                distributedProperties.isEnabled(),
+                consoleSecurityProperties.isEnabled(),
+                consoleSecurityProperties.getRoleHeader(),
+                java.util.Arrays.stream(ConsoleRole.values()).map(Enum::name).toList()));
+    }
+
+    /**
+     * @return JDBC datasource keys for editor source/sink dropdowns
+     */
+    @GetMapping("/jdbc-names")
+    public R<List<String>> jdbcNames() {
+        return R.ok(listJdbcNames());
+    }
+
+    /**
+     * @return JDBC, Kafka, and Elasticsearch keys for template editor dropdowns
+     */
+    @GetMapping("/editor-data-sources")
+    public R<EditorDataSourcesDto> editorDataSources() {
+        return R.ok(new EditorDataSourcesDto(
+                listJdbcNames(),
+                messagingClusterConfigService.listKafkaClusterKeys(),
+                messagingClusterConfigService.listElasticsearchClusterKeys()));
+    }
+
+    private List<String> listJdbcNames() {
+        if (dynamicRoutingDataSource == null || dynamicRoutingDataSource.getDataSources() == null) {
+            return Collections.emptyList();
+        }
+        Set<String> keys = dynamicRoutingDataSource.getDataSources().keySet();
+        return keys.stream().sorted().toList();
+    }
+
+    private List<String> listKafkaClusters() {
+        if (kafkaTemplateRegistry == null) {
+            return Collections.emptyList();
+        }
+        return kafkaTemplateRegistry.getTemplates().keySet().stream().sorted().toList();
+    }
+
+    private List<String> listElasticsearchClusters() {
+        if (elasticsearchClientRegistry == null) {
+            return Collections.emptyList();
+        }
+        return elasticsearchClientRegistry.getLowLevelClients().keySet().stream().sorted().toList();
+    }
+}

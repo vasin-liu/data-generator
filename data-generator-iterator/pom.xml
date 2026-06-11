@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.gensokyo.data.generator</groupId>
+        <artifactId>data-generator</artifactId>
+        <version>${revision}</version>
+<!--        <relativePath>../pom.xml</relativePath>-->
+    </parent>
+
+    <artifactId>data-generator-iterator</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+
+    </properties>
+
+    <modules>
+        <module>data-generator-iterator-number</module>
+        <module>data-generator-iterator-datetime</module>
+        <module>data-generator-iterator-database</module>
+        <module>data-generator-iterator-constant</module>
+        <module>data-generator-iterator-excel</module>
+        <module>data-generator-iterator-json</module>
+        <module>data-generator-iterator-csv</module>
+        <module>data-generator-iterator-geo</module>
+    </modules>
+
+    <dependencies>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+</project>

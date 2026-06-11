@@ -1,0 +1,44 @@
+# 数据集名称，各个文件中唯一
+name: demo_12
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID_IN_MEMORY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      - type: SELECT
+        # 内存驻留 不会重复选取 策略生效
+        strategy:
+          type: ONCE_RANDOM
+  - name: ID_NON_IN_MEMORY
+    stages:
+      - type: READ
+        readers:
+          - type: CONSTANT
+            content: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      - type: SELECT
+        # 非内存驻留 会重复选取 策略失效
+        strategy:
+          type: ONCE_RANDOM
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

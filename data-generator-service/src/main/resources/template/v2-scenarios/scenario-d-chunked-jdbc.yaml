@@ -1,0 +1,35 @@
+# definitionKind: V2
+# scenarioId: GF-D
+# catalogRef: CV-02 — query-backed JDBC export with CHUNKED execution
+name: scenario-d-chunked-jdbc
+executionPolicy:
+  mode: CHUNKED
+  sourceChunkSize: 50
+  sinkBatchSize: 25
+  maxTotalRows: 200
+  maxRowsInMemory: 500
+sources:
+  ledger:
+    type: query
+    dataSource:
+      name: gf-d-source
+      type: jdbc
+      url: jdbc:h2:mem:gf_d_source;MODE=MySQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, label FROM gf_ledger ORDER BY id
+transform:
+  type: sql
+  sql: SELECT id, label FROM ledger
+sink:
+  writers:
+    - type: jdbc
+      dataSource:
+        name: gf-d-target
+        type: jdbc
+        url: jdbc:h2:mem:gf_d_target;MODE=MySQL;DB_CLOSE_DELAY=-1
+        username: sa
+        password: ""
+        driverClassName: org.h2.Driver
+      target: gf_ledger_export

@@ -1,0 +1,176 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-reader-elasticsearch                                [jar]
+[INFO] data-generator-writer-elasticsearch                                [jar]
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                             [1/8]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                      [2/8]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                        [3/8]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-core ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-core ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-core ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-reader >----------
+[INFO] Building data-generator-reader 3.0.0-SNAPSHOT                      [4/8]
+[INFO]   from data-generator-reader\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-writer >----------
+[INFO] Building data-generator-writer 3.0.0-SNAPSHOT                      [5/8]
+[INFO]   from data-generator-writer\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-kafka >-------
+[INFO] Building data-generator-writer-kafka 3.0.0-SNAPSHOT                [6/8]
+[INFO]   from data-generator-writer\data-generator-writer-kafka\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-kafka ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-kafka ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-kafka ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-kafka ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-kafka ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.writer.KafkaWriterAutoConfigurationTests
+10:54:37.007 [main] WARN org.springframework.context.annotation.AnnotationConfigApplicationContext -- Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to process import candidates for configuration class [org.gensokyo.boot.kafka.MultipleKafkaAutoConfiguration]: Failed to introspect Class [org.gensokyo.boot.kafka.config.MultipleKafkaClusterAutoConfiguration] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@2a139a55]
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.00 s -- in org.gensokyo.data.writer.KafkaWriterAutoConfigurationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-reader-elasticsearch >---
+[INFO] Building data-generator-reader-elasticsearch 3.0.0-SNAPSHOT        [7/8]
+[INFO]   from data-generator-reader\data-generator-reader-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-elasticsearch ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.reader.EsReaderAutoConfigurationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.019 s -- in org.gensokyo.data.reader.EsReaderAutoConfigurationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-writer-elasticsearch >---
+[INFO] Building data-generator-writer-elasticsearch 3.0.0-SNAPSHOT        [8/8]
+[INFO]   from data-generator-writer\data-generator-writer-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: Some input files use or override a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-elasticsearch ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.gensokyo.data.writer.EsWriterAutoConfigurationTests
+10:56:19.315 [main] WARN org.springframework.context.annotation.AnnotationConfigApplicationContext -- Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to process import candidates for configuration class [org.gensokyo.boot.elasticsearch.MultipleElasticsearchAutoConfiguration]: Failed to introspect Class [org.gensokyo.boot.elasticsearch.config.MultipleElasticsearchClusterAutoConfiguration] from ClassLoader [jdk.internal.loader.ClassLoaders$AppClassLoader@2a139a55]
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.30 s -- in org.gensokyo.data.writer.EsWriterAutoConfigurationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator ..................................... SUCCESS [  0.032 s]
+[INFO] data-generator-common .............................. SUCCESS [  0.004 s]
+[INFO] data-generator-core ................................ SUCCESS [ 13.860 s]
+[INFO] data-generator-reader .............................. SUCCESS [  0.001 s]
+[INFO] data-generator-writer .............................. SUCCESS [  0.003 s]
+[INFO] data-generator-writer-kafka ........................ SUCCESS [ 49.871 s]
+[INFO] data-generator-reader-elasticsearch ................ SUCCESS [ 45.095 s]
+[INFO] data-generator-writer-elasticsearch ................ SUCCESS [ 54.859 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:50 min
+[INFO] Finished at: 2026-04-27T10:56:26+08:00
+[INFO] ------------------------------------------------------------------------

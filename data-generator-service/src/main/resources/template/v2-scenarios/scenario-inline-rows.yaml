@@ -1,0 +1,20 @@
+# definitionKind: V2
+# scenarioId: GF-IR
+# catalogRef: SG-IR — inline static rows (V1 constant-reader replacement), SQL filter, console sink
+name: scenario-inline-rows
+sources:
+  lookup:
+    type: inline_rows
+    rows:
+      - id: 1
+        code: US
+        label: United States
+      - id: 2
+        code: UK
+        label: United Kingdom
+transform:
+  type: sql
+  sql: SELECT id, code, label FROM lookup WHERE code = 'US'
+sink:
+  writers:
+    - type: console

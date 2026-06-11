@@ -1,0 +1,35 @@
+# definitionKind: V2
+# scenarioId: GF-B
+# catalogRef: QE-02 — query source plus lookup join enrichment
+name: scenario-b-lookup-join
+sources:
+  orders:
+    type: query
+    dataSource:
+      name: gf-b-orders
+      type: jdbc
+      url: jdbc:h2:mem:gf_b_orders;MODE=MySQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, customer_id FROM gf_orders ORDER BY id
+  customers:
+    type: query
+    dataSource:
+      name: gf-b-customers
+      type: jdbc
+      url: jdbc:h2:mem:gf_b_customers;MODE=MySQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, name FROM gf_customers
+    maxRows: 100
+transform:
+  type: sql
+  sql: |
+    SELECT o.id AS order_id, c.name AS customer_name
+    FROM orders o
+    LEFT JOIN customers c ON o.customer_id = c.id
+sink:
+  writers:
+    - type: console

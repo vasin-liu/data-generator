@@ -1,0 +1,46 @@
+# definitionKind: V2
+# scenarioId: GF-WF-C
+# catalogRef: WF-04 — shared scope open/write with branch gate and compute block invoke
+name: scenario-wf-shared-state
+workflow:
+  steps:
+    - type: shared_scope
+      id: scope-open
+      scopeId: run-scope
+      action: open
+    - type: shared_scope
+      id: scope-write
+      scopeId: run-scope
+      action: write
+      entries:
+        limit: 2
+    - type: branch
+      id: branch-check
+      condition: "#shared['run-scope']['limit'] == 2"
+      thenSteps:
+        - type: log
+          id: scope-ok
+          level: INFO
+          message: shared-state-ok
+      elseSteps:
+        - type: log
+          id: scope-fail
+          level: WARN
+          message: shared-state-fail
+    - type: invoke_compute_block
+      id: invoke-seed
+      computeBlockId: seed-block
+computeBlocks:
+  - id: seed-block
+    sharedScopeId: run-scope
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 3
+          step: 1
+    transformers:
+      - type: sql
+        sql: SELECT value FROM seed

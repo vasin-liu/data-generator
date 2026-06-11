@@ -1,0 +1,15 @@
+name: regression-iterator-simple
+iterator:
+  type: number
+  from: 1
+  to: 3
+fields:
+  - name: label
+    stages:
+      - type: SCRIPT
+        language:
+          type: plain
+          content: "row"
+output:
+  writers:
+    - type: console

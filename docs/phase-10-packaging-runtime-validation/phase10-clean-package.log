@@ -1,0 +1,1476 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] data-generator-dependencies                                        [pom]
+[INFO] data-generator                                                     [pom]
+[INFO] data-generator-common                                              [pom]
+[INFO] data-generator-core                                                [jar]
+[INFO] data-generator-database-core                                       [jar]
+[INFO] data-generator-datasource                                          [pom]
+[INFO] data-generator-iterator                                            [pom]
+[INFO] data-generator-iterator-number                                     [jar]
+[INFO] data-generator-iterator-constant                                   [jar]
+[INFO] data-generator-iterator-datetime                                   [jar]
+[INFO] data-generator-reader                                              [pom]
+[INFO] data-generator-reader-database                                     [jar]
+[INFO] data-generator-iterator-database                                   [jar]
+[INFO] data-generator-iterator-excel                                      [jar]
+[INFO] data-generator-iterator-csv                                        [jar]
+[INFO] data-generator-iterator-json                                       [jar]
+[INFO] data-generator-generator                                           [pom]
+[INFO] data-generator-generator-async                                     [jar]
+[INFO] data-generator-generator-sync                                      [jar]
+[INFO] data-generator-stage                                               [jar]
+[INFO] data-generator-faker                                               [jar]
+[INFO] data-generator-reader-spel                                         [jar]
+[INFO] data-generator-reader-ai                                           [jar]
+[INFO] data-generator-reader-excel                                        [jar]
+[INFO] data-generator-reader-json                                         [jar]
+[INFO] data-generator-reader-csv                                          [jar]
+[INFO] data-generator-scripter                                            [pom]
+[INFO] data-generator-scripter-spel                                       [jar]
+[INFO] data-generator-writer                                              [pom]
+[INFO] data-generator-writer-database                                     [jar]
+[INFO] data-generator-writer-kafka                                        [jar]
+[INFO] data-generator-writer-csv                                          [jar]
+[INFO] data-generator-writer-excel                                        [jar]
+[INFO] data-generator-service                                             [jar]
+[INFO] data-generator-reader-elasticsearch                                [jar]
+[INFO] data-generator-scripter-javascript                                 [jar]
+[INFO] data-generator-scripter-velocity                                   [jar]
+[INFO] data-generator-writer-elasticsearch                                [jar]
+[INFO] data-generator-writer-json                                         [jar]
+[INFO] data-generator-converter                                           [pom]
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-dependencies >-------
+[INFO] Building data-generator-dependencies 3.0.0-SNAPSHOT               [1/40]
+[INFO]   from data-generator-dependencies\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-dependencies ---
+[INFO] 
+[INFO] -------------< org.gensokyo.data.generator:data-generator >-------------
+[INFO] Building data-generator 3.0.0-SNAPSHOT                            [2/40]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator ---
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-common >----------
+[INFO] Building data-generator-common 3.0.0-SNAPSHOT                     [3/40]
+[INFO]   from data-generator-common\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-common ---
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-core >-----------
+[INFO] Building data-generator-core 3.0.0-SNAPSHOT                       [4/40]
+[INFO]   from data-generator-common\data-generator-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-core ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-core ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 116 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-common/data-generator-core/src/main/java/org/gensokyo/data/config/FactoryConfig.java: Some input files use or override a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-common/data-generator-core/src/main/java/org/gensokyo/data/config/FactoryConfig.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-core ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-core ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-common\data-generator-core\target\data-generator-core-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-database-core >------
+[INFO] Building data-generator-database-core 3.0.0-SNAPSHOT              [5/40]
+[INFO]   from data-generator-common\data-generator-database-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-database-core ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-database-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 13 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-database-core ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-database-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-database-core ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-database-core ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-common\data-generator-database-core\target\data-generator-database-core-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-datasource >--------
+[INFO] Building data-generator-datasource 3.0.0-SNAPSHOT                 [6/40]
+[INFO]   from data-generator-datasource\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-datasource ---
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-iterator >---------
+[INFO] Building data-generator-iterator 3.0.0-SNAPSHOT                   [7/40]
+[INFO]   from data-generator-iterator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-number >-----
+[INFO] Building data-generator-iterator-number 3.0.0-SNAPSHOT            [8/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-number\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-number ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-number\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-number ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-number ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-number ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-number ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-number ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-number ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-number\target\data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-constant >----
+[INFO] Building data-generator-iterator-constant 3.0.0-SNAPSHOT          [9/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-constant\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-constant ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-constant\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-constant ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-constant ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-constant ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-constant ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-constant ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-constant ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-constant\target\data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-datetime >----
+[INFO] Building data-generator-iterator-datetime 3.0.0-SNAPSHOT         [10/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-datetime\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-datetime ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-datetime\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-datetime ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-datetime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-datetime ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-datetime ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-datetime ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-datetime ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-datetime\target\data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-reader >----------
+[INFO] Building data-generator-reader 3.0.0-SNAPSHOT                    [11/40]
+[INFO]   from data-generator-reader\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-reader-database >-----
+[INFO] Building data-generator-reader-database 3.0.0-SNAPSHOT           [12/40]
+[INFO]   from data-generator-reader\data-generator-reader-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-database\target\data-generator-reader-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-iterator-database >----
+[INFO] Building data-generator-iterator-database 3.0.0-SNAPSHOT         [13/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-database\target\data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-iterator-excel >------
+[INFO] Building data-generator-iterator-excel 3.0.0-SNAPSHOT            [14/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-excel\target\data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-csv >-------
+[INFO] Building data-generator-iterator-csv 3.0.0-SNAPSHOT              [15/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-csv\target\data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-iterator-json >------
+[INFO] Building data-generator-iterator-json 3.0.0-SNAPSHOT             [16/40]
+[INFO]   from data-generator-iterator\data-generator-iterator-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-iterator-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-iterator-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-iterator-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-iterator-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-iterator-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-iterator-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-iterator-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-iterator\data-generator-iterator-json\target\data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-generator >--------
+[INFO] Building data-generator-generator 3.0.0-SNAPSHOT                 [17/40]
+[INFO]   from data-generator-generator\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-async >-----
+[INFO] Building data-generator-generator-async 3.0.0-SNAPSHOT           [18/40]
+[INFO]   from data-generator-generator\data-generator-generator-async\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator-async ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-async\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-async ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-async ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-generator/data-generator-generator-async/src/main/java/org/gensokyo/data/generator/MdcTaskDecorator.java: D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-async\src\main\java\org\gensokyo\data\generator\MdcTaskDecorator.java uses or overrides a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-generator/data-generator-generator-async/src/main/java/org/gensokyo/data/generator/MdcTaskDecorator.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-async ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-async ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-async ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-generator-async ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-async\target\data-generator-generator-async-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-generator-sync >------
+[INFO] Building data-generator-generator-sync 3.0.0-SNAPSHOT            [19/40]
+[INFO]   from data-generator-generator\data-generator-generator-sync\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-generator-sync ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-sync\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-generator-sync ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-generator-sync ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-generator-sync ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-generator-sync ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-generator-sync ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-generator-sync ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-generator\data-generator-generator-sync\target\data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-stage >----------
+[INFO] Building data-generator-stage 3.0.0-SNAPSHOT                     [20/40]
+[INFO]   from data-generator-stage\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-stage ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-stage\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-stage ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-stage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 13 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-stage ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-stage ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-stage ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-stage ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-stage\target\data-generator-stage-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----------< org.gensokyo.data.generator:data-generator-faker >----------
+[INFO] Building data-generator-faker 3.0.0-SNAPSHOT                     [21/40]
+[INFO]   from data-generator-faker\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-faker ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-faker\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-faker ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-faker ---
+[INFO] Copying 2 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-faker ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-faker ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-faker ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-faker\target\data-generator-faker-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-spel >-------
+[INFO] Building data-generator-reader-spel 3.0.0-SNAPSHOT               [22/40]
+[INFO]   from data-generator-reader\data-generator-reader-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-spel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-spel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[WARNING] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-spel/src/main/java/org/gensokyo/data/reader/SpelReader.java:[44,37] org.springframework.context.expression.MapAccessor in org.springframework.context.expression has been deprecated and marked for removal
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-spel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-spel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-spel\target\data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-reader-ai >--------
+[INFO] Building data-generator-reader-ai 3.0.0-SNAPSHOT                 [23/40]
+[INFO]   from data-generator-reader\data-generator-reader-ai\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-ai ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-ai\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-ai ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-ai ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 62 source files with javac [debug release 17] to target\classes
+[WARNING] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/reader/AiProviderOllamaVO.java:[23,1] Service provider org.gensokyo.data.reader.AiProviderVO is generic, so it can't be named exactly by @AutoService. If this is OK, add @SuppressWarnings("rawtypes").
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Some input files use or override a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Recompile with -Xlint:deprecation for details.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Some input files use unchecked or unsafe operations.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-reader/data-generator-reader-ai/src/main/java/org/gensokyo/data/ai/model/ModelOptionsUtils.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-ai ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-ai ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-ai ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-ai ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-ai\target\data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-reader-excel >-------
+[INFO] Building data-generator-reader-excel 3.0.0-SNAPSHOT              [24/40]
+[INFO]   from data-generator-reader\data-generator-reader-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 5 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-excel\target\data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-json >-------
+[INFO] Building data-generator-reader-json 3.0.0-SNAPSHOT               [25/40]
+[INFO]   from data-generator-reader\data-generator-reader-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-json\target\data-generator-reader-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-reader-csv >--------
+[INFO] Building data-generator-reader-csv 3.0.0-SNAPSHOT                [26/40]
+[INFO]   from data-generator-reader\data-generator-reader-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-csv\target\data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-scripter >---------
+[INFO] Building data-generator-scripter 3.0.0-SNAPSHOT                  [27/40]
+[INFO]   from data-generator-scripter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter ---
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-scripter-spel >------
+[INFO] Building data-generator-scripter-spel 3.0.0-SNAPSHOT             [28/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-spel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-spel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-spel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-spel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[WARNING] /D:/Work/99_Code/data-generator/data-generator-scripter/data-generator-scripter-spel/src/main/java/org/gensokyo/data/script/SpelScript.java:[49,41] org.springframework.context.expression.MapAccessor in org.springframework.context.expression has been deprecated and marked for removal
+[INFO] /D:/Work/99_Code/data-generator/data-generator-scripter/data-generator-scripter-spel/src/main/java/org/gensokyo/data/script/SingleValuePropertyAccessor.java: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-spel\src\main\java\org\gensokyo\data\script\SingleValuePropertyAccessor.java uses or overrides a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-scripter/data-generator-scripter-spel/src/main/java/org/gensokyo/data/script/SingleValuePropertyAccessor.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-spel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-spel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-spel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-spel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-spel\target\data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-writer >----------
+[INFO] Building data-generator-writer 3.0.0-SNAPSHOT                    [29/40]
+[INFO]   from data-generator-writer\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer ---
+[INFO] 
+[INFO] -----< org.gensokyo.data.generator:data-generator-writer-database >-----
+[INFO] Building data-generator-writer-database 3.0.0-SNAPSHOT           [30/40]
+[INFO]   from data-generator-writer\data-generator-writer-database\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-database ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-database\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-database ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-database ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-database ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-database ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-database ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-database\target\data-generator-writer-database-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-kafka >-------
+[INFO] Building data-generator-writer-kafka 3.0.0-SNAPSHOT              [31/40]
+[INFO]   from data-generator-writer\data-generator-writer-kafka\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-kafka ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-kafka\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-kafka ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-kafka ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-kafka ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-kafka ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-kafka ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-kafka ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-kafka\target\data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-csv >--------
+[INFO] Building data-generator-writer-csv 3.0.0-SNAPSHOT                [32/40]
+[INFO]   from data-generator-writer\data-generator-writer-csv\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-csv ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-csv\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-csv ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-csv ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-csv ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-csv ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-csv ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-csv\target\data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ------< org.gensokyo.data.generator:data-generator-writer-excel >-------
+[INFO] Building data-generator-writer-excel 3.0.0-SNAPSHOT              [33/40]
+[INFO]   from data-generator-writer\data-generator-writer-excel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-excel ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-excel\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-excel ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-excel ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-excel ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-excel ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-excel ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-excel\target\data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-service >---------
+[INFO] Building data-generator-service 3.0.0-SNAPSHOT                   [34/40]
+[INFO]   from data-generator-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-service ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-service ---
+[INFO] Copying 65 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 17 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-service ---
+[INFO] Copying 3 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-service ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 17 source files with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-service ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-service ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-service\target\data-generator-service-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:4.0.5:repackage (default) @ data-generator-service ---
+[INFO] Artifact org.springframework:spring-core:jar:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [nexus-releases (http://172.25.20.192:8081/nexus/content/repositories/releases/, default, releases), nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots, default, snapshots), vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-core:jar:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [nexus-releases (http://172.25.20.192:8081/nexus/content/repositories/releases/, default, releases), nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots, default, snapshots), vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from nexus-releases: http://172.25.20.192:8081/nexus/content/repositories/releases/org/springframework/spring-core/7.0.6/spring-core-7.0.6.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/springframework/spring-core/7.0.6/spring-core-7.0.6.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.6/spring-core-7.0.6.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.6/spring-core-7.0.6.jar (0 B at 0 B/s)
+[INFO] 
+[INFO] --- assembly:3.7.1:single (make-assembly) @ data-generator-service ---
+[INFO] Reading assembly descriptor: D:\Work\99_Code\data-generator\data-generator-service/assembly.xml
+[INFO] Artifact io.netty:netty-transport-classes-epoll:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-transport-classes-epoll:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-epoll/4.2.12.Final/netty-transport-classes-epoll-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-classes-epoll/4.2.12.Final/netty-transport-classes-epoll-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-parent:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-parent:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-parent/4.2.12.Final/netty-parent-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-parent/4.2.12.Final/netty-parent-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-reactor-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-reactor-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-reactor-netty/4.0.5/spring-boot-reactor-netty-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-reactor-netty/4.0.5/spring-boot-reactor-netty-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.5/spring-boot-starter-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter/4.0.5/spring-boot-starter-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-sql:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-sql:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-sql/4.0.5/spring-boot-sql-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-sql/4.0.5/spring-boot-sql-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.micrometer:micrometer-commons:pom:1.16.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.micrometer:micrometer-commons:pom:1.16.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.4/micrometer-commons-1.16.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-commons/1.16.4/micrometer-commons-1.16.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.jspecify:jspecify:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.jspecify:jspecify:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-data-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-data-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-data-jpa/4.0.5/spring-boot-data-jpa-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-data-jpa/4.0.5/spring-boot-data-jpa-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-data-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-data-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-data-jpa/4.0.5/spring-boot-starter-data-jpa-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-data-jpa/4.0.5/spring-boot-starter-data-jpa-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.projectreactor:reactor-core:pom:3.8.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.projectreactor:reactor-core:pom:3.8.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/projectreactor/reactor-core/3.8.4/reactor-core-3.8.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/projectreactor/reactor-core/3.8.4/reactor-core-3.8.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-context:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-context:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.6/spring-context-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-context/7.0.6/spring-context-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-webmvc:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-webmvc:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.5/spring-boot-webmvc-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webmvc/4.0.5/spring-boot-webmvc-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.projectreactor.netty:reactor-netty-http:pom:1.3.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.projectreactor.netty:reactor-netty-http:pom:1.3.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/projectreactor/netty/reactor-netty-http/1.3.4/reactor-netty-http-1.3.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/projectreactor/netty/reactor-netty-http/1.3.4/reactor-netty-http-1.3.4.pom (0 B at 0 B/s)
+[INFO] Artifact com.zaxxer:HikariCP:pom:7.0.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact com.zaxxer:HikariCP:pom:7.0.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/com/zaxxer/HikariCP/7.0.2/HikariCP-7.0.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/com/zaxxer/HikariCP/7.0.2/HikariCP-7.0.2.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-native-quic:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-native-quic:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-native-quic/4.2.12.Final/netty-codec-native-quic-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-native-quic/4.2.12.Final/netty-codec-native-quic-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-resolver-dns:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-resolver-dns:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns/4.2.12.Final/netty-resolver-dns-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns/4.2.12.Final/netty-resolver-dns-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact io.micrometer:micrometer-observation:pom:1.16.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.micrometer:micrometer-observation:pom:1.16.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.4/micrometer-observation-1.16.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/micrometer/micrometer-observation/1.16.4/micrometer-observation-1.16.4.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-http2:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-http2:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http2/4.2.12.Final/netty-codec-http2-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http2/4.2.12.Final/netty-codec-http2-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-jackson:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-jackson:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.5/spring-boot-jackson-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jackson/4.0.5/spring-boot-jackson-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-transport-native-epoll:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-transport-native-epoll:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.12.Final/netty-transport-native-epoll-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-epoll/4.2.12.Final/netty-transport-native-epoll-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson.core:jackson-core:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson.core:jackson-core:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.0/jackson-core-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-core/3.1.0/jackson-core-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson:jackson-base:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson:jackson-base:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.0/jackson-base-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-base/3.1.0/jackson-base-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson:jackson-bom:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson:jackson-bom:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.0/jackson-bom-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/jackson-bom/3.1.0/jackson-bom-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact com.fasterxml:oss-parent:pom:76 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact com.fasterxml:oss-parent:pom:76 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/76/oss-parent-76.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/oss-parent/76/oss-parent-76.pom (0 B at 0 B/s)
+[INFO] Artifact jakarta.persistence:jakarta.persistence-api:pom:3.2.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact jakarta.persistence:jakarta.persistence-api:pom:3.2.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/jakarta/persistence/jakarta.persistence-api/3.2.0/jakarta.persistence-api-3.2.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/persistence/jakarta.persistence-api/3.2.0/jakarta.persistence-api-3.2.0.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-reactor:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-reactor:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-reactor/4.0.5/spring-boot-reactor-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-reactor/4.0.5/spring-boot-reactor-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-hibernate:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-hibernate:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-hibernate/4.0.5/spring-boot-hibernate-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-hibernate/4.0.5/spring-boot-hibernate-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-persistence:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-persistence:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-persistence/4.0.5/spring-boot-persistence-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-persistence/4.0.5/spring-boot-persistence-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-netty/4.0.5/spring-boot-netty-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-netty/4.0.5/spring-boot-netty-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-handler-proxy:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-handler-proxy:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-handler-proxy/4.2.12.Final/netty-handler-proxy-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-handler-proxy/4.2.12.Final/netty-handler-proxy-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-socks:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-socks:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-socks/4.2.12.Final/netty-codec-socks-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-socks/4.2.12.Final/netty-codec-socks-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.data:spring-data-commons:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.data:spring-data-commons:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-commons/4.0.4/spring-data-commons-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-commons/4.0.4/spring-data-commons-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.data.build:spring-data-parent:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.data.build:spring-data-parent:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/build/spring-data-parent/4.0.4/spring-data-parent-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/build/spring-data-parent/4.0.4/spring-data-parent-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.data.build:spring-data-build:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.data.build:spring-data-build:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/build/spring-data-build/4.0.4/spring-data-build-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/build/spring-data-build/4.0.4/spring-data-build-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-aop:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-aop:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.6/spring-aop-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aop/7.0.6/spring-aop-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-configuration-processor:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-configuration-processor:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-configuration-processor/4.0.5/spring-boot-configuration-processor-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-configuration-processor/4.0.5/spring-boot-configuration-processor-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-expression:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-expression:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.6/spring-expression-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-expression/7.0.6/spring-expression-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact io.projectreactor.netty:reactor-netty-core:pom:1.3.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.projectreactor.netty:reactor-netty-core:pom:1.3.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/projectreactor/netty/reactor-netty-core/1.3.4/reactor-netty-core-1.3.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/projectreactor/netty/reactor-netty-core/1.3.4/reactor-netty-core-1.3.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-beans:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-beans:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.6/spring-beans-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-beans/7.0.6/spring-beans-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson.dataformat:jackson-dataformat-yaml:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson.dataformat:jackson-dataformat-yaml:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/dataformat/jackson-dataformat-yaml/3.1.0/jackson-dataformat-yaml-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/dataformat/jackson-dataformat-yaml/3.1.0/jackson-dataformat-yaml-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson.dataformat:jackson-dataformats-text:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson.dataformat:jackson-dataformats-text:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/dataformat/jackson-dataformats-text/3.1.0/jackson-dataformats-text-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/dataformat/jackson-dataformats-text/3.1.0/jackson-dataformats-text-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-core:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-core:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.6/spring-core-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/7.0.6/spring-core-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-jdbc:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-jdbc:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jdbc/7.0.6/spring-jdbc-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jdbc/7.0.6/spring-jdbc-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-websocket:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-websocket:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.20/tomcat-embed-websocket-11.0.20.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-websocket/11.0.20/tomcat-embed-websocket-11.0.20.pom (0 B at 0 B/s)
+[INFO] Artifact org.gensokyo:kits:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.gensokyo:kits:pom:1.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/gensokyo/kits/1.0.0/kits-1.0.0.pom
+[INFO] Artifact org.apache.kafka:kafka-clients:pom:4.1.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.kafka:kafka-clients:pom:4.1.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/kafka/kafka-clients/4.1.2/kafka-clients-4.1.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/kafka/kafka-clients/4.1.2/kafka-clients-4.1.2.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-resolver-dns-native-macos:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-resolver-dns-native-macos:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns-native-macos/4.2.12.Final/netty-resolver-dns-native-macos-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns-native-macos/4.2.12.Final/netty-resolver-dns-native-macos-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact com.dameng:dm-jdbc:pom:1.8 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact com.dameng:dm-jdbc:pom:1.8 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/com/dameng/dm-jdbc/1.8/dm-jdbc-1.8.pom
+[INFO] Artifact io.netty:netty-transport:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-transport:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.2.12.Final/netty-transport-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport/4.2.12.Final/netty-transport-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-web:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-web:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-web/4.0.5/spring-boot-starter-web-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-web/4.0.5/spring-boot-starter-web-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-web-server:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-web-server:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.5/spring-boot-web-server-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-web-server/4.0.5/spring-boot-web-server-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-common:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-common:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-common/4.2.12.Final/netty-common-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-common/4.2.12.Final/netty-common-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-jdbc:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-jdbc:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jdbc/4.0.5/spring-boot-jdbc-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jdbc/4.0.5/spring-boot-jdbc-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-base:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-base:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-base/4.2.12.Final/netty-codec-base-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-base/4.2.12.Final/netty-codec-base-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.yaml:snakeyaml:pom:2.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.yaml:snakeyaml:pom:2.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/yaml/snakeyaml/2.5/snakeyaml-2.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-webflux:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-webflux:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webflux/4.0.5/spring-boot-starter-webflux-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-webflux/4.0.5/spring-boot-starter-webflux-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact jakarta.validation:jakarta.validation-api:pom:3.1.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact jakarta.validation:jakarta.validation-api:pom:3.1.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/validation/jakarta.validation-api/3.1.1/jakarta.validation-api-3.1.1.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-aop:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-aop:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-aop/1.5.3.RELEASE/spring-boot-starter-aop-1.5.3.RELEASE.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-aop/1.5.3.RELEASE/spring-boot-starter-aop-1.5.3.RELEASE.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starters:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [spring-ext (http://repo.spring.io/ext-release-local/, default, releases), spring-milestones (http://repo.spring.io/milestone, default, releases), spring-snapshots (http://repo.spring.io/snapshot, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starters:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [spring-ext (http://repo.spring.io/ext-release-local/, default, releases), spring-milestones (http://repo.spring.io/milestone, default, releases), spring-snapshots (http://repo.spring.io/snapshot, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from spring-ext: http://repo.spring.io/ext-release-local/org/springframework/boot/spring-boot-starters/1.5.3.RELEASE/spring-boot-starters-1.5.3.RELEASE.pom
+Downloading from spring-milestones: http://repo.spring.io/milestone/org/springframework/boot/spring-boot-starters/1.5.3.RELEASE/spring-boot-starters-1.5.3.RELEASE.pom
+Downloading from spring-snapshots: http://repo.spring.io/snapshot/org/springframework/boot/spring-boot-starters/1.5.3.RELEASE/spring-boot-starters-1.5.3.RELEASE.pom
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starters/1.5.3.RELEASE/spring-boot-starters-1.5.3.RELEASE.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starters/1.5.3.RELEASE/spring-boot-starters-1.5.3.RELEASE.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-parent:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [spring-ext (http://repo.spring.io/ext-release-local/, default, releases), spring-milestones (http://repo.spring.io/milestone, default, releases), spring-snapshots (http://repo.spring.io/snapshot, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-parent:pom:1.5.3.RELEASE is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [spring-ext (http://repo.spring.io/ext-release-local/, default, releases), spring-milestones (http://repo.spring.io/milestone, default, releases), spring-snapshots (http://repo.spring.io/snapshot, default, releases+snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from spring-ext: http://repo.spring.io/ext-release-local/org/springframework/boot/spring-boot-parent/1.5.3.RELEASE/spring-boot-parent-1.5.3.RELEASE.pom
+Downloading from spring-milestones: http://repo.spring.io/milestone/org/springframework/boot/spring-boot-parent/1.5.3.RELEASE/spring-boot-parent-1.5.3.RELEASE.pom
+Downloading from spring-snapshots: http://repo.spring.io/snapshot/org/springframework/boot/spring-boot-parent/1.5.3.RELEASE/spring-boot-parent-1.5.3.RELEASE.pom
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-parent/1.5.3.RELEASE/spring-boot-parent-1.5.3.RELEASE.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-parent/1.5.3.RELEASE/spring-boot-parent-1.5.3.RELEASE.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-handler:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-handler:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.2.12.Final/netty-handler-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-handler/4.2.12.Final/netty-handler-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-orm:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-orm:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-orm/7.0.6/spring-orm-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-orm/7.0.6/spring-orm-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-el:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-el:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.20/tomcat-embed-el-11.0.20.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-el/11.0.20/tomcat-embed-el-11.0.20.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-http-codec:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-http-codec:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-codec/4.0.5/spring-boot-http-codec-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-codec/4.0.5/spring-boot-http-codec-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.hibernate.orm:hibernate-core:pom:7.2.7.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.hibernate.orm:hibernate-core:pom:7.2.7.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/hibernate/orm/hibernate-core/7.2.7.Final/hibernate-core-7.2.7.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/hibernate/orm/hibernate-core/7.2.7.Final/hibernate-core-7.2.7.Final.pom (0 B at 0 B/s)
+[INFO] Artifact tools.jackson.core:jackson-databind:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact tools.jackson.core:jackson-databind:pom:3.1.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.0/jackson-databind-3.1.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/tools/jackson/core/jackson-databind/3.1.0/jackson-databind-3.1.0.pom (0 B at 0 B/s)
+[INFO] Artifact org.antlr:antlr4-runtime:pom:4.13.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.antlr:antlr4-runtime:pom:4.13.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.13.2/antlr4-runtime-4.13.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.13.2/antlr4-runtime-4.13.2.pom (0 B at 0 B/s)
+[INFO] Artifact org.antlr:antlr4-master:pom:4.13.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.antlr:antlr4-master:pom:4.13.2 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots), central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-master/4.13.2/antlr4-master-4.13.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/antlr/antlr4-master/4.13.2/antlr4-master-4.13.2.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.logging.log4j:log4j-to-slf4j:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.logging.log4j:log4j-to-slf4j:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.3/log4j-to-slf4j-2.25.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-to-slf4j/2.25.3/log4j-to-slf4j-2.25.3.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.logging.log4j:log4j:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.logging.log4j:log4j:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j/2.25.3/log4j-2.25.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j/2.25.3/log4j-2.25.3.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.logging.log4j:log4j-bom:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.logging.log4j:log4j-bom:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-bom/2.25.3/log4j-bom-2.25.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-bom/2.25.3/log4j-bom-2.25.3.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-tomcat:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-tomcat:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.5/spring-boot-starter-tomcat-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat/4.0.5/spring-boot-starter-tomcat-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.data:spring-data-jpa:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.data:spring-data-jpa:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-jpa/4.0.4/spring-data-jpa-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-jpa/4.0.4/spring-data-jpa-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.data:spring-data-jpa-parent:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.data:spring-data-jpa-parent:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-jpa-parent/4.0.4/spring-data-jpa-parent-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/data/spring-data-jpa-parent/4.0.4/spring-data-jpa-parent-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-dns:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-dns:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-dns/4.2.12.Final/netty-codec-dns-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-dns/4.2.12.Final/netty-codec-dns-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.kafka:spring-kafka:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.kafka:spring-kafka:pom:4.0.4 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/kafka/spring-kafka/4.0.4/spring-kafka-4.0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/kafka/spring-kafka/4.0.4/spring-kafka-4.0.4.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-transport-native-unix-common:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-transport-native-unix-common:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-unix-common/4.2.12.Final/netty-transport-native-unix-common-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-transport-native-unix-common/4.2.12.Final/netty-transport-native-unix-common-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-webflux:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-webflux:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webflux/4.0.5/spring-boot-webflux-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-webflux/4.0.5/spring-boot-webflux-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-classes-quic:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-classes-quic:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-classes-quic/4.2.12.Final/netty-codec-classes-quic-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-classes-quic/4.2.12.Final/netty-codec-classes-quic-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-tomcat:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-tomcat:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.5/spring-boot-tomcat-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-tomcat/4.0.5/spring-boot-tomcat-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-reactor-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-reactor-netty:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-reactor-netty/4.0.5/spring-boot-starter-reactor-netty-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-reactor-netty/4.0.5/spring-boot-starter-reactor-netty-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-resolver:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-resolver:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver/4.2.12.Final/netty-resolver-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver/4.2.12.Final/netty-resolver-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-logging:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-logging:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.5/spring-boot-starter-logging-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-logging/4.0.5/spring-boot-starter-logging-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.snakeyaml:snakeyaml-engine:pom:3.0.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.snakeyaml:snakeyaml-engine:pom:3.0.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/snakeyaml/snakeyaml-engine/3.0.1/snakeyaml-engine-3.0.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/snakeyaml/snakeyaml-engine/3.0.1/snakeyaml-engine-3.0.1.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-autoconfigure:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-autoconfigure:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.5/spring-boot-autoconfigure-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-autoconfigure/4.0.5/spring-boot-autoconfigure-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-servlet:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-servlet:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.5/spring-boot-servlet-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-servlet/4.0.5/spring-boot-servlet-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-jpa:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jpa/4.0.5/spring-boot-jpa-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jpa/4.0.5/spring-boot-jpa-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.logging.log4j:log4j-api:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.logging.log4j:log4j-api:pom:2.25.3 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.3/log4j-api-2.25.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.25.3/log4j-api-2.25.3.pom (0 B at 0 B/s)
+[INFO] Artifact org.ehcache:ehcache:pom:3.11.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.ehcache:ehcache:pom:3.11.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/ehcache/ehcache/3.11.1/ehcache-3.11.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/ehcache/ehcache/3.11.1/ehcache-3.11.1.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-web:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-web:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.6/spring-web-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-web/7.0.6/spring-web-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-messaging:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-messaging:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-messaging/7.0.6/spring-messaging-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-messaging/7.0.6/spring-messaging-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-aspects:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-aspects:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aspects/7.0.6/spring-aspects-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-aspects/7.0.6/spring-aspects-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.hibernate.models:hibernate-models:pom:1.0.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.hibernate.models:hibernate-models:pom:1.0.1 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/hibernate/models/hibernate-models/1.0.1/hibernate-models-1.0.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/hibernate/models/hibernate-models/1.0.1/hibernate-models-1.0.1.pom (0 B at 0 B/s)
+[INFO] Artifact commons-logging:commons-logging:pom:1.3.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact commons-logging:commons-logging:pom:1.3.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.3.6/commons-logging-1.3.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.commons:commons-parent:pom:97 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.commons:commons-parent:pom:97 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/97/commons-parent-97.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/97/commons-parent-97.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache:apache:pom:37 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache:apache:pom:37 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/37/apache-37.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/37/apache-37.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-buffer:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-buffer:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.2.12.Final/netty-buffer-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-buffer/4.2.12.Final/netty-buffer-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-http:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-http:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http/4.2.12.Final/netty-codec-http-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http/4.2.12.Final/netty-codec-http-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-core:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.tomcat.embed:tomcat-embed-core:pom:11.0.20 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.20/tomcat-embed-core-11.0.20.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/tomcat/embed/tomcat-embed-core/11.0.20/tomcat-embed-core-11.0.20.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-http-converter:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-http-converter:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.5/spring-boot-http-converter-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-http-converter/4.0.5/spring-boot-http-converter-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-data-commons:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-data-commons:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-data-commons/4.0.5/spring-boot-data-commons-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-data-commons/4.0.5/spring-boot-data-commons-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-resolver-dns-classes-macos:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-resolver-dns-classes-macos:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns-classes-macos/4.2.12.Final/netty-resolver-dns-classes-macos-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-resolver-dns-classes-macos/4.2.12.Final/netty-resolver-dns-classes-macos-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.5/spring-boot-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot/4.0.5/spring-boot-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact jakarta.annotation:jakarta.annotation-api:pom:3.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact jakarta.annotation:jakarta.annotation-api:pom:3.0.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/jakarta/annotation/jakarta.annotation-api/3.0.0/jakarta.annotation-api-3.0.0.pom (0 B at 0 B/s)
+[INFO] Artifact commons-codec:commons-codec:pom:1.19.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact commons-codec:commons-codec:pom:1.19.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.19.0/commons-codec-1.19.0.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache.commons:commons-parent:pom:85 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache.commons:commons-parent:pom:85 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/85/commons-parent-85.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/85/commons-parent-85.pom (0 B at 0 B/s)
+[INFO] Artifact org.apache:apache:pom:35 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.apache:apache:pom:35 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/35/apache-35.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/35/apache-35.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-webflux:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-webflux:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webflux/7.0.6/spring-webflux-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webflux/7.0.6/spring-webflux-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-compression:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-compression:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-compression/4.2.12.Final/netty-codec-compression-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-compression/4.2.12.Final/netty-codec-compression-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-tx:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-tx:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-tx/7.0.6/spring-tx-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-tx/7.0.6/spring-tx-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-jackson:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-jackson:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.5/spring-boot-starter-jackson-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-jackson/4.0.5/spring-boot-starter-jackson-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact io.netty:netty-codec-http3:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact io.netty:netty-codec-http3:pom:4.2.12.Final is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http3/4.2.12.Final/netty-codec-http3-4.2.12.Final.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/io/netty/netty-codec-http3/4.2.12.Final/netty-codec-http3-4.2.12.Final.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-starter-tomcat-runtime:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-starter-tomcat-runtime:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.5/spring-boot-starter-tomcat-runtime-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-tomcat-runtime/4.0.5/spring-boot-starter-tomcat-runtime-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework:spring-webmvc:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework:spring-webmvc:pom:7.0.6 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.6/spring-webmvc-7.0.6.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-webmvc/7.0.6/spring-webmvc-7.0.6.pom (0 B at 0 B/s)
+[INFO] Artifact org.springframework.boot:spring-boot-transaction:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.springframework.boot:spring-boot-transaction:pom:4.0.5 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-transaction/4.0.5/spring-boot-transaction-4.0.5.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-transaction/4.0.5/spring-boot-transaction-4.0.5.pom (0 B at 0 B/s)
+[INFO] Artifact org.gensokyo.boot:kafka-spring-boot-starter:pom:2.7.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+[INFO] Artifact org.gensokyo.boot:kafka-spring-boot-starter:pom:2.7.0 is present in the local repository, but cached from a remote repository ID that is unavailable in current build context, verifying that is downloadable from [central (https://repo.maven.apache.org/maven2, default, releases)]
+Downloading from central: https://repo.maven.apache.org/maven2/org/gensokyo/boot/kafka-spring-boot-starter/2.7.0/kafka-spring-boot-starter-2.7.0.pom
+[INFO] Building tar: D:\Work\99_Code\data-generator\data-generator-service\target\data-generator-service.tar.gz
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-reader-elasticsearch >---
+[INFO] Building data-generator-reader-elasticsearch 3.0.0-SNAPSHOT      [35/40]
+[INFO]   from data-generator-reader\data-generator-reader-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-reader-elasticsearch ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-elasticsearch\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-reader-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-reader-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-reader-elasticsearch ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-reader-elasticsearch ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-reader\data-generator-reader-elasticsearch\target\data-generator-reader-elasticsearch-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ---< org.gensokyo.data.generator:data-generator-scripter-javascript >---
+[INFO] Building data-generator-scripter-javascript 3.0.0-SNAPSHOT       [36/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-javascript\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-javascript ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-javascript\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-javascript ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-javascript ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-javascript ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-javascript ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-javascript ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-javascript ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-javascript\target\data-generator-scripter-javascript-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] ----< org.gensokyo.data.generator:data-generator-scripter-velocity >----
+[INFO] Building data-generator-scripter-velocity 3.0.0-SNAPSHOT         [37/40]
+[INFO]   from data-generator-scripter\data-generator-scripter-velocity\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-scripter-velocity ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-velocity\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-scripter-velocity ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-scripter-velocity ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-scripter-velocity ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-scripter-velocity ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-scripter-velocity ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-scripter\data-generator-scripter-velocity\target\data-generator-scripter-velocity-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --< org.gensokyo.data.generator:data-generator-writer-elasticsearch >---
+[INFO] Building data-generator-writer-elasticsearch 3.0.0-SNAPSHOT      [38/40]
+[INFO]   from data-generator-writer\data-generator-writer-elasticsearch\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-elasticsearch ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-elasticsearch\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 4 source files with javac [debug release 17] to target\classes
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: Some input files use or override a deprecated API.
+[INFO] /D:/Work/99_Code/data-generator/data-generator-writer/data-generator-writer-elasticsearch/src/main/java/org/gensokyo/data/writer/ElasticsearchWriter.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-elasticsearch ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-elasticsearch ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-elasticsearch ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-elasticsearch ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-elasticsearch\target\data-generator-writer-elasticsearch-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] -------< org.gensokyo.data.generator:data-generator-writer-json >-------
+[INFO] Building data-generator-writer-json 3.0.0-SNAPSHOT               [39/40]
+[INFO]   from data-generator-writer\data-generator-writer-json\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-writer-json ---
+[INFO] Deleting D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-json\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ data-generator-writer-json ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ data-generator-writer-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ data-generator-writer-json ---
+[INFO] Copying 0 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ data-generator-writer-json ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ data-generator-writer-json ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.1:jar (default-jar) @ data-generator-writer-json ---
+[INFO] Building jar: D:\Work\99_Code\data-generator\data-generator-writer\data-generator-writer-json\target\data-generator-writer-json-3.0.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --------< org.gensokyo.data.generator:data-generator-converter >--------
+[INFO] Building data-generator-converter 3.0.0-SNAPSHOT                 [40/40]
+[INFO]   from data-generator-converter\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ data-generator-converter ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for data-generator 3.0.0-SNAPSHOT:
+[INFO] 
+[INFO] data-generator-dependencies ........................ SUCCESS [  1.346 s]
+[INFO] data-generator ..................................... SUCCESS [  0.257 s]
+[INFO] data-generator-common .............................. SUCCESS [  0.018 s]
+[INFO] data-generator-core ................................ SUCCESS [01:04 min]
+[INFO] data-generator-database-core ....................... SUCCESS [ 15.218 s]
+[INFO] data-generator-datasource .......................... SUCCESS [  0.023 s]
+[INFO] data-generator-iterator ............................ SUCCESS [  0.010 s]
+[INFO] data-generator-iterator-number ..................... SUCCESS [ 11.627 s]
+[INFO] data-generator-iterator-constant ................... SUCCESS [  9.831 s]
+[INFO] data-generator-iterator-datetime ................... SUCCESS [ 11.224 s]
+[INFO] data-generator-reader .............................. SUCCESS [  0.005 s]
+[INFO] data-generator-reader-database ..................... SUCCESS [  9.519 s]
+[INFO] data-generator-iterator-database ................... SUCCESS [ 13.601 s]
+[INFO] data-generator-iterator-excel ...................... SUCCESS [ 12.242 s]
+[INFO] data-generator-iterator-csv ........................ SUCCESS [ 10.412 s]
+[INFO] data-generator-iterator-json ....................... SUCCESS [ 10.292 s]
+[INFO] data-generator-generator ........................... SUCCESS [  0.009 s]
+[INFO] data-generator-generator-async ..................... SUCCESS [ 10.994 s]
+[INFO] data-generator-generator-sync ...................... SUCCESS [  6.126 s]
+[INFO] data-generator-stage ............................... SUCCESS [ 11.588 s]
+[INFO] data-generator-faker ............................... SUCCESS [ 22.471 s]
+[INFO] data-generator-reader-spel ......................... SUCCESS [ 11.771 s]
+[INFO] data-generator-reader-ai ........................... SUCCESS [ 21.504 s]
+[INFO] data-generator-reader-excel ........................ SUCCESS [ 10.824 s]
+[INFO] data-generator-reader-json ......................... SUCCESS [  7.594 s]
+[INFO] data-generator-reader-csv .......................... SUCCESS [ 21.646 s]
+[INFO] data-generator-scripter ............................ SUCCESS [  0.004 s]
+[INFO] data-generator-scripter-spel ....................... SUCCESS [  7.576 s]
+[INFO] data-generator-writer .............................. SUCCESS [  0.003 s]
+[INFO] data-generator-writer-database ..................... SUCCESS [ 12.230 s]
+[INFO] data-generator-writer-kafka ........................ SUCCESS [ 17.984 s]
+[INFO] data-generator-writer-csv .......................... SUCCESS [  9.437 s]
+[INFO] data-generator-writer-excel ........................ SUCCESS [  8.507 s]
+[INFO] data-generator-service ............................. SUCCESS [02:03 min]
+[INFO] data-generator-reader-elasticsearch ................ SUCCESS [ 25.542 s]
+[INFO] data-generator-scripter-javascript ................. SUCCESS [ 10.569 s]
+[INFO] data-generator-scripter-velocity ................... SUCCESS [  1.282 s]
+[INFO] data-generator-writer-elasticsearch ................ SUCCESS [ 27.839 s]
+[INFO] data-generator-writer-json ......................... SUCCESS [  6.057 s]
+[INFO] data-generator-converter ........................... SUCCESS [  0.003 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  09:09 min
+[INFO] Finished at: 2026-04-27T13:29:26+08:00
+[INFO] ------------------------------------------------------------------------

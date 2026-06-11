@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: data-generator-service-staging
+
+data:
+  generator:
+    governance:
+      require-published-for-task-run: true
+      reject-plaintext-passwords-in-templates: true
+    schedule:
+      enabled: true
+    console-security:
+      enabled: true
+      role-header: X-Console-Role
+      actor-header: X-Console-Actor

@@ -1,0 +1,421 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/vasin/.m2/wrapper/dists/apache-maven-3.9.11-bin/6mqf5t809d9geo83kj4ttckcbc/apache-maven-3.9.11/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------< org.gensokyo.data.generator:data-generator-service >---------
+[INFO] Building data-generator-service 3.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/maven-metadata.xml
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.pom
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.pom
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.pom
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.pom
+[WARNING] The POM for org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT is missing, no dependency information available
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+Downloading from nexus-snapshots: http://172.25.20.192:8081/nexus/content/repositories/snapshots/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+Downloading from maven_central: https://repo.maven.apache.org/maven2/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+Downloading from spring-snapshots: https://repo.spring.io/snapshot/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-core/3.0.0-SNAPSHOT/data-generator-core-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-number/3.0.0-SNAPSHOT/data-generator-iterator-number-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-constant/3.0.0-SNAPSHOT/data-generator-iterator-constant-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-datetime/3.0.0-SNAPSHOT/data-generator-iterator-datetime-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-database/3.0.0-SNAPSHOT/data-generator-iterator-database-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-excel/3.0.0-SNAPSHOT/data-generator-iterator-excel-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-csv/3.0.0-SNAPSHOT/data-generator-iterator-csv-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-iterator-json/3.0.0-SNAPSHOT/data-generator-iterator-json-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-async/3.0.0-SNAPSHOT/data-generator-generator-async-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-generator-sync/3.0.0-SNAPSHOT/data-generator-generator-sync-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-stage/3.0.0-SNAPSHOT/data-generator-stage-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-database/3.0.0-SNAPSHOT/data-generator-reader-database-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-spel/3.0.0-SNAPSHOT/data-generator-reader-spel-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-ai/3.0.0-SNAPSHOT/data-generator-reader-ai-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-excel/3.0.0-SNAPSHOT/data-generator-reader-excel-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-json/3.0.0-SNAPSHOT/data-generator-reader-json-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-reader-csv/3.0.0-SNAPSHOT/data-generator-reader-csv-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-scripter-spel/3.0.0-SNAPSHOT/data-generator-scripter-spel-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-database/3.0.0-SNAPSHOT/data-generator-writer-database-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-kafka/3.0.0-SNAPSHOT/data-generator-writer-kafka-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-csv/3.0.0-SNAPSHOT/data-generator-writer-csv-3.0.0-SNAPSHOT.jar
+Downloading from vaadin-prereleases: https://maven.vaadin.com/vaadin-prereleases/org/gensokyo/data/generator/data-generator-writer-excel/3.0.0-SNAPSHOT/data-generator-writer-excel-3.0.0-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  49.985 s
+[INFO] Finished at: 2026-04-27T08:51:29+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal on project data-generator-service: Could not resolve dependencies for project org.gensokyo.data.generator:data-generator-service:jar:3.0.0-SNAPSHOT
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-core:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-number:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-constant:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-datetime:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-database:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-excel:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-csv:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-iterator-json:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-async:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-generator-sync:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-stage:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-database:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-spel:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-ai:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-excel:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-json:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-reader-csv:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-scripter-spel:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-database:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-kafka:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-csv:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] dependency: org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT (compile)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT in nexus-snapshots (http://172.25.20.192:8081/nexus/content/repositories/snapshots)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT in maven_central (https://repo.maven.apache.org/maven2/)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT in spring-snapshots (https://repo.spring.io/snapshot)
+[ERROR] 	Could not find artifact org.gensokyo.data.generator:data-generator-writer-excel:jar:3.0.0-SNAPSHOT in vaadin-prereleases (https://maven.vaadin.com/vaadin-prereleases)
+[ERROR] 
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException

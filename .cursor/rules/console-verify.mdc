@@ -1,0 +1,46 @@
+---
+description: Run the fixed console verification pipeline when changing operator console UI, APIs, or E2E assets.
+globs:
+  - data-generator-console-web/**
+  - data-generator-service/src/main/java/org/gensokyo/data/api/console/**
+  - data-generator-service/src/main/java/org/gensokyo/data/config/ConsoleWebConfig.java
+  - data-generator-service/src/main/java/org/gensokyo/data/controller/HealthController.java
+  - data-generator-service/src/main/java/org/gensokyo/data/messaging/**
+  - data-generator-service/src/test/java/org/gensokyo/data/api/console/**
+  - data-generator-service/src/test/java/org/gensokyo/data/config/Console*
+  - scripts/e2e-podman.ps1
+  - scripts/verify-console*.ps1
+  - e2e/**
+alwaysApply: false
+---
+
+# Console verification (mandatory when touching console)
+
+After editing files matched by this rule, run the **fixed verification pipeline** before claiming the work is done:
+
+```powershell
+# Full pipeline: Java unit tests → frontend build → Podman Playwright UI/E2E
+.\scripts\verify-console.ps1
+
+# Faster iteration when the container image is already built:
+.\scripts\verify-console.ps1 -SkipBuild -KeepContainer
+```
+
+## Pipeline phases
+
+| Phase | What | Script / command |
+|-------|------|------------------|
+| Unit | Console REST, health, static resource, Jackson ID tests | `scripts/verify-console-unit.ps1` |
+| Build | `tsc` + Vite production bundle | `npm run build` in `data-generator-console-web` |
+| UI/E2E | Playwright specs under `e2e/specs/` against Podman service | `scripts/e2e-podman.ps1` |
+
+## E2E layout
+
+- `e2e/specs/api.*.spec.ts` — REST smoke
+- `e2e/specs/navigation.spec.ts`, `home.spec.ts`, `pages.spec.ts` — page coverage
+- `e2e/specs/theme.spec.ts`, `acceptance.spec.ts` — dual-theme UI acceptance
+- `e2e/specs/template-workflow.spec.ts` — save-template business flow
+
+CI runs the same pipeline on push/PR when console paths change (`.github/workflows/console-verify.yml`).
+
+Do **not** skip verification for console-only bugfixes unless the user explicitly opts out.

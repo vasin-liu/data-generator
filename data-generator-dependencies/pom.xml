@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.gensokyo.data.generator</groupId>
+    <version>3.0.0-SNAPSHOT</version>
+    <artifactId>data-generator-dependencies</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>25</java.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+
+        <!-- gensokyo -->
+        <gensokyo.version>2.7.0</gensokyo.version>
+        <elasticsearch.version>7.17.8</elasticsearch.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>nexus-releases</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>nexus-snapshots</name>
+            <url>http://172.25.20.192:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- dap 依赖定义 -->
+            <dependency>
+                <groupId>org.gensokyo</groupId>
+                <artifactId>kits</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-client</artifactId>
+                <version>${elasticsearch.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-calcite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-database-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-datasource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-stage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-faker</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-number</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-datetime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-constant</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-iterator-csv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-generator-async</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-generator-sync</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-elasticsearch</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-spel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-csv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-reader-ai</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-scripter-javascript</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-scripter-spel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-scripter-velocity</artifactId>
+                <version>3.0.0-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-elasticsearch</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-csv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.gensokyo.data.generator</groupId>
+                <artifactId>data-generator-writer-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+</project>

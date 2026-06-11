@@ -1,0 +1,103 @@
+# 数据集名称，各个文件中唯一
+name: bas_site_flow
+# 迭代器配置
+iterator:
+  type: constant
+  dataset: [ 'GZSCATS_7502','GZSCATS_7503','GZSCATS_7504' ]
+  iterator:
+    type: database
+    params:
+      - name: siteCode
+        language:
+          type: SPEL
+          content: '#dataset'
+    dataSourceId: 'tc_pg'
+    sql: >-
+      SELECT unnest(STRING_TO_ARRAY(dictionary_codes, ',')) AS detector_code
+      FROM utcs_bas_dictionary_group where site_code = :siteCode
+      GROUP BY site_code, unnest(STRING_TO_ARRAY(dictionary_codes, ','))
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.detector_code"
+      - type: SELECT
+    iterator:
+      type: datetime
+      from: 2024-12-24 00:00:00
+      to: 2024-12-26 00:00:00
+      step: 5
+      unit: Minutes
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: site_id
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0]"
+      - type: SELECT
+  - name: detector_id
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[1]"
+      - type: SELECT
+  - name: detector_count
+    stages:
+      - type: READ
+        strategy:
+          type: WEIGHT
+        readers:
+          - type: SPEL
+            weight: 5
+            content: "#faker.number.numberBetween(0,65533)"
+          - type: CONSTANT
+            weight: 95
+            content: [ 65534,65535 ]
+  - name: create_time
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[2]"
+      - type: SELECT
+  - name: statistic_time
+    dependsOn:
+      - create_time
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: zone_name
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 'GZSCATS' ]
+
+
+# 数据输出配置
+output:
+  writers:
+        - type: CONSOLE
+#    - type: JDBC
+#      dataSourceId: 'tc_pg'
+#      target: 'bas_site_flow'
+#      template: >-
+#        site_id, detector_id, detector_count, create_time, statistic_time, zone_name

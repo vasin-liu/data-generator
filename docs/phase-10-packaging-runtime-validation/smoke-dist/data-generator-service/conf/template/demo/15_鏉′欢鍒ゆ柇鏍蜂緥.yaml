@@ -1,0 +1,56 @@
+# 数据集名称，各个文件中唯一
+name: demo_15
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: DICT
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [1,2,3,NULL]
+  - name: MAP_NO
+    dependsOn:
+      - DICT
+    stages:
+      - type: SELECT
+      - type: CONDITION
+        choose:
+          - when:
+              content: "#dataset==3"
+            then:
+              content: >-
+                #faker.datetime.plusHours(#faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}"),#dataset+1)
+          - when:
+              content: "#dataset==1"
+            then:
+              content: "#dataset+100"
+          - when:
+              content: "#dataset==null"
+            then:
+              type: PLAIN
+              content: ""
+        otherwise:
+          then:
+            type: PLAIN
+            content: 'X'
+
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

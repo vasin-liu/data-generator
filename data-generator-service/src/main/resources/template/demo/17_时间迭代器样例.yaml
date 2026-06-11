@@ -1,0 +1,92 @@
+# 数据集名称，各个文件中唯一
+name: demo_17
+# 迭代器配置
+iterator:
+  type: datetime
+  from: 2024-08-01 00:00:00
+  to: 2024-08-03 00:00:00
+#  stages:
+#    - type: LOG
+#    - type: SELECT
+#    - type: SCRIPT
+#      language:
+#        type: SPEL
+#        content: "#dataset.plusMinutes(5)"
+#    - type: LOG
+#  choose:
+#    - when:
+#        type: SPEL
+#        content: "#dataset.isBefore(T(java.time.LocalDateTime).of(2024,8,2,00,05))"
+#      then:
+#        type: SPEL
+#        content: "true"
+#  otherwise:
+#    then:
+#      type: SPEL
+#      content: "#dataset"
+  iterator:
+    type: NUMBER
+    from: 1
+    to: 3
+#    stages:
+#      - type: LOG
+#    choose:
+#      - when:
+#          type: SPEL
+#          content: "#dataset==2"
+#        then:
+#          type: SPEL
+#          content: "true"
+#    otherwise:
+#      then:
+#        type: SPEL
+#        content: "#dataset"
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: IT_DATETIME
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset[0].get(),'yyyy-MM-dd HH:mm:ss')
+      - type: SELECT
+  - name: IT_NUMBER
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[1]"
+      - type: SELECT
+  - name: CONCAT
+    dependsOn:
+      - IT_DATETIME
+      - IT_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset[0],'yyyyMMddHHmmss') + '-' + #dataset[1]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

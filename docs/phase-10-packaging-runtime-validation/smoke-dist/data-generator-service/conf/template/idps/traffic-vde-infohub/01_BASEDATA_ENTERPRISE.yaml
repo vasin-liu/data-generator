@@ -1,0 +1,97 @@
+# 数据集名称，各个文件中唯一
+name: BASEDATA_ENTERPRISE
+# 迭代器配置
+iterator:
+  type: CONSTANT
+  dataset: [{"NAME":"***","COMPUTER_NUMBER":"123456","BUSINESS_CODE":"1234","BUSINESS_ABBREVIATION":"***","ID_NUMBER":"440101********3398","BUSINESS_LICENSE":"粤A***","ORGANIZATION_CODE":"440115"}]
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: NAME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.NAME"
+  - name: COMPUTER_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.COMPUTER_NUMBER"
+  - name: BUSINESS_CODE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.BUSINESS_CODE"
+  - name: BUSINESS_LICENSE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.BUSINESS_LICENSE"
+  - name: ID_NUMBER
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.ID_NUMBER"
+  - name: ORGANIZATION_CODE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.ORGANIZATION_CODE"
+  - name: BUSINESS_ABBREVIATION
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.BUSINESS_ABBREVIATION"
+  - name: STATE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1 ]
+  - name: CREATE_TIME
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.now()
+  - name: UPDATE_TIME
+    dependsOn:
+      - CREATE_TIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+
+# 数据输出配置
+output:
+  writers:
+    #    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'traffic_vde_infohub'
+      target: 'BASEDATA_ENTERPRISE'
+      template: >-
+        NAME,COMPUTER_NUMBER,BUSINESS_CODE,BUSINESS_LICENSE,ID_NUMBER,ORGANIZATION_CODE,BUSINESS_ABBREVIATION,STATE,CREATE_TIME,UPDATE_TIME

@@ -1,0 +1,31 @@
+# E2E / container image for Data Generator packaged service (JDK 25).
+FROM docker.io/eclipse-temurin:25-jre-jammy
+
+LABEL org.opencontainers.image.title="data-generator-service" \
+      org.opencontainers.image.description="Data Generator operator console and API"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl bash \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+# Maven assembly archive root folder: data-generator-service/{bin,conf,lib,...}
+ADD target/data-generator-service.tar.gz .
+WORKDIR /opt/data-generator-service
+
+RUN mkdir -p logs db jvmdump \
+    && if [ -f conf/service.env.example ]; then cp conf/service.env.example conf/service.env; fi \
+    && find conf bin -type f \( -name '*.env' -o -name '*.example' -o -name '*.sh' \) -exec sed -i 's/\r$//' {} + \
+    && chmod +x bin/*.sh bin/lib/*.sh 2>/dev/null || true
+
+ENV DG_DAEMON=0 \
+    DG_JAVA_PROMPT=0 \
+    DG_SPRING_PROFILES_ACTIVE=e2e \
+    DG_SERVER_PORT=9876
+
+EXPOSE 9876
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=120s --retries=8 \
+  CMD curl -sf http://127.0.0.1:9876/healthz | grep -q '"opcode"[[:space:]]*:[[:space:]]*0' || exit 1
+
+CMD ["bash", "bin/run.sh", "start", "0"]

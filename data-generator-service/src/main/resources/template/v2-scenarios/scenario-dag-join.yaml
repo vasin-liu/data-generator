@@ -1,0 +1,41 @@
+# definitionKind: V2
+# scenarioId: GF-DAG
+# catalogRef: WF-03 — L1 transform DAG filter then shift inside compute block
+name: scenario-dag-join
+workflow:
+  steps:
+    - type: invoke_compute_block
+      id: invoke-dag
+      computeBlockId: dag-block
+computeBlocks:
+  - id: dag-block
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 5
+          step: 1
+    transformGraph:
+      transforms:
+        filter-high:
+          type: sql
+          name: filter-high
+          sql: SELECT value FROM seed WHERE value >= 4
+        shift-values:
+          type: sql
+          name: shift-values
+          sql: SELECT value, value + 10 AS shifted FROM input
+      nodes:
+        - id: n1
+          transformId: filter-high
+          outputAlias: filtered
+        - id: n2
+          transformId: shift-values
+          outputAlias: output
+      edges:
+        - fromNodeId: n1
+          fromPort: out
+          toNodeId: n2
+          toPort: in

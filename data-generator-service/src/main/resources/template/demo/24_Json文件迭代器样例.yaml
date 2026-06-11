@@ -1,0 +1,30 @@
+# 数据集名称，各个文件中唯一
+name: demo_24
+# 迭代器配置
+iterator:
+  type: JSON
+  path: "E:\\Desktop\\temp\\1-测试数据\\停车场-普查路内-列表.json"
+  startRow: 1
+  endRow: 3
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.get('停车场名称')"
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

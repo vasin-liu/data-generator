@@ -1,0 +1,815 @@
+# 数据集名称，各个文件中唯一
+name: car_detect_info
+# 迭代器配置
+iterator:
+  type: NUMBER
+  from: 1
+  to: 100
+  step: 1
+# 生成器配置
+generator:
+  type: ASYNC
+  batchSize: 10
+  executor:
+    coreSize: 8
+    maxSize: 16
+    queueCapacity: 8
+# 数据集元数据配置
+fields:
+  - name: VEHICLE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [
+              { "HPHM": "粤A11112","HPZL": 2,"CLLX": 24,"CSYS": 1,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X3","CAR_YEAR": "2021","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A33332","HPZL": 1,"CLLX": 21,"CSYS": 3,"HPYS": 2,"CAR_LOGO": "东风","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A44441","HPZL": 2,"CLLX": 24,"CSYS": 4,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "A8","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A55552","HPZL": 2,"CLLX": 24,"CSYS": 5,"HPYS": 0,"CAR_LOGO": "奔驰","CAR_SERIES": "S200","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A66661","HPZL": 2,"CLLX": 24,"CSYS": 6,"HPYS": 0,"CAR_LOGO": "丰田","CAR_SERIES": "凯美瑞","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A77772","HPZL": 1,"CLLX": 22,"CSYS": 7,"HPYS": 2,"CAR_LOGO": "解放","CAR_SERIES": "","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A88881","HPZL": 2,"CLLX": 24,"CSYS": 8,"HPYS": 0,"CAR_LOGO": "日产","CAR_SERIES": "奇骏","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A99992","HPZL": 2,"CLLX": 24,"CSYS": 9,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X1","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A12341","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q5","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A88888","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "奥迪","CAR_SERIES": "Q7","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+              { "HPHM": "粤A379T7","HPZL": 2,"CLLX": 24,"CSYS": 10,"HPYS": 0,"CAR_LOGO": "宝马","CAR_SERIES": "X5","CAR_YEAR": "2024","NO_PLATE_CAR": 0 },
+            ]
+  - name: INFO_ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: HPZL
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.HPZL"
+      - type: SELECT
+  - name: CLLX
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CLLX"
+      - type: SELECT
+  - name: CSYS
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CSYS"
+      - type: SELECT
+  - name: ILLEGAL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+      - type: SELECT
+  - name: DEVICE_ID
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [
+              { "KKBH": "440112000000111112","FXMS": "1","CDBH": 1,"KKDZ": "测试卡口地址","KKMC": "测试卡口","CDLX": "1","JSDW": "","ZPFXLX": "1","DLMC": "测试卡口地址","JD":"113.4593690","WD":"23.0744790","SXJSBBM":"44011200000011111201","XZQH":"440112" },
+              { "KKBH": "440112000000111113","FXMS": "1","CDBH": 1,"KKDZ": "电警卡口地址","KKMC": "测试电警卡口","CDLX": "1","JSDW": "","ZPFXLX": "1","DLMC": "电警卡口地址","JD":"113.4293690","WD":"23.2744790","SXJSBBM":"44011200000011111301","XZQH":"440112" },
+            ]
+      - type: SELECT
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKBH + '01'"
+  - name: JGSK
+    dependsOn:
+      - IN_OUT_TYPE
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.format(#faker.datetime.minusHours(#dataset),'yyMMddHHmmss')
+  - name: HPHM
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.HPHM"
+      - type: SELECT
+  - name: HPYS
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.HPYS"
+      - type: SELECT
+  - name: CAR_YEAR
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CAR_YEAR"
+      - type: SELECT
+  - name: PILOT_SUNVISOR
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: COPILOT_SUNVISOR
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: PENDANTS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: ACCESSORY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: TISSUE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: PILOT_SEATBELT
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: COPILOT_SEATBELT
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: PIC_PLATE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/simulation/pic/g1/M01/00011001/20200225/LDpT4l5U2xqIerXBAAAZOo6T43EAADzmQIba1IAABlS467.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M01/00011001/20200225/LDpT415U3HeIG0A0AAAXhp_0kZMAAD1KgKdSXcAABee516.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M00/00011001/20200225/LDpT415U2zmIEUEIAAAmYpqcYCkAAD1JgFY-cMAACZ6559.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M00/00011001/20200225/LDpT415U2x2IcE6CAAAm6rbQPtAAAD1JgDn9TIAACcC957.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U26SIIKE5AAAww51_jvQAADzngCeJu8AADDb256.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U2uKINBpAAAAXzxQFQ-kAADzlwECudYAABfn848.jpg"
+  - name: PIC_ABBREVIATE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210610/rBkVhWDB2GWIEZx-AAdwNGUSeOwAAAAWgAAAAAAB3BM397.jpg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn7GIHz71AADogyvcEjMAAAADAA4xEEAAOib567.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/motorvehicle_20200225_16_44050100000034010001_cimya9.Jpeg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn6WISyHPAAB_niC42DUAAAADAA4RIsAAH-2098.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/motorvehicle_20200225_16_44050100000031020002_5646rg.Jpeg"
+  - name: PIC_VEHICLE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn6WISyHPAAB_niC42DUAAAADAA4RIsAAH-2098.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U2z2IOAJ9AAcZxS4rRyYAADzmAP1wnQABxnd758.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M01/00011001/20200225/LDpT415U3CKID869AAhp-A8vTmkAAD1KwKY34AACGoQ573.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M01/00011001/20200225/LDpT415U2zmIXDlYAAP-Iid3racAAD1JQFY16sAA_46814.jpg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn26IdFdgAABT00_opxEAAAADAAqrYQAAFPr743.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M00/00011001/20200225/LDpT415U2x6IMTvXAAbPnQjnTsoAAD1JgDx_sEABs-1838.jpg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn7GIHz71AADogyvcEjMAAAADAA4xEEAAOib567.jpg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn6WISyHPAAB_niC42DUAAAADAA4RIsAAH-2098.jpg"
+              - "http://172.25.21.133:8088/g1/M00/00031003/20210528/rBkVhWCwn7GIHz71AADogyvcEjMAAAADAA4xEEAAOib567.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g1/M01/00011001/20200225/LDpT4l5U2ziIM5KtAAWHoWDjiVwAADzmQKgxU8ABYe5966.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M01/00011001/20200225/LDpT415U2v2ILliCAATphe2VDy4AAD1IQP3V7MABOmd413.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M01/00011001/20200225/LDpT415U21aIPWTEAAb347UURtcAAD1JQMnDvUABvf7820.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U21aICtQlAAVEVr02mHMAADzmgFHfM8ABURu976.jpg"
+              - "http://172.25.21.133:8088/simulation/pic/g2/M00/00011001/20200225/LDpT415U23GIM6RcAATc76ukOqsAAD1JgPm1TYABN0H656.jpg"
+  - name: WITH_SUNROOF
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: PILOT_CALL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: VEHICLE_LENGTH
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(3900,5000)"
+  - name: GRAFFITI
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: DIRECTION_ID
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.FXMS"
+  - name: LANE_NO
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CDBH"
+  - name: SPEED
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(60,120)"
+  - name: CJSJ
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyMMddHHmmss'}")
+  - name: ORIGINAL_DEVICE_ID
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKBH + '01'"
+  - name: DEVICE_ADDR
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKDZ"
+  - name: JGRQ
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','yyMMdd'}")
+  - name: JGSJ
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.expression("#{date.past '1','DAYS','HHmmss'}")
+  - name: HPGS
+    dependsOn:
+      - HPHM
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#faker.vehicleCN.plateProvince(#dataset)"
+  - name: CAR_RECT
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+  - name: PLATE_RECT
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ "{'X':0,'Y':0,'Width':0,'Height':0}" ]
+  - name: CAR_LOGO
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CAR_LOGO"
+      - type: SELECT
+  - name: CAR_SERIES
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CAR_SERIES"
+      - type: SELECT
+  - name: IN_OUT_TYPE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1,0 ]
+      - type: SELECT
+        # 按顺序且可重复读取
+        strategy:
+          type: REPEAT_ORDER
+  - name: NO_PLATE_CAR
+    dependsOn:
+      - VEHICLE
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.NO_PLATE_CAR"
+      - type: SELECT
+  - name: DATA_SRC
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1,2,3,4,5,6,7,9,10 ]
+  - name: INSERT_TIME
+    dependsOn:
+      - CJSJ
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: TOLLGATE_ID
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKBH"
+  - name: ORIGINAL_TOLLGATE_ID
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKBH"
+  - name: TOLLGATE_NAME
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.KKMC"
+  - name: LANE_TYPE
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.CDLX"
+  - name: PLATE_UNIFORM
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 99 ]
+  - name: VECHILE_LIMIT_SPEED
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 60,70,80 ]
+  - name: VEHICLE_APPEARANCE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: VEHICLE_SUNVISOR
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: ORGAN_NAME
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.JSDW"
+  - name: VEHICLE_QUALITY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: YELLOW_LABEL_CAR
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: DAMAGED_PARTS
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 99 ]
+  - name: BACK_VEHICLE
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.ZPFXLX"
+  - name: CARD
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: NAME_OF_PASSED_ROAD
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.DLMC"
+  - name: IS_ALTERED
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: IS_COVERED
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: DRIVER_FACE_URL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
+  - name: CO_DRIVER_FACE_URL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content:
+              - "http://172.25.21.133:8088/simulation/pic/g1/M00/00011001/20200225/LDpT4l5U3CKIOctXAAAvpaTsytQAADzngPYf8wAAC-9855.jpg"
+  - name: ECSB
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: OCCUPANT_CO_DRIVER
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: USING_PROPERTIES_CODE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 ]
+  - name: ROOF_RACK
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: HEAVY_TRUCK_COVER
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: SPARE_TIRE
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: VEHICLE_WIDTH
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(3000,4000)"
+  - name: VEHICLE_HEIGHT
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(2000,3000)"
+  - name: PLATE_RELIABILITY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: PLATE_CHAR_RELIABILITY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: BRAND_RELIABILITY
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: ALGORITHM_ID
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 50001 ]
+  - name: LONGITUDE
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.JD"
+  - name: LATITUDE
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.WD"
+  - name: VIID_OBJECT_ID
+    dependsOn:
+      - DEVICE_ID
+      - JGSK
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#faker.snowflake.viid(#dataset[0].SXJSBBM!=null?#dataset[0].SXJSBBM:#dataset[0].KKBH+'01','02',#dataset[1],'02')"
+  - name: COMPOSITE_URL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: THUMBNAIL_URL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: VENDOR
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: ORG_CODE
+    dependsOn:
+      - DEVICE_ID
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset.XZQH"
+  - name: VEHICLE_MASK
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(1,5)"
+  - name: COPILOT_CALL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: AERIAL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: IS_RENEWAL
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0 ]
+  - name: PRE_HPZL
+    dependsOn:
+      - HPZL
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_CLLX
+    dependsOn:
+      - CLLX
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_CAR_LOGO
+    dependsOn:
+      - CAR_LOGO
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_CSYS
+    dependsOn:
+      - CSYS
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_HPHM
+    dependsOn:
+      - HPHM
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_HPYS
+    dependsOn:
+      - HPYS
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_CAR_SERIES
+    dependsOn:
+      - CAR_SERIES
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: PRE_CAR_YEAR
+    dependsOn:
+      - CAR_YEAR
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: THIRD_ID
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: THIRD_SRC
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0 ]
+  - name: RLTZ
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ 0,1,99 ]
+  - name: RELATED_LIST
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: JDBC
+      dataSourceId: 'traffic_command_clickhouse'
+      target: 'CAR_DETECT_INFO'
+      template: >-
+        HPZL,CLLX,CSYS,ILLEGAL,INFO_ID,DEVICE_ID,JGSK,HPHM,HPYS,CAR_YEAR,PILOT_SUNVISOR,COPILOT_SUNVISOR,PENDANTS,
+        ACCESSORY,TISSUE,PILOT_SEATBELT,COPILOT_SEATBELT,PIC_PLATE,PIC_ABBREVIATE,PIC_VEHICLE,WITH_SUNROOF,PILOT_CALL,VEHICLE_LENGTH,
+        GRAFFITI,DIRECTION_ID,LANE_NO,SPEED,CJSJ,ORIGINAL_DEVICE_ID,DEVICE_ADDR,JGRQ,JGSJ,HPGS,CAR_RECT,PLATE_RECT,CAR_LOGO,
+        CAR_SERIES,IN_OUT_TYPE,NO_PLATE_CAR,DATA_SRC,INSERT_TIME,TOLLGATE_ID,ORIGINAL_TOLLGATE_ID,TOLLGATE_NAME,LANE_TYPE,
+        PLATE_UNIFORM,VECHILE_LIMIT_SPEED,VEHICLE_APPEARANCE,VEHICLE_SUNVISOR,ORGAN_NAME,VEHICLE_QUALITY,YELLOW_LABEL_CAR,
+        DAMAGED_PARTS,BACK_VEHICLE,CARD,NAME_OF_PASSED_ROAD,IS_ALTERED,IS_COVERED,DRIVER_FACE_URL,CO_DRIVER_FACE_URL,
+        ECSB,OCCUPANT_CO_DRIVER,USING_PROPERTIES_CODE,ROOF_RACK,HEAVY_TRUCK_COVER,SPARE_TIRE,VEHICLE_WIDTH,VEHICLE_HEIGHT,
+        PLATE_RELIABILITY,PLATE_CHAR_RELIABILITY,BRAND_RELIABILITY,ALGORITHM_ID,LONGITUDE,LATITUDE,VIID_OBJECT_ID,COMPOSITE_URL,
+        THUMBNAIL_URL,VENDOR,ORG_CODE,VEHICLE_MASK,COPILOT_CALL,AERIAL,IS_RENEWAL,PRE_HPZL,PRE_CLLX,PRE_CAR_LOGO,PRE_CSYS,
+        PRE_HPHM,PRE_HPYS,PRE_CAR_YEAR,THIRD_ID,THIRD_SRC,RLTZ,RELATED_LIST
+#    - type: CSV
+#      target: "E:\\Desktop\\CAR_DETECT_INFO_OUTPUT.csv"
+#      custom:
+#        headers: ["HPZL","CLLX","CSYS","ILLEGAL","INFO_ID","DEVICE_ID","JGSK","HPHM","HPYS","CAR_YEAR","PILOT_SUNVISOR","COPILOT_SUNVISOR","PENDANTS","
+#        ACCESSORY","TISSUE","PILOT_SEATBELT","COPILOT_SEATBELT","PIC_PLATE","PIC_ABBREVIATE","PIC_VEHICLE","WITH_SUNROOF","PILOT_CALL","VEHICLE_LENGTH","
+#        GRAFFITI","DIRECTION_ID","LANE_NO","SPEED","CJSJ","ORIGINAL_DEVICE_ID","DEVICE_ADDR","JGRQ","JGSJ","HPGS","CAR_RECT","PLATE_RECT","CAR_LOGO","
+#        CAR_SERIES","IN_OUT_TYPE","NO_PLATE_CAR","DATA_SRC","INSERT_TIME","TOLLGATE_ID","ORIGINAL_TOLLGATE_ID","TOLLGATE_NAME","LANE_TYPE","
+#        PLATE_UNIFORM","VECHILE_LIMIT_SPEED","VEHICLE_APPEARANCE","VEHICLE_SUNVISOR","ORGAN_NAME","VEHICLE_QUALITY","YELLOW_LABEL_CAR","
+#        DAMAGED_PARTS","BACK_VEHICLE","CARD","NAME_OF_PASSED_ROAD","IS_ALTERED","IS_COVERED","DRIVER_FACE_URL","CO_DRIVER_FACE_URL","
+#        ECSB","OCCUPANT_CO_DRIVER","USING_PROPERTIES_CODE","ROOF_RACK","HEAVY_TRUCK_COVER","SPARE_TIRE","VEHICLE_WIDTH","VEHICLE_HEIGHT","
+#        PLATE_RELIABILITY","PLATE_CHAR_RELIABILITY","BRAND_RELIABILITY","ALGORITHM_ID","LONGITUDE","LATITUDE","VIID_OBJECT_ID","COMPOSITE_URL","
+#        THUMBNAIL_URL","VENDOR","ORG_CODE","VEHICLE_MASK","COPILOT_CALL","AERIAL","IS_RENEWAL","PRE_HPZL","PRE_CLLX","PRE_CAR_LOGO","PRE_CSYS","
+#        PRE_HPHM","PRE_HPYS","PRE_CAR_YEAR","THIRD_ID","THIRD_SRC","RLTZ","RELATED_LIST"]

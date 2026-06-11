@@ -1,0 +1,33 @@
+# 数据集名称，各个文件中唯一
+name: demo_27
+# 迭代器配置
+iterator:
+  type: datetime
+  from: 2025-03-07 09:00:00
+  to: 2025-03-07 09:00:30
+  step: 5
+  unit: Seconds
+  stages:
+    - type: PAUSE
+      #duration: 5
+      unit: SECONDS
+      language:
+        #type: SPEL
+        content: 5
+# 生成器配置
+generator:
+  type: ASYNC
+# 数据集元数据配置
+fields:
+  - name: IT_DATETIME
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: >-
+            #faker.datetime.format(#dataset[0],'yyyy-MM-dd HH:mm:ss')
+
+# 数据输出配置
+output:
+  writers:
+    - type: CONSOLE

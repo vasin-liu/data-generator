@@ -1,0 +1,223 @@
+server:
+  port: 9876
+spring:
+  application:
+    name: data-generator-service
+  h2:
+    console:
+      enabled: true
+      path: /h2
+  kafka:
+    multiple:
+      primary: command_kafka
+      clusters:
+        command_kafka:
+          bootstrap-servers:
+            - 172.25.21.52:9092
+#          producer:
+#            properties:
+#              security.protocol: SASL_PLAINTEXT
+#              sasl.mechanism: PLAIN
+#              sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="admin" password="Suntek123";
+  datasource:
+    dynamic:
+      primary: data-generator
+      datasource:
+        data-generator:
+          #url: jdbc:h2:mem:data-generator
+          url: jdbc:h2:file:../db/data-generator
+          username: admin
+          password: Suntek@123
+          driver-class-name: org.h2.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+          init:
+            schema: classpath:db/schema.sql
+          druid:
+            filters: stat,slf4j
+        traffic_command_clickhouse:
+          url: jdbc:clickhouse://172.25.20.125:18123/idps_traffic_command
+          username: default
+          password: Suntek@123
+          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+
+        tocc_parking:
+          url: jdbc:dm://172.25.22.2:30236?schema=TOCC_PARKING_LOT
+          username: SYSDBA
+          password: Suntek123
+          driver-class-name: dm.jdbc.driver.DmDriver
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            filters: stat,slf4j
+#        inet_cloud_ctrl:
+#          url: jdbc:dm://172.25.21.15:30236?schema=IDPS_INET_CLOUD_CONTROL
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        traffic_ledger:
+#          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_LEDGER
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        traffic_vde_infohub:
+#          url: jdbc:dm://172.25.21.15:30236?schema=TRAFFIC_VDE_INFOHUB
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        tocc_driving_school:
+#          url: jdbc:mysql://172.25.22.135:3306/tocc_driving_school?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        tocc_training:
+#          url: jdbc:mysql://172.25.22.135:3306/tocc_training?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        tocc_parking_20_12:
+#          url: jdbc:dm://dm.tocc:5236?schema=TOCC_PARKING_LOT
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        TOCC_BUS_MANAGEMENT:
+#          url: jdbc:dm://172.25.20.85:5237?schema=TOCC_BUS_MANAGEMENT
+#          username: SYSDBA
+#          password: SYSDBA
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        system_manage:
+#          url: jdbc:mysql://172.25.22.135:3306/system_manage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        system_manage_dev:
+#          url: jdbc:dm://dm.tocc:5236?schema=SYSTEM_MANAGE_DEV
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        utcs_dm:
+#          url: jdbc:dm://dm.tocc:5236?schema=UTCS
+#          username: SYSDBA
+#          password: Suntek123
+#          driver-class-name: dm.jdbc.driver.DmDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        utcs_pg:
+#          url: jdbc:postgresql://192.168.200.242:5432/UTCS
+#          username: postgres
+#          password: its312
+#          driver-class-name: org.postgresql.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        tc_pg:
+#          url: jdbc:postgresql://172.25.61.116:5432/TC
+#          username: postgres
+#          password: its312
+#          driver-class-name: org.postgresql.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        reader:
+#          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: PCI@suntek#123
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer:
+#          url: jdbc:mysql://localhost:3306/writer?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: PCI@suntek#123
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer2:
+#          url: jdbc:postgresql://localhost:5432/pd_dts
+#          username: jiadu
+#          password: PCI@suntek#123
+#          driver-class-name: org.postgresql.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer3:
+#          url: jdbc:clickhouse://localhost:8123/default
+#          username: default
+#          password: PCI@suntek#123
+#          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        writer4:
+#          url: jdbc:postgresql://172.25.21.18:25308/pd_dts_gz
+#          username: pd_dts_gz
+#          password: suntek@123
+#          driver-class-name: org.postgresql.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        clickhouse:
+#          url: jdbc:clickhouse://172.25.23.17:8123/pd_dts_vehicle
+#          username: default
+#          password: Suntek@123
+#          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        pd_dicmanage:
+#          url: jdbc:mysql://172.25.21.29:3306/pd_dicmanage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: videoweb
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        pd_sysmanage:
+#          url: jdbc:mysql://172.25.20.196:3306/pd_sysmanage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: root
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+#        md_device_mgr:
+#          url: jdbc:mysql://172.25.21.29:3306/md_device_mgr?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
+#          username: videoweb
+#          password: suntek
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            filters: stat,slf4j
+      druid:
+        filters: stat,slf4j

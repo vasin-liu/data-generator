@@ -1,0 +1,26 @@
+# definitionKind: V2
+# scenarioId: GF-SP
+# catalogRef: SG-SP — SpEL column expressions after SQL projection
+name: scenario-spel-transform
+workflow:
+  steps:
+    - type: invoke_compute_block
+      id: invoke-spel
+      computeBlockId: spel-block
+computeBlocks:
+  - id: spel-block
+    sources:
+      seed:
+        type: iterator
+        iterator:
+          type: number
+          from: 1
+          to: 3
+          step: 1
+    transformers:
+      - type: sql
+        sql: SELECT value AS amount FROM seed
+      - type: spel
+        columns:
+          - name: doubled
+            expression: "#row['amount'] * 2"

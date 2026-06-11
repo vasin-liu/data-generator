@@ -1,0 +1,186 @@
+name: GA_LOCATION_01
+# 迭代器配置
+iterator:
+  type: CONSTANT
+  dataset: [[113.3389396,23.13477691],[113.3385786,23.13462839],[113.3382177,23.13447987],[113.3378567,23.13433136],[113.3374957,23.13418284],[113.3371348,23.13403432],[113.3367028,23.13391654],[113.3362708,23.13379876],[113.3358388,23.13368097],[113.3354068,23.13356319],[113.3350673,23.13349653],[113.3347278,23.13342987],[113.3343883,23.13336321],[113.3340967,23.13335191],[113.333805,23.13334061],[113.3335134,23.13332931],[113.3332016,23.13337931],[113.3328899,23.13342931],[113.3325038,23.13344199],[113.3321178,23.13345467],[113.3317318,23.13346734],[113.3313457,23.13348002],[113.3309597,23.1334927],[113.3305737,23.13350538],[113.3301876,23.13351806],[113.3298016,23.13353074],[113.3294156,23.13354342],[113.3290295,23.1335561],[113.3286435,23.13356878],[113.3282575,23.1335811],[113.3278716,23.13359343],[113.3274856,23.13360575],[113.3270997,23.13361807],[113.3267137,23.1336304],[113.3263277,23.13364272],[113.3259418,23.13365504],[113.3255558,23.13366737],[113.3252646,23.13369972],[113.3249734,23.13373207],[113.3246822,23.13376443],[113.3242522,23.13378003],[113.3238222,23.13379564],[113.3233922,23.13381125],[113.3229622,23.13382685],[113.3225322,23.13384246],[113.3221022,23.13385807],[113.3219231,23.13386795],[113.3216409,23.13402584],[113.3216543,23.1343708],[113.3216676,23.13471575],[113.321681,23.13506071],[113.3216943,23.13540567],[113.3222541,23.13544283]]
+  #暂停5秒再生成
+  pause: 3
+  repeat: 1
+# 生成器配置
+generator:
+  type: SYNC
+  batchSize: 1
+# 数据集元数据配置
+fields:
+  - name: ID
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.snowflake.next"
+      - type: SELECT
+  - name: simid
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '73017301' ]
+      - type: SELECT
+  - name: altitude
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(0,20)"
+  - name: latitude
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0][1]"
+  - name: longitude
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset[0][0]"
+  - name: recTime
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.seconds()
+  - name: svrTime
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: >-
+              #faker.datetime.seconds()
+  - name: speed
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(40,60)"
+      - type: SELECT
+  - name: alarmFlag
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '0' ]
+      - type: SELECT
+  - name: terminalType
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '1' ]
+      - type: SELECT
+  - name: gas
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '0' ]
+      - type: SELECT
+  - name: course
+    stages:
+      - type: READ
+        readers:
+          - type: SPEL
+            content: "#faker.number.numberBetween(40,300)"
+      - type: SELECT
+  - name: recordVelocity
+    dependsOn:
+      - speed
+    stages:
+      - type: SCRIPT
+        language:
+          type: SPEL
+          content: "#dataset"
+  - name: status
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '0' ]
+  - name: mileage
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '0' ]
+  - name: onlineState
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '0' ]
+  - name: depId
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: depName
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '' ]
+  - name: plateno
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '粤A7301警' ]
+  - name: simno
+    stages:
+      - type: READ
+        inMemory: true
+        readers:
+          - type: CONSTANT
+            content: [ '73017301' ]
+
+# 数据输出配置
+output:
+  writers:
+#    - type: CONSOLE
+    - type: KAFKA
+      dataSourceId: 'command_kafka'
+      target: 'ga_location'
+      template: >-
+        {
+          "simid": "${simid}",
+          "altitude": "${altitude}",
+          "latitude": "${latitude}",
+          "longitude": "${longitude}",
+          "recTime": "${recTime}",
+          "svrTime": "${svrTime}",
+          "speed": "${speed}",
+          "alarmFlag": "${alarmFlag}",
+          "terminalType": "${terminalType}",
+          "gas": "${gas}",
+          "course": "${course}",
+          "recordVelocity": "${recordVelocity}",
+          "status": "${status}",
+          "mileage": "${mileage}",
+          "onlineState": "${onlineState}",
+          "depId": "${depId}",
+          "depName": "${depName}",
+          "plateno": "${plateno}",
+          "simno": "${simno}"
+        }

@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.gensokyo.data.generator</groupId>
+        <artifactId>data-generator</artifactId>
+        <version>${revision}</version>
+<!--        <relativePath>../pom.xml</relativePath>-->
+    </parent>
+
+    <artifactId>data-generator-service</artifactId>
+
+    <properties>
+        <mainClass>org.gensokyo.data.DataGeneratorApplication</mainClass>
+        <console.web.dist>${project.basedir}/../data-generator-console-web/target/console-dist</console.web.dist>
+        <skip.console.frontend>false</skip.console.frontend>
+        <jdbc.bundled.dir>${project.build.outputDirectory}/jdbc-bundled</jdbc.bundled.dir>
+    </properties>
+
+    <dependencies>
+        <!-- data-generator modules -->
+        <!-- core -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-calcite</artifactId>
+        </dependency>
+
+        <!-- iterator -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-number</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-constant</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-datetime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-iterator-geo</artifactId>
+        </dependency>
+
+        <!-- generator -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-generator-async</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-generator-sync</artifactId>
+        </dependency>
+
+        <!-- stage -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-stage</artifactId>
+        </dependency>
+
+        <!-- reader -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-spel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-ai</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-reader-csv</artifactId>
+        </dependency>
+
+        <!-- scripter -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-scripter-spel</artifactId>
+        </dependency>
+
+        <!-- writer -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-elasticsearch</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-csv</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-writer-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+        </dependency>
+
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>dynamic-datasource-spring-boot4-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <!-- validator -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- yaml & json -->
+        <dependency>
+            <groupId>tools.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
+        <!-- jdbc driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>dm-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.com.kingbase</groupId>
+            <artifactId>kingbase8</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.highgo</groupId>
+            <artifactId>HgdbJdbc</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>com.google.auto.service</groupId>
+                            <artifactId>auto-service</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-jdbc-drivers</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.mysql</groupId>
+                                    <artifactId>mysql-connector-j</artifactId>
+                                    <outputDirectory>${jdbc.bundled.dir}/mysql</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <outputDirectory>${jdbc.bundled.dir}/postgresql</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.dameng</groupId>
+                                    <artifactId>dm-jdbc</artifactId>
+                                    <outputDirectory>${jdbc.bundled.dir}/dm</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>cn.com.kingbase</groupId>
+                                    <artifactId>kingbase8</artifactId>
+                                    <version>${kingbase8.jdbc.version}</version>
+                                    <outputDirectory>${jdbc.bundled.dir}/kingbase8</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>cn.com.kingbase</groupId>
+                                    <artifactId>kingbase8</artifactId>
+                                    <version>${kingbase9.jdbc.version}</version>
+                                    <outputDirectory>${jdbc.bundled.dir}/kingbase9</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.highgo</groupId>
+                                    <artifactId>HgdbJdbc</artifactId>
+                                    <outputDirectory>${jdbc.bundled.dir}/highgo</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bundle-jdbc-clickhouse</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${jdbc.bundled.dir}/clickhouse</outputDirectory>
+                            <includeArtifactIds>clickhouse-jdbc</includeArtifactIds>
+                            <includeGroupIds>com.clickhouse</includeGroupIds>
+                            <excludeTransitive>false</excludeTransitive>
+                            <stripVersion>false</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-console-frontend</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skip.console.frontend}</skip>
+                            <target>
+                                <copy todir="${project.build.outputDirectory}/static/console" overwrite="true">
+                                    <fileset dir="${console.web.dist}" includes="**/*"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                                        <mainClass>${mainClass}</mainClass>
+                    <skip>true</skip>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <!-- Skip Spring Boot repackage; assembly packaging remains the delivery path. -->
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>../lib/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>${project.name}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId> <!-- Keep the assembly output name stable. -->
+                    <descriptors>
+                        <descriptor>${project.basedir}/assembly.xml</descriptor>
+                    </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                    <!-- If the parent POM defines descriptors, use <descriptors combine.self="override"/>. -->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id><!-- Stable execution id for packaging. -->
+                        <phase>package</phase> <!-- Bind assembly generation to the package phase. -->
+                        <goals>
+                            <goal>single</goal><!-- Produce the final distributable archive. -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+
+
+
