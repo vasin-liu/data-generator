@@ -8,7 +8,7 @@ V2 JDBC sinks use `JdbcRowSinkAdapter` with a generic `INSERT` statement by defa
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `dialect` | string | `generic` | `generic`, `postgres`, or `mysql` |
+| `dialect` | string | `generic` | `generic`, `postgres`, `mysql`, or `clickhouse` |
 | `upsert` | boolean | `false` | Enable dialect-specific duplicate handling |
 | `conflictColumns` | string | — | Required for `postgres` upsert; comma-separated conflict key columns |
 
@@ -51,12 +51,27 @@ sinks:
           upsert: true
 ```
 
+### ClickHouse insert (dedup via table engine)
+
+ClickHouse has no `ON CONFLICT` or `INSERT IGNORE`. With `dialect: clickhouse` and `upsert: true`, the runtime emits a plain `INSERT`; use `ReplacingMergeTree` / `CollapsingMergeTree` (or application-level keys) for duplicate handling.
+
+```yaml
+sinks:
+  - writers:
+      - type: JDBC
+        target: orders_out
+        template: id:value, amount:amount
+        options:
+          dialect: clickhouse
+          upsert: true
+```
+
 ## Limitations
 
-- **ClickHouse / bulk loaders**: no native COPY/bulk path yet; use generic `INSERT` only.
-- **Generic dialect + upsert**: `upsert` is ignored; only `postgres` and `mysql` change SQL shape.
+- **ClickHouse bulk loaders**: no native `FORMAT CSV` / COPY path in the V2 JDBC adapter yet; use plain `INSERT` batches.
+- **Generic dialect + upsert**: `upsert` is ignored unless `postgres`, `mysql`, or `clickhouse` is set.
 - **ON DUPLICATE KEY UPDATE**: not generated; MySQL path uses `INSERT IGNORE` only.
-- **Parallel sinks**: optional `sinkExecutionPolicy.parallelSinks` runs writers concurrently; use with independent targets.
+- **Parallel sinks**: optional `sinkExecutionPolicy.parallelSinks` runs writers concurrently when more than one writer is configured; targets must be independent (no shared connection assumptions).
 
 ## Sink execution policy
 

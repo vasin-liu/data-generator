@@ -20,12 +20,14 @@ class V2ScenarioCatalogServiceTest {
     private final V2ScenarioCatalogService service = new V2ScenarioCatalogService(new JacksonParser());
 
     @Test
-    void listOfficial_returnsSixFamilies() {
+    void listOfficial_returnsOfficialCatalogEntries() {
         var rows = service.listOfficial();
-        Assertions.assertEquals(6, rows.size());
+        Assertions.assertEquals(8, rows.size());
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-A".equals(row.scenarioId())));
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-B".equals(row.scenarioId())));
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-BJ".equals(row.scenarioId())));
+        Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-IR".equals(row.scenarioId())));
+        Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-SP".equals(row.scenarioId())));
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-WF".equals(row.scenarioId())));
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-WFS".equals(row.scenarioId())));
         Assertions.assertTrue(rows.stream().anyMatch(row -> "GF-JS".equals(row.scenarioId())));

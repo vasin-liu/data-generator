@@ -53,6 +53,7 @@ class V2WorkflowScenarioIT {
                 "scenario-dag-join.yaml",
                 "scenario-dag-fanout.yaml",
                 "scenario-js-transform.yaml",
+                "scenario-spel-transform.yaml",
                 "scenario-wf-shared-state.yaml"
         ).map(name -> SCENARIO_ROOT + name);
     }
@@ -127,6 +128,12 @@ class V2WorkflowScenarioIT {
                 assertThat(toLong(result.getRows().get(0).values().get("amount"))).isEqualTo(2L);
                 assertThat(toLong(result.getRows().get(1).values().get("amount"))).isEqualTo(4L);
                 assertThat(toLong(result.getRows().get(2).values().get("amount"))).isEqualTo(6L);
+            }
+            case "scenario-spel-transform" -> {
+                assertThat(result.getRows()).hasSize(3);
+                assertThat(toLong(result.getRows().get(0).values().get("doubled"))).isEqualTo(2L);
+                assertThat(toLong(result.getRows().get(1).values().get("doubled"))).isEqualTo(4L);
+                assertThat(toLong(result.getRows().get(2).values().get("doubled"))).isEqualTo(6L);
             }
             default -> throw new IllegalArgumentException("Unknown workflow scenario: " + scenarioName);
         }

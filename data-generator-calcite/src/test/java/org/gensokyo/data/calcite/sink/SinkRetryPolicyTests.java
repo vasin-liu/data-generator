@@ -155,6 +155,38 @@ class SinkRetryPolicyTests {
     }
 
     @Test
+    void parallelSinksInvokesAllWritersWhenEnabled() {
+        RunMetrics metrics = new RunMetrics("IN_MEMORY");
+
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(new OkWriterVO(), new OkWriterVO()));
+
+        SinkExecutionPolicyVO policy = new SinkExecutionPolicyVO();
+        policy.setParallelSinks(true);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setSinkExecutionPolicy(policy);
+        template.setSinks(List.of(sink));
+
+        RowSchema schema = schema(new ColumnDef("value", "BIGINT", false));
+        List<Row> rows = List.of(new Row(Map.of("value", 1L)));
+        CalciteRowTransformer.TransformResult result =
+                new CalciteRowTransformer.TransformResult(schema, rows);
+
+        AtomicInteger okInvocations = new AtomicInteger();
+        SinkWriteExecutor.writeSinks(
+                (registry, writer) -> writer instanceof OkWriterVO ? new CountingOkRowSink(okInvocations) : createSink(writer),
+                null,
+                template,
+                result,
+                metrics,
+                0);
+
+        Assertions.assertEquals(2, okInvocations.get());
+        Assertions.assertEquals(2L, metrics.getRowsWritten());
+    }
+
+    @Test
     void lastErrorSampleIsTruncatedToFiveHundredCharacters() {
         RunMetrics metrics = new RunMetrics("IN_MEMORY");
 
@@ -281,6 +313,19 @@ class SinkRetryPolicyTests {
         @Override
         public void write(RowSchema schema, List<Row> rows) {
             // no-op success
+        }
+    }
+
+    private static final class CountingOkRowSink implements RowSink {
+        private final AtomicInteger counter;
+
+        private CountingOkRowSink(AtomicInteger counter) {
+            this.counter = counter;
+        }
+
+        @Override
+        public void write(RowSchema schema, List<Row> rows) {
+            counter.incrementAndGet();
         }
     }
 }

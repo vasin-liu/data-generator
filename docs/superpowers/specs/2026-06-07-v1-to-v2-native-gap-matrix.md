@@ -65,7 +65,7 @@
 | CONVERT | `CAST` + UDFs | **Done** | |
 | SCRIPT SpEL | `spel` transform (column expressions) | **Done** | Console + engine |
 | SCRIPT JavaScript | `js` transform (GraalJS sandbox) | **Done** | |
-| Non-SQL custom logic | `CustomTransformVO` / PF4J plugin | **Partial** | SPI exists; few built-in examples |
+| Non-SQL custom logic | `CustomTransformVO` / PF4J plugin | **Partial** | SPI + `js`/`spel` scenarios (`GF-JS`, `GF-SP`); PF4J sample in `samples/` |
 | Field `dependsOn` graph | SQL projection + L1 DAG edges | **Done** | |
 | Linear transformer chain | `transformers[]` or compute block | **Done** | |
 | Transform DAG | `transformGraph` in compute block | **Done** | Console `TransformDagEditor` |
@@ -79,9 +79,9 @@
 | V1 capability | V2-native replacement | Status | Notes |
 |---------------|----------------------|--------|-------|
 | Console / JDBC / Kafka / ES / file sinks | V2 sink adapters | **Done** | |
-| MySQL / Postgres / ClickHouse dialect writers | Generic JDBC sink + dialect `options` | **Partial** | Postgres/MySQL upsert options; no COPY/bulk yet |
+| MySQL / Postgres / ClickHouse dialect writers | Generic JDBC sink + dialect `options` | **Partial** | Postgres/MySQL upsert + ClickHouse plain insert; no COPY/bulk yet |
 | Sink failure policy | `sinkExecutionPolicy` FAIL_FAST / CONTINUE | **Done** | Per-sink `rowsOk`/`rowsFailed` in run report UI |
-| Parallel multi-sink | `sinkExecutionPolicy.parallelSinks` | **Partial** | Experimental parallel fan-out spike |
+| Parallel multi-sink | `sinkExecutionPolicy.parallelSinks` | **Partial** | Parallel fan-out + unit test; independent targets only |
 | CHUNKED JDBC | `executionPolicy.mode: CHUNKED` | **Done** | Scenarios C/D |
 | STREAMING JDBC | `executionPolicy.mode: STREAMING` | **Done** | Scenario E |
 | V1 `template.generator` | **Removed from console**; use `executionPolicy` | **Done** | `sinkBatchSize`, `partitionCount`, CHUNKED/STREAMING |
@@ -138,6 +138,12 @@
 1. Partial-success metrics on CONTINUE_ON_ERROR — run report `rowsOk`/`rowsFailed` + job detail UI.
 2. JDBC dialect writer options (`postgres`/`mysql` upsert) + `docs/template-v2-jdbc-sink-guide.md`.
 3. Optional `parallelSinks` execution spike + console execution step fields.
+
+### Pack V5 — Catalog & dialect depth (shipped 2026-06-10)
+
+1. ClickHouse JDBC dialect option (`dialect: clickhouse`) documented for engine-backed dedup.
+2. Official catalog entries **GF-IR** (`inline_rows`) and **GF-SP** (SpEL transform scenario).
+3. `parallelSinks` unit test coverage + JDBC sink guide hardening.
 
 ---
 

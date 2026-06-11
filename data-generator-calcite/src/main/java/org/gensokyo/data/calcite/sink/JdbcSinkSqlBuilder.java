@@ -54,6 +54,7 @@ final class JdbcSinkSqlBuilder {
         return switch (dialect) {
             case "postgres" -> appendPostgresUpsert(writer, baseInsert);
             case "mysql" -> "insert ignore into " + table + " (" + columns + ") values (" + values + ")";
+            case "clickhouse", "click_house" -> baseInsert;
             default -> baseInsert;
         };
     }

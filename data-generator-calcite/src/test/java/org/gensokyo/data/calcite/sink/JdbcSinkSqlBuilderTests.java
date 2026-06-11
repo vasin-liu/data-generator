@@ -43,6 +43,16 @@ class JdbcSinkSqlBuilderTests {
     }
 
     @Test
+    void clickhouseUpsertUsesPlainInsert() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of("dialect", "clickhouse", "upsert", true));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
+        Assertions.assertEquals(
+                "insert into orders_out (id, amount) values (:id, :amount)",
+                sql);
+    }
+
+    @Test
     void buildsMysqlInsertIgnoreWhenDialectIsMysql() {
         JdbcWriterVO writer = writer("orders_out");
         writer.setOptions(Map.of("dialect", "mysql", "upsert", true));
