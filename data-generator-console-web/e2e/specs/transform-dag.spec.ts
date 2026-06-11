@@ -1,8 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { expectApiSuccess, fetchTemplateEditor, unwrapApiData } from '../helpers/api';
 import { gotoConsoleHome, navigateViaTopNav } from '../helpers/navigation';
 import {
   openNewTemplateEditor,
+  runStagedDagPreviewFromReview,
   selectEditorTab,
   setTemplateName,
 } from '../helpers/editor';
@@ -32,10 +34,6 @@ async function bindInvokeBlock(page: Page, rowIndex: number, blockId: string) {
     .filter({ hasText: blockId })
     .first()
     .click();
-}
-
-async function expectJobSucceeded(page: Page) {
-  await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 60_000 });
 }
 
 async function selectDagDependsOn(page: Page, nodeLabel: string) {
@@ -71,9 +69,12 @@ test.describe('Transform DAG editor', () => {
     const n2Row = page.getByTestId('transform-dag-table').locator('tr').nth(2);
     await n2Row.locator('input').first().fill('n2');
     await n2Row.locator('input').nth(1).fill('step-2');
+    await n2Row.locator('input').nth(2).fill('shifted');
     await n2Row.getByRole('combobox').first().click();
     await selectDagDependsOn(page, 'n1');
     await n2Row.locator('textarea').first().fill('SELECT value, value + 10 AS shifted FROM input');
+
+    await runStagedDagPreviewFromReview(page, /shifted/i);
 
     await selectEditorTab(page, /review|审阅/i);
     await page.getByTestId('review-save').click();
@@ -85,7 +86,7 @@ test.describe('Transform DAG editor', () => {
     await page.getByRole('button', { name: /运\s*行|^run$/i }).click();
     await page.waitForURL(/\/jobs\/\d+/, { timeout: 60_000 });
 
-    await expectJobSucceeded(page);
+    await expectJobSucceeded(page, 60_000);
 
     await expect(page.getByRole('heading', { name: /transformers|转换/i })).toBeVisible({
       timeout: 30_000,

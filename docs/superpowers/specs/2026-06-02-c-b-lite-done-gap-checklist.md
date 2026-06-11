@@ -18,7 +18,7 @@
 |------|--------------------------------|----------|
 | **C Done** | **Done** | `ScenarioCatalogModal` + `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); `WorkflowStepFields` branch form; `ReviewPanel` DAG staged preview; `workflow-pause.spec.ts`, `workflow-shared-scope.spec.ts`, `workflow-branch.spec.ts` |
 | **B-lite Done** | **Done** | `application-staging.yaml`, `ConsoleLayout` role picker, `ReviewPanel` publish gate, `ConsoleAuthorizationIntegrationIT` (VIEWER forbidden), `rbac.*.spec.ts` |
-| **C2 start** | **Defer** | Distributed code + `staging-distributed-deployment.md` exist; product gate still deferred per gap matrix |
+| **C2 staging** | **Done** (P1) | `application-distributed-staging.yaml`, dual-JVM `e2e-distributed-podman.ps1`, `distributed-job-detail.spec.ts`; AC-1/2/3/5 automated; AC-4/6 manual per `staging-distributed-deployment.md` |
 
 Waves **0–5** and **B-lite** landed: V1 execution retired, scenario wizard, branch/shared workflow editors, DAG preview UI, RBAC, audit, Pack V1–V5 engine features.
 
@@ -54,38 +54,38 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 
 | Family | Scenario YAML | Backend IT | Console author E2E | Publish → run → report E2E | Status |
 |--------|---------------|------------|--------------------|----------------------------|--------|
-| **A** Synthetic + MatPol | `scenario-a-synthetic.yaml` | `V2ScenarioTemplateIT` | `materialization-policy.spec.ts` | Partial (save/policy; no full publish-run-report chain) | **Partial** |
-| **B** Multi-source join | `scenario-b-lookup-join.yaml`, `scenario-dag-join.yaml` | `V2ScenarioTemplateIT`, `V2WorkflowScenarioIT` (dag-join) | `transform-dag.spec.ts` (synthetic DAG, not join scenario) | Partial (DAG metrics; not two-source join template) | **Partial** |
-| **WF** Pause / branch / shared state | `scenario-wf-*.yaml` (4 files) | `V2WorkflowScenarioIT` | `workflow-pause.spec.ts` (pause only) | Pause/resume **Done**; branch **Missing** in UI/E2E | **Partial** |
-| **JS** Transform | `scenario-js-transform.yaml` | `V2WorkflowScenarioIT` | `js-transform.spec.ts` | Partial (save + chain; publish optional in spec) | **Partial** |
+| **A** Synthetic + MatPol | `scenario-a-synthetic.yaml` | `V2ScenarioTemplateIT` | `materialization-policy.spec.ts`, `scenario-catalog.spec.ts` (GF-A) | **Done** — catalog create → publish → run → report | **Done** |
+| **B** Multi-source join | `scenario-b-lookup-join.yaml`, `scenario-dag-join.yaml` | `V2ScenarioTemplateIT`, `V2WorkflowScenarioIT` (dag-join) | `transform-dag.spec.ts`, `scenario-catalog.spec.ts` (GF-B + DAG staged preview) | **Done** — GF-B catalog + per-transform report | **Done** |
+| **WF** Pause / branch / shared state | `scenario-wf-*.yaml` (4 files) | `V2WorkflowScenarioIT` | `workflow-pause.spec.ts`, `workflow-branch.spec.ts`, `workflow-shared-scope.spec.ts`, `scenario-catalog.spec.ts` (GF-WF) | **Done** — branch editor + GF-WF/GF-WFS paths | **Done** |
+| **JS** Transform | `scenario-js-transform.yaml` | `V2WorkflowScenarioIT` | `js-transform.spec.ts`, `scenario-catalog.spec.ts` (GF-JS) | **Done** — catalog publish → run → success | **Done** |
 
 ### 1.2 C Done — criterion table
 
 | ID | Criterion (from roadmap) | Status | Evidence on `master` | Gap / next step |
 |----|--------------------------|--------|----------------------|-----------------|
 | C-A1 | Scenario A configurable in console without YAML (MatPol) | **Done** | `SourcesStep.tsx`, `materialization-policy.spec.ts`, `scenario-a-synthetic.yaml` IT | Optional: E2E full publish → catalog run → report |
-| C-A2 | “Create from scenario” for Synthetic (Sprint 2+) | **Missing** | Only empty scaffold: `TemplatesPage` → `/templates/new`, `fetchEditorScaffold()` | Add scenario picker + seed draft from `v2-scenarios` catalog API |
-| C-B1 | Two-source join authored, published, run, per-transform diagnosis | **Partial** | Engine + `scenario-dag-join.yaml` IT; `TransformDagEditor`, `JobDetailPage` transformer table; E2E builds ad-hoc DAG not join scenario | E2E from multi-source `SourcesStep` through join DAG; document Scenario B path |
-| C-B2 | “Create from scenario” for Multi-source join (Sprint 4) | **Missing** | Same as C-A2 | Same wizard; preset sources + join graph |
+| C-A2 | “Create from scenario” for Synthetic (Sprint 2+) | **Done** | `ScenarioCatalogModal`, `TemplatesPage` “from scenario”, `scenario-catalog.spec.ts` GF-A | — |
+| C-B1 | Two-source join authored, published, run, per-transform diagnosis | **Done** | `scenario-dag-join.yaml` IT; GF-B catalog + `transform-dag.spec.ts`; transformer table on job detail | Optional: GF-BJ two-source lookup-join E2E |
+| C-B2 | “Create from scenario” for Multi-source join (Sprint 4) | **Done** | GF-B → `scenario-dag-join.yaml` via `V2ScenarioCatalogService` | — |
 | C-B3 | Fan-out DAG scenario in CI | **Done** | `scenario-dag-fanout.yaml`, `V2WorkflowScenarioIT` | — |
 | C-WF1 | Pause workflow visible and controllable from Job detail | **Done** | `JobDetailPage.tsx` PAUSED/resume/cancel; `workflow-pause.spec.ts`; backend `pauseReason` | — |
 | C-WF2 | WorkflowPanel wizard UX (step types, params, compute binding) | **Partial** | `WorkflowPanel.tsx`, `WorkflowStepFields.tsx` for log/pause/invoke/shared_scope | **`branch` step JSON-only** (fallback textarea in `WorkflowStepFields.tsx`) |
 | C-WF3 | Shared-state scenario + UI hints | **Partial** | `scenario-wf-shared-state.yaml` IT; shared_scope fields in editor | No dedicated E2E; hints/docs thin vs roadmap |
-| C-WF4 | Branch workflow in console | **Missing** | `scenario-wf-branch.yaml` IT only | Structured branch editor + E2E |
-| C-WF5 | “Create from scenario” for WF (Sprint 6) | **Missing** | — | Scenario wizard |
+| C-WF4 | Branch workflow in console | **Done** | `WorkflowStepFields` branch form; `workflow-branch.spec.ts` | — |
+| C-WF5 | “Create from scenario” for WF (Sprint 6) | **Done** | `scenario-catalog.spec.ts` GF-WF; `workflow-shared-scope.spec.ts` GF-WFS | — |
 | C-JS1 | JS template created in console; scenario IT passes | **Done** | `TransformJsFields.tsx`, `js-transform.spec.ts`, `docs/js-transform-sandbox.md`, IT | — |
-| C-JS2 | “Create from scenario” for JS (Sprint 7) | **Missing** | — | Scenario wizard |
-| C-X1 | **C Done E2E:** all four families end-to-end in Playwright | **Partial** | 32 E2E tests; no single spec per official scenario catalog row | Add `scenario-catalog.spec.ts` or extend specs for A/B/WF/JS publish-run-report |
+| C-JS2 | “Create from scenario” for JS (Sprint 7) | **Done** | `scenario-catalog.spec.ts` GF-JS | — |
+| C-X1 | **C Done E2E:** all four families end-to-end in Playwright | **Done** | `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); shared `expectJobSucceeded` helper | — |
 | C-X2 | Linear execution reliability (roadmap ~80% note) | **Defer** | C/D/E scenarios in `V2ScenarioTemplateIT` only | JSON streaming, sink retry/idempotency — post C Done polish |
 
 ### 1.3 Wave deliverables still open under C
 
 | Wave | Deliverable | Status | Evidence | Next step |
 |------|-------------|--------|----------|-----------|
-| W2 | Staged preview **by DAG node** where API supports it | **Missing** (UI) | API: `ConsoleTemplateEditorActionsController` accepts `throughTransformIndex`; `TemplateV2StagedPreviewTests`; Review uses full-chain preview only | DAG node picker on Review/Transform tab; wire `throughTransformIndex` in `editor.ts` |
-| W2 | `scenario-dag-join.yaml` console authoring parity | **Partial** | IT green; E2E uses hand-built DAG | Author join template in UI without YAML |
-| W3 | `branch` in WorkflowPanel | **Missing** | JSON fallback | Branch step form (condition / thenSteps) |
-| All | Scenario catalog **create from scenario** | **Missing** | Roadmap table § Official scenario catalog | One wizard entry point on Templates home |
+| W2 | Staged preview **by DAG node** where API supports it | **Done** | `ReviewPanel` `review-preview-dag-select`; `runStagedDagPreviewFromReview` in `transform-dag.spec.ts` | — |
+| W2 | `scenario-dag-join.yaml` console authoring parity | **Done** | GF-B catalog seed + `scenario-catalog.spec.ts` | Optional: GF-BJ lookup-join catalog path |
+| W3 | `branch` in WorkflowPanel | **Done** | `WorkflowStepFields` structured branch; `workflow-branch.spec.ts` | — |
+| All | Scenario catalog **create from scenario** | **Done** | `ScenarioCatalogModal`, `templates-from-scenario-button`, `scenario-catalog.spec.ts` | — |
 
 ---
 
@@ -145,9 +145,10 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 | Baseline commit | `git rev-parse master` | `26f7ade` |
 | Java unit (console slice) | `scripts/verify-console-unit.ps1` | Includes `ConsoleAuditControllerTest`, `ConsoleRoleTests`, `TaskScheduleServiceTests` |
 | Frontend build | `npm run build` in `data-generator-console-web` | Passed in Wave 4 session |
-| E2E | `scripts/e2e-podman.ps1` / `verify-console.ps1` | **32/32** Playwright (incl. `js-transform`, `transform-dag`, `workflow-pause`, audit page) |
+| E2E | `scripts/e2e-podman.ps1` / `verify-console.ps1` | Playwright incl. `scenario-catalog`, `workflow-branch`, `transform-dag`, distributed split when enabled |
 | Scenario ITs | `V2ScenarioTemplateIT`, `V2WorkflowScenarioIT` | A/B/C/D/E + DAG + WF + JS YAMLs |
-| Staged preview (backend) | `TemplateV2StagedPreviewTests` | Green; not exposed in console |
+| Staged preview (console) | `transform-dag.spec.ts` | DAG node picker + preview on Review tab |
+| Staged preview (backend) | `TemplateV2StagedPreviewTests` | Green |
 
 ---
 
@@ -168,12 +169,13 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 
 Prioritized **small** epics to close gates without starting C2.
 
-### Pack 1 — **C Done polish** (~1–2 sprints)
+### Pack 1 — **C Done polish** (shipped 2026-06-11)
 
 1. Scenario catalog wizard (“create from scenario”) for A, B, WF, JS.
 2. Structured **branch** workflow step editor + E2E against `scenario-wf-branch.yaml` patterns.
 3. **DAG staged preview** UI (`throughTransformIndex` per node).
-4. **`scenario-catalog.e2e.spec.ts`**: one happy path per family — author → publish → run → RunReport.
+4. **`scenario-catalog.spec.ts`**: one happy path per family — author → publish → run → RunReport.
+5. Shared `expectJobSucceeded` helper for distributed job-detail strict mode.
 
 **Closes:** C-A2, C-B2, C-WF4/5, C-JS2, C-X1, W2 staged preview, Scenario B console parity.
 

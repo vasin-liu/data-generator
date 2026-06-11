@@ -6,6 +6,7 @@ import {
   selectEditorTab,
   setTemplateName,
 } from '../helpers/editor';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { TestIds } from '../helpers/test-ids';
 
 async function enableWorkflowMode(page: Page) {
@@ -44,10 +45,6 @@ async function selectTransformType(page: Page, stepIndex: number) {
     .filter({ hasText: /JavaScript.*沙箱|JavaScript.*sandboxed/i })
     .first()
     .click();
-}
-
-async function expectJobSucceeded(page: Page) {
-  await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 60_000 });
 }
 
 test.describe('JavaScript transform editor', () => {
@@ -105,6 +102,6 @@ test.describe('JavaScript transform editor', () => {
 
     await page.getByRole('button', { name: /运\s*行|^run$/i }).click();
     await page.waitForURL(/\/jobs\/\d+/, { timeout: 60_000 });
-    await expectJobSucceeded(page);
+    await expectJobSucceeded(page, 60_000);
   });
 });

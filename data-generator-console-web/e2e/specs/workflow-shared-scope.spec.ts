@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectApiSuccess, fetchScenarioScaffold, unwrapApiData } from '../helpers/api';
 import { gotoConsoleHome, navigateViaTopNav } from '../helpers/navigation';
 import { openScenarioFromCatalog, publishAndRunFromReview, saveTemplateFromReview } from '../helpers/editor';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { TestIds } from '../helpers/test-ids';
 
 test.describe('Workflow shared scope scenario', () => {
@@ -23,6 +24,6 @@ test.describe('Workflow shared scope scenario', () => {
     await saveTemplateFromReview(page);
     await publishAndRunFromReview(page);
 
-    await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 90_000 });
+    await expectJobSucceeded(page);
   });
 });

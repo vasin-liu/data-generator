@@ -6,6 +6,7 @@ import {
   selectEditorTab,
   setTemplateName,
 } from '../helpers/editor';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { TestIds } from '../helpers/test-ids';
 
 async function enableWorkflowMode(page: Page) {
@@ -73,6 +74,6 @@ test.describe('Workflow branch editor', () => {
     await page.waitForURL(/\/templates\/\d+/, { timeout: 30_000 });
     await publishAndRunFromReview(page);
 
-    await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 90_000 });
+    await expectJobSucceeded(page);
   });
 });

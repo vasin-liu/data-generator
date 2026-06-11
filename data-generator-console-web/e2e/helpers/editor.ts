@@ -68,3 +68,24 @@ export async function saveTemplateAndReturn(page: Page): Promise<void> {
   await page.waitForURL(/\/templates\/?$/);
   await page.getByTestId('templates-page').waitFor({ state: 'visible' });
 }
+
+/** Runs staged preview for a DAG node from the Review tab. */
+export async function runStagedDagPreviewFromReview(page: Page, nodeLabel: RegExp): Promise<void> {
+  await selectEditorTab(page, /review|审阅/i);
+  await expect(page.getByTestId('review-save')).toBeEnabled({ timeout: 30_000 });
+  const dagSelect = page.getByTestId('review-preview-dag-select');
+  await expect(dagSelect).toBeVisible({ timeout: 30_000 });
+  await dagSelect.click();
+  const dropdown = page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last();
+  await dropdown.waitFor({ state: 'visible', timeout: 10_000 });
+  await dropdown
+    .locator('.ant-select-item-option')
+    .filter({ hasText: nodeLabel })
+    .first()
+    .click();
+  await page.getByTestId('review-preview').click();
+  const previewDialog = page.getByRole('dialog').filter({ hasText: /preview|预览/i });
+  await expect(previewDialog.locator('pre').first()).toBeVisible({ timeout: 60_000 });
+  await expect(previewDialog.locator('pre').first()).not.toContainText(/ERROR:/i);
+  await previewDialog.getByRole('button', { name: /ok|确定|知道了/i }).click();
+}

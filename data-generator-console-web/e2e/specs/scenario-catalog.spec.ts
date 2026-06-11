@@ -1,11 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { gotoConsoleHome, navigateViaTopNav } from '../helpers/navigation';
 import { openScenarioFromCatalog, publishAndRunFromReview, saveTemplateFromReview } from '../helpers/editor';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { TestIds } from '../helpers/test-ids';
-
-async function expectJobSucceeded(page: Page) {
-  await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 90_000 });
-}
 
 const OFFICIAL_SCENARIOS = [
   { id: 'GF-A', label: 'Synthetic (A)' },

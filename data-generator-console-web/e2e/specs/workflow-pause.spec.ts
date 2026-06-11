@@ -5,6 +5,7 @@ import {
   selectEditorTab,
   setTemplateName,
 } from '../helpers/editor';
+import { expectJobSucceeded } from '../helpers/job-detail';
 import { TestIds } from '../helpers/test-ids';
 
 async function enableWorkflowMode(page: Page) {
@@ -42,10 +43,6 @@ async function bindInvokeBlock(page: Page, rowIndex: number, blockId: string) {
     .filter({ hasText: blockId })
     .first()
     .click();
-}
-
-async function expectJobSucceeded(page: Page) {
-  await expect(page.getByRole('cell', { name: /成功|Succeeded/i })).toBeVisible({ timeout: 60_000 });
 }
 
 test.describe('Workflow pause and resume', () => {
@@ -86,6 +83,6 @@ test.describe('Workflow pause and resume', () => {
     await expect(page.getByTestId('job-resume-button')).toBeVisible();
 
     await page.getByTestId('job-resume-button').click();
-    await expectJobSucceeded(page);
+    await expectJobSucceeded(page, 60_000);
   });
 });
