@@ -1,0 +1,30 @@
+# definitionKind: V2
+# scenarioId: GF-EP
+# catalogRef: CV-03 — dual sinks with CONTINUE_ON_ERROR partial-success metrics
+name: scenario-e-partial-sink
+sinkExecutionPolicy:
+  mode: CONTINUE_ON_ERROR
+sources:
+  seed:
+    type: iterator
+    iterator:
+      type: number
+      from: 1
+      to: 3
+      step: 1
+transform:
+  type: sql
+  sql: SELECT value AS id FROM seed
+sinks:
+  - writers:
+      - type: jdbc
+        dataSource:
+          name: gf-partial-bad
+          type: jdbc
+          url: jdbc:h2:mem:gf_partial_bad;MODE=MySQL;DB_CLOSE_DELAY=-1
+          username: sa
+          password: ""
+          driverClassName: org.h2.Driver
+        target: __missing_sink_target__
+  - writers:
+      - type: console

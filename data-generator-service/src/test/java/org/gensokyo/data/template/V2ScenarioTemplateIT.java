@@ -8,6 +8,7 @@ package org.gensokyo.data.template;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import org.gensokyo.data.DataGeneratorApplication;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.runtime.SinkWriteMetric;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.model.v2.CsvSourceVO;
@@ -31,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,6 +73,7 @@ class V2ScenarioTemplateIT {
                 "scenario-c-csv-export.yaml",
                 "scenario-d-chunked-jdbc.yaml",
                 "scenario-e-streaming-jdbc.yaml",
+                "scenario-e-partial-sink.yaml",
                 "scenario-inline-rows.yaml"
         ).map(name -> SCENARIO_ROOT + name);
     }
@@ -141,6 +144,10 @@ class V2ScenarioTemplateIT {
                         seedLedgerRows("gf_ledger", 120));
                 execOn("gf-e-target", "create table gf_ledger_export(id bigint, label varchar(32))");
             }
+            case "scenario-e-partial-sink" -> {
+                // Intentionally omit __missing_sink_target__ so the first JDBC sink fails.
+                registerInlineSinks(template);
+            }
             default -> throw new IllegalArgumentException("Unknown scenario template: " + template.getName());
         }
     }
@@ -174,8 +181,22 @@ class V2ScenarioTemplateIT {
             case "scenario-e-streaming-jdbc" -> {
                 assertThat(result.getMetrics()).isNotNull();
                 assertThat(result.getMetrics().getExecutionMode()).isEqualTo("STREAMING");
+                assertThat(result.getMetrics().getPeakRowsInMemory()).isGreaterThan(0);
                 assertThat(result.getMetrics().getRowsWritten()).isEqualTo(120L);
                 assertThat(countRows("gf-e-target", "gf_ledger_export")).isEqualTo(120L);
+            }
+            case "scenario-e-partial-sink" -> {
+                assertThat(result.getMetrics()).isNotNull();
+                Map<String, SinkWriteMetric> sinkMetrics = result.getMetrics().getSinkMetrics();
+                SinkWriteMetric failingWriter = sinkMetrics.get("sink[0].writer[0]");
+                SinkWriteMetric okWriter = sinkMetrics.get("sink[1].writer[0]");
+                assertThat(failingWriter).isNotNull();
+                assertThat(okWriter).isNotNull();
+                assertThat(failingWriter.getRowsFailed()).isEqualTo(3L);
+                assertThat(failingWriter.getRowsOk()).isZero();
+                assertThat(failingWriter.getLastErrorSample()).isNotBlank();
+                assertThat(okWriter.getRowsOk()).isEqualTo(3L);
+                assertThat(okWriter.getRowsFailed()).isZero();
             }
             default -> throw new IllegalArgumentException("Unknown scenario resource: " + resourcePath);
         }
@@ -191,10 +212,18 @@ class V2ScenarioTemplateIT {
     }
 
     private void registerInlineSinks(TemplateV2VO template) {
-        for (WriterVO writer : template.getSinks().getFirst().getWriters()) {
-            if (writer instanceof JdbcWriterVO jdbcWriter) {
-                String id = runtimeJdbcEndpointResolver.resolveSinkDataSourceId(jdbcWriter);
-                jdbcWriter.setDataSourceId(id);
+        if (template.getSinks() == null) {
+            return;
+        }
+        for (var sink : template.getSinks()) {
+            if (sink.getWriters() == null) {
+                continue;
+            }
+            for (WriterVO writer : sink.getWriters()) {
+                if (writer instanceof JdbcWriterVO jdbcWriter) {
+                    String id = runtimeJdbcEndpointResolver.resolveSinkDataSourceId(jdbcWriter);
+                    jdbcWriter.setDataSourceId(id);
+                }
             }
         }
     }

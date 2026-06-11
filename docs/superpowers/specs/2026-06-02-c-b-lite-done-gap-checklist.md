@@ -19,6 +19,7 @@
 | **C Done** | **Done** | `ScenarioCatalogModal` + `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); `WorkflowStepFields` branch form; `ReviewPanel` DAG staged preview; `workflow-pause.spec.ts`, `workflow-shared-scope.spec.ts`, `workflow-branch.spec.ts` |
 | **B-lite Done** | **Done** | `application-staging.yaml`, `ConsoleLayout` role picker, `ReviewPanel` publish gate, `ConsoleAuthorizationIntegrationIT` (VIEWER forbidden), `rbac.*.spec.ts` |
 | **C2 staging** | **Done** | P1: dual-JVM Podman + Playwright; P2: `RUNNING` expired-lease re-acquire, `Invoke-DistributedLeaseRecoverySmoke` (AC-4), `Invoke-DistributedRequeueSmoke` (AC-6) |
+| **Pack 3 execution reliability** | **Done** | `scenario-e-partial-sink.yaml` (GF-EP), `execution-reliability.spec.ts`, `verify-execution-reliability.ps1` |
 
 Waves **0–5** and **B-lite** landed: V1 execution retired, scenario wizard, branch/shared workflow editors, DAG preview UI, RBAC, audit, Pack V1–V5 engine features.
 
@@ -76,7 +77,7 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 | C-JS1 | JS template created in console; scenario IT passes | **Done** | `TransformJsFields.tsx`, `js-transform.spec.ts`, `docs/js-transform-sandbox.md`, IT | — |
 | C-JS2 | “Create from scenario” for JS (Sprint 7) | **Done** | `scenario-catalog.spec.ts` GF-JS | — |
 | C-X1 | **C Done E2E:** all four families end-to-end in Playwright | **Done** | `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); shared `expectJobSucceeded` helper | — |
-| C-X2 | Linear execution reliability (roadmap ~80% note) | **Defer** | C/D/E scenarios in `V2ScenarioTemplateIT` only | JSON streaming, sink retry/idempotency — post C Done polish |
+| C-X2 | Linear execution reliability (roadmap ~80% note) | **Done** | `scenario-e-partial-sink.yaml`, `SinkRetryPolicyTests`, `RunReportCollectorTests`, `execution-reliability.spec.ts`, `verify-execution-reliability.ps1` | Idempotency keys remain future work |
 
 ### 1.3 Wave deliverables still open under C
 
@@ -188,9 +189,14 @@ Prioritized **small** epics to close gates without starting C2.
 
 **Closes:** B1-3/4, B3-2/4/5/6.
 
-### Pack 3 — **Execution reliability** (parallel / post-gate)
+### Pack 3 — **Execution reliability** (shipped 2026-06-11)
 
-Linear sink retry, streaming polish, partial-success semantics — does **not** block C Done per roadmap family gate but affects operator trust.
+1. `scenario-e-partial-sink.yaml` (GF-EP) — dual sinks + `CONTINUE_ON_ERROR` partial-success metrics.
+2. `V2ScenarioTemplateIT` — multi-sink inline JDBC registration; streaming `peakRowsInMemory` assertion.
+3. `execution-reliability.spec.ts` — API publish/run + job detail `rowsOk`/`rowsFailed` columns; execution step retry policy persistence.
+4. `scripts/verify-execution-reliability.ps1` — Maven (`SinkRetryPolicyTests`, `RunReportCollectorTests`, `V2ScenarioTemplateIT`) + optional Playwright.
+
+**Closes:** C-X2 (operator trust / linear execution reliability).
 
 ---
 
@@ -201,7 +207,7 @@ Linear sink retry, streaming polish, partial-success semantics — does **not** 
 | Declare **B-lite Done** | Pack 2 |
 | Declare **C Done** | Pack 1 |
 | Start **C2** staging design execution | Pack 1 + Pack 2 |
-| Production operator trust (non-blocking) | Pack 3 |
+| Production operator trust (non-blocking) | Pack 3 (**Done**) |
 
 ---
 
