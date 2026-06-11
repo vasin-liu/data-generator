@@ -97,6 +97,8 @@ sinks:
           bulkMode: clickhouse_insert
 ```
 
+Verified by `ClickHouseInsertBulkWriterIntegrationTests` (Testcontainers; requires Docker).
+
 ## Limitations
 
 - **Bulk modes and upsert**: `postgres_copy` and `clickhouse_insert` reject `upsert: true`; use `jdbc_batch` when duplicate handling is required.

@@ -4,6 +4,7 @@ param(
     [switch]$SkipUnit,
     [switch]$SkipE2e,
     [switch]$KeepContainer,
+    [switch]$SkipDistributedSplit,
     [string]$ImageTag = 'dg-e2e:local',
     [string]$ContainerName = 'dg-e2e',
     [int]$HostPort = 9876
@@ -53,6 +54,7 @@ $e2eArgs = @{
 }
 if ($SkipBuild) { $e2eArgs.SkipBuild = $true }
 if ($KeepContainer) { $e2eArgs.KeepContainer = $true }
+if ($SkipDistributedSplit) { $e2eArgs.SkipDistributedSplit = $true }
 
 & (Join-Path $RepoRoot 'scripts\e2e-podman.ps1') @e2eArgs
 exit $LASTEXITCODE

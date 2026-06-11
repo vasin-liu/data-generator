@@ -142,7 +142,9 @@ Run on `master` after merge:
 | AC-6 | `DistributedJobRequeueIntegrationTests` |
 | AC-7 | Merge `feature-4.3` → `master` (this doc + profiles on `master`) |
 
-Manual staging still required for multi-JVM deployment, shared production DB, and Console UI smoke.
+`scripts/e2e-podman.ps1` and `scripts/verify-console.ps1` run the dual-JVM Podman drill after the embedded `e2e-distributed` phase (skip with `-SkipDistributedSplit`).
+
+Manual staging still required for shared production DB and non-Podman multi-host deployment.
 
 ## References
 

@@ -2,6 +2,7 @@
 param(
     [switch]$SkipBuild,
     [switch]$KeepContainer,
+    [switch]$SkipDistributedSplit,
     [string]$ImageTag = 'dg-e2e:local',
     [string]$ContainerName = 'dg-e2e',
     [int]$HostPort = 9876
@@ -129,13 +130,29 @@ try {
         Pop-Location
     }
 
+    if (-not $SkipDistributedSplit) {
+        Write-Step "Dual-JVM distributed staging E2E (coordinator + worker)"
+        podman rm -f $ContainerName 2>$null | Out-Null
+        $splitArgs = @{
+            SkipBuild = $true
+            ImageTag  = $ImageTag
+        }
+        if ($KeepContainer) {
+            $splitArgs.KeepContainers = $true
+        }
+        & (Join-Path $PSScriptRoot 'e2e-distributed-podman.ps1') @splitArgs
+        if ($LASTEXITCODE -ne 0) { throw "Dual-JVM distributed E2E failed" }
+    }
+
     Write-Host ""
     Write-Host "[SUCCESS] Podman E2E completed." -ForegroundColor Green
 } finally {
     if (-not $KeepContainer) {
         Write-Step "Stopping container $ContainerName"
-        podman rm -f $ContainerName | Out-Null
+        podman rm -f $ContainerName 2>$null | Out-Null
+        podman rm -f dg-dist-coordinator dg-dist-worker 2>$null | Out-Null
     } else {
         Write-Host "Container kept running: podman logs -f $ContainerName"
+        Write-Host "Dual-JVM containers (if started): podman logs -f dg-dist-coordinator | podman logs -f dg-dist-worker"
     }
 }
