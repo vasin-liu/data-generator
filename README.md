@@ -1,427 +1,360 @@
 # data-generator
 
-数据生成服务是通过给定的模板批量生成模拟数据，并且写入目标数据源的工具。
+面向测试数据、样例数据与批量数据管道的 **Java 数据生成平台**。通过 YAML 模板定义 **读取 → 转换 → 写入** 流程，支持 JDBC、Elasticsearch、Kafka、文件等多种数据源，可由 **运营控制台** 或 **REST API** 触发执行。
 
-1. 读取数据源支持MySQL、Postgresql、Clickhouse、Elasticsearch；
-2. 支持常量、动态表达式生成数据；
-3. 写入数据源支持MySQL、Postgresql、Clickhouse、Elasticsearch、Kafka；
-4. 支持Rest接口启动任务；
-5. 支持带权重的数据生成；
-6. 支持数据生成顺序控制；
-7. 支持单个或者多个字段依赖；
-8. 支持SQL参数化；
-9. 支持多个写入数据源；
-10. 支持全局缓存数据获取；
-11. 支持复杂阶段处理；
-12. 支持条件判断阶段；
-13. 支持地理空间数据：V1/V2 合成 GEO 迭代器、GeoJSON/PostGIS 源、Template V2 SQL 地理函数（距离/谓词/近似 buffer）；总览见 `docs/geospatial-overview.md`，用法见 `docs/geospatial-phase1-usage.md`。
+当前主线版本：**3.0.0-SNAPSHOT**（**Template V2**）。Legacy V1 字段阶段模型已退役，任务执行仅支持 V2 模板。
 
-### 数据源配置
+**文档语言：** 中文 · [English](README.en.md) · [快速入门](docs/quickstart.md)
 
-elasticsearch
+---
 
-```yaml
-spring:
-  elasticsearch:
-    multiple:
-      #默认数据源
-      primary: es1
-      clusters:
-        #es1 即为属于编号，后续模板中均用此编号来识别
-        es1:
-          uris:
-            - https://localhost:9200
-          username: elastic
-          password: PCI@suntek#123
-        es2:
-          uris:
-            - 172.25.22.60:9401
-            - 172.25.20.217:9401
-            - 172.25.20.218:9401
-          username: elastic
-          password: Suntek123
+## 核心能力
+
+| 能力 | 说明 |
+|------|------|
+| **Template V2** | 声明式 `sources` / `transform` / `sink`；支持 SQL（Calcite）、SpEL、JavaScript 转换 |
+| **工作流与计算块** | L2 `workflow` 步骤（日志、暂停、分支、共享作用域）+ L1 `computeBlocks` / `transformGraph` DAG |
+| **多源读取** | JDBC 查询、迭代器、CSV/Excel/JSON、Elasticsearch、GeoJSON/PostGIS、AI 生成等 |
+| **多目标写入** | MySQL、PostgreSQL、ClickHouse、Elasticsearch、Kafka、CSV/Excel/JSON、控制台 |
+| **运营控制台** | React SPA：模板编辑、数据源管理、任务历史、Cron 调度、审计 |
+| **任务治理** | 草稿 / 发布生命周期、密钥引用、运行报告与指标 |
+| **定时调度** | 基于 Cron 的模板定时触发（可开关） |
+| **分布式执行** | 协调器 / Worker 队列、租约与心跳（可开关） |
+| **地理空间** | 合成 GEO 迭代器、GeoJSON/PostGIS 源、V2 地理 SQL 函数 |
+| **插件扩展** | PF4J 自定义 Transformer；模块化 Reader / Writer / Iterator |
+
+---
+
+## 技术栈
+
+| 类别 | 技术 |
+|------|------|
+| 语言与构建 | Java **25**、Maven 多模块、`mvnw` / `mvnw-jdk25.ps1` |
+| 运行时 | Spring Boot **4.x**（`data-generator-service`） |
+| 控制台前端 | React 19、Vite、Ant Design（`data-generator-console-web`） |
+| 转换引擎 | Apache Calcite、GraalJS、SpEL、DataFaker |
+| 数据访问 | 动态 JDBC（Druid）、Elasticsearch、Kafka |
+| 序列化 | Jackson 3.x、YAMLBeans、JSON Schema |
+
+---
+
+## 项目结构
+
+```
+data-generator/
+├── data-generator-service/          # Spring Boot 可执行服务（REST + 控制台静态资源）
+├── data-generator-console-web/      # 运营控制台 React 源码
+├── data-generator-calcite/          # Template V2 运行时与 SQL 引擎
+├── data-generator-common/           # 公共模型与工具
+├── data-generator-datasource/       # 数据源抽象
+├── data-generator-stage/            # 阶段处理（V1 遗留模块，运行时已退役）
+├── data-generator-reader/           # 读取器（JDBC、CSV、Excel、ES、AI…）
+├── data-generator-writer/           # 写入器（JDBC、Kafka、ES、文件…）
+├── data-generator-iterator/         # 迭代器（数值、日期、GEO、数据库…）
+├── data-generator-scripter/         # 脚本引擎（GraalJS、SpEL、Velocity）
+├── data-generator-geo/              # 地理空间工具与谓词
+├── data-generator-faker/            # 假数据集成
+├── data-generator-converter/        # 类型转换
+├── data-generator-generator/        # 生成编排
+├── data-generator-dependencies/     # 依赖 BOM
+├── docs/                            # 设计说明、迁移与专题文档
+└── samples/                         # 示例插件等
 ```
 
-kafka
+---
 
-```yaml
-spring:
-  kafka:
-    multiple:
-      #默认数据源
-      primary: kafka1
-      clusters:
-        #kafka1 即为属于编号，后续模板中均用此编号来识别
-        kafka1:
-          bootstrap-servers:
-            - localhost:9092
-        kafka2:
-          bootstrap-servers:
-            - 172.25.21.29:9092
+## 快速开始
+
+手把手入门见 **[docs/quickstart.md](docs/quickstart.md)**。
+
+### 环境要求
+
+- **JDK 25**
+- **Node.js 22+**（仅本地开发控制台前端时需要）
+- Maven 使用仓库内配置：`.mvn/settings-jdk25.xml`（内网 Nexus 可能为 HTTP）
+
+### 构建与运行
+
+`data-generator-service` 在 `process-classes` 阶段会把 `data-generator-console-web/target/console-dist` 嵌入 JAR。**单独打包 service 前必须先构建控制台前端**，否则会报 `console-dist does not exist`。
+
+```powershell
+# 查看 Maven / Java 版本
+.\mvnw-jdk25.ps1 -v
+
+# 推荐：一次构建前端 + 服务（跳过测试）
+.\mvnw-jdk25.ps1 -pl data-generator-console-web,data-generator-service -am -DskipTests package
+
+# 仅启动服务（需已 package 成功）
+.\mvnw-jdk25.ps1 -pl data-generator-service spring-boot:run
 ```
 
-database
+仅改后端、不需要 `/console/` 静态资源时，可临时跳过嵌入（**不推荐**用于验证控制台）：
+
+```powershell
+.\mvnw-jdk25.ps1 -pl data-generator-service -am -DskipTests -Dskip.console.frontend=true package
+```
+
+### 访问入口
+
+| 入口 | 地址 |
+|------|------|
+| 运营控制台 | http://localhost:9876/console/ |
+| 控制台 API | http://localhost:9876/api/… |
+| 遗留 REST | `/template/…`、`/task/…`、`/datasource/…` |
+| H2 控制台（开发） | http://localhost:9876/h2 |
+
+### 本地前端热更新
+
+后端保持在 **9876** 端口，另开终端：
+
+```powershell
+cd data-generator-console-web
+npm install
+npm run dev
+```
+
+浏览器打开 http://localhost:5173/console/ ，Vite 会将 `/api` 代理到后端。
+
+### 验证
+
+```powershell
+# 全量测试：先构建 console-dist，再跑全仓库 test
+.\mvnw-jdk25.ps1 -pl data-generator-console-web -DskipTests package
+.\mvnw-jdk25.ps1 test
+
+# 或一步（console-web + service 及其依赖）
+.\mvnw-jdk25.ps1 -pl data-generator-console-web,data-generator-service -am test
+
+# 控制台切片（更快；含前端构建 + 控制台相关 Java 测试）
+.\scripts\verify-console-unit.ps1 -IncludeWebBuild
+```
+
+更多构建说明见 [`docs/jdk25-upgrade.md`](docs/jdk25-upgrade.md)。
+
+---
+
+## 运营控制台
+
+控制台用于 **Template V2** 全生命周期管理，不再提供 V1 模板或迁移工作台。
+
+推荐流程：
+
+1. **数据源** — 登记 JDBC 连接（支持常用驱动预设）
+2. **模板** — 向导创建：General → Sources → Transform → Sinks → Execution
+3. **校验与发布** — Review 页 Validate → Save → Publish（`PUBLISHED` 状态方可正式运行）
+4. **执行** — 手动 Run 或配置 Cron 调度
+5. **任务** — 查看运行报告、错误样本与分布式作业信息
+
+详细操作说明：[`docs/operator-console-usage.md`](docs/operator-console-usage.md)
+
+---
+
+## Template V2 简介
+
+V2 以 **数据源（sources）→ 转换（transform / transformers / transformGraph）→ 输出（sink）** 为主线。复杂场景可使用 **workflow + computeBlocks** 组合多个计算块。
+
+### 最小示例（合成数据 + SQL 投影 + 控制台输出）
+
+```yaml
+name: demo-synthetic
+sources:
+  seed:
+    type: iterator
+    iterator:
+      type: number
+      from: 1
+      to: 5
+      step: 1
+transform:
+  type: sql
+  sql: SELECT value AS id, value * 10 AS score FROM seed
+sink:
+  writers:
+    - type: console
+```
+
+更多场景样例位于 `data-generator-service/src/main/resources/template/v2-scenarios/`（如 `scenario-a-synthetic.yaml`、`scenario-b-lookup-join.yaml`）。
+
+### 能力分层（简表）
+
+| 层级 | 用途 | YAML 位置 |
+|------|------|-----------|
+| **线性管道** | 单条 sources → transform → sink | 根级 `sources` / `transform` / `sink` |
+| **L1 转换 DAG** | 多节点变换图 | `transformGraph` 或 `computeBlocks[].transformGraph` |
+| **L2 工作流** | 步骤编排、分支、暂停 | 根级 `workflow.steps` + `computeBlocks` |
+
+专题文档：
+
+- 工作流编写：[`docs/template-v2-workflow-authoring-guide.md`](docs/template-v2-workflow-authoring-guide.md)
+- 转换策略（SQL / SpEL / JS）：[`docs/template-v2-transformer-strategy.md`](docs/template-v2-transformer-strategy.md)
+- 场景目录：[`docs/template-v2-scenario-template-catalog.md`](docs/template-v2-scenario-template-catalog.md)
+- JDBC 分块执行：[`docs/template-v2-jdbc-chunked-execution-guide.md`](docs/template-v2-jdbc-chunked-execution-guide.md)
+- 流式执行：[`docs/template-v2-streaming-execution-guide.md`](docs/template-v2-streaming-execution-guide.md)
+
+---
+
+## 数据源配置
+
+服务使用 **动态多数据源**。每个数据源以唯一 **编号（name）** 注册，模板中通过 `dataSourceId` 或内联 `dataSource` 引用。
+
+### JDBC（内置元数据库 + 业务库）
 
 ```yaml
 spring:
   datasource:
     dynamic:
-      #默认数据源
-      primary: reader
+      primary: data-generator
       datasource:
-        #内置内存数据库，用来保存任务信息
         data-generator:
-          url: jdbc:h2:mem:data-generator
-          #url: jdbc:h2:file:./db/data-generator
+          url: jdbc:h2:file:./db/data-generator
           username: sa
-          password:
+          password: ""
           driver-class-name: org.h2.Driver
           type: com.alibaba.druid.pool.DruidDataSource
           init:
             schema: classpath:db/schema.sql
-          druid:
-            filters: stat,slf4j
-        #omof 即为属于编号，后续模板中均用此编号来识别
-        omof:
-          url: jdbc:mysql://172.25.20.175:3306/omof_gzsj?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: videoweb
-          password: suntek
+        my-mysql:
+          url: jdbc:mysql://localhost:3306/demo?useSSL=false&serverTimezone=UTC
+          username: demo
+          password: "${DB_PASSWORD}"
           driver-class-name: com.mysql.cj.jdbc.Driver
           type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        reader:
-          url: jdbc:mysql://localhost:3306/reader?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: root
-          password: PCI@suntek#123
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer:
-          url: jdbc:mysql://localhost:3306/writer?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: root
-          password: PCI@suntek#123
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer2:
-          url: jdbc:postgresql://localhost:5432/pd_dts
-          username: jiadu
-          password: PCI@suntek#123
-          driver-class-name: org.postgresql.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer3:
-          url: jdbc:clickhouse://localhost:8123/default
-          username: default
-          password: PCI@suntek#123
-          driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        writer4:
-          url: jdbc:postgresql://172.25.21.18:25308/pd_dts_gz
-          username: pd_dts_gz
-          password: suntek@123
-          driver-class-name: org.postgresql.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        pd_dicmanage:
-          url: jdbc:mysql://172.25.21.29:3306/pd_dicmanage?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: videoweb
-          password: suntek
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-        md_device_mgr:
-          url: jdbc:mysql://172.25.21.29:3306/md_device_mgr?useUnicode=true&autoReconnect=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowLoadLocalInfile=true
-          username: videoweb
-          password: suntek
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            filters: stat,slf4j
-      druid:
-        filters: stat,slf4j
 ```
 
-### 启动任务
+支持的 JDBC 方言包括 **MySQL、PostgreSQL、ClickHouse、H2、达梦（DM）、人大金仓、瀚高等**（以各 `data-generator-writer-database` 模块为准）。
 
-1. 启动数据生成服务，确认启动成功；
-2. 启动任务：`http://ip:port/task/run/{your-template-name}`，其中`{your-template-name}`
-   替换为需要执行的模板名
+生产环境请通过控制台 **密钥引用** 或环境变量注入密码，避免在模板 YAML 中写明文密码。见 [`docs/template-v2-datasource-and-secret-governance.md`](docs/template-v2-datasource-and-secret-governance.md)。
 
-### 模板规范
+### Elasticsearch
 
-模板配置主要分以下几部分：
-
-1. 模板公共部分；
-2. 表数据集来源元数据配置，包含各个字段数据源读取、处理、选择、转换、映射等配置，可以包含虚拟字段，字段依赖等；
-3. 表数据集写入器配置；
-
-> **注意：模板校验文件路径为：src/resources/META-INF/template-schema.json**
-
-样例配置如下：
 ```yaml
-# 数据集名称，各个文件中唯一
-name: demo_00
-#生成数量
-amount: 10
-#批次数量
-batchSize: 5
-#全局配置
-global:
-   #线程池配置
-   executor:
-      #核心线程数
-      coreSize: 8
-      #最大线程数
-      maxSize: 16
-      #队列大小
-      queueCapacity: 16
-
-# 数据集元数据配置
-table:
-   fields:
-      - name: ID #字段名称
-        stages:  # 字段处理阶段
-           - type: READ #读取阶段
-             readers: # 读取器配置
-                - type: SPEL # spel表达式读取器
-                  content: "#faker.snowflake.next" # 表达式内容
-      - name: DISTRICT_CODE
-        stages:
-           - type: READ
-             inMemory: true # 驻留内存数据源
-             readers:
-                - type: JDBC # jdbc读取器
-                  dataSourceId: 'system_manage' # 数据源编号，对应上面数据源配置
-                  content: "SELECT CODE,NAME,PARENT_CODE FROM PC_DISTRICT WHERE PARENT_CODE = '440100' LIMIT 10" # SQL语句
-           - type: SELECT # 上一阶段的结果作为输入，选择字段值（如果为单值或者Map类的值，则选择阶段无效，直接返回原值，如果为集合类型，则按配置的选择策略选择一个值）
-           - type: SCRIPT # 上一阶段的结果作为输入，执行脚本，生成新值
-             scriptType: SPEL # 脚本类型
-             content: "#dataset.CODE" # 脚本内容
-      - name: DISTRICT_NAME
-        dependsOn: # 字段依赖集合
-           - DISTRICT_CODE # 依赖字段名称，依赖该字段最后的生成结果作为输入
-        stages:
-           - type: SCRIPT # 上一阶段的结果作为输入（此时的输入值为依赖字段的生成结果），执行脚本，生成新值
-             scriptType: SPEL # 脚本类型
-             content: "#dataset.NAME" # 脚本内容
-      - name: STATUS
-        stages:
-           - type: READ
-             inMemory: true
-             readers:
-                - type: CONSTANT
-                  content: [ 'S0A', 'S0X' ,'S0D', 'S0H' ]
-           - type: SELECT
-      - name: CREATE_TIME
-        stages:
-           - type: READ
-             readers:
-                - type: SPEL
-                  content: >-
-                     #faker.expression("#{date.past '1','DAYS','yyyy-MM-dd HH:mm:ss'}")
-
-# 数据输出配置
-output:
-   writers:
-      - type: CONSOLE # 控制台输出器
+spring:
+  elasticsearch:
+    multiple:
+      primary: es1
+      clusters:
+        es1:
+          uris:
+            - https://localhost:9200
+          username: elastic
+          password: "${ES_PASSWORD}"
 ```
 
-### 阶段处理
+### Kafka
 
-阶段处理主要分以下几类：
-1. READ 读取阶段，主要用于从数据源读取数据；
-2. SCRIPT 脚本阶段，主要用于执行脚本，生成新值；
-3. SELECT 选择阶段，主要用于选择字段值；
-4. MAPPING 映射阶段，主要用于字段值映射；
-5. CONVERT 转换阶段，主要用于字段值类型转换；
-6. CONDITION 条件判断阶段，主要用于根据字段值进行条件判断，使用不同的分支处理；
-6. WRITE 写入阶段，主要用于写入数据；
-
-> 一个字段的处理阶段可以有1...N个，核心处理逻辑是才有流水线的方式，上一个阶段的输出会作为下一阶段的输入。
-
-### 脚本处理
-
->脚本处理目前支持两种方式：`javascript`和`spel`。
-
-#### javascript
-
-javascript脚本目前仅仅支持立即执行的脚本，支持以下三种方式加载脚本内容：
-
-1. 支持内联脚本字符串；
-2. 服务器上本地脚本文件；
-3. 远程服务器脚本文件（http/https）；
-
-脚本内容示例如下：
-
-```javascript
-(dataset, args) => {
-    var data = [];
-    for (var i = 0; i < dataset.length; i++) {
-        data.push(arr[i].CODE);
-    }
-    return data;
-}
+```yaml
+spring:
+  kafka:
+    multiple:
+      primary: kafka1
+      clusters:
+        kafka1:
+          bootstrap-servers:
+            - localhost:9092
 ```
 
-对于上述脚本内容的，有两个个参数：`dataset`、`args`。
+控制台也可在 **数据源** 页面动态登记 JDBC，无需改 `application.yaml`。
 
-1. dataset 参数为当前脚本执行的数据集参数，通常来说是上一个阶段的输出值；
-2. args 参数为脚本执行的附加参数，为数组类型，其中`args[0]`是当前所有驻留内存数据集的集合，其他的作为预留扩展参数；
+---
 
-#### spel
+## 运行任务
 
-`SPEL` 请参考官方文档：https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions
+### 方式一：运营控制台（推荐）
 
-### 扩展
+在模板 Review 页或列表页点击 **Run**，跳转至任务详情查看 `SUCCESS` / `FAILED` 状态与结构化运行报告。
 
-#### Stage
+### 方式二：REST API
 
-> 目前支持的`Stage`有：ConstantStage、DirectSpelStage、ElasticsearchStage、JdbcStage、KafkaStage、MappingStage、ReadStage、ScriptStage、SelectStage、WriteStage
+```http
+# 按模板 ID 启动（POST 推荐）
+POST /task/run/{templateId}
 
-如需新增`Stage`，则可以继承 `AbstractStage` 抽象类，实现`Stage`接口的`internalExecute`方法
+# 按名称启动（名称唯一时）
+GET  /task/runByName/{templateName}
 
-```java
-@FunctionalInterface
-public interface Stage {
-
-   /**
-    * 省略其他方法...
-    */
-
-   /**
-    * 执行处理阶段（实际内部处理方法）
-    *
-    * @param input 输入值
-    * @return 输出值
-    */
-   Value internalExecute(Value input);
-}
+# 查询模板列表
+GET  /task/list
 ```
 
-#### Reader
+当 `data.generator.governance.require-published-for-task-run=true`（默认）时，仅 **已发布** 模板可通过 `/task/run` 执行；编辑器内草稿运行走控制台专用接口。
 
-目前支持的`Reader`有：ConstantReader、JdbcReader、SpelReader
+---
 
-如果需要新增`Reader`，则可以实现`Reader`接口的`read`方法
+## 运行时配置
 
-```java
-public interface Reader<T extends ReaderPO> {
+常用 `application.yaml` 片段（`data.generator` 前缀）：
 
-   Value read(final ReaderContext<T> ctx, final Value input);
-}
+```yaml
+data:
+  generator:
+    # V1 执行路径已退役，保留配置项仅为兼容
+    v1-execution:
+      enabled: false
+    governance:
+      require-published-for-task-run: true
+      reject-plaintext-passwords-in-templates: true
+    schedule:
+      enabled: false          # true 时启用 Cron 调度轮询
+      poll-delay-ms: 60000
+    distributed:
+      enabled: false          # true 时启用分布式队列
+      worker-enabled: false
+      lease-seconds: 30
+    preview-max-rows: 100
+    v2-plugin-directories: [] # PF4J 插件目录
 ```
 
-#### ReaderSelectStrategy
+分布式部署说明：[`docs/staging-distributed-deployment.md`](docs/staging-distributed-deployment.md)
 
-目前支持的`ReaderSelectStrategy`有：EqualReaderSelectStrategy、WeightReaderSelectStrategy
+运行时标志可通过 `GET /api/console/runtime` 查询，控制台首页会展示调度 / 分布式模式状态。
 
-如果需要新增`ReaderSelectStrategy`，则可以实现`ReaderSelectStrategy`接口的`select`方法
+---
 
-```java
-@FunctionalInterface
-public interface ReaderSelectStrategy<T extends ReaderPO> {
+## 地理空间
 
-   /**
-    * 数据选择策略
-    *
-    * @param rpo 读取阶段信息
-    * @return 选择结果
-    */
-   T select(final ReadStagePO rpo);
-}
-```
+支持合成点生成、GeoJSON/PostGIS 读取，以及在 Calcite SQL 中使用内置 `V2_GEO_*` 函数（距离、包含、缓冲等）。
 
-#### Writer
+- 总览：[`docs/geospatial-overview.md`](docs/geospatial-overview.md)
+- 用法：[`docs/geospatial-phase1-usage.md`](docs/geospatial-phase1-usage.md)
 
-目前支持的`Writer`有：ClickHouseWriter、ElasticsearchWriter、JdbcWriter、KafkaWriter、MySQLWriter、PostgresWriter、ConsoleWriter
+---
 
-如果需要新增`Writer`，则可以实现`Writer`接口的`write`方法
+## 扩展开发
 
-```java
-@FunctionalInterface
-public interface Writer<T extends WriterPO> {
+平台采用 **可插拔模块** 设计，扩展点包括：
 
-   /**
-    * 写入数据集
-    *
-    * @param ctx     写入上下文
-    * @param dataset 数据集
-    * @return 写入数据量
-    */
-   long write(final WriterContext<T> ctx, final List<Map<String, Object>> dataset);
-}
-```
+| 扩展点 | 模块位置 | 说明 |
+|--------|----------|------|
+| Reader | `data-generator-reader-*` | 实现 `Reader` 接口 |
+| Writer | `data-generator-writer-*` | 实现 `Writer` 接口 |
+| Iterator | `data-generator-iterator-*` | 注册迭代器类型 |
+| Transformer 插件 | PF4J | 见 `docs/template-v2-pf4j-custom-transform-guide.md` |
+| Calcite UDF | `data-generator-calcite` | SQL 函数注册 |
 
-#### Converter
+示例 PF4J 插件：`samples/template-v2-pf4j-plugin/`
 
-目前支持的`Converter`有：StringConverter
+AI 读取器（Ollama 等）在本地无模型端点时会自动跳过相关测试。
 
-如果需要新增`Converter`，则可以实现 `Converter` 接口的`convert`方法
+---
 
-```java
-@FunctionalInterface
-public interface Converter {
+## 文档索引
 
-   /**
-    * 将输入值转换为指定的输出值
-    *
-    * @param input 输入值
-    * @return 输出值
-    */
-   Value convert(Value input);
-}
-```
+| 主题 | 文档 |
+|------|------|
+| 快速入门 | [`docs/quickstart.md`](docs/quickstart.md) |
+| 控制台使用 | [`docs/operator-console-usage.md`](docs/operator-console-usage.md) |
+| Template V2 产品路线图 | [`docs/template-v2-product-roadmap.md`](docs/template-v2-product-roadmap.md) |
+| Calcite 实现状态 | [`docs/calcite-implementation-status.md`](docs/calcite-implementation-status.md) |
+| V1 → V2 映射 | [`docs/calcite-v1-v2-mapping.md`](docs/calcite-v1-v2-mapping.md) |
+| 嵌入式测试约定 | [`docs/testing-embedded-components.md`](docs/testing-embedded-components.md) |
+| JDK 25 升级说明 | [`docs/jdk25-upgrade.md`](docs/jdk25-upgrade.md) |
+| V1 迁移归档 | [`docs/archive/migration/`](docs/archive/migration/) |
+| AI 贡献者指南 | [`AGENTS.md`](AGENTS.md) |
 
-#### Script
+---
 
-目前支持的`Script`有：JsScript、SpelScript
+## 许可证与归属
 
-如果需要新增`Script`，则可以实现 `Script` 接口的`eval`方法
+Copyright © 2021–2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
 
-```java
-@FunctionalInterface
-public interface Script {
-
-   /**
-    * 执行脚本
-    *
-    * @param spo     脚本阶段配置
-    * @param dataset 输入数据集
-    * @param args    输入参数列表
-    * @return 脚本执行结果
-    */
-   Value eval(final ScriptStagePO spo, final Value dataset, Object... args);
-}
-```
-
-#### ValueSelectStrategy
-
-目前支持的`ValueSelectStrategy`有：RepeatRandomValueSelectStrategy、RepeatOrderValueSelectStrategy、OnceRandomValueSelectStrategy、OnceOrderValueSelectStrategy、MultipleOrderValueSelectStrategy
-
-如果需要新增`ValueSelectStrategy`，则可以实现 `ValueSelectStrategy` 接口的`select`方法
-
-```java
-@FunctionalInterface
-public interface ValueSelectStrategy {
-
-    /**
-     * 数据选择策略
-     *
-     * @param index         选择索引
-     * @param selectedCount 已选择选择次数
-     * @param spo           选择阶段参数
-     * @param input         给定数据集
-     * @return 选择结果
-     */
-    Value select(final AtomicInteger index, final AtomicInteger selectedCount, SelectStagePO spo, final Value input);
-}
-```
+内部 Maven 制品与 SCM 配置见根 `pom.xml`。
