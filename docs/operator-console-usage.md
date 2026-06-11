@@ -161,6 +161,7 @@ flowchart LR
 | Id, name, status, archived | Catalog sort; status `DRAFT` / `PUBLISHED` |
 | Filter | Name or id substring |
 | Include archived | Shows soft-deleted rows |
+| **From scenario** | Opens official scenario catalog (`GET /api/templates/scenarios`); seeds draft from `template/v2-scenarios/` |
 | **New template** | Opens empty V2 scaffold |
 | **Edit** | Wizard + YAML advanced panel |
 | **View jobs** | `/jobs?templateId=` |
@@ -181,8 +182,8 @@ flowchart LR
 | Transform | SQL or SpEL; single step or transformer chain; compute blocks may use linear or **DAG** layout |
 | Sinks | CONSOLE, JDBC, KAFKA, ELASTICSEARCH with labeled writer types and cluster dropdowns |
 | Execution | `executionPolicy`, chunking (labeled modes) |
-| Workflow | Optional L2 steps + compute blocks (each block reuses Sources / Transform / Sinks) |
-| Review | Validate, Preview, Save, Publish, Run |
+| Workflow | Optional L2 steps (log, pause, **branch**, shared_scope, invoke_compute_block) + compute blocks |
+| Review | Validate, Preview (linear **or DAG node** staged cutoff), Save, Publish, Run |
 
 **Legacy V1 templates:** excluded from `GET /api/templates` catalog. Opening a V1 row in the editor returns an error — create a new Template V2 instead. V1 execution via `/task/run` is retired.
 
@@ -342,20 +343,44 @@ Distributed staging: `docs/staging-distributed-deployment.md`.
 
 ---
 
+## Execution policy notes
+
+### Parallel sinks
+
+When a template defines **multiple independent writers**, enable optional parallel fan-out on the **Execution** tab (`sinkExecutionPolicy.parallelSinks`). Targets must not share connection state assumptions. Partial success metrics (`rowsOk` / `rowsFailed`) appear on the job detail run report when `CONTINUE_ON_ERROR` is set.
+
+See `docs/template-v2-jdbc-sink-guide.md` for dialect options (`postgres` / `mysql` / `clickhouse` upsert).
+
+### Distributed execution (staging)
+
+Multi-node queue execution is **off by default**. Enable on coordinator and worker JVMs per `docs/staging-distributed-deployment.md`:
+
+- Coordinator: `spring.profiles.active=distributed-coordinator`
+- Worker: `spring.profiles.active=distributed-worker` with unique `data.generator.distributed.worker-id`
+
+The console **Jobs** detail page shows lease, worker, and attempt metadata when distributed mode is active.
+
+---
+
 ## Known gaps (follow-on)
 
 - In-console registration of Kafka / Elasticsearch clusters (today: `application.yaml` + restart only).
-- Fine-grained Spring Security roles on all console routes (partial RBAC on schedules).
-- W3 V2 orchestration spike (P5, deferred).
+- Phase D inter-template pipeline DAG (deferred).
+- C2 multi-node distributed product gate (code + staging doc exist; not default-on).
 
 ---
 
 ## Verify after changes
 
 ```powershell
-.\mvnw-jdk25.ps1 -pl data-generator-service -am test
-cd data-generator-console-web && npm run build
-jar tf data-generator-service\target\data-generator-service-*.jar | findstr static/console/index.html
+# Console slice (recommended)
+.\scripts\verify-console-unit.ps1 -IncludeWebBuild
+
+# Full service reactor (requires console-dist)
+.\mvnw-jdk25.ps1 -pl data-generator-console-web,data-generator-service -am test
+
+# Full pipeline including Playwright E2E (Podman)
+.\scripts\verify-console.ps1
 ```
 
 ## Related docs

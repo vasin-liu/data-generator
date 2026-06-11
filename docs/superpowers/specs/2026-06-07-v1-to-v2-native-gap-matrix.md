@@ -151,7 +151,7 @@
 
 | Product gate | Remaining V1-gap work |
 |--------------|----------------------|
-| **C Done** | Scenario wizard (Done), branch editor (Done), catalog E2E (Done), DAG staged preview UI, shared-state E2E |
+| **C Done** | Scenario wizard, branch editor, catalog E2E, DAG staged preview UI, shared-state + branch E2E — **Done** (2026-06-11) |
 | **B-lite Done** | Staging RBAC + catalog publish gate + audit UI (shipped 2026-06-10) |
 | **V2 parity (operator trust)** | Pack V1–V2 above |
 

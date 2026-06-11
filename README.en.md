@@ -303,7 +303,9 @@ data:
     v2-plugin-directories: [] # PF4J plugin directories
 ```
 
-Distributed deployment: [`docs/staging-distributed-deployment.md`](docs/staging-distributed-deployment.md)
+Distributed deployment: [`docs/staging-distributed-deployment.md`](docs/staging-distributed-deployment.md) (off by default; coordinator + worker JVMs via Spring profiles)
+
+Parallel sinks and JDBC dialect options: [`docs/template-v2-jdbc-sink-guide.md`](docs/template-v2-jdbc-sink-guide.md)
 
 Query runtime flags via `GET /api/console/runtime`; the console home page shows schedule and distributed mode status.
 

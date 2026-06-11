@@ -304,7 +304,9 @@ data:
     v2-plugin-directories: [] # PF4J 插件目录
 ```
 
-分布式部署说明：[`docs/staging-distributed-deployment.md`](docs/staging-distributed-deployment.md)
+分布式部署说明：[`docs/staging-distributed-deployment.md`](docs/staging-distributed-deployment.md)（默认关闭；协调器 / Worker 双 JVM，见文档中的 Spring profile）
+
+并行多 Sink、JDBC 方言选项：[`docs/template-v2-jdbc-sink-guide.md`](docs/template-v2-jdbc-sink-guide.md)
 
 运行时标志可通过 `GET /api/console/runtime` 查询，控制台首页会展示调度 / 分布式模式状态。
 

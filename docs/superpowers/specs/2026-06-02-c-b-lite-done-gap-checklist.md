@@ -12,11 +12,19 @@
 
 ## Executive summary
 
+> **Status refresh (2026-06-11):** The sections below retain the original `26f7ade` audit for history. Current `main` has closed most open items.
+
+| Gate | Verdict (2026-06-11 on `main`) | Evidence |
+|------|--------------------------------|----------|
+| **C Done** | **Done** | `ScenarioCatalogModal` + `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); `WorkflowStepFields` branch form; `ReviewPanel` DAG staged preview; `workflow-pause.spec.ts`, `workflow-shared-scope.spec.ts`, `workflow-branch.spec.ts` |
+| **B-lite Done** | **Done** | `application-staging.yaml`, `ConsoleLayout` role picker, `ReviewPanel` publish gate, `ConsoleAuthorizationIntegrationIT` (VIEWER forbidden), `rbac.*.spec.ts` |
+| **C2 start** | **Defer** | Distributed code + `staging-distributed-deployment.md` exist; product gate still deferred per gap matrix |
+
+Waves **0–5** and **B-lite** landed: V1 execution retired, scenario wizard, branch/shared workflow editors, DAG preview UI, RBAC, audit, Pack V1–V5 engine features.
+
+Original audit at `26f7ade`:
+
 Waves **0–4** and **B-lite core** landed on `master`: V1/migration product paths removed, MaterializationPolicy UI, Transform DAG editor + RunReport metrics, Workflow pause/resume UX, JsTransform editor, publish gate on schedules, audit API/page, RBAC filter + role matrix + unit tests, and **32** Playwright E2E tests.
-
-**C Done** is **~85%**: all four official scenario families have **backend IT coverage** and **partial console E2E**, but the roadmap’s **“create from scenario”** wizard, **Scenario B full console loop**, **DAG staged preview in UI**, and **structured `branch` workflow editor** are still open.
-
-**B-lite Done** is **shipped** (2026-06-10): `application-staging.yaml`, console role headers + picker, publish UI gate, catalog run requires `PUBLISHED`, RBAC filter unit + integration ITs, and Playwright RBAC E2E (`DG_E2E_RBAC=true`).
 
 | Gate | Verdict on `26f7ade` | Block C2? |
 |------|----------------------|-----------|

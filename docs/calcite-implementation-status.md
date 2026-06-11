@@ -626,7 +626,8 @@ The following items remain intentionally deferred after the current step:
 - UDF expansion
 - source policy caching/materialization modes beyond row post-processing
 - nested JSON serialization for Kafka/Elasticsearch row payloads if complex values become required
-- V1 retirement
+
+**Completed (Wave 0, 2026-06):** V1 task execution retirement — `/task/run` rejects V1 templates unconditionally; console is V2-only. Legacy V1 modules remain in the repo for reference only.
 
 ## Current Recommendation
 
