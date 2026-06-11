@@ -70,8 +70,8 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 | C-B2 | “Create from scenario” for Multi-source join (Sprint 4) | **Done** | GF-B → `scenario-dag-join.yaml` via `V2ScenarioCatalogService` | — |
 | C-B3 | Fan-out DAG scenario in CI | **Done** | `scenario-dag-fanout.yaml`, `V2WorkflowScenarioIT` | — |
 | C-WF1 | Pause workflow visible and controllable from Job detail | **Done** | `JobDetailPage.tsx` PAUSED/resume/cancel; `workflow-pause.spec.ts`; backend `pauseReason` | — |
-| C-WF2 | WorkflowPanel wizard UX (step types, params, compute binding) | **Partial** | `WorkflowPanel.tsx`, `WorkflowStepFields.tsx` for log/pause/invoke/shared_scope | **`branch` step JSON-only** (fallback textarea in `WorkflowStepFields.tsx`) |
-| C-WF3 | Shared-state scenario + UI hints | **Partial** | `scenario-wf-shared-state.yaml` IT; shared_scope fields in editor | No dedicated E2E; hints/docs thin vs roadmap |
+| C-WF2 | WorkflowPanel wizard UX (step types, params, compute binding) | **Done** | `WorkflowStepFields` branch form; `workflow-branch.spec.ts` | — |
+| C-WF3 | Shared-state scenario + UI hints | **Done** | `scenario-wf-shared-state.yaml` IT; `workflow-shared-scope.spec.ts` (GF-WFS) | Optional: richer FieldHelp copy |
 | C-WF4 | Branch workflow in console | **Done** | `WorkflowStepFields` branch form; `workflow-branch.spec.ts` | — |
 | C-WF5 | “Create from scenario” for WF (Sprint 6) | **Done** | `scenario-catalog.spec.ts` GF-WF; `workflow-shared-scope.spec.ts` GF-WFS | — |
 | C-JS1 | JS template created in console; scenario IT passes | **Done** | `TransformJsFields.tsx`, `js-transform.spec.ts`, `docs/js-transform-sandbox.md`, IT | — |
@@ -133,7 +133,7 @@ Waves **0–4** and **B-lite core** landed on `master`: V1/migration product pat
 | W0-3 | Migration docs archived | **Done** | `docs/archive/migration/**` | — |
 | W0-4 | No migration/V1 in operator docs as product | **Done** | `operator-console-usage.md` V2-first | — |
 | W0-5 | CI independent of V1/migration | **Done** | Gates on `v2-scenarios/**`, `verify-console.ps1` | — |
-| W0-6 | Dead migration i18n removed | **Partial** | `en.json` / `zh-CN.json` still contain `migration.*` keys | Cosmetic cleanup |
+| W0-6 | Dead migration i18n removed | **Done** | `migration.*` and `editor.migration.saveFirst` removed from `en.json` / `zh-CN.json` (2026-06-11) | — |
 
 **Wave 0 verdict:** **Done** (product paths removed; optional i18n cleanup).
 

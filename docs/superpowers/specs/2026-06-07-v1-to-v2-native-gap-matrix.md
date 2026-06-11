@@ -153,7 +153,10 @@
 |--------------|----------------------|
 | **C Done** | Scenario wizard, branch editor, catalog E2E, DAG staged preview UI, shared-state + branch E2E — **Done** (2026-06-11) |
 | **B-lite Done** | Staging RBAC + catalog publish gate + audit UI (shipped 2026-06-10) |
-| **V2 parity (operator trust)** | Pack V1–V2 above |
+| **C2 staging** | Dual-JVM Podman + AC-4/AC-6 drills — **Done** (2026-06-11) |
+| **Pack 3 execution reliability** | GF-EP partial sink, `execution-reliability.spec.ts`, `verify-execution-reliability.ps1` — **Done** (2026-06-11) |
+| **V2 parity (operator trust)** | Pack V1–V5 shipped; idempotency keys / COPY bulk remain incremental |
+| **Next (roadmap P1)** | AI productization — prompt registry, parser catalog, timeout/retry/cost tracing |
 
 ---
 

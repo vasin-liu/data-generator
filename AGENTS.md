@@ -67,6 +67,9 @@ Focused builds (examples from internal upgrade docs):
 # Operator console: unit + frontend build + Podman Playwright UI/E2E (fixed pipeline)
 .\scripts\verify-console.ps1
 
+# Pack 3 execution reliability (Maven slice + optional Playwright against running console)
+.\scripts\verify-execution-reliability.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 
