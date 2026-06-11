@@ -35,7 +35,9 @@ public interface DistributedJobRepository extends JpaRepository<DistributedJobPO
             select j
             from DistributedJobPO j
             where j.status = 'QUEUED'
-               or (j.status = 'LEASED' and j.leaseUntil is not null and j.leaseUntil < :now)
+               or (j.status in ('LEASED', 'RUNNING')
+                   and j.leaseUntil is not null
+                   and j.leaseUntil < :now)
             order by j.queuedAt asc
             """)
     List<DistributedJobPO> findLeaseCandidates(@Param("now") Instant now, Pageable pageable);
@@ -61,7 +63,9 @@ public interface DistributedJobRepository extends JpaRepository<DistributedJobPO
                 j.updatedAt = :now
             where j.id = :id
               and (j.status = 'QUEUED'
-                   or (j.status = 'LEASED' and j.leaseUntil is not null and j.leaseUntil < :now))
+                   or (j.status in ('LEASED', 'RUNNING')
+                       and j.leaseUntil is not null
+                       and j.leaseUntil < :now))
             """)
     int tryAcquireLease(
             @Param("id") Long id,

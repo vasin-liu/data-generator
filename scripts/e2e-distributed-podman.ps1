@@ -2,10 +2,12 @@
 param(
     [switch]$SkipBuild,
     [switch]$SkipPlaywright,
+    [switch]$SkipP2,
     [switch]$KeepContainers,
     [string]$ImageTag = 'dg-e2e:local',
     [string]$CoordinatorName = 'dg-dist-coordinator',
     [string]$WorkerName = 'dg-dist-worker',
+    [string]$Worker2Name = 'dg-dist-worker-2',
     [string]$DbVolume = 'dg-distributed-db',
     [int]$HostPort = 9876
 )
@@ -56,12 +58,14 @@ if ($LASTEXITCODE -ne 0) {
 function Stop-DistributedContainers {
     podman rm -f $CoordinatorName 2>$null | Out-Null
     podman rm -f $WorkerName 2>$null | Out-Null
+    podman rm -f $Worker2Name 2>$null | Out-Null
 }
 
 Stop-DistributedContainers
 
 $coordinatorProfiles = 'distributed-staging,distributed-coordinator'
 $workerProfiles = 'distributed-staging,distributed-worker'
+$workerSpringArgs = '--data.generator.distributed.lease-seconds=10 --data.generator.distributed.heartbeat-interval-ms=3600000 --data.generator.distributed.poll-delay-ms=1000'
 $baseUrl = "http://127.0.0.1:${HostPort}"
 
 try {
@@ -79,21 +83,28 @@ try {
     Wait-DistributedHealth -BaseUrl $baseUrl
 
     Write-Step "Starting worker $WorkerName ($workerProfiles)"
-    podman run -d `
-        --name $WorkerName `
-        -v "${DbVolume}:/opt/data-generator-service/db:Z" `
-        -e DG_DAEMON=0 `
-        -e DG_SERVICE_ROLE=worker `
-        -e DG_SPRING_PROFILES_ACTIVE=$workerProfiles `
-        -e DG_SPRING_ARGS="--data.generator.distributed.worker-id=podman-worker-1" `
-        --entrypoint bash `
-        $ImageTag `
-        bin/run-worker.sh start 0 | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "podman run failed for worker" }
-
-    Wait-DistributedWorkerHealth -ContainerName $WorkerName
+    Start-DistributedWorkerContainer `
+        -ContainerName $WorkerName `
+        -ImageTag $ImageTag `
+        -DbVolume $DbVolume `
+        -WorkerProfiles $workerProfiles `
+        -WorkerId 'podman-worker-1' `
+        -WorkerSpringArgs $workerSpringArgs
 
     $smoke = Invoke-DistributedEnqueueSmoke -BaseUrl $baseUrl
+
+    if (-not $SkipP2) {
+        Write-Step 'C2 P2 drills (AC-4 lease recovery + AC-6 requeue)'
+        Invoke-DistributedLeaseRecoverySmoke `
+            -BaseUrl $baseUrl `
+            -WorkerName $WorkerName `
+            -Worker2Name $Worker2Name `
+            -ImageTag $ImageTag `
+            -DbVolume $DbVolume `
+            -WorkerProfiles $workerProfiles `
+            -WorkerSpringArgs $workerSpringArgs | Out-Null
+        Invoke-DistributedRequeueSmoke -BaseUrl $baseUrl -ExpectedAttempts 3 | Out-Null
+    }
 
     if (-not $SkipPlaywright) {
         Write-Step "Running Playwright distributed job detail E2E"
@@ -124,6 +135,6 @@ try {
         Write-Step "Stopping distributed containers"
         Stop-DistributedContainers
     } else {
-        Write-Host "Containers kept: podman logs -f $CoordinatorName | podman logs -f $WorkerName"
+        Write-Host "Containers kept: podman logs -f $CoordinatorName | podman logs -f $WorkerName | podman logs -f $Worker2Name"
     }
 }

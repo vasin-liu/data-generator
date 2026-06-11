@@ -18,7 +18,7 @@
 |------|--------------------------------|----------|
 | **C Done** | **Done** | `ScenarioCatalogModal` + `scenario-catalog.spec.ts` (GF-A/B/WF/JS publish-run-report); `WorkflowStepFields` branch form; `ReviewPanel` DAG staged preview; `workflow-pause.spec.ts`, `workflow-shared-scope.spec.ts`, `workflow-branch.spec.ts` |
 | **B-lite Done** | **Done** | `application-staging.yaml`, `ConsoleLayout` role picker, `ReviewPanel` publish gate, `ConsoleAuthorizationIntegrationIT` (VIEWER forbidden), `rbac.*.spec.ts` |
-| **C2 staging** | **Done** (P1) | `application-distributed-staging.yaml`, dual-JVM `e2e-distributed-podman.ps1`, `distributed-job-detail.spec.ts`; AC-1/2/3/5 automated; AC-4/6 manual per `staging-distributed-deployment.md` |
+| **C2 staging** | **Done** | P1: dual-JVM Podman + Playwright; P2: `RUNNING` expired-lease re-acquire, `Invoke-DistributedLeaseRecoverySmoke` (AC-4), `Invoke-DistributedRequeueSmoke` (AC-6) |
 
 Waves **0–5** and **B-lite** landed: V1 execution retired, scenario wizard, branch/shared workflow editors, DAG preview UI, RBAC, audit, Pack V1–V5 engine features.
 

@@ -78,5 +78,25 @@ class DistributedJobServiceTests {
         Assertions.assertEquals(2, recovered.getAttempts());
         Assertions.assertEquals(DistributedJobStatus.LEASED.name(), recovered.getStatus());
     }
+
+    @Test
+    void expiredRunningLeaseCanBeReacquiredByAnotherWorker() {
+        Long jobId = distributedJobService.enqueue(1002L, 2003L, 3004L, null);
+
+        distributedJobService.leaseNext("worker-a", 30).orElseThrow();
+        distributedJobService.markRunning(jobId, "worker-a");
+
+        DistributedJobPO running = repository.findById(jobId).orElseThrow();
+        running.setLeaseUntil(Instant.now().minusSeconds(5));
+        repository.saveAndFlush(running);
+
+        DistributedJobLease secondLease = distributedJobService.leaseNext("worker-b", 30).orElseThrow();
+        Assertions.assertEquals(jobId, secondLease.jobId());
+
+        DistributedJobPO recovered = repository.findById(jobId).orElseThrow();
+        Assertions.assertEquals("worker-b", recovered.getWorkerId());
+        Assertions.assertEquals(2, recovered.getAttempts());
+        Assertions.assertEquals(DistributedJobStatus.LEASED.name(), recovered.getStatus());
+    }
 }
 

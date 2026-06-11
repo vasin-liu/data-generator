@@ -112,10 +112,16 @@ Automated enqueue → worker SUCCESS REST smoke (coordinator + worker already ru
 
 ## Podman dual-JVM drill (AC-1 + AC-2)
 
-Starts **two containers** (coordinator + worker) sharing a Podman volume on `db/`, seeds a published GF-A template, enqueues on the coordinator, waits for worker `SUCCESS`, and runs Playwright job-detail checks.
+Starts **two containers** (coordinator + worker) sharing a Podman volume on `db/`, seeds a published GF-A template, enqueues on the coordinator, waits for worker `SUCCESS`, runs **C2 P2** drills (AC-4 worker kill + lease recovery, AC-6 failure requeue), and runs Playwright job-detail checks.
 
 ```powershell
 .\scripts\e2e-distributed-podman.ps1
+```
+
+Skip P2 drills (AC-1/AC-2 smoke + Playwright only):
+
+```powershell
+.\scripts\e2e-distributed-podman.ps1 -SkipP2
 ```
 
 Keep containers for inspection:
@@ -137,9 +143,9 @@ Run on `master` after merge:
 | AC-1 | `DistributedSplitRoleIntegrationTests.coordinatorDoesNotPollWorkerExecutes` |
 | AC-2 | `DistributedJobWorkerIntegrationTests`, `DistributedJobCoordinatorIntegrationTests` |
 | AC-3 | `DistributedJobCoordinatorCancelIntegrationTests` |
-| AC-4 | `DistributedJobServiceTests.expiredLeaseCanBeReacquiredByAnotherWorker` |
+| AC-4 | `DistributedJobServiceTests.expiredLeaseCanBeReacquiredByAnotherWorker`, `expiredRunningLeaseCanBeReacquiredByAnotherWorker`; Podman `Invoke-DistributedLeaseRecoverySmoke` in `e2e-distributed-podman.ps1` |
 | AC-5 | `DistributedJobHeartbeatIntegrationTests.heartbeatUpdatesDuringSlowRun` |
-| AC-6 | `DistributedJobRequeueIntegrationTests` |
+| AC-6 | `DistributedJobRequeueIntegrationTests`; Podman `Invoke-DistributedRequeueSmoke` in `e2e-distributed-podman.ps1` |
 | AC-7 | Merge `feature-4.3` → `master` (this doc + profiles on `master`) |
 
 `scripts/e2e-podman.ps1` and `scripts/verify-console.ps1` run the dual-JVM Podman drill after the embedded `e2e-distributed` phase (skip with `-SkipDistributedSplit`).
