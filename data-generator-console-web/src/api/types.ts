@@ -365,6 +365,35 @@ export interface EditorDataSources {
   elasticsearchClusters: string[];
 }
 
+/** Mirrors {@code AiProviderEntryDto}. */
+export interface AiProviderEntry {
+  type: string;
+  label: string;
+  description: string;
+  remote: boolean;
+}
+
+/** Mirrors {@code AiParserEntryDto}. */
+export interface AiParserEntry {
+  id: string;
+  label: string;
+  description: string;
+}
+
+/** Mirrors {@code AiPromptTemplateDto}. */
+export interface AiPromptTemplateEntry {
+  id: string;
+  label: string;
+  prompt: string;
+}
+
+/** Mirrors {@code AiCatalogDto}. */
+export interface AiCatalog {
+  providers: AiProviderEntry[];
+  parsers: AiParserEntry[];
+  promptTemplates: AiPromptTemplateEntry[];
+}
+
 export interface DataSourcesOverview {
   persisted: DataSourceSummary[];
   runtimeKeys: string[];

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type {
+  AiCatalog,
   EditorDataSources,
   MaterializationMode,
   MaterializationPolicyDraft,
@@ -33,13 +34,14 @@ type Props = {
   draft: TemplateV2Draft;
   readOnly: boolean;
   editorDataSources: EditorDataSources;
+  aiCatalog?: AiCatalog;
   onChange: (draft: TemplateV2Draft) => void;
 };
 
 /**
  * Named template input sources (query / files / iterators — not JDBC admin).
  */
-export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Props) {
+export function SourcesStep({ draft, readOnly, editorDataSources, aiCatalog, onChange }: Props) {
   const { t } = useTranslation();
   const keys = listSourceKeys(draft);
   const [selectedKey, setSelectedKey] = useState(keys[0] ?? '');
@@ -235,6 +237,7 @@ export function SourcesStep({ draft, readOnly, editorDataSources, onChange }: Pr
                         source={node ?? {}}
                         readOnly={readOnly}
                         editorDataSources={editorDataSources}
+                        aiCatalog={aiCatalog}
                         onPatch={(patch) => onChange(applySourceMergeAt(draft, key, patch))}
                       />
                     </Form>

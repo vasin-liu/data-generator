@@ -112,7 +112,18 @@ export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
     case 'excel':
       return { type: 'excel', path: '', sheets: [{ name: 'Sheet1' }] };
     case 'ai':
-      return { type: 'ai', api: '', prompt: '', parser: '' };
+      return {
+        type: 'ai',
+        api: '',
+        prompt: '',
+        parser: '',
+        provider: {
+          type: 'INLINE',
+          options: {
+            rows: [{ name: 'alpha', score: 10 }],
+          },
+        },
+      };
     case 'geojson':
       return { type: 'geojson', path: '' };
     default:

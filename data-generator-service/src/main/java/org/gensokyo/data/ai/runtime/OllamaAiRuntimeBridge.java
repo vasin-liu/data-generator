@@ -52,8 +52,72 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
         }
 
         OllamaOptions options = resolveOptions(provider);
-        String content = generateContent(source, options);
+        String content = generateWithRetry(source, options, provider.getOptions());
         return parse(source, content);
+    }
+
+    private String generateWithRetry(AiSourceVO source, OllamaOptions options, Map<String, Object> providerOptions) {
+        int maxRetries = intOption(providerOptions, "maxRetries", 1);
+        long retryBackoffMs = longOption(providerOptions, "retryBackoffMs", 0L);
+        RuntimeException lastFailure = null;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return generateContent(source, options);
+            }
+            catch (RuntimeException ex) {
+                lastFailure = ex;
+                if (attempt >= maxRetries) {
+                    break;
+                }
+                sleepQuietly(retryBackoffMs);
+            }
+        }
+        throw lastFailure;
+    }
+
+    private static int intOption(Map<String, Object> options, String key, int defaultValue) {
+        if (options == null || !options.containsKey(key) || options.get(key) == null) {
+            return defaultValue;
+        }
+        Object value = options.get(key);
+        if (value instanceof Number number) {
+            return Math.max(1, number.intValue());
+        }
+        try {
+            return Math.max(1, Integer.parseInt(String.valueOf(value).trim()));
+        }
+        catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
+    private static long longOption(Map<String, Object> options, String key, long defaultValue) {
+        if (options == null || !options.containsKey(key) || options.get(key) == null) {
+            return defaultValue;
+        }
+        Object value = options.get(key);
+        if (value instanceof Number number) {
+            return Math.max(0L, number.longValue());
+        }
+        try {
+            return Math.max(0L, Long.parseLong(String.valueOf(value).trim()));
+        }
+        catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
+    private static void sleepQuietly(long retryBackoffMs) {
+        if (retryBackoffMs <= 0L) {
+            return;
+        }
+        try {
+            Thread.sleep(retryBackoffMs);
+        }
+        catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("AI retry backoff interrupted", ex);
+        }
     }
 
     protected String generateContent(AiSourceVO source, OllamaOptions options) {

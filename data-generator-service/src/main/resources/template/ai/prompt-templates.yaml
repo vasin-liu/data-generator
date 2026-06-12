@@ -1,0 +1,10 @@
+# Bundled AI prompt templates for the operator console (AI P1).
+templates:
+  - id: training-titles-zh
+    label: Training plan titles (ZH, comma-separated)
+    prompt: >-
+      你是一个数据生成助手，列出5个项目培训计划标题，响应以中文返回并以符号`,`分隔的值列表，例如：培训计划1,培训计划2,培训计划3
+  - id: product-skus
+    label: Fictional product SKUs (comma-separated)
+    prompt: >-
+      Generate 5 fictional product SKU codes as a comma-separated list without spaces.

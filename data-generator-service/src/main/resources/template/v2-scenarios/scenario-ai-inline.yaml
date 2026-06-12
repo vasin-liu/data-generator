@@ -1,0 +1,21 @@
+# definitionKind: V2
+# scenarioId: GF-AI
+# catalogRef: AI-01 — deterministic INLINE AI source (CI-friendly), SQL filter, console sink
+name: scenario-ai-inline
+sources:
+  ai_seed:
+    type: ai
+    provider:
+      type: INLINE
+      options:
+        rows:
+          - name: alpha
+            score: 10
+          - name: beta
+            score: 20
+transform:
+  type: sql
+  sql: SELECT name, score FROM ai_seed WHERE CAST(score AS BIGINT) >= 20
+sink:
+  writers:
+    - type: console

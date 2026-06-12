@@ -84,6 +84,24 @@ class OllamaAiRuntimeBridgeTests {
     }
 
     @Test
+    void retriesTransientGenerateFailuresBeforeGivingUp() {
+        try (AnnotationConfigApplicationContext context = context()) {
+            FlakyOllamaAiRuntimeBridge bridge = new FlakyOllamaAiRuntimeBridge(
+                    context,
+                    context.getAutowireCapableBeanFactory(),
+                    2,
+                    "alpha,beta"
+            );
+            AiSourceVO source = source("OLLAMA", Map.of("maxRetries", 3, "retryBackoffMs", 1));
+
+            Object output = bridge.generate(source);
+
+            Assertions.assertEquals("alpha,beta", output);
+            Assertions.assertEquals(2, bridge.attempts);
+        }
+    }
+
+    @Test
     void rejectsUnsupportedProviderType() {
         try (AnnotationConfigApplicationContext context = context()) {
             OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(context, context.getAutowireCapableBeanFactory());
@@ -114,6 +132,30 @@ class OllamaAiRuntimeBridgeTests {
         source.setApi("http://localhost:11434");
         source.setProvider(provider);
         return source;
+    }
+
+    private static final class FlakyOllamaAiRuntimeBridge extends OllamaAiRuntimeBridge {
+        private final int failUntilAttempt;
+        private final String content;
+        private int attempts;
+
+        private FlakyOllamaAiRuntimeBridge(AnnotationConfigApplicationContext applicationContext,
+                                           AutowireCapableBeanFactory beanFactory,
+                                           int failUntilAttempt,
+                                           String content) {
+            super(applicationContext, beanFactory);
+            this.failUntilAttempt = failUntilAttempt;
+            this.content = content;
+        }
+
+        @Override
+        protected String generateContent(AiSourceVO source, OllamaOptions options) {
+            attempts++;
+            if (attempts < failUntilAttempt) {
+                throw new IllegalStateException("transient ai failure");
+            }
+            return content;
+        }
     }
 
     private static final class RecordingOllamaAiRuntimeBridge extends OllamaAiRuntimeBridge {

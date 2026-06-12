@@ -156,7 +156,8 @@
 | **C2 staging** | Dual-JVM Podman + AC-4/AC-6 drills — **Done** (2026-06-11) |
 | **Pack 3 execution reliability** | GF-EP partial sink, `execution-reliability.spec.ts`, `verify-execution-reliability.ps1` — **Done** (2026-06-11) |
 | **V2 parity (operator trust)** | Pack V1–V5 shipped; idempotency keys / COPY bulk remain incremental |
-| **Next (roadmap P1)** | AI productization — prompt registry, parser catalog, timeout/retry/cost tracing |
+| **AI P1 (shipped 2026-06-11)** | `GET /api/console/ai/catalog`, GF-AI INLINE scenario, console AI source editor, Ollama `maxRetries`/`retryBackoffMs`, `verify-ai-p1.ps1` |
+| **Next** | AI cost tracing, additional providers, Ollama live E2E when broker available |
 
 ---
 

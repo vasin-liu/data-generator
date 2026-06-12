@@ -31,6 +31,7 @@ import org.gensokyo.data.calcite.V2TransformFactory;
 import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.sink.CsvSinkFactory;
 import org.gensokyo.data.calcite.sink.JsonSinkFactory;
+import org.gensokyo.data.calcite.source.AiSourceFactory;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
 import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
@@ -109,6 +110,12 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "inlineRowsSourceFactory")
     public V2SourceFactory inlineRowsSourceFactory() {
         return new InlineRowsSourceFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "aiSourceFactory")
+    public V2SourceFactory aiSourceFactory(ObjectProvider<AiRuntimeBridge> aiRuntimeBridgeProvider) {
+        return new AiSourceFactory(aiRuntimeBridgeProvider.getIfAvailable());
     }
 
     @Bean

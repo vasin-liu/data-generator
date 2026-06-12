@@ -28,6 +28,8 @@ try {
         'ConsoleAuditControllerTest',
         'ConsoleScenarioCatalogControllerTest',
         'V2ScenarioCatalogServiceTest',
+        'AiCatalogServiceTest',
+        'ConsoleAiCatalogControllerTest',
         'ConsoleAuthorizationFilterTest',
         'ConsoleAuthorizationIntegrationIT',
         'ConsoleDistributedControllerTest',

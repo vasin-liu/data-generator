@@ -1,7 +1,7 @@
 import { Alert, Form, Input, InputNumber, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { EditorDataSources } from '../../api/types';
+import type { AiCatalog, EditorDataSources } from '../../api/types';
 import { FieldHelp } from '../../components/FieldHelp';
 import { yesNoOptions } from '../utils/optionLabels';
 import { SourceFileInput } from '../../components/SourceFileInput';
@@ -13,6 +13,7 @@ type Props = {
   source: SourceDraft;
   readOnly: boolean;
   editorDataSources: EditorDataSources;
+  aiCatalog?: AiCatalog;
   onPatch: (patch: SourceDraft) => void;
 };
 
@@ -24,6 +25,7 @@ export function SourceFieldsForm({
   source,
   readOnly,
   editorDataSources,
+  aiCatalog,
   onPatch,
 }: Props) {
   const { t } = useTranslation();
@@ -274,44 +276,8 @@ export function SourceFieldsForm({
   }
 
   if (kind === 'ai') {
-    const provider = (source.provider as { type?: string } | undefined) ?? {};
     return (
-      <>
-        <Form.Item label={<FieldHelp label={t('source.ai.api')} help={t('source.ai.api.help')} />}>
-          <Input
-            readOnly={readOnly}
-            value={(source.api as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, api: e.target.value })}
-          />
-        </Form.Item>
-        <Form.Item label={<FieldHelp label={t('source.ai.provider')} help={t('source.ai.provider.help')} />}>
-          <Input
-            readOnly={readOnly}
-            value={provider.type ?? ''}
-            onChange={(e) =>
-              onPatch({
-                ...source,
-                provider: { ...provider, type: e.target.value },
-              })
-            }
-          />
-        </Form.Item>
-        <Form.Item label={<FieldHelp label={t('source.ai.prompt')} help={t('source.ai.prompt.help')} />}>
-          <Input.TextArea
-            rows={4}
-            readOnly={readOnly}
-            value={(source.prompt as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, prompt: e.target.value })}
-          />
-        </Form.Item>
-        <Form.Item label={<FieldHelp label={t('source.ai.parser')} help={t('source.ai.parser.help')} />}>
-          <Input
-            readOnly={readOnly}
-            value={(source.parser as string) ?? ''}
-            onChange={(e) => onPatch({ ...source, parser: e.target.value })}
-          />
-        </Form.Item>
-      </>
+      <AiSourceFields source={source} readOnly={readOnly} aiCatalog={aiCatalog} onPatch={onPatch} t={t} />
     );
   }
 
@@ -344,6 +310,189 @@ export function SourceFieldsForm({
   }
 
   return null;
+}
+
+type AiProviderDraft = {
+  type?: string;
+  options?: Record<string, unknown>;
+};
+
+function AiSourceFields({
+  source,
+  readOnly,
+  aiCatalog,
+  onPatch,
+  t,
+}: {
+  source: SourceDraft;
+  readOnly: boolean;
+  aiCatalog?: AiCatalog;
+  onPatch: (patch: SourceDraft) => void;
+  t: (key: string) => string;
+}) {
+  const provider = (source.provider as AiProviderDraft | undefined) ?? {};
+  const providerType = (provider.type ?? 'INLINE').toUpperCase();
+  const options = (provider.options ?? {}) as Record<string, unknown>;
+  const defaultInlineRows = [{ name: 'alpha', score: 10 }];
+  const [rowsJson, setRowsJson] = useState(() =>
+    JSON.stringify(options.rows ?? defaultInlineRows, null, 2),
+  );
+
+  useEffect(() => {
+    setRowsJson(JSON.stringify(options.rows ?? defaultInlineRows, null, 2));
+  }, [options.rows]);
+
+  const patchProvider = (partial: AiProviderDraft) => {
+    onPatch({
+      ...source,
+      provider: {
+        ...provider,
+        ...partial,
+        options: partial.options ?? provider.options,
+      },
+    });
+  };
+
+  const commitInlineRows = () => {
+    try {
+      const parsed = JSON.parse(rowsJson) as unknown;
+      if (Array.isArray(parsed)) {
+        patchProvider({ options: { ...options, rows: parsed } });
+      }
+    } catch {
+      // Keep invalid JSON in the editor until the operator fixes it.
+    }
+  };
+
+  const providerOptions =
+    aiCatalog?.providers.map((entry) => ({
+      value: entry.type,
+      label: entry.label,
+    })) ?? [];
+
+  const parserOptions =
+    aiCatalog?.parsers.map((entry) => ({
+      value: entry.id,
+      label: entry.label,
+    })) ?? [];
+
+  const promptTemplateOptions =
+    aiCatalog?.promptTemplates.map((entry) => ({
+      value: entry.id,
+      label: entry.label,
+    })) ?? [];
+
+  return (
+    <>
+      <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('source.ai.intro')} />
+      <Form.Item label={<FieldHelp label={t('source.ai.provider')} help={t('source.ai.provider.help')} />}>
+        <Select
+          disabled={readOnly}
+          value={providerType}
+          options={providerOptions}
+          onChange={(value) => patchProvider({ type: value })}
+        />
+      </Form.Item>
+      {promptTemplateOptions.length > 0 ? (
+        <Form.Item
+          label={<FieldHelp label={t('source.ai.promptTemplate')} help={t('source.ai.promptTemplate.help')} />}
+        >
+          <Select
+            allowClear
+            disabled={readOnly}
+            placeholder={t('source.ai.promptTemplate.placeholder')}
+            options={promptTemplateOptions}
+            onChange={(templateId) => {
+              const template = aiCatalog?.promptTemplates.find((row) => row.id === templateId);
+              if (template) {
+                onPatch({ ...source, prompt: template.prompt });
+              }
+            }}
+          />
+        </Form.Item>
+      ) : null}
+      <Form.Item label={<FieldHelp label={t('source.ai.prompt')} help={t('source.ai.prompt.help')} />}>
+        <Input.TextArea
+          rows={4}
+          readOnly={readOnly}
+          value={(source.prompt as string) ?? ''}
+          onChange={(e) => onPatch({ ...source, prompt: e.target.value })}
+        />
+      </Form.Item>
+      <Form.Item label={<FieldHelp label={t('source.ai.parser')} help={t('source.ai.parser.help')} />}>
+        {parserOptions.length > 0 ? (
+          <Select
+            disabled={readOnly}
+            value={(source.parser as string) ?? ''}
+            options={parserOptions}
+            onChange={(value) => onPatch({ ...source, parser: value })}
+          />
+        ) : (
+          <Input
+            readOnly={readOnly}
+            value={(source.parser as string) ?? ''}
+            onChange={(e) => onPatch({ ...source, parser: e.target.value })}
+          />
+        )}
+      </Form.Item>
+      {providerType === 'INLINE' ? (
+        <Form.Item
+          label={<FieldHelp label={t('source.ai.inlineRows')} help={t('source.ai.inlineRows.help')} required />}
+        >
+          <Input.TextArea
+            rows={8}
+            readOnly={readOnly}
+            value={rowsJson}
+            onChange={(e) => setRowsJson(e.target.value)}
+            onBlur={readOnly ? undefined : commitInlineRows}
+          />
+        </Form.Item>
+      ) : null}
+      {providerType === 'OLLAMA' ? (
+        <>
+          <Form.Item label={<FieldHelp label={t('source.ai.api')} help={t('source.ai.api.help')} />}>
+            <Input
+              readOnly={readOnly}
+              value={(source.api as string) ?? ''}
+              placeholder="http://127.0.0.1:11434"
+              onChange={(e) => onPatch({ ...source, api: e.target.value })}
+            />
+          </Form.Item>
+          <Form.Item label={<FieldHelp label={t('source.ai.model')} help={t('source.ai.model.help')} />}>
+            <Input
+              readOnly={readOnly}
+              value={(options.model as string) ?? ''}
+              onChange={(e) => patchProvider({ options: { ...options, model: e.target.value || undefined } })}
+            />
+          </Form.Item>
+          <Form.Item label={<FieldHelp label={t('source.ai.maxRetries')} help={t('source.ai.maxRetries.help')} />}>
+            <InputNumber
+              min={1}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+              value={(options.maxRetries as number | undefined) ?? 1}
+              onChange={(value) =>
+                patchProvider({ options: { ...options, maxRetries: value ?? undefined } })
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label={<FieldHelp label={t('source.ai.retryBackoffMs')} help={t('source.ai.retryBackoffMs.help')} />}
+          >
+            <InputNumber
+              min={0}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+              value={(options.retryBackoffMs as number | undefined) ?? 0}
+              onChange={(value) =>
+                patchProvider({ options: { ...options, retryBackoffMs: value ?? undefined } })
+              }
+            />
+          </Form.Item>
+        </>
+      ) : null}
+    </>
+  );
 }
 
 function InlineRowsEditor({

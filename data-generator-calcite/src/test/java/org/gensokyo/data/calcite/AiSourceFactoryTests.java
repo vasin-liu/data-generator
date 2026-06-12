@@ -44,6 +44,20 @@ class AiSourceFactoryTests {
     }
 
     @Test
+    void infersInlineRowSchemaWhenNotDeclared() {
+        AiSourceVO source = aiSource("INLINE", Map.of("rows", List.of(
+                Map.of("name", "alpha", "score", 10),
+                Map.of("name", "beta", "score", 20)
+        )));
+
+        RowSource rowSource = new AiSourceFactory().create("ai_seed", source);
+
+        Assertions.assertTrue(rowSource.schema().contains("name"));
+        Assertions.assertTrue(rowSource.schema().contains("score"));
+        Assertions.assertEquals(2, rowSource.rows().size());
+    }
+
+    @Test
     void materializesEchoPromptAsDefaultContentColumn() {
         AiSourceVO source = aiSource("ECHO", Map.of());
         source.setPrompt("generate row");
@@ -99,6 +113,12 @@ class AiSourceFactoryTests {
                 () -> new AiSourceFactory().create("ai_seed", source));
 
         Assertions.assertTrue(failure.getMessage().contains("external AI runtime bridge"));
+    }
+
+    @Test
+    void bridgeBackedFactoryStillSupportsInlineProvider() {
+        AiSourceFactory factory = new AiSourceFactory(new RecordingAiRuntimeBridge());
+        Assertions.assertTrue(factory.supports(aiSource("INLINE", Map.of("rows", List.of(Map.of("name", "alpha"))))));
     }
 
     @Test

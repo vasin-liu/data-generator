@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { fetchEditor, fetchEditorScaffold } from '../../api/editor';
 import { fetchScenarioScaffold } from '../../api/scenarios';
+import { fetchAiCatalog } from '../../api/ai';
 import { fetchEditorDataSources } from '../../api/runtime';
-import type { EditorDataSources } from '../../api/types';
+import type { AiCatalog, EditorDataSources } from '../../api/types';
 import type { TemplateEditorPayload, TemplateV2Draft } from '../../api/types';
 import { cloneDraft } from '../editor/draftUtils';
 import { EditorTabHint } from '../editor/EditorTabHint';
@@ -61,10 +62,21 @@ export function TemplateEditorPage() {
     queryFn: fetchEditorDataSources,
   });
 
+  const aiCatalogQuery = useQuery({
+    queryKey: ['ai-catalog'],
+    queryFn: fetchAiCatalog,
+  });
+
   const editorDataSources: EditorDataSources = dsQuery.data ?? {
     jdbcNames: [],
     kafkaClusters: [],
     elasticsearchClusters: [],
+  };
+
+  const aiCatalog: AiCatalog = aiCatalogQuery.data ?? {
+    providers: [],
+    parsers: [],
+    promptTemplates: [],
   };
 
   const applyPayload = useCallback((payload: TemplateEditorPayload) => {
@@ -160,7 +172,7 @@ export function TemplateEditorPage() {
       children: (
         <>
           <EditorTabHint tab="sources" isNew={isNew} />
-          <SourcesStep {...stepProps} editorDataSources={editorDataSources} />
+          <SourcesStep {...stepProps} editorDataSources={editorDataSources} aiCatalog={aiCatalog} />
         </>
       ),
     },

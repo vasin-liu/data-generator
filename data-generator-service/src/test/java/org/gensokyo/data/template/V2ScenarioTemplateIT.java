@@ -74,6 +74,7 @@ class V2ScenarioTemplateIT {
                 "scenario-d-chunked-jdbc.yaml",
                 "scenario-e-streaming-jdbc.yaml",
                 "scenario-e-partial-sink.yaml",
+                "scenario-ai-inline.yaml",
                 "scenario-inline-rows.yaml"
         ).map(name -> SCENARIO_ROOT + name);
     }
@@ -148,6 +149,9 @@ class V2ScenarioTemplateIT {
                 // Intentionally omit __missing_sink_target__ so the first JDBC sink fails.
                 registerInlineSinks(template);
             }
+            case "scenario-ai-inline" -> {
+                // INLINE provider embeds rows in YAML; no external fixtures required.
+            }
             default -> throw new IllegalArgumentException("Unknown scenario template: " + template.getName());
         }
     }
@@ -197,6 +201,11 @@ class V2ScenarioTemplateIT {
                 assertThat(failingWriter.getLastErrorSample()).isNotBlank();
                 assertThat(okWriter.getRowsOk()).isEqualTo(3L);
                 assertThat(okWriter.getRowsFailed()).isZero();
+            }
+            case "scenario-ai-inline" -> {
+                assertThat(result.getRows()).hasSize(1);
+                assertThat(result.getRows().getFirst().getString("name")).isEqualTo("beta");
+                assertThat(result.getRows().getFirst().getString("score")).isEqualTo("20");
             }
             default -> throw new IllegalArgumentException("Unknown scenario resource: " + resourcePath);
         }

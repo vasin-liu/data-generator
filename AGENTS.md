@@ -70,6 +70,9 @@ Focused builds (examples from internal upgrade docs):
 # Pack 3 execution reliability (Maven slice + optional Playwright against running console)
 .\scripts\verify-execution-reliability.ps1 -SkipPlaywright
 
+# AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
+.\scripts\verify-ai-p1.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 

@@ -28,10 +28,11 @@ public class AiSourceFactory implements V2SourceFactory {
         if (!(source instanceof AiSourceVO aiSource)) {
             return false;
         }
-        if (aiRuntimeBridge == null) {
-            return isLocalProvider(aiSource.getProvider());
+        // INLINE/ECHO/STATIC stay available even when a remote bridge is wired for OLLAMA.
+        if (isLocalProvider(aiSource.getProvider())) {
+            return true;
         }
-        return aiRuntimeBridge.supports(aiSource.getProvider());
+        return aiRuntimeBridge != null && aiRuntimeBridge.supports(aiSource.getProvider());
     }
 
     @Override

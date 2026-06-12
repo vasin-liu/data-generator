@@ -55,6 +55,7 @@ export function ComputeBlockEditor({ block, readOnly, editorDataSources, onChang
           draft={scoped}
           readOnly={readOnly}
           editorDataSources={editorDataSources}
+          aiCatalog={{ providers: [], parsers: [], promptTemplates: [] }}
           onChange={(scopedDraft) => patchBlock(scopedDraftToComputeBlock(block, scopedDraft))}
         />
       ),

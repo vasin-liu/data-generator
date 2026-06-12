@@ -30,8 +30,8 @@ public class AiRowSource implements RowSource {
     public AiRowSource(String name, AiSourceVO source, AiRuntimeBridge aiRuntimeBridge) {
         this.name = name;
         this.aiRuntimeBridge = aiRuntimeBridge;
-        this.schema = source.getSchema() == null ? DEFAULT_SCHEMA : source.getSchema();
         this.rows = materialize(source);
+        this.schema = resolveSchema(source.getSchema(), rows);
     }
 
     @Override
@@ -108,6 +108,25 @@ public class AiRowSource implements RowSource {
             return row.values();
         }
         return Map.of("content", item == null ? "" : item);
+    }
+
+    private static RowSchema resolveSchema(RowSchema declared, List<Row> materializedRows) {
+        if (declared != null && declared.getColumns() != null && !declared.getColumns().isEmpty()) {
+            return declared;
+        }
+        if (!materializedRows.isEmpty()) {
+            Map<String, Object> first = materializedRows.getFirst().values();
+            if (!first.isEmpty()) {
+                RowSchema inferred = new RowSchema();
+                List<ColumnDef> columns = new ArrayList<>();
+                for (String key : first.keySet()) {
+                    columns.add(new ColumnDef(key, "VARCHAR", true));
+                }
+                inferred.setColumns(columns);
+                return inferred;
+            }
+        }
+        return defaultSchema();
     }
 
     private static RowSchema defaultSchema() {
