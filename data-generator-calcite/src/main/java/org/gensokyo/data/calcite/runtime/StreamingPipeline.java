@@ -72,7 +72,14 @@ public final class StreamingPipeline {
         QuerySourceVO querySource = queryEntry.getValue();
 
         RunMetrics metrics = new RunMetrics(policy.mode());
-        RowSource rowSource = registry.createSource(sourceName, querySource, policy);
+        RowSource rowSource;
+        try {
+            AiRunMetricsScope.bind(metrics);
+            rowSource = registry.createSource(sourceName, querySource, policy);
+        }
+        finally {
+            AiRunMetricsScope.clear();
+        }
         if (!(rowSource instanceof ChunkedRowSource chunked)) {
             throw new IllegalStateException(
                     "STREAMING mode requires a chunked row source for [" + sourceName + "], got "

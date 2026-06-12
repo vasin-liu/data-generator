@@ -86,7 +86,15 @@ public final class PartitionedComputeBlockRunner {
 
         Map.Entry<String, SourceVO> sourceEntry = block.getSources().entrySet().iterator().next();
         String sourceName = sourceEntry.getKey();
-        RowSource rowSource = registry.createSource(sourceName, sourceEntry.getValue(), policy);
+        RunMetrics metrics = new RunMetrics(policy.mode());
+        RowSource rowSource;
+        try {
+            AiRunMetricsScope.bind(metrics);
+            rowSource = registry.createSource(sourceName, sourceEntry.getValue(), policy);
+        }
+        finally {
+            AiRunMetricsScope.clear();
+        }
         RowSchema sourceSchema = rowSource.schema();
         List<Row> sourceRows = List.copyOf(rowSource.rows());
 
@@ -99,8 +107,6 @@ public final class PartitionedComputeBlockRunner {
                     "SOURCE_READ",
                     sourceName);
         }
-
-        RunMetrics metrics = new RunMetrics(policy.mode());
         int partitionCount = policy.partitionCount();
         List<List<Row>> partitions = RowPartitioner.partition(sourceRows, partitionCount, policy.partitionKey());
         int executedPartitions = (int) partitions.stream().filter(bucket -> !bucket.isEmpty()).count();

@@ -25,6 +25,7 @@ public final class RunMetrics {
     private int chunksProcessed;
     private final LinkedHashMap<String, Long> rowsReadPerSource;
     private final LinkedHashMap<String, SinkWriteMetric> sinkMetrics;
+    private final LinkedHashMap<String, AiCallMetric> aiCallMetrics;
     private final ArrayList<String> warnings;
     private int configuredPartitions;
     private int executedPartitions;
@@ -38,6 +39,7 @@ public final class RunMetrics {
         this.executionMode = executionMode;
         this.rowsReadPerSource = new LinkedHashMap<>();
         this.sinkMetrics = new LinkedHashMap<>();
+        this.aiCallMetrics = new LinkedHashMap<>();
         this.warnings = new ArrayList<>();
     }
 
@@ -160,6 +162,28 @@ public final class RunMetrics {
      */
     public Map<String, SinkWriteMetric> getSinkMetrics() {
         return sinkMetrics;
+    }
+
+    /**
+     * Per-source AI call diagnostics collected during remote provider materialization.
+     *
+     * @return AI call metrics keyed by source name
+     */
+    public Map<String, AiCallMetric> getAiCallMetrics() {
+        return aiCallMetrics;
+    }
+
+    /**
+     * Records diagnostics for a remote AI provider call on a named source.
+     *
+     * @param sourceName logical source key
+     * @param metric     call diagnostics
+     */
+    public void recordAiCall(String sourceName, AiCallMetric metric) {
+        if (sourceName == null || sourceName.isBlank() || metric == null) {
+            return;
+        }
+        aiCallMetrics.put(sourceName, metric.withSourceName(sourceName));
     }
 
     /**

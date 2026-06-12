@@ -60,21 +60,27 @@ public final class InMemoryPipeline {
 
         RunMetrics metrics = new RunMetrics(policy.mode());
         CalciteExecutionContext context = new CalciteExecutionContext();
-        for (Map.Entry<String, SourceVO> entry : template.getSources().entrySet()) {
-            String sourceName = entry.getKey();
-            RowSource rowSource = registry.createSource(sourceName, entry.getValue());
-            int count = rowSource.rows().size();
-            metrics.addRead(sourceName, count);
-            if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
-                throw new ScaleLimitExceededException(
-                        "maxRowsInMemory",
-                        policy.maxRowsInMemory(),
-                        metrics.getTotalRowsRead(),
-                        "SOURCE_READ",
-                        sourceName);
+        try {
+            AiRunMetricsScope.bind(metrics);
+            for (Map.Entry<String, SourceVO> entry : template.getSources().entrySet()) {
+                String sourceName = entry.getKey();
+                RowSource rowSource = registry.createSource(sourceName, entry.getValue());
+                int count = rowSource.rows().size();
+                metrics.addRead(sourceName, count);
+                if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
+                    throw new ScaleLimitExceededException(
+                            "maxRowsInMemory",
+                            policy.maxRowsInMemory(),
+                            metrics.getTotalRowsRead(),
+                            "SOURCE_READ",
+                            sourceName);
+                }
+                ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
+                context.addSource(rowSource);
             }
-            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
-            context.addSource(rowSource);
+        }
+        finally {
+            AiRunMetricsScope.clear();
         }
 
         CalciteRowTransformer.TransformResult current = null;

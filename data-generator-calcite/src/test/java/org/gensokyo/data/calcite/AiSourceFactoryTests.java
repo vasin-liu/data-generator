@@ -193,6 +193,24 @@ class AiSourceFactoryTests {
 
         Assertions.assertEquals(1, result.getRows().size());
         Assertions.assertEquals("bob", result.getRows().getFirst().getString("name"));
+        Assertions.assertTrue(result.getMetrics().getAiCallMetrics().containsKey("ai_remote"));
+        Assertions.assertEquals("OLLAMA", result.getMetrics().getAiCallMetrics().get("ai_remote").getProviderType());
+    }
+
+    @Test
+    void recordsAiCallMetricsWhenRunMetricsScopeIsBound() {
+        RecordingAiRuntimeBridge bridge = new RecordingAiRuntimeBridge();
+        RunMetrics metrics = new RunMetrics("IN_MEMORY");
+        try {
+            AiRunMetricsScope.bind(metrics);
+            new AiSourceFactory(bridge).create("ai_remote", aiSource("OLLAMA", Map.of("model", "qwen")));
+        }
+        finally {
+            AiRunMetricsScope.clear();
+        }
+
+        Assertions.assertTrue(metrics.getAiCallMetrics().containsKey("ai_remote"));
+        Assertions.assertEquals("qwen", metrics.getAiCallMetrics().get("ai_remote").getModel());
     }
 
     private AiSourceVO aiSource(String providerType, Map<String, Object> options) {
@@ -239,6 +257,17 @@ class AiSourceFactoryTests {
                     Map.of("name", "alice", "score", 10),
                     Map.of("name", "bob", "score", 20)
             );
+        }
+
+        @Override
+        public AiGenerateResult generateTraced(AiSourceVO source) {
+            Object payload = generate(source);
+            String model = source.getProvider() == null || source.getProvider().getOptions() == null
+                    ? null
+                    : String.valueOf(source.getProvider().getOptions().get("model"));
+            return new AiGenerateResult(
+                    payload,
+                    AiCallMetric.remote("OLLAMA", model, 5L, 3L, 9L, 1, null));
         }
     }
 }

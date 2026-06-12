@@ -71,7 +71,10 @@ Focused builds (examples from internal upgrade docs):
 .\scripts\verify-execution-reliability.ps1 -SkipPlaywright
 
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
-.\scripts\verify-ai-p1.ps1 -SkipPlaywright
+.\scripts\verify-ai-p1.ps1
+
+# AI P2 cost tracing + run report AI metrics (Maven slice + optional live Ollama)
+.\scripts\verify-ai-p2.ps1 -SkipLive -SkipPlaywright
 
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild

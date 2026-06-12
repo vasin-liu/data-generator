@@ -1,7 +1,9 @@
 package org.gensokyo.data.calcite.source;
 
-import org.gensokyo.data.calcite.*;
-import org.gensokyo.data.calcite.parser.*;
+import org.gensokyo.data.calcite.AiRuntimeBridge;
+import org.gensokyo.data.calcite.RowSource;
+import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.calcite.runtime.AiRunMetricsScope;
 
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
@@ -67,7 +69,12 @@ public class AiRowSource implements RowSource {
             throw new UnsupportedOperationException("AI provider type [" + provider.getType()
                     + "] requires an external AI runtime bridge");
         }
-        return toRows(aiRuntimeBridge.generate(source));
+        AiGenerateResult result = aiRuntimeBridge.generateTraced(source);
+        var metrics = AiRunMetricsScope.current();
+        if (metrics != null && result.metric() != null) {
+            metrics.recordAiCall(name, result.metric());
+        }
+        return toRows(result.payload());
     }
 
     private List<Row> inlineRows(Map<String, Object> options) {

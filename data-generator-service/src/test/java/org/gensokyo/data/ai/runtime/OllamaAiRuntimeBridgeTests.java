@@ -3,6 +3,7 @@ package org.gensokyo.data.ai.runtime;
 import org.gensokyo.data.ai.ollama.api.OllamaOptions;
 import org.gensokyo.data.ai.parser.ListOutputParser;
 import org.gensokyo.data.ai.parser.OutputParser;
+import org.gensokyo.data.calcite.runtime.AiGenerateResult;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.junit.jupiter.api.Assertions;
@@ -84,6 +85,31 @@ class OllamaAiRuntimeBridgeTests {
     }
 
     @Test
+    void generateTracedCapturesModelLatencyAndAttempts() {
+        try (AnnotationConfigApplicationContext context = context()) {
+            RecordingOllamaAiRuntimeBridge bridge = new RecordingOllamaAiRuntimeBridge(
+                    context,
+                    context.getAutowireCapableBeanFactory(),
+                    "alpha,beta",
+                    11L,
+                    7L);
+            AiSourceVO source = source("OLLAMA", Map.of("model", "qwen2", "maxRetries", 2));
+            source.setParser("namedListParser");
+
+            AiGenerateResult result = bridge.generateTraced(source);
+
+            Assertions.assertEquals(List.of("alpha", "beta"), result.payload());
+            Assertions.assertNotNull(result.metric());
+            Assertions.assertEquals("OLLAMA", result.metric().getProviderType());
+            Assertions.assertEquals("qwen2", result.metric().getModel());
+            Assertions.assertEquals(11L, result.metric().getPromptTokens());
+            Assertions.assertEquals(7L, result.metric().getCompletionTokens());
+            Assertions.assertEquals(1, result.metric().getAttempts());
+            Assertions.assertTrue(result.metric().getLatencyMs() >= 0L);
+        }
+    }
+
+    @Test
     void retriesTransientGenerateFailuresBeforeGivingUp() {
         try (AnnotationConfigApplicationContext context = context()) {
             FlakyOllamaAiRuntimeBridge bridge = new FlakyOllamaAiRuntimeBridge(
@@ -149,32 +175,44 @@ class OllamaAiRuntimeBridgeTests {
         }
 
         @Override
-        protected String generateContent(AiSourceVO source, OllamaOptions options) {
+        protected ContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
             attempts++;
             if (attempts < failUntilAttempt) {
                 throw new IllegalStateException("transient ai failure");
             }
-            return content;
+            return new ContentCall(content, 0L, 0L, 1, 0L);
         }
     }
 
     private static final class RecordingOllamaAiRuntimeBridge extends OllamaAiRuntimeBridge {
         private final String content;
+        private final long promptTokens;
+        private final long completionTokens;
         private String lastPrompt;
         private OllamaOptions lastOptions;
 
         private RecordingOllamaAiRuntimeBridge(AnnotationConfigApplicationContext applicationContext,
                                                AutowireCapableBeanFactory beanFactory,
                                                String content) {
+            this(applicationContext, beanFactory, content, 0L, 0L);
+        }
+
+        private RecordingOllamaAiRuntimeBridge(AnnotationConfigApplicationContext applicationContext,
+                                               AutowireCapableBeanFactory beanFactory,
+                                               String content,
+                                               long promptTokens,
+                                               long completionTokens) {
             super(applicationContext, beanFactory);
             this.content = content;
+            this.promptTokens = promptTokens;
+            this.completionTokens = completionTokens;
         }
 
         @Override
-        protected String generateContent(AiSourceVO source, OllamaOptions options) {
+        protected ContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
             this.lastPrompt = source.getPrompt();
             this.lastOptions = options;
-            return content;
+            return new ContentCall(content, promptTokens, completionTokens, 1, 0L);
         }
     }
 }

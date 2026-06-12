@@ -5,9 +5,11 @@
  */
 package org.gensokyo.data.task;
 
+import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.RunMetrics;
 import org.gensokyo.data.calcite.runtime.SinkWriteMetric;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
+import org.gensokyo.data.model.v2.AiCallMetricVO;
 import org.gensokyo.data.model.v2.RunReportVO;
 import org.gensokyo.data.model.v2.StageMetricVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
@@ -59,7 +61,24 @@ public class RunReportCollector {
                 List.copyOf(sinks),
                 metrics.getExecutionMode(),
                 durationMs,
-                List.copyOf(collectErrorSamples(metrics)));
+                List.copyOf(collectErrorSamples(metrics)),
+                List.copyOf(buildAiCallMetrics(metrics)));
+    }
+
+    private static List<AiCallMetricVO> buildAiCallMetrics(RunMetrics metrics) {
+        List<AiCallMetricVO> aiCalls = new ArrayList<>();
+        for (AiCallMetric metric : metrics.getAiCallMetrics().values()) {
+            aiCalls.add(new AiCallMetricVO(
+                    metric.getSourceName(),
+                    metric.getProviderType(),
+                    metric.getModel(),
+                    metric.getPromptTokens(),
+                    metric.getCompletionTokens(),
+                    metric.getLatencyMs(),
+                    metric.getAttempts(),
+                    metric.getResponseSample()));
+        }
+        return aiCalls;
     }
 
     private static List<StageMetricVO> buildTransformerMetrics(TemplateV2VO template, long outputRows) {

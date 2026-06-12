@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cancelJob, fetchJob, resumeJob } from '../../api/jobs';
-import type { RunReport, StageMetric } from '../../api/types';
+import type { AiCallMetric, RunReport, StageMetric } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 import { enumLabel } from '../utils/optionLabels';
@@ -75,6 +75,35 @@ export function JobDetailPage() {
         title: t('jobDetail.report.col.error'),
         dataIndex: 'errorSample',
         render: (value: string | null) => value ?? '—',
+      },
+    ],
+    [t],
+  );
+
+  const aiCallColumns: ColumnsType<AiCallMetric> = useMemo(
+    () => [
+      { title: t('jobDetail.report.col.name'), dataIndex: 'sourceName' },
+      { title: t('jobDetail.report.ai.provider'), dataIndex: 'providerType' },
+      { title: t('jobDetail.report.ai.model'), dataIndex: 'model' },
+      {
+        title: t('jobDetail.report.ai.promptTokens'),
+        dataIndex: 'promptTokens',
+        render: (value: number | null) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.ai.completionTokens'),
+        dataIndex: 'completionTokens',
+        render: (value: number | null) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.duration'),
+        dataIndex: 'latencyMs',
+        render: (value: number | null) => formatDuration(value),
+      },
+      {
+        title: t('jobDetail.report.ai.attempts'),
+        dataIndex: 'attempts',
+        render: (value: number | null) => value ?? '—',
       },
     ],
     [t],
@@ -276,6 +305,7 @@ export function JobDetailPage() {
               report={report}
               stageColumns={stageColumns}
               sinkStageColumns={sinkStageColumns}
+              aiCallColumns={aiCallColumns}
             />
           )}
           {body.length > 0 && (
@@ -296,10 +326,12 @@ function RunReportSection({
   report,
   stageColumns,
   sinkStageColumns,
+  aiCallColumns,
 }: {
   report: RunReport;
   stageColumns: ColumnsType<StageMetric>;
   sinkStageColumns: ColumnsType<StageMetric>;
+  aiCallColumns: ColumnsType<AiCallMetric>;
 }) {
   const { t } = useTranslation();
 
@@ -336,6 +368,19 @@ function RunReportSection({
         rows={report.sinks}
         columns={sinkStageColumns}
       />
+      {report.aiCalls && report.aiCalls.length > 0 && (
+        <>
+          <Typography.Title level={5}>{t('jobDetail.report.aiCalls')}</Typography.Title>
+          <Table
+            size="small"
+            pagination={false}
+            rowKey={(row, index) => `${row.sourceName ?? 'ai'}-${index}`}
+            dataSource={report.aiCalls}
+            columns={aiCallColumns}
+            style={{ marginBottom: 16 }}
+          />
+        </>
+      )}
       {report.errorSamples.length > 0 && (
         <>
           <Typography.Title level={5}>{t('jobDetail.report.errorSamples')}</Typography.Title>

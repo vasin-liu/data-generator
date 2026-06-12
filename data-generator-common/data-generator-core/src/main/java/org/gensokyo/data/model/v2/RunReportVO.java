@@ -17,6 +17,7 @@ import java.util.List;
  * @param executionMode  resolved execution mode name
  * @param durationMs     total run duration in milliseconds
  * @param errorSamples   non-fatal warnings and sink failure samples
+ * @param aiCalls        remote AI provider call diagnostics when collected
  * @author Gensokyo
  * @since 2026-05-29
  */
@@ -26,5 +27,15 @@ public record RunReportVO(
         List<StageMetricVO> sinks,
         String executionMode,
         Long durationMs,
-        List<String> errorSamples) implements Serializable {
+        List<String> errorSamples,
+        List<AiCallMetricVO> aiCalls) implements Serializable {
+
+    /**
+     * Normalizes nullable collections for backward-compatible report deserialization.
+     */
+    public RunReportVO {
+        if (aiCalls == null) {
+            aiCalls = List.of();
+        }
+    }
 }

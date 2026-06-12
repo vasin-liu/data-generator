@@ -1,6 +1,8 @@
 package org.gensokyo.data.ai.runtime;
 
 import org.gensokyo.data.ai.chat.ChatResponse;
+import org.gensokyo.data.ai.chat.Generation;
+import org.gensokyo.data.ai.chat.metadata.Usage;
 import org.gensokyo.data.ai.chat.prompt.Prompt;
 import org.gensokyo.data.ai.model.ModelOptionsUtils;
 import org.gensokyo.data.ai.ollama.OllamaChatClient;
@@ -8,6 +10,8 @@ import org.gensokyo.data.ai.ollama.api.OllamaApi;
 import org.gensokyo.data.ai.ollama.api.OllamaOptions;
 import org.gensokyo.data.ai.parser.OutputParser;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
+import org.gensokyo.data.calcite.runtime.AiCallMetric;
+import org.gensokyo.data.calcite.runtime.AiGenerateResult;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.springframework.beans.BeanInstantiationException;
@@ -44,6 +48,11 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
 
     @Override
     public Object generate(AiSourceVO source) {
+        return generateTraced(source).payload();
+    }
+
+    @Override
+    public AiGenerateResult generateTraced(AiSourceVO source) {
         Assert.notNull(source, "AI source must not be null");
         AiProviderVO provider = source.getProvider();
         if (!supports(provider)) {
@@ -52,17 +61,29 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
         }
 
         OllamaOptions options = resolveOptions(provider);
-        String content = generateWithRetry(source, options, provider.getOptions());
-        return parse(source, content);
+        ContentCall call = generateWithRetry(source, options, provider.getOptions());
+        Object payload = parse(source, call.content());
+        AiCallMetric metric = AiCallMetric.remote(
+                OLLAMA,
+                options.getModel(),
+                call.promptTokens(),
+                call.completionTokens(),
+                call.latencyMs(),
+                call.attempts(),
+                call.content());
+        return new AiGenerateResult(payload, metric);
     }
 
-    private String generateWithRetry(AiSourceVO source, OllamaOptions options, Map<String, Object> providerOptions) {
+    private ContentCall generateWithRetry(AiSourceVO source, OllamaOptions options, Map<String, Object> providerOptions) {
         int maxRetries = intOption(providerOptions, "maxRetries", 1);
         long retryBackoffMs = longOption(providerOptions, "retryBackoffMs", 0L);
         RuntimeException lastFailure = null;
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                return generateContent(source, options);
+                long startNanos = System.nanoTime();
+                ContentCall call = generateContentCall(source, options);
+                long latencyMs = Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
+                return call.withAttemptsAndLatency(attempt, latencyMs);
             }
             catch (RuntimeException ex) {
                 lastFailure = ex;
@@ -120,13 +141,41 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
         }
     }
 
-    protected String generateContent(AiSourceVO source, OllamaOptions options) {
+    protected ContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
         Prompt prompt = new Prompt(source.getPrompt() == null ? "" : source.getPrompt());
         ChatResponse response = createClient(source, options).call(prompt);
         if (response == null || response.getResult() == null || response.getResult().getOutput() == null) {
-            return "";
+            return new ContentCall("", 0L, 0L, 1, 0L);
         }
-        return response.getResult().getOutput().getContent();
+        Generation generation = response.getResult();
+        String content = generation.getOutput().getContent();
+        TokenUsage usage = extractUsage(generation);
+        return new ContentCall(content, usage.promptTokens(), usage.completionTokens(), 1, 0L);
+    }
+
+    private static TokenUsage extractUsage(Generation generation) {
+        Object metadata = generation.getMetadata().getContentFilterMetadata();
+        if (metadata instanceof Usage usage) {
+            long promptTokens = usage.getPromptTokens() == null ? 0L : usage.getPromptTokens();
+            long completionTokens = usage.getGenerationTokens() == null ? 0L : usage.getGenerationTokens();
+            return new TokenUsage(promptTokens, completionTokens);
+        }
+        return new TokenUsage(0L, 0L);
+    }
+
+    private record TokenUsage(long promptTokens, long completionTokens) {
+    }
+
+    protected record ContentCall(
+            String content,
+            long promptTokens,
+            long completionTokens,
+            int attempts,
+            long latencyMs) {
+
+        ContentCall withAttemptsAndLatency(int attempts, long latencyMs) {
+            return new ContentCall(content, promptTokens, completionTokens, attempts, latencyMs);
+        }
     }
 
     protected OllamaChatClient createClient(AiSourceVO source, OllamaOptions options) {

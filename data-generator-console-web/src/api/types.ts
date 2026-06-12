@@ -48,6 +48,18 @@ export interface StageMetric {
   rowsFailed?: number | null;
 }
 
+/** Mirrors {@code AiCallMetricVO}. */
+export interface AiCallMetric {
+  sourceName: string | null;
+  providerType: string | null;
+  model: string | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+  latencyMs: number | null;
+  attempts: number | null;
+  responseSample: string | null;
+}
+
 /** Mirrors {@code RunReportVO}. */
 export interface RunReport {
   sources: StageMetric[];
@@ -56,6 +68,7 @@ export interface RunReport {
   executionMode: string | null;
   durationMs: number | null;
   errorSamples: string[];
+  aiCalls?: AiCallMetric[];
 }
 
 export interface TaskExecutionSummary {

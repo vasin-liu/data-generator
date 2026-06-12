@@ -87,7 +87,14 @@ public final class ChunkedPipeline {
         QuerySourceVO querySource = queryEntry.getValue();
 
         RunMetrics metrics = new RunMetrics(policy.mode());
-        var rowSource = registry.createSource(sourceName, querySource, policy);
+        RowSource rowSource;
+        try {
+            AiRunMetricsScope.bind(metrics);
+            rowSource = registry.createSource(sourceName, querySource, policy);
+        }
+        finally {
+            AiRunMetricsScope.clear();
+        }
         if (!(rowSource instanceof ChunkedRowSource chunked)) {
             throw new IllegalStateException(
                     "CHUNKED mode requires a chunked row source for [" + sourceName + "], got "
@@ -141,8 +148,17 @@ public final class ChunkedPipeline {
         int sinkBatchSize = policy.sinkBatchSize();
         int chunkSize = policy.sourceChunkSize();
 
-        // Materialize dimension in memory (non-chunked read).
-        RowSource dimRowSource = registry.createSource(spec.dimSourceName(), dimSourceVo, null);
+        RowSource dimRowSource;
+        RowSource factRowSource;
+        try {
+            AiRunMetricsScope.bind(metrics);
+            // Materialize dimension in memory (non-chunked read).
+            dimRowSource = registry.createSource(spec.dimSourceName(), dimSourceVo, null);
+            factRowSource = registry.createSource(spec.factSourceName(), factSourceVo, policy);
+        }
+        finally {
+            AiRunMetricsScope.clear();
+        }
         BroadcastJoinSnapshot snapshot = BroadcastJoinSnapshot.materialize(
                 dimRowSource,
                 spec.dimJoinColumn(),
@@ -150,8 +166,6 @@ public final class ChunkedPipeline {
                 spec.dimSourceName());
         metrics.addRead(spec.dimSourceName(), dimRowSource.rows().size());
         ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
-
-        RowSource factRowSource = registry.createSource(spec.factSourceName(), factSourceVo, policy);
         if (!(factRowSource instanceof ChunkedRowSource chunked)) {
             throw new IllegalStateException(
                     "CHUNKED broadcast join requires a chunked fact source for ["

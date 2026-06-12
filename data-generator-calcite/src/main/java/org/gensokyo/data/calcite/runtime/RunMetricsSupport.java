@@ -39,5 +39,6 @@ final class RunMetricsSupport {
                 target.recordSinkRowsFailed(key, metric.getRowsFailed(), metric.getLastErrorSample());
             }
         });
+        source.getAiCallMetrics().forEach(target::recordAiCall);
     }
 }

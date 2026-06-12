@@ -157,7 +157,8 @@
 | **Pack 3 execution reliability** | GF-EP partial sink, `execution-reliability.spec.ts`, `verify-execution-reliability.ps1` — **Done** (2026-06-11) |
 | **V2 parity (operator trust)** | Pack V1–V5 shipped; idempotency keys / COPY bulk remain incremental |
 | **AI P1 (shipped 2026-06-11)** | `GET /api/console/ai/catalog`, GF-AI INLINE scenario, console AI source editor, Ollama `maxRetries`/`retryBackoffMs`, `verify-ai-p1.ps1` |
-| **Next** | AI cost tracing, additional providers, Ollama live E2E when broker available |
+| **AI P2 (shipped 2026-06-11)** | `AiCallMetric` run report tracing, Ollama token/latency capture, job detail AI calls table, `OllamaAiRuntimeBridgeLiveIT`, `verify-ai-p2.ps1` |
+| **Next** | Additional providers (OpenAI/Azure), platform-level AI cost accounting |
 
 ---
 

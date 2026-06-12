@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.task;
 
+import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.RunMetrics;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.model.v2.RunReportVO;
@@ -114,5 +115,31 @@ class RunReportCollectorTests {
         StageMetricVO okWriter = report.sinks().get(1);
         assertThat(okWriter.rowsOk()).isEqualTo(5L);
         assertThat(okWriter.rowsFailed()).isEqualTo(0L);
+    }
+
+    /**
+     * Remote AI call diagnostics are surfaced in the structured run report.
+     */
+    @Test
+    void exposesAiCallMetrics() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("ai-report");
+
+        RunMetrics metrics = new RunMetrics("IN_MEMORY");
+        metrics.recordAiCall(
+                "ai_seed",
+                AiCallMetric.remote("OLLAMA", "qwen2", 12L, 8L, 42L, 2, "alpha,beta"));
+        TemplateV2RunResult result = new TemplateV2RunResult(null, List.of(), metrics);
+
+        RunReportVO report = collector.collect(template, result, 15L);
+        assertThat(report).isNotNull();
+        assertThat(report.aiCalls()).hasSize(1);
+        assertThat(report.aiCalls().getFirst().sourceName()).isEqualTo("ai_seed");
+        assertThat(report.aiCalls().getFirst().providerType()).isEqualTo("OLLAMA");
+        assertThat(report.aiCalls().getFirst().model()).isEqualTo("qwen2");
+        assertThat(report.aiCalls().getFirst().promptTokens()).isEqualTo(12L);
+        assertThat(report.aiCalls().getFirst().completionTokens()).isEqualTo(8L);
+        assertThat(report.aiCalls().getFirst().latencyMs()).isEqualTo(42L);
+        assertThat(report.aiCalls().getFirst().attempts()).isEqualTo(2);
     }
 }
