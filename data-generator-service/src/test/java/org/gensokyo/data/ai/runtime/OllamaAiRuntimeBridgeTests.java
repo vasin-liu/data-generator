@@ -175,12 +175,12 @@ class OllamaAiRuntimeBridgeTests {
         }
 
         @Override
-        protected ContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
+        protected RemoteAiContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
             attempts++;
             if (attempts < failUntilAttempt) {
                 throw new IllegalStateException("transient ai failure");
             }
-            return new ContentCall(content, 0L, 0L, 1, 0L);
+            return new RemoteAiContentCall(content, 0L, 0L, 1, 0L);
         }
     }
 
@@ -209,10 +209,10 @@ class OllamaAiRuntimeBridgeTests {
         }
 
         @Override
-        protected ContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
+        protected RemoteAiContentCall generateContentCall(AiSourceVO source, OllamaOptions options) {
             this.lastPrompt = source.getPrompt();
             this.lastOptions = options;
-            return new ContentCall(content, promptTokens, completionTokens, 1, 0L);
+            return new RemoteAiContentCall(content, promptTokens, completionTokens, 1, 0L);
         }
     }
 }

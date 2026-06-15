@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
+import org.gensokyo.data.ai.runtime.OpenAiCompatibleRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
@@ -243,7 +245,9 @@ public class CoreConfig {
     @ConditionalOnMissingBean(AiRuntimeBridge.class)
     public AiRuntimeBridge aiRuntimeBridge(ApplicationContext applicationContext,
                                            AutowireCapableBeanFactory beanFactory) {
-        return new OllamaAiRuntimeBridge(applicationContext, beanFactory);
+        return new CompositeAiRuntimeBridge(List.of(
+                new OllamaAiRuntimeBridge(applicationContext, beanFactory),
+                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory)));
     }
 
     @Bean

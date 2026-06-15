@@ -1,6 +1,6 @@
 package org.gensokyo.data.config;
 
-import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
+import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.TemplateV2RuntimePluginProvider;
@@ -70,10 +70,10 @@ class Pf4jRuntimeConfigTests {
         contextRunner
                 .withBean(DataGeneratorProperties.class, DataGeneratorProperties::new)
                 .run(context -> {
-                    Assertions.assertInstanceOf(OllamaAiRuntimeBridge.class, context.getBean(AiRuntimeBridge.class));
+                    Assertions.assertInstanceOf(CompositeAiRuntimeBridge.class, context.getBean(AiRuntimeBridge.class));
                     TemplateV2RuntimeContext runtimeContext = context.getBean(TemplateV2RuntimeContext.class);
                     Assertions.assertNotNull(runtimeContext.runtimeServices().aiRuntimeBridge());
-                    Assertions.assertInstanceOf(OllamaAiRuntimeBridge.class, runtimeContext.runtimeServices().aiRuntimeBridge());
+                    Assertions.assertInstanceOf(CompositeAiRuntimeBridge.class, runtimeContext.runtimeServices().aiRuntimeBridge());
                 });
     }
 

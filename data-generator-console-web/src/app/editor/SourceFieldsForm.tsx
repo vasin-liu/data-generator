@@ -376,6 +376,9 @@ function AiSourceFields({
       label: entry.label,
     })) ?? [];
 
+  const providerEntry = aiCatalog?.providers.find((entry) => entry.type === providerType);
+  const isRemoteProvider = providerEntry?.remote === true;
+
   const promptTemplateOptions =
     aiCatalog?.promptTemplates.map((entry) => ({
       value: entry.id,
@@ -448,16 +451,31 @@ function AiSourceFields({
           />
         </Form.Item>
       ) : null}
-      {providerType === 'OLLAMA' ? (
+      {isRemoteProvider ? (
         <>
           <Form.Item label={<FieldHelp label={t('source.ai.api')} help={t('source.ai.api.help')} />}>
             <Input
               readOnly={readOnly}
               value={(source.api as string) ?? ''}
-              placeholder="http://127.0.0.1:11434"
+              placeholder={
+                providerType === 'AZURE_OPENAI'
+                  ? 'https://{resource}.openai.azure.com/openai/deployments/{deployment}/chat/completions?api-version=2024-02-15-preview'
+                  : providerType === 'OPENAI'
+                    ? 'https://api.openai.com'
+                    : 'http://127.0.0.1:11434'
+              }
               onChange={(e) => onPatch({ ...source, api: e.target.value })}
             />
           </Form.Item>
+          {providerType === 'OPENAI' || providerType === 'AZURE_OPENAI' ? (
+            <Form.Item label={<FieldHelp label={t('source.ai.apiKey')} help={t('source.ai.apiKey.help')} />}>
+              <Input.Password
+                readOnly={readOnly}
+                value={(options.apiKey as string) ?? ''}
+                onChange={(e) => patchProvider({ options: { ...options, apiKey: e.target.value || undefined } })}
+              />
+            </Form.Item>
+          ) : null}
           <Form.Item label={<FieldHelp label={t('source.ai.model')} help={t('source.ai.model.help')} />}>
             <Input
               readOnly={readOnly}

@@ -74,7 +74,10 @@ Focused builds (examples from internal upgrade docs):
 .\scripts\verify-ai-p1.ps1
 
 # AI P2 cost tracing + run report AI metrics (Maven slice + optional live Ollama)
-.\scripts\verify-ai-p2.ps1 -SkipLive -SkipPlaywright
+.\scripts\verify-ai-p2.ps1 -SkipLive
+
+# AI P3 composite bridge + OpenAI-compatible provider
+.\scripts\verify-ai-p3.ps1 -SkipPlaywright -SkipPlaywright
 
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild

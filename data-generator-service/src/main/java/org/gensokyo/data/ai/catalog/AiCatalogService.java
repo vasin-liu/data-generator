@@ -64,6 +64,16 @@ public class AiCatalogService {
                         "OLLAMA",
                         "Ollama",
                         "Call a remote Ollama endpoint via the service runtime bridge.",
+                        true),
+                new AiProviderEntryDto(
+                        "OPENAI",
+                        "OpenAI",
+                        "Call an OpenAI-compatible chat-completions endpoint (apiKey + model in provider.options).",
+                        true),
+                new AiProviderEntryDto(
+                        "AZURE_OPENAI",
+                        "Azure OpenAI",
+                        "Call an Azure OpenAI deployment URL via source.api with apiKey + model in provider.options.",
                         true));
     }
 

@@ -27,6 +27,7 @@ class AiCatalogServiceTest {
 
         Assertions.assertTrue(catalog.providers().stream().anyMatch(row -> "INLINE".equals(row.type())));
         Assertions.assertTrue(catalog.providers().stream().anyMatch(row -> "OLLAMA".equals(row.type())));
+        Assertions.assertTrue(catalog.providers().stream().anyMatch(row -> "OPENAI".equals(row.type())));
         Assertions.assertTrue(catalog.parsers().stream()
                 .anyMatch(row -> ListOutputParser.class.getName().equals(row.id())));
         Assertions.assertTrue(catalog.promptTemplates().stream()
