@@ -159,7 +159,8 @@
 | **AI P1 (shipped 2026-06-11)** | `GET /api/console/ai/catalog`, GF-AI INLINE scenario, console AI source editor, Ollama `maxRetries`/`retryBackoffMs`, `verify-ai-p1.ps1` |
 | **AI P2 (shipped 2026-06-11)** | `AiCallMetric` run report tracing, Ollama token/latency capture, job detail AI calls table, `OllamaAiRuntimeBridgeLiveIT`, `verify-ai-p2.ps1` |
 | **AI P3 (shipped 2026-06-12)** | `CompositeAiRuntimeBridge`, `OpenAiCompatibleRuntimeBridge` (OPENAI/AZURE_OPENAI), catalog + console remote provider fields, `verify-ai-p3.ps1` |
-| **Next** | Secret-ref resolution for API keys, platform-level AI cost accounting |
+| **AI P4 (shipped 2026-06-12)** | `apiKeySecretRef` resolution + governance, `GET /api/console/ai/usage` platform rollup, jobs page AI usage panel, `verify-ai-p4.ps1` |
+| **Next** | AI rate limits / quotas, richer cost pricing models |
 
 ---
 

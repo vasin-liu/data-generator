@@ -35,4 +35,23 @@ public interface SecretResolver {
         }
         return password == null ? "" : password;
     }
+
+    /**
+     * Resolves a credential from plaintext or secret reference (secret ref wins when present).
+     *
+     * @param plaintext optional inline value
+     * @param secretRef optional logical secret name
+     * @param fieldName operator-facing field label for error messages
+     * @return resolved credential
+     * @throws IllegalArgumentException when neither value is present
+     */
+    default String resolvePlaintextOrSecretRef(String plaintext, String secretRef, String fieldName) {
+        if (secretRef != null && !secretRef.isBlank()) {
+            return resolveRequired(secretRef);
+        }
+        if (plaintext != null && !plaintext.isBlank()) {
+            return plaintext;
+        }
+        throw new IllegalArgumentException(fieldName + " requires a plaintext value or secretRef");
+    }
 }

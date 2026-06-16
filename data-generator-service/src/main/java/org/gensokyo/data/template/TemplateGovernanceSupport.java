@@ -5,6 +5,8 @@
  */
 package org.gensokyo.data.template;
 
+import org.gensokyo.data.model.v2.AiProviderVO;
+import org.gensokyo.data.model.v2.AiSourceVO;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.PostGisQuerySourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
@@ -18,6 +20,8 @@ import org.gensokyo.kit.collect.CollectKit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Template governance checks (plaintext secrets, publish readiness).
@@ -43,6 +47,7 @@ public final class TemplateGovernanceSupport {
         if (!CollectKit.isEmpty(template.getSources())) {
             for (var entry : template.getSources().entrySet()) {
                 collectInlineSecretErrors(errors, entry.getKey(), entry.getValue());
+                collectAiSecretErrors(errors, entry.getKey(), entry.getValue());
             }
         }
         if (!CollectKit.isEmpty(template.getSinks())) {
@@ -68,6 +73,34 @@ public final class TemplateGovernanceSupport {
         if (source instanceof PostGisQuerySourceVO postGis) {
             collectInline(errors, "sources." + sourceName, postGis.getDataSource());
         }
+    }
+
+    private static void collectAiSecretErrors(List<String> errors, String sourceName, SourceVO source) {
+        if (!(source instanceof AiSourceVO aiSource)) {
+            return;
+        }
+        collectAiProviderSecretErrors(errors, "sources." + sourceName, aiSource.getProvider());
+    }
+
+    private static void collectAiProviderSecretErrors(List<String> errors, String path, AiProviderVO provider) {
+        if (provider == null || StrKit.isBlank(provider.getType())) {
+            return;
+        }
+        String providerType = provider.getType().trim().toUpperCase(Locale.ROOT);
+        if (!"OPENAI".equals(providerType) && !"AZURE_OPENAI".equals(providerType)) {
+            return;
+        }
+        Map<String, Object> options = provider.getOptions() == null ? Map.of() : provider.getOptions();
+        String apiKey = stringOption(options, "apiKey");
+        String apiKeySecretRef = stringOption(options, "apiKeySecretRef");
+        if (StrKit.isNotBlank(apiKey) && StrKit.isBlank(apiKeySecretRef)) {
+            errors.add(path + ".provider.options: plaintext apiKey is not allowed; use apiKeySecretRef");
+        }
+    }
+
+    private static String stringOption(Map<String, Object> options, String key) {
+        Object value = options.get(key);
+        return value == null ? null : String.valueOf(value);
     }
 
     private static void collectJdbcWriterSecretErrors(List<String> errors, String path, JdbcWriterVO writer) {

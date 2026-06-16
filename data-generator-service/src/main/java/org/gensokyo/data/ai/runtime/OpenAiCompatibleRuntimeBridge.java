@@ -10,6 +10,7 @@ import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
+import org.gensokyo.data.secret.SecretResolver;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -35,10 +36,18 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
     private static final String DEFAULT_OPENAI_BASE_URL = "https://api.openai.com";
 
     private final AiRuntimeBridgeSupport support;
+    private final SecretResolver secretResolver;
 
+    /**
+     * @param applicationContext Spring context for parser beans
+     * @param beanFactory        bean factory for parser resolution
+     * @param secretResolver     resolves {@code apiKeySecretRef} at runtime
+     */
     public OpenAiCompatibleRuntimeBridge(ApplicationContext applicationContext,
-                                           AutowireCapableBeanFactory beanFactory) {
+                                           AutowireCapableBeanFactory beanFactory,
+                                           SecretResolver secretResolver) {
         this.support = new AiRuntimeBridgeSupport(applicationContext, beanFactory);
+        this.secretResolver = secretResolver;
     }
 
     @Override
@@ -67,7 +76,7 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
         String providerType = provider.getType().trim().toUpperCase(Locale.ROOT);
         Map<String, Object> providerOptions = provider.getOptions() == null ? Map.of() : provider.getOptions();
         String model = requireModel(providerOptions);
-        String apiKey = requireApiKey(providerOptions);
+        String apiKey = resolveApiKey(providerOptions);
         String endpoint = resolveEndpoint(source, providerType, providerOptions);
 
         RemoteAiContentCall call = support.executeWithRetry(
@@ -168,12 +177,13 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
         return baseUrl + "/v1/chat/completions";
     }
 
-    private static String requireApiKey(Map<String, Object> options) {
+    private String resolveApiKey(Map<String, Object> options) {
         String apiKey = AiRuntimeBridgeSupport.stringOption(options, "apiKey");
-        if (!StringUtils.hasText(apiKey)) {
-            throw new IllegalArgumentException("OpenAI provider requires provider.options.apiKey");
-        }
-        return apiKey;
+        String apiKeySecretRef = AiRuntimeBridgeSupport.stringOption(options, "apiKeySecretRef");
+        return secretResolver.resolvePlaintextOrSecretRef(
+                apiKey,
+                apiKeySecretRef,
+                "OpenAI provider requires provider.options.apiKey or provider.options.apiKeySecretRef");
     }
 
     private static String requireModel(Map<String, Object> options) {

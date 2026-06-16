@@ -5,8 +5,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchDistributedMetrics } from '../../api/distributed';
+import { fetchAiUsage } from '../../api/ai';
 import { fetchJobs } from '../../api/jobs';
-import type { TaskExecutionSummary } from '../../api/types';
+import type { AiProviderUsage, TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 import { enumLabel } from '../utils/optionLabels';
@@ -46,6 +47,27 @@ export function JobsPage() {
     queryFn: fetchDistributedMetrics,
     refetchInterval: 5000,
   });
+
+  const aiUsageQuery = useQuery({
+    queryKey: ['ai-usage'],
+    queryFn: fetchAiUsage,
+    refetchInterval: 10000,
+  });
+
+  const aiProviderColumns: ColumnsType<AiProviderUsage> = useMemo(
+    () => [
+      { title: t('jobs.aiUsage.provider'), dataIndex: 'providerType' },
+      { title: t('jobs.aiUsage.calls'), dataIndex: 'calls' },
+      { title: t('jobs.aiUsage.promptTokens'), dataIndex: 'promptTokens' },
+      { title: t('jobs.aiUsage.completionTokens'), dataIndex: 'completionTokens' },
+      {
+        title: t('jobs.aiUsage.latency'),
+        dataIndex: 'latencyMs',
+        render: (value: number) => `${value} ms`,
+      },
+    ],
+    [t],
+  );
 
   const pollHint =
     jobsQuery.data?.some((r) => ACTIVE.has(r.status)) ?? false
@@ -202,6 +224,44 @@ export function JobsPage() {
             </Descriptions.Item>
           </Descriptions>
         </>
+      )}
+      <Typography.Title level={5}>{t('jobs.aiUsage.title')}</Typography.Title>
+      {aiUsageQuery.data && aiUsageQuery.data.totalCalls > 0 ? (
+        <>
+          <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+            <Descriptions.Item label={t('jobs.aiUsage.jobs')}>
+              {aiUsageQuery.data.jobsWithAiCalls}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.aiUsage.calls')}>{aiUsageQuery.data.totalCalls}</Descriptions.Item>
+            <Descriptions.Item label={t('jobs.aiUsage.promptTokens')}>
+              {aiUsageQuery.data.promptTokens}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.aiUsage.completionTokens')}>
+              {aiUsageQuery.data.completionTokens}
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.aiUsage.latency')} span={2}>
+              {aiUsageQuery.data.totalLatencyMs} ms
+            </Descriptions.Item>
+          </Descriptions>
+          {aiUsageQuery.data.byProvider.length > 0 ? (
+            <>
+              <Typography.Text type="secondary">{t('jobs.aiUsage.byProvider')}</Typography.Text>
+              <Table<AiProviderUsage>
+                style={{ marginTop: 8, marginBottom: 16 }}
+                size="small"
+                rowKey="providerType"
+                pagination={false}
+                loading={aiUsageQuery.isLoading}
+                dataSource={aiUsageQuery.data.byProvider}
+                columns={aiProviderColumns}
+              />
+            </>
+          ) : null}
+        </>
+      ) : (
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+          {t('jobs.aiUsage.empty')}
+        </Typography.Paragraph>
       )}
       <Table<TaskExecutionSummary>
         rowKey="instanceId"

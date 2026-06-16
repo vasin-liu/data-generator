@@ -6,7 +6,9 @@
 package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.ai.catalog.AiCatalogService;
+import org.gensokyo.data.ai.usage.AiUsageService;
 import org.gensokyo.data.api.console.dto.AiCatalogDto;
+import org.gensokyo.data.api.console.dto.AiUsageSummaryDto;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConsoleAiCatalogController {
 
     private final AiCatalogService aiCatalogService;
+    private final AiUsageService aiUsageService;
 
     /**
      * @param aiCatalogService bundled AI metadata service
+     * @param aiUsageService   platform AI usage aggregator
      */
-    public ConsoleAiCatalogController(AiCatalogService aiCatalogService) {
+    public ConsoleAiCatalogController(AiCatalogService aiCatalogService, AiUsageService aiUsageService) {
         this.aiCatalogService = aiCatalogService;
+        this.aiUsageService = aiUsageService;
     }
 
     /**
@@ -37,5 +42,13 @@ public class ConsoleAiCatalogController {
     @GetMapping("/ai/catalog")
     public R<AiCatalogDto> catalog() {
         return R.ok(aiCatalogService.catalog());
+    }
+
+    /**
+     * @return aggregated AI token usage from successful job run reports
+     */
+    @GetMapping("/ai/usage")
+    public R<AiUsageSummaryDto> usage() {
+        return R.ok(aiUsageService.summarize());
     }
 }

@@ -1,7 +1,9 @@
 import { Alert, Form, Input, InputNumber, Select } from 'antd';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AiCatalog, EditorDataSources } from '../../api/types';
+import { fetchSecretSummaries } from '../../api/secrets';
 import { FieldHelp } from '../../components/FieldHelp';
 import { yesNoOptions } from '../utils/optionLabels';
 import { SourceFileInput } from '../../components/SourceFileInput';
@@ -376,6 +378,24 @@ function AiSourceFields({
       label: entry.label,
     })) ?? [];
 
+  const isOpenAiFamily = providerType === 'OPENAI' || providerType === 'AZURE_OPENAI';
+  const apiKeySecretRef = (options.apiKeySecretRef as string | undefined) ?? undefined;
+
+  const secretsQuery = useQuery({
+    queryKey: ['secret-summaries'],
+    queryFn: fetchSecretSummaries,
+    enabled: isOpenAiFamily,
+  });
+
+  const secretOptions = useMemo(
+    () =>
+      secretsQuery.data?.map((entry) => ({
+        value: entry.name,
+        label: entry.description ? `${entry.name} — ${entry.description}` : entry.name,
+      })) ?? [],
+    [secretsQuery.data],
+  );
+
   const providerEntry = aiCatalog?.providers.find((entry) => entry.type === providerType);
   const isRemoteProvider = providerEntry?.remote === true;
 
@@ -467,7 +487,32 @@ function AiSourceFields({
               onChange={(e) => onPatch({ ...source, api: e.target.value })}
             />
           </Form.Item>
-          {providerType === 'OPENAI' || providerType === 'AZURE_OPENAI' ? (
+          {isOpenAiFamily ? (
+            <Form.Item
+              label={
+                <FieldHelp label={t('source.ai.apiKeySecretRef')} help={t('source.ai.apiKeySecretRef.help')} />
+              }
+            >
+              <Select
+                allowClear
+                showSearch
+                disabled={readOnly}
+                placeholder={t('source.ai.apiKeySecretRef.placeholder')}
+                value={apiKeySecretRef}
+                options={secretOptions}
+                onChange={(value) =>
+                  patchProvider({
+                    options: {
+                      ...options,
+                      apiKeySecretRef: value || undefined,
+                      apiKey: value ? undefined : options.apiKey,
+                    },
+                  })
+                }
+              />
+            </Form.Item>
+          ) : null}
+          {isOpenAiFamily && !apiKeySecretRef ? (
             <Form.Item label={<FieldHelp label={t('source.ai.apiKey')} help={t('source.ai.apiKey.help')} />}>
               <Input.Password
                 readOnly={readOnly}

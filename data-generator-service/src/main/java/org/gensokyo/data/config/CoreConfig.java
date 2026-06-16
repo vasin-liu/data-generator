@@ -244,10 +244,11 @@ public class CoreConfig {
     @Bean
     @ConditionalOnMissingBean(AiRuntimeBridge.class)
     public AiRuntimeBridge aiRuntimeBridge(ApplicationContext applicationContext,
-                                           AutowireCapableBeanFactory beanFactory) {
+                                           AutowireCapableBeanFactory beanFactory,
+                                           org.gensokyo.data.secret.SecretResolver secretResolver) {
         return new CompositeAiRuntimeBridge(List.of(
                 new OllamaAiRuntimeBridge(applicationContext, beanFactory),
-                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory)));
+                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory, secretResolver)));
     }
 
     @Bean

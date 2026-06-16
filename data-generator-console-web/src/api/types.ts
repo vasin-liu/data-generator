@@ -407,6 +407,32 @@ export interface AiCatalog {
   promptTemplates: AiPromptTemplateEntry[];
 }
 
+/** Mirrors {@code AiProviderUsageDto}. */
+export interface AiProviderUsage {
+  providerType: string;
+  calls: number;
+  promptTokens: number;
+  completionTokens: number;
+  latencyMs: number;
+}
+
+/** Mirrors {@code AiUsageSummaryDto}. */
+export interface AiUsageSummary {
+  jobsWithAiCalls: number;
+  totalCalls: number;
+  promptTokens: number;
+  completionTokens: number;
+  totalLatencyMs: number;
+  byProvider: AiProviderUsage[];
+}
+
+/** Secret registry metadata (value never returned). */
+export interface SecretSummary {
+  name: string;
+  description: string | null;
+  updatedAt: string | null;
+}
+
 export interface DataSourcesOverview {
   persisted: DataSourceSummary[];
   runtimeKeys: string[];

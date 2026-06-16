@@ -38,4 +38,10 @@ public interface TaskExecutionRepository extends JpaRepository<TaskExecutionPO, 
      * @return whether any matching row exists
      */
     boolean existsByTemplateIdAndStatusIn(Long templateId, Collection<String> statuses);
+
+    /**
+     * @param status execution status name
+     * @return matching rows newest first
+     */
+    List<TaskExecutionPO> findByStatusOrderByFinishedAtDesc(String status);
 }

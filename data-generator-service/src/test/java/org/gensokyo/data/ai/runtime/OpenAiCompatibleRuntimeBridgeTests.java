@@ -10,6 +10,7 @@ import org.gensokyo.data.ai.parser.OutputParser;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
+import org.gensokyo.data.secret.SecretResolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -27,12 +28,20 @@ import java.util.Map;
  */
 class OpenAiCompatibleRuntimeBridgeTests {
 
+    private static final SecretResolver PLAINTEXT_RESOLVER = new SecretResolver() {
+        @Override
+        public String resolveRequired(String secretRef) {
+            throw new UnsupportedOperationException(secretRef);
+        }
+    };
+
     @Test
     void supportsOpenAiAndAzureProviderTypes() {
         try (AnnotationConfigApplicationContext context = context()) {
             OpenAiCompatibleRuntimeBridge bridge = new OpenAiCompatibleRuntimeBridge(
                     context,
-                    context.getAutowireCapableBeanFactory());
+                    context.getAutowireCapableBeanFactory(),
+                    PLAINTEXT_RESOLVER);
 
             AiProviderVO openAi = new AiProviderVO();
             openAi.setType("OPENAI");
@@ -50,6 +59,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
             RecordingOpenAiBridge bridge = new RecordingOpenAiBridge(
                     context,
                     context.getAutowireCapableBeanFactory(),
+                    PLAINTEXT_RESOLVER,
                     "alpha,beta");
             AiSourceVO source = source("OPENAI", Map.of("model", "gpt-4o-mini", "apiKey", "test-key"));
             source.setPrompt("generate values");
@@ -67,11 +77,39 @@ class OpenAiCompatibleRuntimeBridgeTests {
     }
 
     @Test
+    void resolvesApiKeyFromSecretRef() {
+        try (AnnotationConfigApplicationContext context = context()) {
+            SecretResolver resolver = new SecretResolver() {
+                @Override
+                public String resolveRequired(String secretRef) {
+                    Assertions.assertEquals("secrets/ai/openai", secretRef);
+                    return "vault-key";
+                }
+            };
+            RecordingOpenAiBridge bridge = new RecordingOpenAiBridge(
+                    context,
+                    context.getAutowireCapableBeanFactory(),
+                    resolver,
+                    "one,two");
+            AiSourceVO source = source("OPENAI", Map.of(
+                    "model", "gpt-4o-mini",
+                    "apiKeySecretRef", "secrets/ai/openai"));
+            source.setPrompt("generate values");
+            source.setParser(ListOutputParser.class.getName());
+
+            bridge.generateTraced(source);
+
+            Assertions.assertEquals("vault-key", bridge.lastApiKey);
+        }
+    }
+
+    @Test
     void requiresApiKeyForOpenAiProvider() {
         try (AnnotationConfigApplicationContext context = context()) {
             OpenAiCompatibleRuntimeBridge bridge = new OpenAiCompatibleRuntimeBridge(
                     context,
-                    context.getAutowireCapableBeanFactory());
+                    context.getAutowireCapableBeanFactory(),
+                    PLAINTEXT_RESOLVER);
             AiSourceVO source = source("OPENAI", Map.of("model", "gpt-4o-mini"));
 
             IllegalArgumentException failure = Assertions.assertThrows(
@@ -102,17 +140,20 @@ class OpenAiCompatibleRuntimeBridgeTests {
     private static final class RecordingOpenAiBridge extends OpenAiCompatibleRuntimeBridge {
         private final String content;
         private String lastEndpoint;
+        private String lastApiKey;
 
         private RecordingOpenAiBridge(AnnotationConfigApplicationContext applicationContext,
                                       AutowireCapableBeanFactory beanFactory,
+                                      SecretResolver secretResolver,
                                       String content) {
-            super(applicationContext, beanFactory);
+            super(applicationContext, beanFactory, secretResolver);
             this.content = content;
         }
 
         @Override
         protected RemoteAiContentCall invokeChatCompletions(String endpoint, String apiKey, String model, String prompt) {
             this.lastEndpoint = endpoint;
+            this.lastApiKey = apiKey;
             return new RemoteAiContentCall(content, 12L, 4L, 1, 0L);
         }
     }
