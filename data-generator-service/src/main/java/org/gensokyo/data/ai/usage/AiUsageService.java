@@ -16,6 +16,8 @@ import org.gensokyo.data.repository.TaskExecutionRepository;
 import org.gensokyo.data.task.TaskExecutionStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -33,6 +35,7 @@ import java.util.Map;
 public class AiUsageService {
 
     private final TaskExecutionRepository taskExecutionRepository;
+    private final AiPricingService aiPricingService;
 
     /**
      * @return platform-level AI usage totals from all successful executions with reports
@@ -46,6 +49,7 @@ public class AiUsageService {
         long promptTokens = 0L;
         long completionTokens = 0L;
         long totalLatencyMs = 0L;
+        BigDecimal totalCostUsd = BigDecimal.ZERO;
         Map<String, ProviderAccumulator> byProvider = new LinkedHashMap<>();
 
         for (TaskExecutionPO row : successes) {
@@ -59,13 +63,15 @@ public class AiUsageService {
                 long prompt = call.promptTokens() == null ? 0L : call.promptTokens();
                 long completion = call.completionTokens() == null ? 0L : call.completionTokens();
                 long latency = call.latencyMs() == null ? 0L : call.latencyMs();
+                double callCostUsd = resolveEstimatedCostUsd(call, prompt, completion);
                 promptTokens += prompt;
                 completionTokens += completion;
                 totalLatencyMs += latency;
+                totalCostUsd = totalCostUsd.add(BigDecimal.valueOf(callCostUsd));
 
                 String providerType = call.providerType() == null ? "UNKNOWN" : call.providerType();
                 byProvider.computeIfAbsent(providerType, ignored -> new ProviderAccumulator())
-                        .add(prompt, completion, latency);
+                        .add(prompt, completion, latency, callCostUsd);
             }
         }
 
@@ -75,7 +81,8 @@ public class AiUsageService {
                 totals.calls,
                 totals.promptTokens,
                 totals.completionTokens,
-                totals.latencyMs)));
+                totals.latencyMs,
+                totals.estimatedCostUsd)));
         providerRows.sort(Comparator.comparingLong(AiProviderUsageDto::calls).reversed());
 
         return new AiUsageSummaryDto(
@@ -84,7 +91,15 @@ public class AiUsageService {
                 promptTokens,
                 completionTokens,
                 totalLatencyMs,
+                totalCostUsd.setScale(6, RoundingMode.HALF_UP).doubleValue(),
                 List.copyOf(providerRows));
+    }
+
+    private double resolveEstimatedCostUsd(AiCallMetricVO call, long promptTokens, long completionTokens) {
+        if (call.estimatedCostUsd() != null) {
+            return call.estimatedCostUsd();
+        }
+        return aiPricingService.estimateUsd(call.providerType(), call.model(), promptTokens, completionTokens);
     }
 
     private static RunReportVO parseReport(String reportJson) {
@@ -103,12 +118,17 @@ public class AiUsageService {
         private long promptTokens;
         private long completionTokens;
         private long latencyMs;
+        private double estimatedCostUsd;
 
-        private void add(long prompt, long completion, long latency) {
+        private void add(long prompt, long completion, long latency, double costUsd) {
             calls++;
             promptTokens += prompt;
             completionTokens += completion;
             latencyMs += latency;
+            estimatedCostUsd = BigDecimal.valueOf(estimatedCostUsd)
+                    .add(BigDecimal.valueOf(costUsd))
+                    .setScale(6, RoundingMode.HALF_UP)
+                    .doubleValue();
         }
     }
 }

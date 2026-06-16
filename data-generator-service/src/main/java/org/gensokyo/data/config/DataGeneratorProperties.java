@@ -152,6 +152,24 @@ public class DataGeneratorProperties {
          * Default max AI calls per rolling minute per limiter key (0 = disabled).
          */
         private Integer defaultRequestsPerMinute = 0;
+
+        /**
+         * Optional per-model USD pricing overrides (USD per 1M tokens).
+         */
+        private java.util.List<AiModelPricingEntry> modelPricing = new java.util.ArrayList<>();
+    }
+
+    /**
+     * Configurable model pricing entry for {@code data.generator.ai-runtime.model-pricing}.
+     */
+    @Getter
+    @Setter
+    public static class AiModelPricingEntry {
+        private String providerType;
+        /** Model name or {@code *} for provider default. */
+        private String model;
+        private Double promptUsdPer1M;
+        private Double completionUsdPer1M;
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.task;
 
+import org.gensokyo.data.ai.usage.AiPricingService;
 import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.RunMetrics;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
@@ -15,6 +16,7 @@ import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.v2.TransformGraphVO;
 import org.gensokyo.data.model.v2.TransformNodeVO;
 import org.gensokyo.data.model.v2.workflow.ComputeBlockVO;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -31,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class RunReportCollectorTests {
 
-    private final RunReportCollector collector = new RunReportCollector();
+    private final RunReportCollector collector = new RunReportCollector(new AiPricingService(new DataGeneratorProperties()));
 
     /**
      * Linear template transformers remain in the report alongside compute-block DAG nodes.
@@ -141,5 +143,6 @@ class RunReportCollectorTests {
         assertThat(report.aiCalls().getFirst().completionTokens()).isEqualTo(8L);
         assertThat(report.aiCalls().getFirst().latencyMs()).isEqualTo(42L);
         assertThat(report.aiCalls().getFirst().attempts()).isEqualTo(2);
+        assertThat(report.aiCalls().getFirst().estimatedCostUsd()).isEqualTo(0.0D);
     }
 }

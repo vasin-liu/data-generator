@@ -58,6 +58,7 @@ export interface AiCallMetric {
   latencyMs: number | null;
   attempts: number | null;
   responseSample: string | null;
+  estimatedCostUsd?: number | null;
 }
 
 /** Mirrors {@code RunReportVO}. */
@@ -414,6 +415,16 @@ export interface AiProviderUsage {
   promptTokens: number;
   completionTokens: number;
   latencyMs: number;
+  estimatedCostUsd: number;
+}
+
+/** Mirrors {@code AiModelPricingDto}. */
+export interface AiModelPricing {
+  providerType: string;
+  model: string;
+  promptUsdPer1M: number;
+  completionUsdPer1M: number;
+  configured: boolean;
 }
 
 /** Mirrors {@code AiUsageSummaryDto}. */
@@ -423,6 +434,7 @@ export interface AiUsageSummary {
   promptTokens: number;
   completionTokens: number;
   totalLatencyMs: number;
+  estimatedCostUsd: number;
   byProvider: AiProviderUsage[];
 }
 

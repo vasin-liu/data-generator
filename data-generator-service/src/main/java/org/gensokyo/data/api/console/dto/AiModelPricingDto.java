@@ -1,0 +1,25 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.api.console.dto;
+
+/**
+ * Per-model USD token pricing exposed to the operator console.
+ *
+ * @param providerType        provider identifier
+ * @param model               model name or {@code *} wildcard
+ * @param promptUsdPer1M      USD per 1M prompt tokens
+ * @param completionUsdPer1M  USD per 1M completion tokens
+ * @param configured          whether the row comes from application config
+ * @author Gensokyo
+ * @since 2026-06-12
+ */
+public record AiModelPricingDto(
+        String providerType,
+        String model,
+        double promptUsdPer1M,
+        double completionUsdPer1M,
+        boolean configured) {
+}

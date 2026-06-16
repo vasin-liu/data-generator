@@ -18,6 +18,7 @@ import java.io.Serializable;
  * @param latencyMs         wall-clock latency for the successful call
  * @param attempts          number of attempts including retries
  * @param responseSample    truncated response text sample
+ * @param estimatedCostUsd  estimated USD cost when pricing is configured
  * @author Gensokyo
  * @since 2026-06-11
  */
@@ -29,5 +30,6 @@ public record AiCallMetricVO(
         Long completionTokens,
         Long latencyMs,
         Integer attempts,
-        String responseSample) implements Serializable {
+        String responseSample,
+        Double estimatedCostUsd) implements Serializable {
 }

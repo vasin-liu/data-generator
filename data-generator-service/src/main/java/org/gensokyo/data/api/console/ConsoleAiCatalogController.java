@@ -6,13 +6,17 @@
 package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.ai.catalog.AiCatalogService;
+import org.gensokyo.data.ai.usage.AiPricingService;
 import org.gensokyo.data.ai.usage.AiUsageService;
 import org.gensokyo.data.api.console.dto.AiCatalogDto;
+import org.gensokyo.data.api.console.dto.AiModelPricingDto;
 import org.gensokyo.data.api.console.dto.AiUsageSummaryDto;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * AI authoring catalog for the operator console source editor.
@@ -26,14 +30,20 @@ public class ConsoleAiCatalogController {
 
     private final AiCatalogService aiCatalogService;
     private final AiUsageService aiUsageService;
+    private final AiPricingService aiPricingService;
 
     /**
      * @param aiCatalogService bundled AI metadata service
      * @param aiUsageService   platform AI usage aggregator
+     * @param aiPricingService token pricing table and cost estimator
      */
-    public ConsoleAiCatalogController(AiCatalogService aiCatalogService, AiUsageService aiUsageService) {
+    public ConsoleAiCatalogController(
+            AiCatalogService aiCatalogService,
+            AiUsageService aiUsageService,
+            AiPricingService aiPricingService) {
         this.aiCatalogService = aiCatalogService;
         this.aiUsageService = aiUsageService;
+        this.aiPricingService = aiPricingService;
     }
 
     /**
@@ -50,5 +60,21 @@ public class ConsoleAiCatalogController {
     @GetMapping("/ai/usage")
     public R<AiUsageSummaryDto> usage() {
         return R.ok(aiUsageService.summarize());
+    }
+
+    /**
+     * @return effective per-model USD token pricing (configured overrides plus built-in defaults)
+     */
+    @GetMapping("/ai/pricing")
+    public R<List<AiModelPricingDto>> pricing() {
+        List<AiModelPricingDto> rows = aiPricingService.listPricing().stream()
+                .map(view -> new AiModelPricingDto(
+                        view.providerType(),
+                        view.model(),
+                        view.promptUsdPer1M(),
+                        view.completionUsdPer1M(),
+                        view.configured()))
+                .toList();
+        return R.ok(rows);
     }
 }

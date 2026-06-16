@@ -105,6 +105,19 @@ export function JobDetailPage() {
         dataIndex: 'attempts',
         render: (value: number | null) => value ?? '—',
       },
+      {
+        title: t('jobDetail.report.ai.estimatedCost'),
+        dataIndex: 'estimatedCostUsd',
+        render: (value: number | null | undefined) =>
+          value == null
+            ? '—'
+            : new Intl.NumberFormat(undefined, {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 6,
+              }).format(value),
+      },
     ],
     [t],
   );

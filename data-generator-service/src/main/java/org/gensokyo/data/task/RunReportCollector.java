@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.task;
 
+import org.gensokyo.data.ai.usage.AiPricingService;
 import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.RunMetrics;
 import org.gensokyo.data.calcite.runtime.SinkWriteMetric;
@@ -31,6 +32,15 @@ import java.util.Map;
  */
 @Component
 public class RunReportCollector {
+
+    private final AiPricingService aiPricingService;
+
+    /**
+     * @param aiPricingService token pricing for AI call cost estimates
+     */
+    public RunReportCollector(AiPricingService aiPricingService) {
+        this.aiPricingService = aiPricingService;
+    }
 
     /**
      * Aggregates runner metrics into a structured report for persistence and API exposure.
@@ -65,9 +75,16 @@ public class RunReportCollector {
                 List.copyOf(buildAiCallMetrics(metrics)));
     }
 
-    private static List<AiCallMetricVO> buildAiCallMetrics(RunMetrics metrics) {
+    private List<AiCallMetricVO> buildAiCallMetrics(RunMetrics metrics) {
         List<AiCallMetricVO> aiCalls = new ArrayList<>();
         for (AiCallMetric metric : metrics.getAiCallMetrics().values()) {
+            long promptTokens = metric.getPromptTokens();
+            long completionTokens = metric.getCompletionTokens();
+            double estimatedCostUsd = aiPricingService.estimateUsd(
+                    metric.getProviderType(),
+                    metric.getModel(),
+                    promptTokens,
+                    completionTokens);
             aiCalls.add(new AiCallMetricVO(
                     metric.getSourceName(),
                     metric.getProviderType(),
@@ -76,7 +93,8 @@ public class RunReportCollector {
                     metric.getCompletionTokens(),
                     metric.getLatencyMs(),
                     metric.getAttempts(),
-                    metric.getResponseSample()));
+                    metric.getResponseSample(),
+                    estimatedCostUsd));
         }
         return aiCalls;
     }

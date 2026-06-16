@@ -35,6 +35,9 @@ class AiUsageServiceTests {
     @Mock
     private TaskExecutionRepository taskExecutionRepository;
 
+    @Mock
+    private AiPricingService aiPricingService;
+
     @InjectMocks
     private AiUsageService aiUsageService;
 
@@ -55,7 +58,8 @@ class AiUsageServiceTests {
                         5L,
                         20L,
                         1,
-                        "sample")));
+                        "sample",
+                        0.0D)));
         TaskExecutionPO row = new TaskExecutionPO();
         row.setStatus(TaskExecutionStatus.SUCCESS.name());
         row.setReportJson(TemplateJsonCodec.write(report));
@@ -69,7 +73,40 @@ class AiUsageServiceTests {
         Assertions.assertEquals(10L, summary.promptTokens());
         Assertions.assertEquals(5L, summary.completionTokens());
         Assertions.assertEquals(20L, summary.totalLatencyMs());
+        Assertions.assertEquals(0.0D, summary.estimatedCostUsd());
         Assertions.assertEquals(1, summary.byProvider().size());
         Assertions.assertEquals("OLLAMA", summary.byProvider().getFirst().providerType());
+    }
+
+    @Test
+    void summarizeRecomputesCostForLegacyReportsWithoutStoredEstimate() {
+        RunReportVO report = new RunReportVO(
+                List.of(),
+                List.of(),
+                List.of(),
+                "LOCAL",
+                42L,
+                List.of(),
+                List.of(new AiCallMetricVO(
+                        "ai_seed",
+                        "OPENAI",
+                        "gpt-4o-mini",
+                        1_000_000L,
+                        0L,
+                        20L,
+                        1,
+                        "sample",
+                        null)));
+        TaskExecutionPO row = new TaskExecutionPO();
+        row.setStatus(TaskExecutionStatus.SUCCESS.name());
+        row.setReportJson(TemplateJsonCodec.write(report));
+        when(taskExecutionRepository.findByStatusOrderByFinishedAtDesc(TaskExecutionStatus.SUCCESS.name()))
+                .thenReturn(List.of(row));
+        when(aiPricingService.estimateUsd("OPENAI", "gpt-4o-mini", 1_000_000L, 0L)).thenReturn(0.15D);
+
+        AiUsageSummaryDto summary = aiUsageService.summarize();
+
+        Assertions.assertEquals(0.15D, summary.estimatedCostUsd(), 0.000001D);
+        Assertions.assertEquals(0.15D, summary.byProvider().getFirst().estimatedCostUsd(), 0.000001D);
     }
 }

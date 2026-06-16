@@ -13,6 +13,7 @@ package org.gensokyo.data.api.console.dto;
  * @param promptTokens       summed prompt tokens
  * @param completionTokens   summed completion tokens
  * @param latencyMs          summed wall-clock latency
+ * @param estimatedCostUsd   summed estimated USD cost
  * @author Gensokyo
  * @since 2026-06-12
  */
@@ -21,5 +22,6 @@ public record AiProviderUsageDto(
         long calls,
         long promptTokens,
         long completionTokens,
-        long latencyMs) {
+        long latencyMs,
+        double estimatedCostUsd) {
 }

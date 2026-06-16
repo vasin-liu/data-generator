@@ -15,6 +15,7 @@ import java.util.List;
  * @param promptTokens       summed prompt tokens
  * @param completionTokens   summed completion tokens
  * @param totalLatencyMs     summed wall-clock latency
+ * @param estimatedCostUsd   summed estimated USD cost across AI calls
  * @param byProvider         per-provider breakdown sorted by call volume
  * @author Gensokyo
  * @since 2026-06-12
@@ -25,5 +26,6 @@ public record AiUsageSummaryDto(
         long promptTokens,
         long completionTokens,
         long totalLatencyMs,
+        double estimatedCostUsd,
         List<AiProviderUsageDto> byProvider) {
 }

@@ -16,6 +16,18 @@ import { triggerTypeLabel } from '../utils/triggerType';
 
 const ACTIVE = new Set(['QUEUED', 'RUNNING']);
 
+function formatUsd(value: number | null | undefined): string {
+  if (value == null) {
+    return '—';
+  }
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  }).format(value);
+}
+
 function parseTemplateId(raw: string): string | undefined {
   const trimmed = raw.trim();
   return trimmed || undefined;
@@ -64,6 +76,11 @@ export function JobsPage() {
         title: t('jobs.aiUsage.latency'),
         dataIndex: 'latencyMs',
         render: (value: number) => `${value} ms`,
+      },
+      {
+        title: t('jobs.aiUsage.estimatedCost'),
+        dataIndex: 'estimatedCostUsd',
+        render: (value: number) => formatUsd(value),
       },
     ],
     [t],
@@ -239,8 +256,11 @@ export function JobsPage() {
             <Descriptions.Item label={t('jobs.aiUsage.completionTokens')}>
               {aiUsageQuery.data.completionTokens}
             </Descriptions.Item>
-            <Descriptions.Item label={t('jobs.aiUsage.latency')} span={2}>
+            <Descriptions.Item label={t('jobs.aiUsage.latency')}>
               {aiUsageQuery.data.totalLatencyMs} ms
+            </Descriptions.Item>
+            <Descriptions.Item label={t('jobs.aiUsage.estimatedCost')}>
+              {formatUsd(aiUsageQuery.data.estimatedCostUsd)}
             </Descriptions.Item>
           </Descriptions>
           {aiUsageQuery.data.byProvider.length > 0 ? (

@@ -6,6 +6,7 @@
 package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.ai.catalog.AiCatalogService;
+import org.gensokyo.data.ai.usage.AiPricingService;
 import org.gensokyo.data.ai.usage.AiUsageService;
 import org.gensokyo.data.yaml.JacksonParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +34,12 @@ class ConsoleAiCatalogControllerTest {
     void setUp() {
         AiCatalogService catalogService = new AiCatalogService(new JacksonParser());
         AiUsageService usageService = mock(AiUsageService.class);
+        AiPricingService pricingService = new AiPricingService(new org.gensokyo.data.config.DataGeneratorProperties());
         when(usageService.summarize()).thenReturn(
-                new org.gensokyo.data.api.console.dto.AiUsageSummaryDto(0L, 0L, 0L, 0L, 0L, java.util.List.of()));
-        mockMvc = MockMvcBuilders.standaloneSetup(new ConsoleAiCatalogController(catalogService, usageService)).build();
+                new org.gensokyo.data.api.console.dto.AiUsageSummaryDto(
+                        0L, 0L, 0L, 0L, 0L, 0.0D, java.util.List.of()));
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                new ConsoleAiCatalogController(catalogService, usageService, pricingService)).build();
     }
 
     @Test
@@ -53,6 +57,16 @@ class ConsoleAiCatalogControllerTest {
         mockMvc.perform(get("/api/console/ai/usage"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalCalls").value(0));
+                .andExpect(jsonPath("$.data.totalCalls").value(0))
+                .andExpect(jsonPath("$.data.estimatedCostUsd").value(0.0));
+    }
+
+    @Test
+    void pricing_returnsEffectiveModelRates() throws Exception {
+        mockMvc.perform(get("/api/console/ai/pricing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].providerType").exists())
+                .andExpect(jsonPath("$.data[0].promptUsdPer1M").exists());
     }
 }
