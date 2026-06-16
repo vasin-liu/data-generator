@@ -35,7 +35,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
             throw new UnsupportedOperationException(secretRef);
         }
     };
-    private static final AiRateLimiter RATE_LIMITER = new AiRateLimiter();
+    private static final AiRateLimiter RATE_LIMITER = new InMemoryAiRateLimiter();
     private static final DataGeneratorProperties PROPERTIES = new DataGeneratorProperties();
 
     @Test

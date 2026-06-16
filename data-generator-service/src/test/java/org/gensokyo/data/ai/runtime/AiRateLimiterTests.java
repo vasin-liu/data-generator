@@ -18,7 +18,7 @@ class AiRateLimiterTests {
 
     @Test
     void minIntervalMsBlocksBackToBackCalls() {
-        AiRateLimiter limiter = new AiRateLimiter();
+        AiRateLimiter limiter = new InMemoryAiRateLimiter();
         AiRateLimitPolicy policy = new AiRateLimitPolicy(80L, 0);
 
         long start = System.currentTimeMillis();
@@ -31,7 +31,7 @@ class AiRateLimiterTests {
 
     @Test
     void requestsPerMinuteAllowsBurstUpToLimitWithoutWaiting() {
-        AiRateLimiter limiter = new AiRateLimiter();
+        AiRateLimiter limiter = new InMemoryAiRateLimiter();
         AiRateLimitPolicy policy = new AiRateLimitPolicy(0L, 2);
 
         long start = System.currentTimeMillis();
@@ -44,7 +44,7 @@ class AiRateLimiterTests {
 
     @Test
     void disabledPolicyDoesNotBlock() {
-        AiRateLimiter limiter = new AiRateLimiter();
+        AiRateLimiter limiter = new InMemoryAiRateLimiter();
         AiRateLimitPolicy policy = new AiRateLimitPolicy(0L, 0);
 
         long start = System.currentTimeMillis();

@@ -157,6 +157,11 @@ public class DataGeneratorProperties {
          * Optional per-model USD pricing overrides (USD per 1M tokens).
          */
         private java.util.List<AiModelPricingEntry> modelPricing = new java.util.ArrayList<>();
+
+        /**
+         * When {@code true}, AI rate limits are coordinated via {@code ai_rate_limit_state} (multi-JVM).
+         */
+        private boolean distributedRateLimitEnabled = false;
     }
 
     /**

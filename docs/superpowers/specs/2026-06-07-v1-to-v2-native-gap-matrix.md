@@ -162,7 +162,8 @@
 | **AI P4 (shipped 2026-06-12)** | `apiKeySecretRef` resolution + governance, `GET /api/console/ai/usage` platform rollup, jobs page AI usage panel, `verify-ai-p4.ps1` |
 | **AI P5 (shipped 2026-06-12)** | `minIntervalMs` / `requestsPerMinute` / `rateLimitKey` throttling for remote AI bridges, platform defaults `data.generator.ai-runtime.*`, `verify-ai-p5.ps1` |
 | **AI P6 (shipped 2026-06-12)** | `AiPricingService` USD estimates from token usage, `data.generator.ai-runtime.model-pricing`, `estimatedCostUsd` on run reports + usage API, `GET /api/console/ai/pricing`, `verify-ai-p6.ps1` |
-| **Next** | Distributed rate-limit coordination, further AI quota productization |
+| **AI P7 (shipped 2026-06-12)** | JDBC-backed `JdbcAiRateLimiter` + `ai_rate_limit_state` table, `data.generator.ai-runtime.distributed-rate-limit-enabled`, `verify-ai-p7.ps1` |
+| **Next** | Further AI quota productization |
 
 ---
 

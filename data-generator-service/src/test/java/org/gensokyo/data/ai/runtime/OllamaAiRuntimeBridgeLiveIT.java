@@ -36,7 +36,7 @@ class OllamaAiRuntimeBridgeLiveIT {
             OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
                     context,
                     context.getAutowireCapableBeanFactory(),
-                    new AiRateLimiter(),
+                    new InMemoryAiRateLimiter(),
                     new DataGeneratorProperties());
 
             AiSourceVO source = new AiSourceVO();

@@ -88,6 +88,9 @@ Focused builds (examples from internal upgrade docs):
 # AI P6 token pricing + estimated USD cost on reports and usage API
 .\scripts\verify-ai-p6.ps1 -SkipPlaywright
 
+# AI P7 distributed JDBC rate-limit coordination (multi-JVM)
+.\scripts\verify-ai-p7.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 

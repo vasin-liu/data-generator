@@ -40,7 +40,7 @@ final class AiRuntimeBridgeSupport {
                            DataGeneratorProperties.AiRuntime rateLimitDefaults) {
         this.applicationContext = applicationContext;
         this.beanFactory = beanFactory;
-        this.rateLimiter = rateLimiter == null ? new AiRateLimiter() : rateLimiter;
+        this.rateLimiter = rateLimiter == null ? new InMemoryAiRateLimiter() : rateLimiter;
         this.rateLimitDefaults = rateLimitDefaults == null ? new DataGeneratorProperties.AiRuntime() : rateLimitDefaults;
     }
 

@@ -7,8 +7,11 @@ package org.gensokyo.data.config;
 
 import org.gensokyo.data.ai.runtime.AiRateLimiter;
 import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
+import org.gensokyo.data.ai.runtime.InMemoryAiRateLimiter;
+import org.gensokyo.data.ai.runtime.JdbcAiRateLimiter;
 import org.gensokyo.data.ai.runtime.OpenAiCompatibleRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
+import org.gensokyo.data.repository.AiRateLimitStateRepository;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.plugin.DirectoryAwareTemplateV2RuntimePluginProvider;
@@ -57,6 +60,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -244,8 +248,18 @@ public class CoreConfig {
 
     @Bean
     @ConditionalOnMissingBean(AiRateLimiter.class)
-    public AiRateLimiter aiRateLimiter() {
-        return new AiRateLimiter();
+    public AiRateLimiter aiRateLimiter(
+            DataGeneratorProperties properties,
+            ObjectProvider<AiRateLimitStateRepository> rateLimitStateRepositoryProvider,
+            ObjectProvider<TransactionTemplate> transactionTemplateProvider) {
+        if (properties.getAiRuntime().isDistributedRateLimitEnabled()) {
+            AiRateLimitStateRepository repository = rateLimitStateRepositoryProvider.getIfAvailable();
+            TransactionTemplate transactionTemplate = transactionTemplateProvider.getIfAvailable();
+            if (repository != null && transactionTemplate != null) {
+                return new JdbcAiRateLimiter(repository, transactionTemplate);
+            }
+        }
+        return new InMemoryAiRateLimiter();
     }
 
     @Bean
