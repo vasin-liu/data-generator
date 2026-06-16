@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.ai.runtime;
 
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.ai.parser.OutputParser;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiSourceVO;
@@ -31,16 +32,19 @@ final class AiRuntimeBridgeSupport {
     private final ApplicationContext applicationContext;
     private final AutowireCapableBeanFactory beanFactory;
     private final AiRateLimiter rateLimiter;
+    private final AiQuotaService aiQuotaService;
     private final DataGeneratorProperties.AiRuntime rateLimitDefaults;
     private final DefaultConversionService fallbackConversionService = new DefaultConversionService();
 
     AiRuntimeBridgeSupport(ApplicationContext applicationContext,
                            AutowireCapableBeanFactory beanFactory,
                            AiRateLimiter rateLimiter,
+                           AiQuotaService aiQuotaService,
                            DataGeneratorProperties.AiRuntime rateLimitDefaults) {
         this.applicationContext = applicationContext;
         this.beanFactory = beanFactory;
         this.rateLimiter = rateLimiter == null ? new InMemoryAiRateLimiter() : rateLimiter;
+        this.aiQuotaService = aiQuotaService;
         this.rateLimitDefaults = rateLimitDefaults == null ? new DataGeneratorProperties.AiRuntime() : rateLimitDefaults;
     }
 
@@ -61,13 +65,23 @@ final class AiRuntimeBridgeSupport {
     /**
      * Executes a remote call with optional rate limiting and retry/backoff from provider options.
      *
+     * @param providerType    provider identifier for quota accounting
+     * @param model           resolved model name for quota cost accounting
      * @param rateLimitKey    throttle bucket key
      * @param providerOptions provider option map
      * @param call            remote call supplier
      * @return successful call payload and metrics
      */
-    RemoteAiContentCall executeWithRetry(String rateLimitKey, Map<String, Object> providerOptions, Supplier<RemoteAiContentCall> call) {
+    RemoteAiContentCall executeWithRetry(
+            String providerType,
+            String model,
+            String rateLimitKey,
+            Map<String, Object> providerOptions,
+            Supplier<RemoteAiContentCall> call) {
         rateLimiter.acquire(rateLimitKey, AiRateLimitPolicy.resolve(providerOptions, rateLimitDefaults));
+        if (aiQuotaService != null) {
+            aiQuotaService.beforeCall();
+        }
         int maxRetries = intOption(providerOptions, "maxRetries", 1);
         long retryBackoffMs = longOption(providerOptions, "retryBackoffMs", 0L);
         RuntimeException lastFailure = null;
@@ -76,7 +90,15 @@ final class AiRuntimeBridgeSupport {
                 long startNanos = System.nanoTime();
                 RemoteAiContentCall result = call.get();
                 long latencyMs = Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
-                return result.withAttemptsAndLatency(attempt, latencyMs);
+                RemoteAiContentCall traced = result.withAttemptsAndLatency(attempt, latencyMs);
+                if (aiQuotaService != null) {
+                    aiQuotaService.recordUsage(
+                            providerType,
+                            model,
+                            traced.promptTokens(),
+                            traced.completionTokens());
+                }
+                return traced;
             }
             catch (RuntimeException ex) {
                 lastFailure = ex;

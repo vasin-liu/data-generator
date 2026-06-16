@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchDistributedMetrics } from '../../api/distributed';
-import { fetchAiUsage } from '../../api/ai';
+import { fetchAiQuota, fetchAiUsage } from '../../api/ai';
 import { fetchJobs } from '../../api/jobs';
 import type { AiProviderUsage, TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
@@ -65,6 +65,17 @@ export function JobsPage() {
     queryFn: fetchAiUsage,
     refetchInterval: 10000,
   });
+
+  const aiQuotaQuery = useQuery({
+    queryKey: ['ai-quota'],
+    queryFn: fetchAiQuota,
+    refetchInterval: 10000,
+  });
+
+  const formatQuotaLimit = (value: number) => (value > 0 ? String(value) : t('jobs.aiQuota.unlimited'));
+
+  const formatQuotaRemaining = (remaining: number | null | undefined) =>
+    remaining == null ? t('jobs.aiQuota.unlimited') : String(remaining);
 
   const aiProviderColumns: ColumnsType<AiProviderUsage> = useMemo(
     () => [
@@ -243,6 +254,35 @@ export function JobsPage() {
         </>
       )}
       <Typography.Title level={5}>{t('jobs.aiUsage.title')}</Typography.Title>
+      {aiQuotaQuery.data?.enabled ? (
+        <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>
+          <Descriptions.Item label={t('jobs.aiQuota.usageDate')}>
+            {aiQuotaQuery.data.usageDate}
+          </Descriptions.Item>
+          <Descriptions.Item label={t('jobs.aiQuota.calls')}>
+            {aiQuotaQuery.data.usedCalls} / {formatQuotaLimit(aiQuotaQuery.data.maxCallsPerDay)}
+            {' · '}
+            {t('jobs.aiQuota.remaining')}: {formatQuotaRemaining(aiQuotaQuery.data.remainingCalls)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t('jobs.aiQuota.tokens')}>
+            {aiQuotaQuery.data.usedPromptTokens + aiQuotaQuery.data.usedCompletionTokens} /{' '}
+            {formatQuotaLimit(aiQuotaQuery.data.maxTokensPerDay)}
+            {' · '}
+            {t('jobs.aiQuota.remaining')}: {formatQuotaRemaining(aiQuotaQuery.data.remainingTokens)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t('jobs.aiQuota.cost')}>
+            {formatUsd(aiQuotaQuery.data.usedCostUsd)} /{' '}
+            {aiQuotaQuery.data.maxCostUsdPerDay > 0
+              ? formatUsd(aiQuotaQuery.data.maxCostUsdPerDay)
+              : t('jobs.aiQuota.unlimited')}
+            {' · '}
+            {t('jobs.aiQuota.remaining')}:{' '}
+            {aiQuotaQuery.data.remainingCostUsd == null
+              ? t('jobs.aiQuota.unlimited')
+              : formatUsd(aiQuotaQuery.data.remainingCostUsd)}
+          </Descriptions.Item>
+        </Descriptions>
+      ) : null}
       {aiUsageQuery.data && aiUsageQuery.data.totalCalls > 0 ? (
         <>
           <Descriptions bordered size="small" column={2} style={{ marginBottom: 16 }}>

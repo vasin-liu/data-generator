@@ -162,6 +162,23 @@ public class DataGeneratorProperties {
          * When {@code true}, AI rate limits are coordinated via {@code ai_rate_limit_state} (multi-JVM).
          */
         private boolean distributedRateLimitEnabled = false;
+
+        /**
+         * Platform daily AI quota limits and enforcement toggle.
+         */
+        private AiRuntimeQuota quota = new AiRuntimeQuota();
+    }
+
+    /**
+     * Nested binding for {@code data.generator.ai-runtime.quota.*}.
+     */
+    @Getter
+    @Setter
+    public static class AiRuntimeQuota {
+        private boolean enabled = false;
+        private Long maxCallsPerDay = 0L;
+        private Long maxTokensPerDay = 0L;
+        private Double maxCostUsdPerDay = 0.0D;
     }
 
     /**

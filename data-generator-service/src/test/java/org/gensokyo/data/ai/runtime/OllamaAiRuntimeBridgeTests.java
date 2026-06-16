@@ -25,7 +25,7 @@ class OllamaAiRuntimeBridgeTests {
     void supportsOllamaProviderType() {
         try (AnnotationConfigApplicationContext context = context()) {
             OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
-                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, PROPERTIES);
+                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, null, PROPERTIES);
             AiProviderVO provider = new AiProviderVO();
             provider.setType("OLLAMA");
 
@@ -156,7 +156,7 @@ class OllamaAiRuntimeBridgeTests {
     void rejectsUnsupportedProviderType() {
         try (AnnotationConfigApplicationContext context = context()) {
             OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
-                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, PROPERTIES);
+                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, null, PROPERTIES);
             AiSourceVO source = source("OPENAI", Map.of());
 
             UnsupportedOperationException failure = Assertions.assertThrows(
@@ -195,7 +195,7 @@ class OllamaAiRuntimeBridgeTests {
                                            AutowireCapableBeanFactory beanFactory,
                                            int failUntilAttempt,
                                            String content) {
-            super(applicationContext, beanFactory, RATE_LIMITER, PROPERTIES);
+            super(applicationContext, beanFactory, RATE_LIMITER, null, PROPERTIES);
             this.failUntilAttempt = failUntilAttempt;
             this.content = content;
         }
@@ -228,7 +228,7 @@ class OllamaAiRuntimeBridgeTests {
                                                String content,
                                                long promptTokens,
                                                long completionTokens) {
-            super(applicationContext, beanFactory, RATE_LIMITER, PROPERTIES);
+            super(applicationContext, beanFactory, RATE_LIMITER, null, PROPERTIES);
             this.content = content;
             this.promptTokens = promptTokens;
             this.completionTokens = completionTokens;

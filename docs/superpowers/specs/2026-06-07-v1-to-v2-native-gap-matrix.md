@@ -163,7 +163,8 @@
 | **AI P5 (shipped 2026-06-12)** | `minIntervalMs` / `requestsPerMinute` / `rateLimitKey` throttling for remote AI bridges, platform defaults `data.generator.ai-runtime.*`, `verify-ai-p5.ps1` |
 | **AI P6 (shipped 2026-06-12)** | `AiPricingService` USD estimates from token usage, `data.generator.ai-runtime.model-pricing`, `estimatedCostUsd` on run reports + usage API, `GET /api/console/ai/pricing`, `verify-ai-p6.ps1` |
 | **AI P7 (shipped 2026-06-12)** | JDBC-backed `JdbcAiRateLimiter` + `ai_rate_limit_state` table, `data.generator.ai-runtime.distributed-rate-limit-enabled`, `verify-ai-p7.ps1` |
-| **Next** | Further AI quota productization |
+| **AI P8 (shipped 2026-06-12)** | Platform daily AI quotas (`quota.max-*-per-day`), JDBC `ai_quota_daily_usage`, bridge enforcement, `GET /api/console/ai/quota`, `verify-ai-p8.ps1` |
+| **Next** | Per-tenant/template AI quotas, quota alert hooks |
 
 ---
 

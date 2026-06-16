@@ -46,6 +46,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
                     context.getAutowireCapableBeanFactory(),
                     PLAINTEXT_RESOLVER,
                     RATE_LIMITER,
+                    null,
                     PROPERTIES);
 
             AiProviderVO openAi = new AiProviderVO();
@@ -116,6 +117,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
                     context.getAutowireCapableBeanFactory(),
                     PLAINTEXT_RESOLVER,
                     RATE_LIMITER,
+                    null,
                     PROPERTIES);
             AiSourceVO source = source("OPENAI", Map.of("model", "gpt-4o-mini"));
 
@@ -153,7 +155,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
                                       AutowireCapableBeanFactory beanFactory,
                                       SecretResolver secretResolver,
                                       String content) {
-            super(applicationContext, beanFactory, secretResolver, RATE_LIMITER, PROPERTIES);
+            super(applicationContext, beanFactory, secretResolver, RATE_LIMITER, null, PROPERTIES);
             this.content = content;
         }
 

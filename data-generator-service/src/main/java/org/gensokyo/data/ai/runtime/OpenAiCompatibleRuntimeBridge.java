@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.ai.runtime;
 
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
@@ -44,17 +45,20 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
      * @param beanFactory        bean factory for parser resolution
      * @param secretResolver     resolves {@code apiKeySecretRef} at runtime
      * @param rateLimiter        shared in-process throttle
+     * @param aiQuotaService     platform daily quota enforcement
      * @param properties         platform AI runtime defaults
      */
     public OpenAiCompatibleRuntimeBridge(ApplicationContext applicationContext,
                                            AutowireCapableBeanFactory beanFactory,
                                            SecretResolver secretResolver,
                                            AiRateLimiter rateLimiter,
+                                           AiQuotaService aiQuotaService,
                                            DataGeneratorProperties properties) {
         this.support = new AiRuntimeBridgeSupport(
                 applicationContext,
                 beanFactory,
                 rateLimiter,
+                aiQuotaService,
                 properties == null ? null : properties.getAiRuntime());
         this.secretResolver = secretResolver;
     }
@@ -89,6 +93,8 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
         String endpoint = resolveEndpoint(source, providerType, providerOptions);
 
         RemoteAiContentCall call = support.executeWithRetry(
+                providerType,
+                model,
                 AiRuntimeBridgeSupport.rateLimitKey(source, providerType, providerOptions),
                 providerOptions,
                 () -> invokeChatCompletions(endpoint, apiKey, model, source.getPrompt()));

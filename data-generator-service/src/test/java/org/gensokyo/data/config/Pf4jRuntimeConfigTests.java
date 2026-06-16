@@ -1,5 +1,6 @@
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
@@ -26,6 +27,7 @@ class Pf4jRuntimeConfigTests {
             .withBean(TemplateRepository.class, () -> mock(TemplateRepository.class))
             .withBean(RuntimeJdbcEndpointResolver.class, () -> mock(RuntimeJdbcEndpointResolver.class))
             .withBean(NamedParameterJdbcTemplate.class, () -> mock(NamedParameterJdbcTemplate.class))
+            .withBean(AiQuotaService.class, () -> mock(AiQuotaService.class))
             .withBean("kafkaTemplateRegistryProvider", ObjectProvider.class, () -> new EmptyObjectProvider<>())
             .withBean("elasticsearchClientRegistryProvider", ObjectProvider.class, () -> new EmptyObjectProvider<>());
 

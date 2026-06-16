@@ -1,5 +1,6 @@
 package org.gensokyo.data.ai.runtime;
 
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.ai.chat.ChatResponse;
 import org.gensokyo.data.ai.chat.Generation;
 import org.gensokyo.data.ai.chat.metadata.Usage;
@@ -29,11 +30,13 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
     public OllamaAiRuntimeBridge(ApplicationContext applicationContext,
                                  AutowireCapableBeanFactory beanFactory,
                                  AiRateLimiter rateLimiter,
+                                 AiQuotaService aiQuotaService,
                                  DataGeneratorProperties properties) {
         this.support = new AiRuntimeBridgeSupport(
                 applicationContext,
                 beanFactory,
                 rateLimiter,
+                aiQuotaService,
                 properties == null ? null : properties.getAiRuntime());
     }
 
@@ -62,6 +65,8 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
         Map<String, Object> providerOptions = provider.getOptions() == null ? Map.of() : provider.getOptions();
         String rateLimitKey = AiRuntimeBridgeSupport.rateLimitKey(source, OLLAMA, providerOptions);
         RemoteAiContentCall call = support.executeWithRetry(
+                OLLAMA,
+                options.getModel(),
                 rateLimitKey,
                 providerOptions,
                 () -> generateContentCall(source, options));

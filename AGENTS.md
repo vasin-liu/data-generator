@@ -91,6 +91,9 @@ Focused builds (examples from internal upgrade docs):
 # AI P7 distributed JDBC rate-limit coordination (multi-JVM)
 .\scripts\verify-ai-p7.ps1 -SkipPlaywright
 
+# AI P8 platform daily AI quotas + console quota status
+.\scripts\verify-ai-p8.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 

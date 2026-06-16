@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.ai.runtime.AiRateLimiter;
 import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
 import org.gensokyo.data.ai.runtime.InMemoryAiRateLimiter;
@@ -268,10 +269,11 @@ public class CoreConfig {
                                            AutowireCapableBeanFactory beanFactory,
                                            org.gensokyo.data.secret.SecretResolver secretResolver,
                                            AiRateLimiter aiRateLimiter,
+                                           AiQuotaService aiQuotaService,
                                            DataGeneratorProperties properties) {
         return new CompositeAiRuntimeBridge(List.of(
-                new OllamaAiRuntimeBridge(applicationContext, beanFactory, aiRateLimiter, properties),
-                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory, secretResolver, aiRateLimiter, properties)));
+                new OllamaAiRuntimeBridge(applicationContext, beanFactory, aiRateLimiter, aiQuotaService, properties),
+                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory, secretResolver, aiRateLimiter, aiQuotaService, properties)));
     }
 
     @Bean

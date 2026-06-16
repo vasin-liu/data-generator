@@ -7,9 +7,11 @@ package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.ai.catalog.AiCatalogService;
 import org.gensokyo.data.ai.usage.AiPricingService;
+import org.gensokyo.data.ai.usage.AiQuotaService;
 import org.gensokyo.data.ai.usage.AiUsageService;
 import org.gensokyo.data.api.console.dto.AiCatalogDto;
 import org.gensokyo.data.api.console.dto.AiModelPricingDto;
+import org.gensokyo.data.api.console.dto.AiQuotaStatusDto;
 import org.gensokyo.data.api.console.dto.AiUsageSummaryDto;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,19 +33,23 @@ public class ConsoleAiCatalogController {
     private final AiCatalogService aiCatalogService;
     private final AiUsageService aiUsageService;
     private final AiPricingService aiPricingService;
+    private final AiQuotaService aiQuotaService;
 
     /**
      * @param aiCatalogService bundled AI metadata service
      * @param aiUsageService   platform AI usage aggregator
      * @param aiPricingService token pricing table and cost estimator
+     * @param aiQuotaService   platform daily quota status and enforcement
      */
     public ConsoleAiCatalogController(
             AiCatalogService aiCatalogService,
             AiUsageService aiUsageService,
-            AiPricingService aiPricingService) {
+            AiPricingService aiPricingService,
+            AiQuotaService aiQuotaService) {
         this.aiCatalogService = aiCatalogService;
         this.aiUsageService = aiUsageService;
         this.aiPricingService = aiPricingService;
+        this.aiQuotaService = aiQuotaService;
     }
 
     /**
@@ -76,5 +82,13 @@ public class ConsoleAiCatalogController {
                         view.configured()))
                 .toList();
         return R.ok(rows);
+    }
+
+    /**
+     * @return platform daily AI quota limits and current UTC-day consumption
+     */
+    @GetMapping("/ai/quota")
+    public R<AiQuotaStatusDto> quota() {
+        return R.ok(aiQuotaService.status());
     }
 }

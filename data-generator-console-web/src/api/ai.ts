@@ -1,5 +1,5 @@
 import { apiRequest } from './client';
-import type { AiCatalog, AiModelPricing, AiUsageSummary } from './types';
+import type { AiCatalog, AiModelPricing, AiQuotaStatus, AiUsageSummary } from './types';
 
 /**
  * @returns bundled AI providers, parsers, and prompt templates for the source editor
@@ -20,4 +20,11 @@ export function fetchAiUsage(): Promise<AiUsageSummary> {
  */
 export function fetchAiPricing(): Promise<AiModelPricing[]> {
   return apiRequest<AiModelPricing[]>('/console/ai/pricing');
+}
+
+/**
+ * @returns platform daily AI quota limits and UTC-day consumption
+ */
+export function fetchAiQuota(): Promise<AiQuotaStatus> {
+  return apiRequest<AiQuotaStatus>('/console/ai/quota');
 }
