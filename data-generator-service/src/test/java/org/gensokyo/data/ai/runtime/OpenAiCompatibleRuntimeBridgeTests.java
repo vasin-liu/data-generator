@@ -8,6 +8,7 @@ package org.gensokyo.data.ai.runtime;
 import org.gensokyo.data.ai.parser.ListOutputParser;
 import org.gensokyo.data.ai.parser.OutputParser;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.gensokyo.data.secret.SecretResolver;
@@ -34,6 +35,8 @@ class OpenAiCompatibleRuntimeBridgeTests {
             throw new UnsupportedOperationException(secretRef);
         }
     };
+    private static final AiRateLimiter RATE_LIMITER = new AiRateLimiter();
+    private static final DataGeneratorProperties PROPERTIES = new DataGeneratorProperties();
 
     @Test
     void supportsOpenAiAndAzureProviderTypes() {
@@ -41,7 +44,9 @@ class OpenAiCompatibleRuntimeBridgeTests {
             OpenAiCompatibleRuntimeBridge bridge = new OpenAiCompatibleRuntimeBridge(
                     context,
                     context.getAutowireCapableBeanFactory(),
-                    PLAINTEXT_RESOLVER);
+                    PLAINTEXT_RESOLVER,
+                    RATE_LIMITER,
+                    PROPERTIES);
 
             AiProviderVO openAi = new AiProviderVO();
             openAi.setType("OPENAI");
@@ -109,7 +114,9 @@ class OpenAiCompatibleRuntimeBridgeTests {
             OpenAiCompatibleRuntimeBridge bridge = new OpenAiCompatibleRuntimeBridge(
                     context,
                     context.getAutowireCapableBeanFactory(),
-                    PLAINTEXT_RESOLVER);
+                    PLAINTEXT_RESOLVER,
+                    RATE_LIMITER,
+                    PROPERTIES);
             AiSourceVO source = source("OPENAI", Map.of("model", "gpt-4o-mini"));
 
             IllegalArgumentException failure = Assertions.assertThrows(
@@ -146,7 +153,7 @@ class OpenAiCompatibleRuntimeBridgeTests {
                                       AutowireCapableBeanFactory beanFactory,
                                       SecretResolver secretResolver,
                                       String content) {
-            super(applicationContext, beanFactory, secretResolver);
+            super(applicationContext, beanFactory, secretResolver, RATE_LIMITER, PROPERTIES);
             this.content = content;
         }
 

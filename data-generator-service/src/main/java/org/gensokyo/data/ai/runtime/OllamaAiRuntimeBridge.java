@@ -11,6 +11,7 @@ import org.gensokyo.data.ai.ollama.api.OllamaOptions;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -26,8 +27,14 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
     private final AiRuntimeBridgeSupport support;
 
     public OllamaAiRuntimeBridge(ApplicationContext applicationContext,
-                                 AutowireCapableBeanFactory beanFactory) {
-        this.support = new AiRuntimeBridgeSupport(applicationContext, beanFactory);
+                                 AutowireCapableBeanFactory beanFactory,
+                                 AiRateLimiter rateLimiter,
+                                 DataGeneratorProperties properties) {
+        this.support = new AiRuntimeBridgeSupport(
+                applicationContext,
+                beanFactory,
+                rateLimiter,
+                properties == null ? null : properties.getAiRuntime());
     }
 
     @Override
@@ -53,7 +60,11 @@ public class OllamaAiRuntimeBridge implements AiRuntimeBridge {
 
         OllamaOptions options = resolveOptions(provider);
         Map<String, Object> providerOptions = provider.getOptions() == null ? Map.of() : provider.getOptions();
-        RemoteAiContentCall call = support.executeWithRetry(providerOptions, () -> generateContentCall(source, options));
+        String rateLimitKey = AiRuntimeBridgeSupport.rateLimitKey(source, OLLAMA, providerOptions);
+        RemoteAiContentCall call = support.executeWithRetry(
+                rateLimitKey,
+                providerOptions,
+                () -> generateContentCall(source, options));
         Object payload = support.parse(source, call.content());
         AiCallMetric metric = AiCallMetric.remote(
                 OLLAMA,

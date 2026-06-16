@@ -125,5 +125,34 @@ public class DataGeneratorProperties {
         return governance == null ? new Governance() : governance;
     }
 
+    /**
+     * Platform defaults for remote AI runtime throttling.
+     */
+    private AiRuntime aiRuntime = new AiRuntime();
+
+    /**
+     * @return AI runtime settings (never null)
+     */
+    public AiRuntime getAiRuntime() {
+        return aiRuntime == null ? new AiRuntime() : aiRuntime;
+    }
+
+    /**
+     * Nested binding for {@code data.generator.ai-runtime.*}.
+     */
+    @Getter
+    @Setter
+    public static class AiRuntime {
+        /**
+         * Default minimum gap between AI calls per limiter key (0 = disabled).
+         */
+        private Long defaultMinIntervalMs = 0L;
+
+        /**
+         * Default max AI calls per rolling minute per limiter key (0 = disabled).
+         */
+        private Integer defaultRequestsPerMinute = 0;
+    }
+
 }
 

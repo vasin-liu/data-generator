@@ -528,6 +528,49 @@ function AiSourceFields({
               onChange={(e) => patchProvider({ options: { ...options, model: e.target.value || undefined } })}
             />
           </Form.Item>
+          <Form.Item
+            label={<FieldHelp label={t('source.ai.rateLimitKey')} help={t('source.ai.rateLimitKey.help')} />}
+          >
+            <Input
+              readOnly={readOnly}
+              value={(options.rateLimitKey as string) ?? ''}
+              placeholder={t('source.ai.rateLimitKey.placeholder')}
+              onChange={(e) =>
+                patchProvider({ options: { ...options, rateLimitKey: e.target.value || undefined } })
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label={<FieldHelp label={t('source.ai.minIntervalMs')} help={t('source.ai.minIntervalMs.help')} />}
+          >
+            <InputNumber
+              min={0}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+              value={(options.minIntervalMs as number | undefined) ?? 0}
+              onChange={(value) =>
+                patchProvider({ options: { ...options, minIntervalMs: value ?? undefined } })
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label={
+              <FieldHelp
+                label={t('source.ai.requestsPerMinute')}
+                help={t('source.ai.requestsPerMinute.help')}
+              />
+            }
+          >
+            <InputNumber
+              min={0}
+              disabled={readOnly}
+              style={{ width: '100%' }}
+              value={(options.requestsPerMinute as number | undefined) ?? 0}
+              onChange={(value) =>
+                patchProvider({ options: { ...options, requestsPerMinute: value ?? undefined } })
+              }
+            />
+          </Form.Item>
           <Form.Item label={<FieldHelp label={t('source.ai.maxRetries')} help={t('source.ai.maxRetries.help')} />}>
             <InputNumber
               min={1}

@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.config;
 
+import org.gensokyo.data.ai.runtime.AiRateLimiter;
 import org.gensokyo.data.ai.runtime.CompositeAiRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OpenAiCompatibleRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
@@ -242,13 +243,21 @@ public class CoreConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(AiRateLimiter.class)
+    public AiRateLimiter aiRateLimiter() {
+        return new AiRateLimiter();
+    }
+
+    @Bean
     @ConditionalOnMissingBean(AiRuntimeBridge.class)
     public AiRuntimeBridge aiRuntimeBridge(ApplicationContext applicationContext,
                                            AutowireCapableBeanFactory beanFactory,
-                                           org.gensokyo.data.secret.SecretResolver secretResolver) {
+                                           org.gensokyo.data.secret.SecretResolver secretResolver,
+                                           AiRateLimiter aiRateLimiter,
+                                           DataGeneratorProperties properties) {
         return new CompositeAiRuntimeBridge(List.of(
-                new OllamaAiRuntimeBridge(applicationContext, beanFactory),
-                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory, secretResolver)));
+                new OllamaAiRuntimeBridge(applicationContext, beanFactory, aiRateLimiter, properties),
+                new OpenAiCompatibleRuntimeBridge(applicationContext, beanFactory, secretResolver, aiRateLimiter, properties)));
     }
 
     @Bean

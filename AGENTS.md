@@ -82,6 +82,9 @@ Focused builds (examples from internal upgrade docs):
 # AI P4 apiKeySecretRef + platform AI usage rollup
 .\scripts\verify-ai-p4.ps1 -SkipPlaywright
 
+# AI P5 remote provider rate limits (minIntervalMs / requestsPerMinute)
+.\scripts\verify-ai-p5.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 

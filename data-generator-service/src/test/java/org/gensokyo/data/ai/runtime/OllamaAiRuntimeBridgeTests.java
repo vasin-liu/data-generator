@@ -4,6 +4,7 @@ import org.gensokyo.data.ai.ollama.api.OllamaOptions;
 import org.gensokyo.data.ai.parser.ListOutputParser;
 import org.gensokyo.data.ai.parser.OutputParser;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.junit.jupiter.api.Assertions;
@@ -17,10 +18,14 @@ import java.util.Map;
 
 class OllamaAiRuntimeBridgeTests {
 
+    private static final AiRateLimiter RATE_LIMITER = new AiRateLimiter();
+    private static final DataGeneratorProperties PROPERTIES = new DataGeneratorProperties();
+
     @Test
     void supportsOllamaProviderType() {
         try (AnnotationConfigApplicationContext context = context()) {
-            OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(context, context.getAutowireCapableBeanFactory());
+            OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
+                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, PROPERTIES);
             AiProviderVO provider = new AiProviderVO();
             provider.setType("OLLAMA");
 
@@ -110,6 +115,26 @@ class OllamaAiRuntimeBridgeTests {
     }
 
     @Test
+    void enforcesMinIntervalBeforeRemoteCall() {
+        try (AnnotationConfigApplicationContext context = context()) {
+            RecordingOllamaAiRuntimeBridge bridge = new RecordingOllamaAiRuntimeBridge(
+                    context,
+                    context.getAutowireCapableBeanFactory(),
+                    "alpha,beta"
+            );
+            AiSourceVO source = source("OLLAMA", Map.of("model", "qwen2", "minIntervalMs", 60));
+            source.setParser("namedListParser");
+
+            long start = System.currentTimeMillis();
+            bridge.generate(source);
+            bridge.generate(source);
+            long elapsed = System.currentTimeMillis() - start;
+
+            Assertions.assertTrue(elapsed >= 50L, "expected rate-limit wait, elapsed=" + elapsed);
+        }
+    }
+
+    @Test
     void retriesTransientGenerateFailuresBeforeGivingUp() {
         try (AnnotationConfigApplicationContext context = context()) {
             FlakyOllamaAiRuntimeBridge bridge = new FlakyOllamaAiRuntimeBridge(
@@ -130,7 +155,8 @@ class OllamaAiRuntimeBridgeTests {
     @Test
     void rejectsUnsupportedProviderType() {
         try (AnnotationConfigApplicationContext context = context()) {
-            OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(context, context.getAutowireCapableBeanFactory());
+            OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
+                    context, context.getAutowireCapableBeanFactory(), RATE_LIMITER, PROPERTIES);
             AiSourceVO source = source("OPENAI", Map.of());
 
             UnsupportedOperationException failure = Assertions.assertThrows(
@@ -169,7 +195,7 @@ class OllamaAiRuntimeBridgeTests {
                                            AutowireCapableBeanFactory beanFactory,
                                            int failUntilAttempt,
                                            String content) {
-            super(applicationContext, beanFactory);
+            super(applicationContext, beanFactory, RATE_LIMITER, PROPERTIES);
             this.failUntilAttempt = failUntilAttempt;
             this.content = content;
         }
@@ -202,7 +228,7 @@ class OllamaAiRuntimeBridgeTests {
                                                String content,
                                                long promptTokens,
                                                long completionTokens) {
-            super(applicationContext, beanFactory);
+            super(applicationContext, beanFactory, RATE_LIMITER, PROPERTIES);
             this.content = content;
             this.promptTokens = promptTokens;
             this.completionTokens = completionTokens;

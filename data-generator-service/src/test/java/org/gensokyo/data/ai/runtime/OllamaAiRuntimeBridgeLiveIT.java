@@ -6,6 +6,7 @@
 package org.gensokyo.data.ai.runtime;
 
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.junit.jupiter.api.Assumptions;
@@ -34,7 +35,9 @@ class OllamaAiRuntimeBridgeLiveIT {
             context.refresh();
             OllamaAiRuntimeBridge bridge = new OllamaAiRuntimeBridge(
                     context,
-                    context.getAutowireCapableBeanFactory());
+                    context.getAutowireCapableBeanFactory(),
+                    new AiRateLimiter(),
+                    new DataGeneratorProperties());
 
             AiSourceVO source = new AiSourceVO();
             source.setApi("http://localhost:11434");

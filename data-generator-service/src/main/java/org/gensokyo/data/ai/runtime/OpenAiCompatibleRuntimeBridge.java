@@ -8,6 +8,7 @@ package org.gensokyo.data.ai.runtime;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.runtime.AiCallMetric;
 import org.gensokyo.data.calcite.runtime.AiGenerateResult;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiProviderVO;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.gensokyo.data.secret.SecretResolver;
@@ -42,11 +43,19 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
      * @param applicationContext Spring context for parser beans
      * @param beanFactory        bean factory for parser resolution
      * @param secretResolver     resolves {@code apiKeySecretRef} at runtime
+     * @param rateLimiter        shared in-process throttle
+     * @param properties         platform AI runtime defaults
      */
     public OpenAiCompatibleRuntimeBridge(ApplicationContext applicationContext,
                                            AutowireCapableBeanFactory beanFactory,
-                                           SecretResolver secretResolver) {
-        this.support = new AiRuntimeBridgeSupport(applicationContext, beanFactory);
+                                           SecretResolver secretResolver,
+                                           AiRateLimiter rateLimiter,
+                                           DataGeneratorProperties properties) {
+        this.support = new AiRuntimeBridgeSupport(
+                applicationContext,
+                beanFactory,
+                rateLimiter,
+                properties == null ? null : properties.getAiRuntime());
         this.secretResolver = secretResolver;
     }
 
@@ -80,6 +89,7 @@ public class OpenAiCompatibleRuntimeBridge implements AiRuntimeBridge {
         String endpoint = resolveEndpoint(source, providerType, providerOptions);
 
         RemoteAiContentCall call = support.executeWithRetry(
+                AiRuntimeBridgeSupport.rateLimitKey(source, providerType, providerOptions),
                 providerOptions,
                 () -> invokeChatCompletions(endpoint, apiKey, model, source.getPrompt()));
         Object payload = support.parse(source, call.content());

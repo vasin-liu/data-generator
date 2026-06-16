@@ -6,6 +6,7 @@
 package org.gensokyo.data.ai.runtime;
 
 import org.gensokyo.data.ai.parser.OutputParser;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.v2.AiSourceVO;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
@@ -29,11 +30,18 @@ final class AiRuntimeBridgeSupport {
 
     private final ApplicationContext applicationContext;
     private final AutowireCapableBeanFactory beanFactory;
+    private final AiRateLimiter rateLimiter;
+    private final DataGeneratorProperties.AiRuntime rateLimitDefaults;
     private final DefaultConversionService fallbackConversionService = new DefaultConversionService();
 
-    AiRuntimeBridgeSupport(ApplicationContext applicationContext, AutowireCapableBeanFactory beanFactory) {
+    AiRuntimeBridgeSupport(ApplicationContext applicationContext,
+                           AutowireCapableBeanFactory beanFactory,
+                           AiRateLimiter rateLimiter,
+                           DataGeneratorProperties.AiRuntime rateLimitDefaults) {
         this.applicationContext = applicationContext;
         this.beanFactory = beanFactory;
+        this.rateLimiter = rateLimiter == null ? new AiRateLimiter() : rateLimiter;
+        this.rateLimitDefaults = rateLimitDefaults == null ? new DataGeneratorProperties.AiRuntime() : rateLimitDefaults;
     }
 
     /**
@@ -51,13 +59,15 @@ final class AiRuntimeBridgeSupport {
     }
 
     /**
-     * Executes a remote call with optional retry/backoff from provider options.
+     * Executes a remote call with optional rate limiting and retry/backoff from provider options.
      *
+     * @param rateLimitKey    throttle bucket key
      * @param providerOptions provider option map
      * @param call            remote call supplier
      * @return successful call payload and metrics
      */
-    RemoteAiContentCall executeWithRetry(Map<String, Object> providerOptions, Supplier<RemoteAiContentCall> call) {
+    RemoteAiContentCall executeWithRetry(String rateLimitKey, Map<String, Object> providerOptions, Supplier<RemoteAiContentCall> call) {
+        rateLimiter.acquire(rateLimitKey, AiRateLimitPolicy.resolve(providerOptions, rateLimitDefaults));
         int maxRetries = intOption(providerOptions, "maxRetries", 1);
         long retryBackoffMs = longOption(providerOptions, "retryBackoffMs", 0L);
         RuntimeException lastFailure = null;
@@ -117,6 +127,29 @@ final class AiRuntimeBridgeSupport {
         }
         String value = String.valueOf(options.get(key)).trim();
         return value.isEmpty() ? null : value;
+    }
+
+    /**
+     * Builds a stable throttle bucket key for a remote provider call.
+     *
+     * @param source       AI source definition
+     * @param providerType normalized provider type
+     * @param options      provider options
+     * @return limiter key
+     */
+    static String rateLimitKey(AiSourceVO source, String providerType, Map<String, Object> options) {
+        String explicit = stringOption(options, "rateLimitKey");
+        if (explicit != null) {
+            return providerType + ":" + explicit;
+        }
+        String model = stringOption(options, "model");
+        if (model != null) {
+            return providerType + ":" + model;
+        }
+        if (source != null && source.getApi() != null && !source.getApi().isBlank()) {
+            return providerType + ":" + source.getApi().trim();
+        }
+        return providerType + ":default";
     }
 
     private static void sleepQuietly(long retryBackoffMs) {
