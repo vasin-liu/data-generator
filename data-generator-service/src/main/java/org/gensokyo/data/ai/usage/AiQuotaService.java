@@ -5,10 +5,15 @@
  */
 package org.gensokyo.data.ai.usage;
 
+import org.gensokyo.data.api.console.dto.AiQuotaScopeStatusDto;
 import org.gensokyo.data.api.console.dto.AiQuotaStatusDto;
+import org.gensokyo.data.audit.AuditService;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.po.AiQuotaDailyUsagePO;
+import org.gensokyo.data.model.po.AiQuotaScopeDailyUsageId;
+import org.gensokyo.data.model.po.AiQuotaScopeDailyUsagePO;
 import org.gensokyo.data.repository.AiQuotaDailyUsageRepository;
+import org.gensokyo.data.repository.AiQuotaScopeDailyUsageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -17,9 +22,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Enforces and tracks platform AI daily quotas across JVMs via JDBC counters.
+ * Enforces and tracks platform, provider, and template AI daily quotas across JVMs via JDBC counters.
  *
  * @author Gensokyo
  * @since 2026-06-12
@@ -28,24 +38,31 @@ import java.time.LocalDate;
 public class AiQuotaService {
 
     private final DataGeneratorProperties properties;
-    private final AiQuotaDailyUsageRepository repository;
+    private final AiQuotaDailyUsageRepository platformRepository;
+    private final AiQuotaScopeDailyUsageRepository scopedRepository;
     private final AiPricingService pricingService;
+    private final AuditService auditService;
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
+    private final Set<String> alertedKeys = ConcurrentHashMap.newKeySet();
 
     /**
      * @param properties          platform configuration
-     * @param repository          daily usage store
+     * @param platformRepository  platform daily usage store
+     * @param scopedRepository    scoped daily usage store
      * @param pricingService      cost estimator for quota accounting
+     * @param auditService        audit log for quota alert hooks
      * @param transactionTemplate short quota transactions
      */
     @Autowired
     public AiQuotaService(
             DataGeneratorProperties properties,
-            AiQuotaDailyUsageRepository repository,
+            AiQuotaDailyUsageRepository platformRepository,
+            AiQuotaScopeDailyUsageRepository scopedRepository,
             AiPricingService pricingService,
+            AuditService auditService,
             TransactionTemplate transactionTemplate) {
-        this(properties, repository, pricingService, transactionTemplate, Clock.systemUTC());
+        this(properties, platformRepository, scopedRepository, pricingService, auditService, transactionTemplate, Clock.systemUTC());
     }
 
     /**
@@ -53,13 +70,17 @@ public class AiQuotaService {
      */
     AiQuotaService(
             DataGeneratorProperties properties,
-            AiQuotaDailyUsageRepository repository,
+            AiQuotaDailyUsageRepository platformRepository,
+            AiQuotaScopeDailyUsageRepository scopedRepository,
             AiPricingService pricingService,
+            AuditService auditService,
             TransactionTemplate transactionTemplate,
             Clock clock) {
         this.properties = properties;
-        this.repository = repository;
+        this.platformRepository = platformRepository;
+        this.scopedRepository = scopedRepository;
         this.pricingService = pricingService;
+        this.auditService = auditService;
         this.transactionTemplate = transactionTemplate;
         this.clock = clock;
     }
@@ -68,38 +89,64 @@ public class AiQuotaService {
      * @return current UTC-day quota status for the operator console
      */
     public AiQuotaStatusDto status() {
-        AiQuotaPolicy policy = policy();
+        AiQuotaPolicy platformPolicy = platformPolicy();
+        DataGeneratorProperties.AiRuntimeQuota quotaConfig = quotaConfig();
+        boolean quotaEnabled = quotaConfig.isEnabled();
+        var configuredScopes = AiQuotaScopePolicyResolver.configuredScopes(quotaConfig);
         String usageDate = usageDate();
-        AiQuotaDailyUsagePO row = repository.findById(usageDate).orElseGet(() -> emptyRow(usageDate));
-        long usedTokens = row.getPromptTokens() + row.getCompletionTokens();
+        AiQuotaDailyUsagePO platformRow = platformRepository.findById(usageDate).orElseGet(() -> emptyPlatformRow(usageDate));
+        long usedTokens = platformRow.getPromptTokens() + platformRow.getCompletionTokens();
+        List<AiQuotaScopeStatusDto> scopes = new ArrayList<>();
+        for (AiQuotaScopedPolicy scopedPolicy : configuredScopes.values()) {
+            AiQuotaScopeDailyUsagePO scopedRow = scopedRepository.findById(scopeId(usageDate, scopedPolicy.scopeKey()))
+                    .orElseGet(() -> emptyScopedRow(usageDate, scopedPolicy.scopeKey()));
+            scopes.add(toScopeStatus(scopedPolicy, scopedRow));
+        }
         return new AiQuotaStatusDto(
-                policy.enabled(),
+                quotaEnabled && (platformPolicy.enabled() || !configuredScopes.isEmpty()),
                 usageDate,
-                policy.maxCallsPerDay(),
-                policy.maxTokensPerDay(),
-                policy.maxCostUsdPerDay(),
-                row.getCallCount(),
-                row.getPromptTokens(),
-                row.getCompletionTokens(),
-                roundUsd(row.getEstimatedCostUsd()),
-                remaining(policy.maxCallsPerDay(), row.getCallCount()),
-                remaining(policy.maxTokensPerDay(), usedTokens),
-                remainingCost(policy.maxCostUsdPerDay(), row.getEstimatedCostUsd()));
+                platformPolicy.maxCallsPerDay(),
+                platformPolicy.maxTokensPerDay(),
+                platformPolicy.maxCostUsdPerDay(),
+                platformRow.getCallCount(),
+                platformRow.getPromptTokens(),
+                platformRow.getCompletionTokens(),
+                roundUsd(platformRow.getEstimatedCostUsd()),
+                remaining(platformPolicy.maxCallsPerDay(), platformRow.getCallCount()),
+                remaining(platformPolicy.maxTokensPerDay(), usedTokens),
+                remainingCost(platformPolicy.maxCostUsdPerDay(), platformRow.getEstimatedCostUsd()),
+                alertsEnabled(quotaConfig),
+                warnAtPercent(quotaConfig),
+                scopes);
     }
 
     /**
-     * Reserves one AI call against the daily quota before a remote provider request.
+     * Reserves one AI call against applicable daily quotas before a remote provider request.
+     *
+     * @param providerType provider identifier for scoped enforcement
      */
-    public void beforeCall() {
-        AiQuotaPolicy policy = policy();
-        if (!policy.enabled()) {
+    public void beforeCall(String providerType) {
+        DataGeneratorProperties.AiRuntimeQuota quotaConfig = quotaConfig();
+        if (!quotaConfig.isEnabled()) {
             return;
         }
+        AiQuotaPolicy platformPolicy = platformPolicy();
+        List<AiQuotaScopedPolicy> scopedPolicies = AiQuotaScopePolicyResolver.activeCallScopes(providerType, quotaConfig);
+        if (!platformPolicy.enabled() && scopedPolicies.isEmpty()) {
+            return;
+        }
+        String usageDate = usageDate();
         transactionTemplate.executeWithoutResult(status -> {
-            AiQuotaDailyUsagePO row = lockedRow(usageDate());
-            assertWithinLimits(policy, row, 1L, 0L, 0.0D);
-            row.setCallCount(row.getCallCount() + 1L);
-            repository.save(row);
+            if (platformPolicy.enabled()) {
+                AiQuotaDailyUsagePO row = lockedPlatformRow(usageDate);
+                reserveCall(platformPolicy, row, usageDate, AiQuotaScopeKeys.PLATFORM, "PLATFORM");
+                platformRepository.save(row);
+            }
+            for (AiQuotaScopedPolicy scopedPolicy : scopedPolicies) {
+                AiQuotaScopeDailyUsagePO row = lockedScopedRow(usageDate, scopedPolicy.scopeKey());
+                reserveCall(scopedPolicy, row, usageDate, scopedPolicy.scopeKey(), scopedPolicy.scopeType());
+                scopedRepository.save(row);
+            }
         });
     }
 
@@ -112,39 +159,259 @@ public class AiQuotaService {
      * @param completionTokens completion tokens consumed
      */
     public void recordUsage(String providerType, String model, long promptTokens, long completionTokens) {
-        AiQuotaPolicy policy = policy();
-        if (!policy.enabled()) {
+        DataGeneratorProperties.AiRuntimeQuota quotaConfig = quotaConfig();
+        if (!quotaConfig.isEnabled()) {
+            return;
+        }
+        AiQuotaPolicy platformPolicy = platformPolicy();
+        List<AiQuotaScopedPolicy> scopedPolicies = AiQuotaScopePolicyResolver.activeCallScopes(providerType, quotaConfig);
+        if (!platformPolicy.enabled() && scopedPolicies.isEmpty()) {
             return;
         }
         double costUsd = pricingService.estimateUsd(providerType, model, promptTokens, completionTokens);
+        String usageDate = usageDate();
         transactionTemplate.executeWithoutResult(status -> {
-            AiQuotaDailyUsagePO row = lockedRow(usageDate());
-            row.setPromptTokens(row.getPromptTokens() + promptTokens);
-            row.setCompletionTokens(row.getCompletionTokens() + completionTokens);
-            row.setEstimatedCostUsd(roundUsd(row.getEstimatedCostUsd() + costUsd));
-            repository.save(row);
+            if (platformPolicy.enabled()) {
+                AiQuotaDailyUsagePO row = lockedPlatformRow(usageDate);
+                recordTokenUsage(platformPolicy, row, usageDate, AiQuotaScopeKeys.PLATFORM, "PLATFORM", promptTokens, completionTokens, costUsd);
+                platformRepository.save(row);
+            }
+            for (AiQuotaScopedPolicy scopedPolicy : scopedPolicies) {
+                AiQuotaScopeDailyUsagePO row = lockedScopedRow(usageDate, scopedPolicy.scopeKey());
+                recordTokenUsage(scopedPolicy, row, usageDate, scopedPolicy.scopeKey(), scopedPolicy.scopeType(), promptTokens, completionTokens, costUsd);
+                scopedRepository.save(row);
+            }
         });
     }
 
-    private AiQuotaPolicy policy() {
+    private void reserveCall(
+            AiQuotaPolicy policy,
+            AiQuotaDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType) {
+        assertWithinLimits(policy, row, 1L, 0L, 0.0D, usageDate, scopeKey, scopeType);
+        row.setCallCount(row.getCallCount() + 1L);
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "CALLS");
+    }
+
+    private void reserveCall(
+            AiQuotaScopedPolicy policy,
+            AiQuotaScopeDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType) {
+        assertWithinLimits(policy, row, 1L, 0L, 0.0D, usageDate, scopeKey, scopeType);
+        row.setCallCount(row.getCallCount() + 1L);
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "CALLS");
+    }
+
+    private void recordTokenUsage(
+            AiQuotaPolicy policy,
+            AiQuotaDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            long promptTokens,
+            long completionTokens,
+            double additionalCostUsd) {
+        long additionalTokens = promptTokens + completionTokens;
+        assertWithinLimits(policy, row, 0L, additionalTokens, additionalCostUsd, usageDate, scopeKey, scopeType);
+        row.setPromptTokens(row.getPromptTokens() + promptTokens);
+        row.setCompletionTokens(row.getCompletionTokens() + completionTokens);
+        row.setEstimatedCostUsd(roundUsd(row.getEstimatedCostUsd() + additionalCostUsd));
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "TOKENS");
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "COST");
+    }
+
+    private void recordTokenUsage(
+            AiQuotaScopedPolicy policy,
+            AiQuotaScopeDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            long promptTokens,
+            long completionTokens,
+            double additionalCostUsd) {
+        long additionalTokens = promptTokens + completionTokens;
+        assertWithinLimits(policy, row, 0L, additionalTokens, additionalCostUsd, usageDate, scopeKey, scopeType);
+        row.setPromptTokens(row.getPromptTokens() + promptTokens);
+        row.setCompletionTokens(row.getCompletionTokens() + completionTokens);
+        row.setEstimatedCostUsd(roundUsd(row.getEstimatedCostUsd() + additionalCostUsd));
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "TOKENS");
+        maybeWarn(policy, row, usageDate, scopeKey, scopeType, "COST");
+    }
+
+    private void assertWithinLimits(
+            AiQuotaPolicy policy,
+            AiQuotaDailyUsagePO row,
+            long additionalCalls,
+            long additionalTokens,
+            double additionalCostUsd,
+            String usageDate,
+            String scopeKey,
+            String scopeType) {
+        long usedTokens = row.getPromptTokens() + row.getCompletionTokens();
+        if (policy.maxCallsPerDay() > 0L && row.getCallCount() + additionalCalls > policy.maxCallsPerDay()) {
+            recordExceeded(usageDate, scopeKey, scopeType, "CALLS", row.getCallCount(), policy.maxCallsPerDay());
+            throw exceeded("call", row.getCallCount(), policy.maxCallsPerDay(), scopeKey);
+        }
+        if (policy.maxTokensPerDay() > 0L && usedTokens + additionalTokens > policy.maxTokensPerDay()) {
+            recordExceeded(usageDate, scopeKey, scopeType, "TOKENS", usedTokens, policy.maxTokensPerDay());
+            throw exceeded("token", usedTokens, policy.maxTokensPerDay(), scopeKey);
+        }
+        if (policy.maxCostUsdPerDay() > 0.0D
+                && row.getEstimatedCostUsd() + additionalCostUsd > policy.maxCostUsdPerDay() + 0.000001D) {
+            recordExceeded(usageDate, scopeKey, scopeType, "COST", roundUsd(row.getEstimatedCostUsd()), policy.maxCostUsdPerDay());
+            throw exceeded("cost", roundUsd(row.getEstimatedCostUsd()), policy.maxCostUsdPerDay(), scopeKey);
+        }
+    }
+
+    private void assertWithinLimits(
+            AiQuotaScopedPolicy policy,
+            AiQuotaScopeDailyUsagePO row,
+            long additionalCalls,
+            long additionalTokens,
+            double additionalCostUsd,
+            String usageDate,
+            String scopeKey,
+            String scopeType) {
+        long usedTokens = row.getPromptTokens() + row.getCompletionTokens();
+        if (policy.maxCallsPerDay() > 0L && row.getCallCount() + additionalCalls > policy.maxCallsPerDay()) {
+            recordExceeded(usageDate, scopeKey, scopeType, "CALLS", row.getCallCount(), policy.maxCallsPerDay());
+            throw exceeded("call", row.getCallCount(), policy.maxCallsPerDay(), scopeKey);
+        }
+        if (policy.maxTokensPerDay() > 0L && usedTokens + additionalTokens > policy.maxTokensPerDay()) {
+            recordExceeded(usageDate, scopeKey, scopeType, "TOKENS", usedTokens, policy.maxTokensPerDay());
+            throw exceeded("token", usedTokens, policy.maxTokensPerDay(), scopeKey);
+        }
+        if (policy.maxCostUsdPerDay() > 0.0D
+                && row.getEstimatedCostUsd() + additionalCostUsd > policy.maxCostUsdPerDay() + 0.000001D) {
+            recordExceeded(usageDate, scopeKey, scopeType, "COST", roundUsd(row.getEstimatedCostUsd()), policy.maxCostUsdPerDay());
+            throw exceeded("cost", roundUsd(row.getEstimatedCostUsd()), policy.maxCostUsdPerDay(), scopeKey);
+        }
+    }
+
+    private void maybeWarn(
+            AiQuotaPolicy policy,
+            AiQuotaDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            String dimension) {
+        maybeWarn(usageDate, scopeKey, scopeType, dimension, usedValue(row, dimension), maxValue(policy, dimension));
+    }
+
+    private void maybeWarn(
+            AiQuotaScopedPolicy policy,
+            AiQuotaScopeDailyUsagePO row,
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            String dimension) {
+        maybeWarn(usageDate, scopeKey, scopeType, dimension, usedValue(row, dimension), maxValue(policy, dimension));
+    }
+
+    private void maybeWarn(
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            String dimension,
+            double used,
+            double max) {
+        DataGeneratorProperties.AiRuntimeQuota quotaConfig = quotaConfig();
+        if (!alertsEnabled(quotaConfig)) {
+            return;
+        }
+        int warnAtPercent = warnAtPercent(quotaConfig);
+        if (warnAtPercent <= 0 || max <= 0.0D) {
+            return;
+        }
+        double percentUsed = used / max * 100.0D;
+        if (percentUsed < warnAtPercent) {
+            return;
+        }
+        String alertKey = usageDate + "|" + scopeKey + "|WARN|" + dimension;
+        if (!alertedKeys.add(alertKey)) {
+            return;
+        }
+        auditService.record(
+                "AI_QUOTA_WARN",
+                "AI_QUOTA",
+                scopeKey,
+                Map.of(
+                        "usageDate", usageDate,
+                        "scopeType", scopeType,
+                        "dimension", dimension,
+                        "used", used,
+                        "max", max,
+                        "percentUsed", roundUsd(percentUsed)));
+    }
+
+    private void recordExceeded(
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            String dimension,
+            double used,
+            double max) {
+        if (!alertsEnabled(quotaConfig())) {
+            return;
+        }
+        auditService.record(
+                "AI_QUOTA_EXCEEDED",
+                "AI_QUOTA",
+                scopeKey,
+                Map.of(
+                        "usageDate", usageDate,
+                        "scopeType", scopeType,
+                        "dimension", dimension,
+                        "used", used,
+                        "max", max));
+    }
+
+    private AiQuotaPolicy platformPolicy() {
         DataGeneratorProperties.AiRuntime aiRuntime = properties == null
                 ? new DataGeneratorProperties.AiRuntime()
                 : properties.getAiRuntime();
         return AiQuotaPolicy.resolve(aiRuntime == null ? null : aiRuntime.getQuota());
     }
 
+    private DataGeneratorProperties.AiRuntimeQuota quotaConfig() {
+        DataGeneratorProperties.AiRuntime aiRuntime = properties == null
+                ? new DataGeneratorProperties.AiRuntime()
+                : properties.getAiRuntime();
+        return aiRuntime == null || aiRuntime.getQuota() == null
+                ? new DataGeneratorProperties.AiRuntimeQuota()
+                : aiRuntime.getQuota();
+    }
+
     private String usageDate() {
         return LocalDate.now(clock).toString();
     }
 
-    private AiQuotaDailyUsagePO lockedRow(String usageDate) {
-        return repository.findLockedByUsageDate(usageDate).orElseGet(() -> {
-            AiQuotaDailyUsagePO created = emptyRow(usageDate);
-            return repository.save(created);
+    private AiQuotaDailyUsagePO lockedPlatformRow(String usageDate) {
+        return platformRepository.findLockedByUsageDate(usageDate).orElseGet(() -> {
+            AiQuotaDailyUsagePO created = emptyPlatformRow(usageDate);
+            return platformRepository.save(created);
         });
     }
 
-    private static AiQuotaDailyUsagePO emptyRow(String usageDate) {
+    private AiQuotaScopeDailyUsagePO lockedScopedRow(String usageDate, String scopeKey) {
+        return scopedRepository.findLockedByUsageDateAndScopeKey(usageDate, scopeKey).orElseGet(() -> {
+            AiQuotaScopeDailyUsagePO created = emptyScopedRow(usageDate, scopeKey);
+            return scopedRepository.save(created);
+        });
+    }
+
+    private static AiQuotaScopeDailyUsageId scopeId(String usageDate, String scopeKey) {
+        AiQuotaScopeDailyUsageId id = new AiQuotaScopeDailyUsageId();
+        id.setUsageDate(usageDate);
+        id.setScopeKey(scopeKey);
+        return id;
+    }
+
+    private static AiQuotaDailyUsagePO emptyPlatformRow(String usageDate) {
         AiQuotaDailyUsagePO row = new AiQuotaDailyUsagePO();
         row.setUsageDate(usageDate);
         row.setCallCount(0L);
@@ -154,27 +421,84 @@ public class AiQuotaService {
         return row;
     }
 
-    private static void assertWithinLimits(
-            AiQuotaPolicy policy,
-            AiQuotaDailyUsagePO row,
-            long additionalCalls,
-            long additionalTokens,
-            double additionalCostUsd) {
+    private static AiQuotaScopeDailyUsagePO emptyScopedRow(String usageDate, String scopeKey) {
+        AiQuotaScopeDailyUsagePO row = new AiQuotaScopeDailyUsagePO();
+        row.setId(scopeId(usageDate, scopeKey));
+        row.setCallCount(0L);
+        row.setPromptTokens(0L);
+        row.setCompletionTokens(0L);
+        row.setEstimatedCostUsd(0.0D);
+        return row;
+    }
+
+    private static AiQuotaExceededException exceeded(String dimension, double used, double max, String scopeKey) {
+        return new AiQuotaExceededException(
+                "AI daily " + dimension + " quota exceeded for [" + scopeKey + "] (" + used + "/" + max + ")");
+    }
+
+    private static double usedValue(AiQuotaDailyUsagePO row, String dimension) {
+        return switch (dimension) {
+            case "CALLS" -> row.getCallCount();
+            case "TOKENS" -> row.getPromptTokens() + row.getCompletionTokens();
+            case "COST" -> row.getEstimatedCostUsd();
+            default -> 0.0D;
+        };
+    }
+
+    private static double usedValue(AiQuotaScopeDailyUsagePO row, String dimension) {
+        return switch (dimension) {
+            case "CALLS" -> row.getCallCount();
+            case "TOKENS" -> row.getPromptTokens() + row.getCompletionTokens();
+            case "COST" -> row.getEstimatedCostUsd();
+            default -> 0.0D;
+        };
+    }
+
+    private static double maxValue(AiQuotaPolicy policy, String dimension) {
+        return switch (dimension) {
+            case "CALLS" -> policy.maxCallsPerDay();
+            case "TOKENS" -> policy.maxTokensPerDay();
+            case "COST" -> policy.maxCostUsdPerDay();
+            default -> 0.0D;
+        };
+    }
+
+    private static double maxValue(AiQuotaScopedPolicy policy, String dimension) {
+        return switch (dimension) {
+            case "CALLS" -> policy.maxCallsPerDay();
+            case "TOKENS" -> policy.maxTokensPerDay();
+            case "COST" -> policy.maxCostUsdPerDay();
+            default -> 0.0D;
+        };
+    }
+
+    private static AiQuotaScopeStatusDto toScopeStatus(AiQuotaScopedPolicy policy, AiQuotaScopeDailyUsagePO row) {
         long usedTokens = row.getPromptTokens() + row.getCompletionTokens();
-        if (policy.maxCallsPerDay() > 0L && row.getCallCount() + additionalCalls > policy.maxCallsPerDay()) {
-            throw new AiQuotaExceededException(
-                    "Platform AI daily call quota exceeded (" + row.getCallCount() + "/" + policy.maxCallsPerDay() + ")");
+        return new AiQuotaScopeStatusDto(
+                policy.scopeKey(),
+                policy.scopeType(),
+                policy.scopeLabel(),
+                policy.maxCallsPerDay(),
+                policy.maxTokensPerDay(),
+                policy.maxCostUsdPerDay(),
+                row.getCallCount(),
+                row.getPromptTokens(),
+                row.getCompletionTokens(),
+                roundUsd(row.getEstimatedCostUsd()),
+                remaining(policy.maxCallsPerDay(), row.getCallCount()),
+                remaining(policy.maxTokensPerDay(), usedTokens),
+                remainingCost(policy.maxCostUsdPerDay(), row.getEstimatedCostUsd()));
+    }
+
+    private static boolean alertsEnabled(DataGeneratorProperties.AiRuntimeQuota quota) {
+        return quota != null && quota.isAlertsEnabled();
+    }
+
+    private static int warnAtPercent(DataGeneratorProperties.AiRuntimeQuota quota) {
+        if (quota == null || quota.getWarnAtPercent() == null) {
+            return 80;
         }
-        if (policy.maxTokensPerDay() > 0L && usedTokens + additionalTokens > policy.maxTokensPerDay()) {
-            throw new AiQuotaExceededException(
-                    "Platform AI daily token quota exceeded (" + usedTokens + "/" + policy.maxTokensPerDay() + ")");
-        }
-        if (policy.maxCostUsdPerDay() > 0.0D
-                && row.getEstimatedCostUsd() + additionalCostUsd > policy.maxCostUsdPerDay() + 0.000001D) {
-            throw new AiQuotaExceededException(
-                    "Platform AI daily cost quota exceeded ("
-                            + roundUsd(row.getEstimatedCostUsd()) + "/" + policy.maxCostUsdPerDay() + " USD)");
-        }
+        return Math.max(0, Math.min(100, quota.getWarnAtPercent()));
     }
 
     private static Long remaining(long max, long used) {

@@ -171,3 +171,15 @@ CREATE TABLE IF NOT EXISTS `task_schedule`
     `updated_at`        TIMESTAMP    DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+-- Scoped AI quota counters (provider/template buckets per UTC day)
+CREATE TABLE IF NOT EXISTS `ai_quota_scope_daily_usage`
+(
+    `usage_date`          VARCHAR(10)  NOT NULL,
+    `scope_key`           VARCHAR(256) NOT NULL,
+    `call_count`          BIGINT       NOT NULL,
+    `prompt_tokens`       BIGINT       NOT NULL,
+    `completion_tokens`   BIGINT       NOT NULL,
+    `estimated_cost_usd`  DOUBLE       NOT NULL,
+    PRIMARY KEY (`usage_date`, `scope_key`)
+);

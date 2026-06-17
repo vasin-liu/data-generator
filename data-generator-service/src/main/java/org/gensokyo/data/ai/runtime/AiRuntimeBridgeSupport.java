@@ -80,7 +80,7 @@ final class AiRuntimeBridgeSupport {
             Supplier<RemoteAiContentCall> call) {
         rateLimiter.acquire(rateLimitKey, AiRateLimitPolicy.resolve(providerOptions, rateLimitDefaults));
         if (aiQuotaService != null) {
-            aiQuotaService.beforeCall();
+            aiQuotaService.beforeCall(providerType);
         }
         int maxRetries = intOption(providerOptions, "maxRetries", 1);
         long retryBackoffMs = longOption(providerOptions, "retryBackoffMs", 0L);

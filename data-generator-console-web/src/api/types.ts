@@ -438,6 +438,23 @@ export interface AiUsageSummary {
   byProvider: AiProviderUsage[];
 }
 
+/** Mirrors {@code AiQuotaScopeStatusDto}. */
+export interface AiQuotaScopeStatus {
+  scopeKey: string;
+  scopeType: string;
+  scopeLabel: string;
+  maxCallsPerDay: number;
+  maxTokensPerDay: number;
+  maxCostUsdPerDay: number;
+  usedCalls: number;
+  usedPromptTokens: number;
+  usedCompletionTokens: number;
+  usedCostUsd: number;
+  remainingCalls: number | null;
+  remainingTokens: number | null;
+  remainingCostUsd: number | null;
+}
+
 /** Mirrors {@code AiQuotaStatusDto}. */
 export interface AiQuotaStatus {
   enabled: boolean;
@@ -452,6 +469,9 @@ export interface AiQuotaStatus {
   remainingCalls: number | null;
   remainingTokens: number | null;
   remainingCostUsd: number | null;
+  alertsEnabled: boolean;
+  warnAtPercent: number;
+  scopes: AiQuotaScopeStatus[];
 }
 
 /** Secret registry metadata (value never returned). */

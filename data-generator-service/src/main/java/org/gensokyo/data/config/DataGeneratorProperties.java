@@ -179,6 +179,27 @@ public class DataGeneratorProperties {
         private Long maxCallsPerDay = 0L;
         private Long maxTokensPerDay = 0L;
         private Double maxCostUsdPerDay = 0.0D;
+        /** When {@code true}, quota warn/exceed events are appended to the audit log. */
+        private boolean alertsEnabled = false;
+        /** Warn threshold percent (1–100); 0 disables warn alerts. */
+        private Integer warnAtPercent = 80;
+        /** Optional per-provider or per-template daily quota overrides. */
+        private java.util.List<AiQuotaScopeOverride> scopeOverrides = new java.util.ArrayList<>();
+    }
+
+    /**
+     * Scoped AI quota override for {@code data.generator.ai-runtime.quota.scope-overrides}.
+     */
+    @Getter
+    @Setter
+    public static class AiQuotaScopeOverride {
+        /** {@code PROVIDER} or {@code TEMPLATE}. */
+        private String scopeType;
+        /** Provider type (e.g. {@code OPENAI}) or template snowflake id. */
+        private String scopeKey;
+        private Long maxCallsPerDay = 0L;
+        private Long maxTokensPerDay = 0L;
+        private Double maxCostUsdPerDay = 0.0D;
     }
 
     /**

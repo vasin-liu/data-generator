@@ -111,6 +111,8 @@
   "jobs.aiQuota.cost": "每日费用（USD）",
   "jobs.aiQuota.remaining": "剩余",
   "jobs.aiQuota.unlimited": "不限",
+  "jobs.aiQuota.scopedTitle": "提供商 / 模板配额",
+  "jobs.aiQuota.scope": "范围",
   "schedules.title": "定时任务",
   "schedules.subtitle": "按 Cron 触发模板运行（需服务端开启 data.generator.schedule.enabled）",
   "schedules.hint.title": "服务端配置",

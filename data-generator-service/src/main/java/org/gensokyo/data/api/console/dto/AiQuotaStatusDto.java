@@ -20,6 +20,9 @@ package org.gensokyo.data.api.console.dto;
  * @param remainingCalls          calls left today, or {@code null} when unlimited
  * @param remainingTokens         tokens left today, or {@code null} when unlimited
  * @param remainingCostUsd        USD left today, or {@code null} when unlimited
+ * @param alertsEnabled           whether quota warn/exceed audit hooks are active
+ * @param warnAtPercent           warn threshold percent (0 = disabled)
+ * @param scopes                  configured provider/template scoped quotas
  * @author Gensokyo
  * @since 2026-06-12
  */
@@ -35,5 +38,8 @@ public record AiQuotaStatusDto(
         double usedCostUsd,
         Long remainingCalls,
         Long remainingTokens,
-        Double remainingCostUsd) {
+        Double remainingCostUsd,
+        boolean alertsEnabled,
+        int warnAtPercent,
+        java.util.List<AiQuotaScopeStatusDto> scopes) {
 }

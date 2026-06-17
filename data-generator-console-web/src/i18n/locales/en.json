@@ -111,6 +111,8 @@
   "jobs.aiQuota.cost": "Daily cost (USD)",
   "jobs.aiQuota.remaining": "Remaining",
   "jobs.aiQuota.unlimited": "Unlimited",
+  "jobs.aiQuota.scopedTitle": "Provider / template quotas",
+  "jobs.aiQuota.scope": "Scope",
   "schedules.title": "Schedules",
   "schedules.subtitle": "Cron-driven template runs (requires data.generator.schedule.enabled on server)",
   "schedules.hint.title": "Server configuration",

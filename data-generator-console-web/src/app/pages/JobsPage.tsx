@@ -7,7 +7,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchDistributedMetrics } from '../../api/distributed';
 import { fetchAiQuota, fetchAiUsage } from '../../api/ai';
 import { fetchJobs } from '../../api/jobs';
-import type { AiProviderUsage, TaskExecutionSummary } from '../../api/types';
+import type { AiProviderUsage, AiQuotaScopeStatus, TaskExecutionSummary } from '../../api/types';
 import { JobStatusTag } from '../../components/JobStatusTag';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 import { enumLabel } from '../utils/optionLabels';
@@ -76,6 +76,37 @@ export function JobsPage() {
 
   const formatQuotaRemaining = (remaining: number | null | undefined) =>
     remaining == null ? t('jobs.aiQuota.unlimited') : String(remaining);
+
+  const aiQuotaScopeColumns: ColumnsType<AiQuotaScopeStatus> = useMemo(
+    () => [
+      {
+        title: t('jobs.aiQuota.scope'),
+        key: 'scope',
+        render: (_, row) => `${row.scopeType}: ${row.scopeLabel}`,
+      },
+      {
+        title: t('jobs.aiQuota.calls'),
+        key: 'calls',
+        render: (_, row) =>
+          `${row.usedCalls} / ${formatQuotaLimit(row.maxCallsPerDay)} · ${t('jobs.aiQuota.remaining')}: ${formatQuotaRemaining(row.remainingCalls)}`,
+      },
+      {
+        title: t('jobs.aiQuota.tokens'),
+        key: 'tokens',
+        render: (_, row) => {
+          const used = row.usedPromptTokens + row.usedCompletionTokens;
+          return `${used} / ${formatQuotaLimit(row.maxTokensPerDay)} · ${t('jobs.aiQuota.remaining')}: ${formatQuotaRemaining(row.remainingTokens)}`;
+        },
+      },
+      {
+        title: t('jobs.aiQuota.cost'),
+        key: 'cost',
+        render: (_, row) =>
+          `${formatUsd(row.usedCostUsd)} / ${row.maxCostUsdPerDay > 0 ? formatUsd(row.maxCostUsdPerDay) : t('jobs.aiQuota.unlimited')} · ${t('jobs.aiQuota.remaining')}: ${row.remainingCostUsd == null ? t('jobs.aiQuota.unlimited') : formatUsd(row.remainingCostUsd)}`,
+      },
+    ],
+    [t],
+  );
 
   const aiProviderColumns: ColumnsType<AiProviderUsage> = useMemo(
     () => [
@@ -282,6 +313,19 @@ export function JobsPage() {
               : formatUsd(aiQuotaQuery.data.remainingCostUsd)}
           </Descriptions.Item>
         </Descriptions>
+      ) : null}
+      {aiQuotaQuery.data?.enabled && (aiQuotaQuery.data.scopes?.length ?? 0) > 0 ? (
+        <>
+          <Typography.Text type="secondary">{t('jobs.aiQuota.scopedTitle')}</Typography.Text>
+          <Table<AiQuotaScopeStatus>
+            style={{ marginBottom: 16 }}
+            size="small"
+            rowKey="scopeKey"
+            pagination={false}
+            dataSource={aiQuotaQuery.data.scopes}
+            columns={aiQuotaScopeColumns}
+          />
+        </>
       ) : null}
       {aiUsageQuery.data && aiUsageQuery.data.totalCalls > 0 ? (
         <>

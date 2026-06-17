@@ -64,6 +64,16 @@ public class TemplateV2Runner {
             throw new IllegalArgumentException("Template V2 must not be null");
         }
 
+        try {
+            AiExecutionScope.bind(template.getId(), template.getName());
+            return runBound(template);
+        }
+        finally {
+            AiExecutionScope.clear();
+        }
+    }
+
+    private TemplateV2RunResult runBound(TemplateV2VO template) {
         EffectiveExecutionPolicy policy = EffectiveExecutionPolicy.resolve(template.getExecutionPolicy());
         TemplateV2RuntimeRegistry registry = runtimeRegistryProvider.current();
         if (template.getWorkflow() != null) {
