@@ -1,0 +1,383 @@
+schema:
+  description: >
+    Capability-first feature matrix for the data-generator platform. This file is the
+    single source of truth (D-02) consumed by scripts/verify-harness.ps1 and
+    scripts/generate-test-matrix-doc.ps1.
+  columns:
+    id: Stable row identifier referenced by harness and downstream plans.
+    capability: Human-readable capability name (capability-first, D-01).
+    adapter: Adapter or integration kind (jdbc, kafka, console-api, etc.).
+    test_types: Test categories for this row (unit, integration, e2e).
+    owner_module: Owning Maven module (D-04).
+    status: covered | partial | pending | skipped-conditional (D-05).
+    linked_tests: Maven simple class name or Playwright e2e/specs/<file>.spec.ts#<title>.
+    notes: Free-form operator notes.
+  status_values:
+    - covered
+    - partial
+    - pending
+    - skipped-conditional
+
+rows:
+  - id: reader-ai
+    capability: reader-ai
+    adapter: ai
+    test_types: [integration]
+    owner_module: data-generator-reader-ai
+    status: pending
+    linked_tests: []
+    notes: AI-backed reader adapter.
+
+  - id: reader-csv
+    capability: reader-csv
+    adapter: csv
+    test_types: [unit, integration]
+    owner_module: data-generator-reader-csv
+    status: pending
+    linked_tests: []
+    notes: CSV file reader.
+
+  - id: reader-jdbc-basic
+    capability: reader-jdbc
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: pending
+    linked_tests: []
+    notes: Reserved for plan 01-02 embedded JDBC reader example.
+
+  - id: reader-elasticsearch
+    capability: reader-elasticsearch
+    adapter: elasticsearch
+    test_types: [integration]
+    owner_module: data-generator-reader-elasticsearch
+    status: pending
+    linked_tests: []
+    notes: Elasticsearch reader adapter.
+
+  - id: reader-excel
+    capability: reader-excel
+    adapter: excel
+    test_types: [unit]
+    owner_module: data-generator-reader-excel
+    status: pending
+    linked_tests: []
+    notes: Excel workbook reader.
+
+  - id: reader-json
+    capability: reader-json
+    adapter: json
+    test_types: [unit]
+    owner_module: data-generator-reader-json
+    status: pending
+    linked_tests: []
+    notes: JSON document reader.
+
+  - id: reader-spel
+    capability: reader-spel
+    adapter: spel
+    test_types: [unit]
+    owner_module: data-generator-reader-spel
+    status: pending
+    linked_tests: []
+    notes: SpEL expression reader.
+
+  - id: writer-csv
+    capability: writer-csv
+    adapter: csv
+    test_types: [unit]
+    owner_module: data-generator-writer-csv
+    status: pending
+    linked_tests: []
+    notes: CSV file writer.
+
+  - id: writer-jdbc-basic
+    capability: writer-jdbc
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: pending
+    linked_tests: []
+    notes: Reserved for plan 01-02 embedded JDBC writer example.
+
+  - id: writer-elasticsearch
+    capability: writer-elasticsearch
+    adapter: elasticsearch
+    test_types: [integration]
+    owner_module: data-generator-writer-elasticsearch
+    status: partial
+    linked_tests: [ElasticsearchRowSinkAdapterHttpEmbeddedTests]
+    notes: HTTP-embedded Elasticsearch bulk sink.
+
+  - id: writer-excel
+    capability: writer-excel
+    adapter: excel
+    test_types: [unit]
+    owner_module: data-generator-writer-excel
+    status: pending
+    linked_tests: []
+    notes: Excel workbook writer.
+
+  - id: writer-json
+    capability: writer-json
+    adapter: json
+    test_types: [unit]
+    owner_module: data-generator-writer-json
+    status: pending
+    linked_tests: []
+    notes: JSON document writer.
+
+  - id: writer-kafka
+    capability: writer-kafka
+    adapter: kafka
+    test_types: [integration]
+    owner_module: data-generator-writer-kafka
+    status: partial
+    linked_tests:
+      - KafkaRowSinkAdapterEmbeddedTests
+      - TemplateV2RunnerKafkaEmbeddedTests
+    notes: Embedded Kafka row sink and V2 runner path.
+
+  - id: iterator-constant
+    capability: iterator-constant
+    adapter: constant
+    test_types: [unit]
+    owner_module: data-generator-iterator-constant
+    status: pending
+    linked_tests: []
+    notes: Constant value iterator.
+
+  - id: iterator-csv
+    capability: iterator-csv
+    adapter: csv
+    test_types: [unit]
+    owner_module: data-generator-iterator-csv
+    status: pending
+    linked_tests: []
+    notes: CSV-driven iterator.
+
+  - id: iterator-database
+    capability: iterator-database
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-iterator-database
+    status: pending
+    linked_tests: []
+    notes: Database-backed iterator.
+
+  - id: iterator-number
+    capability: iterator-number
+    adapter: number
+    test_types: [unit]
+    owner_module: data-generator-iterator-number
+    status: pending
+    linked_tests: []
+    notes: Numeric sequence iterator.
+
+  - id: calcite-source-jdbc
+    capability: calcite-source-jdbc
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: pending
+    linked_tests: []
+    notes: Calcite JDBC row source.
+
+  - id: calcite-source-csv
+    capability: calcite-source-csv
+    adapter: csv
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: pending
+    linked_tests: []
+    notes: Calcite CSV row source.
+
+  - id: transform-sql-basic
+    capability: transform-sql
+    adapter: calcite-sql
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: pending
+    linked_tests: []
+    notes: Reserved for plan 01-02 embedded SQL transform example.
+
+  - id: calcite-transform-js
+    capability: calcite-transform-js
+    adapter: javascript
+    test_types: [unit]
+    owner_module: data-generator-calcite
+    status: pending
+    linked_tests: []
+    notes: GraalJS row transform factory.
+
+  - id: calcite-sink-jdbc
+    capability: calcite-sink-jdbc
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: pending
+    linked_tests: []
+    notes: Calcite JDBC bulk sink.
+
+  - id: calcite-sink-elasticsearch
+    capability: calcite-sink-elasticsearch
+    adapter: elasticsearch
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: partial
+    linked_tests: [ElasticsearchRowSinkAdapterHttpEmbeddedTests]
+    notes: Calcite HTTP Elasticsearch sink adapter.
+
+  - id: calcite-pipeline-chunked
+    capability: calcite-pipeline-chunked
+    adapter: chunked
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: partial
+    linked_tests: [ChunkedPipelineTests]
+    notes: Chunked V2 pipeline against embedded H2.
+
+  - id: calcite-scenario-v2
+    capability: calcite-scenario-v2
+    adapter: scenario
+    test_types: [integration]
+    owner_module: data-generator-service
+    status: partial
+    linked_tests: [V2ScenarioTemplateIT]
+    notes: Spring IT for V2 scenario templates.
+
+  - id: generator-sync
+    capability: generator-sync
+    adapter: sync
+    test_types: [unit]
+    owner_module: data-generator-generator-sync
+    status: pending
+    linked_tests: []
+    notes: Synchronous generator plugin.
+
+  - id: generator-async
+    capability: generator-async
+    adapter: async
+    test_types: [unit]
+    owner_module: data-generator-generator-async
+    status: pending
+    linked_tests: []
+    notes: Asynchronous generator plugin.
+
+  - id: scripter-javascript
+    capability: scripter-javascript
+    adapter: javascript
+    test_types: [unit]
+    owner_module: data-generator-scripter-javascript
+    status: pending
+    linked_tests: []
+    notes: GraalJS scripter stage.
+
+  - id: scripter-spel
+    capability: scripter-spel
+    adapter: spel
+    test_types: [unit]
+    owner_module: data-generator-scripter-spel
+    status: pending
+    linked_tests: []
+    notes: SpEL scripter stage.
+
+  - id: faker-integration
+    capability: faker-synthetic
+    adapter: datafaker
+    test_types: [unit]
+    owner_module: data-generator-faker
+    status: pending
+    linked_tests: []
+    notes: DataFaker synthetic field generation.
+
+  - id: geo-synthetic
+    capability: geo-synthetic
+    adapter: geojson
+    test_types: [unit]
+    owner_module: data-generator-geo
+    status: pending
+    linked_tests: []
+    notes: GeoJSON synthetic geometry generation.
+
+  - id: console-api-templates
+    capability: console-api-templates
+    adapter: console-api
+    test_types: [unit, e2e]
+    owner_module: data-generator-service
+    status: partial
+    linked_tests: [ConsoleTemplateControllerTest]
+    notes: Console template REST facade.
+
+  - id: console-api-jobs
+    capability: console-api-jobs
+    adapter: console-api
+    test_types: [unit, e2e]
+    owner_module: data-generator-service
+    status: partial
+    linked_tests: [ConsoleJobControllerTest]
+    notes: Console job execution REST facade.
+
+  - id: console-api-health
+    capability: console-api-health
+    adapter: console-api
+    test_types: [e2e]
+    owner_module: data-generator-service
+    status: pending
+    linked_tests: []
+    notes: Health endpoint smoke via Playwright api.health.spec.ts.
+
+  - id: console-ui-template-edit
+    capability: console-ui-template-edit
+    adapter: console-ui
+    test_types: [e2e]
+    owner_module: data-generator-console-web
+    status: partial
+    linked_tests:
+      - e2e/specs/template-workflow.spec.ts#create scaffold, rename, save, and list in catalog
+    notes: Template editor save flow (D-06).
+
+  - id: console-ui-job-trigger
+    capability: console-ui-job-trigger
+    adapter: console-ui
+    test_types: [e2e]
+    owner_module: data-generator-console-web
+    status: pending
+    linked_tests: []
+    notes: Job trigger smoke; wired in plan 01-03.
+
+  - id: console-ui-navigation
+    capability: console-ui-navigation
+    adapter: console-ui
+    test_types: [e2e]
+    owner_module: data-generator-console-web
+    status: pending
+    linked_tests: []
+    notes: SPA route navigation smoke.
+
+  - id: console-ui-api-smoke
+    capability: console-ui-api-smoke
+    adapter: console-ui
+    test_types: [e2e]
+    owner_module: data-generator-console-web
+    status: pending
+    linked_tests: []
+    notes: Console API envelope smoke via api.console.spec.ts.
+
+  - id: stage-pipeline-v1
+    capability: stage-pipeline-v1
+    adapter: v1-stage
+    test_types: [integration]
+    owner_module: data-generator-stage
+    status: pending
+    linked_tests: []
+    notes: V1 read/select/script/write stage pipeline.
+
+  - id: service-task-api
+    capability: service-task-api
+    adapter: rest
+    test_types: [integration]
+    owner_module: data-generator-service
+    status: pending
+    linked_tests: []
+    notes: Legacy task REST controller integration tests.
