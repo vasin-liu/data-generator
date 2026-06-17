@@ -32,9 +32,21 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 
 Plans:
 
-- [ ] 01-01: Define feature matrix schema and initial row catalog from codebase map
-- [ ] 01-02: Build synthetic data simulation fixture library and embedded test examples
-- [ ] 01-03: Wire CI entry script, coverage summary output, and Playwright smoke linkage
+**Wave 1**
+
+- [ ] 01-01: Feature matrix schema + coarse row catalog at `.planning/test-matrix.yaml`, semi-automatic draft generator, and generated `docs/test-feature-matrix.md` (TEST-01)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 01-02: `data-generator-test-fixtures` test-jar module with `FixtureTemplates.load`/`H2Seed.apply` and one embedded example per adapter (reader/writer/transform) using synthetic fixtures (TEST-02, TEST-05)
+
+**Wave 3** *(blocked on Waves 1-2 completion)*
+
+- [ ] 01-03: `scripts/verify-harness.ps1` embedded fast path, `target/test-matrix-summary.json` coverage summary, `harness-verify.yml` CI, and Playwright template-edit + job-trigger smoke tied to matrix rows (TEST-03, TEST-04, TEST-06)
+
+Cross-cutting constraints:
+- `.planning/test-matrix.yaml` is the single source of truth (created in 01-01, linked_tests populated in 01-03)
+- Embedded-first, no production credentials; pending matrix rows never fail the harness in Phase 1
 
 ### Phase 2: UDF Platform Core
 
