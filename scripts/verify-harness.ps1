@@ -48,11 +48,26 @@ if ($allMavenClasses.Count -gt 0) {
     $modules = ($mavenByModule.Keys | Sort-Object) -join ','
     $testList = ($allMavenClasses | Sort-Object) -join ','
     Write-Step "Running linked Maven tests: $testList"
-    $mavenExit = Invoke-RepoMaven -RepoRoot $RepoRoot `
-        -pl $modules -am `
-        "-Dtest=$testList" `
-        '-Dsurefire.failIfNoSpecifiedTests=false' `
-        test
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $mvnArgs = @('-pl', $modules, '-am', "-Dtest=$testList", '-Dsurefire.failIfNoSpecifiedTests=false', 'test')
+        $mvnw = Join-Path $RepoRoot 'mvnw.cmd'
+        $settings = Join-Path $RepoRoot '.mvn/settings-jdk25.xml'
+        $jdk25Helper = Join-Path $RepoRoot 'mvnw-jdk25.ps1'
+        if (-not $env:JAVA_HOME -and (Test-Path -LiteralPath $jdk25Helper)) {
+            # Reuse local JDK 25 path from helper without inheriting its Stop-on-stderr behavior.
+            $helperText = Get-Content -Raw $jdk25Helper
+            if ($helperText -match '\$jdkHome\s*=\s*"([^"]+)"') {
+                $env:JAVA_HOME = $Matches[1]
+                $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+            }
+        }
+        & $mvnw '-s' $settings @mvnArgs 2>&1 | ForEach-Object { Write-Host $_ }
+        $mavenExit = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
 } else {
     Write-Host "No Maven linked_tests in matrix — skipping Surefire slice." -ForegroundColor Yellow
 }

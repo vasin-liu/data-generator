@@ -104,7 +104,7 @@ rows:
     capability: writer-elasticsearch
     adapter: elasticsearch
     test_types: [integration]
-    owner_module: data-generator-writer-elasticsearch
+    owner_module: data-generator-calcite
     status: partial
     linked_tests: [ElasticsearchRowSinkAdapterHttpEmbeddedTests]
     notes: HTTP-embedded Elasticsearch bulk sink.
@@ -131,7 +131,7 @@ rows:
     capability: writer-kafka
     adapter: kafka
     test_types: [integration]
-    owner_module: data-generator-writer-kafka
+    owner_module: data-generator-calcite
     status: partial
     linked_tests:
       - KafkaRowSinkAdapterEmbeddedTests

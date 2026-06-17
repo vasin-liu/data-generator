@@ -91,7 +91,7 @@ function New-TestMatrixSummary {
     $outPath = if ([System.IO.Path]::IsPathRooted($OutFile)) { $OutFile } else { Join-Path $RepoRoot $OutFile }
     $outDir = Split-Path -Parent $outPath
     if ($outDir -and -not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
-    $summary | ConvertTo-Json -Depth 6 | Set-Content -Path $outPath -Encoding utf8NoBOM
+    $summary | ConvertTo-Json -Depth 6 | Set-Content -Path $outPath -Encoding UTF8
     return $summary
 }
 
@@ -154,5 +154,3 @@ function Get-SurefireClassResults {
     }
     return $results
 }
-
-Export-ModuleMember -Function New-TestMatrixSummary, Parse-MatrixRows, Get-SurefireClassResults -ErrorAction SilentlyContinue
