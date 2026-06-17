@@ -85,6 +85,7 @@
         <module>data-generator-writer</module>
         <module>data-generator-converter</module>
         <module>data-generator-calcite</module>
+        <module>data-generator-test-fixtures</module>
     </modules>
 
     <scm>
