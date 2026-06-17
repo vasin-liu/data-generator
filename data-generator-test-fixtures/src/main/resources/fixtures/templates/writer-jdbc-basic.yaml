@@ -1,0 +1,27 @@
+# definitionKind: V2
+# fixtureScenario: writer-jdbc-basic
+name: writer-jdbc-basic
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  rows:
+    type: inline
+    rows:
+      - { id: 1, label: alpha }
+      - { id: 2, label: beta }
+      - { id: 3, label: gamma }
+transform:
+  type: sql
+  sql: SELECT id, label FROM rows
+sink:
+  writers:
+    - type: jdbc
+      dataSource:
+        name: fixture-writer-target
+        type: jdbc
+        url: jdbc:h2:mem:fixture_writer_basic;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+        username: sa
+        password: ""
+        driverClassName: org.h2.Driver
+      target: fixture_export

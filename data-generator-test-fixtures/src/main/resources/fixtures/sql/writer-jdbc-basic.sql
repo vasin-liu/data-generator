@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS fixture_export (
+    id BIGINT PRIMARY KEY,
+    label VARCHAR(64) NOT NULL
+);

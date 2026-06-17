@@ -1,0 +1,23 @@
+# definitionKind: V2
+# fixtureScenario: transform-sql-basic
+name: transform-sql-basic
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  orders:
+    type: query
+    dataSource:
+      name: fixture-transform-source
+      type: jdbc
+      url: jdbc:h2:mem:fixture_transform_basic;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, amount FROM fixture_orders ORDER BY id
+transform:
+  type: sql
+  sql: SELECT COUNT(*) AS order_count, SUM(amount) AS total_amount FROM orders
+sink:
+  writers:
+    - type: console

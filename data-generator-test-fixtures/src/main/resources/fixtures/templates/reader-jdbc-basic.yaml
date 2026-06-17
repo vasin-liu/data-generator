@@ -1,0 +1,23 @@
+# definitionKind: V2
+# fixtureScenario: reader-jdbc-basic
+name: reader-jdbc-basic
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  customers:
+    type: query
+    dataSource:
+      name: fixture-reader-source
+      type: jdbc
+      url: jdbc:h2:mem:fixture_reader_basic;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, name FROM fixture_customers ORDER BY id
+transform:
+  type: sql
+  sql: SELECT id, name FROM customers
+sink:
+  writers:
+    - type: console
