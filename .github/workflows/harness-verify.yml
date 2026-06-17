@@ -1,0 +1,44 @@
+name: Harness verify
+
+on:
+  push:
+    branches: [master, main, 'feature-*']
+  pull_request:
+
+jobs:
+  harness-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Install PowerShell
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https software-properties-common
+          wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo apt-get install -y powershell
+
+      - name: Prepare Maven wrapper
+        run: chmod +x mvnw
+
+      - name: Harness verification (embedded fast path)
+        run: pwsh -NoProfile -File ./scripts/verify-harness.ps1
+
+      - name: Upload test matrix summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-matrix-summary
+          path: target/test-matrix-summary.json
+          if-no-files-found: error

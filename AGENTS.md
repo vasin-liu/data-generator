@@ -67,6 +67,9 @@ Focused builds (examples from internal upgrade docs):
 # Operator console: unit + frontend build + Podman Playwright UI/E2E (fixed pipeline)
 .\scripts\verify-console.ps1
 
+# Test harness: matrix-linked Maven slice + coverage summary (see docs/test-harness.md)
+.\scripts\verify-harness.ps1
+
 # Pack 3 execution reliability (Maven slice + optional Playwright against running console)
 .\scripts\verify-execution-reliability.ps1 -SkipPlaywright
 
