@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -64,6 +65,8 @@ class AiQuotaServiceIntegrationTests {
         properties.getAiRuntime().getQuota().setMaxCallsPerDay(0L);
         properties.getAiRuntime().getQuota().setMaxTokensPerDay(0L);
         properties.getAiRuntime().getQuota().setAlertsEnabled(false);
+        properties.getAiRuntime().getQuota().setWebhooksEnabled(false);
+        properties.getAiRuntime().getQuota().setWebhooks(new java.util.ArrayList<>());
         properties.getAiRuntime().getQuota().setScopeOverrides(new java.util.ArrayList<>());
         AiExecutionScope.clear();
     }
@@ -79,6 +82,7 @@ class AiQuotaServiceIntegrationTests {
                 scopedRepository,
                 pricingService,
                 mock(AuditService.class),
+                mock(AiQuotaWebhookNotifier.class),
                 transactionTemplate,
                 Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
 
@@ -103,6 +107,7 @@ class AiQuotaServiceIntegrationTests {
                 scopedRepository,
                 pricingService,
                 mock(AuditService.class),
+                mock(AiQuotaWebhookNotifier.class),
                 transactionTemplate,
                 Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
         quotaService.beforeCall("OLLAMA");
@@ -132,6 +137,7 @@ class AiQuotaServiceIntegrationTests {
                 scopedRepository,
                 pricingService,
                 mock(AuditService.class),
+                mock(AiQuotaWebhookNotifier.class),
                 transactionTemplate,
                 Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
 
@@ -155,6 +161,7 @@ class AiQuotaServiceIntegrationTests {
                 scopedRepository,
                 pricingService,
                 mock(AuditService.class),
+                mock(AiQuotaWebhookNotifier.class),
                 transactionTemplate,
                 Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
 
@@ -182,10 +189,65 @@ class AiQuotaServiceIntegrationTests {
                 scopedRepository,
                 pricingService,
                 auditService,
+                mock(AiQuotaWebhookNotifier.class),
                 transactionTemplate,
                 Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
 
         quotaService.beforeCall("OLLAMA");
         verify(auditService, atLeastOnce()).record(eq("AI_QUOTA_WARN"), eq("AI_QUOTA"), eq(AiQuotaScopeKeys.PLATFORM), org.mockito.ArgumentMatchers.anyMap());
+    }
+
+    @Test
+    void enforcesTenantScopedCallQuota() {
+        properties.getAiRuntime().getQuota().setEnabled(true);
+        DataGeneratorProperties.AiQuotaScopeOverride override = new DataGeneratorProperties.AiQuotaScopeOverride();
+        override.setScopeType("TENANT");
+        override.setScopeKey("acme");
+        override.setMaxCallsPerDay(1L);
+        properties.getAiRuntime().getQuota().setScopeOverrides(java.util.List.of(override));
+
+        AiQuotaService quotaService = new AiQuotaService(
+                properties,
+                platformRepository,
+                scopedRepository,
+                pricingService,
+                mock(AuditService.class),
+                mock(AiQuotaWebhookNotifier.class),
+                transactionTemplate,
+                Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
+
+        try {
+            AiExecutionScope.bind(9001L, "demo-template", "acme");
+            quotaService.beforeCall("OPENAI");
+            Assertions.assertThrows(AiQuotaExceededException.class, () -> quotaService.beforeCall("OPENAI"));
+        }
+        finally {
+            AiExecutionScope.clear();
+        }
+    }
+
+    @Test
+    void dispatchesWebhookWhenQuotaWarns() {
+        properties.getAiRuntime().getQuota().setEnabled(true);
+        properties.getAiRuntime().getQuota().setWebhooksEnabled(true);
+        properties.getAiRuntime().getQuota().setWarnAtPercent(50);
+        properties.getAiRuntime().getQuota().setMaxCallsPerDay(2L);
+        DataGeneratorProperties.AiQuotaWebhookEndpoint endpoint = new DataGeneratorProperties.AiQuotaWebhookEndpoint();
+        endpoint.setUrl("http://localhost:9999/quota-hook");
+        properties.getAiRuntime().getQuota().setWebhooks(java.util.List.of(endpoint));
+        AiQuotaWebhookNotifier webhookNotifier = mock(AiQuotaWebhookNotifier.class);
+
+        AiQuotaService quotaService = new AiQuotaService(
+                properties,
+                platformRepository,
+                scopedRepository,
+                pricingService,
+                mock(AuditService.class),
+                webhookNotifier,
+                transactionTemplate,
+                Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC));
+
+        quotaService.beforeCall("OLLAMA");
+        verify(webhookNotifier, atLeastOnce()).notifyEvent(any(AiQuotaAlertEvent.class));
     }
 }

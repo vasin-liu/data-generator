@@ -38,6 +38,14 @@ public final class AiQuotaScopeKeys {
     }
 
     /**
+     * @param tenantId tenant identifier from template metadata
+     * @return scoped key {@code tenant:<id>}
+     */
+    public static String tenant(String tenantId) {
+        return "tenant:" + tenantId.trim();
+    }
+
+    /**
      * @param scopeType configured scope type
      * @param scopeKey  configured scope key
      * @return canonical scoped bucket key
@@ -52,6 +60,9 @@ public final class AiQuotaScopeKeys {
         }
         if ("TEMPLATE".equals(normalizedType)) {
             return template(scopeKey);
+        }
+        if ("TENANT".equals(normalizedType)) {
+            return tenant(scopeKey);
         }
         throw new IllegalArgumentException("Unsupported AI quota scope type [" + scopeType + "]");
     }

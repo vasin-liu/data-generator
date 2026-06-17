@@ -25,7 +25,18 @@ public final class AiExecutionScope {
      * @param templateName human-readable template name
      */
     public static void bind(Long templateId, String templateName) {
-        CURRENT.set(new Binding(templateId, templateName));
+        bind(templateId, templateName, null);
+    }
+
+    /**
+     * Binds template and optional tenant identity for the current thread.
+     *
+     * @param templateId   template snowflake id, may be {@code null}
+     * @param templateName human-readable template name
+     * @param tenantId     tenant id from template metadata, may be {@code null}
+     */
+    public static void bind(Long templateId, String templateName, String tenantId) {
+        CURRENT.set(new Binding(templateId, templateName, blankToNull(tenantId)));
     }
 
     /** Clears the binding for the current thread. */
@@ -49,6 +60,21 @@ public final class AiExecutionScope {
         return binding == null ? null : binding.templateName();
     }
 
-    private record Binding(Long templateId, String templateName) {
+    /**
+     * @return bound tenant id or {@code null}
+     */
+    public static String tenantId() {
+        Binding binding = CURRENT.get();
+        return binding == null ? null : binding.tenantId();
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
+    }
+
+    private record Binding(Long templateId, String templateName, String tenantId) {
     }
 }

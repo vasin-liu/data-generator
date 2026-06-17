@@ -472,6 +472,8 @@ export interface AiQuotaStatus {
   alertsEnabled: boolean;
   warnAtPercent: number;
   scopes: AiQuotaScopeStatus[];
+  webhooksEnabled: boolean;
+  webhookCount: number;
 }
 
 /** Secret registry metadata (value never returned). */

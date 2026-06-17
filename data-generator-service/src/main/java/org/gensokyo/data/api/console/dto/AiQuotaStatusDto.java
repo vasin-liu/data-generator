@@ -23,6 +23,8 @@ package org.gensokyo.data.api.console.dto;
  * @param alertsEnabled           whether quota warn/exceed audit hooks are active
  * @param warnAtPercent           warn threshold percent (0 = disabled)
  * @param scopes                  configured provider/template scoped quotas
+ * @param webhooksEnabled           whether outbound quota webhooks are configured
+ * @param webhookCount              number of configured webhook endpoints
  * @author Gensokyo
  * @since 2026-06-12
  */
@@ -41,5 +43,7 @@ public record AiQuotaStatusDto(
         Double remainingCostUsd,
         boolean alertsEnabled,
         int warnAtPercent,
-        java.util.List<AiQuotaScopeStatusDto> scopes) {
+        java.util.List<AiQuotaScopeStatusDto> scopes,
+        boolean webhooksEnabled,
+        int webhookCount) {
 }

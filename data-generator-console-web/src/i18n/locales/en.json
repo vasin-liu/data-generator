@@ -113,6 +113,8 @@
   "jobs.aiQuota.unlimited": "Unlimited",
   "jobs.aiQuota.scopedTitle": "Provider / template quotas",
   "jobs.aiQuota.scope": "Scope",
+  "jobs.aiQuota.webhooks": "Quota webhooks",
+  "jobs.aiQuota.webhookCount": "{{count}} endpoint(s) configured",
   "schedules.title": "Schedules",
   "schedules.subtitle": "Cron-driven template runs (requires data.generator.schedule.enabled on server)",
   "schedules.hint.title": "Server configuration",

@@ -183,8 +183,27 @@ public class DataGeneratorProperties {
         private boolean alertsEnabled = false;
         /** Warn threshold percent (1–100); 0 disables warn alerts. */
         private Integer warnAtPercent = 80;
-        /** Optional per-provider or per-template daily quota overrides. */
+        /** Optional per-provider, per-template, or per-tenant daily quota overrides. */
         private java.util.List<AiQuotaScopeOverride> scopeOverrides = new java.util.ArrayList<>();
+        /** When {@code true}, quota warn/exceed events are POSTed to configured webhook URLs. */
+        private boolean webhooksEnabled = false;
+        /** Outbound webhook endpoints for quota notifications. */
+        private java.util.List<AiQuotaWebhookEndpoint> webhooks = new java.util.ArrayList<>();
+    }
+
+    /**
+     * Outbound webhook endpoint for {@code data.generator.ai-runtime.quota.webhooks}.
+     */
+    @Getter
+    @Setter
+    public static class AiQuotaWebhookEndpoint {
+        private String url;
+        /** Optional header name for shared-secret authentication. */
+        private String secretHeaderName;
+        /** Optional header value; never returned by console APIs. */
+        private String secretValue;
+        /** Subscribed events: {@code WARN}, {@code EXCEEDED} (default both). */
+        private java.util.List<String> events = new java.util.ArrayList<>(java.util.List.of("WARN", "EXCEEDED"));
     }
 
     /**
@@ -193,7 +212,7 @@ public class DataGeneratorProperties {
     @Getter
     @Setter
     public static class AiQuotaScopeOverride {
-        /** {@code PROVIDER} or {@code TEMPLATE}. */
+        /** {@code PROVIDER}, {@code TEMPLATE}, or {@code TENANT}. */
         private String scopeType;
         /** Provider type (e.g. {@code OPENAI}) or template snowflake id. */
         private String scopeKey;

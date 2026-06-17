@@ -77,6 +77,13 @@ final class AiQuotaScopePolicyResolver {
                 active.add(templatePolicy);
             }
         }
+        String tenantId = AiExecutionScope.tenantId();
+        if (tenantId != null) {
+            AiQuotaScopedPolicy tenantPolicy = configured.get(AiQuotaScopeKeys.tenant(tenantId));
+            if (tenantPolicy != null) {
+                active.add(tenantPolicy);
+            }
+        }
         return active;
     }
 
@@ -85,6 +92,13 @@ final class AiQuotaScopePolicyResolver {
         String key = override.getScopeKey().trim();
         if ("PROVIDER".equals(type)) {
             return key.toUpperCase(Locale.ROOT);
+        }
+        if ("TENANT".equals(type)) {
+            String tenantId = AiExecutionScope.tenantId();
+            if (tenantId != null && !tenantId.isBlank()) {
+                return tenantId;
+            }
+            return key;
         }
         String templateName = AiExecutionScope.templateName();
         if (templateName != null && !templateName.isBlank()) {

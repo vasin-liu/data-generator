@@ -42,6 +42,7 @@ public class AiQuotaService {
     private final AiQuotaScopeDailyUsageRepository scopedRepository;
     private final AiPricingService pricingService;
     private final AuditService auditService;
+    private final AiQuotaWebhookNotifier webhookNotifier;
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
     private final Set<String> alertedKeys = ConcurrentHashMap.newKeySet();
@@ -52,6 +53,7 @@ public class AiQuotaService {
      * @param scopedRepository    scoped daily usage store
      * @param pricingService      cost estimator for quota accounting
      * @param auditService        audit log for quota alert hooks
+     * @param webhookNotifier     outbound quota webhook dispatcher
      * @param transactionTemplate short quota transactions
      */
     @Autowired
@@ -61,8 +63,9 @@ public class AiQuotaService {
             AiQuotaScopeDailyUsageRepository scopedRepository,
             AiPricingService pricingService,
             AuditService auditService,
+            AiQuotaWebhookNotifier webhookNotifier,
             TransactionTemplate transactionTemplate) {
-        this(properties, platformRepository, scopedRepository, pricingService, auditService, transactionTemplate, Clock.systemUTC());
+        this(properties, platformRepository, scopedRepository, pricingService, auditService, webhookNotifier, transactionTemplate, Clock.systemUTC());
     }
 
     /**
@@ -74,6 +77,7 @@ public class AiQuotaService {
             AiQuotaScopeDailyUsageRepository scopedRepository,
             AiPricingService pricingService,
             AuditService auditService,
+            AiQuotaWebhookNotifier webhookNotifier,
             TransactionTemplate transactionTemplate,
             Clock clock) {
         this.properties = properties;
@@ -81,6 +85,7 @@ public class AiQuotaService {
         this.scopedRepository = scopedRepository;
         this.pricingService = pricingService;
         this.auditService = auditService;
+        this.webhookNotifier = webhookNotifier;
         this.transactionTemplate = transactionTemplate;
         this.clock = clock;
     }
@@ -117,7 +122,9 @@ public class AiQuotaService {
                 remainingCost(platformPolicy.maxCostUsdPerDay(), platformRow.getEstimatedCostUsd()),
                 alertsEnabled(quotaConfig),
                 warnAtPercent(quotaConfig),
-                scopes);
+                scopes,
+                webhooksEnabled(quotaConfig),
+                webhookCount(quotaConfig));
     }
 
     /**
@@ -320,7 +327,7 @@ public class AiQuotaService {
             double used,
             double max) {
         DataGeneratorProperties.AiRuntimeQuota quotaConfig = quotaConfig();
-        if (!alertsEnabled(quotaConfig)) {
+        if (!alertsEnabled(quotaConfig) && !webhooksEnabled(quotaConfig)) {
             return;
         }
         int warnAtPercent = warnAtPercent(quotaConfig);
@@ -335,17 +342,34 @@ public class AiQuotaService {
         if (!alertedKeys.add(alertKey)) {
             return;
         }
-        auditService.record(
-                "AI_QUOTA_WARN",
-                "AI_QUOTA",
-                scopeKey,
-                Map.of(
-                        "usageDate", usageDate,
-                        "scopeType", scopeType,
-                        "dimension", dimension,
-                        "used", used,
-                        "max", max,
-                        "percentUsed", roundUsd(percentUsed)));
+        emitWarn(usageDate, scopeKey, scopeType, dimension, used, max, roundUsd(percentUsed));
+    }
+
+    private void emitWarn(
+            String usageDate,
+            String scopeKey,
+            String scopeType,
+            String dimension,
+            double used,
+            double max,
+            double percentUsed) {
+        if (alertsEnabled(quotaConfig())) {
+            auditService.record(
+                    "AI_QUOTA_WARN",
+                    "AI_QUOTA",
+                    scopeKey,
+                    Map.of(
+                            "usageDate", usageDate,
+                            "scopeType", scopeType,
+                            "dimension", dimension,
+                            "used", used,
+                            "max", max,
+                            "percentUsed", percentUsed));
+        }
+        if (webhookNotifier != null) {
+            webhookNotifier.notifyEvent(new AiQuotaAlertEvent(
+                    "WARN", usageDate, scopeKey, scopeType, dimension, used, max, percentUsed));
+        }
     }
 
     private void recordExceeded(
@@ -355,19 +379,22 @@ public class AiQuotaService {
             String dimension,
             double used,
             double max) {
-        if (!alertsEnabled(quotaConfig())) {
-            return;
+        if (alertsEnabled(quotaConfig())) {
+            auditService.record(
+                    "AI_QUOTA_EXCEEDED",
+                    "AI_QUOTA",
+                    scopeKey,
+                    Map.of(
+                            "usageDate", usageDate,
+                            "scopeType", scopeType,
+                            "dimension", dimension,
+                            "used", used,
+                            "max", max));
         }
-        auditService.record(
-                "AI_QUOTA_EXCEEDED",
-                "AI_QUOTA",
-                scopeKey,
-                Map.of(
-                        "usageDate", usageDate,
-                        "scopeType", scopeType,
-                        "dimension", dimension,
-                        "used", used,
-                        "max", max));
+        if (webhookNotifier != null) {
+            webhookNotifier.notifyEvent(new AiQuotaAlertEvent(
+                    "EXCEEDED", usageDate, scopeKey, scopeType, dimension, used, max, null));
+        }
     }
 
     private AiQuotaPolicy platformPolicy() {
@@ -499,6 +526,19 @@ public class AiQuotaService {
             return 80;
         }
         return Math.max(0, Math.min(100, quota.getWarnAtPercent()));
+    }
+
+    private static boolean webhooksEnabled(DataGeneratorProperties.AiRuntimeQuota quota) {
+        return quota != null && quota.isWebhooksEnabled() && quota.getWebhooks() != null && !quota.getWebhooks().isEmpty();
+    }
+
+    private static int webhookCount(DataGeneratorProperties.AiRuntimeQuota quota) {
+        if (quota == null || quota.getWebhooks() == null) {
+            return 0;
+        }
+        return (int) quota.getWebhooks().stream()
+                .filter(endpoint -> endpoint != null && endpoint.getUrl() != null && !endpoint.getUrl().isBlank())
+                .count();
     }
 
     private static Long remaining(long max, long used) {

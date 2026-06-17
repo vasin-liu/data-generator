@@ -312,6 +312,11 @@ export function JobsPage() {
               ? t('jobs.aiQuota.unlimited')
               : formatUsd(aiQuotaQuery.data.remainingCostUsd)}
           </Descriptions.Item>
+          {aiQuotaQuery.data.webhooksEnabled ? (
+            <Descriptions.Item label={t('jobs.aiQuota.webhooks')} span={2}>
+              {t('jobs.aiQuota.webhookCount', { count: aiQuotaQuery.data.webhookCount })}
+            </Descriptions.Item>
+          ) : null}
         </Descriptions>
       ) : null}
       {aiQuotaQuery.data?.enabled && (aiQuotaQuery.data.scopes?.length ?? 0) > 0 ? (

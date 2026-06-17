@@ -97,6 +97,9 @@ Focused builds (examples from internal upgrade docs):
 # AI P9 scoped provider/template quotas + quota audit alert hooks
 .\scripts\verify-ai-p9.ps1 -SkipPlaywright
 
+# AI P10 tenant-scoped quotas + quota notification webhooks
+.\scripts\verify-ai-p10.ps1 -SkipPlaywright
+
 # Unit tests only (console REST, health, static resources)
 .\scripts\verify-console-unit.ps1 -IncludeWebBuild
 

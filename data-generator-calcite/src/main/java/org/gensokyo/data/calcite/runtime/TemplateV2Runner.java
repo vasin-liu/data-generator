@@ -65,7 +65,7 @@ public class TemplateV2Runner {
         }
 
         try {
-            AiExecutionScope.bind(template.getId(), template.getName());
+            AiExecutionScope.bind(template.getId(), template.getName(), tenantIdFromMetadata(template));
             return runBound(template);
         }
         finally {
@@ -93,6 +93,21 @@ public class TemplateV2Runner {
             return new ChunkedPipeline(this::createSink).run(template, policy, registry);
         }
         throw new UnsupportedOperationException("Execution mode not yet supported: " + policy.mode());
+    }
+
+    private static String tenantIdFromMetadata(TemplateV2VO template) {
+        if (template.getMetadata() == null || template.getMetadata().isEmpty()) {
+            return null;
+        }
+        Object tenantId = template.getMetadata().get("tenantId");
+        if (tenantId == null) {
+            tenantId = template.getMetadata().get("tenant_id");
+        }
+        if (tenantId == null) {
+            return null;
+        }
+        String value = String.valueOf(tenantId).trim();
+        return value.isEmpty() ? null : value;
     }
 
     protected RowSink createSink(TemplateV2RuntimeRegistry runtimeRegistry, WriterVO writer) {

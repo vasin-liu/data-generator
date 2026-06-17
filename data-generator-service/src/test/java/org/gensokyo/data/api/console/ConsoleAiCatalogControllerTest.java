@@ -42,7 +42,7 @@ class ConsoleAiCatalogControllerTest {
                         0L, 0L, 0L, 0L, 0L, 0.0D, java.util.List.of()));
         when(quotaService.status()).thenReturn(
                 new org.gensokyo.data.api.console.dto.AiQuotaStatusDto(
-                        false, "2026-06-12", 0L, 0L, 0.0D, 0L, 0L, 0L, 0.0D, null, null, null, false, 80, java.util.List.of()));
+                        false, "2026-06-12", 0L, 0L, 0.0D, 0L, 0L, 0L, 0.0D, null, null, null, false, 80, java.util.List.of(), false, 0));
         mockMvc = MockMvcBuilders.standaloneSetup(
                 new ConsoleAiCatalogController(catalogService, usageService, pricingService, quotaService)).build();
     }
