@@ -42,9 +42,9 @@ rows:
     adapter: jdbc
     test_types: [integration]
     owner_module: data-generator-test-fixtures
-    status: pending
-    linked_tests: []
-    notes: Reserved for plan 01-02 embedded JDBC reader example.
+    status: partial
+    linked_tests: [FixtureReaderJdbcExampleTests]
+    notes: Embedded JDBC reader example from data-generator-test-fixtures.
 
   - id: reader-elasticsearch
     capability: reader-elasticsearch
@@ -96,9 +96,9 @@ rows:
     adapter: jdbc
     test_types: [integration]
     owner_module: data-generator-test-fixtures
-    status: pending
-    linked_tests: []
-    notes: Reserved for plan 01-02 embedded JDBC writer example.
+    status: partial
+    linked_tests: [FixtureWriterJdbcExampleTests]
+    notes: Embedded JDBC writer example from data-generator-test-fixtures.
 
   - id: writer-elasticsearch
     capability: writer-elasticsearch
@@ -197,9 +197,9 @@ rows:
     adapter: calcite-sql
     test_types: [integration]
     owner_module: data-generator-test-fixtures
-    status: pending
-    linked_tests: []
-    notes: Reserved for plan 01-02 embedded SQL transform example.
+    status: partial
+    linked_tests: [FixtureTransformSqlExampleTests]
+    notes: Embedded SQL transform example from data-generator-test-fixtures.
 
   - id: calcite-transform-js
     capability: calcite-transform-js
@@ -342,9 +342,10 @@ rows:
     adapter: console-ui
     test_types: [e2e]
     owner_module: data-generator-console-web
-    status: pending
-    linked_tests: []
-    notes: Job trigger smoke; wired in plan 01-03.
+    status: partial
+    linked_tests:
+      - e2e/specs/job-trigger.spec.ts#triggers template run via console API and returns instance id
+    notes: Job trigger smoke via console template run API.
 
   - id: console-ui-navigation
     capability: console-ui-navigation

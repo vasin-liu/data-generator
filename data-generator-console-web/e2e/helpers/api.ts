@@ -82,6 +82,10 @@ export async function fetchJobs(request: APIRequestContext) {
   return { res, body: res.ok() ? await res.json() : null };
 }
 
+export async function triggerTemplateRun(request: APIRequestContext, templateId: string) {
+  return apiPostWithRole(request, `/api/templates/${encodeURIComponent(templateId)}/run`, {});
+}
+
 export async function fetchSchedules(request: APIRequestContext) {
   const res = await request.get(`${apiBaseUrl()}/api/console/schedules`);
   return { res, body: res.ok() ? await res.json() : null };
