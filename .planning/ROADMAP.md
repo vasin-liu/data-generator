@@ -6,7 +6,7 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 
 ## Phases
 
-- [ ] **Phase 1: Test Harness Foundation** — Feature matrix, simulation fixtures, CI entry, coverage reporting
+- [x] **Phase 1: Test Harness Foundation** — Feature matrix, simulation fixtures, CI entry, coverage reporting (completed 2026-06-17)
 - [ ] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance
 - [ ] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs
 - [ ] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing
@@ -34,17 +34,18 @@ Plans:
 
 **Wave 1**
 
-- [ ] 01-01: Feature matrix schema + coarse row catalog at `.planning/test-matrix.yaml`, semi-automatic draft generator, and generated `docs/test-feature-matrix.md` (TEST-01)
+- [x] 01-01: Feature matrix schema + coarse row catalog at `.planning/test-matrix.yaml`, semi-automatic draft generator, and generated `docs/test-feature-matrix.md` (TEST-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02: `data-generator-test-fixtures` test-jar module with `FixtureTemplates.load`/`H2Seed.apply` and one embedded example per adapter (reader/writer/transform) using synthetic fixtures (TEST-02, TEST-05)
+- [x] 01-02: `data-generator-test-fixtures` test-jar module with `FixtureTemplates.load`/`H2Seed.apply` and one embedded example per adapter (reader/writer/transform) using synthetic fixtures (TEST-02, TEST-05)
 
 **Wave 3** *(blocked on Waves 1-2 completion)*
 
-- [ ] 01-03: `scripts/verify-harness.ps1` embedded fast path, `target/test-matrix-summary.json` coverage summary, `harness-verify.yml` CI, and Playwright template-edit + job-trigger smoke tied to matrix rows (TEST-03, TEST-04, TEST-06)
+- [x] 01-03: `scripts/verify-harness.ps1` embedded fast path, `target/test-matrix-summary.json` coverage summary, `harness-verify.yml` CI, and Playwright template-edit + job-trigger smoke tied to matrix rows (TEST-03, TEST-04, TEST-06)
 
 Cross-cutting constraints:
+
 - `.planning/test-matrix.yaml` is the single source of truth (created in 01-01, linked_tests populated in 01-03)
 - Embedded-first, no production credentials; pending matrix rows never fail the harness in Phase 1
 
@@ -63,10 +64,13 @@ Cross-cutting constraints:
 3. Governance rejects UDF payloads that violate secret/template policy at registration time
 
 **Plans**: 3 plans
-
 Plans:
+**Wave 1**
 
 - [ ] 02-01: Design and implement unified UDF registry model and persistence
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 02-02: Implement Java/PF4J and script UDF registration runtimes
 - [ ] 02-03: Implement SQL/Calcite UDF registration and governance integration
 
@@ -145,7 +149,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Test Harness Foundation | 0/3 | Not started | - |
+| 1. Test Harness Foundation | 3/3 | Complete    | 2026-06-17 |
 | 2. UDF Platform Core | 0/3 | Not started | - |
 | 3. UDF Console & Template Binding | 0/3 | Not started | - |
 | 4. Transform Operators & SQL | 0/3 | Not started | - |
