@@ -15,6 +15,10 @@ import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.repository.AiRateLimitStateRepository;
 import org.gensokyo.data.udf.InMemoryUdfRegistry;
 import org.gensokyo.data.udf.UdfRegistry;
+import org.gensokyo.data.udf.DefaultRegistrySqlFunctionSource;
+import org.gensokyo.data.calcite.udf.GraalJsScriptUdfExecutor;
+import org.gensokyo.data.calcite.udf.RegistryBackedRuntimePluginProvider;
+import org.gensokyo.data.calcite.udf.RegistrySqlFunctionSource;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.plugin.DirectoryAwareTemplateV2RuntimePluginProvider;
@@ -316,6 +320,26 @@ public class CoreConfig {
     @ConditionalOnMissingBean(UdfRegistry.class)
     public UdfRegistry udfRegistry() {
         return new InMemoryUdfRegistry();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(GraalJsScriptUdfExecutor.class)
+    public GraalJsScriptUdfExecutor graalJsScriptUdfExecutor() {
+        return new GraalJsScriptUdfExecutor();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(RegistrySqlFunctionSource.class)
+    public RegistrySqlFunctionSource registrySqlFunctionSource(UdfRegistry udfRegistry,
+                                                               GraalJsScriptUdfExecutor graalJsScriptUdfExecutor) {
+        return new DefaultRegistrySqlFunctionSource(udfRegistry, graalJsScriptUdfExecutor);
+    }
+
+    @Bean(name = "registryBackedTemplateV2RuntimePluginProvider")
+    @ConditionalOnMissingBean(name = "registryBackedTemplateV2RuntimePluginProvider")
+    public TemplateV2RuntimePluginProvider registryBackedTemplateV2RuntimePluginProvider(
+            RegistrySqlFunctionSource registrySqlFunctionSource) {
+        return new RegistryBackedRuntimePluginProvider(registrySqlFunctionSource);
     }
 
     private boolean usePf4j(DataGeneratorProperties properties) {

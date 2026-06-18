@@ -382,3 +382,32 @@ rows:
     status: pending
     linked_tests: []
     notes: Legacy task REST controller integration tests.
+
+  - id: udf-sql
+    capability: udf-sql
+    adapter: calcite-sql
+    test_types: [unit]
+    owner_module: data-generator-service
+    status: covered
+    linked_tests: [UdfPublishServiceTests]
+    notes: Registry-backed SQL UDF publish gate, runtime bridge, and built-in collision skip (UDF-04).
+
+  - id: udf-script
+    capability: udf-script
+    adapter: javascript
+    test_types: [unit]
+    owner_module: data-generator-calcite
+    status: covered
+    linked_tests:
+      - GraalJsScriptUdfExecutorTests
+      - UdfPublishServiceTests
+    notes: GraalJS callable script UDF executor with sandbox, timeout, and schema-gate (UDF-03).
+
+  - id: udf-java-plugin
+    capability: udf-java-plugin
+    adapter: pf4j
+    test_types: [unit]
+    owner_module: data-generator-service
+    status: covered
+    linked_tests: [UdfGovernanceSupportTests]
+    notes: Registry records and governs PF4J JAR plugins; loading reuses existing directory path (UDF-02, D-09).

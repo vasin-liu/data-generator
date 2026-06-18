@@ -7,12 +7,12 @@
 
 ### Test Harness
 
-- [ ] **TEST-01**: A documented feature matrix exists mapping platform capabilities (readers, writers, transforms, console flows) to test types and owners (`docs/` or `.planning/`)
-- [ ] **TEST-02**: A reusable synthetic data simulation fixture library supports Template V2 runs in tests without production credentials
-- [ ] **TEST-03**: A single CI-oriented entry script runs the harness slice (Maven modules + optional console build) with JDK 25 and project Maven settings
-- [ ] **TEST-04**: Harness reports which matrix rows are covered vs pending (machine-readable summary for phased ramp)
-- [ ] **TEST-05**: Embedded-first integration patterns are documented and exemplified for at least one reader, one writer, and one transform path
-- [ ] **TEST-06**: Playwright console smoke path is wired to matrix rows for template edit and job trigger (extends `data-generator-console-web/e2e/`)
+- [x] **TEST-01**: A documented feature matrix exists mapping platform capabilities (readers, writers, transforms, console flows) to test types and owners (`docs/` or `.planning/`)
+- [x] **TEST-02**: A reusable synthetic data simulation fixture library supports Template V2 runs in tests without production credentials
+- [x] **TEST-03**: A single CI-oriented entry script runs the harness slice (Maven modules + optional console build) with JDK 25 and project Maven settings
+- [x] **TEST-04**: Harness reports which matrix rows are covered vs pending (machine-readable summary for phased ramp)
+- [x] **TEST-05**: Embedded-first integration patterns are documented and exemplified for at least one reader, one writer, and one transform path
+- [x] **TEST-06**: Playwright console smoke path is wired to matrix rows for template edit and job trigger (extends `data-generator-console-web/e2e/`)
 
 ### UDF Platform
 
@@ -81,12 +81,12 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 1 | Pending |
-| TEST-03 | Phase 1 | Pending |
-| TEST-04 | Phase 1 | Pending |
-| TEST-05 | Phase 1 | Pending |
-| TEST-06 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
+| TEST-02 | Phase 1 | Complete |
+| TEST-03 | Phase 1 | Complete |
+| TEST-04 | Phase 1 | Complete |
+| TEST-05 | Phase 1 | Complete |
+| TEST-06 | Phase 1 | Complete |
 | UDF-01 | Phase 2 | Pending |
 | UDF-02 | Phase 2 | Pending |
 | UDF-03 | Phase 2 | Pending |
