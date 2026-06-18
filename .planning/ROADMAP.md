@@ -7,7 +7,7 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 ## Phases
 
 - [x] **Phase 1: Test Harness Foundation** — Feature matrix, simulation fixtures, CI entry, coverage reporting (completed 2026-06-17)
-- [ ] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance
+- [x] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance (completed 2026-06-18)
 - [ ] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs
 - [ ] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing
 - [ ] **Phase 5: Coverage Ramp & CI Gates** — P0 matrix green, API slices, merge regression gate
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Test Harness Foundation | 3/3 | Complete    | 2026-06-17 |
-| 2. UDF Platform Core | 0/3 | Not started | - |
+| 2. UDF Platform Core | 3/3 | Complete    | 2026-06-18 |
 | 3. UDF Console & Template Binding | 0/3 | Not started | - |
 | 4. Transform Operators & SQL | 0/3 | Not started | - |
 | 5. Coverage Ramp & CI Gates | 0/2 | Not started | - |
