@@ -13,6 +13,8 @@ import org.gensokyo.data.ai.runtime.JdbcAiRateLimiter;
 import org.gensokyo.data.ai.runtime.OpenAiCompatibleRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.repository.AiRateLimitStateRepository;
+import org.gensokyo.data.udf.InMemoryUdfRegistry;
+import org.gensokyo.data.udf.UdfRegistry;
 import org.gensokyo.data.cache.Templates;
 import org.gensokyo.data.calcite.AiRuntimeBridge;
 import org.gensokyo.data.calcite.plugin.DirectoryAwareTemplateV2RuntimePluginProvider;
@@ -308,6 +310,12 @@ public class CoreConfig {
     @ConditionalOnMissingBean(org.gensokyo.data.secret.SecretResolver.class)
     public org.gensokyo.data.secret.SecretResolver passthroughSecretResolver() {
         return new PassthroughSecretResolver();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(UdfRegistry.class)
+    public UdfRegistry udfRegistry() {
+        return new InMemoryUdfRegistry();
     }
 
     private boolean usePf4j(DataGeneratorProperties properties) {

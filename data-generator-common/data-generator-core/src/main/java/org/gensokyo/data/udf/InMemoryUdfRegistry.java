@@ -1,0 +1,194 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.udf;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
+/**
+ * Thread-safe in-memory {@link UdfRegistry} implementation.
+ *
+ * @author Gensokyo
+ * @since 2026-06-17
+ */
+public final class InMemoryUdfRegistry implements UdfRegistry {
+
+    private static final Pattern UDF_ID_PATTERN =
+            Pattern.compile("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$");
+    private static final Pattern SEMVER_PATTERN = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+
+    private final Map<String, UdfRecord> records = new ConcurrentHashMap<>();
+
+    @Override
+    public UdfRecord registerDraft(String udfId, String version, UdfType type, byte[] payload,
+                                   Map<String, String> metadata) {
+        String normalizedId = validateUdfId(udfId);
+        String normalizedVersion = validateVersion(version);
+        if (type == null) {
+            throw new UdfRegistryException("UDF_INVALID_TYPE", "UDF type is required");
+        }
+        String key = key(normalizedId, normalizedVersion);
+        if (records.containsKey(key)) {
+            throw new UdfRegistryException("UDF_DUPLICATE_VERSION",
+                    "UDF already registered: " + normalizedId + "@" + normalizedVersion);
+        }
+        UdfRecord record = new UdfRecord.Builder()
+                .udfId(normalizedId)
+                .version(normalizedVersion)
+                .type(type)
+                .state(UdfLifecycleState.DRAFT)
+                .payload(payload == null ? new byte[0] : payload)
+                .metadata(metadata == null ? Map.of() : metadata)
+                .registeredAt(Instant.now())
+                .build();
+        records.put(key, record);
+        return record;
+    }
+
+    @Override
+    public UdfRecord publish(String udfId, String version) {
+        UdfRecord current = requireExisting(udfId, version);
+        if (current.state() == UdfLifecycleState.PUBLISHED) {
+            return current;
+        }
+        if (current.state() != UdfLifecycleState.DRAFT) {
+            throw new UdfRegistryException("UDF_INVALID_TRANSITION",
+                    "Cannot publish UDF in state " + current.state());
+        }
+        UdfRecord published = current.toBuilder()
+                .state(UdfLifecycleState.PUBLISHED)
+                .publishedAt(Instant.now())
+                .build();
+        records.put(key(published.udfId(), published.version()), published);
+        return published;
+    }
+
+    @Override
+    public UdfRecord deprecate(String udfId, String version) {
+        UdfRecord current = requireExisting(udfId, version);
+        if (current.state() == UdfLifecycleState.DEPRECATED) {
+            return current;
+        }
+        if (current.state() != UdfLifecycleState.PUBLISHED) {
+            throw new UdfRegistryException("UDF_INVALID_TRANSITION",
+                    "Cannot deprecate UDF in state " + current.state());
+        }
+        UdfRecord deprecated = current.toBuilder()
+                .state(UdfLifecycleState.DEPRECATED)
+                .deprecatedAt(Instant.now())
+                .build();
+        records.put(key(deprecated.udfId(), deprecated.version()), deprecated);
+        return deprecated;
+    }
+
+    @Override
+    public List<UdfRecord> list(Optional<UdfType> typeFilter) {
+        List<UdfRecord> result = new ArrayList<>();
+        for (UdfRecord record : records.values()) {
+            if (typeFilter.isEmpty() || typeFilter.get() == record.type()) {
+                result.add(record);
+            }
+        }
+        result.sort(Comparator.comparing(UdfRecord::udfId).thenComparing(UdfRecord::version));
+        return List.copyOf(result);
+    }
+
+    @Override
+    public Optional<UdfRecord> find(String udfId, String version) {
+        return Optional.ofNullable(records.get(key(validateUdfId(udfId), validateVersion(version))));
+    }
+
+    @Override
+    public UdfRecord resolve(String udfId, Optional<String> versionOptional) {
+        String normalizedId = validateUdfId(udfId);
+        if (versionOptional.isPresent() && !versionOptional.get().isBlank()) {
+            UdfRecord exact = requireExisting(normalizedId, versionOptional.get());
+            return requirePublished(exact);
+        }
+        // Latest published semver for this udfId (D-17).
+        UdfRecord latest = records.values().stream()
+                .filter(r -> normalizedId.equals(r.udfId()))
+                .filter(r -> r.state() == UdfLifecycleState.PUBLISHED)
+                .max(Comparator.comparing(UdfRecord::version, InMemoryUdfRegistry::compareSemver))
+                .orElseThrow(() -> new UdfRegistryException("UDF_NOT_FOUND",
+                        "No published UDF found for id " + normalizedId));
+        return latest;
+    }
+
+    private UdfRecord requireExisting(String udfId, String version) {
+        return find(udfId, version).orElseThrow(() -> new UdfRegistryException("UDF_NOT_FOUND",
+                "UDF not found: " + udfId + "@" + version));
+    }
+
+    private static UdfRecord requirePublished(UdfRecord record) {
+        if (record.state() == UdfLifecycleState.DRAFT) {
+            throw new UdfRegistryException("UDF_NOT_PUBLISHED",
+                    "UDF is not published: " + record.udfId() + "@" + record.version());
+        }
+        if (record.state() == UdfLifecycleState.DEPRECATED) {
+            throw new UdfRegistryException("UDF_DEPRECATED",
+                    "UDF is deprecated: " + record.udfId() + "@" + record.version());
+        }
+        return record;
+    }
+
+    private static String validateUdfId(String udfId) {
+        if (udfId == null || udfId.isBlank()) {
+            throw new UdfRegistryException("UDF_INVALID_ID", "udfId is required");
+        }
+        String normalized = udfId.trim().toLowerCase(Locale.ROOT);
+        if (!UDF_ID_PATTERN.matcher(normalized).matches()) {
+            throw new UdfRegistryException("UDF_INVALID_ID",
+                    "udfId must be reverse-DNS (e.g. com.example.my_udf): " + udfId);
+        }
+        return normalized;
+    }
+
+    private static String validateVersion(String version) {
+        if (version == null || version.isBlank()) {
+            throw new UdfRegistryException("UDF_INVALID_VERSION", "version is required");
+        }
+        String normalized = version.trim();
+        if (!SEMVER_PATTERN.matcher(normalized).matches()) {
+            throw new UdfRegistryException("UDF_INVALID_VERSION",
+                    "version must be semver major.minor.patch: " + version);
+        }
+        return normalized;
+    }
+
+    private static String key(String udfId, String version) {
+        return udfId + "@" + version;
+    }
+
+    private static int compareSemver(String left, String right) {
+        int[] l = parseSemver(left);
+        int[] r = parseSemver(right);
+        for (int i = 0; i < 3; i++) {
+            int cmp = Integer.compare(l[i], r[i]);
+            if (cmp != 0) {
+                return cmp;
+            }
+        }
+        return 0;
+    }
+
+    private static int[] parseSemver(String version) {
+        String[] parts = version.split("\\.");
+        return new int[] {
+                Integer.parseInt(parts[0]),
+                Integer.parseInt(parts[1]),
+                Integer.parseInt(parts[2])
+        };
+    }
+}
