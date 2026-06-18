@@ -90,13 +90,23 @@ Plans:
 
 **UI hint**: yes
 
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
 
-- [ ] 03-01: Console/API upload, list, publish, deprecate endpoints and persistence
-- [ ] 03-02: Template V2 publish-time UDF reference validation
-- [ ] 03-03: Sample UDFs, console UX polish, harness E2E for UDF flows
+**Wave 1** *(parallel — no file overlap)*
+
+- [ ] 03-01-PLAN.md — UDF JDBC persistence + JdbcUdfRegistry + startup reload (UDF-05)
+- [ ] 03-04-PLAN.md — Template V2 publish-time UDF reference validation (UDF-06)
+
+**Wave 2** *(blocked on 03-01)*
+
+- [ ] 03-02-PLAN.md — Console UDF REST API (/api/console/udfs) + RBAC + DTOs (UDF-05)
+
+**Wave 3** *(03-03 blocked on 03-02; 03-05 blocked on 03-02 + 03-04)*
+
+- [ ] 03-03-PLAN.md — Console UDFs React page + API client + en/zh-CN i18n (UDF-05)
+- [ ] 03-05-PLAN.md — Sample UDFs (one per type) + embedded harness E2E + matrix linked_tests (UDF-08)
 
 ### Phase 4: Transform Operators & SQL
 
