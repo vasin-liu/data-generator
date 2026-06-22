@@ -9,7 +9,7 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 - [x] **Phase 1: Test Harness Foundation** — Feature matrix, simulation fixtures, CI entry, coverage reporting (completed 2026-06-17)
 - [x] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance (completed 2026-06-18)
 - [x] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs (completed 2026-06-18)
-- [ ] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing
+- [x] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing (completed 2026-06-22)
 - [ ] **Phase 5: Coverage Ramp & CI Gates** — P0 matrix green, API slices, merge regression gate
 
 ## Phase Details
@@ -132,13 +132,13 @@ Plans:
 
 **Wave 2** *(blocked on 04-01)*
 
-- [ ] 04-02-PLAN.md — Operator factories (json/mask/lookup) + runtime plugin registration + internal `V2_JSON_EXTRACT` Calcite scalar function (XFORM-02, XFORM-03)
+- [x] 04-02-PLAN.md — Operator factories (json/mask/lookup) + runtime plugin registration + internal `V2_JSON_EXTRACT` Calcite scalar function (XFORM-02, XFORM-03)
 
 **Wave 3** *(parallel — no file overlap; each blocked on 04-02)*
 
-- [ ] 04-03-PLAN.md — Unified transform catalog metadata API `GET /api/console/transforms` (built-ins + published UDFs) (XFORM-01)
-- [ ] 04-04-PLAN.md — Actionable transform/UDF error surfacing in run reports + console job detail, fail-fast (XFORM-05)
-- [ ] 04-05-PLAN.md — Schema/version docs + harness matrix rows + embedded sample templates & fixture tests per operator (XFORM-04, XFORM-06)
+- [x] 04-03-PLAN.md — Unified transform catalog metadata API `GET /api/console/transforms` (built-ins + published UDFs) (XFORM-01)
+- [x] 04-04-PLAN.md — Actionable transform/UDF error surfacing in run reports + console job detail, fail-fast (XFORM-05)
+- [x] 04-05-PLAN.md — Schema/version docs + harness matrix rows + embedded sample templates & fixture tests per operator (XFORM-04, XFORM-06)
 
 ### Phase 5: Coverage Ramp & CI Gates
 
