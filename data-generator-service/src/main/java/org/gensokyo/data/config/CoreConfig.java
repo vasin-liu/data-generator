@@ -14,7 +14,11 @@ import org.gensokyo.data.ai.runtime.OpenAiCompatibleRuntimeBridge;
 import org.gensokyo.data.ai.runtime.OllamaAiRuntimeBridge;
 import org.gensokyo.data.repository.AiRateLimitStateRepository;
 import org.gensokyo.data.udf.InMemoryUdfRegistry;
+import org.gensokyo.data.udf.JdbcUdfRegistry;
 import org.gensokyo.data.udf.UdfRegistry;
+import org.gensokyo.data.udf.UdfRegistryService;
+import org.gensokyo.data.udf.TransformCatalogSource;
+import org.gensokyo.data.repository.UdfArtifactRepository;
 import org.gensokyo.data.udf.DefaultRegistrySqlFunctionSource;
 import org.gensokyo.data.calcite.udf.GraalJsScriptUdfExecutor;
 import org.gensokyo.data.calcite.udf.RegistryBackedRuntimePluginProvider;
@@ -52,6 +56,7 @@ import org.gensokyo.data.calcite.source.InlineRowsSourceFactory;
 import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
+import org.gensokyo.data.calcite.sql.TemplateV2SqlFunctionRegistry;
 import org.gensokyo.data.calcite.transform.JsTransformFactory;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
@@ -70,6 +75,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -182,6 +188,22 @@ public class CoreConfig {
             @Override
             public List<V2TransformFactory> transformFactories() {
                 return transformFactories;
+            }
+
+            @Override
+            public List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
+                // Rebind the SQL transform factory to the merged registry so published UDF SQL functions
+                // (contributed by the registry-backed plugin) become resolvable at run time (D-08). Other
+                // factories are passed through unchanged. Mirrors DefaultTemplateV2RuntimePlugin.
+                List<V2TransformFactory> rebound = new ArrayList<>(transformFactories.size());
+                for (V2TransformFactory factory : transformFactories) {
+                    if (factory instanceof SqlTransformFactory) {
+                        rebound.add(new SqlTransformFactory(sqlFunctionRegistry));
+                    } else {
+                        rebound.add(factory);
+                    }
+                }
+                return rebound;
             }
 
             @Override
@@ -316,6 +338,20 @@ public class CoreConfig {
         return new PassthroughSecretResolver();
     }
 
+    /**
+     * JDBC-backed UDF registry so uploaded/published UDFs survive restart (D-01). Declared with a
+     * DISTINCT bean name {@code jdbcUdfRegistry} (not a second {@code udfRegistry} overload, which Spring
+     * skips before {@code @ConditionalOnMissingBean} is evaluated) and ahead of the in-memory default so
+     * the conditional fallback backs off to it.
+     *
+     * @param udfArtifactRepository persistence repository for UDF artifact rows
+     * @return persistence-backed registry implementation
+     */
+    @Bean
+    public UdfRegistry jdbcUdfRegistry(UdfArtifactRepository udfArtifactRepository) {
+        return new JdbcUdfRegistry(udfArtifactRepository);
+    }
+
     @Bean
     @ConditionalOnMissingBean(UdfRegistry.class)
     public UdfRegistry udfRegistry() {
@@ -333,6 +369,12 @@ public class CoreConfig {
     public RegistrySqlFunctionSource registrySqlFunctionSource(UdfRegistry udfRegistry,
                                                                GraalJsScriptUdfExecutor graalJsScriptUdfExecutor) {
         return new DefaultRegistrySqlFunctionSource(udfRegistry, graalJsScriptUdfExecutor);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TransformCatalogSource.class)
+    public TransformCatalogSource transformCatalogSource(UdfRegistryService udfRegistryService) {
+        return new TransformCatalogSource(udfRegistryService);
     }
 
     @Bean(name = "registryBackedTemplateV2RuntimePluginProvider")
