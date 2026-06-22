@@ -1,0 +1,33 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.model.v2;
+
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * One masking rule applied in place by {@link MaskTransformVO}: it names a column and the predefined
+ * named strategy used to redact that column's value.
+ *
+ * @author Gensokyo
+ * @since 2026-06-22
+ */
+@Data
+public class MaskRuleVO implements Serializable {
+
+    /**
+     * Column whose value is masked in place on each input row.
+     */
+    private String column;
+
+    /**
+     * Predefined masking strategy name; valid values are exactly {@code email}, {@code phone},
+     * {@code credit-card} and {@code generic-fixed}. Custom masking is not configured here — it is
+     * delegated to the Phase 3 {@code mask-email} UDF sample; this operator is the no-config complement.
+     */
+    private String strategy;
+}
