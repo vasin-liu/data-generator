@@ -58,6 +58,9 @@ import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.calcite.sql.TemplateV2SqlFunctionRegistry;
 import org.gensokyo.data.calcite.transform.JsTransformFactory;
+import org.gensokyo.data.calcite.transform.JsonTransformFactory;
+import org.gensokyo.data.calcite.transform.LookupTransformFactory;
+import org.gensokyo.data.calcite.transform.MaskTransformFactory;
 import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.repository.TemplateRepository;
@@ -154,6 +157,24 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "jsTransformFactory")
     public V2TransformFactory jsTransformFactory() {
         return new JsTransformFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "jsonTransformFactory")
+    public V2TransformFactory jsonTransformFactory() {
+        return new JsonTransformFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "maskTransformFactory")
+    public V2TransformFactory maskTransformFactory() {
+        return new MaskTransformFactory();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "lookupTransformFactory")
+    public V2TransformFactory lookupTransformFactory() {
+        return new LookupTransformFactory();
     }
 
     @Bean

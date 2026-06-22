@@ -14,6 +14,7 @@ import org.gensokyo.data.model.v2.AiCallMetricVO;
 import org.gensokyo.data.model.v2.RunReportVO;
 import org.gensokyo.data.model.v2.StageMetricVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.v2.TransformErrorVO;
 import org.gensokyo.data.model.v2.TransformGraphVO;
 import org.gensokyo.data.model.v2.TransformNodeVO;
 import org.gensokyo.data.model.v2.TransformVO;
@@ -73,6 +74,73 @@ public class RunReportCollector {
                 durationMs,
                 List.copyOf(collectErrorSamples(metrics)),
                 List.copyOf(buildAiCallMetrics(metrics)));
+    }
+
+    /**
+     * Builds a minimal failure report carrying one structured transform error so the operator console
+     * can surface an actionable failure (D-08) even when the run produced no metrics.
+     *
+     * @param template   executed template definition (may be {@code null} when the failure preceded load)
+     * @param error      terminal run exception
+     * @param durationMs elapsed wall-clock time before the failure
+     * @return report with a populated {@code transformErrors} list, or {@code null} when {@code error} is null
+     */
+    public RunReportVO collectFailure(TemplateV2VO template, Throwable error, long durationMs) {
+        if (error == null) {
+            return null;
+        }
+        // The runtime registry wraps factory failures as "... for type [<type>] and model [<model>]";
+        // walk the cause chain to recover the operator type and the underlying root-cause message.
+        String operatorType = null;
+        String rootMessage = null;
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            String message = t.getMessage();
+            if (message == null) {
+                continue;
+            }
+            int token = message.indexOf("for type [");
+            if (token >= 0 && operatorType == null) {
+                int start = token + "for type [".length();
+                int end = message.indexOf(']', start);
+                if (end > start) {
+                    operatorType = message.substring(start, end);
+                }
+                // Prefer the wrapped cause's message as the actionable root cause.
+                rootMessage = t.getCause() != null ? t.getCause().getMessage() : message;
+            }
+            rootMessage = rootMessage == null ? message : rootMessage;
+        }
+        if (rootMessage == null) {
+            rootMessage = error.toString();
+        }
+
+        String step = "transform";
+        String operatorName = null;
+        if (operatorType != null && template != null && template.getTransformers() != null) {
+            for (int index = 0; index < template.getTransformers().size(); index++) {
+                TransformVO transformer = template.getTransformers().get(index);
+                if (operatorType.equals(transformer.getType())) {
+                    step = "transformers[" + index + "]";
+                    if (transformer.getName() != null && !transformer.getName().isBlank()) {
+                        operatorName = transformer.getName();
+                    }
+                    break;
+                }
+            }
+        }
+
+        String safeMessage = rootMessage.length() > 2000 ? rootMessage.substring(0, 2000) : rootMessage;
+        TransformErrorVO transformError = new TransformErrorVO(
+                step, operatorType, operatorName, safeMessage, null, null);
+        return new RunReportVO(
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                durationMs,
+                List.of(safeMessage),
+                List.of(),
+                List.of(transformError));
     }
 
     private List<AiCallMetricVO> buildAiCallMetrics(RunMetrics metrics) {

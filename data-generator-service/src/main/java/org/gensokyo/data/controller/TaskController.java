@@ -318,15 +318,27 @@ public class TaskController {
             if (taskExecutionService.isCancelRequested(instanceId)) {
                 taskExecutionService.markCancelled(instanceId);
             } else {
-                taskExecutionService.markFailed(instanceId, e.getMessage());
+                long durationMs = System.currentTimeMillis() - startedAtMs;
+                String reportJson = buildFailureReportJson(template, e, durationMs);
+                taskExecutionService.markFailed(instanceId, e.getMessage(), reportJson);
                 auditService.record(
                         "TASK_RUN_FAILED",
                         "TASK",
                         String.valueOf(instanceId),
-                        java.util.Map.of("error", e.getMessage()));
+                        java.util.Map.of("error", String.valueOf(e.getMessage())));
             }
         } finally {
             WorkflowRunContext.clear();
+        }
+    }
+
+    private String buildFailureReportJson(TemplateV2VO template, Throwable error, long durationMs) {
+        try {
+            RunReportVO report = runReportCollector.collectFailure(template, error, durationMs);
+            return report == null ? null : TemplateJsonCodec.write(report);
+        } catch (Exception ignored) {
+            // Failure-report enrichment is best-effort; never mask the original run failure.
+            return null;
         }
     }
 

@@ -64,6 +64,8 @@ public class DistributedJobLeaseRunner {
     public void runLease(String workerId, int leaseSeconds, DistributedJobLease lease) {
         Long jobId = lease.jobId();
         Long instanceId = lease.instanceId();
+        TemplateV2VO template = null;
+        long startedAtMs = System.currentTimeMillis();
         try {
             distributedJobService.markRunning(jobId, workerId);
             distributedJobService.heartbeat(jobId, workerId, leaseSeconds);
@@ -73,12 +75,13 @@ public class DistributedJobLeaseRunner {
                 distributedJobService.markCancelled(jobId, workerId);
                 return;
             }
-            TemplateV2VO template = loadTemplate(lease);
+            template = loadTemplate(lease);
             taskExecutionService.markRunning(instanceId);
             executeTrackedRun(workerId, leaseSeconds, lease, template);
         } catch (Exception e) {
             log.warn("Distributed worker failed to run job {} instance {}", jobId, instanceId, e);
-            taskExecutionService.markFailed(instanceId, e.getMessage());
+            String reportJson = buildFailureReportJson(template, e, System.currentTimeMillis() - startedAtMs);
+            taskExecutionService.markFailed(instanceId, e.getMessage(), reportJson);
             distributedJobService.markFailedWithRetryPolicy(
                     jobId,
                     workerId,
@@ -144,6 +147,16 @@ public class DistributedJobLeaseRunner {
             heartbeatTask.cancel(true);
             heartbeatExecutor.shutdownNow();
             WorkflowRunContext.clear();
+        }
+    }
+
+    private String buildFailureReportJson(TemplateV2VO template, Throwable error, long durationMs) {
+        try {
+            RunReportVO report = runReportCollector.collectFailure(template, error, durationMs);
+            return report == null ? null : TemplateJsonCodec.write(report);
+        } catch (Exception ignored) {
+            // Failure-report enrichment is best-effort; never mask the original run failure.
+            return null;
         }
     }
 

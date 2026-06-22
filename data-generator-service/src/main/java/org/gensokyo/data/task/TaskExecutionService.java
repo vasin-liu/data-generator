@@ -245,8 +245,22 @@ public class TaskExecutionService {
         });
     }
 
+    /**
+     * @param instanceId   run instance id
+     * @param errorMessage failure detail
+     */
     @Transactional
     public void markFailed(Long instanceId, String errorMessage) {
+        markFailed(instanceId, errorMessage, null);
+    }
+
+    /**
+     * @param instanceId   run instance id
+     * @param errorMessage failure detail
+     * @param reportJson   optional structured V2 failure report JSON (carries transform errors)
+     */
+    @Transactional
+    public void markFailed(Long instanceId, String errorMessage, String reportJson) {
         update(instanceId, row -> {
             row.setStatus(TaskExecutionStatus.FAILED.name());
             row.setFinishedAt(Instant.now());
@@ -256,6 +270,9 @@ public class TaskExecutionService {
                 message = message.substring(0, 4000);
             }
             row.setErrorMessage(message);
+            if (reportJson != null) {
+                row.setReportJson(reportJson);
+            }
         });
     }
 

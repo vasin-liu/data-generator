@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RunReportPersistenceTests {
 
     private static final long TEMPLATE_ID = 91001L;
+    private static final long TEMPLATE_ID_FAIL = 91002L;
     private static final Pattern INSTANCE_ID_PATTERN = Pattern.compile("instanceId=(\\d+)");
 
     @Autowired
@@ -53,9 +54,11 @@ class RunReportPersistenceTests {
     @AfterEach
     void cleanup() {
         taskExecutionRepository.findAll().stream()
-                .filter(row -> row.getTemplateId() != null && row.getTemplateId().equals(TEMPLATE_ID))
+                .filter(row -> row.getTemplateId() != null
+                        && (row.getTemplateId().equals(TEMPLATE_ID) || row.getTemplateId().equals(TEMPLATE_ID_FAIL)))
                 .forEach(taskExecutionRepository::delete);
         templateRepository.findById(TEMPLATE_ID).ifPresent(templateRepository::delete);
+        templateRepository.findById(TEMPLATE_ID_FAIL).ifPresent(templateRepository::delete);
     }
 
     @Test
@@ -99,6 +102,49 @@ class RunReportPersistenceTests {
         assertThat(persisted.getReportJson()).contains("input");
     }
 
+    @Test
+    void failingTransformPersistsStructuredErrorReachingJobDetail() throws Exception {
+        TemplatePO entity = new TemplatePO();
+        entity.setId(TEMPLATE_ID_FAIL);
+        entity.setName("run-report-v2-fail");
+        entity.setContentYaml("""
+                name: run-report-v2-fail
+                sources:
+                  input:
+                    type: iterator
+                    iterator:
+                      type: number
+                      from: 1
+                      to: 3
+                      step: 1
+                transform:
+                  type: mask
+                  rules:
+                    - column: value
+                      strategy: rot13
+                sink:
+                  writers:
+                    - type: console
+                """);
+        templateRepository.saveAndFlush(entity);
+
+        R<String> start = taskController.runById(entity.getId());
+        assertThat(start.isSuccess()).isTrue();
+
+        Long instanceId = extractInstanceId(start.getMessage());
+        TaskExecutionSummary summary = awaitFailed(instanceId);
+
+        // The structured error reaches the job-detail carrier (JobExecutionDetail.execution IS this summary).
+        assertThat(summary.report()).isNotNull();
+        assertThat(summary.report().transformErrors()).isNotEmpty();
+        var transformError = summary.report().transformErrors().getFirst();
+        assertThat(transformError.operatorType()).isEqualTo("mask");
+        assertThat(transformError.step()).isEqualTo("transformers[0]");
+
+        TaskExecutionPO persisted = taskExecutionRepository.findByInstanceId(instanceId).orElseThrow();
+        assertThat(persisted.getReportJson()).contains("transformErrors");
+    }
+
     private static Long extractInstanceId(String message) {
         Matcher matcher = INSTANCE_ID_PATTERN.matcher(message);
         assertThat(matcher.find()).isTrue();
@@ -119,6 +165,23 @@ class RunReportPersistenceTests {
         }
         assertThat(summary).isNotNull();
         assertThat(summary.status()).isEqualTo(TaskExecutionStatus.SUCCESS.name());
+        return summary;
+    }
+
+    private TaskExecutionSummary awaitFailed(Long instanceId) throws InterruptedException {
+        TaskExecutionSummary summary = null;
+        for (int attempt = 0; attempt < 50; attempt++) {
+            summary = taskExecutionService.getByInstanceId(instanceId);
+            if (TaskExecutionStatus.FAILED.name().equals(summary.status())) {
+                return summary;
+            }
+            if (TaskExecutionStatus.SUCCESS.name().equals(summary.status())) {
+                break;
+            }
+            TimeUnit.MILLISECONDS.sleep(200);
+        }
+        assertThat(summary).isNotNull();
+        assertThat(summary.status()).isEqualTo(TaskExecutionStatus.FAILED.name());
         return summary;
     }
 }
