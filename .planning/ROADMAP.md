@@ -128,7 +128,7 @@ Plans:
 
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — New operator `TransformVO` subtypes (json/mask/lookup) in core model, additive + AutoService-discovered (XFORM-02)
+- [x] 04-01-PLAN.md — New operator `TransformVO` subtypes (json/mask/lookup) in core model, additive + AutoService-discovered (XFORM-02)
 
 **Wave 2** *(blocked on 04-01)*
 
@@ -172,5 +172,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Test Harness Foundation | 3/3 | Complete    | 2026-06-17 |
 | 2. UDF Platform Core | 3/3 | Complete    | 2026-06-18 |
 | 3. UDF Console & Template Binding | 5/5 | Complete    | 2026-06-18 |
-| 4. Transform Operators & SQL | 0/5 | Not started | - |
+| 4. Transform Operators & SQL | 1/5 | In Progress|  |
 | 5. Coverage Ramp & CI Gates | 0/2 | Not started | - |
