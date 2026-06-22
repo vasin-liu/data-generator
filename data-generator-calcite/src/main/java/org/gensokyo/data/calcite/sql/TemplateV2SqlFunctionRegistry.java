@@ -337,7 +337,15 @@ public final class TemplateV2SqlFunctionRegistry {
                                 List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC),
                                 count -> count == 2
                         ),
-                        TemplateV2GeoSqlFunctions::geoJsonBuffer)
+                        TemplateV2GeoSqlFunctions::geoJsonBuffer),
+                // Internal-only JSON path extraction (D-11/D-12): V2_ prefix keeps it out of the UDF sqlName
+                // namespace and it is deliberately NOT cataloged.
+                new TemplateV2SqlFunction("V2_JSON_EXTRACT", ReturnTypes.VARCHAR_NULLABLE,
+                        OperandTypes.family(
+                                List.of(SqlTypeFamily.CHARACTER, SqlTypeFamily.CHARACTER),
+                                count -> count == 2
+                        ),
+                        TemplateV2JsonSqlFunctions::jsonExtract)
         ));
     }
 

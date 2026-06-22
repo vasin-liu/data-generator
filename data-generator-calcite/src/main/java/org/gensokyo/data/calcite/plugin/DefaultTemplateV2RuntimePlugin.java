@@ -8,6 +8,9 @@ import org.gensokyo.data.calcite.sql.SpelTransformFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.calcite.sql.TemplateV2SqlFunctionRegistry;
 import org.gensokyo.data.calcite.transform.JsTransformFactory;
+import org.gensokyo.data.calcite.transform.JsonTransformFactory;
+import org.gensokyo.data.calcite.transform.LookupTransformFactory;
+import org.gensokyo.data.calcite.transform.MaskTransformFactory;
 
 import java.util.List;
 
@@ -28,6 +31,9 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
                 .capability(TemplateV2PluginCapability.transform("sql"))
                 .capability(TemplateV2PluginCapability.transform("spel"))
                 .capability(TemplateV2PluginCapability.transform("js"))
+                .capability(TemplateV2PluginCapability.transform("json"))
+                .capability(TemplateV2PluginCapability.transform("mask"))
+                .capability(TemplateV2PluginCapability.transform("lookup"))
                 .capability(TemplateV2PluginCapability.sink("console"))
                 .capability(TemplateV2PluginCapability.sink("csv"))
                 .capability(TemplateV2PluginCapability.sink("excel"))
@@ -50,7 +56,8 @@ public class DefaultTemplateV2RuntimePlugin implements TemplateV2RuntimePlugin {
 
     @Override
     public List<V2TransformFactory> transformFactories(TemplateV2SqlFunctionRegistry sqlFunctionRegistry) {
-        return List.of(new SqlTransformFactory(sqlFunctionRegistry), new SpelTransformFactory(), new JsTransformFactory());
+        return List.of(new SqlTransformFactory(sqlFunctionRegistry), new SpelTransformFactory(), new JsTransformFactory(),
+                new JsonTransformFactory(), new MaskTransformFactory(), new LookupTransformFactory());
     }
 
     @Override
