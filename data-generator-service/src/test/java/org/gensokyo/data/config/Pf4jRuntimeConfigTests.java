@@ -10,6 +10,8 @@ import org.gensokyo.data.calcite.plugin.Pf4jRuntimeExtensionLocator;
 import org.gensokyo.data.calcite.plugin.Pf4jTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeContext;
 import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.repository.UdfArtifactRepository;
+import org.gensokyo.data.udf.UdfRegistryService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -25,6 +27,8 @@ class Pf4jRuntimeConfigTests {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(CoreConfig.class))
             .withBean(TemplateRepository.class, () -> mock(TemplateRepository.class))
+            .withBean(UdfArtifactRepository.class, () -> mock(UdfArtifactRepository.class))
+            .withBean(UdfRegistryService.class, () -> mock(UdfRegistryService.class))
             .withBean(RuntimeJdbcEndpointResolver.class, () -> mock(RuntimeJdbcEndpointResolver.class))
             .withBean(NamedParameterJdbcTemplate.class, () -> mock(NamedParameterJdbcTemplate.class))
             .withBean(AiQuotaService.class, () -> mock(AiQuotaService.class))
