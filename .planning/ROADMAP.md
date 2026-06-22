@@ -172,5 +172,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Test Harness Foundation | 3/3 | Complete    | 2026-06-17 |
 | 2. UDF Platform Core | 3/3 | Complete    | 2026-06-18 |
 | 3. UDF Console & Template Binding | 5/5 | Complete    | 2026-06-18 |
-| 4. Transform Operators & SQL | 1/5 | In Progress|  |
+| 4. Transform Operators & SQL | 5/5 | Complete    | 2026-06-22 |
 | 5. Coverage Ramp & CI Gates | 0/2 | Not started | - |
