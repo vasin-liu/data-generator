@@ -8,7 +8,7 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 
 - [x] **Phase 1: Test Harness Foundation** — Feature matrix, simulation fixtures, CI entry, coverage reporting (completed 2026-06-17)
 - [x] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance (completed 2026-06-18)
-- [ ] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs
+- [x] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs (completed 2026-06-18)
 - [ ] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing
 - [ ] **Phase 5: Coverage Ramp & CI Gates** — P0 matrix green, API slices, merge regression gate
 
@@ -96,17 +96,17 @@ Plans:
 
 **Wave 1** *(parallel — no file overlap)*
 
-- [ ] 03-01-PLAN.md — UDF JDBC persistence + JdbcUdfRegistry + startup reload (UDF-05)
-- [ ] 03-04-PLAN.md — Template V2 publish-time UDF reference validation (UDF-06)
+- [x] 03-01-PLAN.md — UDF JDBC persistence + JdbcUdfRegistry + startup reload (UDF-05)
+- [x] 03-04-PLAN.md — Template V2 publish-time UDF reference validation (UDF-06)
 
 **Wave 2** *(blocked on 03-01)*
 
-- [ ] 03-02-PLAN.md — Console UDF REST API (/api/console/udfs) + RBAC + DTOs (UDF-05)
+- [x] 03-02-PLAN.md — Console UDF REST API (/api/console/udfs) + RBAC + DTOs (UDF-05)
 
 **Wave 3** *(03-03 blocked on 03-02; 03-05 blocked on 03-02 + 03-04)*
 
-- [ ] 03-03-PLAN.md — Console UDFs React page + API client + en/zh-CN i18n (UDF-05)
-- [ ] 03-05-PLAN.md — Sample UDFs (one per type) + embedded harness E2E + matrix linked_tests (UDF-08)
+- [x] 03-03-PLAN.md — Console UDFs React page + API client + en/zh-CN i18n (UDF-05)
+- [x] 03-05-PLAN.md — Sample UDFs (one per type) + embedded harness E2E + matrix linked_tests (UDF-08)
 
 ### Phase 4: Transform Operators & SQL
 
@@ -122,13 +122,23 @@ Plans:
 2. At least three new built-in operators work in a Template V2 run with harness-covered examples
 3. Transform/UDF failures appear in job run reports with enough context to fix template YAML
 
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
 
-- [ ] 04-01: Operator catalog metadata API and documentation
-- [ ] 04-02: Implement new built-in operators and Calcite SQL enhancements
-- [ ] 04-03: Schema/docs update, error surfacing, harness rows for each operator
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — New operator `TransformVO` subtypes (json/mask/lookup) in core model, additive + AutoService-discovered (XFORM-02)
+
+**Wave 2** *(blocked on 04-01)*
+
+- [ ] 04-02-PLAN.md — Operator factories (json/mask/lookup) + runtime plugin registration + internal `V2_JSON_EXTRACT` Calcite scalar function (XFORM-02, XFORM-03)
+
+**Wave 3** *(parallel — no file overlap; each blocked on 04-02)*
+
+- [ ] 04-03-PLAN.md — Unified transform catalog metadata API `GET /api/console/transforms` (built-ins + published UDFs) (XFORM-01)
+- [ ] 04-04-PLAN.md — Actionable transform/UDF error surfacing in run reports + console job detail, fail-fast (XFORM-05)
+- [ ] 04-05-PLAN.md — Schema/version docs + harness matrix rows + embedded sample templates & fixture tests per operator (XFORM-04, XFORM-06)
 
 ### Phase 5: Coverage Ramp & CI Gates
 
@@ -161,6 +171,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Test Harness Foundation | 3/3 | Complete    | 2026-06-17 |
 | 2. UDF Platform Core | 3/3 | Complete    | 2026-06-18 |
-| 3. UDF Console & Template Binding | 0/3 | Not started | - |
-| 4. Transform Operators & SQL | 0/3 | Not started | - |
+| 3. UDF Console & Template Binding | 5/5 | Complete    | 2026-06-18 |
+| 4. Transform Operators & SQL | 0/5 | Not started | - |
 | 5. Coverage Ramp & CI Gates | 0/2 | Not started | - |
