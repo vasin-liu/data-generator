@@ -1,0 +1,19 @@
+# definitionKind: V2
+# fixtureScenario: transform-json
+name: transform-json
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  input:
+    type: inline_rows
+    rows:
+      - payload: '{"name":"alice","addr":{"city":"sh","zip":"200000"}}'
+transform:
+  type: json
+  sourceColumn: payload
+  flatten: true
+  separator: "."
+sink:
+  writers:
+    - type: console

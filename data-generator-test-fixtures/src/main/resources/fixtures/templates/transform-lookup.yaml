@@ -1,0 +1,31 @@
+# definitionKind: V2
+# fixtureScenario: transform-lookup
+name: transform-lookup
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  input:
+    type: inline_rows
+    rows:
+      - id: "1"
+        dept_id: d1
+      - id: "2"
+        dept_id: d2
+  ref:
+    type: inline_rows
+    rows:
+      - dept_id: d1
+        dept_name: Eng
+      - dept_id: d2
+        dept_name: Sales
+transform:
+  type: lookup
+  source: ref
+  leftKey: dept_id
+  rightKey: dept_id
+  columns:
+    - dept_name
+sink:
+  writers:
+    - type: console

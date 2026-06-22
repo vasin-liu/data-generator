@@ -1,0 +1,25 @@
+# definitionKind: V2
+# fixtureScenario: transform-mask
+name: transform-mask
+executionPolicy:
+  mode: IN_MEMORY
+  maxRowsInMemory: 100
+sources:
+  input:
+    type: inline_rows
+    rows:
+      - email: alice@example.com
+        phone: "13800138000"
+        card: "4111111111111111"
+transform:
+  type: mask
+  rules:
+    - column: email
+      strategy: email
+    - column: phone
+      strategy: phone
+    - column: card
+      strategy: credit-card
+sink:
+  writers:
+    - type: console

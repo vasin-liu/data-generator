@@ -201,6 +201,33 @@ rows:
     linked_tests: [FixtureTransformSqlExampleTests]
     notes: Embedded SQL transform example from data-generator-test-fixtures.
 
+  - id: transform-json
+    capability: transform-json
+    adapter: calcite-json
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: covered
+    linked_tests: [FixtureTransformJsonExampleTests]
+    notes: Built-in json operator (parse + flatten), D-02.
+
+  - id: transform-mask
+    capability: transform-mask
+    adapter: calcite-mask
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: covered
+    linked_tests: [FixtureTransformMaskExampleTests]
+    notes: Built-in mask operator (named strategies, PII-safe), D-03.
+
+  - id: transform-lookup
+    capability: transform-lookup
+    adapter: calcite-lookup
+    test_types: [integration]
+    owner_module: data-generator-test-fixtures
+    status: covered
+    linked_tests: [FixtureTransformLookupExampleTests]
+    notes: Built-in lookup operator (in-template join enrichment), D-04.
+
   - id: calcite-transform-js
     capability: calcite-transform-js
     adapter: javascript
@@ -389,7 +416,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-service
     status: covered
-    linked_tests: [UdfPublishServiceTests]
+    linked_tests: [UdfPublishServiceTests, UdfConsoleTemplateBindingE2ETests]
     notes: Registry-backed SQL UDF publish gate, runtime bridge, and built-in collision skip (UDF-04).
 
   - id: udf-script
@@ -401,6 +428,7 @@ rows:
     linked_tests:
       - GraalJsScriptUdfExecutorTests
       - UdfPublishServiceTests
+      - UdfConsoleTemplateBindingE2ETests
     notes: GraalJS callable script UDF executor with sandbox, timeout, and schema-gate (UDF-03).
 
   - id: udf-java-plugin
@@ -409,5 +437,5 @@ rows:
     test_types: [unit]
     owner_module: data-generator-service
     status: covered
-    linked_tests: [UdfGovernanceSupportTests]
+    linked_tests: [UdfGovernanceSupportTests, UdfConsoleTemplateBindingE2ETests]
     notes: Registry records and governs PF4J JAR plugins; loading reuses existing directory path (UDF-02, D-09).
