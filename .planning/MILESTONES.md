@@ -1,5 +1,25 @@
 # Milestones
 
+## v2.0 — Reader/Writer & Datasource Platform
+
+**Started:** 2026-06-23
+**Status:** Planning
+**Phases:** 6-10 (continues from v1.0)
+
+### Scope
+
+- Datasource platform: unified JDBC/Kafka/ES abstractions, hot-reload, governance, audit
+- RW gap closure: streaming CSV/JSON, JDBC upsert (PG/MySQL)
+- JDBC dialect expansion: Dameng, Kingbase, HighGo, PostgreSQL, ClickHouse
+- Harness matrix + P0 CI gates for new paths
+
+### Artifacts
+
+- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
+- Roadmap: [ROADMAP.md](ROADMAP.md)
+
+---
+
 ## v1.0 — UDF, Transform & Test Harness
 
 **Shipped:** 2026-06-23
