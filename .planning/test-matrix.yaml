@@ -25,6 +25,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-reader-ai
     status: pending
+    tier: P2
     linked_tests: []
     notes: AI-backed reader adapter.
 
@@ -34,6 +35,7 @@ rows:
     test_types: [unit, integration]
     owner_module: data-generator-reader-csv
     status: pending
+    tier: P2
     linked_tests: []
     notes: CSV file reader.
 
@@ -43,6 +45,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: partial
+    tier: P1
     linked_tests: [FixtureReaderJdbcExampleTests]
     notes: Embedded JDBC reader example from data-generator-test-fixtures.
 
@@ -52,6 +55,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-reader-elasticsearch
     status: pending
+    tier: P2
     linked_tests: []
     notes: Elasticsearch reader adapter.
 
@@ -61,6 +65,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-reader-excel
     status: pending
+    tier: P2
     linked_tests: []
     notes: Excel workbook reader.
 
@@ -70,6 +75,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-reader-json
     status: pending
+    tier: P2
     linked_tests: []
     notes: JSON document reader.
 
@@ -79,6 +85,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-reader-spel
     status: pending
+    tier: P2
     linked_tests: []
     notes: SpEL expression reader.
 
@@ -88,6 +95,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-writer-csv
     status: pending
+    tier: P2
     linked_tests: []
     notes: CSV file writer.
 
@@ -97,6 +105,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: partial
+    tier: P1
     linked_tests: [FixtureWriterJdbcExampleTests]
     notes: Embedded JDBC writer example from data-generator-test-fixtures.
 
@@ -106,6 +115,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: partial
+    tier: P2
     linked_tests: [ElasticsearchRowSinkAdapterHttpEmbeddedTests]
     notes: HTTP-embedded Elasticsearch bulk sink.
 
@@ -115,6 +125,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-writer-excel
     status: pending
+    tier: P2
     linked_tests: []
     notes: Excel workbook writer.
 
@@ -124,6 +135,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-writer-json
     status: pending
+    tier: P2
     linked_tests: []
     notes: JSON document writer.
 
@@ -133,6 +145,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: partial
+    tier: P2
     linked_tests:
       - KafkaRowSinkAdapterEmbeddedTests
       - TemplateV2RunnerKafkaEmbeddedTests
@@ -144,6 +157,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-iterator-constant
     status: pending
+    tier: P2
     linked_tests: []
     notes: Constant value iterator.
 
@@ -153,6 +167,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-iterator-csv
     status: pending
+    tier: P2
     linked_tests: []
     notes: CSV-driven iterator.
 
@@ -162,6 +177,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-iterator-database
     status: pending
+    tier: P2
     linked_tests: []
     notes: Database-backed iterator.
 
@@ -171,6 +187,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-iterator-number
     status: pending
+    tier: P2
     linked_tests: []
     notes: Numeric sequence iterator.
 
@@ -180,6 +197,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: pending
+    tier: P2
     linked_tests: []
     notes: Calcite JDBC row source.
 
@@ -189,6 +207,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: pending
+    tier: P2
     linked_tests: []
     notes: Calcite CSV row source.
 
@@ -198,6 +217,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: partial
+    tier: P1
     linked_tests: [FixtureTransformSqlExampleTests]
     notes: Embedded SQL transform example from data-generator-test-fixtures.
 
@@ -207,6 +227,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: covered
+    tier: P0
     linked_tests: [FixtureTransformJsonExampleTests]
     notes: Built-in json operator (parse + flatten), D-02.
 
@@ -216,6 +237,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: covered
+    tier: P0
     linked_tests: [FixtureTransformMaskExampleTests]
     notes: Built-in mask operator (named strategies, PII-safe), D-03.
 
@@ -225,6 +247,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-test-fixtures
     status: covered
+    tier: P0
     linked_tests: [FixtureTransformLookupExampleTests]
     notes: Built-in lookup operator (in-template join enrichment), D-04.
 
@@ -234,6 +257,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-calcite
     status: pending
+    tier: P2
     linked_tests: []
     notes: GraalJS row transform factory.
 
@@ -243,6 +267,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: pending
+    tier: P2
     linked_tests: []
     notes: Calcite JDBC bulk sink.
 
@@ -252,6 +277,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: partial
+    tier: P2
     linked_tests: [ElasticsearchRowSinkAdapterHttpEmbeddedTests]
     notes: Calcite HTTP Elasticsearch sink adapter.
 
@@ -261,6 +287,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-calcite
     status: partial
+    tier: P1
     linked_tests: [ChunkedPipelineTests]
     notes: Chunked V2 pipeline against embedded H2.
 
@@ -269,7 +296,8 @@ rows:
     adapter: scenario
     test_types: [integration]
     owner_module: data-generator-service
-    status: partial
+    status: covered
+    tier: P0
     linked_tests: [V2ScenarioTemplateIT]
     notes: Spring IT for V2 scenario templates.
 
@@ -279,6 +307,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-generator-sync
     status: pending
+    tier: P2
     linked_tests: []
     notes: Synchronous generator plugin.
 
@@ -288,6 +317,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-generator-async
     status: pending
+    tier: P2
     linked_tests: []
     notes: Asynchronous generator plugin.
 
@@ -297,6 +327,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-scripter-javascript
     status: pending
+    tier: P2
     linked_tests: []
     notes: GraalJS scripter stage.
 
@@ -306,6 +337,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-scripter-spel
     status: pending
+    tier: P2
     linked_tests: []
     notes: SpEL scripter stage.
 
@@ -315,6 +347,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-faker
     status: pending
+    tier: P2
     linked_tests: []
     notes: DataFaker synthetic field generation.
 
@@ -324,6 +357,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-geo
     status: pending
+    tier: P2
     linked_tests: []
     notes: GeoJSON synthetic geometry generation.
 
@@ -333,6 +367,7 @@ rows:
     test_types: [unit, e2e]
     owner_module: data-generator-service
     status: partial
+    tier: P1
     linked_tests: [ConsoleTemplateControllerTest]
     notes: Console template REST facade.
 
@@ -342,8 +377,29 @@ rows:
     test_types: [unit, e2e]
     owner_module: data-generator-service
     status: partial
+    tier: P1
     linked_tests: [ConsoleJobControllerTest]
     notes: Console job execution REST facade.
+
+  - id: console-api-udf
+    capability: console-api-udf
+    adapter: console-api
+    test_types: [unit]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests: [ConsoleUdfControllerTest]
+    notes: Console UDF upload/publish/deprecate/list/history REST slice (COV-03).
+
+  - id: console-api-transforms
+    capability: console-api-transforms
+    adapter: console-api
+    test_types: [unit]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests: [ConsoleTransformCatalogControllerTest]
+    notes: Console transform catalog metadata REST slice (COV-03).
 
   - id: console-api-health
     capability: console-api-health
@@ -351,6 +407,7 @@ rows:
     test_types: [e2e]
     owner_module: data-generator-service
     status: pending
+    tier: P2
     linked_tests: []
     notes: Health endpoint smoke via Playwright api.health.spec.ts.
 
@@ -360,6 +417,7 @@ rows:
     test_types: [e2e]
     owner_module: data-generator-console-web
     status: partial
+    tier: P2
     linked_tests:
       - e2e/specs/template-workflow.spec.ts#create scaffold, rename, save, and list in catalog
     notes: Template editor save flow (D-06).
@@ -370,6 +428,7 @@ rows:
     test_types: [e2e]
     owner_module: data-generator-console-web
     status: partial
+    tier: P2
     linked_tests:
       - e2e/specs/job-trigger.spec.ts#triggers template run via console API and returns instance id
     notes: Job trigger smoke via console template run API.
@@ -380,6 +439,7 @@ rows:
     test_types: [e2e]
     owner_module: data-generator-console-web
     status: pending
+    tier: P2
     linked_tests: []
     notes: SPA route navigation smoke.
 
@@ -389,6 +449,7 @@ rows:
     test_types: [e2e]
     owner_module: data-generator-console-web
     status: pending
+    tier: P2
     linked_tests: []
     notes: Console API envelope smoke via api.console.spec.ts.
 
@@ -398,6 +459,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-stage
     status: pending
+    tier: P2
     linked_tests: []
     notes: V1 read/select/script/write stage pipeline.
 
@@ -407,6 +469,7 @@ rows:
     test_types: [integration]
     owner_module: data-generator-service
     status: pending
+    tier: P2
     linked_tests: []
     notes: Legacy task REST controller integration tests.
 
@@ -416,6 +479,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-service
     status: covered
+    tier: P0
     linked_tests: [UdfPublishServiceTests, UdfConsoleTemplateBindingE2ETests]
     notes: Registry-backed SQL UDF publish gate, runtime bridge, and built-in collision skip (UDF-04).
 
@@ -425,6 +489,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-calcite
     status: covered
+    tier: P0
     linked_tests:
       - GraalJsScriptUdfExecutorTests
       - UdfPublishServiceTests
@@ -437,5 +502,7 @@ rows:
     test_types: [unit]
     owner_module: data-generator-service
     status: covered
+    tier: P0
     linked_tests: [UdfGovernanceSupportTests, UdfConsoleTemplateBindingE2ETests]
     notes: Registry records and governs PF4J JAR plugins; loading reuses existing directory path (UDF-02, D-09).
+

@@ -33,10 +33,11 @@ jobs:
       - name: Prepare Maven wrapper
         run: chmod +x mvnw
 
-      - name: Harness verification (embedded fast path)
+      - name: Harness verification + P0 regression gate
         run: pwsh -NoProfile -File ./scripts/verify-harness.ps1
 
       - name: Upload test matrix summary
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-matrix-summary

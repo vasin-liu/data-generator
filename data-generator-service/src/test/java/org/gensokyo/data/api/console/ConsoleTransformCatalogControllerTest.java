@@ -87,6 +87,32 @@ class ConsoleTransformCatalogControllerTest {
     }
 
     @Test
+    void list_kindFilterReturnsUdfsOnly() throws Exception {
+        UdfRecord published = sqlRecord("com.acme.greet", "1.0.0", "GREET", UdfLifecycleState.PUBLISHED);
+        when(udfRegistryService.list(any())).thenReturn(List.of(published));
+
+        mockMvc.perform(get("/api/console/transforms").param("kind", "UDF"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[?(@.kind == 'UDF')]").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.kind == 'BUILTIN')]").isEmpty());
+    }
+
+    @Test
+    void list_builtinOperatorsHaveCompleteMetadata() throws Exception {
+        when(udfRegistryService.list(any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/console/transforms"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.type == 'json')].params[0].name").value("sourceColumn"))
+                .andExpect(jsonPath("$.data[?(@.type == 'json')].example").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.type == 'mask')].params").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.type == 'mask')].example").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.type == 'lookup')].params").isNotEmpty())
+                .andExpect(jsonPath("$.data[?(@.type == 'lookup')].example").isNotEmpty());
+    }
+
+    @Test
     void list_unknownKind_mapsToBadRequest() throws Exception {
         mockMvc.perform(get("/api/console/transforms").param("kind", "bogus"))
                 .andExpect(status().isBadRequest())

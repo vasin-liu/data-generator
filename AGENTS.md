@@ -140,6 +140,10 @@ Prefer **in-process embedded** infrastructure in unit and integration tests: H2 
 - Prefer **feature branches** (e.g. `feature-*`) and merge via PR when the team uses that process; keep commits scoped to a coherent change set.
 - PR descriptions should use **complete sentences**: what changed, why, and any breaking behavior or migration notes.
 
+### Merge criteria (P0 regression gate)
+
+Pull requests are **blocked when any P0 matrix row is not green**. The gate is enforced by `scripts/verify-harness.ps1` (reads `p0.pass` from `target/test-matrix-summary.json`) via the **Harness verify** workflow (`.github/workflows/harness-verify.yml`) on `pull_request`. P1/P2 row failures are tracked in the summary but do **not** block merge this phase. The P0 set is defined in `.planning/test-matrix.yaml` (`tier: P0`); see `docs/test-harness.md` for tier semantics and the COV-01 completion target.
+
 ## Boundaries
 
 - ✅ **Always do:** Run **`test`** or at least a **targeted `-pl … -am test`** before claiming a fix is done; use **JDK 25** and repo settings (`.mvn/settings-jdk25.xml` or `mvnw-jdk25.ps1`) for builds. Keep edits **within the module that owns the behavior**. Follow Java file/Javadoc conventions for any touched `.java` public API.

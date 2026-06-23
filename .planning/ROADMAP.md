@@ -10,7 +10,7 @@ Quality-first brownfield milestone: establish an automated test harness and feat
 - [x] **Phase 2: UDF Platform Core** — Unified registry, multi-form registration, governance (completed 2026-06-18)
 - [x] **Phase 3: UDF Console & Template Binding** — Upload/publish APIs, template validation, sample UDFs (completed 2026-06-18)
 - [x] **Phase 4: Transform Operators & SQL** — New built-in operators, Calcite enhancements, error surfacing (completed 2026-06-22)
-- [ ] **Phase 5: Coverage Ramp & CI Gates** — P0 matrix green, API slices, merge regression gate
+- [x] **Phase 5: Coverage Ramp & CI Gates** — P0 matrix green, API slices, merge regression gate (completed 2026-06-23)
 
 ## Phase Details
 
@@ -163,11 +163,11 @@ Plans:
 
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — Add P0/P1/P2 matrix tiers + COV-01 target + P0 rollup in summary tooling; close `calcite-scenario-v2` P0 gap (COV-01, COV-02)
+- [x] 05-01-PLAN.md — Add P0/P1/P2 matrix tiers + COV-01 target + P0 rollup in summary tooling; close `calcite-scenario-v2` P0 gap (COV-01, COV-02)
 
 **Wave 2** *(blocked on 05-01)*
 
-- [ ] 05-02-PLAN.md — Expand console UDF + transform-catalog API slice tests; add P0 regression merge gate in harness + CI workflow, documented in AGENTS.md (COV-03, COV-04)
+- [x] 05-02-PLAN.md — Expand console UDF + transform-catalog API slice tests; add P0 regression merge gate in harness + CI workflow, documented in AGENTS.md (COV-03, COV-04)
 
 Cross-cutting constraints:
 - P0 set is exactly 7 rows (calcite-scenario-v2, udf-sql/script/java-plugin, transform-json/mask/lookup); both plans must keep the P0 count at 7.
@@ -184,4 +184,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. UDF Platform Core | 3/3 | Complete    | 2026-06-18 |
 | 3. UDF Console & Template Binding | 5/5 | Complete    | 2026-06-18 |
 | 4. Transform Operators & SQL | 5/5 | Complete    | 2026-06-22 |
-| 5. Coverage Ramp & CI Gates | 0/2 | Planned     | - |
+| 5. Coverage Ramp & CI Gates | 2/2 | Complete    | 2026-06-23 |

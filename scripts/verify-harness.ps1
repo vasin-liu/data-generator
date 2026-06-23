@@ -75,6 +75,20 @@ if ($allMavenClasses.Count -gt 0) {
 $summary = New-TestMatrixSummary -MatrixFile $matrixPath -RepoRoot $RepoRoot
 Write-Host "Summary written to target/test-matrix-summary.json (rows=$($summary.rows.Count))" -ForegroundColor Green
 
+$p0Pass = $true
+if ($summary.p0) {
+    $p0Pass = [bool]$summary.p0.pass
+    if ($p0Pass) {
+        Write-Host "P0 regression gate passed ($($summary.p0.green)/$($summary.p0.total) green)" -ForegroundColor Green
+    } else {
+        $failedIds = @($summary.p0.rows | Where-Object { -not $_.green } | ForEach-Object { $_.id })
+        Write-Host "P0 regression gate FAILED: $($failedIds -join ', ') not green" -ForegroundColor Red
+    }
+} else {
+    Write-Host "WARN: summary missing p0 block — treating as P0 gate failure" -ForegroundColor Yellow
+    $p0Pass = $false
+}
+
 $linkedFailed = $false
 foreach ($entry in $summary.rows) {
     foreach ($lr in @($entry.linkedResults)) {
@@ -99,8 +113,8 @@ if ($IncludeE2e) {
     }
 }
 
-if ($mavenExit -ne 0 -or $linkedFailed) {
-    Write-Host "Harness failed: mavenExit=$mavenExit linkedFailed=$linkedFailed" -ForegroundColor Red
+if ($mavenExit -ne 0 -or $linkedFailed -or -not $p0Pass) {
+    Write-Host "Harness failed: mavenExit=$mavenExit linkedFailed=$linkedFailed p0Pass=$p0Pass" -ForegroundColor Red
     exit 1
 }
 

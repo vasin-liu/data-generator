@@ -83,8 +83,8 @@ $banner = @"
 
 This document is generated from ``.planning/test-matrix.yaml``. Edit the YAML source of truth and re-run ``scripts/generate-test-matrix-doc.ps1``.
 
-| id | capability | adapter | test_types | owner_module | status | linked_tests |
-|----|------------|---------|------------|--------------|--------|--------------|
+| id | capability | adapter | test_types | owner_module | status | tier | linked_tests |
+|----|------------|---------|------------|--------------|--------|------|--------------|
 "@
 
 $tableRows = foreach ($row in $rows) {
@@ -95,6 +95,7 @@ $tableRows = foreach ($row in $rows) {
         (Format-Cell $row.test_types),
         (Format-Cell $row.owner_module),
         (Format-Cell $row.status),
+        (Format-Cell $row.tier),
         (Format-Cell $row.linked_tests)
     )
     '| ' + ($cells -join ' | ') + ' |'

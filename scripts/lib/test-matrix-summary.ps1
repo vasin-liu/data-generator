@@ -30,11 +30,13 @@ function New-TestMatrixSummary {
 
     $summaryRows = New-Object System.Collections.Generic.List[hashtable]
     $totals = @{ covered = 0; partial = 0; pending = 0; skipped = 0 }
+    $p0Rows = New-Object System.Collections.Generic.List[hashtable]
 
     foreach ($row in $rows) {
         $links = @($row.linked_tests)
         $mavenLinks = $links | Where-Object { $_ -and $_ -notmatch 'e2e/specs/' }
         $linkedResults = @()
+        $rowTier = if ($row.tier) { "$($row.tier)" } else { $null }
 
         if ($mavenLinks.Count -eq 0) {
             $status = if ($row.status) { $row.status } else { 'pending' }
@@ -76,7 +78,15 @@ function New-TestMatrixSummary {
 
         if ($totals.ContainsKey($status)) { $totals[$status]++ } else { $totals.pending++ }
         $summaryRows.Add(@{ id = $row.id; status = $status; linkedResults = $linkedResults })
+
+        if ($rowTier -eq 'P0') {
+            $green = ($status -eq 'covered')
+            $p0Rows.Add(@{ id = $row.id; status = $status; green = $green })
+        }
     }
+
+    $p0Pass = ($p0Rows.Count -gt 0) -and (@($p0Rows | Where-Object { -not $_.green }).Count -eq 0)
+    $p0GreenCount = @($p0Rows | Where-Object { $_.green }).Count
 
     $gitCommit = $null
     try { $gitCommit = (git -C $RepoRoot rev-parse HEAD 2>$null) } catch { }
@@ -86,12 +96,18 @@ function New-TestMatrixSummary {
         gitCommit   = $gitCommit
         totals      = $totals
         rows        = $summaryRows
+        p0          = @{
+            total = $p0Rows.Count
+            green = $p0GreenCount
+            pass  = $p0Pass
+            rows  = $p0Rows
+        }
     }
 
     $outPath = if ([System.IO.Path]::IsPathRooted($OutFile)) { $OutFile } else { Join-Path $RepoRoot $OutFile }
     $outDir = Split-Path -Parent $outPath
     if ($outDir -and -not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
-    $summary | ConvertTo-Json -Depth 6 | Set-Content -Path $outPath -Encoding UTF8
+    $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $outPath -Encoding UTF8
     return $summary
 }
 
