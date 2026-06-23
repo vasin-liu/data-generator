@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -444,5 +446,129 @@ public final class TemplateV2Validator {
             return ExecutionShape.MATERIALIZATION_REQUIRED.name();
         }
         return String.join(", ", features);
+    }
+
+    /**
+     * Kind of UDF reference detected in a Template V2 definition (D-10/D-27).
+     */
+    public enum UdfReferenceKind {
+        /** SQL transform {@code sqlName} function-call token. */
+        SQL,
+        /** Script transform {@code udfRef:{id,version?}} block. */
+        SCRIPT
+    }
+
+    /**
+     * One UDF reference detected in a template, carrying enough context to resolve it against the registry
+     * and to report the offending location when resolution fails (D-12).
+     *
+     * @param kind      reference form (SQL sqlName token or script udfRef block)
+     * @param reference SQL {@code sqlName} token (SQL) or reverse-DNS {@code udfId} (script)
+     * @param version   optional semver (script udfRef only; {@code null} → latest published)
+     * @param path      template path of the owning transform, used as the error {@code field}
+     */
+    public record UdfReference(UdfReferenceKind kind, String reference, String version, String path) {
+    }
+
+    // Standard SQL / Calcite built-in function (and keyword-before-paren) names that are NOT registry UDFs.
+    // Compared case-insensitively; any non-built-in function token is treated as a candidate sqlName (D-10/D-12).
+    private static final Set<String> BUILT_IN_SQL_FUNCTIONS = Set.of(
+            // structural clause keywords that can appear immediately before '(' (e.g. FROM (SELECT ...))
+            "SELECT", "FROM", "WHERE", "AS", "JOIN", "INNER", "LEFT", "RIGHT", "FULL", "OUTER", "CROSS",
+            "GROUP", "ORDER", "BY", "HAVING", "UNION", "INTERSECT", "EXCEPT", "WITH", "THEN", "ELSE",
+            "END", "DISTINCT", "INTO", "LIMIT", "OFFSET", "FETCH", "ASC", "DESC",
+            // logical / predicate keywords that can appear immediately before '('
+            "IN", "EXISTS", "VALUES", "AND", "OR", "NOT", "BETWEEN", "LIKE", "ALL", "ANY", "SOME",
+            "CASE", "WHEN", "ON", "USING", "OVER", "PARTITION",
+            // aggregate / window built-ins
+            "COUNT", "SUM", "AVG", "MIN", "MAX", "STDDEV", "VARIANCE", "ROW_NUMBER", "RANK", "DENSE_RANK",
+            "LAG", "LEAD", "FIRST_VALUE", "LAST_VALUE",
+            // scalar / string / math / date built-ins
+            "COALESCE", "NULLIF", "GREATEST", "LEAST", "CAST", "CONVERT", "SUBSTRING", "SUBSTR", "TRIM",
+            "LTRIM", "RTRIM", "UPPER", "LOWER", "CONCAT", "LENGTH", "CHAR_LENGTH", "REPLACE", "ABS",
+            "ROUND", "FLOOR", "CEIL", "CEILING", "MOD", "POWER", "SQRT", "TRUNCATE", "IF", "IFNULL",
+            "NVL", "EXTRACT", "NOW", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "DATE",
+            "TIME", "TIMESTAMP", "YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "ARRAY", "MAP");
+
+    // Identifier immediately followed by '(' — a SQL function-call token candidate.
+    private static final Pattern SQL_FUNCTION_CALL = Pattern.compile("([A-Za-z_][A-Za-z0-9_]*)\\s*\\(");
+    // Script udfRef:{ ... } block; the inner id/version are extracted separately (D-27).
+    private static final Pattern SCRIPT_UDF_REF_BLOCK = Pattern.compile("udfRef\\s*:\\s*\\{([^}]*)}");
+    private static final Pattern SCRIPT_UDF_REF_ID =
+            Pattern.compile("\\bid\\s*:\\s*[\"']?([A-Za-z0-9_.]+)[\"']?");
+    private static final Pattern SCRIPT_UDF_REF_VERSION =
+            Pattern.compile("\\bversion\\s*:\\s*[\"']?(\\d+\\.\\d+\\.\\d+)[\"']?");
+
+    /**
+     * Collects the UDF references embedded in a normalized template (D-10/D-27): SQL {@code sqlName}
+     * function-call tokens (excluding the built-in allow-list) and script {@code udfRef:{id,version?}}
+     * blocks. Java/PF4J capabilities are intentionally not reference-validated (D-10). The same transform
+     * traversal used by {@link #validate(TemplateV2VO)} is mirrored so linear transformers and compute-block
+     * transforms (including transform-graph nodes) are all covered.
+     *
+     * @param template normalized template (may be {@code null})
+     * @return detected references with their template paths; never {@code null}
+     */
+    public static List<UdfReference> collectUdfReferences(TemplateV2VO template) {
+        List<UdfReference> references = new ArrayList<>();
+        if (template == null) {
+            return references;
+        }
+        if (!CollectKit.isEmpty(template.getTransformers())) {
+            for (int index = 0; index < template.getTransformers().size(); index++) {
+                collectFromTransform(template.getTransformers().get(index), "transformers[" + index + "]", references);
+            }
+        }
+        if (!CollectKit.isEmpty(template.getComputeBlocks())) {
+            for (int blockIndex = 0; blockIndex < template.getComputeBlocks().size(); blockIndex++) {
+                ComputeBlockVO block = template.getComputeBlocks().get(blockIndex);
+                if (block == null) {
+                    continue;
+                }
+                String blockPath = "computeBlocks[" + blockIndex + "]";
+                if (!CollectKit.isEmpty(block.getTransformers())) {
+                    for (int index = 0; index < block.getTransformers().size(); index++) {
+                        collectFromTransform(block.getTransformers().get(index),
+                                blockPath + ".transformers[" + index + "]", references);
+                    }
+                }
+                TransformGraphVO graph = block.getTransformGraph();
+                if (graph != null && graph.getTransforms() != null) {
+                    for (Map.Entry<String, TransformVO> entry : graph.getTransforms().entrySet()) {
+                        collectFromTransform(entry.getValue(),
+                                blockPath + ".transformGraph.transforms." + entry.getKey(), references);
+                    }
+                }
+            }
+        }
+        return references;
+    }
+
+    private static void collectFromTransform(TransformVO transformer, String path, List<UdfReference> references) {
+        if (transformer instanceof SqlTransformVO sqlTransform && StrKit.isNotBlank(sqlTransform.getSql())) {
+            Matcher matcher = SQL_FUNCTION_CALL.matcher(sqlTransform.getSql());
+            Set<String> seen = new HashSet<>();
+            while (matcher.find()) {
+                String token = matcher.group(1);
+                // Built-ins are skipped; every remaining non-built-in token is a candidate sqlName (D-10/D-12).
+                if (BUILT_IN_SQL_FUNCTIONS.contains(token.toUpperCase(Locale.ROOT)) || !seen.add(token)) {
+                    continue;
+                }
+                references.add(new UdfReference(UdfReferenceKind.SQL, token, null, path + ".sql"));
+            }
+        }
+        if (transformer instanceof JsTransformVO jsTransform && StrKit.isNotBlank(jsTransform.getScript())) {
+            Matcher blockMatcher = SCRIPT_UDF_REF_BLOCK.matcher(jsTransform.getScript());
+            while (blockMatcher.find()) {
+                String block = blockMatcher.group(1);
+                Matcher idMatcher = SCRIPT_UDF_REF_ID.matcher(block);
+                if (!idMatcher.find()) {
+                    continue;
+                }
+                Matcher versionMatcher = SCRIPT_UDF_REF_VERSION.matcher(block);
+                String version = versionMatcher.find() ? versionMatcher.group(1) : null;
+                references.add(new UdfReference(UdfReferenceKind.SCRIPT, idMatcher.group(1), version, path + ".script"));
+            }
+        }
     }
 }

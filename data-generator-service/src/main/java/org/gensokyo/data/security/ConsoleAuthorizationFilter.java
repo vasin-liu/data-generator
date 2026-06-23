@@ -85,6 +85,14 @@ public class ConsoleAuthorizationFilter extends OncePerRequestFilter {
             }
             return ConsolePermission.TEMPLATE_READ;
         }
+        if (path.startsWith("/api/console/udfs")) {
+            // UDF mutations (upload/publish/deprecate) are all POST → operator-grade; reads → viewer-grade (D-15).
+            // Placed before the generic /publish branch so /udfs/.../publish is classified here, not as a template.
+            if (HttpMethod.POST.matches(method)) {
+                return ConsolePermission.TEMPLATE_PUBLISH;
+            }
+            return ConsolePermission.TEMPLATE_READ;
+        }
         if (path.contains("/publish")) {
             return ConsolePermission.TEMPLATE_PUBLISH;
         }

@@ -34,6 +34,7 @@ public class TemplateLifecycleService {
     private final YamlParser yamlParser;
     private final DataGeneratorProperties properties;
     private final AuditService auditService;
+    private final UdfReferenceValidator udfReferenceValidator;
 
     /**
      * @param entity template row
@@ -96,6 +97,8 @@ public class TemplateLifecycleService {
         if (!secretErrors.isEmpty()) {
             throw new IllegalArgumentException(String.join("; ", secretErrors));
         }
+        // Publish-only hard fail on unknown/unpublished/deprecated UDF references; draft saves stay lenient (D-11).
+        udfReferenceValidator.validate(normalized);
         entity.setStatus(TemplateLifecycleStatus.PUBLISHED.name());
         repository.saveAndFlush(entity);
         auditService.record(

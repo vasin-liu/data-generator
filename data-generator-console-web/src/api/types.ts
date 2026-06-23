@@ -150,6 +150,25 @@ export interface TaskScheduleUpsertRequest {
   description?: string | null;
 }
 
+/** Mirrors {@code org.gensokyo.data.api.console.dto.UdfVersionView} — payload bytes are never exposed. */
+export interface UdfVersionView {
+  udfId: string;
+  version: string;
+  type: string;
+  state: 'draft' | 'published' | 'deprecated';
+  registeredAt: string;
+  publishedAt?: string | null;
+  deprecatedAt?: string | null;
+  metadata: Record<string, string>;
+}
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.UdfGroupView} — one udfId with its version history. */
+export interface UdfGroupView {
+  udfId: string;
+  type: string;
+  versions: UdfVersionView[];
+}
+
 /** Mirrors {@code AuditEventView}. */
 export interface AuditEventView {
   id: string | number;

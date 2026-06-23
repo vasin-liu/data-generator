@@ -1,0 +1,16 @@
+{
+  "input": {
+    "type": "array",
+    "minItems": 1,
+    "maxItems": 1,
+    "items": {
+      "type": "string",
+      "description": "Raw phone number, any formatting"
+    }
+  },
+  "output": {
+    "type": "string",
+    "pattern": "^[0-9]*$",
+    "description": "Digits-only normalized phone number"
+  }
+}

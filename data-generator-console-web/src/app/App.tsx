@@ -8,6 +8,7 @@ import { JobsPage } from './pages/JobsPage';
 import { SchedulesPage } from './pages/SchedulesPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
 import { TemplatesPage } from './pages/TemplatesPage';
+import { UdfsPage } from './pages/UdfsPage';
 
 /**
  * Root route tree for the operator console SPA.
@@ -24,6 +25,7 @@ export function App() {
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/:instanceId" element={<JobDetailPage />} />
         <Route path="schedules" element={<SchedulesPage />} />
+        <Route path="udfs" element={<UdfsPage />} />
         <Route path="audit" element={<AuditPage />} />
       </Route>
     </Routes>

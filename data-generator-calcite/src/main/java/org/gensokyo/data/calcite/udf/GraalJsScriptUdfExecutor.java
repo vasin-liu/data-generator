@@ -45,6 +45,13 @@ public final class GraalJsScriptUdfExecutor {
             .allowExperimentalOptions(true)
             .build();
 
+    static {
+        // Pay the one-time GraalJS language/runtime initialization (multi-second in interpreter-only
+        // mode) at class load — i.e. Spring startup — so the first real, timeout-bounded UDF call does
+        // not absorb cold-start latency and spuriously trip the per-call budget.
+        warmUp();
+    }
+
     /**
      * Evaluates a script UDF body once with the supplied arguments.
      *
@@ -82,6 +89,26 @@ public final class GraalJsScriptUdfExecutor {
             return runWithTimeout(jsContext, source, arguments == null ? List.of() : arguments, timeoutMs);
         } catch (PolyglotException e) {
             throw new IllegalStateException("Script UDF execution failed: " + e.getMessage(), e);
+        }
+    }
+
+    private static void warmUp() {
+        // Mirror the real execution path (shared engine, sandboxed context, callable wrapper) so the
+        // expensive first-time initialization is triggered here rather than inside a timed call.
+        try (Context jsContext = Context.newBuilder(LANGUAGE)
+                .engine(ENGINE)
+                .allowHostAccess(SANDBOX_HOST_ACCESS)
+                .allowIO(IOAccess.NONE)
+                .allowCreateThread(false)
+                .allowNativeAccess(false)
+                .allowHostClassLookup(className -> false)
+                .option(JS_ECMASCRIPT_VERSION_OPTION, "2022")
+                .build()) {
+            Source source = Source.newBuilder(LANGUAGE, "(function(args){ return args.length; })", "warmup.js").build();
+            jsContext.eval(source).execute(List.of());
+        } catch (Throwable ignored) {
+            // Warm-up is best-effort; any failure (including Errors like NoClassDefFoundError) must not
+            // abort class initialization and block startup. Real calls still work, paying cold-start once.
         }
     }
 
