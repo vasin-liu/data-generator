@@ -20,14 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Planning next milestone (`/gsd-new-milestone`)
+**Current focus:** Milestone v2.0 — Reader/Writer & Datasource Platform
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 — Datasource Platform Core (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-23 — Milestone v2.0 started
+Status: Roadmap approved — ready for `/gsd-plan-phase 6`
+Last activity: 2026-06-23 — Milestone v2.0 roadmap created
+
+Progress: [░░░░░░░░░░] 0% (v2.0)
 
 ## Performance Metrics
 
@@ -45,7 +47,8 @@ Last activity: 2026-06-23 — Milestone v2.0 started
 - v1 quality-first: harness before feature breadth — **shipped**
 - Multi-form UDF with unified registry — **shipped**
 - P0 regression gate (7 rows) — **shipped**
-- Orchestration/RW/datasource deferred to v2
+- Orchestration/RW/datasource deferred to v2 — **v2.0 active**
+- v2 dialect priority: DM, Kingbase, HighGo, PG, CK
 
 ### Pending Todos
 

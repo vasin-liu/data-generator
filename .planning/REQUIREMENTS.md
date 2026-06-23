@@ -62,24 +62,24 @@ Deferred beyond v2.0.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RW-01 | — | Pending |
-| RW-02 | — | Pending |
-| RW-03 | — | Pending |
-| RW-04 | — | Pending |
-| RW-05 | — | Pending |
-| RW-06 | — | Pending |
-| DS-01 | — | Pending |
-| DS-02 | — | Pending |
-| DS-03 | — | Pending |
-| DS-04 | — | Pending |
-| DS-05 | — | Pending |
-| TEST-07 | — | Pending |
-| TEST-08 | — | Pending |
+| DS-01 | Phase 6 | Pending |
+| DS-02 | Phase 6 | Pending |
+| DS-03 | Phase 7 | Pending |
+| DS-04 | Phase 7 | Pending |
+| DS-05 | Phase 7 | Pending |
+| RW-01 | Phase 8 | Pending |
+| RW-02 | Phase 8 | Pending |
+| RW-03 | Phase 8 | Pending |
+| RW-04 | Phase 8 | Pending |
+| RW-05 | Phase 9 | Pending |
+| RW-06 | Phase 9 | Pending |
+| TEST-07 | Phase 10 | Pending |
+| TEST-08 | Phase 10 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-23*
