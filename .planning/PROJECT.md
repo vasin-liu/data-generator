@@ -10,19 +10,28 @@
 
 Operators can define, extend, and trust data-generation pipelines: register custom logic (UDFs), apply rich transforms, and verify behavior through an automated test harness before shipping.
 
-## Current State (v1.0 — 2026-06-23)
+## Current Milestone: v2.0 Reader/Writer & Datasource Platform
+
+**Goal:** Close high-priority V2 source/sink gaps and establish a unified datasource abstraction with hot-reload governance, including first-class JDBC dialect support for Dameng, Kingbase, HighGo, PostgreSQL, and ClickHouse.
+
+**Target features:**
+- Reader/Writer gap closure: streaming CSV/JSON, JDBC upsert/merge, dialect-specific writers
+- JDBC dialect expansion: Dameng (达梦), Kingbase (金仓), HighGo (翰高), PostgreSQL, ClickHouse
+- Datasource module: unified JDBC/Kafka/ES abstractions in `data-generator-datasource`
+- Datasource governance: hot-reload snapshots, managed vs inline connections, secret refs, connectivity test, audit trail
+- Harness matrix rows for new RW and dialect paths
+
+## Current State (v1.0 shipped — 2026-06-23)
 
 - **Test harness:** `.planning/test-matrix.yaml`, `scripts/verify-harness.ps1`, `harness-verify.yml`, embedded fixtures, Playwright smoke
 - **UDFs:** Unified registry (java-plugin, script, sql); console upload/publish; JDBC persistence; template publish-time validation; sample UDFs in `samples/udf-samples/`
 - **Transforms:** json/mask/lookup operators, `GET /api/console/transforms`, actionable run-report errors, `V2_JSON_EXTRACT`
 - **CI gate:** 7 P0 matrix rows must pass before merge (`AGENTS.md` merge criteria)
 
-## Next Milestone Goals (v2 — not yet planned)
+## Deferred Beyond v2.0
 
-- Reader/Writer expansion (RW-01, RW-02)
-- Datasource abstraction refactor (DS-01, DS-02)
 - Template-level orchestration (ORCH-01, ORCH-02)
-- Stretch: exhaustive matrix coverage, distributed worker E2E (TEST-V2)
+- Exhaustive matrix coverage, distributed worker E2E (TEST-V2)
 
 ## Requirements
 
@@ -43,15 +52,15 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 - ✓ Transform operators + catalog + errors (XFORM-01..06) — v1.0 Phase 4
 - ✓ P0 coverage ramp + CI gate (COV-01..04) — v1.0 Phase 5
 
-### Active
+### Active (v2.0)
 
-_None — define via `/gsd-new-milestone`._
+- Reader/Writer gap closure and dialect expansion (RW-01..RW-06)
+- Datasource abstraction and governance (DS-01..DS-05)
+- Harness coverage for new RW/dialect paths (TEST-07..TEST-08)
 
 ### Out of Scope
 
-- New Reader/Writer integrations — deferred to v2
-- Datasource abstraction refactor — deferred to v2
-- Template-level orchestration — deferred to v2
+- Template-level orchestration — deferred beyond v2.0
 - Flow-control transforms (branch/retry/parallel DAG) — not in v1 scope
 - Exhaustive 100% UI/control coverage — harness-first with phased targets
 - Greenfield rewrite or Template V1 revival — V2 only
@@ -83,7 +92,9 @@ Known pressure points:
 | UDF v1: multi-form (Java PF4J + script + SQL) with unified registry | Uploadable custom logic across transform stacks | ✓ Good — registry + console shipped |
 | Transform v1: operators + SQL enhancement (not flow-control DAG) | Scoped built-in operators/SQL only | ✓ Good — json/mask/lookup shipped |
 | Defer template orchestration to later version | Product decision during questioning | — Pending v2 |
-| Defer Reader/Writer and datasource abstraction to v2 | Focus v1 on UDF + quality + transforms | — Pending v2 |
+| Defer Reader/Writer and datasource abstraction to v2 | Focus v1 on UDF + quality + transforms | ✓ v2.0 started |
+| v2 dialect priority: DM, Kingbase, HighGo, PG, CK | Domestic + core analytical JDBC targets | — Pending v2.0 |
+| v2 RW: close streaming/upsert gaps before new adapters | Gap matrix over net-new connectors | — Pending v2.0 |
 | Test acceptance: harness + phased coverage (not exhaustive matrix in v1) | Pragmatic ramp vs big-bang UI coverage | ✓ Good — P0/P1/P2 tiers |
 | P0 = 7 matrix rows; merge gate in CI | Protect core UDF/transform paths | ✓ Good — 7/7 green |
 
@@ -94,5 +105,22 @@ Initial GSD milestone scoped UDF, transform operators, and test harness as v1; d
 
 </details>
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-06-23 after v1.0 milestone*
+*Last updated: 2026-06-23 after v2.0 milestone start*
