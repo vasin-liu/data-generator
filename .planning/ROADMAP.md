@@ -1,6 +1,6 @@
 # Milestone v2.0: Reader/Writer & Datasource Platform
 
-**Status:** 🚧 PLANNING
+**Status:** 🚧 IN PROGRESS (Phase 6 validated)
 **Phases:** 6-10
 **Total Plans:** TBD
 
@@ -10,7 +10,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 
 ## Phases
 
-- [ ] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
+- [x] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
 - [ ] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
 - [ ] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [ ] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06)

@@ -19,8 +19,8 @@
 
 ### Datasource Platform (DS)
 
-- [ ] **DS-01**: `data-generator-datasource` module hosts unified connection abstractions for JDBC, Kafka, and Elasticsearch (replacing ad-hoc service-only wiring)
-- [ ] **DS-02**: Managed connection catalog API resolves `dataSourceId` / `connectionRef` through the new abstraction layer without breaking existing console templates
+- [x] **DS-01**: `data-generator-datasource` module hosts unified connection abstractions for JDBC, Kafka, and Elasticsearch (replacing ad-hoc service-only wiring)
+- [x] **DS-02**: Managed connection catalog API resolves `dataSourceId` / `connectionRef` through the new abstraction layer without breaking existing console templates
 - [ ] **DS-03**: Hot-reload applies datasource changes via snapshot-based refresh; in-flight runs continue on the connection snapshot taken at run start
 - [ ] **DS-04**: Governance enforces managed vs inline connection policy, secret refs (no plaintext production secrets), and connectivity test before publish where configured
 - [ ] **DS-05**: Datasource create/update/delete and hot-reload events emit audit records consumable by the console Audit page
@@ -62,8 +62,8 @@ Deferred beyond v2.0.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | Phase 6 | Pending |
-| DS-02 | Phase 6 | Pending |
+| DS-01 | Phase 6 | Complete |
+| DS-02 | Phase 6 | Complete |
 | DS-03 | Phase 7 | Pending |
 | DS-04 | Phase 7 | Pending |
 | DS-05 | Phase 7 | Pending |
