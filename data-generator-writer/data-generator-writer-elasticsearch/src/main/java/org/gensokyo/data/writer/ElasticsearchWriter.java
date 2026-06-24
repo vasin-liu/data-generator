@@ -9,7 +9,7 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.gensokyo.data.context.StageContext;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.springframework.util.CollectionUtils;

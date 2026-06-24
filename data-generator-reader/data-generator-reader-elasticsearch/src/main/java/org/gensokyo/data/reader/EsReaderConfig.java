@@ -5,7 +5,7 @@
  */
 package org.gensokyo.data.reader;
 
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 

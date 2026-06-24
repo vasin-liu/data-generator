@@ -1,7 +1,7 @@
 package org.gensokyo.data.writer;
 
 import org.gensokyo.data.config.DynamicElasticsearchConfig;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

@@ -11,7 +11,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.gensokyo.data.elasticsearch.config.MultipleElasticsearchClusterProperties;
 import org.gensokyo.data.elasticsearch.config.MultipleElasticsearchClusterProperties.ElasticsearchClusterProperties;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -9,7 +9,7 @@ import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
 import org.gensokyo.data.calcite.plugin.ElasticsearchTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.support.EmbeddedElasticsearchHttpSupport;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
