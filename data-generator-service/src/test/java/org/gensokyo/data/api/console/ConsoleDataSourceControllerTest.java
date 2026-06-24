@@ -5,7 +5,11 @@
  */
 package org.gensokyo.data.api.console;
 
+import org.gensokyo.data.datasource.api.CatalogEntry;
+import org.gensokyo.data.datasource.api.CatalogEntrySource;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.api.JdbcCatalogMetadata;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.messaging.MessagingClusterConfigService;
@@ -79,6 +83,29 @@ class ConsoleDataSourceControllerTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.driverPresets[0].id").exists())
                 .andExpect(jsonPath("$.data.driverPresets[?(@.id == 'mysql8')].bundled").value(true));
+    }
+
+    @Test
+    void overview_includesCatalogConnectionsWithSource() throws Exception {
+        when(dataSourceConfigService.listAll()).thenReturn(List.of());
+        when(dataSourceConfigService.listRuntimeNames()).thenReturn(Set.of("data-generator"));
+        when(bundledJdbcDriverRegistry.hasBundle(anyString())).thenReturn(false);
+        when(messagingClusterConfigService.listKafkaClusterKeys()).thenReturn(List.of());
+        when(messagingClusterConfigService.listElasticsearchClusterKeys()).thenReturn(List.of());
+        when(messagingClusterConfigService.listKafka()).thenReturn(List.of());
+        when(messagingClusterConfigService.listElasticsearch()).thenReturn(List.of());
+        when(connectionCatalog.listAll()).thenReturn(List.of(
+                new CatalogEntry(
+                        "data-generator",
+                        ConnectionKind.JDBC,
+                        CatalogEntrySource.BOOTSTRAP,
+                        new JdbcCatalogMetadata("jdbc:h2:mem:dg", "org.h2.Driver"))));
+
+        mockMvc.perform(get("/api/datasources"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.catalogConnections[0].name").value("data-generator"))
+                .andExpect(jsonPath("$.data.catalogConnections[0].kind").value("JDBC"))
+                .andExpect(jsonPath("$.data.catalogConnections[0].source").value("BOOTSTRAP"));
     }
 
     @Test

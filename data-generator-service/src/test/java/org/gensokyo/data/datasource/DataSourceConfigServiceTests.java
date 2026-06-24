@@ -55,6 +55,14 @@ class DataSourceConfigServiceTests {
     }
 
     @Test
+    void removeRejectsBootstrapOnlyYamlDatasource() {
+        IllegalArgumentException failure = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> dataSourceConfigService.remove("data-generator"));
+        Assertions.assertTrue(failure.getMessage().contains("Bootstrap datasource cannot be removed"));
+    }
+
+    @Test
     void removeDisablesPersistedRow() {
         dataSourceConfigService.save(
                 DS_NAME,
