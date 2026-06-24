@@ -18,6 +18,7 @@
 
     <modules>
         <module>data-generator-datasource-api</module>
+        <module>data-generator-datasource-jdbc</module>
     </modules>
 
     <dependencies>
