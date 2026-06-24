@@ -61,8 +61,9 @@ import org.gensokyo.data.calcite.transform.JsTransformFactory;
 import org.gensokyo.data.calcite.transform.JsonTransformFactory;
 import org.gensokyo.data.calcite.transform.LookupTransformFactory;
 import org.gensokyo.data.calcite.transform.MaskTransformFactory;
-import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
-import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
+import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.yaml.JacksonParser;
 import org.gensokyo.data.yaml.YamlParser;
@@ -277,8 +278,7 @@ public class CoreConfig {
     public TemplateV2RuntimeContext templateV2RuntimeContext(DataGeneratorProperties properties,
                                                              RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver,
                                                              NamedParameterJdbcTemplate namedParameterJdbcTemplate,
-                                                             ObjectProvider<DynamicKafkaTemplateRegistry> kafkaTemplateRegistryProvider,
-                                                             ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchClientRegistryProvider,
+                                                             ConnectionCatalog connectionCatalog,
                                                              ObjectProvider<AiRuntimeBridge> aiRuntimeBridgeProvider) {
         List<Path> pluginDirectories = properties.getV2PluginDirectories().stream()
                 .map(Path::of)
@@ -287,8 +287,7 @@ public class CoreConfig {
                 runtimeJdbcEndpointResolver,
                 new TemplateV2RuntimeServices(
                         namedParameterJdbcTemplate,
-                        kafkaTemplateRegistryProvider.getIfAvailable(),
-                        elasticsearchClientRegistryProvider.getIfAvailable(),
+                        connectionCatalog,
                         aiRuntimeBridgeProvider.getIfAvailable()
                 ),
                 pluginDirectories,
@@ -346,11 +345,19 @@ public class CoreConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(ConnectionCatalog.class)
+    public ConnectionCatalog connectionCatalog(org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl connectionCatalogImpl) {
+        return connectionCatalogImpl;
+    }
+
+    @Bean
     @ConditionalOnMissingBean(RuntimeJdbcEndpointResolver.class)
     public RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver(
             ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider,
-            org.gensokyo.data.secret.SecretResolver secretResolver) {
-        return new DefaultRuntimeJdbcEndpointResolver(dynamicRoutingDataSourceProvider, secretResolver);
+            org.gensokyo.data.secret.SecretResolver secretResolver,
+            ObjectProvider<ConnectionCatalog> connectionCatalogProvider) {
+        return new DefaultRuntimeJdbcEndpointResolver(
+                dynamicRoutingDataSourceProvider, secretResolver, connectionCatalogProvider);
     }
 
     @Bean

@@ -9,6 +9,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.po.DataSourceConfigPO;
 import org.gensokyo.data.repository.DataSourceConfigRepository;
@@ -40,6 +41,7 @@ public class DataSourceConfigService {
     private final DataSourceDriverSupport driverSupport;
     private final SecretResolver secretResolver;
     private final AuditService auditService;
+    private final ConnectionCatalogImpl connectionCatalog;
 
     /**
      * @return summaries of all persisted configs
@@ -128,6 +130,9 @@ public class DataSourceConfigService {
      */
     @Transactional
     public void remove(String name) {
+        if (connectionCatalog.isBootstrapOnly(name)) {
+            throw new IllegalArgumentException("Bootstrap datasource cannot be removed via console: " + name);
+        }
         DynamicRoutingDataSource routing = requireRouting();
         if (routing.getDataSources().containsKey(name)) {
             routing.removeDataSource(name);
