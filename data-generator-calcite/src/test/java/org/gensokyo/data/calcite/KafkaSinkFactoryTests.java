@@ -9,7 +9,7 @@ import org.gensokyo.data.calcite.source.*;
 import org.gensokyo.data.calcite.sql.*;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.Row;

@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.gensokyo.data.context.StageContext;
 import org.gensokyo.data.exception.DataGeneratorException;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.kit.base.ObjectKit;
 import org.gensokyo.kit.character.StrKit;

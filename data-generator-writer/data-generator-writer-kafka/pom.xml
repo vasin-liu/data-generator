@@ -22,6 +22,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-datasource-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <scope>provided</scope>

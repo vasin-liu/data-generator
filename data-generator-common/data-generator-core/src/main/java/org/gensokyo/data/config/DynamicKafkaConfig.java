@@ -1,7 +1,7 @@
 package org.gensokyo.data.config;
 
 import org.gensokyo.data.kafka.config.MultipleKafkaClusterProperties;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

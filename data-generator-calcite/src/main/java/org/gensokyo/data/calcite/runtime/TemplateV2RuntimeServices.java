@@ -7,8 +7,8 @@ import org.gensokyo.data.calcite.source.*;
 import org.gensokyo.data.calcite.sql.*;
 
 import org.elasticsearch.client.RestClient;
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 

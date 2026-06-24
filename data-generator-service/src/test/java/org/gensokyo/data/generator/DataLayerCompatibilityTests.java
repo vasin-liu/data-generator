@@ -1,7 +1,7 @@
 package org.gensokyo.data.generator;
 
-import org.gensokyo.data.elasticsearch.support.DynamicElasticsearchClientRegistry;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

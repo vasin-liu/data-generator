@@ -10,7 +10,7 @@ import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
 import org.gensokyo.data.calcite.plugin.KafkaTemplateTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.support.EmbeddedKafkaTestSupport;
 import org.gensokyo.data.iterator.NumberIteratorVO;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;

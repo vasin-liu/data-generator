@@ -1,7 +1,7 @@
 package org.gensokyo.data.writer;
 
 import org.gensokyo.data.config.DynamicKafkaConfig;
-import org.gensokyo.data.kafka.support.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

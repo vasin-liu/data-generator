@@ -17,6 +17,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-datasource-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-datasource-elasticsearch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>

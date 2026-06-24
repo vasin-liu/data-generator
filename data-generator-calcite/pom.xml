@@ -18,6 +18,18 @@
 
         <dependency>
             <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-datasource-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-datasource-elasticsearch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
             <artifactId>data-generator-database-core</artifactId>
         </dependency>
 
