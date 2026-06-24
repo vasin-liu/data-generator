@@ -13,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
-import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.calcite.support.InMemoryCatalog;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
@@ -128,13 +128,12 @@ class ElasticsearchSinkFactoryTests {
 
     @Test
     void providerContributesElasticsearchSinkFactoryWhenRuntimeServiceExists() {
-        DynamicElasticsearchClientRegistry registry = new DynamicElasticsearchClientRegistry("main",
-                Map.of("main", restClient()));
+        InMemoryCatalog catalog = InMemoryCatalog.elasticsearchOnly("main", restClient());
 
         TemplateV2RuntimePlugin plugin = new ElasticsearchTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, null, registry),
+                        new TemplateV2RuntimeServices(null, catalog),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -149,7 +148,7 @@ class ElasticsearchSinkFactoryTests {
         TemplateV2RuntimePlugin plugin = new ElasticsearchTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, null, null),
+                        new TemplateV2RuntimeServices(null, null),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -160,11 +159,10 @@ class ElasticsearchSinkFactoryTests {
     @Test
     void runnerWritesTransformRowsToElasticsearchSinkFromRuntimeProvider() throws Exception {
         RestClient client = restClient();
-        DynamicElasticsearchClientRegistry registry = new DynamicElasticsearchClientRegistry("main",
-                Map.of("main", client));
+        InMemoryCatalog catalog = InMemoryCatalog.elasticsearchOnly("main", client);
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, null, registry),
+                new TemplateV2RuntimeServices(null, catalog),
                 List.of(),
                 getClass().getClassLoader()
         );

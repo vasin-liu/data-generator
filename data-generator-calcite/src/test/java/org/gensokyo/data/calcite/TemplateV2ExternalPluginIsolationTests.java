@@ -144,7 +144,7 @@ class TemplateV2ExternalPluginIsolationTests {
     private TemplateV2RuntimeContext runtimeContext(Path pluginDirectory) {
         return new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, null, null),
+                new TemplateV2RuntimeServices(null, null),
                 List.of(pluginDirectory),
                 getClass().getClassLoader()
         );

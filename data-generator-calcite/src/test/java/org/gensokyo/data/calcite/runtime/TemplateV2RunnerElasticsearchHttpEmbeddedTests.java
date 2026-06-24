@@ -9,7 +9,7 @@ import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
 import org.gensokyo.data.calcite.plugin.ElasticsearchTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.support.EmbeddedElasticsearchHttpSupport;
-import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
+import org.gensokyo.data.calcite.support.InMemoryCatalog;
 import org.gensokyo.data.iterator.NumberIteratorVO;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
@@ -50,11 +50,10 @@ class TemplateV2RunnerElasticsearchHttpEmbeddedTests {
     @Test
     void runnerWritesFilteredRowsToEmbeddedElasticsearchBulkEndpoint() throws Exception {
         try (var client = httpServer.restClient()) {
-            DynamicElasticsearchClientRegistry registry = new DynamicElasticsearchClientRegistry(
-                    "main", Map.of("main", client));
+            InMemoryCatalog catalog = InMemoryCatalog.elasticsearchOnly("main", client);
             TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                     new NoopRuntimeJdbcEndpointResolver(),
-                    new TemplateV2RuntimeServices(null, null, registry),
+                    new TemplateV2RuntimeServices(null, catalog),
                     List.of(),
                     getClass().getClassLoader());
             TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(

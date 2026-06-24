@@ -27,7 +27,7 @@ class TemplateV2RuntimeWatcherTests {
             CountingSubtypeRegistrar subtypeRegistrar = new CountingSubtypeRegistrar();
             CountingTemplates templates = new CountingTemplates();
             TemplateV2RuntimeWatcher watcher = new TemplateV2RuntimeWatcher(
-                    new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new TemplateV2RuntimeServices(null, null, null), List.of(directory),
+                    new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new TemplateV2RuntimeServices(null, null), List.of(directory),
                             getClass().getClassLoader()),
                     registryProvider,
                     new FixedObjectProvider<>(subtypeRegistrar),

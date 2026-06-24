@@ -14,7 +14,7 @@ public record TemplateV2RuntimeContext(RuntimeJdbcEndpointResolver runtimeJdbcEn
                                        List<Path> pluginDirectories,
                                        ClassLoader pluginClassLoader) {
     public TemplateV2RuntimeContext {
-        runtimeServices = runtimeServices == null ? new TemplateV2RuntimeServices(null, null, null) : runtimeServices;
+        runtimeServices = runtimeServices == null ? new TemplateV2RuntimeServices(null, null) : runtimeServices;
         pluginDirectories = pluginDirectories == null ? List.of() : List.copyOf(pluginDirectories);
         pluginClassLoader = pluginClassLoader == null
                 ? TemplateV2RuntimeContext.class.getClassLoader()
@@ -22,7 +22,7 @@ public record TemplateV2RuntimeContext(RuntimeJdbcEndpointResolver runtimeJdbcEn
     }
 
     public static TemplateV2RuntimeContext empty() {
-        return new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new TemplateV2RuntimeServices(null, null, null), List.of(),
+        return new TemplateV2RuntimeContext(new NoopRuntimeJdbcEndpointResolver(), new TemplateV2RuntimeServices(null, null), List.of(),
                 TemplateV2RuntimeContext.class.getClassLoader());
     }
 }

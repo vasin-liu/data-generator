@@ -7,34 +7,38 @@ import org.gensokyo.data.calcite.runtime.*;
 import org.gensokyo.data.calcite.sink.*;
 import org.gensokyo.data.calcite.source.*;
 import org.gensokyo.data.calcite.sql.*;
-import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
-import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.calcite.support.InMemoryCatalog;
+import org.gensokyo.data.datasource.api.CatalogEntrySource;
+import org.gensokyo.data.datasource.api.ElasticsearchCatalogMetadata;
+import org.gensokyo.data.datasource.api.KafkaCatalogMetadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
-import java.util.Map;
 
 class TemplateV2RuntimeServicesTests {
 
     @Test
     void exposesJdbcKafkaAndElasticsearchServicesThroughContext() {
         NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource());
-        DynamicKafkaTemplateRegistry kafkaRegistry = new DynamicKafkaTemplateRegistry("primary", Map.of());
-        DynamicElasticsearchClientRegistry elasticsearchRegistry =
-                new DynamicElasticsearchClientRegistry("primary", Map.of());
+        InMemoryCatalog catalog = new InMemoryCatalog()
+                .putKafka("primary", Mockito.mock(org.springframework.kafka.core.KafkaTemplate.class),
+                        CatalogEntrySource.BOOTSTRAP, new KafkaCatalogMetadata("embedded"))
+                .putElasticsearch("primary", Mockito.mock(org.elasticsearch.client.RestClient.class),
+                        CatalogEntrySource.BOOTSTRAP, new ElasticsearchCatalogMetadata("embedded"));
 
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(jdbcTemplate, kafkaRegistry, elasticsearchRegistry),
+                new TemplateV2RuntimeServices(jdbcTemplate, catalog),
                 java.util.List.of(),
                 getClass().getClassLoader()
         );
 
         Assertions.assertSame(jdbcTemplate, context.runtimeServices().jdbcTemplate());
-        Assertions.assertSame(kafkaRegistry, context.runtimeServices().kafkaTemplateRegistry());
-        Assertions.assertSame(elasticsearchRegistry, context.runtimeServices().elasticsearchClientRegistry());
+        Assertions.assertSame(catalog, context.runtimeServices().connectionCatalog());
+        Assertions.assertTrue(context.runtimeServices().hasKafka());
+        Assertions.assertTrue(context.runtimeServices().hasElasticsearch());
     }
 
     @Test
@@ -52,7 +56,7 @@ class TemplateV2RuntimeServicesTests {
         };
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, null, null, bridge),
+                new TemplateV2RuntimeServices(null, null, bridge),
                 java.util.List.of(),
                 getClass().getClassLoader()
         );

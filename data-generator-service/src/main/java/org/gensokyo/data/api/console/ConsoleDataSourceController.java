@@ -8,6 +8,7 @@ package org.gensokyo.data.api.console;
 import jakarta.validation.constraints.NotBlank;
 import org.gensokyo.data.api.console.dto.DataSourcesOverviewDto;
 import org.gensokyo.data.api.console.dto.JdbcDriverPresetDto;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
@@ -42,19 +43,23 @@ public class ConsoleDataSourceController {
     private final DataSourceConfigService dataSourceConfigService;
     private final BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
     private final MessagingClusterConfigService messagingClusterConfigService;
+    private final ConnectionCatalog connectionCatalog;
 
     /**
      * @param dataSourceConfigService       JDBC persistence
      * @param bundledJdbcDriverRegistry     driver catalog
      * @param messagingClusterConfigService Kafka/ES console persistence
+     * @param connectionCatalog             merged bootstrap + managed connection list
      */
     public ConsoleDataSourceController(
             DataSourceConfigService dataSourceConfigService,
             BundledJdbcDriverRegistry bundledJdbcDriverRegistry,
-            MessagingClusterConfigService messagingClusterConfigService) {
+            MessagingClusterConfigService messagingClusterConfigService,
+            ConnectionCatalog connectionCatalog) {
         this.dataSourceConfigService = dataSourceConfigService;
         this.bundledJdbcDriverRegistry = bundledJdbcDriverRegistry;
         this.messagingClusterConfigService = messagingClusterConfigService;
+        this.connectionCatalog = connectionCatalog;
     }
 
     /**
@@ -67,7 +72,8 @@ public class ConsoleDataSourceController {
                 dataSourceConfigService.listAll(),
                 runtimeKeys,
                 bundledJdbcDriverRegistry,
-                messagingClusterConfigService));
+                messagingClusterConfigService,
+                connectionCatalog));
     }
 
     /**

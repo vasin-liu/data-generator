@@ -9,6 +9,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.calcite.RuntimeJdbcEndpointResolver;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.ConnectionKind;
 import org.gensokyo.data.model.v2.InlineDataSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
@@ -19,7 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import java.util.Objects;
 
 /**
- * Registers inline JDBC endpoints into the dynamic routing datasource.
+ * Registers inline JDBC endpoints into the dynamic routing datasource and validates managed ids via catalog (D-29).
  *
  * @author Gensokyo
  * @since 2026-05-19
@@ -29,6 +31,7 @@ public class DefaultRuntimeJdbcEndpointResolver implements RuntimeJdbcEndpointRe
 
     private final ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider;
     private final SecretResolver secretResolver;
+    private final ObjectProvider<ConnectionCatalog> connectionCatalogProvider;
 
     @Override
     public String resolveSourceDataSourceId(QuerySourceVO source) {
@@ -36,6 +39,7 @@ public class DefaultRuntimeJdbcEndpointResolver implements RuntimeJdbcEndpointRe
             return null;
         }
         if (StrKit.isNotBlank(source.getDataSourceId())) {
+            ensureManagedJdbc(source.getDataSourceId());
             return source.getDataSourceId();
         }
         return ensureInlineDataSource(source.getDataSource(), source.getDataSourceId());
@@ -47,9 +51,17 @@ public class DefaultRuntimeJdbcEndpointResolver implements RuntimeJdbcEndpointRe
             return null;
         }
         if (StrKit.isNotBlank(writer.getDataSourceId())) {
+            ensureManagedJdbc(writer.getDataSourceId());
             return writer.getDataSourceId();
         }
         return ensureInlineDataSource(writer.getDataSource(), writer.getDataSourceId());
+    }
+
+    private void ensureManagedJdbc(String name) {
+        ConnectionCatalog catalog = connectionCatalogProvider == null ? null : connectionCatalogProvider.getIfAvailable();
+        if (catalog != null) {
+            catalog.resolve(name, ConnectionKind.JDBC);
+        }
     }
 
     private String ensureInlineDataSource(InlineDataSourceVO inline, String fallback) {

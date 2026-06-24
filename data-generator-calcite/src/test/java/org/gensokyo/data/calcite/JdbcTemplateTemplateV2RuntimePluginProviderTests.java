@@ -34,7 +34,7 @@ class JdbcTemplateTemplateV2RuntimePluginProviderTests {
         TemplateV2RuntimePlugin plugin = new JdbcTemplateTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         resolver,
-                        new TemplateV2RuntimeServices(jdbcTemplate, null, null),
+                        new TemplateV2RuntimeServices(jdbcTemplate, null),
                         java.util.List.of(),
                         getClass().getClassLoader()
                 ));

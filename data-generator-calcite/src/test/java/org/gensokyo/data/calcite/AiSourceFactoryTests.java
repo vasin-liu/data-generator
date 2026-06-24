@@ -126,7 +126,7 @@ class AiSourceFactoryTests {
         TemplateV2RuntimePlugin plugin = new AiRuntimeBridgeTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, null, null, new RecordingAiRuntimeBridge()),
+                        new TemplateV2RuntimeServices(null, null, new RecordingAiRuntimeBridge()),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -141,7 +141,7 @@ class AiSourceFactoryTests {
         TemplateV2RuntimePlugin plugin = new AiRuntimeBridgeTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, null, null),
+                        new TemplateV2RuntimeServices(null, null),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -168,7 +168,7 @@ class AiSourceFactoryTests {
         RecordingAiRuntimeBridge bridge = new RecordingAiRuntimeBridge();
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, null, null, bridge),
+                new TemplateV2RuntimeServices(null, null, bridge),
                 List.of(),
                 getClass().getClassLoader()
         );

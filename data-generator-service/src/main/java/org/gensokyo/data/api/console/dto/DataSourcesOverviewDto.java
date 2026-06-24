@@ -8,6 +8,7 @@ package org.gensokyo.data.api.console.dto;
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.messaging.MessagingClusterConfigService;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
  * @param elasticsearchClusters merged Elasticsearch cluster ids
  * @param kafkaPersisted console-managed Kafka rows
  * @param elasticsearchPersisted console-managed Elasticsearch rows
+ * @param catalogConnections merged catalog entries with BOOTSTRAP/MANAGED source tags
  */
 public record DataSourcesOverviewDto(
         List<DataSourceConfigSummary> persisted,
@@ -30,7 +32,8 @@ public record DataSourcesOverviewDto(
         List<String> kafkaClusters,
         List<String> elasticsearchClusters,
         List<MessagingClusterSummaryDto> kafkaPersisted,
-        List<MessagingClusterSummaryDto> elasticsearchPersisted) {
+        List<MessagingClusterSummaryDto> elasticsearchPersisted,
+        List<CatalogConnectionSummaryDto> catalogConnections) {
 
     /**
      * @param persisted   persisted rows
@@ -41,9 +44,13 @@ public record DataSourcesOverviewDto(
             List<DataSourceConfigSummary> persisted,
             List<String> runtimeKeys,
             BundledJdbcDriverRegistry bundledDrivers,
-            MessagingClusterConfigService messagingClusterConfigService) {
+            MessagingClusterConfigService messagingClusterConfigService,
+            ConnectionCatalog connectionCatalog) {
         List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
                 .map(p -> JdbcDriverPresetDto.from(p, bundledDrivers))
+                .toList();
+        List<CatalogConnectionSummaryDto> catalogConnections = connectionCatalog.listAll().stream()
+                .map(CatalogConnectionSummaryDto::from)
                 .toList();
         return new DataSourcesOverviewDto(
                 persisted,
@@ -54,6 +61,7 @@ public record DataSourcesOverviewDto(
                 messagingClusterConfigService.listKafka().stream().map(MessagingClusterSummaryDto::from).toList(),
                 messagingClusterConfigService.listElasticsearch().stream()
                         .map(MessagingClusterSummaryDto::from)
-                        .toList());
+                        .toList(),
+                catalogConnections);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 public final class ElasticsearchTemplateV2RuntimePluginProvider implements TemplateV2RuntimePluginProvider {
     @Override
     public TemplateV2RuntimePlugin createPlugin(TemplateV2RuntimeContext context) {
-        if (context.runtimeServices().elasticsearchClientRegistry() == null) {
+        if (!context.runtimeServices().hasElasticsearch()) {
             return new TemplateV2RuntimePlugin() {
             };
         }

@@ -10,7 +10,7 @@ import org.gensokyo.data.calcite.plugin.DefaultTemplateV2RuntimePlugin;
 import org.gensokyo.data.calcite.plugin.KafkaTemplateTemplateV2RuntimePluginProvider;
 import org.gensokyo.data.calcite.support.EmbeddedKafkaTestSupport;
 import org.gensokyo.data.iterator.NumberIteratorVO;
-import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.calcite.support.InMemoryCatalog;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
@@ -56,10 +56,10 @@ class TemplateV2RunnerKafkaEmbeddedTests {
     @Test
     void runnerWritesFilteredRowsToEmbeddedKafkaTopic() {
         var kafkaTemplate = EmbeddedKafkaTestSupport.kafkaTemplate();
-        DynamicKafkaTemplateRegistry registry = new DynamicKafkaTemplateRegistry("main", Map.of("main", kafkaTemplate));
+        InMemoryCatalog catalog = InMemoryCatalog.kafkaOnly("main", kafkaTemplate);
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, registry, null),
+                new TemplateV2RuntimeServices(null, catalog),
                 List.of(),
                 getClass().getClassLoader());
         TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistryFactory().fromPlugins(List.of(

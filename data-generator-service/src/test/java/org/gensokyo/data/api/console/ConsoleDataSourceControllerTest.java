@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.api.console;
 
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.messaging.MessagingClusterConfigService;
@@ -43,6 +44,9 @@ class ConsoleDataSourceControllerTest {
     @Mock
     private MessagingClusterConfigService messagingClusterConfigService;
 
+    @Mock
+    private ConnectionCatalog connectionCatalog;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -51,7 +55,8 @@ class ConsoleDataSourceControllerTest {
                         new ConsoleDataSourceController(
                                 dataSourceConfigService,
                                 bundledJdbcDriverRegistry,
-                                messagingClusterConfigService))
+                                messagingClusterConfigService,
+                                connectionCatalog))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }
@@ -68,6 +73,7 @@ class ConsoleDataSourceControllerTest {
         when(messagingClusterConfigService.listElasticsearchClusterKeys()).thenReturn(List.of());
         when(messagingClusterConfigService.listKafka()).thenReturn(List.of());
         when(messagingClusterConfigService.listElasticsearch()).thenReturn(List.of());
+        when(connectionCatalog.listAll()).thenReturn(List.of());
         mockMvc.perform(get("/api/datasources"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))

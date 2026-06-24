@@ -11,7 +11,7 @@ import java.util.List;
 public final class KafkaTemplateTemplateV2RuntimePluginProvider implements TemplateV2RuntimePluginProvider {
     @Override
     public TemplateV2RuntimePlugin createPlugin(TemplateV2RuntimeContext context) {
-        if (context.runtimeServices().kafkaTemplateRegistry() == null) {
+        if (!context.runtimeServices().hasKafka()) {
             return new TemplateV2RuntimePlugin() {
             };
         }

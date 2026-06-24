@@ -9,7 +9,7 @@ import org.gensokyo.data.calcite.source.*;
 import org.gensokyo.data.calcite.sql.*;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
-import org.gensokyo.data.datasource.kafka.DynamicKafkaTemplateRegistry;
+import org.gensokyo.data.calcite.support.InMemoryCatalog;
 import org.gensokyo.data.model.v2.ColumnDef;
 import org.gensokyo.data.model.v2.IteratorSourceVO;
 import org.gensokyo.data.model.v2.Row;
@@ -95,13 +95,12 @@ class KafkaSinkFactoryTests {
 
     @Test
     void providerContributesKafkaSinkFactoryWhenRuntimeServiceExists() {
-        DynamicKafkaTemplateRegistry registry = new DynamicKafkaTemplateRegistry("main",
-                Map.of("main", kafkaTemplate()));
+        InMemoryCatalog catalog = InMemoryCatalog.kafkaOnly("main", kafkaTemplate());
 
         TemplateV2RuntimePlugin plugin = new KafkaTemplateTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, registry, null),
+                        new TemplateV2RuntimeServices(null, catalog),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -116,7 +115,7 @@ class KafkaSinkFactoryTests {
         TemplateV2RuntimePlugin plugin = new KafkaTemplateTemplateV2RuntimePluginProvider()
                 .createPlugin(new TemplateV2RuntimeContext(
                         new NoopRuntimeJdbcEndpointResolver(),
-                        new TemplateV2RuntimeServices(null, null, null),
+                        new TemplateV2RuntimeServices(null, null),
                         List.of(),
                         getClass().getClassLoader()
                 ));
@@ -127,11 +126,10 @@ class KafkaSinkFactoryTests {
     @Test
     void runnerWritesTransformRowsToKafkaSinkFromRuntimeProvider() {
         KafkaTemplate<String, String> kafkaTemplate = kafkaTemplate();
-        DynamicKafkaTemplateRegistry registry = new DynamicKafkaTemplateRegistry("main",
-                Map.of("main", kafkaTemplate));
+        InMemoryCatalog catalog = InMemoryCatalog.kafkaOnly("main", kafkaTemplate);
         TemplateV2RuntimeContext context = new TemplateV2RuntimeContext(
                 new NoopRuntimeJdbcEndpointResolver(),
-                new TemplateV2RuntimeServices(null, registry, null),
+                new TemplateV2RuntimeServices(null, catalog),
                 List.of(),
                 getClass().getClassLoader()
         );
