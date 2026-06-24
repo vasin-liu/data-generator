@@ -35,16 +35,20 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 **Plans**: 5 plans in 4 waves
 
 **Wave 1** *(no dependencies)*
+
 - `06-01` — Datasource API module & Catalog contracts (DS-01)
 
 **Wave 2** *(blocked on Wave 1)*
+
 - `06-02` — JDBC datasource adapter (DS-01)
 - `06-03` — Kafka & Elasticsearch adapter relocation (DS-01)
 
 **Wave 3** *(blocked on Wave 2)*
+
 - `06-04` — Service Catalog implementation & bootstrap wiring (DS-02)
 
 **Wave 4** *(blocked on Wave 3)*
+
 - `06-05` — Calcite runtime integration & regression gate (DS-01, DS-02)
 
 ### Phase 7: Datasource Governance & Hot-Reload
