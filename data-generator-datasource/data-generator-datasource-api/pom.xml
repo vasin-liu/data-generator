@@ -4,28 +4,23 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.gensokyo.data.generator</groupId>
-        <artifactId>data-generator</artifactId>
+        <artifactId>data-generator-datasource</artifactId>
         <version>${revision}</version>
-<!--        <relativePath>../pom.xml</relativePath>-->
     </parent>
 
-    <artifactId>data-generator-datasource</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>data-generator-datasource-api</artifactId>
 
-    <properties>
-
-    </properties>
-
-    <modules>
-        <module>data-generator-datasource-api</module>
-    </modules>
+    <description>Unified connection catalog contracts for JDBC, Kafka, and Elasticsearch (no adapter dependencies).</description>
 
     <dependencies>
-
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>
