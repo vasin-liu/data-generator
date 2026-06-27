@@ -43,7 +43,7 @@ created: 2026-06-27
 | 07-01-02 | 01 | 1 | DS-03 | T-07-02 | Snapshot JSON schema round-trip | unit | `mvnw -Dtest=ExecutionConnectionSnapshotTests test` | ✅ | ✅ green |
 | 07-02-01 | 02 | 2 | DS-03 | T-07-03 | Snapshot at RUNNING; in-flight isolation | IT | `mvnw -Dtest=ConnectionSnapshotIT test` | ❌ W2 | ⬜ pending |
 | 07-02-02 | 02 | 2 | DS-03 | T-07-04 | DEGRADED retains last-known-good | IT | `mvnw -Dtest=HotReloadTests test` | ❌ W2 | ⬜ pending |
-| 07-03-01 | 03 | 3 | DS-04 | T-07-05 | Governance blocks inline prod refs | IT | `mvnw -Dtest=DatasourceGovernanceIT test` | ❌ W3 | ⬜ pending |
+| 07-03-01 | 03 | 3 | DS-04 | T-07-05 | Governance blocks inline prod refs at publish/run | IT | `mvnw -Dtest=DatasourceGovernanceIT test` | ❌ W3 | ⬜ pending |
 | 07-03-02 | 03 | 3 | DS-04/05 | T-07-06 | Catalog.test JDBC/Kafka/ES | IT | `mvnw -Dtest=ConnectionCatalogTestTests test` | ❌ W3 | ⬜ pending |
 | 07-03-03 | 03 | 3 | DS-05 | T-07-07 | Audit events summary-only | IT | `mvnw -Dtest=ConsoleAuditControllerTest test` | ✅ | ⬜ pending |
 | 07-04-01 | 04 | 4 | DS-04 | T-07-08 | Console test gate + HEALTHY/DEGRADED | unit/e2e | console-web build + manual | ❌ W4 | ⬜ pending |
