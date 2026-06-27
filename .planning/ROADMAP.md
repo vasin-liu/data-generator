@@ -66,7 +66,26 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. Console connectivity test succeeds or fails with actionable message before operator saves a datasource
 4. Datasource create/update/delete and reload events appear in the Audit page feed
 
-**Plans**: TBD via `/gsd-plan-phase 7`
+**Plans**: 5 plans in 4 waves
+
+**Wave 1** *(no dependencies)*
+
+- `07-01` — Catalog API extensions & execution snapshot schema (DS-03, DS-04, DS-05)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- `07-02` — Run-start snapshot, hot-reload & DEGRADED runtime (DS-03)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- `07-03` — Connectivity test, governance gates & audit events (DS-04, DS-05)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- `07-04` — Console datasource UX, bug fixes & audit deep-link (DS-03, DS-04, DS-05)
+- `07-05` — Playwright E2E, playwright-cli & Phase 7 UAT scripts (DS-03, DS-04, DS-05)
+
+**Verification**: `.\scripts\verify-phase7-uat-datasource-governance.ps1 -SkipPlaywright` (Maven IT slice); full UAT adds Podman Playwright + playwright-cli snapshots.
 
 ### Phase 8: RW Streaming & Upsert
 

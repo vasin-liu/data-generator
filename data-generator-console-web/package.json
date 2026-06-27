@@ -12,6 +12,18 @@
     "verify:unit": "tsc -p tsconfig.json --noEmit",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
+    "e2e:phase6-cold-start": "playwright test e2e/specs/datasource-catalog-cold-start.spec.ts",
+    "e2e:phase6-catalog-overview": "playwright test e2e/specs/datasource-catalog-overview.spec.ts",
+    "e2e:phase6-managed-crud": "playwright test e2e/specs/datasource-managed-crud.spec.ts",
+    "e2e:phase6-v2-template-run": "playwright test e2e/specs/datasource-v2-template-run.spec.ts",
+    "e2e:phase6-messaging-sink": "playwright test e2e/specs/datasource-messaging-sink-resolution.spec.ts",
+    "e2e:phase7-governance": "playwright test e2e/specs/datasource-governance.spec.ts",
+    "e2e:cli:cold-start": "pwsh -NoProfile -File e2e/cli/run-cold-start-cli.ps1",
+    "e2e:cli:catalog-overview": "pwsh -NoProfile -File e2e/cli/run-catalog-overview-cli.ps1",
+    "e2e:cli:managed-crud": "pwsh -NoProfile -File e2e/cli/run-managed-crud-cli.ps1",
+    "e2e:cli:v2-template-run": "pwsh -NoProfile -File e2e/cli/run-v2-template-run-cli.ps1",
+    "e2e:cli:messaging-sink": "pwsh -NoProfile -File e2e/cli/run-messaging-sink-cli.ps1",
+    "e2e:cli:phase7-governance": "pwsh -NoProfile -File e2e/cli/run-datasource-governance-cli.ps1",
     "verify:e2e": "playwright test",
     "verify:acceptance": "playwright test e2e/specs/acceptance.spec.ts e2e/specs/template-workflow.spec.ts",
     "verify:all": "pwsh -NoProfile -File ../scripts/verify-console.ps1"
@@ -28,6 +40,7 @@
     "react-router-dom": "^7.1.0"
   },
   "devDependencies": {
+    "@playwright/cli": "^0.1.14",
     "@playwright/test": "^1.49.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

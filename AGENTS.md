@@ -67,11 +67,21 @@ Focused builds (examples from internal upgrade docs):
 # Operator console: unit + frontend build + Podman Playwright UI/E2E (fixed pipeline)
 .\scripts\verify-console.ps1
 
+# One-click full package (console SPA embedded + service assembly tar.gz/zip)
+.\scripts\package-full.ps1 -SkipTests
+
+# Package, build Podman image, and start local container (profile e2e)
+.\scripts\run-podman-local.ps1 -SkipTests -KeepContainer
+
 # Test harness: matrix-linked Maven slice + coverage summary (see docs/test-harness.md)
 .\scripts\verify-harness.ps1
 
 # Pack 3 execution reliability (Maven slice + optional Playwright against running console)
 .\scripts\verify-execution-reliability.ps1 -SkipPlaywright
+
+# Phase 7 datasource governance & hot-reload UAT (Maven IT slice + optional Podman Playwright)
+.\scripts\verify-phase7-uat-datasource-governance.ps1 -SkipPlaywright
+.\scripts\verify-phase7-uat-hot-reload.ps1 -SkipPlaywright
 
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
