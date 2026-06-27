@@ -58,4 +58,19 @@ class ConsoleAuditControllerTest {
                 .andExpect(jsonPath("$.data[0].action").value("TEMPLATE_PUBLISH"))
                 .andExpect(jsonPath("$.data[0].detail.name").value("demo"));
     }
+
+    @Test
+    void list_categoryDatasource_mapsToDatasourceResourceType() throws Exception {
+        Instant at = Instant.parse("2026-06-27T00:00:00Z");
+        when(auditService.listRecent(null, "DATASOURCE", 100))
+                .thenReturn(List.of(
+                        new AuditEventView(2L, at, "bob", "DATASOURCE_RELOAD", "DATASOURCE", "orders-db",
+                                Map.of("connectionName", "orders-db", "kind", "JDBC", "action", "DATASOURCE_RELOAD"))));
+
+        mockMvc.perform(get("/api/console/audit").param("category", "DATASOURCE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].action").value("DATASOURCE_RELOAD"))
+                .andExpect(jsonPath("$.data[0].resourceType").value("DATASOURCE"));
+    }
 }

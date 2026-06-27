@@ -9,7 +9,14 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.audit.DatasourceAuditActions;
+import org.gensokyo.data.audit.DatasourceAuditDetail;
+import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.api.ConnectionTestRequest;
+import org.gensokyo.data.datasource.api.ConnectionTestResult;
+import org.gensokyo.data.datasource.catalog.ConnectivityTestGate;
 import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.po.DataSourceConfigPO;
@@ -21,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Connection;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +49,9 @@ public class DataSourceConfigService {
     private final SecretResolver secretResolver;
     private final AuditService auditService;
     private final ConnectionCatalogImpl connectionCatalog;
+    private final ConnectionCatalog catalog;
+    private final DataGeneratorProperties properties;
+    private final ConnectivityTestGate connectivityTestGate;
 
     /**
      * @return summaries of all persisted configs
@@ -114,13 +123,19 @@ public class DataSourceConfigService {
                 throw new DataGeneratorException("Failed to store driver JAR", e);
             }
         }
+        if (properties.getGovernance().isRequireConnectivityTestBeforeSave()) {
+            java.util.Map<String, Object> fingerprint = java.util.Map.of(
+                    "url", url, "driverClassName", driverClassName == null ? "" : driverClassName);
+            connectivityTestGate.requireRecentSuccess(ConnectionKind.JDBC, name, fingerprint);
+        }
         DataSourceConfigPO saved = repository.saveAndFlush(entity);
         connectionCatalog.reload(saved.getName(), ConnectionKind.JDBC);
         auditService.record(
-                isNew ? "DATASOURCE_CREATE" : "DATASOURCE_UPDATE",
-                "DATASOURCE",
+                isNew ? DatasourceAuditActions.CREATE : DatasourceAuditActions.UPDATE,
+                DatasourceAuditActions.CATEGORY,
                 saved.getName(),
-                java.util.Map.of("url", saved.getUrl()));
+                DatasourceAuditDetail.summary(saved.getName(), ConnectionKind.JDBC,
+                        isNew ? DatasourceAuditActions.CREATE : DatasourceAuditActions.UPDATE));
         return toSummary(saved);
     }
 
@@ -142,6 +157,11 @@ public class DataSourceConfigService {
             row.setEnabled(Boolean.FALSE);
             row.setUpdatedAt(Instant.now());
             repository.saveAndFlush(row);
+            auditService.record(
+                    DatasourceAuditActions.DELETE,
+                    DatasourceAuditActions.CATEGORY,
+                    name,
+                    DatasourceAuditDetail.summary(name, ConnectionKind.JDBC, DatasourceAuditActions.DELETE));
         });
     }
 
@@ -161,20 +181,26 @@ public class DataSourceConfigService {
             String password,
             String driverClassName,
             String driverJarPath) {
-        try {
-            JdbcDriverLoadResult loaded = driverSupport.ensureDriverLoaded(driverClassName, url, driverJarPath);
-            try (Connection connection = driverSupport.openConnection(url, username, password, loaded)) {
-                if (!connection.isValid(5)) {
-                    throw new IllegalStateException("Connection invalid");
-                }
-            }
-            String suffix = buildLoadMessageSuffix(loaded, driverClassName);
-            return "Connection OK" + suffix;
-        } catch (DataGeneratorException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DataGeneratorException("Connection test failed: " + e.getMessage(), e);
+        java.util.Map<String, Object> payload = new java.util.LinkedHashMap<>();
+        payload.put("url", url);
+        payload.put("username", username);
+        payload.put("password", password);
+        payload.put("driverClassName", driverClassName);
+        payload.put("driverJarPath", driverJarPath);
+        ConnectionTestResult result = catalog.test(ConnectionTestRequest.forDraft(ConnectionKind.JDBC, payload));
+        if (!result.success()) {
+            auditService.record(
+                    DatasourceAuditActions.CONNECTIVITY_FAIL,
+                    DatasourceAuditActions.CATEGORY,
+                    "draft",
+                    DatasourceAuditDetail.summary("draft", ConnectionKind.JDBC,
+                            DatasourceAuditActions.CONNECTIVITY_FAIL, "failure", result.message()));
+            throw new DataGeneratorException(result.message());
         }
+        java.util.Map<String, Object> fingerprint = java.util.Map.of(
+                "url", url, "driverClassName", driverClassName == null ? "" : driverClassName);
+        connectivityTestGate.recordFingerprintSuccess(ConnectionKind.JDBC, fingerprint);
+        return result.message();
     }
 
     /**
@@ -184,14 +210,17 @@ public class DataSourceConfigService {
      * @return success message
      */
     public String testConnectionByName(String name) {
-        DataSourceConfigPO row = repository.findById(name)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown datasource: " + name));
-        return testConnection(
-                row.getUrl(),
-                row.getUsername(),
-                resolvePassword(row),
-                row.getDriverClassName(),
-                row.getDriverJarPath());
+        ConnectionTestResult result = catalog.test(ConnectionTestRequest.forExisting(ConnectionKind.JDBC, name));
+        if (!result.success()) {
+            auditService.record(
+                    DatasourceAuditActions.CONNECTIVITY_FAIL,
+                    DatasourceAuditActions.CATEGORY,
+                    name,
+                    DatasourceAuditDetail.summary(name, ConnectionKind.JDBC,
+                            DatasourceAuditActions.CONNECTIVITY_FAIL, "failure", result.message()));
+            throw new DataGeneratorException(result.message());
+        }
+        return result.message();
     }
 
     /**
@@ -255,19 +284,5 @@ public class DataSourceConfigService {
                 Boolean.TRUE.equals(row.getEnabled()),
                 row.getCreatedAt(),
                 row.getUpdatedAt());
-    }
-
-    private static String buildLoadMessageSuffix(JdbcDriverLoadResult loaded, String requestedClass) {
-        java.util.List<String> parts = new java.util.ArrayList<>();
-        if (!loaded.driverClassName().equals(requestedClass)) {
-            parts.add("driver loaded as " + loaded.driverClassName());
-        }
-        if (loaded.bundled()) {
-            parts.add("bundled driver");
-        }
-        if (parts.isEmpty()) {
-            return "";
-        }
-        return " (" + String.join(", ", parts) + ")";
     }
 }

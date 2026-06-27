@@ -33,6 +33,7 @@ import org.gensokyo.data.template.TemplateDefinitionDetector;
 import org.gensokyo.data.template.TemplateDefinitionKind;
 import org.gensokyo.data.task.RunLineageSupport;
 import org.gensokyo.data.template.TemplateLifecycleService;
+import org.gensokyo.data.template.TemplateLifecycleStatus;
 import org.gensokyo.data.template.TemplateV2Normalizer;
 import org.gensokyo.data.template.TemplateV2Validator;
 import org.gensokyo.data.task.DistributedJobService;
@@ -252,8 +253,13 @@ public class TaskController {
         Long instanceId = RandomKit.snowFlake().nextId();
         template.setInstanceId(instanceId);
         TemplateV2Validator.validate(template);
+        boolean grandfatherRun = templateLifecycleService.statusOf(entity) == TemplateLifecycleStatus.PUBLISHED;
         TemplateV2Validator.validateGovernance(
-                template, properties.getGovernance().isRejectPlaintextPasswordsInTemplates());
+                template,
+                properties.getGovernance().isRejectPlaintextPasswordsInTemplates(),
+                properties.getGovernance(),
+                connectionCatalog,
+                grandfatherRun);
         Long taskExecutionId = taskExecutionService.queueExecution(
                 entity.getId(),
                 template.getName(),

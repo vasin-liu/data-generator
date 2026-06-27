@@ -21,8 +21,14 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.gensokyo.data.api.console.dto.ElasticsearchClusterUpsertRequest;
 import org.gensokyo.data.api.console.dto.KafkaClusterUpsertRequest;
+import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.audit.DatasourceAuditActions;
+import org.gensokyo.data.audit.DatasourceAuditDetail;
+import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.api.ConnectionKind;
 import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
+import org.gensokyo.data.datasource.catalog.ConnectivityTestGate;
 import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.json.TemplateJsonCodec;
@@ -60,6 +66,10 @@ public class MessagingClusterConfigService {
     private final ObjectProvider<DynamicKafkaTemplateRegistry> kafkaRegistryProvider;
     private final ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchRegistryProvider;
     private final ConnectionCatalogImpl connectionCatalog;
+    private final ConnectionCatalog catalog;
+    private final DataGeneratorProperties properties;
+    private final ConnectivityTestGate connectivityTestGate;
+    private final AuditService auditService;
 
     /**
      * Loads persisted clusters into runtime registries on startup.
@@ -140,8 +150,17 @@ public class MessagingClusterConfigService {
         entity.setConfigJson(TemplateJsonCodec.write(config));
         entity.setEnabled(Boolean.TRUE);
         touch(entity);
+        if (properties.getGovernance().isRequireConnectivityTestBeforeSave()) {
+            connectivityTestGate.requireRecentSuccess(ConnectionKind.KAFKA, name, Map.of(
+                    "bootstrapServers", String.join(",", request.bootstrapServers())));
+        }
         repository.saveAndFlush(entity);
         connectionCatalog.reload(name, ConnectionKind.KAFKA);
+        auditService.record(
+                DatasourceAuditActions.UPDATE,
+                DatasourceAuditActions.CATEGORY,
+                name,
+                DatasourceAuditDetail.summary(name, ConnectionKind.KAFKA, DatasourceAuditActions.UPDATE));
         return toSummary(entity);
     }
 
@@ -174,8 +193,17 @@ public class MessagingClusterConfigService {
         entity.setConfigJson(TemplateJsonCodec.write(config));
         entity.setEnabled(Boolean.TRUE);
         touch(entity);
+        if (properties.getGovernance().isRequireConnectivityTestBeforeSave()) {
+            connectivityTestGate.requireRecentSuccess(ConnectionKind.ELASTICSEARCH, name, Map.of(
+                    "uris", String.join(",", request.uris())));
+        }
         repository.saveAndFlush(entity);
         connectionCatalog.reload(name, ConnectionKind.ELASTICSEARCH);
+        auditService.record(
+                DatasourceAuditActions.UPDATE,
+                DatasourceAuditActions.CATEGORY,
+                name,
+                DatasourceAuditDetail.summary(name, ConnectionKind.ELASTICSEARCH, DatasourceAuditActions.UPDATE));
         return toSummary(entity);
     }
 
@@ -187,8 +215,16 @@ public class MessagingClusterConfigService {
         Objects.requireNonNull(name, "name");
         MessagingClusterConfigPO entity = repository.findById(name)
                 .orElseThrow(() -> new IllegalArgumentException("Cluster not found: " + name));
+        ConnectionKind kind = MessagingClusterType.KAFKA.name().equals(entity.getClusterType())
+                ? ConnectionKind.KAFKA
+                : ConnectionKind.ELASTICSEARCH;
         repository.delete(entity);
         unregister(entity);
+        auditService.record(
+                DatasourceAuditActions.DELETE,
+                DatasourceAuditActions.CATEGORY,
+                name,
+                DatasourceAuditDetail.summary(name, kind, DatasourceAuditActions.DELETE));
     }
 
     private void refreshRuntimeRegistrations() {

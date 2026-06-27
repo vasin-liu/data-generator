@@ -13,6 +13,10 @@ data:
     governance:
       require-published-for-task-run: true
       reject-plaintext-passwords-in-templates: true
+      require-managed-connections: true
+      require-connectivity-test-before-save: true
+      require-connectivity-test-before-publish: true
+      allow-bootstrap-references: true
     schedule:
       enabled: true
     console-security:

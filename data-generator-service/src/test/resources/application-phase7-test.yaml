@@ -36,4 +36,5 @@ data:
       reject-plaintext-passwords-in-templates: true
       require-managed-connections: false
       require-connectivity-test-before-save: false
+      require-connectivity-test-before-publish: false
       allow-bootstrap-references: true

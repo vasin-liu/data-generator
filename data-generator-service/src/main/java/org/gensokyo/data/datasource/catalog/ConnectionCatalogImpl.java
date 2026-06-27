@@ -64,6 +64,8 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
     private final DataSourceConfigRepository dataSourceConfigRepository;
     private final MessagingClusterConfigRepository messagingClusterConfigRepository;
     private final HotReloadCoordinator hotReloadCoordinator;
+    private final ConnectionConnectivityService connectionConnectivityService;
+    private final ConnectivityTestGate connectivityTestGate;
 
     /**
      * {@inheritDoc}
@@ -97,8 +99,11 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
      */
     @Override
     public ConnectionTestResult test(ConnectionTestRequest request) {
-        // Wave 2 delegates to JDBC/Kafka/ES adapter connectivity checks (07-02).
-        throw new UnsupportedOperationException("ConnectionCatalog.test is implemented in Phase 7 Wave 2");
+        ConnectionTestResult result = connectionConnectivityService.test(request);
+        if (result.success() && request.isExistingEntry()) {
+            connectivityTestGate.recordSuccess(request.kind(), request.name(), null);
+        }
+        return result;
     }
 
     /**

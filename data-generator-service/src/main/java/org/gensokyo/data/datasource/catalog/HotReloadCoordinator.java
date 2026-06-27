@@ -6,6 +6,9 @@
 package org.gensokyo.data.datasource.catalog;
 
 import org.gensokyo.data.datasource.DataSourceConfigService;
+import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.audit.DatasourceAuditActions;
+import org.gensokyo.data.audit.DatasourceAuditDetail;
 import org.gensokyo.data.datasource.api.CatalogEntry;
 import org.gensokyo.data.datasource.api.ConnectionHealthStatus;
 import org.gensokyo.data.datasource.api.ConnectionKind;
@@ -35,6 +38,7 @@ public class HotReloadCoordinator {
     private final MessagingClusterConfigRepository messagingClusterConfigRepository;
     private final DataSourceConfigService dataSourceConfigService;
     private final MessagingClusterConfigService messagingClusterConfigService;
+    private final AuditService auditService;
 
     private final ConcurrentHashMap<String, HealthOverlay> healthByKey = new ConcurrentHashMap<>();
 
@@ -43,16 +47,19 @@ public class HotReloadCoordinator {
      * @param messagingClusterConfigRepository messaging config repository
      * @param dataSourceConfigService          lazy JDBC registration service
      * @param messagingClusterConfigService    lazy messaging registration service
+     * @param auditService                     audit trail for reload attempts
      */
     public HotReloadCoordinator(
             DataSourceConfigRepository dataSourceConfigRepository,
             MessagingClusterConfigRepository messagingClusterConfigRepository,
             @Lazy DataSourceConfigService dataSourceConfigService,
-            @Lazy MessagingClusterConfigService messagingClusterConfigService) {
+            @Lazy MessagingClusterConfigService messagingClusterConfigService,
+            AuditService auditService) {
         this.dataSourceConfigRepository = dataSourceConfigRepository;
         this.messagingClusterConfigRepository = messagingClusterConfigRepository;
         this.dataSourceConfigService = dataSourceConfigService;
         this.messagingClusterConfigService = messagingClusterConfigService;
+        this.auditService = auditService;
     }
 
     /**
@@ -88,6 +95,7 @@ public class HotReloadCoordinator {
                     null,
                     targetVersion);
             healthByKey.put(key, healthy);
+            emitReloadAudit(trimmed, kind, "success", null);
             return overlay(baseEntry, healthy);
         } catch (Exception ex) {
             HealthOverlay degraded = new HealthOverlay(
@@ -96,8 +104,26 @@ public class HotReloadCoordinator {
                     summarize(ex),
                     previous != null ? previous.version() : targetVersion);
             healthByKey.put(key, degraded);
+            emitReloadAudit(trimmed, kind, "failure", summarize(ex));
+            emitDegradedAudit(trimmed, kind, summarize(ex));
             return overlay(baseEntry, degraded);
         }
+    }
+
+    private void emitReloadAudit(String name, ConnectionKind kind, String outcome, String reason) {
+        auditService.record(
+                DatasourceAuditActions.RELOAD,
+                DatasourceAuditActions.CATEGORY,
+                name,
+                DatasourceAuditDetail.summary(name, kind, DatasourceAuditActions.RELOAD, outcome, reason));
+    }
+
+    private void emitDegradedAudit(String name, ConnectionKind kind, String reason) {
+        auditService.record(
+                DatasourceAuditActions.DEGRADED,
+                DatasourceAuditActions.CATEGORY,
+                name,
+                DatasourceAuditDetail.summary(name, kind, DatasourceAuditActions.DEGRADED, "degraded", reason));
     }
 
     /**

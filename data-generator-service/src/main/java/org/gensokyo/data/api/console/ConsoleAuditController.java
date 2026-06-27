@@ -8,6 +8,7 @@ package org.gensokyo.data.api.console;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.api.console.dto.AuditEventView;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.audit.DatasourceAuditActions;
 import org.gensokyo.data.model.vo.R;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +35,7 @@ public class ConsoleAuditController {
      *
      * @param action       optional action code filter (e.g. TEMPLATE_PUBLISH)
      * @param resourceType optional resource type filter
+     * @param category     optional category alias ({@code DATASOURCE} maps to datasource events, D-25)
      * @param limit        max rows (default 100, max 500)
      * @return sanitized audit rows newest first
      */
@@ -41,7 +43,13 @@ public class ConsoleAuditController {
     public R<List<AuditEventView>> list(
             @RequestParam(name = "action", required = false) String action,
             @RequestParam(name = "resourceType", required = false) String resourceType,
+            @RequestParam(name = "category", required = false) String category,
             @RequestParam(name = "limit", defaultValue = "100") int limit) {
-        return R.ok(auditService.listRecent(action, resourceType, limit));
+        String resolvedResourceType = resourceType;
+        if (category != null && !category.isBlank()
+                && DatasourceAuditActions.CATEGORY.equalsIgnoreCase(category.trim())) {
+            resolvedResourceType = DatasourceAuditActions.CATEGORY;
+        }
+        return R.ok(auditService.listRecent(action, resolvedResourceType, limit));
     }
 }

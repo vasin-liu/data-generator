@@ -55,6 +55,14 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Ensures console-web builds before service when using -pl data-generator-service -am. -->
+        <dependency>
+            <groupId>org.gensokyo.data.generator</groupId>
+            <artifactId>data-generator-console-web</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
         <!-- iterator -->
         <dependency>
             <groupId>org.gensokyo.data.generator</groupId>
@@ -263,6 +271,12 @@
             <groupId>com.highgo</groupId>
             <artifactId>HgdbJdbc</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -354,13 +368,16 @@
                 <executions>
                     <execution>
                         <id>copy-console-frontend</id>
-                        <phase>process-classes</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
                             <skip>${skip.console.frontend}</skip>
                             <target>
+                                <available file="${console.web.dist}/index.html" property="console.dist.ready" type="file"/>
+                                <fail unless="console.dist.ready"
+                                      message="Console dist missing at ${console.web.dist}/index.html. Build console-web first: mvn -pl data-generator-service -am -DskipTests package"/>
                                 <copy todir="${project.build.outputDirectory}/static/console" overwrite="true">
                                     <fileset dir="${console.web.dist}" includes="**/*"/>
                                 </copy>

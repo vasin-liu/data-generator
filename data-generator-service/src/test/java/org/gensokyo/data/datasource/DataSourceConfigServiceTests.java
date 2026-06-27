@@ -51,7 +51,7 @@ class DataSourceConfigServiceTests {
                 null);
         Assertions.assertTrue(dataSourceConfigService.listRuntimeNames().contains(DS_NAME));
         Assertions.assertTrue(repository.findById(DS_NAME).isPresent());
-        Assertions.assertEquals("Connection OK", dataSourceConfigService.testConnectionByName(DS_NAME));
+        Assertions.assertEquals("JDBC connection OK", dataSourceConfigService.testConnectionByName(DS_NAME));
     }
 
     @Test

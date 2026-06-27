@@ -14,6 +14,8 @@ import org.gensokyo.data.model.v2.SpelColumnMapping;
 import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.model.v2.TransformGraphVO;
 import org.gensokyo.data.model.v2.TransformVO;
 import org.gensokyo.data.model.v2.workflow.BranchStepVO;
@@ -108,7 +110,36 @@ public final class TemplateV2Validator {
      * @param rejectPlaintextPasswords when true, inline plaintext passwords are errors
      */
     public static void validateGovernance(TemplateV2VO template, boolean rejectPlaintextPasswords) {
+        validateGovernance(template, rejectPlaintextPasswords, null, null, false);
+    }
+
+    /**
+     * Validates secret and datasource governance rules for publish/run paths (D-13..D-17).
+     *
+     * @param template                 normalized template
+     * @param rejectPlaintextPasswords when true, inline plaintext passwords are errors
+     * @param governance               datasource governance settings; may be {@code null}
+     * @param catalog                  live catalog for BOOTSTRAP/MANAGED checks; required when governance enabled
+     * @param grandfatherPublishedRun  when true, skip managed-only enforcement for unchanged published templates
+     */
+    public static void validateGovernance(
+            TemplateV2VO template,
+            boolean rejectPlaintextPasswords,
+            DataGeneratorProperties.Governance governance,
+            ConnectionCatalog catalog,
+            boolean grandfatherPublishedRun) {
         for (String error : TemplateGovernanceSupport.collectSecretViolations(template, rejectPlaintextPasswords)) {
+            throw new IllegalArgumentException(error);
+        }
+        if (governance == null || catalog == null) {
+            return;
+        }
+        for (String error : DatasourceGovernanceSupport.collectViolations(
+                template,
+                catalog,
+                governance.isRequireManagedConnections(),
+                governance.isAllowBootstrapReferences(),
+                grandfatherPublishedRun)) {
             throw new IllegalArgumentException(error);
         }
     }

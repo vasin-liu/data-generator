@@ -116,6 +116,30 @@ public class DataGeneratorProperties {
          * When {@code true}, {@code /task/run} requires template status {@code PUBLISHED}.
          */
         private boolean requirePublishedForTaskRun = true;
+
+        /**
+         * When {@code true}, templates must use managed catalog refs instead of inline connection blocks (D-13).
+         * Binds to {@code require-managed-connections}.
+         */
+        private boolean requireManagedConnections = false;
+
+        /**
+         * When {@code true}, datasource save requires a recent successful connectivity test (D-19).
+         * Binds to {@code require-connectivity-test-before-save}.
+         */
+        private boolean requireConnectivityTestBeforeSave = false;
+
+        /**
+         * When {@code true}, template publish requires referenced connections to have passed connectivity test (D-19).
+         * Binds to {@code require-connectivity-test-before-publish}.
+         */
+        private boolean requireConnectivityTestBeforePublish = false;
+
+        /**
+         * When {@code true}, templates may reference yaml-seeded BOOTSTRAP catalog entries (D-15).
+         * Binds to {@code allow-bootstrap-references}.
+         */
+        private boolean allowBootstrapReferences = true;
     }
 
     /**

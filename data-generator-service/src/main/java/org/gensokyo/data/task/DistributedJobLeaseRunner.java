@@ -15,6 +15,7 @@ import org.gensokyo.data.calcite.runtime.WorkflowRunControl;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.template.TemplateLifecycleStatus;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.RunReportVO;
@@ -172,8 +173,14 @@ public class DistributedJobLeaseRunner {
         template.setId(entity.getId());
         template.setInstanceId(lease.instanceId());
         TemplateV2Validator.validate(template);
+        boolean grandfatherRun = TemplateLifecycleStatus.PUBLISHED.name().equalsIgnoreCase(
+                entity.getStatus() == null ? TemplateLifecycleStatus.PUBLISHED.name() : entity.getStatus());
         TemplateV2Validator.validateGovernance(
-                template, dataGeneratorProperties.getGovernance().isRejectPlaintextPasswordsInTemplates());
+                template,
+                dataGeneratorProperties.getGovernance().isRejectPlaintextPasswordsInTemplates(),
+                dataGeneratorProperties.getGovernance(),
+                connectionCatalog,
+                grandfatherRun);
         return template;
     }
 }

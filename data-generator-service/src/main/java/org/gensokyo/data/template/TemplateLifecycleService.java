@@ -7,6 +7,11 @@ package org.gensokyo.data.template;
 
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.audit.DatasourceAuditActions;
+import org.gensokyo.data.audit.DatasourceAuditDetail;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.catalog.ConnectivityTestGate;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.TemplateV2DraftVO;
@@ -35,6 +40,8 @@ public class TemplateLifecycleService {
     private final DataGeneratorProperties properties;
     private final AuditService auditService;
     private final UdfReferenceValidator udfReferenceValidator;
+    private final ConnectionCatalog connectionCatalog;
+    private final ConnectivityTestGate connectivityTestGate;
 
     /**
      * @param entity template row
@@ -97,6 +104,23 @@ public class TemplateLifecycleService {
         if (!secretErrors.isEmpty()) {
             throw new IllegalArgumentException(String.join("; ", secretErrors));
         }
+        List<String> datasourceErrors = DatasourceGovernanceSupport.collectViolations(
+                normalized,
+                connectionCatalog,
+                properties.getGovernance().isRequireManagedConnections(),
+                properties.getGovernance().isAllowBootstrapReferences(),
+                false);
+        if (!datasourceErrors.isEmpty()) {
+            auditService.record(
+                    DatasourceAuditActions.GOVERNANCE_BLOCK,
+                    DatasourceAuditActions.CATEGORY,
+                    String.valueOf(templateId),
+                    Map.of("action", DatasourceAuditActions.GOVERNANCE_BLOCK, "reason", datasourceErrors.getFirst()));
+            throw new IllegalArgumentException(String.join("; ", datasourceErrors));
+        }
+        if (properties.getGovernance().isRequireConnectivityTestBeforePublish()) {
+            requireReferencedConnectionsTested(normalized);
+        }
         // Publish-only hard fail on unknown/unpublished/deprecated UDF references; draft saves stay lenient (D-11).
         udfReferenceValidator.validate(normalized);
         entity.setStatus(TemplateLifecycleStatus.PUBLISHED.name());
@@ -119,6 +143,12 @@ public class TemplateLifecycleService {
         if (statusOf(entity) != TemplateLifecycleStatus.PUBLISHED) {
             throw new IllegalArgumentException(
                     "Template must be PUBLISHED before task run; current status=" + statusOf(entity));
+        }
+    }
+
+    private void requireReferencedConnectionsTested(TemplateV2VO template) {
+        for (DatasourceGovernanceSupport.ConnectionRef ref : DatasourceGovernanceSupport.collectManagedRefs(template)) {
+            connectivityTestGate.requireRecentSuccess(ref.kind(), ref.name(), null);
         }
     }
 }
