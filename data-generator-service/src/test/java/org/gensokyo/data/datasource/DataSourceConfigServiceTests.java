@@ -48,6 +48,7 @@ class DataSourceConfigServiceTests {
                 "",
                 null,
                 "org.h2.Driver",
+                null,
                 null);
         Assertions.assertTrue(dataSourceConfigService.listRuntimeNames().contains(DS_NAME));
         Assertions.assertTrue(repository.findById(DS_NAME).isPresent());
@@ -71,6 +72,7 @@ class DataSourceConfigServiceTests {
                 "",
                 null,
                 "org.h2.Driver",
+                null,
                 null);
         dataSourceConfigService.remove(DS_NAME);
         Assertions.assertFalse(dataSourceConfigService.listRuntimeNames().contains(DS_NAME));

@@ -6,9 +6,14 @@
 package org.gensokyo.data.api.console;
 
 import jakarta.validation.constraints.NotBlank;
+import org.gensokyo.data.api.console.dto.ConnectionTestRequestDto;
 import org.gensokyo.data.api.console.dto.DataSourcesOverviewDto;
 import org.gensokyo.data.api.console.dto.JdbcDriverPresetDto;
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.api.ConnectionTestRequest;
+import org.gensokyo.data.datasource.api.ConnectionTestResult;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.DataSourceConfigService;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
@@ -44,22 +49,26 @@ public class ConsoleDataSourceController {
     private final BundledJdbcDriverRegistry bundledJdbcDriverRegistry;
     private final MessagingClusterConfigService messagingClusterConfigService;
     private final ConnectionCatalog connectionCatalog;
+    private final DataGeneratorProperties properties;
 
     /**
      * @param dataSourceConfigService       JDBC persistence
      * @param bundledJdbcDriverRegistry     driver catalog
      * @param messagingClusterConfigService Kafka/ES console persistence
      * @param connectionCatalog             merged bootstrap + managed connection list
+     * @param properties                    governance flags for console overview
      */
     public ConsoleDataSourceController(
             DataSourceConfigService dataSourceConfigService,
             BundledJdbcDriverRegistry bundledJdbcDriverRegistry,
             MessagingClusterConfigService messagingClusterConfigService,
-            ConnectionCatalog connectionCatalog) {
+            ConnectionCatalog connectionCatalog,
+            DataGeneratorProperties properties) {
         this.dataSourceConfigService = dataSourceConfigService;
         this.bundledJdbcDriverRegistry = bundledJdbcDriverRegistry;
         this.messagingClusterConfigService = messagingClusterConfigService;
         this.connectionCatalog = connectionCatalog;
+        this.properties = properties;
     }
 
     /**
@@ -73,7 +82,8 @@ public class ConsoleDataSourceController {
                 runtimeKeys,
                 bundledJdbcDriverRegistry,
                 messagingClusterConfigService,
-                connectionCatalog));
+                connectionCatalog,
+                properties));
     }
 
     /**
@@ -144,10 +154,11 @@ public class ConsoleDataSourceController {
             @RequestParam String password,
             @RequestParam(required = false) String passwordSecretRef,
             @RequestParam String driverClassName,
+            @RequestParam(required = false) String driverPresetId,
             @RequestParam(required = false) MultipartFile driverFile) {
         try {
             dataSourceConfigService.save(
-                    name, url, username, password, passwordSecretRef, driverClassName, driverFile);
+                    name, url, username, password, passwordSecretRef, driverClassName, driverPresetId, driverFile);
         } catch (Exception e) {
             throw new DataGeneratorException("Failed to save datasource", e);
         }
@@ -162,6 +173,42 @@ public class ConsoleDataSourceController {
     public R<String> remove(@NotBlank @PathVariable String name) {
         dataSourceConfigService.remove(name);
         return R.ok("Datasource removed");
+    }
+
+    /**
+     * Unified connectivity test for JDBC, Kafka, and Elasticsearch before or after save (D-18).
+     *
+     * @param request kind, optional name, or draft payload
+     * @return test outcome message
+     */
+    @PostMapping("/connections/test")
+    public R<String> testConnectionUnified(@RequestBody ConnectionTestRequestDto request) {
+        if (request == null || request.kind() == null || request.kind().isBlank()) {
+            return R.fail("kind is required");
+        }
+        try {
+            ConnectionKind kind = ConnectionKind.valueOf(request.kind().trim().toUpperCase());
+            ConnectionTestRequest catalogRequest = buildCatalogTestRequest(kind, request);
+            ConnectionTestResult result = connectionCatalog.test(catalogRequest);
+            if (!result.success()) {
+                return R.fail(result.message());
+            }
+            return R.ok(result.message());
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        } catch (Exception e) {
+            return R.fail(e.getMessage());
+        }
+    }
+
+    private ConnectionTestRequest buildCatalogTestRequest(ConnectionKind kind, ConnectionTestRequestDto request) {
+        if (request.name() != null && !request.name().isBlank()) {
+            return ConnectionTestRequest.forExisting(kind, request.name());
+        }
+        if (request.draftPayload() == null || request.draftPayload().isEmpty()) {
+            throw new IllegalArgumentException("Provide name or draftPayload for connectivity test");
+        }
+        return ConnectionTestRequest.forDraft(kind, request.draftPayload());
     }
 
     /**

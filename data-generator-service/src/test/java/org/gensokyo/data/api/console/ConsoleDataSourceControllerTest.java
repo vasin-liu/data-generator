@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.api.console;
 
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.datasource.api.CatalogEntry;
 import org.gensokyo.data.datasource.api.CatalogEntrySource;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
@@ -51,16 +52,21 @@ class ConsoleDataSourceControllerTest {
     @Mock
     private ConnectionCatalog connectionCatalog;
 
+    @Mock
+    private DataGeneratorProperties properties;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        when(properties.getGovernance()).thenReturn(new DataGeneratorProperties.Governance());
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new ConsoleDataSourceController(
                                 dataSourceConfigService,
                                 bundledJdbcDriverRegistry,
                                 messagingClusterConfigService,
-                                connectionCatalog))
+                                connectionCatalog,
+                                properties))
                 .setControllerAdvice(new ConsoleApiAdvice())
                 .build();
     }

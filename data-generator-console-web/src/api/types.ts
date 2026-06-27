@@ -376,6 +376,7 @@ export interface DataSourceSummary {
   username: string | null;
   driverClassName: string;
   driverJarPath: string | null;
+  driverPresetId?: string | null;
   enabled: boolean;
   createdAt: string | null;
   updatedAt: string | null;
@@ -502,6 +503,23 @@ export interface SecretSummary {
   updatedAt: string | null;
 }
 
+/** Mirrors {@code CatalogConnectionSummaryDto}. */
+export interface CatalogConnectionSummary {
+  name: string;
+  kind: string;
+  source: string;
+  healthStatus?: string;
+  lastReloadAt?: string | null;
+  degradedReason?: string | null;
+  version?: number;
+  updatedAt?: string | null;
+}
+
+export interface DatasourceGovernanceFlags {
+  requireConnectivityTestBeforeSave: boolean;
+  requireConnectivityTestBeforePublish: boolean;
+}
+
 export interface DataSourcesOverview {
   persisted: DataSourceSummary[];
   runtimeKeys: string[];
@@ -510,6 +528,8 @@ export interface DataSourcesOverview {
   kafkaPersisted: MessagingClusterSummary[];
   elasticsearchPersisted: MessagingClusterSummary[];
   driverPresets: JdbcDriverPresetDto[];
+  catalogConnections?: CatalogConnectionSummary[];
+  governance?: DatasourceGovernanceFlags;
 }
 
 export interface MessagingClusterSummary {
@@ -567,6 +587,13 @@ export interface DataSourceTestRequest {
   password: string;
   driverClassName: string;
   driverJarPath?: string | null;
+}
+
+/** Unified catalog connectivity test body (D-18). */
+export interface ConnectionTestPayload {
+  kind: 'JDBC' | 'KAFKA' | 'ELASTICSEARCH';
+  name?: string;
+  draftPayload?: Record<string, unknown>;
 }
 
 export interface MigrationInventorySummary {

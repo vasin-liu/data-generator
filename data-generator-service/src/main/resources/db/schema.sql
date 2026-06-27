@@ -84,6 +84,7 @@ ALTER TABLE `template` ALTER COLUMN `status` VARCHAR(16);
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `category` VARCHAR(128);
 ALTER TABLE `template` ADD COLUMN IF NOT EXISTS `tags` VARCHAR(1024);
 ALTER TABLE `datasource_config` ADD COLUMN IF NOT EXISTS `password_secret_ref` VARCHAR(256);
+ALTER TABLE `datasource_config` ADD COLUMN IF NOT EXISTS `driver_preset_id` VARCHAR(64);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `cancel_requested` BOOLEAN DEFAULT FALSE NOT NULL;
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `template_version` VARCHAR(64);
 ALTER TABLE `task_execution` ADD COLUMN IF NOT EXISTS `plugin_set_json` CLOB;

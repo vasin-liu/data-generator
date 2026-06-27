@@ -1,5 +1,6 @@
 import { apiFormRequest, apiRequest } from './client';
 import type {
+  ConnectionTestPayload,
   DataSourceTestRequest,
   DataSourcesOverview,
   ElasticsearchClusterUpsertPayload,
@@ -52,7 +53,7 @@ export function removeElasticsearchCluster(name: string): Promise<string> {
 }
 
 /**
- * @param form multipart fields (name, url, username, password, driverClassName, optional driverFile)
+ * @param form multipart fields (name, url, username, password, driverClassName, optional driverPresetId, driverFile)
  */
 export function upsertDataSource(form: FormData): Promise<string> {
   return apiFormRequest<string>('/datasources', form);
@@ -63,6 +64,18 @@ export function upsertDataSource(form: FormData): Promise<string> {
  */
 export function removeDataSource(name: string): Promise<string> {
   return apiRequest<string>(`/datasources/${encodeURIComponent(name)}`, { method: 'DELETE' });
+}
+
+/**
+ * Unified connectivity test for JDBC, Kafka, or Elasticsearch (D-18).
+ *
+ * @param payload kind, name, or draft payload
+ */
+export function testConnectionUnified(payload: ConnectionTestPayload): Promise<string> {
+  return apiRequest<string>('/datasources/connections/test', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 /**

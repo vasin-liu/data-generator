@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Alert, App, Button, Select, Space, Typography, message } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { canPublishWithRole, getConsoleRole } from '../../api/consoleRole';
 import { fetchConsoleRuntime } from '../../api/runtime';
 import { createTemplate, publishTemplate, previewDraft, runDraft, saveTemplate, validateDraft } from '../../api/editor';
@@ -36,6 +36,7 @@ export function ReviewPanel({
 }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { id: routeTemplateId } = useParams<{ id: string }>();
   const { modal } = App.useApp();
   const [output, setOutput] = useState('');
   const [throughTransformIndex, setThroughTransformIndex] = useState<number | undefined>(undefined);
@@ -133,6 +134,10 @@ export function ReviewPanel({
       if (id != null) {
         onSaved(id);
         message.success(t('review.saved', { id }));
+        const validation = await validateDraft(draft, id);
+        if (validation.warnings.length > 0) {
+          message.warning(validation.warnings.join(' · '));
+        }
       }
       if (andReturn) {
         navigate('/templates');
@@ -142,8 +147,10 @@ export function ReviewPanel({
     onError: (err: Error) => message.error(err.message),
   });
 
+  const resolvedTemplateId = templateId ?? routeTemplateId ?? null;
+
   const runMutation = useMutation({
-    mutationFn: () => runDraft(draft, templateId),
+    mutationFn: () => runDraft(draft, resolvedTemplateId),
     onSuccess: (data) => {
       onSaved(data.templateId);
       message.success(t('review.run.started'));
@@ -154,10 +161,11 @@ export function ReviewPanel({
 
   const publishMutation = useMutation({
     mutationFn: () => {
-      if (templateId == null) {
+      const publishId = resolvedTemplateId;
+      if (publishId == null) {
         return Promise.reject(new Error(t('review.publish.needsSave')));
       }
-      return publishTemplate(templateId);
+      return publishTemplate(publishId);
     },
     onSuccess: () => {
       message.success(t('review.publish.done'));
@@ -274,7 +282,7 @@ export function ReviewPanel({
         </Button>
         <Button
           type="primary"
-          disabled={!saveAllowed || templateId == null || !publishAllowed}
+          disabled={!saveAllowed || resolvedTemplateId == null || !publishAllowed}
           loading={publishMutation.isPending}
           data-testid="review-publish"
           onClick={() =>

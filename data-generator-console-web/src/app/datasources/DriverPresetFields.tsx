@@ -16,6 +16,7 @@ type FormValues = {
   username: string;
   password: string;
   driverClassName: string;
+  driverPresetId?: string;
 };
 
 type Props = {
@@ -37,7 +38,9 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
   const driverClassName = Form.useWatch('driverClassName', form);
 
   useEffect(() => {
-    const guessed = guessPresetId(presets, form.getFieldValue('driverClassName'));
+    const fromForm = form.getFieldValue('driverPresetId');
+    const guessed =
+      fromForm?.trim() ? fromForm : guessPresetId(presets, form.getFieldValue('driverClassName'));
     setPresetId(guessed);
     onPresetIdChange?.(guessed);
   }, [dialogKey, form, presets, onPresetIdChange]);
@@ -82,6 +85,7 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
   const onPresetChange = (id: string) => {
     setPresetId(id);
     onPresetIdChange?.(id);
+    form.setFieldValue('driverPresetId', id);
     const preset = findJdbcDriverPreset(presets, id);
     if (preset) {
       applyPreset(preset, true);
@@ -112,6 +116,7 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
           onClear={() => {
             setPresetId(undefined);
             onPresetIdChange?.(undefined);
+            form.setFieldValue('driverPresetId', undefined);
             form.setFieldValue('driverClassName', '');
           }}
         />
@@ -135,6 +140,9 @@ export function DriverPresetFields({ form, dialogKey, presets, onPresetIdChange 
       {bundledSelected ? (
         <Typography.Text type="success">{t('datasources.dialog.bundledDriverNote')}</Typography.Text>
       ) : null}
+      <Form.Item name="driverPresetId" hidden>
+        <Input />
+      </Form.Item>
     </>
   );
 }

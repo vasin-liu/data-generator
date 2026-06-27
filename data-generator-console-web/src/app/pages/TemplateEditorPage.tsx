@@ -60,6 +60,7 @@ export function TemplateEditorPage() {
   const dsQuery = useQuery({
     queryKey: ['editor-data-sources'],
     queryFn: fetchEditorDataSources,
+    refetchOnMount: 'always',
   });
 
   const aiCatalogQuery = useQuery({
@@ -145,7 +146,7 @@ export function TemplateEditorPage() {
     );
   }
 
-  if (loadQuery.isLoading || !draft || !meta) {
+  if ((loadQuery.isLoading && !loadQuery.data) || !draft || !meta) {
     return <Spin style={{ display: 'block', margin: '48px auto' }} />;
   }
 

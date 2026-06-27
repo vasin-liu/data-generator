@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.api.console.dto;
 
+import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.datasource.DataSourceConfigSummary;
 import org.gensokyo.data.datasource.BundledJdbcDriverRegistry;
 import org.gensokyo.data.datasource.JdbcDriverPresetCatalog;
@@ -24,6 +25,7 @@ import java.util.List;
  * @param kafkaPersisted console-managed Kafka rows
  * @param elasticsearchPersisted console-managed Elasticsearch rows
  * @param catalogConnections merged catalog entries with BOOTSTRAP/MANAGED source tags
+ * @param governance       profile-gated connectivity test flags for the console
  */
 public record DataSourcesOverviewDto(
         List<DataSourceConfigSummary> persisted,
@@ -33,7 +35,8 @@ public record DataSourcesOverviewDto(
         List<String> elasticsearchClusters,
         List<MessagingClusterSummaryDto> kafkaPersisted,
         List<MessagingClusterSummaryDto> elasticsearchPersisted,
-        List<CatalogConnectionSummaryDto> catalogConnections) {
+        List<CatalogConnectionSummaryDto> catalogConnections,
+        DatasourceGovernanceFlagsDto governance) {
 
     /**
      * @param persisted   persisted rows
@@ -45,7 +48,8 @@ public record DataSourcesOverviewDto(
             List<String> runtimeKeys,
             BundledJdbcDriverRegistry bundledDrivers,
             MessagingClusterConfigService messagingClusterConfigService,
-            ConnectionCatalog connectionCatalog) {
+            ConnectionCatalog connectionCatalog,
+            DataGeneratorProperties properties) {
         List<JdbcDriverPresetDto> presets = JdbcDriverPresetCatalog.all().stream()
                 .map(p -> JdbcDriverPresetDto.from(p, bundledDrivers))
                 .toList();
@@ -62,6 +66,14 @@ public record DataSourcesOverviewDto(
                 messagingClusterConfigService.listElasticsearch().stream()
                         .map(MessagingClusterSummaryDto::from)
                         .toList(),
-                catalogConnections);
+                catalogConnections,
+                governanceFlags(properties));
+    }
+
+    private static DatasourceGovernanceFlagsDto governanceFlags(DataGeneratorProperties properties) {
+        DataGeneratorProperties.Governance governance = properties.getGovernance();
+        return new DatasourceGovernanceFlagsDto(
+                governance.isRequireConnectivityTestBeforeSave(),
+                governance.isRequireConnectivityTestBeforePublish());
     }
 }

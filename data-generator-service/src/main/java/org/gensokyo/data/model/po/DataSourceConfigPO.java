@@ -46,6 +46,9 @@ public class DataSourceConfigPO implements Serializable {
     @Column(name = "driver_class_name", length = 512, nullable = false)
     private String driverClassName;
 
+    @Column(name = "driver_preset_id", length = 64)
+    private String driverPresetId;
+
     @Column(name = "driver_jar_path", length = 1024)
     private String driverJarPath;
 

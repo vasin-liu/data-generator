@@ -76,6 +76,7 @@ public class DataSourceConfigService {
      * @param username        user
      * @param password        password
      * @param driverClassName driver class
+     * @param driverPresetId  optional console JDBC preset id
      * @param driverFile      optional driver jar upload
      * @return summary
      */
@@ -87,6 +88,7 @@ public class DataSourceConfigService {
             String password,
             String passwordSecretRef,
             String driverClassName,
+            String driverPresetId,
             MultipartFile driverFile) {
         Objects.requireNonNull(name, "name");
         if (name.isBlank()) {
@@ -111,6 +113,11 @@ public class DataSourceConfigService {
             }
         }
         entity.setDriverClassName(driverClassName);
+        if (StrKit.isNotBlank(driverPresetId)) {
+            entity.setDriverPresetId(driverPresetId.trim());
+        } else if (isNew) {
+            entity.setDriverPresetId(null);
+        }
         entity.setEnabled(Boolean.TRUE);
         if (isNew) {
             entity.setCreatedAt(now);
@@ -278,9 +285,10 @@ public class DataSourceConfigService {
                 row.getName(),
                 row.getUrl(),
                 row.getUsername(),
+                row.getPasswordSecretRef(),
                 row.getDriverClassName(),
                 row.getDriverJarPath(),
-                row.getPasswordSecretRef(),
+                row.getDriverPresetId(),
                 Boolean.TRUE.equals(row.getEnabled()),
                 row.getCreatedAt(),
                 row.getUpdatedAt());

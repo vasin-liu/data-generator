@@ -66,6 +66,7 @@ class DataSourceControllerTests {
                     "",
                     null,
                     "org.h2.Driver",
+                    null,
                     null);
             R<List<DataSourceConfigSummary>> result = dataSourceController.listDatabaseConfigs();
             Assertions.assertTrue(result.isSuccess());

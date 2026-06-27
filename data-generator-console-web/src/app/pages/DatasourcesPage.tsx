@@ -1,25 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Button, Checkbox, Form, Input, InputNumber, Modal, Space, Table, Typography, Upload, message } from 'antd';
+import { Alert, Button, Checkbox, Drawer, Form, Input, InputNumber, Modal, Space, Table, Tag, Typography, Upload, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import {
   fetchDataSources,
   removeDataSource,
   removeElasticsearchCluster,
   removeKafkaCluster,
+  testConnectionUnified,
   testDataSourceByName,
-  testDataSourceConnection,
   upsertDataSource,
   upsertElasticsearchCluster,
   upsertKafkaCluster,
 } from '../../api/datasources';
-import type { DataSourceSummary, MessagingClusterSummary } from '../../api/types';
+import type { CatalogConnectionSummary, DataSourceSummary, MessagingClusterSummary } from '../../api/types';
 import { DriverPresetFields } from '../datasources/DriverPresetFields';
 import { isBundledPreset, resolveDriverPresets } from '../datasources/jdbcDriverPresets';
 import { ConsolePageHeader } from '../../components/ConsolePageHeader';
 import { FieldHelp } from '../../components/FieldHelp';
+import { formatDateTime } from '../utils/formatDateTime';
+
+type TestFeedback = { ok: boolean; message: string } | null;
 
 type JdbcFormValues = {
   name: string;
@@ -27,6 +31,7 @@ type JdbcFormValues = {
   username: string;
   password: string;
   driverClassName: string;
+  driverPresetId?: string;
 };
 
 type KafkaFormValues = {
@@ -90,6 +95,40 @@ function formatProperties(props: Record<string, string> | null | undefined): str
     .join('\n');
 }
 
+function catalogKey(name: string, kind: string): string {
+  return `${kind}:${name}`;
+}
+
+function HealthBadge({ status }: { status: string | undefined }) {
+  const { t } = useTranslation();
+  if (!status) {
+    return <>—</>;
+  }
+  if (status === 'HEALTHY') {
+    return <Tag color="success">{t('datasources.health.healthy')}</Tag>;
+  }
+  if (status === 'DEGRADED') {
+    return <Tag color="warning">{t('datasources.health.degraded')}</Tag>;
+  }
+  return <Tag>{status}</Tag>;
+}
+
+function TestResultAlert({ feedback }: { feedback: TestFeedback }) {
+  const { t } = useTranslation();
+  if (!feedback) {
+    return null;
+  }
+  return (
+    <Alert
+      type={feedback.ok ? 'success' : 'error'}
+      showIcon
+      message={feedback.ok ? t('datasources.test.success') : t('datasources.test.failure')}
+      description={feedback.message}
+      style={{ marginBottom: 16 }}
+    />
+  );
+}
+
 /**
  * JDBC datasource administration (persisted configs + runtime keys).
  */
@@ -105,6 +144,13 @@ export function DatasourcesPage() {
   const [jarFile, setJarFile] = useState<File | null>(null);
   const [dialogKey, setDialogKey] = useState('new');
   const [selectedPresetId, setSelectedPresetId] = useState<string | undefined>();
+  const [jdbcTestFeedback, setJdbcTestFeedback] = useState<TestFeedback>(null);
+  const [kafkaTestFeedback, setKafkaTestFeedback] = useState<TestFeedback>(null);
+  const [esTestFeedback, setEsTestFeedback] = useState<TestFeedback>(null);
+  const [jdbcTestPassed, setJdbcTestPassed] = useState(false);
+  const [kafkaTestPassed, setKafkaTestPassed] = useState(false);
+  const [esTestPassed, setEsTestPassed] = useState(false);
+  const [catalogDetail, setCatalogDetail] = useState<CatalogConnectionSummary | null>(null);
   const [jdbcForm] = Form.useForm<JdbcFormValues>();
   const [kafkaForm] = Form.useForm<KafkaFormValues>();
   const [esForm] = Form.useForm<EsFormValues>();
@@ -113,6 +159,16 @@ export function DatasourcesPage() {
     queryKey: ['datasources'],
     queryFn: fetchDataSources,
   });
+
+  const requireTestBeforeSave = overviewQuery.data?.governance?.requireConnectivityTestBeforeSave ?? false;
+
+  const catalogByKey = useMemo(() => {
+    const map = new Map<string, CatalogConnectionSummary>();
+    for (const row of overviewQuery.data?.catalogConnections ?? []) {
+      map.set(catalogKey(row.name, row.kind), row);
+    }
+    return map;
+  }, [overviewQuery.data?.catalogConnections]);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['datasources'] });
@@ -127,6 +183,9 @@ export function DatasourcesPage() {
       body.set('username', values.username);
       body.set('password', values.password);
       body.set('driverClassName', values.driverClassName);
+      if (values.driverPresetId?.trim()) {
+        body.set('driverPresetId', values.driverPresetId.trim());
+      }
       if (jarFile) {
         body.set('driverFile', jarFile);
       }
@@ -136,6 +195,8 @@ export function DatasourcesPage() {
       message.success(t('datasources.dialog.saved', { name: jdbcForm.getFieldValue('name') }));
       setJdbcModalOpen(false);
       setJarFile(null);
+      setJdbcTestFeedback(null);
+      setJdbcTestPassed(false);
       invalidate();
     },
     onError: (err: Error) => message.error(err.message),
@@ -158,6 +219,8 @@ export function DatasourcesPage() {
     onSuccess: () => {
       message.success(t('datasources.kafka.saved', { name: kafkaForm.getFieldValue('name') }));
       setKafkaModalOpen(false);
+      setKafkaTestFeedback(null);
+      setKafkaTestPassed(false);
       invalidate();
     },
     onError: (err: Error) => message.error(err.message),
@@ -179,6 +242,8 @@ export function DatasourcesPage() {
     onSuccess: () => {
       message.success(t('datasources.es.saved', { name: esForm.getFieldValue('name') }));
       setEsModalOpen(false);
+      setEsTestFeedback(null);
+      setEsTestPassed(false);
       invalidate();
     },
     onError: (err: Error) => message.error(err.message),
@@ -211,22 +276,91 @@ export function DatasourcesPage() {
     onError: (err: Error) => message.error(err.message),
   });
 
-  const testFormMutation = useMutation({
-    mutationFn: (values: JdbcFormValues) =>
-      testDataSourceConnection({
-        url: values.url,
-        username: values.username,
-        password: values.password,
-        driverClassName: values.driverClassName,
-        driverJarPath: editing?.driverJarPath,
-      }),
-    onSuccess: (msg) => message.success(msg),
-    onError: (err: Error) => message.error(err.message),
+  const testJdbcFormMutation = useMutation({
+    mutationFn: async (values: JdbcFormValues) => {
+      if (editing?.name) {
+        return testDataSourceByName(editing.name);
+      }
+      return testConnectionUnified({
+        kind: 'JDBC',
+        draftPayload: {
+          url: values.url,
+          username: values.username ?? '',
+          password: values.password ?? '',
+          driverClassName: values.driverClassName,
+          driverJarPath: editing?.driverJarPath ?? undefined,
+        },
+      });
+    },
+    onSuccess: (msg) => {
+      setJdbcTestFeedback({ ok: true, message: msg });
+      setJdbcTestPassed(true);
+    },
+    onError: (err: Error) => {
+      setJdbcTestFeedback({ ok: false, message: err.message });
+      setJdbcTestPassed(false);
+    },
+  });
+
+  const testKafkaFormMutation = useMutation({
+    mutationFn: async (values: KafkaFormValues) => {
+      const servers = parseServerList(values.bootstrapServers);
+      if (editingKafka?.name) {
+        return testConnectionUnified({ kind: 'KAFKA', name: editingKafka.name });
+      }
+      const payload: Record<string, unknown> = { bootstrapServers: servers };
+      if (values.clientId?.trim()) payload.clientId = values.clientId.trim();
+      if (values.acks?.trim()) payload.acks = values.acks.trim();
+      if (values.compressionType?.trim()) payload.compressionType = values.compressionType.trim();
+      if (values.retries != null) payload.retries = values.retries;
+      if (values.securityProtocol?.trim()) payload.securityProtocol = values.securityProtocol.trim();
+      if (values.saslMechanism?.trim()) payload.saslMechanism = values.saslMechanism.trim();
+      if (values.saslJaasConfig?.trim()) payload.saslJaasConfig = values.saslJaasConfig.trim();
+      const props = parseProperties(values.extraProperties);
+      if (props) payload.properties = props;
+      return testConnectionUnified({ kind: 'KAFKA', draftPayload: payload });
+    },
+    onSuccess: (msg) => {
+      setKafkaTestFeedback({ ok: true, message: msg });
+      setKafkaTestPassed(true);
+    },
+    onError: (err: Error) => {
+      setKafkaTestFeedback({ ok: false, message: err.message });
+      setKafkaTestPassed(false);
+    },
+  });
+
+  const testEsFormMutation = useMutation({
+    mutationFn: async (values: EsFormValues) => {
+      const uris = parseServerList(values.uris);
+      if (editingEs?.name) {
+        return testConnectionUnified({ kind: 'ELASTICSEARCH', name: editingEs.name });
+      }
+      const payload: Record<string, unknown> = { uris };
+      if (values.username?.trim()) payload.username = values.username.trim();
+      if (values.password?.trim()) payload.password = values.password.trim();
+      if (values.apiKey?.trim()) payload.apiKey = values.apiKey.trim();
+      if (values.pathPrefix?.trim()) payload.pathPrefix = values.pathPrefix.trim();
+      if (values.connectionTimeoutMs != null) payload.connectionTimeoutMs = values.connectionTimeoutMs;
+      if (values.socketTimeoutMs != null) payload.socketTimeoutMs = values.socketTimeoutMs;
+      if (values.socketKeepAlive != null) payload.socketKeepAlive = values.socketKeepAlive;
+      return testConnectionUnified({ kind: 'ELASTICSEARCH', draftPayload: payload });
+    },
+    onSuccess: (msg) => {
+      setEsTestFeedback({ ok: true, message: msg });
+      setEsTestPassed(true);
+    },
+    onError: (err: Error) => {
+      setEsTestFeedback({ ok: false, message: err.message });
+      setEsTestPassed(false);
+    },
   });
 
   const openCreateJdbc = () => {
     setEditing(null);
     setJarFile(null);
+    setJdbcTestFeedback(null);
+    setJdbcTestPassed(false);
     setDialogKey(`new-${Date.now()}`);
     jdbcForm.resetFields();
     setJdbcModalOpen(true);
@@ -236,24 +370,33 @@ export function DatasourcesPage() {
     setEditing(row);
     setJarFile(null);
     setDialogKey(`edit-${row.name}`);
+    const presetId = row.driverPresetId ?? undefined;
+    setSelectedPresetId(presetId);
     jdbcForm.setFieldsValue({
       name: row.name,
       url: row.url,
       username: row.username ?? '',
       password: '',
       driverClassName: row.driverClassName,
+      driverPresetId: presetId,
     });
+    setJdbcTestFeedback(null);
+    setJdbcTestPassed(false);
     setJdbcModalOpen(true);
   };
 
   const openCreateKafka = () => {
     setEditingKafka(null);
+    setKafkaTestFeedback(null);
+    setKafkaTestPassed(false);
     kafkaForm.resetFields();
     setKafkaModalOpen(true);
   };
 
   const openEditKafka = (row: MessagingClusterSummary) => {
     setEditingKafka(row);
+    setKafkaTestFeedback(null);
+    setKafkaTestPassed(false);
     kafkaForm.setFieldsValue({
       name: row.name,
       bootstrapServers: formatServerList(row.bootstrapServers),
@@ -271,12 +414,16 @@ export function DatasourcesPage() {
 
   const openCreateEs = () => {
     setEditingEs(null);
+    setEsTestFeedback(null);
+    setEsTestPassed(false);
     esForm.resetFields();
     setEsModalOpen(true);
   };
 
   const openEditEs = (row: MessagingClusterSummary) => {
     setEditingEs(row);
+    setEsTestFeedback(null);
+    setEsTestPassed(false);
     esForm.setFieldsValue({
       name: row.name,
       uris: formatServerList(row.uris),
@@ -329,11 +476,51 @@ export function DatasourcesPage() {
     [overviewQuery.data?.driverPresets],
   );
 
+  const catalogColumns: ColumnsType<CatalogConnectionSummary> = useMemo(
+    () => [
+      { title: t('datasources.col.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
+      { title: t('datasources.col.kind'), dataIndex: 'kind' },
+      { title: t('datasources.col.source'), dataIndex: 'source' },
+      {
+        title: t('datasources.col.health'),
+        key: 'health',
+        render: (_, row) => <HealthBadge status={row.healthStatus} />,
+      },
+      {
+        title: t('datasources.col.lastReload'),
+        dataIndex: 'lastReloadAt',
+        render: (v: string | null | undefined) => (v ? formatDateTime(v) : '—'),
+      },
+      {
+        title: t('datasources.col.actions'),
+        key: 'actions',
+        render: (_, row) => (
+          <Space wrap>
+            <Button type="link" onClick={() => setCatalogDetail(row)}>
+              {t('common.detail')}
+            </Button>
+            <Link to={`/console/audit?category=DATASOURCE&resourceId=${encodeURIComponent(row.name)}`}>
+              {t('datasources.audit.view')}
+            </Link>
+          </Space>
+        ),
+      },
+    ],
+    [t],
+  );
+
   const jdbcColumns: ColumnsType<DataSourceSummary> = useMemo(
     () => [
       { title: t('datasources.col.name'), dataIndex: 'name', sorter: (a, b) => a.name.localeCompare(b.name) },
       { title: t('datasources.col.url'), dataIndex: 'url', ellipsis: true },
       { title: t('datasources.col.driver'), dataIndex: 'driverClassName' },
+      {
+        title: t('datasources.col.health'),
+        key: 'health',
+        render: (_, row) => (
+          <HealthBadge status={catalogByKey.get(catalogKey(row.name, 'JDBC'))?.healthStatus} />
+        ),
+      },
       {
         title: t('datasources.col.enabled'),
         dataIndex: 'enabled',
@@ -357,6 +544,9 @@ export function DatasourcesPage() {
             >
               {t('common.test')}
             </Button>
+            <Link to={`/console/audit?category=DATASOURCE&resourceId=${encodeURIComponent(row.name)}`}>
+              {t('datasources.audit.view')}
+            </Link>
             <Button type="link" danger onClick={() => confirmRemoveJdbc(row.name)}>
               {t('common.remove')}
             </Button>
@@ -364,7 +554,7 @@ export function DatasourcesPage() {
         ),
       },
     ],
-    [t],
+    [catalogByKey, t],
   );
 
   const kafkaColumns: ColumnsType<MessagingClusterSummary> = useMemo(
@@ -382,6 +572,13 @@ export function DatasourcesPage() {
         render: (v: string | null | undefined) => v ?? '—',
       },
       {
+        title: t('datasources.col.health'),
+        key: 'health',
+        render: (_, row) => (
+          <HealthBadge status={catalogByKey.get(catalogKey(row.name, 'KAFKA'))?.healthStatus} />
+        ),
+      },
+      {
         title: t('datasources.col.updatedAt'),
         dataIndex: 'updatedAt',
         render: (v: string | null) => v ?? '—',
@@ -394,6 +591,9 @@ export function DatasourcesPage() {
             <Button type="link" onClick={() => openEditKafka(row)}>
               {t('common.edit')}
             </Button>
+            <Link to={`/console/audit?category=DATASOURCE&resourceId=${encodeURIComponent(row.name)}`}>
+              {t('datasources.audit.view')}
+            </Link>
             <Button type="link" danger onClick={() => confirmRemoveKafka(row.name)}>
               {t('common.remove')}
             </Button>
@@ -401,7 +601,7 @@ export function DatasourcesPage() {
         ),
       },
     ],
-    [t],
+    [catalogByKey, t],
   );
 
   const esColumns: ColumnsType<MessagingClusterSummary> = useMemo(
@@ -412,6 +612,13 @@ export function DatasourcesPage() {
         dataIndex: 'uris',
         ellipsis: true,
         render: (v: string[] | null | undefined) => (v ?? []).join(', ') || '—',
+      },
+      {
+        title: t('datasources.col.health'),
+        key: 'health',
+        render: (_, row) => (
+          <HealthBadge status={catalogByKey.get(catalogKey(row.name, 'ELASTICSEARCH'))?.healthStatus} />
+        ),
       },
       {
         title: t('datasources.col.updatedAt'),
@@ -426,6 +633,9 @@ export function DatasourcesPage() {
             <Button type="link" onClick={() => openEditEs(row)}>
               {t('common.edit')}
             </Button>
+            <Link to={`/console/audit?category=DATASOURCE&resourceId=${encodeURIComponent(row.name)}`}>
+              {t('datasources.audit.view')}
+            </Link>
             <Button type="link" danger onClick={() => confirmRemoveEs(row.name)}>
               {t('common.remove')}
             </Button>
@@ -433,7 +643,7 @@ export function DatasourcesPage() {
         ),
       },
     ],
-    [t],
+    [catalogByKey, t],
   );
 
   const uploadFileList: UploadFile[] = jarFile
@@ -447,9 +657,14 @@ export function DatasourcesPage() {
         subtitle={t('datasources.subtitle')}
         crumbs={[{ label: t('nav.home'), path: '/' }, { label: t('nav.datasources') }]}
         extra={
-          <Button type="primary" data-testid="datasources-new-button" onClick={openCreateJdbc}>
-            {t('datasources.new')}
-          </Button>
+          <Space>
+            <Link to="/console/audit?category=DATASOURCE">
+              <Button>{t('datasources.audit.viewAll')}</Button>
+            </Link>
+            <Button type="primary" data-testid="datasources-new-button" onClick={openCreateJdbc}>
+              {t('datasources.new')}
+            </Button>
+          </Space>
         }
       />
       <Alert
@@ -474,6 +689,7 @@ export function DatasourcesPage() {
 
       <Typography.Title level={5}>{t('datasources.section.persisted')}</Typography.Title>
       <Table
+        data-testid="datasources-persisted-table"
         rowKey="name"
         loading={overviewQuery.isLoading}
         dataSource={overviewQuery.data?.persisted ?? []}
@@ -483,9 +699,20 @@ export function DatasourcesPage() {
       />
 
       <Typography.Title level={5}>{t('datasources.section.runtime')}</Typography.Title>
-      <Typography.Paragraph>
+      <Typography.Paragraph data-testid="datasources-runtime-keys">
         {(overviewQuery.data?.runtimeKeys ?? []).join(', ') || '—'}
       </Typography.Paragraph>
+
+      <Typography.Title level={5}>{t('datasources.section.catalog')}</Typography.Title>
+      <Table
+        data-testid="datasources-catalog-table"
+        rowKey={(row) => `${row.name}-${row.kind}`}
+        loading={overviewQuery.isLoading}
+        dataSource={overviewQuery.data?.catalogConnections ?? []}
+        columns={catalogColumns}
+        pagination={false}
+        style={{ marginBottom: 24 }}
+      />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <Typography.Title level={5} style={{ margin: 0 }}>
@@ -546,7 +773,15 @@ export function DatasourcesPage() {
         footer={null}
         destroyOnClose
       >
-        <Form form={jdbcForm} layout="vertical" onFinish={(v) => saveJdbcMutation.mutate(v)}>
+        <Form
+          form={jdbcForm}
+          layout="vertical"
+          onFinish={(v) => saveJdbcMutation.mutate(v)}
+          onValuesChange={() => {
+            setJdbcTestFeedback(null);
+            setJdbcTestPassed(false);
+          }}
+        >
           <Form.Item
             name="name"
             label={<FieldHelp label={t('datasources.dialog.name')} help={t('datasources.dialog.name.help')} />}
@@ -599,11 +834,28 @@ export function DatasourcesPage() {
               </Upload>
             </Form.Item>
           ) : null}
+          <TestResultAlert feedback={jdbcTestFeedback} />
+          {requireTestBeforeSave && !jdbcTestPassed ? (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('datasources.test.requiredBeforeSave')}
+            />
+          ) : null}
           <Space>
-            <Button onClick={() => testFormMutation.mutate(jdbcForm.getFieldsValue())} loading={testFormMutation.isPending}>
+            <Button
+              onClick={() => testJdbcFormMutation.mutate(jdbcForm.getFieldsValue())}
+              loading={testJdbcFormMutation.isPending}
+            >
               {t('datasources.dialog.test')}
             </Button>
-            <Button type="primary" htmlType="submit" loading={saveJdbcMutation.isPending}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={saveJdbcMutation.isPending}
+              disabled={requireTestBeforeSave && !jdbcTestPassed}
+            >
               {t('common.save')}
             </Button>
             <Button onClick={() => setJdbcModalOpen(false)}>{t('common.cancel')}</Button>
@@ -618,7 +870,15 @@ export function DatasourcesPage() {
         footer={null}
         destroyOnClose
       >
-        <Form form={kafkaForm} layout="vertical" onFinish={(v) => saveKafkaMutation.mutate(v)}>
+        <Form
+          form={kafkaForm}
+          layout="vertical"
+          onFinish={(v) => saveKafkaMutation.mutate(v)}
+          onValuesChange={() => {
+            setKafkaTestFeedback(null);
+            setKafkaTestPassed(false);
+          }}
+        >
           <Form.Item
             name="name"
             label={
@@ -724,8 +984,28 @@ export function DatasourcesPage() {
           >
             <Input.TextArea rows={3} placeholder={t('datasources.kafka.dialog.extraProperties.placeholder')} />
           </Form.Item>
+          <TestResultAlert feedback={kafkaTestFeedback} />
+          {requireTestBeforeSave && !kafkaTestPassed ? (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('datasources.test.requiredBeforeSave')}
+            />
+          ) : null}
           <Space>
-            <Button type="primary" htmlType="submit" loading={saveKafkaMutation.isPending}>
+            <Button
+              onClick={() => testKafkaFormMutation.mutate(kafkaForm.getFieldsValue())}
+              loading={testKafkaFormMutation.isPending}
+            >
+              {t('datasources.dialog.test')}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={saveKafkaMutation.isPending}
+              disabled={requireTestBeforeSave && !kafkaTestPassed}
+            >
               {t('common.save')}
             </Button>
             <Button onClick={() => setKafkaModalOpen(false)}>{t('common.cancel')}</Button>
@@ -740,7 +1020,15 @@ export function DatasourcesPage() {
         footer={null}
         destroyOnClose
       >
-        <Form form={esForm} layout="vertical" onFinish={(v) => saveEsMutation.mutate(v)}>
+        <Form
+          form={esForm}
+          layout="vertical"
+          onFinish={(v) => saveEsMutation.mutate(v)}
+          onValuesChange={() => {
+            setEsTestFeedback(null);
+            setEsTestPassed(false);
+          }}
+        >
           <Form.Item
             name="name"
             label={<FieldHelp label={t('datasources.es.dialog.name')} help={t('datasources.es.dialog.name.help')} />}
@@ -814,14 +1102,90 @@ export function DatasourcesPage() {
           <Form.Item name="socketKeepAlive" valuePropName="checked">
             <Checkbox>{t('datasources.es.dialog.socketKeepAlive')}</Checkbox>
           </Form.Item>
+          <TestResultAlert feedback={esTestFeedback} />
+          {requireTestBeforeSave && !esTestPassed ? (
+            <Alert
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message={t('datasources.test.requiredBeforeSave')}
+            />
+          ) : null}
           <Space>
-            <Button type="primary" htmlType="submit" loading={saveEsMutation.isPending}>
+            <Button
+              onClick={() => testEsFormMutation.mutate(esForm.getFieldsValue())}
+              loading={testEsFormMutation.isPending}
+            >
+              {t('datasources.dialog.test')}
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={saveEsMutation.isPending}
+              disabled={requireTestBeforeSave && !esTestPassed}
+            >
               {t('common.save')}
             </Button>
             <Button onClick={() => setEsModalOpen(false)}>{t('common.cancel')}</Button>
           </Space>
         </Form>
       </Modal>
+
+      <Drawer
+        title={catalogDetail ? t('datasources.detail.title', { name: catalogDetail.name }) : t('common.detail')}
+        open={catalogDetail != null}
+        onClose={() => setCatalogDetail(null)}
+        width={480}
+      >
+        {catalogDetail ? (
+          <>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              <div>
+                <Typography.Text type="secondary">{t('datasources.col.name')}</Typography.Text>
+                <div>{catalogDetail.name}</div>
+              </div>
+              <div>
+                <Typography.Text type="secondary">{t('datasources.col.kind')}</Typography.Text>
+                <div>{catalogDetail.kind}</div>
+              </div>
+              <div>
+                <Typography.Text type="secondary">{t('datasources.col.source')}</Typography.Text>
+                <div>{catalogDetail.source}</div>
+              </div>
+              <div>
+                <Typography.Text type="secondary">{t('datasources.col.health')}</Typography.Text>
+                <div>
+                  <HealthBadge status={catalogDetail.healthStatus} />
+                </div>
+              </div>
+              <div>
+                <Typography.Text type="secondary">{t('datasources.col.lastReload')}</Typography.Text>
+                <div>{catalogDetail.lastReloadAt ? formatDateTime(catalogDetail.lastReloadAt) : '—'}</div>
+              </div>
+              {catalogDetail.healthStatus === 'DEGRADED' ? (
+                <>
+                  <Alert
+                    type="warning"
+                    showIcon
+                    message={t('datasources.health.degraded')}
+                    description={
+                      catalogDetail.degradedReason?.trim()
+                        ? catalogDetail.degradedReason
+                        : t('datasources.detail.degradedUnknown')
+                    }
+                  />
+                  <Typography.Text type="secondary">{t('datasources.detail.lastKnownGood')}</Typography.Text>
+                </>
+              ) : null}
+            </Space>
+            <div style={{ marginTop: 24 }}>
+              <Link to={`/console/audit?category=DATASOURCE&resourceId=${encodeURIComponent(catalogDetail.name)}`}>
+                {t('datasources.audit.view')}
+              </Link>
+            </div>
+          </>
+        ) : null}
+      </Drawer>
     </div>
   );
 }

@@ -17,6 +17,7 @@ import java.time.Instant;
  * @param passwordSecretRef   optional secret reference instead of stored password
  * @param driverClassName     driver class
  * @param driverJarPath   optional uploaded driver path
+ * @param driverPresetId  optional console JDBC preset id (D-21)
  * @param enabled         active flag
  * @param createdAt       created timestamp
  * @param updatedAt       last update timestamp
@@ -28,6 +29,7 @@ public record DataSourceConfigSummary(
         String passwordSecretRef,
         String driverClassName,
         String driverJarPath,
+        String driverPresetId,
         boolean enabled,
         Instant createdAt,
         Instant updatedAt) implements Serializable {
