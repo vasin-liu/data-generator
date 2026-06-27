@@ -102,7 +102,36 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. JDBC sink upsert on PostgreSQL and MySQL reloads idempotently (re-run updates existing keys instead of duplicating)
 4. Job run report shows per-sink row counts and actionable errors for streaming and upsert failure paths
 
-**Plans**: TBD via `/gsd-plan-phase 8`
+**Plans**: 12 plans in 5 waves
+
+**Wave 1** *(no dependencies within wave for 08-01; 08-02 blocked on 08-01; 08-03 blocked on Wave 1 sources)*
+
+- `08-01` — Chunked CSV row source & UTF-8 BOM parser (RW-01)
+- `08-02` — Chunked JSON row source & NDJSON/array streaming parser (RW-01)
+- `08-03` — Pipeline CSV/JSON eligibility & registry policy wiring (RW-01)
+
+**Wave 2** *(blocked on Wave 1)*
+
+- `08-04` — CSV/JSON streaming sinks per-chunk flush + pipeline finalize hook (RW-02)
+- `08-05` — JDBC upsert SQL generation for PostgreSQL & MySQL (RW-03)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- `08-06` — Run report sink metrics & actionable errors (RW-04)
+- `08-07` — Publish validation, warnings & console form hints (RW-03, RW-04)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- `08-08` — V2 scenario YAML fixtures & scenario IT harness (RW-01, RW-02, RW-03, RW-04)
+- `08-09` — OOM proof IT & Testcontainers upsert idempotency (RW-01, RW-03)
+- `08-10` — Calcite unit tests for streaming pipelines & SQL builder (RW-01, RW-02, RW-03)
+
+**Wave 5** *(blocked on Wave 4)*
+
+- `08-11` — Playwright E2E RW streaming & upsert scenarios (RW-01..RW-04)
+- `08-12` — UAT verify script, operator docs & ROADMAP update (RW-01..RW-04)
+
+**Verification**: `.\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright` (Maven IT slice); full UAT adds Podman Playwright + playwright-cli snapshots.
 
 ### Phase 9: JDBC Dialect Expansion
 
