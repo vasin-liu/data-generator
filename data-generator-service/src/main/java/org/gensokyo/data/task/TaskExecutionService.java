@@ -6,17 +6,24 @@
 package org.gensokyo.data.task;
 
 import lombok.RequiredArgsConstructor;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.snapshot.ExecutionConnectionSnapshot;
+import org.gensokyo.data.datasource.catalog.ExecutionSnapshotConnectionCatalog;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TaskExecutionPO;
 import org.gensokyo.data.model.v2.RunReportVO;
+import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.repository.TaskExecutionRepository;
 import org.gensokyo.data.util.RandomKit;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Persists and queries template run lifecycle for the operator job center.
@@ -34,6 +41,11 @@ public class TaskExecutionService {
             TaskExecutionStatus.PAUSED.name());
 
     private final TaskExecutionRepository repository;
+    private final ConnectionSnapshotSupport connectionSnapshotSupport;
+    private final ObjectProvider<ExecutionSnapshotConnectionCatalog> snapshotCatalogProvider;
+
+    /** In-process snapshot cache until terminal status; DB row retained permanently (D-04). */
+    private final ConcurrentHashMap<Long, ExecutionConnectionSnapshot> activeSnapshots = new ConcurrentHashMap<>();
 
     /**
      * @param templateId template id
@@ -149,6 +161,62 @@ public class TaskExecutionService {
     }
 
     /**
+     * Builds and persists the connection snapshot when a worker enters RUNNING (D-02, D-04).
+     *
+     * @param instanceId run instance id
+     * @param template   template being executed
+     * @param catalog    live catalog for version pinning at capture time
+     */
+    @Transactional
+    public void captureConnectionSnapshot(Long instanceId, TemplateV2VO template, ConnectionCatalog catalog) {
+        ExecutionConnectionSnapshot snapshot = connectionSnapshotSupport.buildSnapshot(template, catalog);
+        persistConnectionSnapshot(instanceId, TemplateJsonCodec.write(snapshot));
+        activeSnapshots.put(instanceId, snapshot);
+    }
+
+    /**
+     * Perserves pre-serialized snapshot JSON on the execution row.
+     *
+     * @param instanceId run instance id
+     * @param json       snapshot JSON
+     */
+    @Transactional
+    public void persistConnectionSnapshot(Long instanceId, String json) {
+        update(instanceId, row -> row.setConnectionSnapshotJson(json));
+    }
+
+    /**
+     * Returns the in-process snapshot cache entry or deserializes from the execution row (D-07).
+     *
+     * @param instanceId run instance id
+     * @return snapshot when present
+     */
+    public Optional<ExecutionConnectionSnapshot> getConnectionSnapshot(Long instanceId) {
+        ExecutionConnectionSnapshot cached = activeSnapshots.get(instanceId);
+        if (cached != null) {
+            return Optional.of(cached);
+        }
+        return repository.findByInstanceId(instanceId)
+                .map(TaskExecutionPO::getConnectionSnapshotJson)
+                .filter(json -> json != null && !json.isBlank())
+                .map(json -> TemplateJsonCodec.read(json, ExecutionConnectionSnapshot.class))
+                .map(snapshot -> {
+                    activeSnapshots.putIfAbsent(instanceId, snapshot);
+                    return snapshot;
+                });
+    }
+
+    /**
+     * @param instanceId run instance id
+     * @return persisted snapshot JSON when present
+     */
+    public Optional<String> getConnectionSnapshotJson(Long instanceId) {
+        return repository.findByInstanceId(instanceId)
+                .map(TaskExecutionPO::getConnectionSnapshotJson)
+                .filter(json -> json != null && !json.isBlank());
+    }
+
+    /**
      * @param instanceId  run instance id
      * @param rowCount    rows processed
      * @param metricsJson optional V2 metrics JSON
@@ -175,6 +243,7 @@ public class TaskExecutionService {
             row.setErrorMessage(null);
             row.setPauseReason(null);
         });
+        evictSnapshotCache(instanceId);
     }
 
     /**
@@ -243,6 +312,7 @@ public class TaskExecutionService {
             row.setFinishedAt(Instant.now());
             row.setPauseReason(null);
         });
+        evictSnapshotCache(instanceId);
     }
 
     /**
@@ -274,6 +344,7 @@ public class TaskExecutionService {
                 row.setReportJson(reportJson);
             }
         });
+        evictSnapshotCache(instanceId);
     }
 
     /**
@@ -364,5 +435,10 @@ public class TaskExecutionService {
             return null;
         }
         return TemplateJsonCodec.read(reportJson, RunReportVO.class);
+    }
+
+    private void evictSnapshotCache(Long instanceId) {
+        activeSnapshots.remove(instanceId);
+        snapshotCatalogProvider.ifAvailable(catalog -> catalog.evictInstance(instanceId));
     }
 }

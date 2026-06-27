@@ -9,6 +9,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.datasource.api.ConnectionKind;
 import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.model.po.DataSourceConfigPO;
@@ -114,7 +115,7 @@ public class DataSourceConfigService {
             }
         }
         DataSourceConfigPO saved = repository.saveAndFlush(entity);
-        registerToRuntime(saved);
+        connectionCatalog.reload(saved.getName(), ConnectionKind.JDBC);
         auditService.record(
                 isNew ? "DATASOURCE_CREATE" : "DATASOURCE_UPDATE",
                 "DATASOURCE",

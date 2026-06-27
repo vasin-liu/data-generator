@@ -11,6 +11,8 @@ import org.gensokyo.data.datasource.api.CatalogMetadata;
 import org.gensokyo.data.datasource.api.CatalogResolveSupport;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.api.ConnectionTestRequest;
+import org.gensokyo.data.datasource.api.ConnectionTestResult;
 import org.gensokyo.data.datasource.api.ElasticsearchCatalogMetadata;
 import org.gensokyo.data.datasource.api.ElasticsearchResolvedConnection;
 import org.gensokyo.data.datasource.api.JdbcCatalogMetadata;
@@ -112,6 +114,33 @@ public final class InMemoryCatalog implements ConnectionCatalog {
     @Override
     public List<CatalogEntry> listAll() {
         return List.copyOf(entries.values());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConnectionTestResult test(ConnectionTestRequest request) {
+        if (request.isExistingEntry()) {
+            String lookupKey = key(request.name(), request.kind());
+            if (entries.containsKey(lookupKey)) {
+                return ConnectionTestResult.ok("InMemoryCatalog connectivity ok for " + request.name());
+            }
+            return ConnectionTestResult.fail("Unknown connection: " + request.name());
+        }
+        return ConnectionTestResult.ok("Draft connectivity ok");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CatalogEntry reload(String name, ConnectionKind kind) {
+        CatalogEntry existing = entries.get(key(name, kind));
+        if (existing == null) {
+            throw CatalogResolveSupport.unknownConnection(name, kind, "Register the connection in InMemoryCatalog");
+        }
+        return existing;
     }
 
     /**

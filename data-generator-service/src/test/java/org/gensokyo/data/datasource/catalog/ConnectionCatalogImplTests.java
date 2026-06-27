@@ -49,6 +49,9 @@ class ConnectionCatalogImplTests {
     @Mock
     private MessagingClusterConfigRepository messagingClusterConfigRepository;
 
+    @Mock
+    private HotReloadCoordinator hotReloadCoordinator;
+
     private ObjectProvider<DynamicRoutingDataSource> dynamicRoutingDataSourceProvider;
     private ObjectProvider<DynamicKafkaTemplateRegistry> kafkaRegistryProvider;
     private ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchRegistryProvider;
@@ -69,7 +72,8 @@ class ConnectionCatalogImplTests {
                 kafkaRegistryProvider,
                 elasticsearchRegistryProvider,
                 dataSourceConfigRepository,
-                messagingClusterConfigRepository);
+                messagingClusterConfigRepository,
+                hotReloadCoordinator);
         lenient().when(kafkaRegistryProvider.getIfAvailable()).thenReturn(null);
         lenient().when(elasticsearchRegistryProvider.getIfAvailable()).thenReturn(null);
         lenient().when(messagingClusterConfigRepository.findByClusterType(org.mockito.ArgumentMatchers.anyString()))

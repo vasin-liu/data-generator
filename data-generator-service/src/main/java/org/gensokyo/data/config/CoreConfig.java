@@ -346,7 +346,7 @@ public class CoreConfig {
 
     @Bean
     @ConditionalOnMissingBean(ConnectionCatalog.class)
-    public ConnectionCatalog connectionCatalog(org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl connectionCatalogImpl) {
+    public ConnectionCatalog connectionCatalogFallback(ConnectionCatalogImpl connectionCatalogImpl) {
         return connectionCatalogImpl;
     }
 

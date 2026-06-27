@@ -45,6 +45,7 @@ import org.springframework.validation.annotation.Validated;
 import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.model.v2.RunReportVO;
 import org.gensokyo.data.task.RunReportCollector;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,6 +76,7 @@ public class TaskController {
     private final ObjectProvider<WorkflowRunControl> workflowRunControlProvider;
     private final DistributedExecutionProperties distributedExecutionProperties;
     private final DistributedJobService distributedJobService;
+    private final ConnectionCatalog connectionCatalog;
     private final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
     @PostConstruct
@@ -285,6 +287,7 @@ public class TaskController {
             return;
         }
         taskExecutionService.markRunning(instanceId);
+        taskExecutionService.captureConnectionSnapshot(instanceId, template, connectionCatalog);
         WorkflowRunControl control = workflowRunControlProvider.getIfAvailable(() -> WorkflowRunControl.NO_OP);
         WorkflowRunContext.bind(instanceId, control);
         long startedAtMs = System.currentTimeMillis();

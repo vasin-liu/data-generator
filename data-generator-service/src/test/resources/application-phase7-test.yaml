@@ -27,3 +27,13 @@ spring:
       druid:
         filters: stat,slf4j
         validation-query: SELECT 1
+
+# Phase 7 governance placeholders — dev OFF defaults for downstream IT slices (D-14).
+data:
+  generator:
+    governance:
+      require-published-for-task-run: false
+      reject-plaintext-passwords-in-templates: true
+      require-managed-connections: false
+      require-connectivity-test-before-save: false
+      allow-bootstrap-references: true

@@ -21,6 +21,8 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.gensokyo.data.api.console.dto.ElasticsearchClusterUpsertRequest;
 import org.gensokyo.data.api.console.dto.KafkaClusterUpsertRequest;
+import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
 import org.gensokyo.data.datasource.elasticsearch.DynamicElasticsearchClientRegistry;
 import org.gensokyo.data.exception.DataGeneratorException;
 import org.gensokyo.data.json.TemplateJsonCodec;
@@ -57,6 +59,7 @@ public class MessagingClusterConfigService {
     private final MessagingClusterConfigRepository repository;
     private final ObjectProvider<DynamicKafkaTemplateRegistry> kafkaRegistryProvider;
     private final ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchRegistryProvider;
+    private final ConnectionCatalogImpl connectionCatalog;
 
     /**
      * Loads persisted clusters into runtime registries on startup.
@@ -138,7 +141,7 @@ public class MessagingClusterConfigService {
         entity.setEnabled(Boolean.TRUE);
         touch(entity);
         repository.saveAndFlush(entity);
-        registerKafka(name, config);
+        connectionCatalog.reload(name, ConnectionKind.KAFKA);
         return toSummary(entity);
     }
 
@@ -172,7 +175,7 @@ public class MessagingClusterConfigService {
         entity.setEnabled(Boolean.TRUE);
         touch(entity);
         repository.saveAndFlush(entity);
-        registerElasticsearch(name, config);
+        connectionCatalog.reload(name, ConnectionKind.ELASTICSEARCH);
         return toSummary(entity);
     }
 
@@ -205,6 +208,32 @@ public class MessagingClusterConfigService {
                 throw new DataGeneratorException("Failed to register messaging cluster: " + row.getName(), ex);
             }
         }
+    }
+
+    /**
+     * Hot-reloads a persisted Kafka cluster into the runtime registry (D-09).
+     *
+     * @param name cluster name
+     */
+    public void reloadKafkaFromPersistence(String name) {
+        MessagingClusterConfigPO row = repository.findById(name)
+                .filter(r -> MessagingClusterType.KAFKA.name().equals(r.getClusterType()))
+                .filter(r -> Boolean.TRUE.equals(r.getEnabled()))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown Kafka cluster: " + name));
+        registerKafka(name, TemplateJsonCodec.read(row.getConfigJson(), KafkaClusterConfig.class));
+    }
+
+    /**
+     * Hot-reloads a persisted Elasticsearch cluster into the runtime registry (D-09).
+     *
+     * @param name cluster name
+     */
+    public void reloadElasticsearchFromPersistence(String name) {
+        MessagingClusterConfigPO row = repository.findById(name)
+                .filter(r -> MessagingClusterType.ELASTICSEARCH.name().equals(r.getClusterType()))
+                .filter(r -> Boolean.TRUE.equals(r.getEnabled()))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown Elasticsearch cluster: " + name));
+        registerElasticsearch(name, TemplateJsonCodec.read(row.getConfigJson(), ElasticsearchClusterConfig.class));
     }
 
     private void registerKafka(String name, KafkaClusterConfig config) {

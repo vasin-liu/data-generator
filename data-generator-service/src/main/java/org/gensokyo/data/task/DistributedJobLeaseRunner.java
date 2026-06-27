@@ -14,6 +14,7 @@ import org.gensokyo.data.calcite.runtime.WorkflowRunContext;
 import org.gensokyo.data.calcite.runtime.WorkflowRunControl;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.config.DistributedExecutionProperties;
+import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.json.TemplateJsonCodec;
 import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.model.v2.RunReportVO;
@@ -53,6 +54,7 @@ public class DistributedJobLeaseRunner {
     private final DataGeneratorProperties dataGeneratorProperties;
     private final AuditService auditService;
     private final ObjectProvider<WorkflowRunControl> workflowRunControlProvider;
+    private final ConnectionCatalog connectionCatalog;
 
     /**
      * Runs one leased queue row through V2 execution and terminal status updates.
@@ -77,6 +79,7 @@ public class DistributedJobLeaseRunner {
             }
             template = loadTemplate(lease);
             taskExecutionService.markRunning(instanceId);
+            taskExecutionService.captureConnectionSnapshot(instanceId, template, connectionCatalog);
             executeTrackedRun(workerId, leaseSeconds, lease, template);
         } catch (Exception e) {
             log.warn("Distributed worker failed to run job {} instance {}", jobId, instanceId, e);

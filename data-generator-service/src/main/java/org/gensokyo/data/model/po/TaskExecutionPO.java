@@ -85,6 +85,12 @@ public class TaskExecutionPO implements Serializable {
     @Column(name = "datasource_config_hash", length = 64)
     private String datasourceConfigHash;
 
+    /**
+     * Param-only connection snapshot JSON captured at RUNNING; retained permanently for audit (D-04).
+     */
+    @Column(name = "connection_snapshot_json", columnDefinition = "CLOB")
+    private String connectionSnapshotJson;
+
     @Column(name = "trigger_type", length = 16)
     private String triggerType;
 

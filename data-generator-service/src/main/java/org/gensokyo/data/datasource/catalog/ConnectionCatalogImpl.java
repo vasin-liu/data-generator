@@ -13,7 +13,10 @@ import org.gensokyo.data.datasource.api.CatalogEntrySource;
 import org.gensokyo.data.datasource.api.CatalogMetadata;
 import org.gensokyo.data.datasource.api.CatalogResolveSupport;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
+import org.gensokyo.data.datasource.api.ConnectionHealthStatus;
 import org.gensokyo.data.datasource.api.ConnectionKind;
+import org.gensokyo.data.datasource.api.ConnectionTestRequest;
+import org.gensokyo.data.datasource.api.ConnectionTestResult;
 import org.gensokyo.data.datasource.api.ElasticsearchCatalogMetadata;
 import org.gensokyo.data.datasource.api.ElasticsearchResolvedConnection;
 import org.gensokyo.data.datasource.api.JdbcCatalogMetadata;
@@ -37,6 +40,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +63,7 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
     private final ObjectProvider<DynamicElasticsearchClientRegistry> elasticsearchRegistryProvider;
     private final DataSourceConfigRepository dataSourceConfigRepository;
     private final MessagingClusterConfigRepository messagingClusterConfigRepository;
+    private final HotReloadCoordinator hotReloadCoordinator;
 
     /**
      * {@inheritDoc}
@@ -85,6 +90,30 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
         appendKafkaEntries(merged);
         appendElasticsearchEntries(merged);
         return List.copyOf(merged.values());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConnectionTestResult test(ConnectionTestRequest request) {
+        // Wave 2 delegates to JDBC/Kafka/ES adapter connectivity checks (07-02).
+        throw new UnsupportedOperationException("ConnectionCatalog.test is implemented in Phase 7 Wave 2");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CatalogEntry reload(String name, ConnectionKind kind) {
+        if (StrKit.isBlank(name)) {
+            throw new IllegalArgumentException("Connection name must not be blank");
+        }
+        String trimmed = name.trim();
+        CatalogEntry base = findEntry(trimmed, kind)
+                .orElseThrow(() -> CatalogResolveSupport.unknownConnection(
+                        trimmed, kind, "Cannot reload unknown connection"));
+        return hotReloadCoordinator.reload(trimmed, kind, base);
     }
 
     public boolean isBootstrapOnly(String name) {
@@ -155,25 +184,28 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
             CatalogEntrySource source = managedNames.contains(runtimeName)
                     ? CatalogEntrySource.MANAGED
                     : CatalogEntrySource.BOOTSTRAP;
-            merged.put(runtimeName, new CatalogEntry(
+            merged.put(runtimeName, entry(
                     runtimeName,
                     ConnectionKind.JDBC,
                     source,
-                    jdbcMetadata(runtimeName, managedNames)));
+                    jdbcMetadata(runtimeName, managedNames),
+                    null));
         }
         for (DataSourceConfigPO row : dataSourceConfigRepository.findByEnabledTrue()) {
             if (!merged.containsKey(row.getName())) {
-                merged.put(row.getName(), new CatalogEntry(
+                merged.put(row.getName(), entry(
                         row.getName(),
                         ConnectionKind.JDBC,
                         CatalogEntrySource.MANAGED,
-                        new JdbcCatalogMetadata(row.getUrl(), row.getDriverClassName())));
+                        new JdbcCatalogMetadata(row.getUrl(), row.getDriverClassName()),
+                        row.getUpdatedAt()));
             } else {
-                merged.put(row.getName(), new CatalogEntry(
+                merged.put(row.getName(), entry(
                         row.getName(),
                         ConnectionKind.JDBC,
                         CatalogEntrySource.MANAGED,
-                        new JdbcCatalogMetadata(row.getUrl(), row.getDriverClassName())));
+                        new JdbcCatalogMetadata(row.getUrl(), row.getDriverClassName()),
+                        row.getUpdatedAt()));
             }
         }
     }
@@ -196,11 +228,12 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
             String brokers = config == null || config.bootstrapServers() == null || config.bootstrapServers().isEmpty()
                     ? row.getName()
                     : String.join(",", config.bootstrapServers());
-            merged.put(row.getName(), new CatalogEntry(
+            merged.put(row.getName(), entry(
                     row.getName(),
                     ConnectionKind.KAFKA,
                     CatalogEntrySource.MANAGED,
-                    new KafkaCatalogMetadata(brokers)));
+                    new KafkaCatalogMetadata(brokers),
+                    row.getUpdatedAt()));
         }
     }
 
@@ -222,11 +255,12 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
             String hosts = config == null || config.uris() == null || config.uris().isEmpty()
                     ? row.getName()
                     : String.join(",", config.uris());
-            merged.put(row.getName(), new CatalogEntry(
+            merged.put(row.getName(), entry(
                     row.getName(),
                     ConnectionKind.ELASTICSEARCH,
                     CatalogEntrySource.MANAGED,
-                    new ElasticsearchCatalogMetadata(hosts)));
+                    new ElasticsearchCatalogMetadata(hosts),
+                    row.getUpdatedAt()));
         }
     }
 
@@ -237,7 +271,29 @@ public class ConnectionCatalogImpl implements ConnectionCatalog {
             boolean managed,
             CatalogMetadata metadata) {
         CatalogEntrySource source = managed ? CatalogEntrySource.MANAGED : CatalogEntrySource.BOOTSTRAP;
-        merged.put(name, new CatalogEntry(name, kind, source, metadata));
+        merged.put(name, entry(name, kind, source, metadata, null));
+    }
+
+    private CatalogEntry entry(
+            String name,
+            ConnectionKind kind,
+            CatalogEntrySource source,
+            CatalogMetadata metadata,
+            Instant updatedAt) {
+        long version = updatedAt != null ? updatedAt.toEpochMilli() : 1L;
+        CatalogEntry base = new CatalogEntry(
+                name,
+                kind,
+                source,
+                metadata,
+                version,
+                updatedAt,
+                ConnectionHealthStatus.HEALTHY,
+                null,
+                null);
+        return hotReloadCoordinator.healthOverlay(name, kind)
+                .map(overlay -> hotReloadCoordinator.overlay(base, overlay))
+                .orElse(base);
     }
 
     private CatalogMetadata jdbcMetadata(String runtimeName, Set<String> managedNames) {
