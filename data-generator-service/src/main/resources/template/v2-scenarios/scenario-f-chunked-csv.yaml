@@ -1,0 +1,21 @@
+# definitionKind: V2
+# scenarioId: GF-FC
+# catalogRef: RW-01 — CSV chunked source, SQL transform, console sink
+name: scenario-f-chunked-csv
+executionPolicy:
+  mode: CHUNKED
+  sourceChunkSize: 40
+  sinkBatchSize: 40
+  maxTotalRows: 120
+  maxRowsInMemory: 200
+sources:
+  incoming:
+    type: csv
+    path: template/v2-scenarios/fixtures/streaming-orders.csv
+    header: true
+transform:
+  type: sql
+  sql: SELECT order_id, UPPER(customer) AS customer, amount FROM incoming
+sink:
+  writers:
+    - type: console

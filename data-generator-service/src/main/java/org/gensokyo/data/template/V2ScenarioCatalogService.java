@@ -46,7 +46,11 @@ public class V2ScenarioCatalogService {
             new CatalogBinding("GF-WFS", "WF", "scenario-wf-shared-state.yaml"),
             new CatalogBinding("GF-JS", "JS", "scenario-js-transform.yaml"),
             new CatalogBinding("GF-EP", "E", "scenario-e-partial-sink.yaml"),
-            new CatalogBinding("GF-AI", "AI", "scenario-ai-inline.yaml"));
+            new CatalogBinding("GF-AI", "AI", "scenario-ai-inline.yaml"),
+            new CatalogBinding("GF-FC", "F", "scenario-f-chunked-csv.yaml"),
+            new CatalogBinding("GF-FN", "F", "scenario-f-streaming-ndjson.yaml"),
+            new CatalogBinding("GF-GP", "G", "scenario-g-upsert-pg.yaml"),
+            new CatalogBinding("GF-GM", "G", "scenario-g-upsert-mysql.yaml"));
 
     private final YamlParser yamlParser;
 
