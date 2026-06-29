@@ -9,13 +9,20 @@ import org.gensokyo.data.calcite.*;
 
 import org.gensokyo.data.model.v2.JsonSourceVO;
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.TokenStreamFactory;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
 
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Default {@link JsonParser} implementation using Jackson 3 {@link JsonNode} trees.
@@ -25,6 +32,7 @@ import java.util.Map;
  */
 public class DefaultJsonParser implements JsonParser {
     private final ObjectMapper objectMapper;
+    private final ObjectReader arrayElementReader;
 
     /**
      * Creates a parser backed by a default {@link ObjectMapper}.
@@ -40,6 +48,8 @@ public class DefaultJsonParser implements JsonParser {
      */
     public DefaultJsonParser(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        this.arrayElementReader = objectMapper.readerFor(JsonNode.class)
+                .without(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
     }
 
     /**
@@ -71,6 +81,133 @@ public class DefaultJsonParser implements JsonParser {
             return List.of(toRow(root));
         } catch (JacksonException e) {
             throw new IllegalArgumentException("Failed to parse JSON source: " + source.getPath(), e);
+        }
+    }
+
+    /**
+     * Parses a single NDJSON line into a row map.
+     *
+     * @param line       one line of NDJSON text (must not be blank)
+     * @param lineNumber 1-based physical line number for actionable errors
+     * @return row values for the JSON object on this line
+     * @throws IllegalArgumentException when the line is blank, not a JSON object, or malformed
+     */
+    public Map<String, Object> parseNdjsonLine(String line, long lineNumber) {
+        if (line == null || line.isBlank()) {
+            throw new IllegalArgumentException("NDJSON line [" + lineNumber + "] must not be blank");
+        }
+        try {
+            JsonNode node = objectMapper.readTree(line);
+            if (node == null || node.isNull()) {
+                throw new IllegalArgumentException("NDJSON line [" + lineNumber + "] must not be JSON null");
+            }
+            if (!node.isObject()) {
+                throw new IllegalArgumentException(
+                        "NDJSON line [" + lineNumber + "] must be a JSON object, got " + node.getNodeType());
+            }
+            return toRow(node);
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException(
+                    "Failed to parse NDJSON at line [" + lineNumber + "]: " + e.getOriginalMessage(), e);
+        }
+    }
+
+    /**
+     * Opens a streaming iterator over elements of a top-level JSON array without loading the full document.
+     *
+     * @param reader UTF-8 (or caller-selected charset) reader positioned at the start of the file
+     * @return closeable iterator yielding one row map per array element
+     */
+    public ArrayElementIterator openArrayElementIterator(Reader reader) {
+        return new ArrayElementIterator(reader);
+    }
+
+    /**
+     * Streaming iterator for top-level JSON array elements.
+     */
+    public final class ArrayElementIterator implements Iterator<Map<String, Object>>, AutoCloseable {
+
+        private final tools.jackson.core.JsonParser parser;
+        private final boolean parserCreated;
+        private Map<String, Object> nextRow;
+        private boolean finished;
+        private long elementIndex;
+        private boolean closed;
+
+        private ArrayElementIterator(Reader reader) {
+            try {
+                TokenStreamFactory factory = objectMapper.tokenStreamFactory();
+                this.parser = factory.createParser(reader);
+                this.parserCreated = true;
+                advanceToNextElement();
+            } catch (JacksonException ex) {
+                throw new IllegalArgumentException("Failed to open JSON array stream: " + ex.getOriginalMessage(), ex);
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextRow != null;
+        }
+
+        @Override
+        public Map<String, Object> next() {
+            if (nextRow == null) {
+                throw new NoSuchElementException("No more JSON array elements");
+            }
+            Map<String, Object> current = nextRow;
+            advanceToNextElement();
+            return current;
+        }
+
+        @Override
+        public void close() {
+            if (closed) {
+                return;
+            }
+            closed = true;
+            if (parserCreated && parser != null) {
+                try {
+                    parser.close();
+                } catch (JacksonException ex) {
+                    throw new IllegalStateException("Failed to close JSON array parser", ex);
+                }
+            }
+        }
+
+        private void advanceToNextElement() {
+            if (finished) {
+                nextRow = null;
+                return;
+            }
+            try {
+                if (elementIndex == 0) {
+                    JsonToken token = parser.nextToken();
+                    if (token == null || token == JsonToken.END_ARRAY) {
+                        finished = true;
+                        nextRow = null;
+                        return;
+                    }
+                    if (token != JsonToken.START_ARRAY) {
+                        throw new IllegalArgumentException(
+                                "JSON array source must start with '[' but found token [" + token + "]");
+                    }
+                }
+                JsonToken token = parser.nextToken();
+                if (token == null || token == JsonToken.END_ARRAY) {
+                    finished = true;
+                    nextRow = null;
+                    return;
+                }
+                elementIndex++;
+                JsonNode node = arrayElementReader.readValue(parser);
+                nextRow = toRow(node);
+            } catch (JacksonException ex) {
+                throw new IllegalArgumentException(
+                        "Failed to parse JSON array element at index [" + elementIndex + "]: "
+                                + ex.getOriginalMessage(),
+                        ex);
+            }
         }
     }
 

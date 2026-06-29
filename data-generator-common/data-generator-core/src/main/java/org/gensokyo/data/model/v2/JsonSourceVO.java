@@ -18,6 +18,11 @@ public class JsonSourceVO extends SourceVO {
 
     private String path;
     private String charset = StandardCharsets.UTF_8.name();
+    /**
+     * Optional JSON layout: {@code ndjson} (line-delimited objects) or {@code array} (top-level JSON array).
+     * When absent, the reader auto-detects from the first non-whitespace character ({@code [} → array).
+     */
+    private String format;
     private String root;
     private Long maxRows;
     private RowSchema schema;
