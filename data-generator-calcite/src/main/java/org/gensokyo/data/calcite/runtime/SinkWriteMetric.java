@@ -15,6 +15,7 @@ public final class SinkWriteMetric {
 
     private long rowsOk;
     private long rowsFailed;
+    private long rowsUpserted;
     private String lastErrorSample;
 
     /**
@@ -36,6 +37,15 @@ public final class SinkWriteMetric {
     }
 
     /**
+     * Rows updated via upsert/merge for this sink writer.
+     *
+     * @return upsert row count
+     */
+    public long getRowsUpserted() {
+        return rowsUpserted;
+    }
+
+    /**
      * Truncated sample of the most recent write failure message.
      *
      * @return error sample, or {@code null} when no failure was recorded
@@ -51,6 +61,15 @@ public final class SinkWriteMetric {
      */
     void addRowsOk(long count) {
         rowsOk += count;
+    }
+
+    /**
+     * Records rows updated via upsert SQL during batch execution.
+     *
+     * @param count number of upserted rows in this increment
+     */
+    void addRowsUpserted(long count) {
+        rowsUpserted += count;
     }
 
     /**

@@ -41,7 +41,20 @@ final class JdbcSinkSqlBuilder {
         if (!WriterOptionResolver.booleanOption(writer, "upsert")) {
             return baseInsert;
         }
-        return appendUpsertClause(writer, table, columns, values, baseInsert);
+        return appendUpsertClause(writer, table, columns, values, baseInsert, targetColumns);
+    }
+
+    /**
+     * Validates {@code upsertKeys} against known target columns when upsert is enabled.
+     *
+     * @param writer        JDBC writer configuration
+     * @param targetColumns target table column names in insert order
+     */
+    static void validateUpsertKeys(JdbcWriterVO writer, List<String> targetColumns) {
+        if (!WriterOptionResolver.booleanOption(writer, "upsert")) {
+            return;
+        }
+        requireUpsertKeys(writer, targetColumns);
     }
 
     private static String appendUpsertClause(
@@ -49,23 +62,88 @@ final class JdbcSinkSqlBuilder {
             String table,
             String columns,
             String values,
-            String baseInsert) {
+            String baseInsert,
+            List<String> targetColumns) {
         String dialect = resolveDialect(writer);
         return switch (dialect) {
-            case "postgres" -> appendPostgresUpsert(writer, baseInsert);
-            case "mysql" -> "insert ignore into " + table + " (" + columns + ") values (" + values + ")";
-            case "clickhouse", "click_house" -> baseInsert;
-            default -> baseInsert;
+            case "postgres", "postgresql" -> appendPostgresUpsert(writer, baseInsert, targetColumns);
+            case "mysql" -> appendMysqlUpsert(writer, table, columns, values, targetColumns);
+            case "clickhouse", "click_house" -> throw unsupportedUpsertDialect("clickhouse");
+            default -> throw unsupportedUpsertDialect(dialect);
         };
     }
 
-    private static String appendPostgresUpsert(JdbcWriterVO writer, String baseInsert) {
-        String conflictColumns = WriterOptionResolver.stringOption(writer, "conflictColumns", null);
-        if (!StringUtils.hasText(conflictColumns)) {
-            throw new IllegalArgumentException(
-                    "JDBC sink upsert with dialect postgres requires options.conflictColumns");
+    private static IllegalArgumentException unsupportedUpsertDialect(String dialect) {
+        return new IllegalArgumentException(
+                "JDBC sink upsert=true is supported for dialect postgres and mysql only (Phase 8); got: "
+                        + dialect);
+    }
+
+    private static String appendPostgresUpsert(
+            JdbcWriterVO writer,
+            String baseInsert,
+            List<String> targetColumns) {
+        List<String> upsertKeys = requireUpsertKeys(writer, targetColumns);
+        String conflict = String.join(", ", upsertKeys);
+        List<String> updateColumns = targetColumns.stream()
+                .filter(column -> !upsertKeys.contains(column))
+                .toList();
+        if (updateColumns.isEmpty()) {
+            return baseInsert + " on conflict (" + conflict + ") do nothing";
         }
-        return baseInsert + " on conflict (" + conflictColumns.trim() + ") do nothing";
+        String updates = updateColumns.stream()
+                .map(column -> column + " = excluded." + column)
+                .collect(Collectors.joining(", "));
+        return baseInsert + " on conflict (" + conflict + ") do update set " + updates;
+    }
+
+    /**
+     * Builds MySQL {@code INSERT ... ON DUPLICATE KEY UPDATE} SQL.
+     * Legacy {@code options.conflictColumns} is not honored for MySQL — use {@code upsertKeys}.
+     */
+    private static String appendMysqlUpsert(
+            JdbcWriterVO writer,
+            String table,
+            String columns,
+            String values,
+            List<String> targetColumns) {
+        List<String> upsertKeys = requireUpsertKeys(writer, targetColumns);
+        String baseInsert = "insert into " + table + " (" + columns + ") values (" + values + ")";
+        List<String> updateColumns = targetColumns.stream()
+                .filter(column -> !upsertKeys.contains(column))
+                .toList();
+        if (updateColumns.isEmpty()) {
+            return baseInsert;
+        }
+        String updates = updateColumns.stream()
+                .map(column -> column + " = values(" + column + ")")
+                .collect(Collectors.joining(", "));
+        return baseInsert + " on duplicate key update " + updates;
+    }
+
+    /**
+     * Resolves upsert key columns from {@code options.upsertKeys} or legacy {@code conflictColumns}.
+     *
+     * @param writer        JDBC writer configuration
+     * @param targetColumns known target column names
+     * @return non-empty upsert key list
+     */
+    private static List<String> requireUpsertKeys(JdbcWriterVO writer, List<String> targetColumns) {
+        List<String> upsertKeys = WriterOptionResolver.upsertKeysOption(writer);
+        String writerName = writer.getTarget() == null ? "jdbc" : writer.getTarget();
+        if (upsertKeys.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "JDBC sink writer '" + writerName + "' upsert=true requires non-empty options.upsertKeys; "
+                            + "known columns: " + targetColumns);
+        }
+        for (String key : upsertKeys) {
+            if (!targetColumns.contains(key)) {
+                throw new IllegalArgumentException(
+                        "JDBC sink writer '" + writerName + "' upsert key '" + key + "' is not a known column; "
+                                + "known columns: " + targetColumns);
+            }
+        }
+        return upsertKeys;
     }
 
     private static String resolveDialect(JdbcWriterVO writer) {

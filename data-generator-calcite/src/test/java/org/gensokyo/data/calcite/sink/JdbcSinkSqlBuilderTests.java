@@ -30,6 +30,18 @@ class JdbcSinkSqlBuilderTests {
     }
 
     @Test
+    void buildsPostgresUpsertWithUpsertKeysAndUpdateClause() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "postgres",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
+        Assertions.assertTrue(sql.contains("on conflict (id) do update set"));
+        Assertions.assertTrue(sql.contains("amount = excluded.amount"));
+    }
+
+    @Test
     void buildsPostgresUpsertWhenDialectAndConflictColumnsAreSet() {
         JdbcWriterVO writer = writer("orders_out");
         writer.setOptions(Map.of(
@@ -37,29 +49,57 @@ class JdbcSinkSqlBuilderTests {
                 "upsert", true,
                 "conflictColumns", "id"));
         String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
-        Assertions.assertEquals(
-                "insert into orders_out (id, amount) values (:id, :amount) on conflict (id) do nothing",
-                sql);
+        Assertions.assertTrue(sql.contains("on conflict (id) do update set"));
+        Assertions.assertTrue(sql.contains("amount = excluded.amount"));
     }
 
     @Test
-    void clickhouseUpsertUsesPlainInsert() {
+    void buildsMysqlUpsertWithUpsertKeys() {
         JdbcWriterVO writer = writer("orders_out");
-        writer.setOptions(Map.of("dialect", "clickhouse", "upsert", true));
+        writer.setOptions(Map.of(
+                "dialect", "mysql",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
         String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
-        Assertions.assertEquals(
-                "insert into orders_out (id, amount) values (:id, :amount)",
-                sql);
+        Assertions.assertTrue(sql.contains("on duplicate key update"));
+        Assertions.assertTrue(sql.contains("amount = values(amount)"));
     }
 
     @Test
-    void buildsMysqlInsertIgnoreWhenDialectIsMysql() {
+    void rejectsEmptyUpsertKeysWhenUpsertTrue() {
         JdbcWriterVO writer = writer("orders_out");
-        writer.setOptions(Map.of("dialect", "mysql", "upsert", true));
-        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
-        Assertions.assertEquals(
-                "insert ignore into orders_out (id, amount) values (:id, :amount)",
-                sql);
+        writer.setOptions(Map.of("dialect", "postgres", "upsert", true));
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount")));
+        Assertions.assertTrue(ex.getMessage().contains("upsertKeys"));
+        Assertions.assertTrue(ex.getMessage().contains("upsert"));
+    }
+
+    @Test
+    void clickhouseUpsertIsUnsupported() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "clickhouse",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount")));
+        Assertions.assertTrue(ex.getMessage().contains("clickhouse"));
+    }
+
+    @Test
+    void rejectsUnknownUpsertKeyColumn() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "mysql",
+                "upsert", true,
+                "upsertKeys", List.of("unknown_col")));
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount")));
+        Assertions.assertTrue(ex.getMessage().contains("unknown_col"));
     }
 
     private static JdbcWriterVO writer(String target) {

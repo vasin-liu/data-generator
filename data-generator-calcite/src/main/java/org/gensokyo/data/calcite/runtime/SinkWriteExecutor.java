@@ -7,6 +7,8 @@ package org.gensokyo.data.calcite.runtime;
 
 import org.gensokyo.data.calcite.RowSink;
 import org.gensokyo.data.calcite.sink.JdbcRowSinkAdapter;
+import org.gensokyo.data.calcite.sink.JdbcSinkWriteStats;
+import org.gensokyo.data.calcite.sink.StreamingFileRowSink;
 import org.gensokyo.data.calcite.sql.CalciteRowTransformer;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
@@ -15,8 +17,11 @@ import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Shared sink write orchestration: retry-aware JDBC writes and partial-success metrics.
@@ -27,6 +32,58 @@ import java.util.Locale;
 public final class SinkWriteExecutor {
 
     private SinkWriteExecutor() {
+    }
+
+    /**
+     * Per-pipeline sink session that reuses file sink adapters across chunk writes in CHUNKED/STREAMING runs.
+     */
+    public static final class SinkWriteSession {
+        private final boolean streamingFileSinks;
+        private final Map<String, RowSink> sinksByKey = new LinkedHashMap<>();
+
+        private SinkWriteSession(boolean streamingFileSinks) {
+            this.streamingFileSinks = streamingFileSinks;
+        }
+
+        /**
+         * Opens a sink session for the given execution policy.
+         *
+         * @param policy resolved execution policy
+         * @return session that caches sinks when mode is {@code CHUNKED} or {@code STREAMING}
+         */
+        public static SinkWriteSession open(EffectiveExecutionPolicy policy) {
+            String mode = policy.mode();
+            boolean streaming = "CHUNKED".equals(mode) || "STREAMING".equals(mode);
+            return new SinkWriteSession(streaming);
+        }
+
+        RowSink resolveSink(String sinkKey, Supplier<RowSink> factory) {
+            return sinksByKey.computeIfAbsent(sinkKey, key -> {
+                RowSink sink = factory.get();
+                if (streamingFileSinks && sink instanceof StreamingFileRowSink streamingSink) {
+                    streamingSink.enableStreaming();
+                }
+                return sink;
+            });
+        }
+
+        void closeAll() {
+            for (RowSink sink : sinksByKey.values()) {
+                sink.finish();
+            }
+            sinksByKey.clear();
+        }
+    }
+
+    /**
+     * Finalizes all sinks in the session (e.g. closes JSON ARRAY brackets).
+     *
+     * @param session sink session from {@link SinkWriteSession#open(EffectiveExecutionPolicy)}; may be {@code null}
+     */
+    public static void closeSinks(SinkWriteSession session) {
+        if (session != null) {
+            session.closeAll();
+        }
     }
 
     /**
@@ -46,6 +103,28 @@ public final class SinkWriteExecutor {
             CalciteRowTransformer.TransformResult result,
             RunMetrics metrics,
             int sinkBatchSize) {
+        writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize, null);
+    }
+
+    /**
+     * Writes transform output to all configured sinks, optionally reusing sink instances from a session.
+     *
+     * @param rowSinkFactory sink factory
+     * @param registry runtime registry (may be null when the factory ignores it)
+     * @param template template definition
+     * @param result transform output
+     * @param metrics run metrics collector (may be null)
+     * @param sinkBatchSize maximum rows per sink batch; non-positive values write all rows at once
+     * @param session optional per-run sink session for streaming file sinks
+     */
+    public static void writeSinks(
+            InMemoryPipeline.RowSinkFactory rowSinkFactory,
+            TemplateV2RuntimeRegistry registry,
+            TemplateV2VO template,
+            CalciteRowTransformer.TransformResult result,
+            RunMetrics metrics,
+            int sinkBatchSize,
+            SinkWriteSession session) {
         SinkExecutionPolicyVO policy = template.getSinkExecutionPolicy();
         SinkPolicyMode mode = sinkPolicyMode(policy);
         boolean parallelSinks = policy != null && Boolean.TRUE.equals(policy.getParallelSinks());
@@ -63,7 +142,8 @@ public final class SinkWriteExecutor {
                     sinkBatchSize,
                     mode,
                     rowCount,
-                    job));
+                    job,
+                    session));
             return;
         }
         for (SinkWriteJob job : jobs) {
@@ -77,7 +157,8 @@ public final class SinkWriteExecutor {
                     sinkBatchSize,
                     mode,
                     rowCount,
-                    job);
+                    job,
+                    session);
         }
     }
 
@@ -112,8 +193,14 @@ public final class SinkWriteExecutor {
             int sinkBatchSize,
             SinkPolicyMode mode,
             int rowCount,
-            SinkWriteJob job) {
-        RowSink rowSink = prepareSink(rowSinkFactory.create(registry, job.writer()), policy);
+            SinkWriteJob job,
+            SinkWriteSession session) {
+        JdbcSinkWriteStats jdbcWriteStats = null;
+        RowSink rowSink = resolveRowSink(rowSinkFactory, registry, policy, job, session);
+        if (rowSink instanceof JdbcRowSinkAdapter jdbcSink) {
+            jdbcWriteStats = new JdbcSinkWriteStats();
+            rowSink = jdbcSink.withWriteStats(jdbcWriteStats);
+        }
         try {
             writeRows(rowSink, result.schema(), result.rows(), sinkBatchSize);
             if (mode == SinkPolicyMode.CONTINUE_ON_ERROR && metrics != null) {
@@ -121,6 +208,11 @@ public final class SinkWriteExecutor {
             }
             if (metrics != null) {
                 synchronizedMetric(metricsLock, () -> metrics.addRowsWritten(rowCount));
+                if (jdbcWriteStats != null) {
+                    JdbcSinkWriteStats stats = jdbcWriteStats;
+                    synchronizedMetric(metricsLock, () ->
+                            metrics.recordSinkRowsUpserted(job.sinkKey(), stats.getRowsUpserted()));
+                }
             }
         } catch (RuntimeException ex) {
             if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
@@ -132,6 +224,19 @@ public final class SinkWriteExecutor {
                 throw sinkWriteFailure(job.sinkIndex(), job.writerIndex(), job.writer(), ex);
             }
         }
+    }
+
+    private static RowSink resolveRowSink(
+            InMemoryPipeline.RowSinkFactory rowSinkFactory,
+            TemplateV2RuntimeRegistry registry,
+            SinkExecutionPolicyVO policy,
+            SinkWriteJob job,
+            SinkWriteSession session) {
+        Supplier<RowSink> factory = () -> prepareSink(rowSinkFactory.create(registry, job.writer()), policy);
+        if (session != null) {
+            return session.resolveSink(job.sinkKey(), factory);
+        }
+        return factory.get();
     }
 
     private static void synchronizedMetric(Object metricsLock, Runnable action) {

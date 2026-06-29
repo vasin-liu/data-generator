@@ -208,6 +208,19 @@ public final class RunMetrics {
     }
 
     /**
+     * Records rows updated via upsert SQL for a sink writer.
+     *
+     * @param sinkKey sink metric key
+     * @param count number of upserted rows
+     */
+    public void recordSinkRowsUpserted(String sinkKey, long count) {
+        if (count <= 0) {
+            return;
+        }
+        sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsUpserted(count);
+    }
+
+    /**
      * Sets partitioned execution counters for operator run reports.
      *
      * @param configured number of configured partitions

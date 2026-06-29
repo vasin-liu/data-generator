@@ -1,17 +1,27 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
 package org.gensokyo.data.calcite.sink;
-
-import org.gensokyo.data.calcite.*;
-import org.gensokyo.data.calcite.codec.*;
 
 import org.gensokyo.data.model.v2.Row;
 import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Resolves writer {@code options} map entries for sink adapters and SQL builders.
+ *
+ * @author Gensokyo
+ * @since 2026-05-19
+ */
 public final class WriterOptionResolver {
     private static final PropertyPlaceholderHelper PLACEHOLDER_HELPER = new PropertyPlaceholderHelper("${", "}");
 
@@ -38,6 +48,40 @@ public final class WriterOptionResolver {
             return bool;
         }
         return Boolean.parseBoolean(value.toString());
+    }
+
+    /**
+     * Resolves upsert key columns from {@code options.upsertKeys} (YAML array).
+     * Falls back to legacy {@code options.conflictColumns} comma-string for PostgreSQL compatibility.
+     *
+     * @param writer JDBC or generic writer configuration
+     * @return upsert key column names, possibly empty when unset
+     */
+    public static List<String> upsertKeysOption(WriterVO writer) {
+        Object upsertKeys = option(writer, "upsertKeys");
+        if (upsertKeys instanceof List<?> list) {
+            List<String> keys = new ArrayList<>();
+            for (Object item : list) {
+                if (item != null && StringUtils.hasText(item.toString())) {
+                    keys.add(item.toString().trim());
+                }
+            }
+            if (!keys.isEmpty()) {
+                return List.copyOf(keys);
+            }
+        }
+        // Legacy PG conflictColumns comma-string — prefer upsertKeys for new templates.
+        Object conflictColumns = option(writer, "conflictColumns");
+        if (conflictColumns != null && StringUtils.hasText(conflictColumns.toString())) {
+            List<String> keys = new ArrayList<>();
+            for (String part : conflictColumns.toString().split(",")) {
+                if (StringUtils.hasText(part.trim())) {
+                    keys.add(part.trim());
+                }
+            }
+            return List.copyOf(keys);
+        }
+        return List.of();
     }
 
     public static Map<String, String> stringMapOption(WriterVO writer, String name, Row row) {

@@ -30,6 +30,7 @@ public class JdbcRowSinkAdapter implements RowSink {
     private final JdbcWriterVO writer;
     private final RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver;
     private final SinkExecutionPolicyVO retryPolicy;
+    private final JdbcSinkWriteStats writeStats;
 
     /**
      * Creates a JDBC sink without retry policy.
@@ -51,7 +52,7 @@ public class JdbcRowSinkAdapter implements RowSink {
     public JdbcRowSinkAdapter(NamedParameterJdbcTemplate jdbcTemplate,
                               JdbcWriterVO writer,
                               RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver) {
-        this(jdbcTemplate, writer, runtimeJdbcEndpointResolver, null);
+        this(jdbcTemplate, writer, runtimeJdbcEndpointResolver, null, null);
     }
 
     /**
@@ -66,10 +67,28 @@ public class JdbcRowSinkAdapter implements RowSink {
                               JdbcWriterVO writer,
                               RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver,
                               SinkExecutionPolicyVO retryPolicy) {
+        this(jdbcTemplate, writer, runtimeJdbcEndpointResolver, retryPolicy, null);
+    }
+
+    /**
+     * Creates a JDBC sink with optional retry policy and write stats collector.
+     *
+     * @param jdbcTemplate JDBC template for batch updates
+     * @param writer JDBC writer configuration
+     * @param runtimeJdbcEndpointResolver resolves datasource id at runtime
+     * @param retryPolicy retry policy for batch writes (may be null)
+     * @param writeStats optional upsert counter collector (may be null)
+     */
+    public JdbcRowSinkAdapter(NamedParameterJdbcTemplate jdbcTemplate,
+                              JdbcWriterVO writer,
+                              RuntimeJdbcEndpointResolver runtimeJdbcEndpointResolver,
+                              SinkExecutionPolicyVO retryPolicy,
+                              JdbcSinkWriteStats writeStats) {
         this.jdbcTemplate = jdbcTemplate;
         this.writer = writer;
         this.runtimeJdbcEndpointResolver = runtimeJdbcEndpointResolver;
         this.retryPolicy = retryPolicy;
+        this.writeStats = writeStats;
     }
 
     /**
@@ -79,7 +98,26 @@ public class JdbcRowSinkAdapter implements RowSink {
      * @return JDBC sink adapter with retry policy applied
      */
     public JdbcRowSinkAdapter withRetryPolicy(SinkExecutionPolicyVO retryPolicy) {
-        return new JdbcRowSinkAdapter(jdbcTemplate, writer, runtimeJdbcEndpointResolver, retryPolicy);
+        return new JdbcRowSinkAdapter(jdbcTemplate, writer, runtimeJdbcEndpointResolver, retryPolicy, writeStats);
+    }
+
+    /**
+     * Returns a copy of this adapter configured with the given write stats collector.
+     *
+     * @param writeStats upsert counter collector (may be null)
+     * @return JDBC sink adapter with write stats applied
+     */
+    public JdbcRowSinkAdapter withWriteStats(JdbcSinkWriteStats writeStats) {
+        return new JdbcRowSinkAdapter(jdbcTemplate, writer, runtimeJdbcEndpointResolver, retryPolicy, writeStats);
+    }
+
+    /**
+     * Returns cumulative upsert row counts collected during writes, or zero when no collector is configured.
+     *
+     * @return rows upserted in this adapter instance
+     */
+    public long getRowsUpserted() {
+        return writeStats == null ? 0L : writeStats.getRowsUpserted();
     }
 
     @Override
@@ -104,7 +142,7 @@ public class JdbcRowSinkAdapter implements RowSink {
                 // Retry each JDBC batch independently for transient failures.
                 SinkRetryExecutor.run(
                         retryPolicy,
-                        () -> JdbcBulkWriteExecutor.writeSlice(jdbcTemplate, writer, mappings, slice));
+                        () -> JdbcBulkWriteExecutor.writeSlice(jdbcTemplate, writer, mappings, slice, writeStats));
             }
         } finally {
             DynamicDataSourceContextHolder.clear();

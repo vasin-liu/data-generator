@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,12 +42,14 @@ final class JdbcBulkWriteExecutor {
      * @param writer       JDBC writer configuration
      * @param mappings     column mappings for the batch
      * @param rows         rows in this batch slice
+     * @param writeStats   optional collector for upsert counters (may be null)
      */
     static void writeSlice(
             NamedParameterJdbcTemplate jdbcTemplate,
             JdbcWriterVO writer,
             List<JdbcSinkColumnMappings.ColumnMapping> mappings,
-            List<Row> rows) {
+            List<Row> rows,
+            JdbcSinkWriteStats writeStats) {
         if (rows == null || rows.isEmpty()) {
             return;
         }
@@ -54,7 +57,7 @@ final class JdbcBulkWriteExecutor {
         switch (bulkMode) {
             case POSTGRES_COPY -> writePostgresCopy(jdbcTemplate, writer, mappings, rows);
             case CLICKHOUSE_INSERT -> writeClickHouseInsert(jdbcTemplate, writer, mappings, rows);
-            case JDBC_BATCH -> writeJdbcBatch(jdbcTemplate, writer, mappings, rows);
+            case JDBC_BATCH -> writeJdbcBatch(jdbcTemplate, writer, mappings, rows, writeStats);
         }
     }
 
@@ -62,13 +65,55 @@ final class JdbcBulkWriteExecutor {
             NamedParameterJdbcTemplate jdbcTemplate,
             JdbcWriterVO writer,
             List<JdbcSinkColumnMappings.ColumnMapping> mappings,
-            List<Row> rows) {
+            List<Row> rows,
+            JdbcSinkWriteStats writeStats) {
         List<String> targetColumns = mappings.stream().map(JdbcSinkColumnMappings.ColumnMapping::target).toList();
+        // Fail-fast upsert key validation before JDBC execute (D-14).
+        JdbcSinkSqlBuilder.validateUpsertKeys(writer, targetColumns);
         String sql = JdbcSinkSqlBuilder.buildSql(writer, targetColumns);
         Map<String, ?>[] batch = rows.stream()
                 .map(row -> JdbcSinkColumnMappings.toSqlParams(row, mappings))
                 .toArray(Map[]::new);
-        jdbcTemplate.batchUpdate(sql, batch);
+        int[] updateCounts = jdbcTemplate.batchUpdate(sql, batch);
+        if (writeStats != null && WriterOptionResolver.booleanOption(writer, "upsert")) {
+            String dialect = resolveDialect(writer);
+            long upserted = countUpsertedRows(updateCounts, dialect);
+            writeStats.addRowsUpserted(upserted);
+        }
+    }
+
+    /**
+     * Interprets JDBC batch update counts for upsert metrics.
+     * <p>
+     * MySQL returns {@code 2} when a duplicate-key row was updated and {@code 1} for a fresh insert.
+     * PostgreSQL returns {@code 1} for both insert and update on {@code ON CONFLICT DO UPDATE}.
+     * {@link Statement#SUCCESS_NO_INFO} is treated as one successful row when drivers omit exact counts.
+     * </p>
+     *
+     * @param updateCounts per-row batch update counts from the driver
+     * @param dialect      normalized JDBC sink dialect
+     * @return number of rows counted as upsert updates
+     */
+    static long countUpsertedRows(int[] updateCounts, String dialect) {
+        long upserted = 0;
+        for (int count : updateCounts) {
+            upserted += upsertCountAsRows(count, dialect);
+        }
+        return upserted;
+    }
+
+    private static int upsertCountAsRows(int updateCount, String dialect) {
+        if (updateCount == Statement.SUCCESS_NO_INFO) {
+            return 1;
+        }
+        if (updateCount < 0) {
+            return 0;
+        }
+        if ("mysql".equals(dialect)) {
+            return updateCount == 2 ? 1 : 0;
+        }
+        // PostgreSQL upsert path: count successful row operations (insert or update).
+        return updateCount > 0 ? 1 : 0;
     }
 
     private static void writePostgresCopy(
@@ -129,6 +174,14 @@ final class JdbcBulkWriteExecutor {
                 .collect(Collectors.joining(", "));
         String sql = "INSERT INTO " + table + " (" + columns + ") VALUES " + valuesClause;
         jdbcTemplate.getJdbcTemplate().update(sql);
+    }
+
+    private static String resolveDialect(JdbcWriterVO writer) {
+        String dialect = WriterOptionResolver.stringOption(writer, "dialect", null);
+        if (!StringUtils.hasText(dialect)) {
+            return "generic";
+        }
+        return dialect.trim().toLowerCase(Locale.ROOT);
     }
 
     private static String buildCsvPayload(List<Row> rows, List<JdbcSinkColumnMappings.ColumnMapping> mappings) {
