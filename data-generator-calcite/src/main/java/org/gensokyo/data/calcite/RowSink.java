@@ -26,4 +26,12 @@ public interface RowSink {
             write(schema, rows.subList(i, Math.min(i + batchSize, rows.size())));
         }
     }
+
+    /**
+     * Finalizes a streaming file sink after the last chunk (e.g. closes a JSON array bracket).
+     * Default implementation is a no-op for one-shot and JDBC sinks.
+     */
+    default void finish() {
+        // Non-streaming sinks require no finalize step.
+    }
 }

@@ -89,37 +89,42 @@ public final class StreamingPipeline {
         RowSchema lastSchema = null;
         int chunkSize = resolveSourceChunkSize(policy, sourceVo);
         int sinkBatchSize = policy.sinkBatchSize();
+        SinkWriteExecutor.SinkWriteSession sinkSession = SinkWriteExecutor.SinkWriteSession.open(policy);
 
-        while (chunked.hasNextChunk()) {
-            var chunk = chunked.nextChunk(chunkSize);
-            if (chunk.isEmpty()) {
-                continue;
+        try {
+            while (chunked.hasNextChunk()) {
+                var chunk = chunked.nextChunk(chunkSize);
+                if (chunk.isEmpty()) {
+                    continue;
+                }
+                metrics.incrementChunks();
+                metrics.addRead(sourceName, chunk.size());
+                if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
+                    throw new ScaleLimitExceededException(
+                            "maxRowsInMemory",
+                            policy.maxRowsInMemory(),
+                            metrics.getTotalRowsRead(),
+                            "SOURCE_READ",
+                            sourceName);
+                }
+                ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
+
+                RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
+                CalciteExecutionContext context = new CalciteExecutionContext()
+                        .addTable(sourceName, chunkSchema, chunk);
+                CalciteRowTransformer.TransformResult current =
+                        registry.applyTransform(transformer, context);
+                lastSchema = current.schema();
+
+                // Peak tracks the largest transformed chunk held before sink flush completes.
+                metrics.recordPeakRowsInMemory(current.rows().size());
+                writeSinks(registry, template, current, metrics, sinkBatchSize, sinkSession);
             }
-            metrics.incrementChunks();
-            metrics.addRead(sourceName, chunk.size());
-            if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
-                throw new ScaleLimitExceededException(
-                        "maxRowsInMemory",
-                        policy.maxRowsInMemory(),
-                        metrics.getTotalRowsRead(),
-                        "SOURCE_READ",
-                        sourceName);
-            }
-            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
-            RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
-            CalciteExecutionContext context = new CalciteExecutionContext()
-                    .addTable(sourceName, chunkSchema, chunk);
-            CalciteRowTransformer.TransformResult current =
-                    registry.applyTransform(transformer, context);
-            lastSchema = current.schema();
-
-            // Peak tracks the largest transformed chunk held before sink flush completes.
-            metrics.recordPeakRowsInMemory(current.rows().size());
-            writeSinks(registry, template, current, metrics, sinkBatchSize);
+            return new TemplateV2RunResult(lastSchema, List.of(), metrics);
+        } finally {
+            SinkWriteExecutor.closeSinks(sinkSession);
         }
-
-        return new TemplateV2RunResult(lastSchema, List.of(), metrics);
     }
 
     private static void validateV1Scope(TemplateV2VO template) {
@@ -145,8 +150,9 @@ public final class StreamingPipeline {
             TemplateV2VO template,
             CalciteRowTransformer.TransformResult result,
             RunMetrics metrics,
-            int sinkBatchSize) {
-        SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize);
+            int sinkBatchSize,
+            SinkWriteExecutor.SinkWriteSession session) {
+        SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize, session);
     }
 
     private static int resolveSourceChunkSize(EffectiveExecutionPolicy policy, SourceVO sourceVo) {

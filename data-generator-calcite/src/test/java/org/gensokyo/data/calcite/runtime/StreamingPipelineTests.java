@@ -8,7 +8,9 @@ package org.gensokyo.data.calcite.runtime;
 import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.parser.DefaultCsvParser;
 import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
+import org.gensokyo.data.calcite.sink.CsvSinkFactory;
 import org.gensokyo.data.calcite.sink.JdbcSinkFactory;
+import org.gensokyo.data.calcite.sink.JsonSinkFactory;
 import org.gensokyo.data.calcite.source.CsvRowSource;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.QuerySourceFactory;
@@ -21,6 +23,7 @@ import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
+import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,6 +48,8 @@ class StreamingPipelineTests {
 
     private static final int ROW_COUNT = 500;
     private static final int CSV_ROW_COUNT = 2_500;
+    private static final int CSV_TO_SINK_ROW_COUNT = 3_000;
+    private static final int CSV_TO_SINK_CHUNK_SIZE = 500;
     private static final int DEFAULT_FILE_CHUNK_SIZE = EffectiveExecutionPolicy.DEFAULT_FILE_SOURCE_CHUNK_SIZE;
 
     @Test
@@ -82,6 +87,71 @@ class StreamingPipelineTests {
         Assertions.assertTrue(result.getMetrics().getChunksProcessed() > 1);
         int expectedChunks = (CSV_ROW_COUNT + DEFAULT_FILE_CHUNK_SIZE - 1) / DEFAULT_FILE_CHUNK_SIZE;
         Assertions.assertEquals(expectedChunks, result.getMetrics().getChunksProcessed());
+    }
+
+    @Test
+    void streamsCsvSourceToCsvSinkInBatches(@TempDir Path tempDir) throws Exception {
+        Path inputCsv = writeCsvFixture(tempDir, CSV_TO_SINK_ROW_COUNT);
+        Path outputCsv = tempDir.resolve("out.csv");
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(inputCsv.toString());
+        source.setHeader(true);
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+        executionPolicy.setSourceChunkSize(CSV_TO_SINK_CHUNK_SIZE);
+        executionPolicy.setSinkBatchSize(CSV_TO_SINK_CHUNK_SIZE);
+        executionPolicy.setMaxRowsInMemory(CSV_TO_SINK_ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-csv-to-csv");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(passthroughCsvTransform()));
+        template.setSinks(List.of(csvSink(outputCsv)));
+
+        TemplateV2RunResult result = new TemplateV2Runner(csvToFileSinkRegistry()).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals("STREAMING", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(CSV_TO_SINK_ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(CSV_TO_SINK_ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertTrue(result.getMetrics().getChunksProcessed() >= 6);
+
+        List<String> lines = Files.readAllLines(outputCsv, StandardCharsets.UTF_8);
+        Assertions.assertEquals(CSV_TO_SINK_ROW_COUNT + 1, lines.size());
+    }
+
+    @Test
+    void streamsCsvSourceToNdjsonSinkInBatches(@TempDir Path tempDir) throws Exception {
+        Path inputCsv = writeCsvFixture(tempDir, CSV_TO_SINK_ROW_COUNT);
+        Path outputJson = tempDir.resolve("out.ndjson");
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(inputCsv.toString());
+        source.setHeader(true);
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+        executionPolicy.setSourceChunkSize(CSV_TO_SINK_CHUNK_SIZE);
+        executionPolicy.setSinkBatchSize(CSV_TO_SINK_CHUNK_SIZE);
+        executionPolicy.setMaxRowsInMemory(CSV_TO_SINK_ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-csv-to-ndjson");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(passthroughCsvTransform()));
+        template.setSinks(List.of(ndjsonSink(outputJson)));
+
+        TemplateV2RunResult result = new TemplateV2Runner(csvToFileSinkRegistry()).run(template);
+
+        Assertions.assertEquals(CSV_TO_SINK_ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertTrue(result.getMetrics().getChunksProcessed() >= 6);
+
+        List<String> lines = Files.readAllLines(outputJson, StandardCharsets.UTF_8);
+        Assertions.assertEquals(CSV_TO_SINK_ROW_COUNT, lines.size());
     }
 
     @Test
@@ -275,6 +345,32 @@ class StreamingPipelineTests {
                 List.of(new CsvSourceFactory()),
                 List.of(new SqlTransformFactory()),
                 List.of(new ConsoleSinkFactory()));
+    }
+
+    private static TemplateV2RuntimeRegistry csvToFileSinkRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new CsvSinkFactory(), new JsonSinkFactory()));
+    }
+
+    private static WriteStageVO csvSink(Path outputPath) {
+        WriterVO writer = new WriterVO();
+        writer.setType("CSV");
+        writer.setTarget(outputPath.toString());
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+        return sink;
+    }
+
+    private static WriteStageVO ndjsonSink(Path outputPath) {
+        WriterVO writer = new WriterVO();
+        writer.setType("JSON");
+        writer.setTarget(outputPath.toString());
+        writer.setOptions(Map.of("mode", "ndjson"));
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+        return sink;
     }
 
     private static Path writeCsvFixture(Path tempDir, int rowCount) throws Exception {

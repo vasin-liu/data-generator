@@ -110,34 +110,39 @@ public final class ChunkedPipeline {
         RowSchema lastSchema = null;
         int chunkSize = resolveSourceChunkSize(policy, sourceVo);
         int sinkBatchSize = policy.sinkBatchSize();
+        SinkWriteExecutor.SinkWriteSession sinkSession = SinkWriteExecutor.SinkWriteSession.open(policy);
 
-        while (chunked.hasNextChunk()) {
-            var chunk = chunked.nextChunk(chunkSize);
-            if (chunk.isEmpty()) {
-                continue;
-            }
-            metrics.incrementChunks();
-            metrics.addRead(sourceName, chunk.size());
-            if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
-                throw new ScaleLimitExceededException(
-                        "maxRowsInMemory",
-                        policy.maxRowsInMemory(),
-                        metrics.getTotalRowsRead(),
-                        "SOURCE_READ",
-                        sourceName);
-            }
-            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
+        try {
+            while (chunked.hasNextChunk()) {
+                var chunk = chunked.nextChunk(chunkSize);
+                if (chunk.isEmpty()) {
+                    continue;
+                }
+                metrics.incrementChunks();
+                metrics.addRead(sourceName, chunk.size());
+                if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
+                    throw new ScaleLimitExceededException(
+                            "maxRowsInMemory",
+                            policy.maxRowsInMemory(),
+                            metrics.getTotalRowsRead(),
+                            "SOURCE_READ",
+                            sourceName);
+                }
+                ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
-            RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
-            CalciteExecutionContext context = new CalciteExecutionContext()
-                    .addTable(sourceName, chunkSchema, chunk);
-            CalciteRowTransformer.TransformResult current =
-                    registry.applyTransform(transformer, context);
-            lastSchema = current.schema();
-            writeSinks(registry, template, current, metrics, sinkBatchSize);
+                RowSchema chunkSchema = chunked.schema() != null ? chunked.schema() : rowSource.schema();
+                CalciteExecutionContext context = new CalciteExecutionContext()
+                        .addTable(sourceName, chunkSchema, chunk);
+                CalciteRowTransformer.TransformResult current =
+                        registry.applyTransform(transformer, context);
+                lastSchema = current.schema();
+                writeSinks(registry, template, current, metrics, sinkBatchSize, sinkSession);
+            }
+
+            return new TemplateV2RunResult(lastSchema, List.of(), metrics);
+        } finally {
+            SinkWriteExecutor.closeSinks(sinkSession);
         }
-
-        return new TemplateV2RunResult(lastSchema, List.of(), metrics);
     }
 
     private TemplateV2RunResult runBroadcastJoin(
@@ -178,30 +183,35 @@ public final class ChunkedPipeline {
         }
 
         RowSchema lastSchema = spec.outputSchema();
-        while (chunked.hasNextChunk()) {
-            var chunk = chunked.nextChunk(chunkSize);
-            if (chunk.isEmpty()) {
-                continue;
-            }
-            metrics.incrementChunks();
-            metrics.addRead(spec.factSourceName(), chunk.size());
-            if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
-                throw new ScaleLimitExceededException(
-                        "maxRowsInMemory",
-                        policy.maxRowsInMemory(),
-                        metrics.getTotalRowsRead(),
-                        "SOURCE_READ",
-                        spec.factSourceName());
-            }
-            ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
+        SinkWriteExecutor.SinkWriteSession sinkSession = SinkWriteExecutor.SinkWriteSession.open(policy);
+        try {
+            while (chunked.hasNextChunk()) {
+                var chunk = chunked.nextChunk(chunkSize);
+                if (chunk.isEmpty()) {
+                    continue;
+                }
+                metrics.incrementChunks();
+                metrics.addRead(spec.factSourceName(), chunk.size());
+                if (metrics.getTotalRowsRead() > policy.maxRowsInMemory() && policy.failOnLimitExceeded()) {
+                    throw new ScaleLimitExceededException(
+                            "maxRowsInMemory",
+                            policy.maxRowsInMemory(),
+                            metrics.getTotalRowsRead(),
+                            "SOURCE_READ",
+                            spec.factSourceName());
+                }
+                ExecutionGuard.checkMaxTotalRows(template, policy, metrics);
 
-            CalciteRowTransformer.TransformResult joined =
-                    BroadcastJoinExecutor.join(chunk, snapshot, spec);
-            lastSchema = joined.schema();
-            writeSinks(registry, template, joined, metrics, sinkBatchSize);
+                CalciteRowTransformer.TransformResult joined =
+                        BroadcastJoinExecutor.join(chunk, snapshot, spec);
+                lastSchema = joined.schema();
+                writeSinks(registry, template, joined, metrics, sinkBatchSize, sinkSession);
+            }
+
+            return new TemplateV2RunResult(lastSchema, List.of(), metrics);
+        } finally {
+            SinkWriteExecutor.closeSinks(sinkSession);
         }
-
-        return new TemplateV2RunResult(lastSchema, List.of(), metrics);
     }
 
     private void writeSinks(
@@ -209,8 +219,9 @@ public final class ChunkedPipeline {
             TemplateV2VO template,
             CalciteRowTransformer.TransformResult result,
             RunMetrics metrics,
-            int sinkBatchSize) {
-        SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize);
+            int sinkBatchSize,
+            SinkWriteExecutor.SinkWriteSession session) {
+        SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize, session);
     }
 
     private static int resolveSourceChunkSize(EffectiveExecutionPolicy policy, SourceVO sourceVo) {
