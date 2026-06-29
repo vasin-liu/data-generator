@@ -34,7 +34,14 @@ export function ExecutionStep({ draft, readOnly, onChange }: Props) {
         message={t('execution.intro.title')}
         description={t('execution.intro.body')}
       />
-      <Form.Item label={<FieldHelp label={t('execution.mode')} help={t('execution.mode.help')} />}>
+      <Form.Item
+        label={<FieldHelp label={t('execution.mode')} help={t('execution.mode.help')} />}
+        extra={
+          policy.mode
+            ? t(`execution.mode.hint.${policy.mode}` as 'execution.mode.hint.IN_MEMORY')
+            : t('execution.mode.hint.default')
+        }
+      >
         <Select
           disabled={readOnly}
           allowClear

@@ -160,15 +160,23 @@ export function ReviewPanel({
   });
 
   const publishMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const publishId = resolvedTemplateId;
       if (publishId == null) {
-        return Promise.reject(new Error(t('review.publish.needsSave')));
+        throw new Error(t('review.publish.needsSave'));
       }
-      return publishTemplate(publishId);
+      const validation = await validateDraft(draft, publishId);
+      if (!validation.valid) {
+        throw new Error(validation.errors.join('; '));
+      }
+      await publishTemplate(publishId);
+      return validation;
     },
-    onSuccess: () => {
+    onSuccess: (validation) => {
       message.success(t('review.publish.done'));
+      if (validation.warnings.length > 0) {
+        message.warning(validation.warnings.join(' · '));
+      }
       onPublished?.();
     },
     onError: (err: Error) => message.error(err.message),

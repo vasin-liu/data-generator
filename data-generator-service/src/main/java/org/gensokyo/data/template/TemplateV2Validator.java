@@ -3,17 +3,24 @@ package org.gensokyo.data.template;
 import org.gensokyo.data.calcite.runtime.EffectiveExecutionPolicy;
 import org.gensokyo.data.calcite.runtime.TransformDagExecutor;
 import org.gensokyo.data.calcite.runtime.TransformDagValidationException;
+import org.gensokyo.data.calcite.sink.WriterOptionResolver;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
+import org.gensokyo.data.constant.Const;
+import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.InlineRowsSourceVO;
+import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.JsTransformVO;
 import org.gensokyo.data.model.v2.MaterializationPolicyVO;
 import org.gensokyo.data.model.v2.SinkExecutionPolicyVO;
+import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.SpelColumnMapping;
 import org.gensokyo.data.model.v2.SpelTransformVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.vo.stage.WriteStageVO;
+import org.gensokyo.data.model.vo.writer.WriterVO;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.model.v2.TransformGraphVO;
@@ -29,13 +36,19 @@ import org.gensokyo.data.model.v2.workflow.WorkflowStepVO;
 import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,6 +60,23 @@ import java.util.regex.Pattern;
  * @since 2026-05-21
  */
 public final class TemplateV2Validator {
+
+    /** Documented OOM fixture bar for large CSV/JSON IN_MEMORY guidance (D-05, D-06). */
+    private static final long LARGE_FILE_BYTES = 10L * 1024L * 1024L;
+
+    /** Row-count bar when declared on CSV/JSON source (D-05, D-06). */
+    private static final long LARGE_ROW_COUNT = 100_000L;
+
+    private static final String OPAQUE_UPSERT_WARNING =
+            "upsertKeys will be validated at run against transform output schema";
+
+    private static final Pattern SQL_SELECT_FROM =
+            Pattern.compile("(?is)^\\s*select\\s+(.*?)\\s+from\\s+");
+    private static final Pattern SQL_AS_ALIAS =
+            Pattern.compile("(?is)\\s+as\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*$");
+    private static final Pattern SQL_IDENTIFIER =
+            Pattern.compile("([A-Za-z_][A-Za-z0-9_]*)\\s*$");
+
     private TemplateV2Validator() {
     }
 
@@ -77,6 +107,7 @@ public final class TemplateV2Validator {
 
         validateLinearTransformers(template);
         validateExecutionPolicy(template);
+        validateJdbcUpsertOptions(template);
 
         for (var entry : template.getSources().entrySet()) {
             if (StrKit.isBlank(entry.getKey())) {
@@ -156,6 +187,8 @@ public final class TemplateV2Validator {
             return warnings;
         }
         appendMaxTotalRowsWarnings(template, warnings);
+        appendLargeFileInMemoryWarnings(template, warnings);
+        appendOpaqueUpsertKeyWarnings(template, warnings);
         return warnings;
     }
 
@@ -387,6 +420,255 @@ public final class TemplateV2Validator {
     private static final Pattern SQL_JOIN = Pattern.compile("\\bJOIN\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern SQL_SELECT_DISTINCT =
             Pattern.compile("\\bSELECT\\s+DISTINCT\\b", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Validates JDBC sink upsert options: non-empty {@code upsertKeys} when {@code upsert: true} and,
+     * for simple SQL transforms, publish-time column cross-check (D-14).
+     *
+     * @param template normalized template
+     */
+    private static void validateJdbcUpsertOptions(TemplateV2VO template) {
+        if (CollectKit.isEmpty(template.getSinks())) {
+            return;
+        }
+        TransformVO primaryTransform = firstLinearTransform(template);
+        boolean opaqueTransform = isOpaqueTransformForUpsertCheck(primaryTransform);
+        List<String> sqlOutputColumns = null;
+        if (!opaqueTransform && primaryTransform instanceof SqlTransformVO sqlTransform) {
+            Optional<List<String>> columns = extractSimpleSqlOutputColumns(sqlTransform.getSql());
+            if (columns.isEmpty()) {
+                opaqueTransform = true;
+            }
+            else {
+                sqlOutputColumns = columns.get();
+            }
+        }
+        for (int sinkIndex = 0; sinkIndex < template.getSinks().size(); sinkIndex++) {
+            WriteStageVO sink = template.getSinks().get(sinkIndex);
+            if (sink == null || CollectKit.isEmpty(sink.getWriters())) {
+                continue;
+            }
+            for (int writerIndex = 0; writerIndex < sink.getWriters().size(); writerIndex++) {
+                WriterVO writer = sink.getWriters().get(writerIndex);
+                if (!isJdbcWriter(writer) || !WriterOptionResolver.booleanOption(writer, "upsert")) {
+                    continue;
+                }
+                String writerPath = "sink[" + sinkIndex + "].writer[" + writerIndex + "]";
+                List<String> upsertKeys = WriterOptionResolver.upsertKeysOption(writer);
+                if (upsertKeys.isEmpty()) {
+                    throw new IllegalArgumentException(writerPath
+                            + ": JDBC sink upsert=true requires non-empty options.upsertKeys");
+                }
+                for (String key : upsertKeys) {
+                    if (StrKit.isBlank(key)) {
+                        throw new IllegalArgumentException(writerPath
+                                + ": upsertKeys entries must be non-blank strings");
+                    }
+                }
+                // Publish-time column cross-check only when transform output columns are inferrable.
+                if (!opaqueTransform && sqlOutputColumns != null) {
+                    for (String key : upsertKeys) {
+                        if (!sqlOutputColumns.contains(key)) {
+                            throw new IllegalArgumentException(writerPath + ": upsertKey '" + key
+                                    + "' is not present in transform output columns " + sqlOutputColumns);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void appendLargeFileInMemoryWarnings(TemplateV2VO template, List<String> warnings) {
+        ExecutionPolicyVO policy = template.getExecutionPolicy();
+        if (policy == null || StrKit.isBlank(policy.getMode())) {
+            return;
+        }
+        String mode = policy.getMode().trim().toUpperCase(Locale.ROOT);
+        if (!"IN_MEMORY".equals(mode)) {
+            return;
+        }
+        for (Map.Entry<String, SourceVO> entry : template.getSources().entrySet()) {
+            String sourceName = entry.getKey();
+            SourceVO source = entry.getValue();
+            String reason = largeFileWarningReason(source);
+            if (reason == null) {
+                continue;
+            }
+            warnings.add("IN_MEMORY execution with large CSV/JSON source '" + sourceName + "' ("
+                    + reason + ") — consider explicit CHUNKED or STREAMING mode to avoid heap pressure");
+        }
+    }
+
+    private static void appendOpaqueUpsertKeyWarnings(TemplateV2VO template, List<String> warnings) {
+        if (CollectKit.isEmpty(template.getSinks())) {
+            return;
+        }
+        TransformVO primaryTransform = firstLinearTransform(template);
+        if (!isOpaqueTransformForUpsertCheck(primaryTransform)
+                && primaryTransform instanceof SqlTransformVO sqlTransform
+                && extractSimpleSqlOutputColumns(sqlTransform.getSql()).isPresent()) {
+            return;
+        }
+        for (WriteStageVO sink : template.getSinks()) {
+            if (sink == null || CollectKit.isEmpty(sink.getWriters())) {
+                continue;
+            }
+            for (WriterVO writer : sink.getWriters()) {
+                if (isJdbcWriter(writer)
+                        && WriterOptionResolver.booleanOption(writer, "upsert")
+                        && !WriterOptionResolver.upsertKeysOption(writer).isEmpty()) {
+                    if (!warnings.contains(OPAQUE_UPSERT_WARNING)) {
+                        warnings.add(OPAQUE_UPSERT_WARNING);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    private static String largeFileWarningReason(SourceVO source) {
+        if (source instanceof CsvSourceVO csvSource) {
+            return largeFileReason(csvSource.getPath(), csvSource.getMaxRows());
+        }
+        if (source instanceof JsonSourceVO jsonSource) {
+            return largeFileReason(jsonSource.getPath(), jsonSource.getMaxRows());
+        }
+        return null;
+    }
+
+    private static String largeFileReason(String path, Long maxRows) {
+        if (maxRows != null && maxRows >= LARGE_ROW_COUNT) {
+            return "maxRows >= " + LARGE_ROW_COUNT;
+        }
+        Long bytes = resolveFileSizeBytes(path);
+        if (bytes != null && bytes >= LARGE_FILE_BYTES) {
+            return "file size >= 10 MB";
+        }
+        return null;
+    }
+
+    private static Long resolveFileSizeBytes(String path) {
+        if (StrKit.isBlank(path)) {
+            return null;
+        }
+        try {
+            if (path.startsWith("classpath:")) {
+                ClassPathResource resource = new ClassPathResource(path.substring("classpath:".length()));
+                return resource.exists() ? resource.contentLength() : null;
+            }
+            Path filePath = Path.of(path);
+            if (Files.isRegularFile(filePath)) {
+                return Files.size(filePath);
+            }
+            ClassPathResource resource = new ClassPathResource(path);
+            return resource.exists() ? resource.contentLength() : null;
+        }
+        catch (IOException ignored) {
+            return null;
+        }
+    }
+
+    private static TransformVO firstLinearTransform(TemplateV2VO template) {
+        if (CollectKit.isEmpty(template.getTransformers())) {
+            return null;
+        }
+        return template.getTransformers().getFirst();
+    }
+
+    private static boolean isJdbcWriter(WriterVO writer) {
+        if (writer == null || StrKit.isBlank(writer.getType())) {
+            return false;
+        }
+        return Const.WriterType.JDBC.equalsIgnoreCase(writer.getType());
+    }
+
+    private static boolean isOpaqueTransformForUpsertCheck(TransformVO transformer) {
+        if (transformer == null) {
+            return true;
+        }
+        if (transformer instanceof JsTransformVO || transformer instanceof SpelTransformVO) {
+            return true;
+        }
+        if (transformer instanceof SqlTransformVO sqlTransform) {
+            String sql = sqlTransform.getSql();
+            if (StrKit.isBlank(sql)) {
+                return true;
+            }
+            if (SQL_JOIN.matcher(sql).find()) {
+                return true;
+            }
+            if (sql.toUpperCase(Locale.ROOT).contains("GROUP BY")) {
+                return true;
+            }
+            if (sql.toUpperCase(Locale.ROOT).contains("SELECT *")) {
+                return true;
+            }
+            // Subquery in FROM clause — output columns not statically inferrable.
+            return Pattern.compile("(?is)\\bfrom\\s*\\(\\s*select\\b").matcher(sql).find();
+        }
+        return true;
+    }
+
+    /**
+     * Best-effort extraction of output column names from a simple top-level {@code SELECT} list.
+     *
+     * @param sql SQL text
+     * @return column names when parseable; empty when opaque or unsupported
+     */
+    static Optional<List<String>> extractSimpleSqlOutputColumns(String sql) {
+        if (StrKit.isBlank(sql)) {
+            return Optional.empty();
+        }
+        Matcher matcher = SQL_SELECT_FROM.matcher(sql.trim());
+        if (!matcher.find()) {
+            return Optional.empty();
+        }
+        String selectList = matcher.group(1).trim();
+        if (selectList.contains("*")) {
+            return Optional.empty();
+        }
+        List<String> columns = new ArrayList<>();
+        for (String expression : splitSelectList(selectList)) {
+            String trimmed = expression.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            Matcher aliasMatcher = SQL_AS_ALIAS.matcher(trimmed);
+            if (aliasMatcher.find()) {
+                columns.add(aliasMatcher.group(1));
+                continue;
+            }
+            Matcher idMatcher = SQL_IDENTIFIER.matcher(trimmed);
+            if (idMatcher.find()) {
+                columns.add(idMatcher.group(1));
+            }
+            else {
+                return Optional.empty();
+            }
+        }
+        return columns.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(columns));
+    }
+
+    private static List<String> splitSelectList(String selectList) {
+        List<String> parts = new ArrayList<>();
+        int depth = 0;
+        int start = 0;
+        for (int i = 0; i < selectList.length(); i++) {
+            char ch = selectList.charAt(i);
+            if (ch == '(') {
+                depth++;
+            }
+            else if (ch == ')') {
+                depth = Math.max(0, depth - 1);
+            }
+            else if (ch == ',' && depth == 0) {
+                parts.add(selectList.substring(start, i));
+                start = i + 1;
+            }
+        }
+        parts.add(selectList.substring(start));
+        return parts;
+    }
 
     private static void validateExecutionPolicy(TemplateV2VO template) {
         ExecutionPolicyVO policy = template.getExecutionPolicy();

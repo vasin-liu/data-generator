@@ -234,7 +234,17 @@ export function SinksStep({ draft, readOnly, editorDataSources, onChange }: Prop
           </Form.Item>
         )}
         {index === selectedIndex && (
-          <Collapse
+          <>
+            {wType === 'jdbc' ? (
+              <Alert
+                type="info"
+                showIcon
+                style={{ marginBottom: 12 }}
+                message={t('sink.jdbcUpsert.hint.title')}
+                description={t('sink.jdbcUpsert.hint.body')}
+              />
+            ) : null}
+            <Collapse
             items={[
               {
                 key: 'options',
@@ -259,6 +269,7 @@ export function SinksStep({ draft, readOnly, editorDataSources, onChange }: Prop
               },
             ]}
           />
+          </>
         )}
       </Form>
     );
