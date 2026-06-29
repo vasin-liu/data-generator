@@ -126,8 +126,23 @@ export function JobDetailPage() {
     () => [
       { title: t('jobDetail.report.col.name'), dataIndex: 'name' },
       {
+        title: t('jobDetail.report.col.rowsRead'),
+        dataIndex: 'rowsRead',
+        render: (value: number | null | undefined) => value ?? '—',
+      },
+      {
         title: t('jobDetail.report.col.rowsOk'),
         dataIndex: 'rowsOk',
+        render: (value: number | null | undefined) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.rowsUpserted'),
+        dataIndex: 'rowsUpserted',
+        render: (value: number | null | undefined) => value ?? '—',
+      },
+      {
+        title: t('jobDetail.report.col.rowsSkipped'),
+        dataIndex: 'rowsSkipped',
         render: (value: number | null | undefined) => value ?? '—',
       },
       {

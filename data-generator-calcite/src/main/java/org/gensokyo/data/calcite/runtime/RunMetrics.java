@@ -187,6 +187,32 @@ public final class RunMetrics {
     }
 
     /**
+     * Records rows accepted into a sink writer batch.
+     *
+     * @param sinkKey sink metric key
+     * @param count number of rows passed to the sink in this increment
+     */
+    public void recordSinkRowsRead(String sinkKey, long count) {
+        if (count <= 0) {
+            return;
+        }
+        sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsRead(count);
+    }
+
+    /**
+     * Records rows intentionally skipped before write for a sink writer.
+     *
+     * @param sinkKey sink metric key
+     * @param count number of skipped rows
+     */
+    public void recordSinkRowsSkipped(String sinkKey, long count) {
+        if (count <= 0) {
+            return;
+        }
+        sinkMetrics.computeIfAbsent(sinkKey, ignored -> new SinkWriteMetric()).addRowsSkipped(count);
+    }
+
+    /**
      * Records successfully written rows for a sink writer under continue-on-error policy.
      *
      * @param sinkKey sink metric key

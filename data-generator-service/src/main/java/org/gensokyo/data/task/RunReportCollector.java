@@ -89,6 +89,31 @@ public class RunReportCollector {
         if (error == null) {
             return null;
         }
+        SinkFailureDetails sinkFailure = parseSinkFailure(error);
+        if (sinkFailure != null) {
+            String safeMessage = sinkFailure.actionableMessage().length() > 2000
+                    ? sinkFailure.actionableMessage().substring(0, 2000)
+                    : sinkFailure.actionableMessage();
+            StageMetricVO sinkMetric = new StageMetricVO(
+                    sinkFailure.sinkKey(),
+                    0L,
+                    null,
+                    safeMessage,
+                    0L,
+                    0L,
+                    0L,
+                    0L,
+                    0L);
+            return new RunReportVO(
+                    List.of(),
+                    List.of(),
+                    List.of(sinkMetric),
+                    null,
+                    durationMs,
+                    List.of(safeMessage),
+                    List.of(),
+                    List.of());
+        }
         // The runtime registry wraps factory failures as "... for type [<type>] and model [<model>]";
         // walk the cause chain to recover the operator type and the underlying root-cause message.
         String operatorType = null;
@@ -234,7 +259,10 @@ public class RunReportCollector {
                     null,
                     sinkMetric.getLastErrorSample(),
                     sinkMetric.getRowsOk(),
-                    sinkMetric.getRowsFailed()));
+                    sinkMetric.getRowsFailed(),
+                    sinkMetric.getRowsRead(),
+                    sinkMetric.getRowsUpserted(),
+                    sinkMetric.getRowsSkipped()));
         }
         if (!sinks.isEmpty()) {
             return sinks;
@@ -278,5 +306,64 @@ public class RunReportCollector {
         }
         samples.addAll(metrics.getWarnings());
         return samples;
+    }
+
+    private static SinkFailureDetails parseSinkFailure(Throwable error) {
+        for (Throwable current = error; current != null; current = current.getCause()) {
+            String message = current.getMessage();
+            if (message == null || !message.startsWith("Failed to execute Template V2 sink writer")) {
+                continue;
+            }
+            Integer sinkIndex = parseBracketedIndex(message, "sink index [");
+            Integer writerIndex = parseBracketedIndex(message, "writer index [");
+            String type = parseBracketedToken(message, "type [");
+            String target = parseBracketedToken(message, "target [");
+            String sinkKey = sinkIndex != null && writerIndex != null
+                    ? "sink[" + sinkIndex + "].writer[" + writerIndex + "]"
+                    : "sink";
+            String root = current.getCause() != null && current.getCause().getMessage() != null
+                    ? current.getCause().getMessage()
+                    : message;
+            String actionable = sinkKey
+                    + (type != null ? " (type=" + type : "")
+                    + (target != null ? (type != null ? ", target=" : " (target=") + target : "")
+                    + (type != null || target != null ? ")" : "")
+                    + ": " + root;
+            return new SinkFailureDetails(sinkKey, actionable);
+        }
+        return null;
+    }
+
+    private static Integer parseBracketedIndex(String message, String prefix) {
+        int start = message.indexOf(prefix);
+        if (start < 0) {
+            return null;
+        }
+        start += prefix.length();
+        int end = message.indexOf(']', start);
+        if (end <= start) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(message.substring(start, end).trim());
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    private static String parseBracketedToken(String message, String prefix) {
+        int start = message.indexOf(prefix);
+        if (start < 0) {
+            return null;
+        }
+        start += prefix.length();
+        int end = message.indexOf(']', start);
+        if (end <= start) {
+            return null;
+        }
+        return message.substring(start, end).trim();
+    }
+
+    private record SinkFailureDetails(String sinkKey, String actionableMessage) {
     }
 }

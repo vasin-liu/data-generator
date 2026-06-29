@@ -18,6 +18,7 @@ import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,7 +72,11 @@ final class JdbcBulkWriteExecutor {
         // Fail-fast upsert key validation before JDBC execute (D-14).
         JdbcSinkSqlBuilder.validateUpsertKeys(writer, targetColumns);
         String sql = JdbcSinkSqlBuilder.buildSql(writer, targetColumns);
-        Map<String, ?>[] batch = rows.stream()
+        List<Row> writableRows = filterWritableRows(writer, mappings, rows, writeStats);
+        if (writableRows.isEmpty()) {
+            return;
+        }
+        Map<String, ?>[] batch = writableRows.stream()
                 .map(row -> JdbcSinkColumnMappings.toSqlParams(row, mappings))
                 .toArray(Map[]::new);
         int[] updateCounts = jdbcTemplate.batchUpdate(sql, batch);
@@ -114,6 +119,61 @@ final class JdbcBulkWriteExecutor {
         }
         // PostgreSQL upsert path: count successful row operations (insert or update).
         return updateCount > 0 ? 1 : 0;
+    }
+
+    /**
+     * Filters rows with null upsert-key values when upsert mode is active.
+     * Skipped rows are counted separately from JDBC failures (D-16, W-03).
+     */
+    private static List<Row> filterWritableRows(
+            JdbcWriterVO writer,
+            List<JdbcSinkColumnMappings.ColumnMapping> mappings,
+            List<Row> rows,
+            JdbcSinkWriteStats writeStats) {
+        if (!WriterOptionResolver.booleanOption(writer, "upsert")) {
+            return rows;
+        }
+        List<String> upsertKeys = WriterOptionResolver.upsertKeysOption(writer);
+        if (upsertKeys.isEmpty()) {
+            return rows;
+        }
+        List<Row> writable = new ArrayList<>(rows.size());
+        long skipped = 0;
+        for (Row row : rows) {
+            if (hasNullUpsertKey(row, upsertKeys, mappings)) {
+                skipped++;
+            } else {
+                writable.add(row);
+            }
+        }
+        if (writeStats != null && skipped > 0) {
+            writeStats.addRowsSkipped(skipped);
+        }
+        return writable;
+    }
+
+    private static boolean hasNullUpsertKey(
+            Row row,
+            List<String> upsertKeys,
+            List<JdbcSinkColumnMappings.ColumnMapping> mappings) {
+        for (String upsertKey : upsertKeys) {
+            String sourceColumn = resolveSourceColumn(upsertKey, mappings);
+            if (row.get(sourceColumn) == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String resolveSourceColumn(
+            String upsertKey,
+            List<JdbcSinkColumnMappings.ColumnMapping> mappings) {
+        for (JdbcSinkColumnMappings.ColumnMapping mapping : mappings) {
+            if (upsertKey.equalsIgnoreCase(mapping.target()) || upsertKey.equalsIgnoreCase(mapping.source())) {
+                return mapping.source();
+            }
+        }
+        return upsertKey;
     }
 
     private static void writePostgresCopy(

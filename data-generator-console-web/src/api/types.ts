@@ -46,6 +46,9 @@ export interface StageMetric {
   errorSample: string | null;
   rowsOk?: number | null;
   rowsFailed?: number | null;
+  rowsRead?: number | null;
+  rowsUpserted?: number | null;
+  rowsSkipped?: number | null;
 }
 
 /** Mirrors {@code AiCallMetricVO}. */

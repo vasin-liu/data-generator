@@ -120,6 +120,33 @@ class RunReportCollectorTests {
     }
 
     /**
+     * Extended sink counters (rowsRead, rowsUpserted, rowsSkipped) map into the run report (RW-04, D-16).
+     */
+    @Test
+    void exposesExtendedSinkMetrics() {
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("upsert-report");
+
+        RunMetrics metrics = new RunMetrics("CHUNKED");
+        metrics.recordSinkRowsRead("sink[0].writer[0]", 10L);
+        metrics.recordSinkRowsOk("sink[0].writer[0]", 9L);
+        metrics.recordSinkRowsUpserted("sink[0].writer[0]", 3L);
+        metrics.recordSinkRowsSkipped("sink[0].writer[0]", 1L);
+        TemplateV2RunResult result = new TemplateV2RunResult(null, List.of(), metrics);
+
+        RunReportVO report = collector.collect(template, result, 20L);
+        assertThat(report).isNotNull();
+        assertThat(report.sinks()).hasSize(1);
+
+        StageMetricVO sink = report.sinks().getFirst();
+        assertThat(sink.name()).isEqualTo("sink[0].writer[0]");
+        assertThat(sink.rowsRead()).isEqualTo(10L);
+        assertThat(sink.rowsUpserted()).isEqualTo(3L);
+        assertThat(sink.rowsSkipped()).isEqualTo(1L);
+        assertThat(sink.rowsOk()).isEqualTo(9L);
+    }
+
+    /**
      * Remote AI call diagnostics are surfaced in the structured run report.
      */
     @Test

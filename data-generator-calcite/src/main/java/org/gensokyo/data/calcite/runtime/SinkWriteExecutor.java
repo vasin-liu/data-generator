@@ -203,6 +203,9 @@ public final class SinkWriteExecutor {
         }
         try {
             writeRows(rowSink, result.schema(), result.rows(), sinkBatchSize);
+            if (metrics != null) {
+                synchronizedMetric(metricsLock, () -> metrics.recordSinkRowsRead(job.sinkKey(), rowCount));
+            }
             if (mode == SinkPolicyMode.CONTINUE_ON_ERROR && metrics != null) {
                 synchronizedMetric(metricsLock, () -> metrics.recordSinkRowsOk(job.sinkKey(), rowCount));
             }
@@ -210,15 +213,20 @@ public final class SinkWriteExecutor {
                 synchronizedMetric(metricsLock, () -> metrics.addRowsWritten(rowCount));
                 if (jdbcWriteStats != null) {
                     JdbcSinkWriteStats stats = jdbcWriteStats;
-                    synchronizedMetric(metricsLock, () ->
-                            metrics.recordSinkRowsUpserted(job.sinkKey(), stats.getRowsUpserted()));
+                    synchronizedMetric(metricsLock, () -> {
+                        metrics.recordSinkRowsUpserted(job.sinkKey(), stats.getRowsUpserted());
+                        metrics.recordSinkRowsSkipped(job.sinkKey(), stats.getRowsSkipped());
+                    });
                 }
             }
         } catch (RuntimeException ex) {
             if (mode == SinkPolicyMode.CONTINUE_ON_ERROR) {
                 if (metrics != null) {
                     synchronizedMetric(metricsLock, () ->
-                            metrics.recordSinkRowsFailed(job.sinkKey(), rowCount, errorMessage(ex)));
+                            metrics.recordSinkRowsFailed(
+                                    job.sinkKey(),
+                                    rowCount,
+                                    actionableSinkError(job, ex)));
                 }
             } else {
                 throw sinkWriteFailure(job.sinkIndex(), job.writerIndex(), job.writer(), ex);
@@ -278,6 +286,14 @@ public final class SinkWriteExecutor {
             return message;
         }
         return ex.getClass().getName();
+    }
+
+    private static String actionableSinkError(SinkWriteJob job, RuntimeException ex) {
+        String root = errorMessage(ex);
+        return job.sinkKey()
+                + " (type=" + job.writer().getType()
+                + ", target=" + job.writer().getTarget()
+                + "): " + root;
     }
 
     private static SinkPolicyMode sinkPolicyMode(SinkExecutionPolicyVO policy) {

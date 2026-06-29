@@ -80,6 +80,30 @@ class RunReportCollectorFailureTests {
     }
 
     @Test
+    void collectFailureSurfacesActionableSinkErrorWithSinkKey() {
+        IllegalStateException runtime = new IllegalStateException(
+                "Failed to execute Template V2 sink writer"
+                        + " at sink index [0]"
+                        + ", writer index [0]"
+                        + ", type [jdbc]"
+                        + ", model [org.gensokyo.data.model.vo.writer.JdbcWriterVO]"
+                        + ", target [gf_ledger_export]",
+                new RuntimeException("duplicate key value violates unique constraint"));
+
+        RunReportVO report = collector.collectFailure(new TemplateV2VO(), runtime, 8L);
+
+        assertThat(report).isNotNull();
+        assertThat(report.sinks()).hasSize(1);
+        assertThat(report.sinks().getFirst().name()).isEqualTo("sink[0].writer[0]");
+        assertThat(report.sinks().getFirst().errorSample())
+                .contains("sink[0].writer[0]")
+                .contains("type=jdbc")
+                .contains("target=gf_ledger_export")
+                .contains("duplicate key");
+        assertThat(report.errorSamples().getFirst()).contains("sink[0].writer[0]");
+    }
+
+    @Test
     void collectFailureMessageCarriesNoRawPiiValue() {
         MaskTransformVO mask = new MaskTransformVO();
         mask.setType("mask");

@@ -14,6 +14,7 @@ package org.gensokyo.data.calcite.sink;
 public final class JdbcSinkWriteStats {
 
     private long rowsUpserted;
+    private long rowsSkipped;
 
     /**
      * Rows counted as upsert updates during this sink write job.
@@ -25,11 +26,29 @@ public final class JdbcSinkWriteStats {
     }
 
     /**
+     * Rows intentionally skipped before JDBC execute (null upsert key, etc.).
+     *
+     * @return cumulative skipped row count
+     */
+    public long getRowsSkipped() {
+        return rowsSkipped;
+    }
+
+    /**
      * Adds upsert row counts from one batch slice.
      *
      * @param count rows upserted in the slice
      */
     void addRowsUpserted(long count) {
         rowsUpserted += count;
+    }
+
+    /**
+     * Adds skipped row counts from one batch slice.
+     *
+     * @param count rows skipped in the slice
+     */
+    void addRowsSkipped(long count) {
+        rowsSkipped += count;
     }
 }
