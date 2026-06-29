@@ -12,7 +12,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 
 - [x] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
 - [ ] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
-- [ ] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
+- [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [ ] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06)
 - [ ] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
 
@@ -131,7 +131,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - `08-11` — Playwright E2E RW streaming & upsert scenarios (RW-01..RW-04)
 - `08-12` — UAT verify script, operator docs & ROADMAP update (RW-01..RW-04)
 
-**Verification**: `.\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright` (Maven IT slice); full UAT adds Podman Playwright + playwright-cli snapshots.
+**Verification**: `.\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright` (Maven IT slice); full UAT adds Podman Playwright (`npm run e2e:phase8-rw-streaming-upsert`).
 
 ### Phase 9: JDBC Dialect Expansion
 

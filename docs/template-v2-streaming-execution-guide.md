@@ -6,6 +6,7 @@ This guide explains when to use `executionPolicy.mode: STREAMING` for **single J
 
 Companion docs:
 
+- `docs/template-v2-streaming-csv-json-guide.md` — large CSV/JSON `CHUNKED` / `STREAMING` (Phase 8)
 - `docs/template-v2-jdbc-chunked-execution-guide.md`
 - `docs/template-v2-execution-policy-model-proposal.md`
 

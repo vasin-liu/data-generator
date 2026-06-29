@@ -83,6 +83,9 @@ Focused builds (examples from internal upgrade docs):
 .\scripts\verify-phase7-uat-datasource-governance.ps1 -SkipPlaywright
 .\scripts\verify-phase7-uat-hot-reload.ps1 -SkipPlaywright
 
+# Phase 8 RW streaming CSV/JSON + JDBC upsert UAT (Maven IT slice + optional Podman Playwright)
+.\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
