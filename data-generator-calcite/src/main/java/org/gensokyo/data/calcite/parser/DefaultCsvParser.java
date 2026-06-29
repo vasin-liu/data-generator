@@ -7,15 +7,46 @@ import org.gensokyo.data.model.v2.CsvSourceVO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * UTF-8 CSV parser with optional BOM strip on the first line (D-09).
+ * <p>
+ * Only UTF-8 is supported for chunked streaming reads; other encodings are out of scope for Phase 8.
+ */
 public class DefaultCsvParser implements CsvParser {
+
+    /**
+     * Removes a leading UTF-8 BOM ({@code U+FEFF}) when present.
+     *
+     * @param line raw line text
+     * @return line without BOM prefix
+     */
+    public static String stripUtf8Bom(String line) {
+        if (line != null && !line.isEmpty() && line.charAt(0) == '\uFEFF') {
+            return line.substring(1);
+        }
+        return line;
+    }
+
     @Override
     public List<List<String>> parse(CsvSourceVO source, List<String> lines) {
-        char delimiter = delimiter(source);
         List<List<String>> records = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
-            records.add(parseLine(lines.get(i), delimiter, i + 1, source));
+            String line = i == 0 ? stripUtf8Bom(lines.get(i)) : lines.get(i);
+            records.add(parseLine(source, line, i + 1));
         }
         return records;
+    }
+
+    /**
+     * Parses a single CSV line without reading the whole file into memory.
+     *
+     * @param source     CSV source configuration (delimiter, path for errors)
+     * @param line       raw line text (caller should strip BOM on first line)
+     * @param lineNumber 1-based line number for error messages
+     * @return parsed field values
+     */
+    public List<String> parseLine(CsvSourceVO source, String line, int lineNumber) {
+        return parseLine(line, delimiter(source), lineNumber, source);
     }
 
     private char delimiter(CsvSourceVO source) {
