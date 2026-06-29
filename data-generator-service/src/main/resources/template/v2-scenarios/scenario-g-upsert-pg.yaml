@@ -1,0 +1,40 @@
+# definitionKind: V2
+# scenarioId: GF-G
+# catalogRef: RW-03 — CHUNKED JDBC upsert (PostgreSQL dialect, H2 MODE=PostgreSQL in IT)
+name: scenario-g-upsert-pg
+executionPolicy:
+  mode: CHUNKED
+  sourceChunkSize: 40
+  sinkBatchSize: 40
+  maxTotalRows: 40
+  maxRowsInMemory: 100
+sources:
+  orders:
+    type: query
+    dataSource:
+      name: gf-g-upsert-pg-source
+      type: jdbc
+      url: jdbc:h2:mem:gf_g_upsert_pg_src;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+      username: sa
+      password: ""
+      driverClassName: org.h2.Driver
+    sql: SELECT id, name FROM gf_upsert_source ORDER BY id
+transform:
+  type: sql
+  sql: SELECT id, name FROM orders
+sink:
+  writers:
+    - type: jdbc
+      dataSource:
+        name: gf-g-upsert-pg-target
+        type: jdbc
+        url: jdbc:h2:mem:gf_g_upsert_pg_tgt;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+        username: sa
+        password: ""
+        driverClassName: org.h2.Driver
+      target: gf_upsert_target
+      options:
+        dialect: postgres
+        upsert: true
+        upsertKeys:
+          - id

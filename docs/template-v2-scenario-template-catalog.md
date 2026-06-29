@@ -270,6 +270,12 @@ loads each YAML from the classpath, runs `TemplateV2Validator.validate`, and exe
 | `GF-C` | `CV-01` | `template/v2-scenarios/scenario-c-csv-export.yaml` | CSV source + SQL + JDBC sink | Exact | `V2ScenarioTemplateIT`, `fixtures/orders.csv` |
 | `GF-D` | `CV-02` | `template/v2-scenarios/scenario-d-chunked-jdbc.yaml` | query source + SQL + JDBC, `CHUNKED` mode | Adapted | `V2ScenarioTemplateIT` |
 | `GF-E` | `CV-02` | `template/v2-scenarios/scenario-e-streaming-jdbc.yaml` | query source + SQL + JDBC, `STREAMING` mode | Adapted | `V2ScenarioTemplateIT` |
+| `GF-F` | `RW-01`, `RW-02` | `template/v2-scenarios/scenario-f-streaming-csv.yaml` | CSV source + SQL + console, `STREAMING` mode | Exact | `V2ScenarioTemplateIT`, `fixtures/streaming-orders.csv` |
+| `GF-F` | `RW-02` | `template/v2-scenarios/scenario-f-streaming-ndjson.yaml` | NDJSON source + SQL + console, `STREAMING` mode | Exact | `V2ScenarioTemplateIT`, `fixtures/streaming-events.ndjson` |
+| `GF-G` | `RW-03` | `template/v2-scenarios/scenario-g-upsert-pg.yaml` | query source + SQL + JDBC upsert (`dialect: postgres`), `CHUNKED` mode | Adapted | `V2ScenarioTemplateIT` (H2 `MODE=PostgreSQL` or skip) |
+| `GF-G` | `RW-03` | `template/v2-scenarios/scenario-g-upsert-mysql.yaml` | query source + SQL + JDBC upsert (`dialect: mysql`), `CHUNKED` mode | Exact | `V2ScenarioTemplateIT` (H2 `MODE=MySQL`) |
+
+Phase 8 streaming fixtures also include a `large-streaming-orders.csv` generator hook in `V2ScenarioTemplateIT.materializeLargeStreamingCsvFixture()` for the 10 MB OOM proof in plan 08-09 (D-06).
 
 ## Suggested First Catalog Backlog
 

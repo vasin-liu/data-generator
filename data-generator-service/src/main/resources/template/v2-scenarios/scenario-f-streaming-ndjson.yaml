@@ -1,0 +1,21 @@
+# definitionKind: V2
+# scenarioId: GF-F
+# catalogRef: RW-02 — NDJSON streaming source, SQL transform, console sink
+name: scenario-f-streaming-ndjson
+executionPolicy:
+  mode: STREAMING
+  sourceChunkSize: 40
+  sinkBatchSize: 40
+  maxTotalRows: 120
+  maxRowsInMemory: 200
+sources:
+  events:
+    type: json
+    path: template/v2-scenarios/fixtures/streaming-events.ndjson
+    format: ndjson
+transform:
+  type: sql
+  sql: SELECT order_id, amount FROM events
+sink:
+  writers:
+    - type: console
