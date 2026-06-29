@@ -49,6 +49,22 @@ Example: `TemplateControllerMigrationCompareTests` (number iterator dual-run wit
 
 - **H2 (fast):** `ChunkedPipelineTests`, `ChunkedQueryRowSourceTests` — functional chunked read/write, not production cursor behavior.
 - **Testcontainers (Docker required):** `ChunkedPipelineMySqlContainerTests` (`useCursorFetch=true`), `ChunkedPipelinePostgresContainerTests` — skipped when Docker is unavailable (`@EnabledIf` on `DockerTestSupport`).
+- **Upsert idempotency (Docker required):** `ChunkedPipelinePostgresUpsertTests`, `ChunkedPipelineMySqlUpsertTests` — shared `UpsertParitySupport.assertUpsertIdempotent`; H2 smoke in `JdbcUpsertSmokeTests` (D-25).
+- **H2 upsert smoke:** `JdbcUpsertSmokeTests` — `MODE=MySQL` basic path; full dialect proof on Testcontainers above.
+
+## CSV/JSON streaming OOM proof (D-06, D-24)
+
+- **Fixture bar:** ≥10 MB / ~100k rows per file; must complete without OOM under `CHUNKED` or `STREAMING`.
+- **IT:** `CsvJsonStreamingOomIT` (`@Tag("oom")`) — generates fixtures in `@BeforeAll`; run with 256 MB heap:
+
+```powershell
+.\mvnw-jdk25.ps1 -pl data-generator-calcite -am test `
+  -Dtest=CsvJsonStreamingOomIT `
+  "-Dsurefire.argLine=-Xmx256m" `
+  -Dsurefire.failIfNoSpecifiedTests=false -q
+```
+
+- **Surefire override:** `data-generator-calcite/pom.xml` exposes `surefire.argLine` (defaults to `${mockito.agentLine}`); quote `-Dsurefire.argLine` on Windows PowerShell.
 
 ## Kafka
 
