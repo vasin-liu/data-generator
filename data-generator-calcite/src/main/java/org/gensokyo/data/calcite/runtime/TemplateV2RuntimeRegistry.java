@@ -48,6 +48,10 @@ public class TemplateV2RuntimeRegistry {
                         rowSource = queryFactory.create(name, source, policy);
                     } else if (policy != null && factory instanceof PostGisQuerySourceFactory postGisFactory) {
                         rowSource = postGisFactory.create(name, source, policy);
+                    } else if (policy != null && factory instanceof CsvSourceFactory csvFactory) {
+                        rowSource = csvFactory.create(name, source, policy);
+                    } else if (policy != null && factory instanceof JsonSourceFactory jsonFactory) {
+                        rowSource = jsonFactory.create(name, source, policy);
                     } else {
                         rowSource = factory.create(name, source);
                     }

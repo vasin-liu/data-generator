@@ -20,6 +20,8 @@ public final class EffectiveExecutionPolicy {
     private static final String DEFAULT_MODE = "IN_MEMORY";
     private static final int DEFAULT_MAX_ROWS_IN_MEMORY = 500_000;
     private static final int DEFAULT_SOURCE_CHUNK_SIZE = 5_000;
+    /** CSV/JSON file source chunk size when template omits {@code sourceChunkSize} (D-03). */
+    public static final int DEFAULT_FILE_SOURCE_CHUNK_SIZE = 1_000;
     private static final int DEFAULT_SINK_BATCH_SIZE = 1_000;
     private static final int DEFAULT_PREVIEW_ROW_LIMIT = 100;
     private static final boolean DEFAULT_FAIL_ON_LIMIT_EXCEEDED = true;
@@ -160,12 +162,24 @@ public final class EffectiveExecutionPolicy {
     }
 
     /**
-     * JDBC fetch / source chunk size.
+     * JDBC fetch / source chunk size (default 5000 when template omits {@code sourceChunkSize}).
      *
      * @return chunk size
      */
     public int sourceChunkSize() {
         return sourceChunkSize;
+    }
+
+    /**
+     * Chunk size for CSV/JSON file sources. When template leaves {@code sourceChunkSize} unset,
+     * file sources use {@link #DEFAULT_FILE_SOURCE_CHUNK_SIZE} instead of the JDBC default.
+     *
+     * @return resolved file-source chunk size
+     */
+    public int fileSourceChunkSize() {
+        return sourceChunkSize == DEFAULT_SOURCE_CHUNK_SIZE
+                ? DEFAULT_FILE_SOURCE_CHUNK_SIZE
+                : sourceChunkSize;
     }
 
     /**

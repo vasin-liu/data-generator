@@ -8,7 +8,6 @@ import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
 
 public class CsvSourceFactory implements V2SourceFactory {
-    private static final int GLOBAL_DEFAULT_SOURCE_CHUNK_SIZE = 5_000;
 
     private final CsvParser csvParser;
 
@@ -41,18 +40,9 @@ public class CsvSourceFactory implements V2SourceFactory {
     public RowSource create(String name, SourceVO source, EffectiveExecutionPolicy policy) {
         CsvSourceVO csvSource = (CsvSourceVO) source;
         if (policy != null && usesChunkedRead(policy.mode())) {
-            return new ChunkedCsvRowSource(name, csvSource, csvParser, resolveCsvChunkSize(policy));
+            return new ChunkedCsvRowSource(name, csvSource, csvParser, policy.fileSourceChunkSize());
         }
         return new CsvRowSource(name, csvSource, csvParser);
-    }
-
-    private static int resolveCsvChunkSize(EffectiveExecutionPolicy policy) {
-        // D-03: CSV chunked reads default to 1000 when template does not set sourceChunkSize.
-        int size = policy.sourceChunkSize();
-        if (size == GLOBAL_DEFAULT_SOURCE_CHUNK_SIZE) {
-            return ChunkedCsvRowSource.DEFAULT_CSV_CHUNK_SIZE;
-        }
-        return size > 0 ? size : ChunkedCsvRowSource.DEFAULT_CSV_CHUNK_SIZE;
     }
 
     private static boolean usesChunkedRead(String mode) {

@@ -6,21 +6,32 @@
 package org.gensokyo.data.calcite.runtime;
 
 import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.parser.DefaultCsvParser;
+import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.sink.JdbcSinkFactory;
+import org.gensokyo.data.calcite.source.CsvRowSource;
+import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.QuerySourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
+import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
+import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +44,101 @@ import java.util.Map;
 class StreamingPipelineTests {
 
     private static final int ROW_COUNT = 500;
+    private static final int CSV_ROW_COUNT = 2_500;
+    private static final int DEFAULT_FILE_CHUNK_SIZE = EffectiveExecutionPolicy.DEFAULT_FILE_SOURCE_CHUNK_SIZE;
+
+    @Test
+    void streamsCsvSourceToConsoleSinkInBatches(@TempDir Path tempDir) throws Exception {
+        Path csv = writeCsvFixture(tempDir, CSV_ROW_COUNT);
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("SELECT id, name FROM incoming");
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+        // D-03: omit sourceChunkSize — file sources default to 1000
+        executionPolicy.setSinkBatchSize(500);
+        executionPolicy.setMaxRowsInMemory(CSV_ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-csv-demo");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(transform));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(fileSourceRegistry()).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertNotNull(result.getMetrics());
+        Assertions.assertEquals("STREAMING", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(CSV_ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(CSV_ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertTrue(result.getMetrics().getPeakRowsInMemory() <= DEFAULT_FILE_CHUNK_SIZE);
+        Assertions.assertTrue(result.getMetrics().getChunksProcessed() > 1);
+        int expectedChunks = (CSV_ROW_COUNT + DEFAULT_FILE_CHUNK_SIZE - 1) / DEFAULT_FILE_CHUNK_SIZE;
+        Assertions.assertEquals(expectedChunks, result.getMetrics().getChunksProcessed());
+    }
+
+    @Test
+    void rejectsCsvSourceWithoutChunkedRowSource(@TempDir Path tempDir) throws Exception {
+        Path csv = writeCsvFixture(tempDir, 10);
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-csv-in-memory-source");
+        template.setExecutionPolicy(streamingPolicy());
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(passthroughCsvTransform()));
+        template.setSinks(List.of(consoleSink()));
+
+        // Factory that always materializes in memory — simulates missing explicit CHUNKED/STREAMING dispatch.
+        CsvSourceFactory inMemoryOnlyFactory = new CsvSourceFactory(new DefaultCsvParser()) {
+            @Override
+            public org.gensokyo.data.calcite.RowSource create(
+                    String name,
+                    org.gensokyo.data.model.v2.SourceVO sourceVo,
+                    EffectiveExecutionPolicy policy) {
+                return new CsvRowSource(name, (CsvSourceVO) sourceVo, new DefaultCsvParser());
+            }
+        };
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
+                List.of(inMemoryOnlyFactory),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory()));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new TemplateV2Runner(registry).run(template));
+        Assertions.assertTrue(exception.getMessage().contains("CHUNKED")
+                || exception.getMessage().contains("STREAMING"));
+        Assertions.assertTrue(exception.getMessage().contains("auto-promoted"));
+    }
+
+    @Test
+    void rejectsMultipleCsvSources(@TempDir Path tempDir) throws Exception {
+        Path csv = writeCsvFixture(tempDir, 5);
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-multi-csv");
+        template.setExecutionPolicy(streamingPolicy());
+        template.setSources(Map.of("left", source, "right", source));
+        template.setTransformers(List.of(passthroughCsvTransform()));
+        template.setSinks(List.of(consoleSink()));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new TemplateV2Runner(fileSourceRegistry()).run(template));
+        Assertions.assertTrue(exception.getMessage().contains("exactly one source"));
+    }
 
     @Test
     void streamsQuerySourceToJdbcSinkInBatches() {
@@ -149,6 +255,37 @@ class StreamingPipelineTests {
         SqlTransformVO transform = new SqlTransformVO();
         transform.setSql("select id, name from t");
         return transform;
+    }
+
+    private static SqlTransformVO passthroughCsvTransform() {
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("SELECT id, name FROM incoming");
+        return transform;
+    }
+
+    private static WriteStageVO consoleSink() {
+        ConsoleWriterVO writer = new ConsoleWriterVO();
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+        return sink;
+    }
+
+    private static TemplateV2RuntimeRegistry fileSourceRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory()));
+    }
+
+    private static Path writeCsvFixture(Path tempDir, int rowCount) throws Exception {
+        Path csv = tempDir.resolve("streaming.csv");
+        List<String> lines = new ArrayList<>();
+        lines.add("id,name");
+        for (int i = 0; i < rowCount; i++) {
+            lines.add(i + ",n" + i);
+        }
+        Files.writeString(csv, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
+        return csv;
     }
 
     private static WriteStageVO jdbcSink() {

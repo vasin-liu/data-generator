@@ -6,21 +6,30 @@
 package org.gensokyo.data.calcite.runtime;
 
 import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
+import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.sink.JdbcSinkFactory;
+import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.QuerySourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
+import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
+import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
 import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +42,47 @@ import java.util.Map;
 class ChunkedPipelineTests {
 
     private static final int ROW_COUNT = 10_000;
+    private static final int CSV_ROW_COUNT = 3_000;
+    private static final int CSV_CHUNK_SIZE = 1_000;
+
+    @Test
+    void chunkedModeWritesCsvSourceInBatches(@TempDir Path tempDir) throws Exception {
+        Path csv = writeCsvFixture(tempDir, CSV_ROW_COUNT);
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("SELECT id, name FROM incoming");
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("CHUNKED");
+        executionPolicy.setSourceChunkSize(CSV_CHUNK_SIZE);
+        executionPolicy.setSinkBatchSize(500);
+        executionPolicy.setMaxRowsInMemory(CSV_ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("chunked-csv-demo");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(transform));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(registry).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertNotNull(result.getMetrics());
+        Assertions.assertEquals("CHUNKED", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(CSV_ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(CSV_ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertEquals(CSV_ROW_COUNT / CSV_CHUNK_SIZE, result.getMetrics().getChunksProcessed());
+    }
 
     @Test
     void chunkedModeWritesAllRowsInBatches() {
@@ -90,6 +140,24 @@ class ChunkedPipelineTests {
         Assertions.assertEquals(ROW_COUNT, result.getMetrics().getTotalRowsRead());
         Assertions.assertEquals(ROW_COUNT, countRows(jdbcTemplate, "target_t"));
         Assertions.assertEquals(ROW_COUNT / 2_000, result.getMetrics().getChunksProcessed());
+    }
+
+    private static WriteStageVO consoleSink() {
+        ConsoleWriterVO writer = new ConsoleWriterVO();
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+        return sink;
+    }
+
+    private static Path writeCsvFixture(Path tempDir, int rowCount) throws Exception {
+        Path csv = tempDir.resolve("chunked.csv");
+        List<String> lines = new ArrayList<>();
+        lines.add("id,name");
+        for (int i = 0; i < rowCount; i++) {
+            lines.add(i + ",n" + i);
+        }
+        Files.writeString(csv, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
+        return csv;
     }
 
     private static long countRows(NamedParameterJdbcTemplate jdbcTemplate, String table) {

@@ -16,6 +16,8 @@ import org.gensokyo.data.calcite.sql.CalciteRowTransformer;
 import org.gensokyo.data.calcite.sql.ExecutionShape;
 import org.gensokyo.data.calcite.sql.ExecutionShapeClassifier;
 import org.gensokyo.data.calcite.source.ChunkedRowSource;
+import org.gensokyo.data.model.v2.CsvSourceVO;
+import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.RowSchema;
 import org.gensokyo.data.model.v2.SourceVO;
@@ -82,28 +84,31 @@ public final class ChunkedPipeline {
             TemplateV2VO template,
             EffectiveExecutionPolicy policy,
             TemplateV2RuntimeRegistry registry) {
-        Map.Entry<String, QuerySourceVO> queryEntry = soleQuerySource(template);
-        String sourceName = queryEntry.getKey();
-        QuerySourceVO querySource = queryEntry.getValue();
+        Map.Entry<String, SourceVO> sourceEntry = soleChunkedFileOrQuerySource(template);
+        String sourceName = sourceEntry.getKey();
+        SourceVO sourceVo = sourceEntry.getValue();
 
         RunMetrics metrics = new RunMetrics(policy.mode());
         RowSource rowSource;
         try {
             AiRunMetricsScope.bind(metrics);
-            rowSource = registry.createSource(sourceName, querySource, policy);
+            rowSource = registry.createSource(sourceName, sourceVo, policy);
         }
         finally {
             AiRunMetricsScope.clear();
         }
         if (!(rowSource instanceof ChunkedRowSource chunked)) {
             throw new IllegalStateException(
-                    "CHUNKED mode requires a chunked row source for [" + sourceName + "], got "
-                            + rowSource.getClass().getName());
+                    "CHUNKED mode requires a chunked row source for [" + sourceName + "] ("
+                            + sourceVo.getClass().getSimpleName()
+                            + "); got "
+                            + rowSource.getClass().getName()
+                            + ". Set executionPolicy.mode to CHUNKED or STREAMING explicitly.");
         }
 
         TransformVO transformer = template.getTransformers().getFirst();
         RowSchema lastSchema = null;
-        int chunkSize = policy.sourceChunkSize();
+        int chunkSize = resolveSourceChunkSize(policy, sourceVo);
         int sinkBatchSize = policy.sinkBatchSize();
 
         while (chunked.hasNextChunk()) {
@@ -208,18 +213,28 @@ public final class ChunkedPipeline {
         SinkWriteExecutor.writeSinks(rowSinkFactory, registry, template, result, metrics, sinkBatchSize);
     }
 
-    private static Map.Entry<String, QuerySourceVO> soleQuerySource(TemplateV2VO template) {
+    private static int resolveSourceChunkSize(EffectiveExecutionPolicy policy, SourceVO sourceVo) {
+        if (sourceVo instanceof CsvSourceVO || sourceVo instanceof JsonSourceVO) {
+            return policy.fileSourceChunkSize();
+        }
+        return policy.sourceChunkSize();
+    }
+
+    private static Map.Entry<String, SourceVO> soleChunkedFileOrQuerySource(TemplateV2VO template) {
         if (template.getSources() == null || template.getSources().size() != 1) {
             int count = template.getSources() == null ? 0 : template.getSources().size();
             throw new IllegalStateException(
                     "CHUNKED ROW_LOCAL mode requires exactly one source entry, found " + count);
         }
         Map.Entry<String, SourceVO> entry = template.getSources().entrySet().iterator().next();
-        if (!(entry.getValue() instanceof QuerySourceVO querySource)) {
+        SourceVO sourceVo = entry.getValue();
+        if (!(sourceVo instanceof QuerySourceVO
+                || sourceVo instanceof CsvSourceVO
+                || sourceVo instanceof JsonSourceVO)) {
             throw new IllegalStateException(
-                    "CHUNKED mode requires a QuerySourceVO source, got "
-                            + entry.getValue().getClass().getSimpleName());
+                    "CHUNKED mode requires a QuerySourceVO, CsvSourceVO, or JsonSourceVO source, got "
+                            + sourceVo.getClass().getSimpleName());
         }
-        return Map.entry(entry.getKey(), querySource);
+        return entry;
     }
 }
