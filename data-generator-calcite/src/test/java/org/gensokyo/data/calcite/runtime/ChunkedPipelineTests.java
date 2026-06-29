@@ -9,10 +9,12 @@ import org.gensokyo.data.calcite.NoopRuntimeJdbcEndpointResolver;
 import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.sink.JdbcSinkFactory;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
+import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.source.QuerySourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
@@ -44,6 +46,103 @@ class ChunkedPipelineTests {
     private static final int ROW_COUNT = 10_000;
     private static final int CSV_ROW_COUNT = 3_000;
     private static final int CSV_CHUNK_SIZE = 1_000;
+
+    private static final int PER_CHUNK_ROW_COUNT = 300;
+    private static final int PER_CHUNK_SIZE = 100;
+
+    @Test
+    void chunkedCsvSourceAppliesSqlPerChunk(@TempDir Path tempDir) throws Exception {
+        Path csv = writeCsvFixture(tempDir, PER_CHUNK_ROW_COUNT);
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        // Aggregate over each read chunk only — a single global batch would yield one summary row.
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("""
+                SELECT MIN(id) AS chunk_min, MAX(id) AS chunk_max, COUNT(*) AS chunk_rows
+                FROM incoming
+                """);
+
+        JdbcWriterVO writer = new JdbcWriterVO();
+        writer.setDataSourceId("ignored");
+        writer.setTarget("chunk_probe");
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("CHUNKED");
+        executionPolicy.setSourceChunkSize(PER_CHUNK_SIZE);
+        executionPolicy.setSinkBatchSize(PER_CHUNK_SIZE);
+        executionPolicy.setMaxRowsInMemory(PER_CHUNK_ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("chunked-csv-per-chunk-sql");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(transform));
+        template.setSinks(List.of(jdbcSink(writer)));
+
+        NamedParameterJdbcTemplate jdbcTemplate = new NamedParameterJdbcTemplate(dataSource());
+        jdbcTemplate.getJdbcTemplate().execute(
+                "create table chunk_probe(chunk_min bigint, chunk_max bigint, chunk_rows bigint)");
+
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new JdbcSinkFactory(jdbcTemplate, new NoopRuntimeJdbcEndpointResolver())));
+
+        TemplateV2RunResult result = new TemplateV2Runner(registry).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals(PER_CHUNK_ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(PER_CHUNK_ROW_COUNT / PER_CHUNK_SIZE, result.getMetrics().getChunksProcessed());
+
+        List<Long> chunkRowCounts = jdbcTemplate.getJdbcTemplate().query(
+                "select chunk_rows from chunk_probe order by chunk_min",
+                (rs, rowNum) -> rs.getLong(1));
+        Assertions.assertEquals(PER_CHUNK_ROW_COUNT / PER_CHUNK_SIZE, chunkRowCounts.size());
+        Assertions.assertTrue(chunkRowCounts.stream().allMatch(count -> count == PER_CHUNK_SIZE));
+    }
+
+    @Test
+    void chunkedJsonArraySourceWritesAllRows(@TempDir Path tempDir) throws Exception {
+        int rowCount = 500;
+        int chunkSize = 100;
+        Path jsonArray = writeJsonArrayFixture(tempDir, rowCount);
+
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(jsonArray.toString());
+        source.setFormat("array");
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("SELECT id, name FROM incoming");
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("CHUNKED");
+        executionPolicy.setSourceChunkSize(chunkSize);
+        executionPolicy.setSinkBatchSize(chunkSize);
+        executionPolicy.setMaxRowsInMemory(rowCount + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("chunked-json-array");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(transform));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RuntimeRegistry registry = new TemplateV2RuntimeRegistry(
+                List.of(new JsonSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(registry).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals("CHUNKED", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(rowCount, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(rowCount, result.getMetrics().getRowsWritten());
+        Assertions.assertEquals(rowCount / chunkSize, result.getMetrics().getChunksProcessed());
+    }
 
     @Test
     void chunkedModeWritesCsvSourceInBatches(@TempDir Path tempDir) throws Exception {
@@ -142,11 +241,31 @@ class ChunkedPipelineTests {
         Assertions.assertEquals(ROW_COUNT / 2_000, result.getMetrics().getChunksProcessed());
     }
 
+    private static WriteStageVO jdbcSink(JdbcWriterVO writer) {
+        WriteStageVO sink = new WriteStageVO();
+        sink.setWriters(List.of(writer));
+        return sink;
+    }
+
     private static WriteStageVO consoleSink() {
         ConsoleWriterVO writer = new ConsoleWriterVO();
         WriteStageVO sink = new WriteStageVO();
         sink.setWriters(List.of(writer));
         return sink;
+    }
+
+    private static Path writeJsonArrayFixture(Path tempDir, int rowCount) throws Exception {
+        Path json = tempDir.resolve("chunked-array.json");
+        StringBuilder builder = new StringBuilder("[");
+        for (int i = 0; i < rowCount; i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append("{\"id\":").append(i).append(",\"name\":\"n").append(i).append("\"}");
+        }
+        builder.append(']');
+        Files.writeString(json, builder.toString(), StandardCharsets.UTF_8);
+        return json;
     }
 
     private static Path writeCsvFixture(Path tempDir, int rowCount) throws Exception {

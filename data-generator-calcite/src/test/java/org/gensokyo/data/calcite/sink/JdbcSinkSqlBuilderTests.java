@@ -30,6 +30,33 @@ class JdbcSinkSqlBuilderTests {
     }
 
     @Test
+    void buildsPostgresCompositeUpsertKeys() {
+        JdbcWriterVO writer = writer("tenant_orders");
+        writer.setOptions(Map.of(
+                "dialect", "postgres",
+                "upsert", true,
+                "upsertKeys", List.of("id", "tenant_id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "tenant_id", "amount"));
+        Assertions.assertTrue(sql.contains("on conflict (id, tenant_id) do update set"));
+        Assertions.assertTrue(sql.contains("amount = excluded.amount"));
+        Assertions.assertFalse(sql.contains("tenant_id = excluded.tenant_id"));
+    }
+
+    @Test
+    void buildsMysqlCompositeUpsertKeys() {
+        JdbcWriterVO writer = writer("tenant_orders");
+        writer.setOptions(Map.of(
+                "dialect", "mysql",
+                "upsert", true,
+                "upsertKeys", List.of("id", "tenant_id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "tenant_id", "amount", "status"));
+        Assertions.assertTrue(sql.contains("on duplicate key update"));
+        Assertions.assertTrue(sql.contains("amount = values(amount)"));
+        Assertions.assertTrue(sql.contains("status = values(status)"));
+        Assertions.assertFalse(sql.contains("tenant_id = values(tenant_id)"));
+    }
+
+    @Test
     void buildsPostgresUpsertWithUpsertKeysAndUpdateClause() {
         JdbcWriterVO writer = writer("orders_out");
         writer.setOptions(Map.of(

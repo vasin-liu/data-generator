@@ -13,10 +13,12 @@ import org.gensokyo.data.calcite.sink.JdbcSinkFactory;
 import org.gensokyo.data.calcite.sink.JsonSinkFactory;
 import org.gensokyo.data.calcite.source.CsvRowSource;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
+import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.source.QuerySourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
 import org.gensokyo.data.model.v2.CsvSourceVO;
 import org.gensokyo.data.model.v2.ExecutionPolicyVO;
+import org.gensokyo.data.model.v2.JsonSourceVO;
 import org.gensokyo.data.model.v2.QuerySourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
@@ -51,6 +53,70 @@ class StreamingPipelineTests {
     private static final int CSV_TO_SINK_ROW_COUNT = 3_000;
     private static final int CSV_TO_SINK_CHUNK_SIZE = 500;
     private static final int DEFAULT_FILE_CHUNK_SIZE = EffectiveExecutionPolicy.DEFAULT_FILE_SOURCE_CHUNK_SIZE;
+
+    @Test
+    void streamsCsvSourceInBatches(@TempDir Path tempDir) throws Exception {
+        int chunkSize = 100;
+        Path csv = writeCsvFixture(tempDir, ROW_COUNT);
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(true);
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+        executionPolicy.setSourceChunkSize(chunkSize);
+        executionPolicy.setSinkBatchSize(chunkSize);
+        executionPolicy.setMaxRowsInMemory(ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-csv-batches");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(passthroughCsvTransform()));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(fileSourceRegistry()).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals("STREAMING", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertTrue(result.getMetrics().getPeakRowsInMemory() <= chunkSize);
+        Assertions.assertEquals(ROW_COUNT / chunkSize, result.getMetrics().getChunksProcessed());
+    }
+
+    @Test
+    void streamsNdjsonSourceInBatches(@TempDir Path tempDir) throws Exception {
+        int chunkSize = 100;
+        Path ndjson = writeNdjsonFixture(tempDir, ROW_COUNT);
+
+        JsonSourceVO source = new JsonSourceVO();
+        source.setPath(ndjson.toString());
+        source.setFormat("ndjson");
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("STREAMING");
+        executionPolicy.setSourceChunkSize(chunkSize);
+        executionPolicy.setSinkBatchSize(chunkSize);
+        executionPolicy.setMaxRowsInMemory(ROW_COUNT + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("streaming-ndjson-batches");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(passthroughNdjsonTransform()));
+        template.setSinks(List.of(consoleSink()));
+
+        TemplateV2RunResult result = new TemplateV2Runner(jsonSourceRegistry()).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals("STREAMING", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(ROW_COUNT, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(ROW_COUNT, result.getMetrics().getRowsWritten());
+        Assertions.assertTrue(result.getMetrics().getPeakRowsInMemory() <= chunkSize);
+        Assertions.assertEquals(ROW_COUNT / chunkSize, result.getMetrics().getChunksProcessed());
+    }
 
     @Test
     void streamsCsvSourceToConsoleSinkInBatches(@TempDir Path tempDir) throws Exception {
@@ -192,7 +258,7 @@ class StreamingPipelineTests {
     }
 
     @Test
-    void rejectsMultipleCsvSources(@TempDir Path tempDir) throws Exception {
+    void rejectsMultipleCsvSourcesInStreamingMode(@TempDir Path tempDir) throws Exception {
         Path csv = writeCsvFixture(tempDir, 5);
         CsvSourceVO source = new CsvSourceVO();
         source.setPath(csv.toString());
@@ -333,6 +399,12 @@ class StreamingPipelineTests {
         return transform;
     }
 
+    private static SqlTransformVO passthroughNdjsonTransform() {
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("SELECT order_id, amount FROM incoming");
+        return transform;
+    }
+
     private static WriteStageVO consoleSink() {
         ConsoleWriterVO writer = new ConsoleWriterVO();
         WriteStageVO sink = new WriteStageVO();
@@ -343,6 +415,13 @@ class StreamingPipelineTests {
     private static TemplateV2RuntimeRegistry fileSourceRegistry() {
         return new TemplateV2RuntimeRegistry(
                 List.of(new CsvSourceFactory()),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory()));
+    }
+
+    private static TemplateV2RuntimeRegistry jsonSourceRegistry() {
+        return new TemplateV2RuntimeRegistry(
+                List.of(new JsonSourceFactory()),
                 List.of(new SqlTransformFactory()),
                 List.of(new ConsoleSinkFactory()));
     }
@@ -382,6 +461,16 @@ class StreamingPipelineTests {
         }
         Files.writeString(csv, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
         return csv;
+    }
+
+    private static Path writeNdjsonFixture(Path tempDir, int rowCount) throws Exception {
+        Path ndjson = tempDir.resolve("streaming.ndjson");
+        List<String> lines = new ArrayList<>();
+        for (int i = 0; i < rowCount; i++) {
+            lines.add("{\"order_id\":\"o" + i + "\",\"amount\":" + i + "}");
+        }
+        Files.writeString(ndjson, String.join("\n", lines) + "\n", StandardCharsets.UTF_8);
+        return ndjson;
     }
 
     private static WriteStageVO jdbcSink() {

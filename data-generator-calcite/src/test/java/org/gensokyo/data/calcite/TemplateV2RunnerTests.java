@@ -700,6 +700,51 @@ class TemplateV2RunnerTests {
     }
 
     @Test
+    void readsCsvSourceChunkedModeViaInjectedParser() throws Exception {
+        int rowCount = 120;
+        int chunkSize = 40;
+        Path csv = Files.createTempFile("template-v2-chunked-parser", ".csv");
+        StringBuilder body = new StringBuilder();
+        for (int i = 0; i < rowCount; i++) {
+            body.append("row-").append(i).append('\n');
+        }
+        Files.writeString(csv, body.toString());
+
+        CsvSourceVO source = new CsvSourceVO();
+        source.setPath(csv.toString());
+        source.setHeader(false);
+
+        ExecutionPolicyVO executionPolicy = new ExecutionPolicyVO();
+        executionPolicy.setMode("CHUNKED");
+        executionPolicy.setSourceChunkSize(chunkSize);
+        executionPolicy.setSinkBatchSize(chunkSize);
+        executionPolicy.setMaxRowsInMemory(rowCount + 1);
+
+        TemplateV2VO template = new TemplateV2VO();
+        template.setName("demo-v2-csv-chunked-parser");
+        template.setExecutionPolicy(executionPolicy);
+        template.setSources(Map.of("incoming", source));
+        template.setTransformers(List.of(sql("SELECT c1 AS label FROM incoming")));
+        template.setSinks(List.of(consoleSink()));
+
+        CsvParser parser = (csvSource, lines) -> lines.stream()
+                .map(line -> List.of(line.trim()))
+                .toList();
+        TemplateV2RuntimeRegistry runtimeRegistry = new TemplateV2RuntimeRegistry(
+                List.of(new CsvSourceFactory(parser)),
+                List.of(new SqlTransformFactory()),
+                List.of(new ConsoleSinkFactory())
+        );
+        TemplateV2RunResult result = new TemplateV2Runner(runtimeRegistry).run(template);
+
+        Assertions.assertTrue(result.getRows().isEmpty());
+        Assertions.assertEquals("CHUNKED", result.getMetrics().getExecutionMode());
+        Assertions.assertEquals(rowCount, result.getMetrics().getTotalRowsRead());
+        Assertions.assertEquals(rowCount, result.getMetrics().getRowsWritten());
+        Assertions.assertEquals(rowCount / chunkSize, result.getMetrics().getChunksProcessed());
+    }
+
+    @Test
     void readsCsvSourceThroughInjectedParser() throws Exception {
         Path csv = Files.createTempFile("template-v2-source-custom-parser", ".csv");
         Files.writeString(csv, """
