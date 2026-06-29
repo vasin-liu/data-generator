@@ -65,7 +65,7 @@ completed: 2026-06-29
 
 ## Task Commits
 
-1. **Pipeline eligibility, registry wiring, D-03 chunk default, tests** - `<commit-hash>` (feat)
+1. **Pipeline eligibility, registry wiring, D-03 chunk default, tests** - `69c82c4` (feat)
 
 ## Files Created/Modified
 
