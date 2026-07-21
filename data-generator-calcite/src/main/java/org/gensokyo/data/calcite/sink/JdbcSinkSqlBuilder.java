@@ -67,16 +67,18 @@ final class JdbcSinkSqlBuilder {
         String dialect = resolveDialect(writer);
         return switch (dialect) {
             case "postgres", "postgresql" -> appendPostgresUpsert(writer, baseInsert, targetColumns);
+            case "kingbase", "highgo" -> appendPostgresUpsert(writer, baseInsert, targetColumns);
             case "mysql" -> appendMysqlUpsert(writer, table, columns, values, targetColumns);
+            case "dameng" -> appendDamengMerge(writer, table, targetColumns);
             case "clickhouse", "click_house" -> throw unsupportedUpsertDialect("clickhouse");
+            case "generic" -> throw unsupportedUpsertDialect("generic");
             default -> throw unsupportedUpsertDialect(dialect);
         };
     }
 
     private static IllegalArgumentException unsupportedUpsertDialect(String dialect) {
         return new IllegalArgumentException(
-                "JDBC sink upsert=true is supported for dialect postgres and mysql only (Phase 8); got: "
-                        + dialect);
+                "JDBC sink upsert=true is not supported for dialect " + dialect);
     }
 
     private static String appendPostgresUpsert(
@@ -119,6 +121,54 @@ final class JdbcSinkSqlBuilder {
                 .map(column -> column + " = values(" + column + ")")
                 .collect(Collectors.joining(", "));
         return baseInsert + " on duplicate key update " + updates;
+    }
+
+    /**
+     * Builds Dameng {@code MERGE INTO} upsert SQL using {@code options.upsertKeys} for the ON match.
+     * Source row binds reuse the same named parameters as the base INSERT ({@code :column}).
+     *
+     * @param writer         JDBC writer configuration
+     * @param table          target table name
+     * @param targetColumns  target table column names in insert order
+     * @return MERGE statement for batch upsert
+     */
+    private static String appendDamengMerge(
+            JdbcWriterVO writer,
+            String table,
+            List<String> targetColumns) {
+        List<String> upsertKeys = requireUpsertKeys(writer, targetColumns);
+        String columns = String.join(", ", targetColumns);
+        // Dameng MERGE binds one row per batch entry via named parameters on the USING subquery.
+        String selectList = targetColumns.stream()
+                .map(column -> ":" + column + " AS " + column)
+                .collect(Collectors.joining(", "));
+        String onClause = upsertKeys.stream()
+                .map(key -> "t." + key + " = s." + key)
+                .collect(Collectors.joining(" AND "));
+        List<String> updateColumns = targetColumns.stream()
+                .filter(column -> !upsertKeys.contains(column))
+                .toList();
+        StringBuilder sql = new StringBuilder();
+        sql.append("merge into ").append(table).append(" t using (select ")
+                .append(selectList)
+                .append(" from dual) s on (")
+                .append(onClause)
+                .append(")");
+        if (!updateColumns.isEmpty()) {
+            String updates = updateColumns.stream()
+                    .map(column -> "t." + column + " = s." + column)
+                    .collect(Collectors.joining(", "));
+            sql.append(" when matched then update set ").append(updates);
+        }
+        String insertValues = targetColumns.stream()
+                .map(column -> "s." + column)
+                .collect(Collectors.joining(", "));
+        sql.append(" when not matched then insert (")
+                .append(columns)
+                .append(") values (")
+                .append(insertValues)
+                .append(")");
+        return sql.toString();
     }
 
     /**
