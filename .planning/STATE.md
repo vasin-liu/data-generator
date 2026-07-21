@@ -2,10 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
+current_phase: 08
+current_phase_name: rw-streaming-upsert
 status: executing
 stopped_at: Phase 9 context gathered
-last_updated: "2026-07-21T10:37:44.395Z"
-last_activity: 2026-06-29 -- Plan 08-09 OOM IT and Testcontainers upsert ITs complete
+last_updated: "2026-07-21T11:26:20.982Z"
+last_activity: 2026-06-29
+last_activity_desc: Plan 08-09 OOM IT and Testcontainers upsert ITs complete
 progress:
   total_phases: 5
   completed_phases: 3
@@ -27,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 
 Phase: 08 (rw-streaming-upsert) — EXECUTING
 Plan: 9 of 12
-Status: Executing Phase 08
+Status: Ready to execute
 Last activity: 2026-06-29 -- Plan 08-09 OOM IT and Testcontainers upsert ITs complete
 
 Progress: [████░░░░░░] 45% (v2.0 — Phase 8 plan 09)

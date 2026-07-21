@@ -148,7 +148,26 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. Embedded harness tests pass for at least one read/write scenario per target dialect without production credentials
 4. Unsupported capabilities per dialect (e.g. ClickHouse upsert limits) are documented in operator-facing docs — not silent failures
 
-**Plans**: TBD via `/gsd-plan-phase 9`
+**Plans**: 5 plans in 4 waves
+
+**Wave 1** *(no dependencies within wave — parallel)*
+
+- `09-01` — JDBC sink dialect SQL generation & publish validation (RW-05, D-01–D-08)
+- `09-02` — Console driver presets & connectivity hygiene (RW-06, D-09–D-11)
+
+**Wave 2** *(blocked on Wave 1 SQL builder)*
+
+- `09-03` — Embedded dialect integration tests: PG/CK Testcontainers, KB/HG PG-proxy, DM MERGE unit, CK reject (RW-05, D-13–D-15)
+
+**Wave 3** *(blocked on Waves 1–2)*
+
+- `09-04` — Playwright preset E2E & UAT verify script (RW-05, RW-06, D-12, D-16)
+
+**Wave 4** *(blocked on Waves 1–3)*
+
+- `09-05` — Operator docs, AGENTS.md & ROADMAP registry (RW-05, RW-06, D-17, D-18)
+
+**Verification**: `.\scripts\verify-phase9-uat-jdbc-dialect.ps1 -SkipPlaywright` (Maven dialect slice); full UAT adds Podman Playwright (`npm run e2e:phase9-jdbc-dialect`).
 
 ### Phase 10: Harness Coverage & CI Gates
 
