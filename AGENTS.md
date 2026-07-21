@@ -86,6 +86,9 @@ Focused builds (examples from internal upgrade docs):
 # Phase 8 RW streaming CSV/JSON + JDBC upsert UAT (Maven IT slice + optional Podman Playwright)
 .\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright
 
+# Phase 9 JDBC dialect expansion UAT (Maven dialect slice + optional Podman Playwright)
+.\scripts\verify-phase9-uat-jdbc-dialect.ps1 -SkipPlaywright
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
