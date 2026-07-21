@@ -37,6 +37,7 @@ import org.gensokyo.kit.character.StrKit;
 import org.gensokyo.kit.collect.CollectKit;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -465,6 +466,7 @@ public final class TemplateV2Validator {
                                 + ": upsertKeys entries must be non-blank strings");
                     }
                 }
+                validateJdbcUpsertDialect(writerPath, writer);
                 // Publish-time column cross-check only when transform output columns are inferrable.
                 if (!opaqueTransform && sqlOutputColumns != null) {
                     for (String key : upsertKeys) {
@@ -475,6 +477,34 @@ public final class TemplateV2Validator {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Publish-time gate for dialect+upsert combinations (D-03, D-04, D-08).
+     * Mirrors {@link org.gensokyo.data.calcite.sink.JdbcSinkSqlBuilder} run-time upsert dialect rules.
+     *
+     * @param writerPath sink writer path for error messages
+     * @param writer     JDBC writer configuration
+     */
+    private static void validateJdbcUpsertDialect(String writerPath, WriterVO writer) {
+        String dialect = WriterOptionResolver.stringOption(writer, "dialect", null);
+        if (!StringUtils.hasText(dialect)) {
+            dialect = "generic";
+        }
+        else {
+            dialect = dialect.trim().toLowerCase(Locale.ROOT);
+        }
+        switch (dialect) {
+            case "postgres", "postgresql", "mysql", "kingbase", "highgo", "dameng" -> {
+                // Supported upsert dialects — upsertKeys validation already enforced above.
+            }
+            case "clickhouse", "click_house" -> throw new IllegalArgumentException(
+                    writerPath + ": JDBC sink upsert=true is not supported for dialect clickhouse");
+            case "generic" -> throw new IllegalArgumentException(
+                    writerPath + ": JDBC sink upsert=true is not supported for dialect generic");
+            default -> throw new IllegalArgumentException(
+                    writerPath + ": JDBC sink upsert=true is not supported for dialect " + dialect);
         }
     }
 

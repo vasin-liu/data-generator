@@ -117,8 +117,24 @@ final class JdbcBulkWriteExecutor {
         if ("mysql".equals(dialect)) {
             return updateCount == 2 ? 1 : 0;
         }
-        // PostgreSQL upsert path: count successful row operations (insert or update).
+        if (isPostgresStyleUpsertDialect(dialect)) {
+            // PostgreSQL ON CONFLICT and Dameng MERGE report successful row ops as updateCount > 0.
+            return updateCount > 0 ? 1 : 0;
+        }
         return updateCount > 0 ? 1 : 0;
+    }
+
+    /**
+     * Dialects whose upsert metrics follow the PostgreSQL batch update-count interpretation.
+     *
+     * @param dialect normalized JDBC sink dialect from writer options
+     * @return true when upsert row counts use the PostgreSQL-style rule
+     */
+    private static boolean isPostgresStyleUpsertDialect(String dialect) {
+        return switch (dialect) {
+            case "postgres", "postgresql", "kingbase", "highgo", "dameng" -> true;
+            default -> false;
+        };
     }
 
     /**

@@ -51,7 +51,7 @@ class TemplateV2ValidatorTests {
   void simpleSqlUpsertKeyMissingAtPublishThrows() {
     TemplateV2VO template = baseTemplate(
         sql("SELECT id, label FROM input"),
-        jdbcUpsertWriter(true, List.of("missing_key")));
+        jdbcUpsertWriter("postgres", true, List.of("missing_key")));
 
     IllegalArgumentException ex = Assertions.assertThrows(
         IllegalArgumentException.class,
@@ -62,12 +62,49 @@ class TemplateV2ValidatorTests {
   }
 
   @Test
+  void clickhouseUpsertRejectedAtPublish() {
+    TemplateV2VO template = baseTemplate(
+        sql("SELECT id, label FROM input"),
+        jdbcUpsertWriter("clickhouse", true, List.of("id")));
+
+    IllegalArgumentException ex = Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> TemplateV2Validator.validate(template));
+
+    Assertions.assertTrue(ex.getMessage().contains("sink[0].writer[0]"));
+    Assertions.assertTrue(ex.getMessage().contains("clickhouse"));
+  }
+
+  @Test
+  void genericDialectUpsertRejectedAtPublish() {
+    TemplateV2VO template = baseTemplate(
+        sql("SELECT id, label FROM input"),
+        jdbcUpsertWriter("generic", true, List.of("id")));
+
+    IllegalArgumentException ex = Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> TemplateV2Validator.validate(template));
+
+    Assertions.assertTrue(ex.getMessage().contains("sink[0].writer[0]"));
+    Assertions.assertTrue(ex.getMessage().contains("generic"));
+  }
+
+  @Test
+  void damengUpsertAllowedWhenKeysPresent() {
+    TemplateV2VO template = baseTemplate(
+        sql("SELECT id, label FROM input"),
+        jdbcUpsertWriter("dameng", true, List.of("id")));
+
+    Assertions.assertDoesNotThrow(() -> TemplateV2Validator.validate(template));
+  }
+
+  @Test
   void opaqueTransformUpsertKeysRunOnlyWarning() {
     JsTransformVO js = new JsTransformVO();
     js.setType("js");
     js.setScript("function transform(rows) { return rows; }");
 
-    TemplateV2VO template = baseTemplate(js, jdbcUpsertWriter(true, List.of("id")));
+    TemplateV2VO template = baseTemplate(js, jdbcUpsertWriter("postgres", true, List.of("id")));
 
     Assertions.assertDoesNotThrow(() -> TemplateV2Validator.validate(template));
 
@@ -164,10 +201,17 @@ class TemplateV2ValidatorTests {
   }
 
   private static WriteStageVO jdbcUpsertWriter(boolean upsert, List<String> upsertKeys) {
+    return jdbcUpsertWriter(null, upsert, upsertKeys);
+  }
+
+  private static WriteStageVO jdbcUpsertWriter(String dialect, boolean upsert, List<String> upsertKeys) {
     JdbcWriterVO writer = new JdbcWriterVO();
     writer.setTarget("orders_out");
     writer.getOptions().put("upsert", upsert);
     writer.getOptions().put("upsertKeys", upsertKeys);
+    if (dialect != null) {
+      writer.getOptions().put("dialect", dialect);
+    }
     WriteStageVO sink = new WriteStageVO();
     sink.setWriters(List.of(writer));
     return sink;
