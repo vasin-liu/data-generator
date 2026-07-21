@@ -19,6 +19,7 @@
     "e2e:phase6-messaging-sink": "playwright test e2e/specs/datasource-messaging-sink-resolution.spec.ts",
     "e2e:phase7-governance": "playwright test e2e/specs/datasource-governance.spec.ts",
     "e2e:phase8-rw-streaming-upsert": "playwright test e2e/specs/rw-streaming-upsert.spec.ts",
+    "e2e:phase9-jdbc-dialect": "playwright test e2e/specs/jdbc-dialect-preset.spec.ts",
     "e2e:cli:cold-start": "pwsh -NoProfile -File e2e/cli/run-cold-start-cli.ps1",
     "e2e:cli:catalog-overview": "pwsh -NoProfile -File e2e/cli/run-catalog-overview-cli.ps1",
     "e2e:cli:managed-crud": "pwsh -NoProfile -File e2e/cli/run-managed-crud-cli.ps1",
