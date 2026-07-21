@@ -13,7 +13,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - [x] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
 - [ ] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
-- [ ] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06)
+- [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
 - [ ] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
 
 ## Phase Details
@@ -148,7 +148,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. Embedded harness tests pass for at least one read/write scenario per target dialect without production credentials
 4. Unsupported capabilities per dialect (e.g. ClickHouse upsert limits) are documented in operator-facing docs — not silent failures
 
-**Plans**: 5 plans in 4 waves (5/5 executed)
+**Plans**: 5/5 plans complete
 
 - [x] 09-01-PLAN.md — JDBC sink dialect SQL generation & publish validation (RW-05, D-01–D-08)
 - [x] 09-02-PLAN.md — Console driver presets & connectivity hygiene (RW-06, D-09–D-11)
