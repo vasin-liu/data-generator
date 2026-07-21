@@ -14,7 +14,7 @@
 
 ### Reader/Writer — Dialect Expansion (RW)
 
-- [ ] **RW-05**: First-class JDBC dialect writers for Dameng (达梦), Kingbase (金仓), HighGo (翰高), PostgreSQL, and ClickHouse — including insert and documented upsert/bulk behavior per engine
+- [x] **RW-05**: First-class JDBC dialect writers for Dameng (达梦), Kingbase (金仓), HighGo (翰高), PostgreSQL, and ClickHouse — including insert and documented upsert/bulk behavior per engine
 - [ ] **RW-06**: Console datasource presets and validation recognize Dameng, Kingbase, HighGo, PostgreSQL, and ClickHouse connection shapes (URL templates, driver hints, connectivity test)
 
 ### Datasource Platform (DS)
@@ -71,12 +71,13 @@ Deferred beyond v2.0.
 | RW-02 | Phase 8 | Pending |
 | RW-03 | Phase 8 | Pending |
 | RW-04 | Phase 8 | Pending |
-| RW-05 | Phase 9 | Pending |
+| RW-05 | Phase 9 | Complete |
 | RW-06 | Phase 9 | Pending |
 | TEST-07 | Phase 10 | Pending |
 | TEST-08 | Phase 10 | Pending |
 
 **Coverage:**
+
 - v2.0 requirements: 13 total
 - Mapped to phases: 13
 - Unmapped: 0 ✓

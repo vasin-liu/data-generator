@@ -6,14 +6,14 @@ current_phase: 08
 current_phase_name: rw-streaming-upsert
 status: executing
 stopped_at: Phase 9 context gathered
-last_updated: "2026-07-21T11:26:20.982Z"
+last_updated: "2026-07-21T11:56:55.823Z"
 last_activity: 2026-06-29
 last_activity_desc: Plan 08-09 OOM IT and Testcontainers upsert ITs complete
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 22
-  completed_plans: 22
+  total_plans: 27
+  completed_plans: 23
   percent: 60
 ---
 
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 08 — rw-streaming-upsert
+**Current focus:** Phase 09 — jdbc-dialect-expansion
 
 ## Current Position
 
-Phase: 08 (rw-streaming-upsert) — EXECUTING
-Plan: 9 of 12
-Status: Ready to execute
-Last activity: 2026-06-29 -- Plan 08-09 OOM IT and Testcontainers upsert ITs complete
+Phase: 09 (jdbc-dialect-expansion) — EXECUTING
+Plan: 1 of 5 complete
+Status: Ready for plan 09-02
+Last activity: 2026-07-21 -- Plan 09-01 JDBC dialect upsert matrix and publish validation complete
 
-Progress: [████░░░░░░] 45% (v2.0 — Phase 8 plan 09)
+Progress: [█████████░] 85% (v2.0 — Phase 9 plan 01)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [████░░░░░░] 45% (v2.0 — Phase 8 plan 09)
 - P0 regression gate (7 rows) — **shipped**
 - Orchestration/RW/datasource deferred to v2 — **v2.0 active**
 - v2 dialect priority: DM, Kingbase, HighGo, PG, CK
+- Dameng MERGE uses SELECT FROM dual for named-parameter batch binding (09-01)
 
 ### Pending Todos
 
@@ -75,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-21T10:37:44.306Z
+Last session: 2026-07-21T11:56:55.809Z
 Stopped at: Phase 9 context gathered
 Next: `/gsd-execute-phase 6`
