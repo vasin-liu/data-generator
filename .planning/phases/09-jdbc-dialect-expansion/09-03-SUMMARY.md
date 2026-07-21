@@ -99,7 +99,7 @@ Each task was committed atomically:
 1. **Task 1: Kingbase/HighGo PG-proxy upsert ITs** - `8e04d66` (test RED), `e78e161` (feat GREEN)
 2. **Task 2: ClickHouse upsert reject and gated Dameng IT** - `b2c969e` (test)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `140e056` (docs: complete plan)
 
 ## Files Created/Modified
 

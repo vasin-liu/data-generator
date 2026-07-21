@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 09
 current_phase_name: jdbc-dialect-expansion
 status: executing
-stopped_at: Completed 09-jdbc-dialect-expansion-02-PLAN.md
-last_updated: "2026-07-21T12:46:51.354Z"
+stopped_at: Completed 09-jdbc-dialect-expansion-03-PLAN.md
+last_updated: "2026-07-21T12:48:00.000Z"
 last_activity: 2026-07-21
-last_activity_desc: Plan 09-02 console JDBC presets and connectivity hygiene complete
+last_activity_desc: Plan 09-03 embedded dialect harness tests complete
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 27
   completed_plans: 25
-  percent: 60
+  percent: 93
 ---
 
 # Project State
@@ -30,10 +30,10 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 
 Phase: 09 (jdbc-dialect-expansion) — EXECUTING
 Plan: 3 of 5 complete
-Status: Ready for plan 09-03
-Last activity: 2026-07-21 -- Plan 09-02 console JDBC presets and connectivity hygiene complete
+Status: Ready for plan 09-04
+Last activity: 2026-07-21 -- Plan 09-03 embedded dialect harness tests complete
 
-Progress: [█████████░] 89% (v2.0 — Phase 9 plan 02)
+Progress: [█████████░] 93% (v2.0 — Phase 9 plan 03)
 
 ## Performance Metrics
 
@@ -56,6 +56,8 @@ Progress: [█████████░] 89% (v2.0 — Phase 9 plan 02)
 - Dameng MERGE uses SELECT FROM dual for named-parameter batch binding (09-01)
 - Fallback presets use bundled:true for DM/KB/HG matching jdbc-bundled policy (09-02)
 - Proprietary driver connectivity failures prefix driverClassName hint without secrets (09-02)
+- Kingbase/highgo PG-proxy ITs fulfill per-dialect harness without licensed KB/HG images (09-03)
+- Dameng real IT opt-in via -Ddm.it=true or DG_DM_IT=true (09-03)
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-21T12:46:51.290Z
-Stopped at: Completed 09-jdbc-dialect-expansion-02-PLAN.md
-Next: Execute plan 09-03
+Last session: 2026-07-21T12:48:00.000Z
+Stopped at: Completed 09-jdbc-dialect-expansion-03-PLAN.md
+Next: Execute plan 09-04
