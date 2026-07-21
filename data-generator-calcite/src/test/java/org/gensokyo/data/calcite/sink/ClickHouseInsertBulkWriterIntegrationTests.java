@@ -107,6 +107,25 @@ class ClickHouseInsertBulkWriterIntegrationTests {
         Assertions.assertEquals("beta, 'quoted'", persisted.get(1).get("note"));
     }
 
+    /**
+     * Verifies {@code upsert=true} with {@code dialect=clickhouse} is rejected at SQL build time (D-03).
+     */
+    @Test
+    void clickhouseUpsertRejectedAtRuntime() {
+        JdbcWriterVO writer = new JdbcWriterVO();
+        writer.setDataSourceId("ignored");
+        writer.setTarget("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "clickhouse",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount", "note")));
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("clickhouse"));
+    }
+
     private static Row row(Map<String, Object> values) {
         return new Row(values);
     }
