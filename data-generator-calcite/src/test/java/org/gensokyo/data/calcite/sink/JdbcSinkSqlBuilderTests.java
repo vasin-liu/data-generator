@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -114,6 +115,57 @@ class JdbcSinkSqlBuilderTests {
                 IllegalArgumentException.class,
                 () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount")));
         Assertions.assertTrue(ex.getMessage().contains("clickhouse"));
+    }
+
+    @Test
+    void buildsKingbaseUsesOnConflictPath() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "kingbase",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
+        Assertions.assertTrue(sql.contains("on conflict (id) do update set"));
+        Assertions.assertTrue(sql.contains("amount = excluded.amount"));
+    }
+
+    @Test
+    void buildsHighgoUsesOnConflictPath() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "highgo",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
+        Assertions.assertTrue(sql.contains("on conflict (id) do update set"));
+        Assertions.assertTrue(sql.contains("amount = excluded.amount"));
+    }
+
+    @Test
+    void buildsDamengMergeInto() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "dameng",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        String sql = JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount"));
+        Assertions.assertTrue(sql.toLowerCase(Locale.ROOT).contains("merge into"));
+        Assertions.assertTrue(sql.contains("t.id = s.id"));
+        Assertions.assertTrue(sql.contains("when matched"));
+        Assertions.assertTrue(sql.contains("when not matched"));
+    }
+
+    @Test
+    void genericDialectUpsertFailsFast() {
+        JdbcWriterVO writer = writer("orders_out");
+        writer.setOptions(Map.of(
+                "dialect", "generic",
+                "upsert", true,
+                "upsertKeys", List.of("id")));
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> JdbcSinkSqlBuilder.buildSql(writer, List.of("id", "amount")));
+        Assertions.assertTrue(ex.getMessage().contains("generic"));
     }
 
     @Test
