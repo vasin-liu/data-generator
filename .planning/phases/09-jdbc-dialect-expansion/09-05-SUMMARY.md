@@ -104,7 +104,7 @@ Each task was committed atomically:
 1. **Task 1: Update template-v2-jdbc-sink-guide for five-engine dialect matrix** - `7879b13` (docs)
 2. **Task 2: AGENTS.md verify entry and ROADMAP Phase 9 plan registry** - `608993b` (docs)
 
-**Plan metadata:** pending (docs: complete plan)
+**Plan metadata:** `0bda657` (docs: complete plan)
 
 ## Files Created/Modified
 

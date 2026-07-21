@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 09
-current_phase_name: jdbc-dialect-expansion
-status: executing
-stopped_at: Completed 09-jdbc-dialect-expansion-04-PLAN.md
-last_updated: "2026-07-21T13:31:30.006Z"
+current_phase: 10
+current_phase_name: harness-coverage-ci-gates
+status: ready
+stopped_at: Completed 09-jdbc-dialect-expansion-05-PLAN.md
+last_updated: "2026-07-21T13:55:00.000Z"
 last_activity: 2026-07-21
-last_activity_desc: Plan 09-04 UAT verify script and Playwright preset E2E complete
+last_activity_desc: Plan 09-05 operator docs, AGENTS.md and ROADMAP registry complete — Phase 9 done
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 27
   completed_plans: 27
-  percent: 80
+  percent: 100
 ---
 
 # Project State
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 09 — jdbc-dialect-expansion
+**Current focus:** Phase 10 — harness-coverage-ci-gates
 
 ## Current Position
 
-Phase: 09 (jdbc-dialect-expansion) — EXECUTING
+Phase: 09 (jdbc-dialect-expansion) — COMPLETE
 Plan: 5 of 5 complete
-Status: Ready for plan 09-05
-Last activity: 2026-07-21 -- Plan 09-04 UAT verify script and Playwright preset E2E complete
+Status: Phase 9 complete; ready for Phase 10 planning
+Last activity: 2026-07-21 -- Plan 09-05 operator docs, AGENTS.md and ROADMAP registry complete
 
-Progress: [█████████░] 96% (v2.0 — Phase 9 plan 04)
+Progress: [██████████] 100% (v2.0 — Phase 9 complete)
 
 ## Performance Metrics
 
@@ -43,6 +43,12 @@ Progress: [█████████░] 96% (v2.0 — Phase 9 plan 04)
 - Plans: 18
 - Commits (milestone range): 46
 - Timeline: 2026-06-17 → 2026-06-23
+
+**Phase 9 plan 09-05:**
+
+- Duration: ~15 min
+- Tasks: 2
+- Files modified: 3
 
 ## Accumulated Context
 
@@ -59,6 +65,7 @@ Progress: [█████████░] 96% (v2.0 — Phase 9 plan 04)
 - Kingbase/highgo PG-proxy ITs fulfill per-dialect harness without licensed KB/HG images (09-03)
 - Dameng real IT opt-in via -Ddm.it=true or DG_DM_IT=true (09-03)
 - PostgreSQL 16 preset chosen for Phase 9 Playwright preset path (09-04)
+- Limitations table documents per-dialect fail-fast combinations in operator JDBC sink guide (09-05)
 
 ### Pending Todos
 
@@ -81,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-21T13:31:29.986Z
-Stopped at: Completed 09-jdbc-dialect-expansion-04-PLAN.md
-Next: Execute plan 09-05
+Last session: 2026-07-21T13:55:00.000Z
+Stopped at: Completed 09-jdbc-dialect-expansion-05-PLAN.md
+Next: Plan Phase 10 harness coverage and CI gates
