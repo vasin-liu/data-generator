@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,7 +60,7 @@ class ConsoleDataSourceControllerTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.getGovernance()).thenReturn(new DataGeneratorProperties.Governance());
+        lenient().when(properties.getGovernance()).thenReturn(new DataGeneratorProperties.Governance());
         mockMvc = MockMvcBuilders.standaloneSetup(
                         new ConsoleDataSourceController(
                                 dataSourceConfigService,
@@ -121,6 +122,16 @@ class ConsoleDataSourceControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[?(@.id == 'dm8')].driverClassName").value("dm.jdbc.driver.DmDriver"))
-                .andExpect(jsonPath("$.data[?(@.id == 'dm8')].bundled").value(true));
+                .andExpect(jsonPath("$.data[?(@.id == 'dm8')].bundled").value(true))
+                .andExpect(jsonPath("$.data[?(@.id == 'kingbase8')].driverClassName").value("com.kingbase8.Driver"))
+                .andExpect(jsonPath("$.data[?(@.id == 'kingbase8')].bundled").value(true))
+                .andExpect(jsonPath("$.data[?(@.id == 'highgo')].driverClassName").value("com.highgo.jdbc.Driver"))
+                .andExpect(jsonPath("$.data[?(@.id == 'highgo')].bundled").value(true))
+                .andExpect(jsonPath("$.data[?(@.id == 'clickhouse24')].urlTemplate")
+                        .value("jdbc:clickhouse://localhost:8123/default"))
+                .andExpect(jsonPath("$.data[?(@.id == 'postgresql16')].urlTemplate")
+                        .value("jdbc:postgresql://localhost:5432/postgres"))
+                .andExpect(jsonPath("$.data[?(@.id == 'postgresql16')].driverClassName")
+                        .value("org.postgresql.Driver"));
     }
 }

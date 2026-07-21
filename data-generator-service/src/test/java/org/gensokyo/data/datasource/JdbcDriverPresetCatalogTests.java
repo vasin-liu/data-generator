@@ -56,4 +56,47 @@ class JdbcDriverPresetCatalogTests {
         assertThat(JdbcDriverPresetCatalog.resolveBundleKey("com.mysql.cj.jdbc.Driver", "jdbc:mysql://h/db"))
                 .contains("mysql");
     }
+
+    @Test
+    void resolveDriverClassCandidates_resolvesHighGoUrl() {
+        List<String> candidates = JdbcDriverPresetCatalog.resolveDriverClassCandidates(
+                null, "jdbc:highgo://localhost:5866/highgo");
+        assertThat(candidates).containsExactly("com.highgo.jdbc.Driver");
+    }
+
+    @Test
+    void resolveDriverClassCandidates_resolvesDmUrl() {
+        List<String> candidates = JdbcDriverPresetCatalog.resolveDriverClassCandidates(
+                null, "jdbc:dm://host:5236");
+        assertThat(candidates).containsExactly("dm.jdbc.driver.DmDriver");
+    }
+
+    @Test
+    void resolveBundleKey_forClickHouseUrl() {
+        assertThat(JdbcDriverPresetCatalog.resolveBundleKey(
+                        "com.clickhouse.jdbc.ClickHouseDriver", "jdbc:clickhouse://localhost:8123/default"))
+                .contains("clickhouse");
+    }
+
+    @Test
+    void postgresql16Preset_hasCompleteFields() {
+        JdbcDriverPreset preset = JdbcDriverPresetCatalog.byId("postgresql16").orElseThrow();
+        assertThat(preset.primaryDriverClassName()).isEqualTo("org.postgresql.Driver");
+        assertThat(preset.urlTemplate()).isEqualTo("jdbc:postgresql://localhost:5432/postgres");
+        assertThat(preset.groupKey()).isEqualTo("postgresql");
+        assertThat(preset.bundleKey()).isEqualTo("postgresql");
+    }
+
+    @Test
+    void all_phase9EngineGroups_haveNonBlankUrlAndDriver() {
+        List<String> phase9Groups = List.of("dm", "kingbase", "highgo", "clickhouse", "postgresql");
+        for (String groupKey : phase9Groups) {
+            assertThat(JdbcDriverPresetCatalog.all())
+                    .anySatisfy(preset -> {
+                        assertThat(preset.groupKey()).isEqualTo(groupKey);
+                        assertThat(preset.primaryDriverClassName()).isNotBlank();
+                        assertThat(preset.urlTemplate()).isNotBlank();
+                    });
+        }
+    }
 }
