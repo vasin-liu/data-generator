@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-current_phase: 08
-current_phase_name: rw-streaming-upsert
+current_phase: 09
+current_phase_name: jdbc-dialect-expansion
 status: executing
-stopped_at: Phase 9 context gathered
-last_updated: "2026-07-21T11:56:55.823Z"
-last_activity: 2026-06-29
-last_activity_desc: Plan 08-09 OOM IT and Testcontainers upsert ITs complete
+stopped_at: Completed 09-jdbc-dialect-expansion-02-PLAN.md
+last_updated: "2026-07-21T12:26:00.000Z"
+last_activity: 2026-07-21
+last_activity_desc: Plan 09-02 console JDBC presets and connectivity hygiene complete
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 27
-  completed_plans: 23
-  percent: 60
+  completed_plans: 24
+  percent: 89
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 ## Current Position
 
 Phase: 09 (jdbc-dialect-expansion) — EXECUTING
-Plan: 1 of 5 complete
-Status: Ready for plan 09-02
-Last activity: 2026-07-21 -- Plan 09-01 JDBC dialect upsert matrix and publish validation complete
+Plan: 2 of 5 complete
+Status: Ready for plan 09-03
+Last activity: 2026-07-21 -- Plan 09-02 console JDBC presets and connectivity hygiene complete
 
-Progress: [█████████░] 85% (v2.0 — Phase 9 plan 01)
+Progress: [█████████░] 89% (v2.0 — Phase 9 plan 02)
 
 ## Performance Metrics
 
@@ -54,6 +54,8 @@ Progress: [█████████░] 85% (v2.0 — Phase 9 plan 01)
 - Orchestration/RW/datasource deferred to v2 — **v2.0 active**
 - v2 dialect priority: DM, Kingbase, HighGo, PG, CK
 - Dameng MERGE uses SELECT FROM dual for named-parameter batch binding (09-01)
+- Fallback presets use bundled:true for DM/KB/HG matching jdbc-bundled policy (09-02)
+- Proprietary driver connectivity failures prefix driverClassName hint without secrets (09-02)
 
 ### Pending Todos
 
@@ -76,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-21T11:56:55.809Z
-Stopped at: Phase 9 context gathered
-Next: `/gsd-execute-phase 6`
+Last session: 2026-07-21T12:26:00.000Z
+Stopped at: Completed 09-jdbc-dialect-expansion-02-PLAN.md
+Next: Execute plan 09-03
