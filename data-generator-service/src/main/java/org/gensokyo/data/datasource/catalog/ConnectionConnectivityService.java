@@ -121,9 +121,12 @@ public class ConnectionConnectivityService {
             }
             return ConnectionTestResult.ok("JDBC connection OK", details);
         } catch (DataGeneratorException ex) {
-            return ConnectionTestResult.fail("JDBC connectivity test failed: " + sanitizeMessage(ex.getMessage()), details);
+            return ConnectionTestResult.fail(
+                    sanitizeOperatorMessage("JDBC connectivity test failed: " + ex.getMessage(), password, url),
+                    enrichFailureDetails(details, driverClassName));
         } catch (Exception ex) {
-            return ConnectionTestResult.fail(summarizeJdbcFailure(ex), details);
+            return ConnectionTestResult.fail(
+                    summarizeJdbcFailure(ex, password, url, driverClassName), enrichFailureDetails(details, driverClassName));
         }
     }
 
@@ -210,26 +213,77 @@ public class ConnectionConnectivityService {
         return stringField(payload, "password");
     }
 
-    private static String summarizeJdbcFailure(Exception ex) {
+    private static String summarizeJdbcFailure(
+            Exception ex, String password, String url, String driverClassName) {
         String message = ex.getMessage();
         if (message == null || message.isBlank()) {
-            return "JDBC connection failed — verify URL, driver, and credentials";
+            return actionableDriverHint(driverClassName)
+                    + "JDBC connection failed — verify URL, driver, and credentials";
         }
         String lower = message.toLowerCase();
         if (lower.contains("password") || lower.contains("access denied") || lower.contains("authentication")) {
-            return "JDBC authentication failed — verify username and password";
+            return actionableDriverHint(driverClassName)
+                    + "JDBC authentication failed — verify username and password";
         }
         if (lower.contains("unknown host") || lower.contains("connection refused") || lower.contains("timeout")) {
-            return "JDBC host unreachable — verify URL and network access";
+            return actionableDriverHint(driverClassName)
+                    + "JDBC host unreachable — verify URL and network access";
         }
-        return "JDBC connectivity test failed: " + sanitizeMessage(message);
+        return actionableDriverHint(driverClassName)
+                + "JDBC connectivity test failed: "
+                + sanitizeOperatorMessage(message, password, url);
+    }
+
+    private static Map<String, Object> enrichFailureDetails(
+            Map<String, Object> details, String driverClassName) {
+        if (isProprietaryPhase9Driver(driverClassName)) {
+            details.put("driverClassName", driverClassName);
+        }
+        return details;
+    }
+
+    private static boolean isProprietaryPhase9Driver(String driverClassName) {
+        if (driverClassName == null || driverClassName.isBlank()) {
+            return false;
+        }
+        return driverClassName.startsWith("dm.jdbc.")
+                || driverClassName.startsWith("com.kingbase")
+                || driverClassName.startsWith("com.highgo.");
+    }
+
+    private static String actionableDriverHint(String driverClassName) {
+        if (!isProprietaryPhase9Driver(driverClassName)) {
+            return "";
+        }
+        return "[" + driverClassName + "] ";
+    }
+
+    /**
+     * Removes password literals and JDBC URL userinfo from operator-facing messages (D-11).
+     */
+    private static String sanitizeOperatorMessage(String message, String password, String jdbcUrl) {
+        if (message == null) {
+            return "";
+        }
+        String sanitized = sanitizeMessage(message);
+        if (password != null && !password.isBlank()) {
+            sanitized = sanitized.replace(password, "[redacted]");
+        }
+        if (jdbcUrl != null && !jdbcUrl.isBlank() && sanitized.contains(jdbcUrl)) {
+            sanitized = sanitized.replace(jdbcUrl, sanitizeMessage(jdbcUrl));
+        }
+        return sanitized;
     }
 
     private static String sanitizeMessage(String message) {
         if (message == null) {
             return "";
         }
-        // Strip userinfo from JDBC URLs that may appear in driver error messages (D-23).
-        return message.replaceAll("jdbc:[^:@/]+://[^@/]+@", "jdbc://[redacted]@");
+        // Strip userinfo from JDBC URLs that may appear in driver error messages (D-11).
+        String sanitized = message.replaceAll("(?i)jdbc:[^:@/\\s]+://[^@/\\s]+@", "jdbc://[redacted]@");
+        // Redact common password query parameters echoed by drivers.
+        sanitized = sanitized.replaceAll("(?i)(password=)[^&\\s\"']+", "$1[redacted]");
+        sanitized = sanitized.replaceAll("(?i)(pwd=)[^&\\s\"']+", "$1[redacted]");
+        return sanitized;
     }
 }

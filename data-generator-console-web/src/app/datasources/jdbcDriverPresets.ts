@@ -23,7 +23,7 @@ export const JDBC_DRIVER_GROUP_KEYS = [
   'mysql',
 ] as const;
 
-/** Client fallback when API catalog is unavailable */
+/** Client fallback when API catalog is unavailable (mirrors JdbcDriverPresetCatalog). */
 export const JDBC_DRIVER_PRESETS_FALLBACK: JdbcDriverPreset[] = [
   {
     id: 'dm8',
@@ -33,7 +33,7 @@ export const JDBC_DRIVER_PRESETS_FALLBACK: JdbcDriverPreset[] = [
     driverClassName: 'dm.jdbc.driver.DmDriver',
     alternateDriverClassNames: [],
     urlTemplate: 'jdbc:dm://localhost:5236?schema=YOUR_SCHEMA',
-    bundled: false,
+    bundled: true,
   },
   {
     id: 'kingbase8',
@@ -43,7 +43,7 @@ export const JDBC_DRIVER_PRESETS_FALLBACK: JdbcDriverPreset[] = [
     driverClassName: 'com.kingbase8.Driver',
     alternateDriverClassNames: ['com.kingbase.Driver'],
     urlTemplate: 'jdbc:kingbase8://localhost:54321/YOUR_DATABASE',
-    bundled: false,
+    bundled: true,
   },
   {
     id: 'kingbase9',
@@ -53,7 +53,7 @@ export const JDBC_DRIVER_PRESETS_FALLBACK: JdbcDriverPreset[] = [
     driverClassName: 'com.kingbase9.Driver',
     alternateDriverClassNames: ['com.kingbase8.Driver', 'com.kingbase.Driver'],
     urlTemplate: 'jdbc:kingbase9://localhost:54321/YOUR_DATABASE',
-    bundled: false,
+    bundled: true,
   },
   {
     id: 'highgo',
@@ -63,16 +63,26 @@ export const JDBC_DRIVER_PRESETS_FALLBACK: JdbcDriverPreset[] = [
     driverClassName: 'com.highgo.jdbc.Driver',
     alternateDriverClassNames: [],
     urlTemplate: 'jdbc:highgo://localhost:5866/highgo',
-    bundled: false,
+    bundled: true,
   },
   {
-    id: 'clickhouse20',
-    labelKey: 'datasources.driver.clickhouse20',
+    id: 'clickhouse24',
+    labelKey: 'datasources.driver.clickhouse24',
     groupKey: 'clickhouse',
     bundleKey: 'clickhouse',
     driverClassName: 'com.clickhouse.jdbc.ClickHouseDriver',
     alternateDriverClassNames: ['ru.yandex.clickhouse.ClickHouseDriver'],
     urlTemplate: 'jdbc:clickhouse://localhost:8123/default',
+    bundled: false,
+  },
+  {
+    id: 'postgresql16',
+    labelKey: 'datasources.driver.postgresql16',
+    groupKey: 'postgresql',
+    bundleKey: 'postgresql',
+    driverClassName: 'org.postgresql.Driver',
+    alternateDriverClassNames: [],
+    urlTemplate: 'jdbc:postgresql://localhost:5432/postgres',
     bundled: false,
   },
   {

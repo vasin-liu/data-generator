@@ -99,6 +99,66 @@ class ConnectionCatalogTestTests {
     }
 
     @Test
+    void jdbcDraftTest_dmDriverFailureIsActionableWithoutSecrets() {
+        assertProprietaryDriverFailureWithoutSecrets(
+                "jdbc:dm://127.0.0.1:59999/YOUR_SCHEMA",
+                "dm.jdbc.driver.DmDriver");
+    }
+
+    @Test
+    void jdbcDraftTest_kingbaseDriverFailureIsActionableWithoutSecrets() {
+        assertProprietaryDriverFailureWithoutSecrets(
+                "jdbc:kingbase8://127.0.0.1:59999/YOUR_DATABASE",
+                "com.kingbase8.Driver");
+    }
+
+    @Test
+    void jdbcDraftTest_highgoDriverFailureIsActionableWithoutSecrets() {
+        assertProprietaryDriverFailureWithoutSecrets(
+                "jdbc:highgo://127.0.0.1:59999/highgo",
+                "com.highgo.jdbc.Driver");
+    }
+
+    @Test
+    void jdbcDraftTest_failureStripsJdbcUrlUserinfo() {
+        Map<String, Object> payload = Map.of(
+                "url", "jdbc:dm://operator:s3cr3t@127.0.0.1:59999/YOUR_SCHEMA",
+                "username", "operator",
+                "password", "s3cr3t",
+                "driverClassName", "dm.jdbc.driver.DmDriver");
+
+        ConnectionTestResult result = connectionCatalog.test(
+                ConnectionTestRequest.forDraft(ConnectionKind.JDBC, payload));
+
+        Assertions.assertFalse(result.success());
+        Assertions.assertFalse(result.message().isBlank());
+        Assertions.assertFalse(result.message().contains("s3cr3t"));
+        Assertions.assertFalse(result.message().contains("operator:s3cr3t@"));
+    }
+
+    private void assertProprietaryDriverFailureWithoutSecrets(String url, String driverClassName) {
+        Map<String, Object> payload = Map.of(
+                "url", url,
+                "username", "operator",
+                "password", "s3cr3t",
+                "driverClassName", driverClassName);
+
+        ConnectionTestResult result = connectionCatalog.test(
+                ConnectionTestRequest.forDraft(ConnectionKind.JDBC, payload));
+
+        Assertions.assertFalse(result.success());
+        Assertions.assertFalse(result.message().isBlank());
+        Assertions.assertFalse(result.message().contains("s3cr3t"));
+        Assertions.assertTrue(
+                result.message().contains("unreachable")
+                        || result.message().contains("connectivity")
+                        || result.message().contains("failed")
+                        || result.message().contains(driverClassName));
+        Object detailsDriver = result.details().get("driverClassName");
+        Assertions.assertEquals(driverClassName, detailsDriver);
+    }
+
+    @Test
     void kafkaDraftTest_succeedsAgainstEmbeddedBroker() {
         Map<String, Object> payload = Map.of(
                 "bootstrapServers", List.of(kafkaBroker.getBrokersAsString()));
