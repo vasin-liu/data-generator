@@ -29,7 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Shared CHUNKED JDBC upsert idempotency scenario for PostgreSQL and MySQL (D-15, D-25).
+ * Shared CHUNKED JDBC upsert idempotency scenario for PostgreSQL, MySQL, Kingbase, and HighGo (D-15).
+ *
+ * <p><strong>PostgreSQL proxy for Kingbase/HighGo (D-15):</strong> {@code assertUpsertIdempotent}
+ * sets sink {@code options.dialect} to the passed dialect key ({@code kingbase} or {@code highgo})
+ * while the JDBC connection may use the PostgreSQL driver against a PG Testcontainers instance.
+ * SQL generation follows the shared {@code ON CONFLICT} path from {@code JdbcSinkSqlBuilder}; the
+ * proxy proves dialect-key mapping and {@code rowsUpserted} metrics without licensed KB/HG images.
  *
  * @author Gensokyo
  * @since 2026-06-29
@@ -50,7 +56,8 @@ public final class UpsertParitySupport {
      * @param username        database user
      * @param password        database password
      * @param driverClassName JDBC driver class
-     * @param dialect         {@code postgres} or {@code mysql} for sink options and upsert SQL fragment checks
+     * @param dialect         sink {@code options.dialect} key ({@code postgres}, {@code mysql},
+     *                        {@code kingbase}, or {@code highgo}); JDBC URL/driver may differ for PG-proxy ITs
      */
     public static void assertUpsertIdempotent(
             String jdbcUrl, String username, String password, String driverClassName, String dialect) {
@@ -170,7 +177,8 @@ public final class UpsertParitySupport {
     }
 
     private static RuntimeException withDialectSqlHint(Throwable cause, String dialect) {
-        String fragment = "postgres".equals(dialect) ? "ON CONFLICT" : "ON DUPLICATE KEY";
+        // Kingbase and HighGo share the PostgreSQL ON CONFLICT upsert path (D-01, D-15).
+        String fragment = usesPostgresConflictClause(dialect) ? "ON CONFLICT" : "ON DUPLICATE KEY";
         String message = "Upsert pipeline failed; expected generated SQL to contain " + fragment
                 + " for dialect " + dialect + ": " + cause.getMessage();
         if (cause instanceof RuntimeException runtimeException) {
@@ -178,6 +186,13 @@ public final class UpsertParitySupport {
             return runtimeException;
         }
         return new IllegalStateException(message, cause);
+    }
+
+    private static boolean usesPostgresConflictClause(String dialect) {
+        return switch (dialect) {
+            case "postgres", "postgresql", "kingbase", "highgo" -> true;
+            default -> false;
+        };
     }
 
     private static DataSource dataSource(
