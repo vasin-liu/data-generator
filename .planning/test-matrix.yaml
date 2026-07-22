@@ -530,3 +530,16 @@ rows:
       - StreamingPipelineTests
     notes: Phase 8 NDJSON/array JSON streaming sink plus StreamingPipeline evidence (RW-01, TEST-07). CsvJsonStreamingOomIT excluded (low-heap profile).
 
+  - id: v2-jdbc-upsert-pg-mysql
+    capability: v2-jdbc-upsert
+    adapter: jdbc
+    test_types: [integration, unit]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - ChunkedPipelinePostgresUpsertTests
+      - ChunkedPipelineMySqlUpsertTests
+      - JdbcUpsertSmokeTests
+    notes: Phase 8 PG/MySQL Testcontainers upsert idempotency plus smoke unit (RW-03, TEST-07). Embedded-first per docs/testing-embedded-components.md.
+
