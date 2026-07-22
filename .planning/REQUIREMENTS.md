@@ -28,7 +28,7 @@
 ### Test Harness (TEST)
 
 - [x] **TEST-07**: Feature matrix adds P0/P1 rows for streaming CSV/JSON, JDBC upsert, and each target dialect (DM, Kingbase, HighGo, PG, CK) with embedded-first tests
-- [ ] **TEST-08**: `verify-harness.ps1` reports coverage status for new RW/DS matrix rows; P0 subset gates merge for dialect + streaming paths
+- [x] **TEST-08**: `verify-harness.ps1` reports coverage status for new RW/DS matrix rows; P0 subset gates merge for dialect + streaming paths
 
 ## Future Requirements
 
@@ -74,7 +74,7 @@ Deferred beyond v2.0.
 | RW-05 | Phase 9 | Complete |
 | RW-06 | Phase 9 | Complete |
 | TEST-07 | Phase 10 | Complete |
-| TEST-08 | Phase 10 | Pending |
+| TEST-08 | Phase 10 | Complete (10-02) |
 
 **Coverage:**
 

@@ -190,10 +190,10 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. CI merge gate fails when any P0 row for streaming, upsert, or dialect paths regresses
 4. `AGENTS.md` documents the expanded P0 row set and verification command
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 - [x] 10-01-PLAN.md
-- [ ] 10-02-PLAN.md
+- [x] 10-02-PLAN.md
 - [ ] 10-03-PLAN.md
 
 ## Requirement Coverage
