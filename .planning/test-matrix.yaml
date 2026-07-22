@@ -543,3 +543,59 @@ rows:
       - JdbcUpsertSmokeTests
     notes: Phase 8 PG/MySQL Testcontainers upsert idempotency plus smoke unit (RW-03, TEST-07). Embedded-first per docs/testing-embedded-components.md.
 
+  - id: v2-dialect-dameng
+    capability: v2-dialect-dameng
+    adapter: jdbc
+    test_types: [unit]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests: [JdbcSinkSqlBuilderTests]
+    notes: Dameng MERGE SQL unit (buildsDamengMergeInto) satisfies covered bar (RW-05, TEST-07). Optional ChunkedPipelineDamengUpsertIT gated by -Ddm.it=true is not linked.
+
+  - id: v2-dialect-kingbase
+    capability: v2-dialect-kingbase
+    adapter: jdbc
+    test_types: [integration, unit]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - ChunkedPipelineKingbaseDialectTests
+      - JdbcSinkSqlBuilderTests
+    notes: PG-proxy Testcontainers IT plus buildsKingbaseUsesOnConflictPath unit (RW-05, TEST-07). No licensed Kingbase image required.
+
+  - id: v2-dialect-highgo
+    capability: v2-dialect-highgo
+    adapter: jdbc
+    test_types: [integration, unit]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - ChunkedPipelineKingbaseDialectTests
+      - JdbcSinkSqlBuilderTests
+    notes: PG-proxy Testcontainers IT plus buildsHighgoUsesOnConflictPath unit (RW-05, TEST-07). No licensed HighGo image required.
+
+  - id: v2-dialect-postgres
+    capability: v2-dialect-postgres
+    adapter: jdbc
+    test_types: [integration]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests: [ChunkedPipelinePostgresUpsertTests]
+    notes: PostgreSQL Testcontainers upsert idempotency IT (RW-05, TEST-07).
+
+  - id: v2-dialect-clickhouse
+    capability: v2-dialect-clickhouse
+    adapter: jdbc
+    test_types: [integration, unit]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - ClickHouseInsertBulkWriterIntegrationTests
+      - JdbcSinkSqlBuilderTests
+    notes: ClickHouse insert-bulk Testcontainers IT plus clickhouseUpsertIsUnsupported unit reject (RW-05, TEST-07).
+
