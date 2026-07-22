@@ -74,7 +74,7 @@ Deferred beyond v2.0.
 | RW-05 | Phase 9 | Complete |
 | RW-06 | Phase 9 | Complete |
 | TEST-07 | Phase 10 | Complete |
-| TEST-08 | Phase 10 | Complete (10-02) |
+| TEST-08 | Phase 10 | Complete (10-02 gate, 10-03 docs) |
 
 **Coverage:**
 

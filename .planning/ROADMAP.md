@@ -14,7 +14,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - [ ] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
-- [ ] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
+- [x] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
 
 ## Phase Details
 
@@ -190,11 +190,11 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 3. CI merge gate fails when any P0 row for streaming, upsert, or dialect paths regresses
 4. `AGENTS.md` documents the expanded P0 row set and verification command
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans executed
 
 - [x] 10-01-PLAN.md
 - [x] 10-02-PLAN.md
-- [ ] 10-03-PLAN.md
+- [x] 10-03-PLAN.md
 
 ## Requirement Coverage
 
