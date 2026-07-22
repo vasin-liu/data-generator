@@ -158,7 +158,14 @@ Prefer **in-process embedded** infrastructure in unit and integration tests: H2 
 
 ### Merge criteria (P0 regression gate)
 
-Pull requests are **blocked when any P0 matrix row is not green**. The gate is enforced by `scripts/verify-harness.ps1` (reads `p0.pass` from `target/test-matrix-summary.json`) via the **Harness verify** workflow (`.github/workflows/harness-verify.yml`) on `pull_request`. P1/P2 row failures are tracked in the summary but do **not** block merge this phase. The P0 set is defined in `.planning/test-matrix.yaml` (`tier: P0`); see `docs/test-harness.md` for tier semantics and the COV-01 completion target.
+Pull requests are **blocked when any P0 matrix row is not green**. The gate is enforced by `.\scripts\verify-harness.ps1` (reads `p0.pass` from `target/test-matrix-summary.json`) via the **Harness verify** workflow (`.github/workflows/harness-verify.yml`) on `pull_request`. P1/P2 row failures are tracked in the summary but do **not** block merge this phase.
+
+The P0 set is defined in `.planning/test-matrix.yaml` (`tier: P0`); see `docs/test-harness.md` for tier semantics, evidence bars, and the COV-01 completion target. Phase 10 expanded the gate from 7 to **15 rows**, adding Phase 8 streaming/upsert and Phase 9 dialect capabilities:
+
+- **New P0 rows (8):** `v2-streaming-csv`, `v2-streaming-json`, `v2-jdbc-upsert-pg-mysql`, `v2-dialect-dameng`, `v2-dialect-kingbase`, `v2-dialect-highgo`, `v2-dialect-postgres`, `v2-dialect-clickhouse`
+- **Plus 7 legacy harness rows:** `calcite-scenario-v2`, `udf-sql`, `udf-script`, `udf-java-plugin`, `transform-json`, `transform-mask`, `transform-lookup`
+
+Phase 8/9 UAT scripts (`verify-phase8-uat-rw-streaming-upsert.ps1`, `verify-phase9-uat-jdbc-dialect.ps1`) are **supplementary UAT** — useful for operator sign-off, but **not** the merge gate. Use `.\scripts\verify-harness.ps1` as the canonical pre-merge check.
 
 ## Boundaries
 
