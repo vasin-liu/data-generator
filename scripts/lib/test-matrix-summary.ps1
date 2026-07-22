@@ -116,24 +116,39 @@ function Parse-MatrixRows([string]$YamlText) {
     $inRows = $false
     $rows = New-Object System.Collections.Generic.List[hashtable]
     $current = $null
+    # Active key for multi-line YAML lists (e.g. linked_tests: then "  - ClassName")
+    $listKey = $null
 
     foreach ($line in $lines) {
-        if ($line -match '^\s*rows:\s*$') { $inRows = $true; continue }
+        if ($line -match '^\s*rows:\s*$') { $inRows = $true; $listKey = $null; continue }
         if (-not $inRows) { continue }
         if ($line -match '^\s*-\s*id:\s*(.+)$') {
             if ($null -ne $current) { $rows.Add($current) }
             $current = @{ id = $Matches[1].Trim() }
+            $listKey = $null
             continue
         }
         if ($null -eq $current) { continue }
+        # Collect "- item" lines while a list-valued key is open
+        if ($null -ne $listKey -and $line -match '^\s+-\s+(.+)$') {
+            $item = $Matches[1].Trim()
+            if ($item -match '^["''](.*)["'']$') { $item = $Matches[1] }
+            $current[$listKey] = @($current[$listKey]) + @($item)
+            continue
+        }
         if ($line -match '^\s*([a-z_]+):\s*(.*)$') {
             $key = $Matches[1]
             $raw = $Matches[2].Trim()
-            if ($raw -eq '') { $current[$key] = @() }
+            $listKey = $null
+            if ($raw -eq '') {
+                # Empty value starts a multi-line list (or stays empty if no items follow)
+                $current[$key] = @()
+                $listKey = $key
+            }
             elseif ($raw -match '^\[(.*)\]$') {
                 $inner = $Matches[1].Trim()
                 if ($inner -eq '') { $current[$key] = @() }
-                else { $current[$key] = $inner -split ',\s*' | ForEach-Object { $_.Trim() } }
+                else { $current[$key] = @($inner -split ',\s*' | ForEach-Object { $_.Trim() }) }
             }
             else { $current[$key] = $raw }
         }
