@@ -506,3 +506,27 @@ rows:
     linked_tests: [UdfGovernanceSupportTests, UdfConsoleTemplateBindingE2ETests]
     notes: Registry records and governs PF4J JAR plugins; loading reuses existing directory path (UDF-02, D-09).
 
+  - id: v2-streaming-csv
+    capability: v2-streaming-csv
+    adapter: csv
+    test_types: [unit, integration]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - CsvJsonStreamingSinkTests
+      - StreamingPipelineTests
+    notes: Phase 8 per-chunk CSV streaming sink plus StreamingPipeline evidence (RW-01, TEST-07). CsvJsonStreamingOomIT excluded (low-heap profile).
+
+  - id: v2-streaming-json
+    capability: v2-streaming-json
+    adapter: json
+    test_types: [unit, integration]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P0
+    linked_tests:
+      - CsvJsonStreamingSinkTests
+      - StreamingPipelineTests
+    notes: Phase 8 NDJSON/array JSON streaming sink plus StreamingPipeline evidence (RW-01, TEST-07). CsvJsonStreamingOomIT excluded (low-heap profile).
+
