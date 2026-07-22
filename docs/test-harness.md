@@ -34,7 +34,20 @@ Each matrix row carries a `tier` field (`P0`, `P1`, or `P2`):
 
 **COV-01 completion target:** P0 must be 100% green to merge; P1/P2 are tracked with no hard percentage this phase.
 
-**P0 rows (7):** `calcite-scenario-v2`, `udf-sql`, `udf-script`, `udf-java-plugin`, `transform-json`, `transform-mask`, `transform-lookup`.
+**P0 rows (15):** `calcite-scenario-v2`, `udf-sql`, `udf-script`, `udf-java-plugin`, `transform-json`, `transform-mask`, `transform-lookup`, `v2-streaming-csv`, `v2-streaming-json`, `v2-jdbc-upsert-pg-mysql`, `v2-dialect-dameng`, `v2-dialect-kingbase`, `v2-dialect-highgo`, `v2-dialect-postgres`, `v2-dialect-clickhouse`.
+
+### Phase 10 RW/dialect P0 evidence
+
+Phase 10 expanded the merge gate with Phase 8 streaming/upsert and Phase 9 dialect rows. Evidence bars (see also [testing-embedded-components.md](testing-embedded-components.md) for Testcontainers norms):
+
+| Row id | Evidence bar |
+|--------|--------------|
+| `v2-dialect-dameng` | **MERGE SQL unit** (`JdbcSinkSqlBuilderTests`, e.g. `buildsDamengMergeInto`). Optional `ChunkedPipelineDamengUpsertIT` via `-Ddm.it=true` is **not** in the default gate. |
+| `v2-dialect-kingbase`, `v2-dialect-highgo` | **PostgreSQL Testcontainers proxy IT** (`ChunkedPipelineKingbaseDialectTests`) plus dialect-key SQL builder units (`buildsKingbaseUsesOnConflictPath`, `buildsHighgoUsesOnConflictPath`). No licensed Kingbase/HighGo images required. |
+| `v2-dialect-postgres` | **PostgreSQL Testcontainers upsert IT** (`ChunkedPipelinePostgresUpsertTests`). |
+| `v2-dialect-clickhouse` | **ClickHouse Testcontainers insert-bulk IT** (`ClickHouseInsertBulkWriterIntegrationTests`) plus SQL builder unit rejecting upsert (`clickhouseUpsertIsUnsupported`). |
+| `v2-streaming-csv`, `v2-streaming-json` | Streaming sink units and `StreamingPipelineTests` (low-heap `CsvJsonStreamingOomIT` excluded from linked tests). |
+| `v2-jdbc-upsert-pg-mysql` | PG/MySQL Testcontainers upsert ITs plus `JdbcUpsertSmokeTests`. |
 
 ## Matrix maintenance
 
@@ -75,7 +88,7 @@ The `p0` block is the machine-readable P0 rollup consumed by the merge gate:
 
 | Field | Meaning |
 |-------|---------|
-| `p0.total` | Count of rows with `tier: P0` |
+| `p0.total` | Count of rows with `tier: P0` (15 after Phase 10 expansion) |
 | `p0.green` | Count of P0 rows whose computed status is `covered` |
 | `p0.pass` | `true` only when every P0 row is green (`status == covered`) |
 | `p0.rows[]` | Per-P0-row `{id, status, green}` detail |
