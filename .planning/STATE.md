@@ -4,17 +4,17 @@ milestone: v2.0
 milestone_name: milestone
 current_phase: 10
 current_phase_name: Harness Coverage & CI Gates
-status: planning
-stopped_at: Phase 10 context gathered — ready to plan
-last_updated: "2026-07-22T05:02:00.000Z"
+status: executing
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-07-22T05:42:00.000Z"
 last_activity: 2026-07-22
-last_activity_desc: Phase 10 discuss-phase complete — CONTEXT.md ready
+last_activity_desc: Phase 10 plan 01 complete — 8 P0 matrix rows registered
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 27
-  completed_plans: 27
-  percent: 80
+  total_plans: 30
+  completed_plans: 28
+  percent: 93
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 ## Current Position
 
 Phase: 10 — Harness Coverage & CI Gates
-Plan: Not started
-Status: Phase 10 context gathered; ready to plan
-Last activity: 2026-07-22 — discuss-phase 10 complete
+Plan: 01 complete (next: 10-02)
+Status: P0 matrix rows registered; harness verification pending plan 02
+Last activity: 2026-07-22 — completed 10-01-PLAN.md
 
-Progress: [██████████] 100% (v2.0 — Phase 9 complete)
+Progress: [█████████░] 93% (28/30 plans)
 
 ## Performance Metrics
 
@@ -49,6 +49,12 @@ Progress: [██████████] 100% (v2.0 — Phase 9 complete)
 - Duration: ~15 min
 - Tasks: 2
 - Files modified: 3
+
+**Phase 10 plan 10-01:**
+
+- Duration: ~8 min
+- Tasks: 3
+- Files modified: 1
 
 ## Accumulated Context
 
@@ -66,6 +72,8 @@ Progress: [██████████] 100% (v2.0 — Phase 9 complete)
 - Dameng real IT opt-in via -Ddm.it=true or DG_DM_IT=true (09-03)
 - PostgreSQL 16 preset chosen for Phase 9 Playwright preset path (09-04)
 - Limitations table documents per-dialect fail-fast combinations in operator JDBC sink guide (09-05)
+- Phase 10 P0 matrix expanded to 15 rows with Phase 8/9 linked_tests (10-01)
+- Dameng P0 covered via MERGE unit only; ChunkedPipelineDamengUpsertIT excluded from linked_tests (10-01, D-08)
 
 ### Pending Todos
 
@@ -88,6 +96,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-21T13:55:00.000Z
-Stopped at: Completed 09-jdbc-dialect-expansion-05-PLAN.md
-Next: Plan Phase 10 harness coverage and CI gates
+Last session: 2026-07-22T05:42:00.000Z
+Stopped at: Completed 10-01-PLAN.md
+Next: Execute 10-02-PLAN.md (harness verification)
