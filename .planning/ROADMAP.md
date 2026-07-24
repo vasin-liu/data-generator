@@ -1,7 +1,7 @@
 # Milestone v2.0: Reader/Writer & Datasource Platform
 
-**Status:** 🚧 IN PROGRESS (Phase 6 validated)
-**Phases:** 6-10
+**Status:** 🚧 IN PROGRESS (Phase 07.1 inserted — DS-03 gap)
+**Phases:** 6-10 (+ 07.1)
 **Total Plans:** TBD
 
 ## Overview
@@ -11,7 +11,8 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 ## Phases
 
 - [x] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
-- [ ] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
+- [x] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
+- [ ] **Phase 07.1: Close gap: DS-03 — JDBC snapshot routing on execute path** (INSERTED) — Wire snap pools into JDBC execute path
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
 - [x] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
@@ -86,6 +87,34 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - `07-05` — Playwright E2E, playwright-cli & Phase 7 UAT scripts (DS-03, DS-04, DS-05)
 
 **Verification**: `.\scripts\verify-phase7-uat-datasource-governance.ps1 -SkipPlaywright` (Maven IT slice); full UAT adds Podman Playwright + playwright-cli snapshots.
+
+### Phase 07.1: Close gap: DS-03 — JDBC snapshot routing on execute path (INSERTED)
+
+**Goal:** In-flight V2 runs keep JDBC reads/writes on the run-start connection snapshot (`snap:{instanceId}:{name}`); hot-reload must not redirect live JDBC traffic for active runs.
+
+**Requirements**: DS-03 (closure)
+
+**Depends on:** Phase 7
+
+**Success Criteria** (what must be TRUE):
+
+1. `DefaultRuntimeJdbcEndpointResolver` (or JDBC adapters) resolves to snapshot routing keys when `WorkflowRunContext.instanceId()` is set
+2. Mid-flight datasource update IT proves in-flight JDBC run still uses pre-reload params while a new run picks up post-reload params
+3. Kafka/ES snapshot paths remain unchanged (already wired)
+
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 07.1-01-PLAN.md — Fix DefaultRuntimeJdbcEndpointResolver managed snap return + ownership Javadoc
+- [ ] 07.1-02-PLAN.md — Verify QuerySource/PostGIS/JdbcRowSink push resolved ids
+- [ ] 07.1-03-PLAN.md — Mid-flight SpringBootTest IT for source+sink snap: routing keys
+
+**Wave 1:** 07.1-01
+
+**Wave 2:** 07.1-02 (blocked on 01)
+
+**Wave 3:** 07.1-03 (blocked on 01; may also depend on 02)
 
 ### Phase 8: RW Streaming & Upsert
 
