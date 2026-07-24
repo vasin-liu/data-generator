@@ -1,7 +1,7 @@
 # Milestone v2.0: Reader/Writer & Datasource Platform
 
-**Status:** 🚧 IN PROGRESS (Phase 07.1 inserted — DS-03 gap)
-**Phases:** 6-10 (+ 07.1)
+**Status:** 🚧 IN PROGRESS (Phase 11 closeout hardening — tech debt from v2.0 audit)
+**Phases:** 6-11 (+ 07.1)
 **Total Plans:** TBD
 
 ## Overview
@@ -16,6 +16,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
 - [x] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
+- [ ] **Phase 11: v2.0 closeout hardening** — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06)
 
 ## Phase Details
 
@@ -251,6 +252,17 @@ Plans:
 - Net-new non-JDBC connectors (Redis, S3, HTTP)
 - Exhaustive 100% matrix coverage
 - Distributed worker multi-JVM E2E
+
+### Phase 11: v2.0 closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 10
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 11 to break down)
 
 ---
 *Roadmap created: 2026-06-23 for milestone v2.0*

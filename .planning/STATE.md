@@ -1,20 +1,20 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: milestone
-current_phase: 08
-current_phase_name: RW Streaming & Upsert
-status: verifying
+milestone_name: closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth
+current_phase: 11
+current_phase_name: v2.0 closeout hardening
+status: executing
 stopped_at: Completed 07.1-03-PLAN.md
-last_updated: "2026-07-24T06:51:34.518Z"
+last_updated: "2026-07-24T10:15:24.258Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 07.1 complete, transitioned to Phase 08
+last_activity_desc: Phase 11 execution started
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
   total_plans: 33
   completed_plans: 33
-  percent: 100
+  percent: 86
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 07.1 — close-gap-ds-03-jdbc-snapshot-routing-on-execute-path
+**Current focus:** Phase 11 — v2.0 closeout hardening
 
 ## Current Position
 
-Phase: 08 — RW Streaming & Upsert
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-07-24 — Phase 07.1 complete, transitioned to Phase 08
+Phase: 11 (v2.0 closeout hardening) — EXECUTING
+Plan: 1 of ?
+Status: Executing Phase 11
+Last activity: 2026-07-24 — Phase 11 execution started
 
 Progress: [██████████] 100% (33/33 plans)
 
