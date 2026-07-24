@@ -27,6 +27,21 @@ import java.util.Objects;
 /**
  * Registers inline JDBC endpoints into the dynamic routing datasource and validates managed ids via catalog (D-29).
  *
+ * <p>This bean is the <b>V2 Template execute-path authority</b> for JDBC endpoint resolution:
+ * {@link org.gensokyo.data.calcite.source.QuerySourceFactory}, PostGIS source factories, and
+ * {@code JdbcRowSinkAdapter} call it to resolve the routing key used for both catalog-managed
+ * and inline connections at run time. When a {@code WorkflowRunContext} is bound for the
+ * current run (i.e. {@code instanceId} is set), the managed path returns the run-start
+ * snapshot routing key {@code snap:{instanceId}:{name}} instead of the logical
+ * {@code dataSourceId}, so in-flight runs keep their pre-reload pool (DS-03).
+ *
+ * <p>{@link org.gensokyo.data.datasource.jdbc.JdbcCatalogResolver} is a separate resolver that
+ * remains the datasource module's catalog-side resolution helper. Both resolvers coexist by
+ * design in this phase — this class does not delegate to or depend on
+ * {@code JdbcCatalogResolver}; it independently mirrors the same catalog-resolve /
+ * register-if-absent semantics for the execute path. Consolidating the two is a deferred,
+ * future concern.
+ *
  * @author Gensokyo
  * @since 2026-05-19
  */
