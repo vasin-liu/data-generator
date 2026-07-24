@@ -21,12 +21,14 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 - Datasource governance: hot-reload snapshots, managed vs inline connections, secret refs, connectivity test, audit trail
 - Harness matrix rows for new RW and dialect paths
 
-## Current State (v1.0 shipped — 2026-06-23)
+## Current State (v2.0 phases complete — Phase 07.1 closed 2026-07-24)
 
+- **Phase 07.1 complete:** `DefaultRuntimeJdbcEndpointResolver` returns `snap:{instanceId}:{name}` on managed JDBC execute path; `JdbcSnapshotExecutePathIT` proves mid-flight isolation
+- **v2.0 roadmap phases 6–10 (+07.1):** executed; progress 33/33 plans
 - **Test harness:** `.planning/test-matrix.yaml`, `scripts/verify-harness.ps1`, `harness-verify.yml`, embedded fixtures, Playwright smoke
 - **UDFs:** Unified registry (java-plugin, script, sql); console upload/publish; JDBC persistence; template publish-time validation; sample UDFs in `samples/udf-samples/`
 - **Transforms:** json/mask/lookup operators, `GET /api/console/transforms`, actionable run-report errors, `V2_JSON_EXTRACT`
-- **CI gate:** 7 P0 matrix rows must pass before merge (`AGENTS.md` merge criteria)
+- **CI gate:** expanded P0 matrix (Phase 10) must pass before merge (`AGENTS.md` merge criteria)
 
 ## Deferred Beyond v2.0
 
@@ -52,11 +54,16 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 - ✓ Transform operators + catalog + errors (XFORM-01..06) — v1.0 Phase 4
 - ✓ P0 coverage ramp + CI gate (COV-01..04) — v1.0 Phase 5
 
+### Validated (v2.0 — through Phase 07.1)
+
+- ✓ Datasource platform core + governance (DS-01..DS-05) — Phases 6–7; DS-03 execute-path snap routing closed in Phase 07.1
+- ✓ RW streaming CSV/JSON + JDBC upsert (RW-01..RW-04) — Phase 8
+- ✓ JDBC dialect expansion DM/KB/HG/PG/CK (RW-05, RW-06) — Phase 9
+- ✓ Harness coverage + P0 CI gates for RW/DS paths (TEST-07, TEST-08) — Phase 10
+
 ### Active (v2.0)
 
-- Reader/Writer gap closure and dialect expansion (RW-01..RW-06)
-- Datasource abstraction and governance (DS-01..DS-05)
-- Harness coverage for new RW/dialect paths (TEST-07..TEST-08)
+- Milestone close-out / audit remaining (phases 6–10 + 07.1 executed)
 
 ### Out of Scope
 
@@ -123,4 +130,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-23 after v2.0 milestone start*
+*Last updated: 2026-07-24 after Phase 07.1 DS-03 execute-path gap closure*
