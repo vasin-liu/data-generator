@@ -255,14 +255,24 @@ Plans:
 
 ### Phase 11: v2.0 closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06)
 
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 10
+**Goal:** Close the two PARTIAL E2E proof gaps from the v2.0 milestone audit so managed-catalog and dialect journeys have traced end-to-end evidence before milestone archive.
+
+**Requirements**: DS-02 (proof depth), RW-05, RW-06 (E2E depth)
+
+**Depends on:** Phase 10 (and Phases 6/9 implementations)
+
+**Success Criteria** (what must be TRUE):
+
+1. A Maven IT (or equivalent harness-linked test) creates/registers a **managed** JDBC datasource, runs a V2 template whose sink/source uses that managed `dataSourceId`, and asserts sink row counts — not only inline `InlineDataSourceVO` registration
+2. At least one dialect beyond PostgreSQL has a traced path from console preset (or API preset apply) → connectivity test → dialect-correct upsert/write execute with evidence in CI-default or documented opt-in (`-Ddm.it=true` for Dameng is acceptable if green when enabled and documented)
+3. Phase 11 verification updates the milestone audit disposition for flows #1 and #8 from PARTIAL toward OK (or documents remaining accepted limits)
+
 **Plans:** 0 plans
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 11 to break down)
+- [ ] TBD (run `/gsd-discuss-phase 11` then `/gsd-plan-phase 11`)
 
 ---
 *Roadmap created: 2026-06-23 for milestone v2.0*
+*Updated: 2026-07-24 — Phase 11 added for v2.0 audit tech-debt closeout*

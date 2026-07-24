@@ -4,11 +4,11 @@ milestone: v2.0
 milestone_name: closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth
 current_phase: 11
 current_phase_name: v2.0 closeout hardening
-status: executing
-stopped_at: Completed 07.1-03-PLAN.md
-last_updated: "2026-07-24T10:15:24.258Z"
+status: planning
+stopped_at: Phase 11 added — awaiting discuss/plan
+last_updated: "2026-07-24T10:16:00Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 11 execution started
+last_activity_desc: Phase 11 added for v2.0 audit tech-debt closeout
 progress:
   total_phases: 7
   completed_phases: 6
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 11 — v2.0 closeout hardening
+**Current focus:** Phase 11 — v2.0 closeout hardening (DS-02 managed E2E + dialect depth)
 
 ## Current Position
 
-Phase: 11 (v2.0 closeout hardening) — EXECUTING
-Plan: 1 of ?
-Status: Executing Phase 11
-Last activity: 2026-07-24 — Phase 11 execution started
+Phase: 11 — v2.0 closeout hardening
+Plan: Not started
+Status: Phase added — ready to discuss/plan
+Last activity: 2026-07-24 — Phase 11 added from v2.0 audit tech-debt option B
 
-Progress: [██████████] 100% (33/33 plans)
+Progress: [█████████░] ~86% (33 prior plans complete; Phase 11 unplanned)
 
 ## Performance Metrics
 
@@ -102,6 +102,7 @@ None.
 ### Roadmap Evolution
 
 - Phase 07.1 inserted after Phase 7 (URGENT): Close gap: DS-03 — JDBC snapshot routing on execute path
+- Phase 11 added: v2.0 closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06) after v2.0 audit `tech_debt` review
 
 ## Deferred Items
 
