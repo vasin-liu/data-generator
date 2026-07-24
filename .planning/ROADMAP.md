@@ -267,12 +267,26 @@ Plans:
 2. At least one dialect beyond PostgreSQL has a traced path from console preset (or API preset apply) → connectivity test → dialect-correct upsert/write execute with evidence in CI-default or documented opt-in (`-Ddm.it=true` for Dameng is acceptable if green when enabled and documented)
 3. Phase 11 verification updates the milestone audit disposition for flows #1 and #8 from PARTIAL toward OK (or documents remaining accepted limits)
 
-**Plans:** 0 plans
+**Plans:** 3 plans in 3 waves
 
-Plans:
+- [ ] `11-01-PLAN.md` — ManagedJdbcCatalogSinkE2eIT (DS-02, D-01–D-08)
+- [ ] `11-02-PLAN.md` — Playwright kingbase8 + verify-phase11-uat-closeout-hardening.ps1 (RW-05, RW-06, D-09–D-16, D-19)
+- [ ] `11-03-PLAN.md` — AGENTS.md + surgical v2.0-MILESTONE-AUDIT.md flows #1/#8 (SC3, D-18, D-20)
 
-- [ ] TBD (run `/gsd-discuss-phase 11` then `/gsd-plan-phase 11`)
+**Wave 1** *(no dependencies)*
+
+- `11-01` — Managed JDBC catalog sink E2E IT
+
+**Wave 2** *(blocked on Wave 1)*
+
+- `11-02` — Kingbase evidence pack (Playwright + UAT script; reuse ConnectionCatalogTestTests + ChunkedPipelineKingbaseDialectTests)
+
+**Wave 3** *(blocked on Waves 1–2)*
+
+- `11-03` — AGENTS.md registry + surgical audit closeout
+
+**Verification:** `.\scripts\verify-phase11-uat-closeout-hardening.ps1 -SkipPlaywright` (Maven slice); full UAT adds Podman Playwright via reused `npm run e2e:phase9-jdbc-dialect`.
 
 ---
 *Roadmap created: 2026-06-23 for milestone v2.0*
-*Updated: 2026-07-24 — Phase 11 added for v2.0 audit tech-debt closeout*
+*Updated: 2026-07-25 — Phase 11 planned (3 plans / 3 waves)*
