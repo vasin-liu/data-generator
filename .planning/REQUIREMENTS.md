@@ -7,10 +7,10 @@
 
 ### Reader/Writer — Gap Closure (RW)
 
-- [ ] **RW-01**: CSV and JSON V2 sources support streaming/chunked reads so large files do not fully materialize in heap
-- [ ] **RW-02**: CSV and JSON V2 sinks support streaming/chunked writes for large output datasets
-- [ ] **RW-03**: JDBC sink supports upsert/merge semantics for PostgreSQL and MySQL with dialect-correct SQL generation
-- [ ] **RW-04**: Run reports surface per-sink row counts and actionable errors for streaming and upsert paths
+- [x] **RW-01**: CSV and JSON V2 sources support streaming/chunked reads so large files do not fully materialize in heap
+- [x] **RW-02**: CSV and JSON V2 sinks support streaming/chunked writes for large output datasets
+- [x] **RW-03**: JDBC sink supports upsert/merge semantics for PostgreSQL and MySQL with dialect-correct SQL generation
+- [x] **RW-04**: Run reports surface per-sink row counts and actionable errors for streaming and upsert paths
 
 ### Reader/Writer — Dialect Expansion (RW)
 
@@ -21,9 +21,9 @@
 
 - [x] **DS-01**: `data-generator-datasource` module hosts unified connection abstractions for JDBC, Kafka, and Elasticsearch (replacing ad-hoc service-only wiring)
 - [x] **DS-02**: Managed connection catalog API resolves `dataSourceId` / `connectionRef` through the new abstraction layer without breaking existing console templates
-- [ ] **DS-03**: Hot-reload applies datasource changes via snapshot-based refresh; in-flight runs continue on the connection snapshot taken at run start
-- [ ] **DS-04**: Governance enforces managed vs inline connection policy, secret refs (no plaintext production secrets), and connectivity test before publish where configured
-- [ ] **DS-05**: Datasource create/update/delete and hot-reload events emit audit records consumable by the console Audit page
+- [x] **DS-03**: Hot-reload applies datasource changes via snapshot-based refresh; in-flight runs continue on the connection snapshot taken at run start
+- [x] **DS-04**: Governance enforces managed vs inline connection policy, secret refs (no plaintext production secrets), and connectivity test before publish where configured
+- [x] **DS-05**: Datasource create/update/delete and hot-reload events emit audit records consumable by the console Audit page
 
 ### Test Harness (TEST)
 
@@ -64,13 +64,13 @@ Deferred beyond v2.0.
 |-------------|-------|--------|
 | DS-01 | Phase 6 | Complete |
 | DS-02 | Phase 6 | Complete |
-| DS-03 | Phase 7 | Pending |
-| DS-04 | Phase 7 | Pending |
-| DS-05 | Phase 7 | Pending |
-| RW-01 | Phase 8 | Pending |
-| RW-02 | Phase 8 | Pending |
-| RW-03 | Phase 8 | Pending |
-| RW-04 | Phase 8 | Pending |
+| DS-03 | Phase 7 | Complete |
+| DS-04 | Phase 7 | Complete |
+| DS-05 | Phase 7 | Complete |
+| RW-01 | Phase 8 | Complete |
+| RW-02 | Phase 8 | Complete |
+| RW-03 | Phase 8 | Complete |
+| RW-04 | Phase 8 | Complete |
 | RW-05 | Phase 9 | Complete |
 | RW-06 | Phase 9 | Complete |
 | TEST-07 | Phase 10 | Complete |
@@ -84,4 +84,4 @@ Deferred beyond v2.0.
 
 ---
 *Requirements defined: 2026-06-23*
-*Last updated: 2026-06-23 after v2.0 milestone scoping*
+*Last updated: 2026-07-23 after Phase 8 UAT close + DS/RW checkbox sync*
