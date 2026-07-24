@@ -102,11 +102,11 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 2. Mid-flight datasource update IT proves in-flight JDBC run still uses pre-reload params while a new run picks up post-reload params
 3. Kafka/ES snapshot paths remain unchanged (already wired)
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 
-- [ ] 07.1-01-PLAN.md — Fix DefaultRuntimeJdbcEndpointResolver managed snap return + ownership Javadoc
+- [x] 07.1-01-PLAN.md — Fix DefaultRuntimeJdbcEndpointResolver managed snap return + ownership Javadoc
 - [ ] 07.1-02-PLAN.md — Verify QuerySource/PostGIS/JdbcRowSink push resolved ids
 - [ ] 07.1-03-PLAN.md — Mid-flight SpringBootTest IT for source+sink snap: routing keys
 

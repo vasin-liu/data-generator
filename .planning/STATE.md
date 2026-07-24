@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 current_phase: 07.1
-status: Not planned yet — run /gsd-plan-phase 07.1
-stopped_at: Phase 07.1 context gathered
-last_updated: "2026-07-24T02:22:36.176Z"
+current_phase_name: close-gap-ds-03-jdbc-snapshot-routing-on-execute-path
+status: executing
+stopped_at: Completed 07.1-01-PLAN.md
+last_updated: "2026-07-24T04:14:05.276Z"
 last_activity: 2026-07-24
-last_activity_desc: Phase 07.1 planning complete
+last_activity_desc: Phase 07.1 execution started
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 30
-  completed_plans: 30
+  total_plans: 33
+  completed_plans: 31
   percent: 83
-current_phase_name: "Close gap: DS-03 JDBC snapshot routing"
 ---
 
 # Project State
@@ -24,14 +24,14 @@ current_phase_name: "Close gap: DS-03 JDBC snapshot routing"
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 07.1 — Close gap: DS-03 JDBC snapshot routing
+**Current focus:** Phase 07.1 — close-gap-ds-03-jdbc-snapshot-routing-on-execute-path
 
 ## Current Position
 
-Phase: 07.1
-Plan: 1 of ?
-Status: Not planned yet — run /gsd-plan-phase 07.1
-Last activity: 2026-07-24 — Phase 07.1 planning complete
+Phase: 07.1 (close-gap-ds-03-jdbc-snapshot-routing-on-execute-path) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-07-24 — Phase 07.1 execution started
 
 Progress: [██████████] 100% (30/30 plans)
 
@@ -84,6 +84,8 @@ Progress: [██████████] 100% (30/30 plans)
 - Windows harness runs require JDK 25 — clear stale JAVA_HOME before verify-harness.ps1 (10-02)
 - docs/test-harness.md and AGENTS.md synced to 15-row P0 inventory with evidence bars (10-03)
 - Phase 8/9 UAT scripts documented as supplementary; verify-harness.ps1 is canonical merge gate (10-03)
+- [Phase 07.1]: Managed JDBC resolve mirrors JdbcCatalogResolver semantics inside DefaultRuntimeJdbcEndpointResolver (no delegation) — D-14/D-15: fix locus stays inside DefaultRuntime; JdbcCatalogResolver gets zero edits this phase
+- [Phase 07.1]: Both JDBC resolvers kept with documented ownership split; consolidation deferred — D-13/D-16: DefaultRuntimeJdbcEndpointResolver is V2 execute-path authority; JdbcCatalogResolver remains catalog-side
 
 ### Pending Todos
 
@@ -108,11 +110,12 @@ None.
 | Platform | Datasource abstraction refactor | v2 | 2026-06-17 init |
 | Product | Template-level orchestration | Later version | 2026-06-17 init |
 | Process | Milestone audit (`/gsd-audit-milestone`) | Skipped at v1.0 close | 2026-06-23 |
+| Phase 07.1 P01 | 64min | 2 tasks | 1 files |
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/07.1-close-gap-ds-03-jdbc-snapshot-routing-on-execute-path/07.1-CONTEXT.md
+**Resume file:** None
 
-Last session: 2026-07-24T01:27:40.408Z
-Stopped at: Phase 07.1 context gathered
+Last session: 2026-07-24T04:14:05.241Z
+Stopped at: Completed 07.1-01-PLAN.md
 Next: `/gsd-plan-phase 07.1`
