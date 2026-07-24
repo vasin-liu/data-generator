@@ -12,7 +12,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 
 - [x] **Phase 6: Datasource Platform Core** — Unified JDBC/Kafka/ES abstractions; managed catalog resolution (DS-01, DS-02)
 - [x] **Phase 7: Datasource Governance & Hot-Reload** — Snapshot refresh, policy enforcement, connectivity test, audit (DS-03, DS-04, DS-05)
-- [ ] **Phase 07.1: Close gap: DS-03 — JDBC snapshot routing on execute path** (INSERTED) — Wire snap pools into JDBC execute path
+- [x] **Phase 07.1: Close gap: DS-03 — JDBC snapshot routing on execute path** (INSERTED) — Wire snap pools into JDBC execute path (completed 2026-07-24)
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
 - [x] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
@@ -102,13 +102,13 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 2. Mid-flight datasource update IT proves in-flight JDBC run still uses pre-reload params while a new run picks up post-reload params
 3. Kafka/ES snapshot paths remain unchanged (already wired)
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 
 - [x] 07.1-01-PLAN.md — Fix DefaultRuntimeJdbcEndpointResolver managed snap return + ownership Javadoc
 - [x] 07.1-02-PLAN.md — Verify QuerySource/PostGIS/JdbcRowSink push resolved ids
-- [ ] 07.1-03-PLAN.md — Mid-flight SpringBootTest IT for source+sink snap: routing keys
+- [x] 07.1-03-PLAN.md — Mid-flight SpringBootTest IT for source+sink snap: routing keys
 
 **Wave 1:** 07.1-01
 
