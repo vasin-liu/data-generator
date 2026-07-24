@@ -2,19 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 10 verified — multi-line linked_tests parser fix + 15/15 P0 gate
-last_updated: "2026-07-22T07:35:00.000Z"
-last_activity: 2026-07-22
-last_activity_desc: Phase 10 VERIFICATION passed after Parse-MatrixRows multi-line list fix
+current_phase: 07.1
+status: Not planned yet — run /gsd-plan-phase 07.1
+stopped_at: Phase 07.1 context gathered
+last_updated: "2026-07-24T01:27:40.833Z"
+last_activity: 2026-07-23
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
   total_plans: 30
   completed_plans: 30
-  percent: 100
-current_phase: 10
-current_phase_name: Harness Coverage & CI Gates
+  percent: 83
+current_phase_name: "Close gap: DS-03 JDBC snapshot routing"
 ---
 
 # Project State
@@ -24,14 +23,14 @@ current_phase_name: Harness Coverage & CI Gates
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 10 — harness-coverage-ci-gates
+**Current focus:** Phase 07.1 — Close gap: DS-03 JDBC snapshot routing
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
-Status: Phase 10 complete — 15-row P0 gate green and documented
-Last activity: 2026-07-22
+Phase: 07.1
+Plan: 1 of ?
+Status: Not planned yet — run /gsd-plan-phase 07.1
+Last activity: 2026-07-23
 
 Progress: [██████████] 100% (30/30 plans)
 
@@ -94,6 +93,11 @@ None.
 - Boot 4 / internal Kafka-ES starter compatibility (see `.planning/codebase/CONCERNS.md`)
 - Console RBAC default-off for external deployments
 - No formal milestone audit before v1.0 close (accepted)
+- v2.0 milestone audit gaps: DS-03 JDBC snapshot execute-path bypass (Phase 07.1)
+
+### Roadmap Evolution
+
+- Phase 07.1 inserted after Phase 7 (URGENT): Close gap: DS-03 — JDBC snapshot routing on execute path
 
 ## Deferred Items
 
@@ -106,6 +110,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-07-22T06:11:00.000Z
-Stopped at: Completed 10-03-PLAN.md
-Next: Phase 10 milestone complete
+**Resume file:** .planning/phases/07.1-close-gap-ds-03-jdbc-snapshot-routing-on-execute-path/07.1-CONTEXT.md
+
+Last session: 2026-07-24T01:27:40.408Z
+Stopped at: Phase 07.1 context gathered
+Next: `/gsd-plan-phase 07.1`
