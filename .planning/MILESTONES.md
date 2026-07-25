@@ -26,6 +26,7 @@ Brownfield release closing V2 source/sink gaps and establishing a unified dataso
 - Roadmap: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Requirements: [milestones/v2.0-REQUIREMENTS.md](milestones/v2.0-REQUIREMENTS.md)
 - Audit: [milestones/v2.0-MILESTONE-AUDIT.md](milestones/v2.0-MILESTONE-AUDIT.md)
+- Phases: [milestones/v2.0-phases/](milestones/v2.0-phases/)
 
 ### Known Tech Debt at Close
 

@@ -63,7 +63,7 @@ completed: 2026-06-29
 
 ## Task Commits
 
-1. **Chunked JSON source + streaming parser + tests** - (feat commit hash below)
+1. **Chunked JSON source + streaming parser + tests** - `fe33bb0` (feat)
 
 ## Files Created/Modified
 

@@ -95,7 +95,7 @@ Each task was committed atomically:
 1. **Task 1: Extend JdbcSinkSqlBuilder for five-engine dialect upsert matrix** - `162c6a5` (test RED), `ef69a34` (feat GREEN)
 2. **Task 2: Wire runtime upsert metrics and publish-time dialect validation** - `6ee784b` (feat)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `4b45ae5` (docs: complete plan)
 
 ## Files Created/Modified
 
