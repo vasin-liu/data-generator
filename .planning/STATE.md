@@ -4,17 +4,17 @@ milestone: v2.0
 milestone_name: closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth
 current_phase: 11
 current_phase_name: v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr
-status: executing
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-07-25T01:04:43.077Z"
+status: verifying
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-07-25T01:21:06.576Z"
 last_activity: 2026-07-25
 last_activity_desc: Completed 11-01 ManagedJdbcCatalogSinkE2eIT
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 36
-  completed_plans: 35
-  percent: 86
+  completed_plans: 36
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 
 Phase: 11 (v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-25 — Completed 11-01 ManagedJdbcCatalogSinkE2eIT
 
 Progress: [█████████░] 94% (34/36 plans; Phase 11: 1/3)
@@ -89,6 +89,7 @@ Progress: [█████████░] 94% (34/36 plans; Phase 11: 1/3)
 - [Phase 07.1]: Plan 07.1-02 verify-only: no code changes to QuerySourceFactory/PostGisQuerySourceFactory/JdbcRowSinkAdapter — All three adapters already used the RuntimeJdbcEndpointResolver return value exclusively; DS-03 gap was fully isolated to DefaultRuntimeJdbcEndpointResolver (fixed in 07.1-01)
 - [Phase 11]: D-01–D-08 honored: dedicated ManagedJdbcCatalogSinkE2eIT, save-managed DS, sink-only managed id, unbound TemplateV2Runner, COUNT(*) proof — CONTEXT non-negotiable decisions for DS-02 proof-depth closeout
 - [Phase 11]: Kingbase evidence pack via Playwright kingbase8 + Maven connectivity/upsert reuse (D-09–D-19) — CONTEXT override: three-piece pack not single-JVM chain; no Dameng/P0/npm changes
+- [Phase 11]: Surgical audit closeout for flows #1/#8 with accepted in-process and Dameng/single-JVM limits; overall status may stay tech_debt — CONTEXT D-20 / D-05 / D-12 / D-13 — evidence pointers without inventing HTTP task or Dameng live-CI green claims
 
 ### Pending Todos
 
@@ -119,11 +120,12 @@ None.
 | Phase 07.1 P03 | 28 min | 2 tasks | 1 files |
 | Phase 11 P01 | 12 min | 1 tasks | 1 files |
 | Phase 11 P02 | 11 min | 2 tasks | 2 files |
+| Phase 11 P03 | 10 min | 2 tasks | 3 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-25T01:04:43.064Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-07-25T01:19:20.584Z
+Stopped at: Completed 11-03-PLAN.md
 Next: `/gsd-execute-phase 11`

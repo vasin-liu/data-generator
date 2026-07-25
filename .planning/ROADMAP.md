@@ -16,7 +16,7 @@ Brownfield milestone delivering V2 source/sink gap closure (streaming CSV/JSON, 
 - [x] **Phase 8: RW Streaming & Upsert** — Chunked CSV/JSON I/O; PG/MySQL upsert; run-report diagnostics (RW-01..RW-04)
 - [x] **Phase 9: JDBC Dialect Expansion** — DM, Kingbase, HighGo, PG, CK writers + console presets (RW-05, RW-06) (completed 2026-07-21)
 - [x] **Phase 10: Harness Coverage & CI Gates** — Matrix rows and P0 gate for RW/DS paths (TEST-07, TEST-08)
-- [ ] **Phase 11: v2.0 closeout hardening** — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06)
+- [x] **Phase 11: v2.0 closeout hardening** — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06) (completed 2026-07-25)
 
 ## Phase Details
 
@@ -267,7 +267,7 @@ Plans:
 2. At least one dialect beyond PostgreSQL has a traced path from console preset (or API preset apply) → connectivity test → dialect-correct upsert/write execute with evidence in CI-default or documented opt-in (`-Ddm.it=true` for Dameng is acceptable if green when enabled and documented)
 3. Phase 11 verification updates the milestone audit disposition for flows #1 and #8 from PARTIAL toward OK (or documents remaining accepted limits)
 
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 
 - [x] 11-01-PLAN.md
 - [x] 11-02-PLAN.md
