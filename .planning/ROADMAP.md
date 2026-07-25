@@ -267,15 +267,15 @@ Plans:
 2. At least one dialect beyond PostgreSQL has a traced path from console preset (or API preset apply) → connectivity test → dialect-correct upsert/write execute with evidence in CI-default or documented opt-in (`-Ddm.it=true` for Dameng is acceptable if green when enabled and documented)
 3. Phase 11 verification updates the milestone audit disposition for flows #1 and #8 from PARTIAL toward OK (or documents remaining accepted limits)
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 
 - [x] 11-01-PLAN.md
 - [x] 11-02-PLAN.md
-- [ ] 11-03-PLAN.md
+- [x] 11-03-PLAN.md
 
 - [x] `11-01-PLAN.md` — ManagedJdbcCatalogSinkE2eIT (DS-02, D-01–D-08)
 - [x] `11-02-PLAN.md` — Playwright kingbase8 + verify-phase11-uat-closeout-hardening.ps1 (RW-05, RW-06, D-09–D-16, D-19)
-- [ ] `11-03-PLAN.md` — AGENTS.md + surgical v2.0-MILESTONE-AUDIT.md flows #1/#8 (SC3, D-18, D-20)
+- [x] `11-03-PLAN.md` — AGENTS.md + surgical v2.0-MILESTONE-AUDIT.md flows #1/#8 (SC3, D-18, D-20)
 
 **Wave 1** *(no dependencies)*
 
