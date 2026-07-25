@@ -12,7 +12,7 @@ last_activity_desc: v2.1 roadmap created (phases 12–17)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
+  total_plans: 2
   completed_plans: 0
   percent: 0
 ---
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 Phase: 12 (HTTP Execute-Path Proof) — context captured
 Plan: —
-Status: Context ready — next `/gsd-plan-phase 12`
-Last activity: 2026-07-25 — Phase 12 CONTEXT.md captured
+Status: Plans ready — next `/gsd-execute-phase 12`
+Last activity: 2026-07-25 — Phase 12 PLAN.md files created (12-01, 12-02)
 
 ## Performance Metrics
 
@@ -54,8 +54,8 @@ Last activity: 2026-07-25 — Phase 12 CONTEXT.md captured
 **Velocity (v2.1):**
 
 - Phases planned: 6 (12–17)
-- Plans: 0
-- Status: roadmap ready
+- Plans: 2 (Phase 12)
+- Status: Phase 12 planned — ready for `/gsd-execute-phase 12`
 
 ## Accumulated Context
 
