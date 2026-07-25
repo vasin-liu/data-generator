@@ -72,12 +72,12 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 3. The IT does **not** count as done if it only invokes `TemplateV2Runner` in-process without HTTP enqueue + job/sink assertion
 4. Evidence packaging makes the HTTP→managed-id→rows path obvious to maintainers reviewing the test
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 12-01-PLAN.md — EXEC-01 ManagedJdbcCatalogHttpExecuteIT (H2, MockMvc `/task/run`)
+- [x] 12-01-PLAN.md — EXEC-01 ManagedJdbcCatalogHttpExecuteIT (H2, MockMvc `/task/run`)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -205,7 +205,7 @@ Plans:
 | 9. JDBC Dialect Expansion | v2.0 | 5/5 | Complete | 2026-07-21 |
 | 10. Harness Coverage & CI Gates | v2.0 | 3/3 | Complete | 2026-07 |
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
-| 12. HTTP Execute-Path Proof | v2.1 | 0/2 | Planned | — |
+| 12. HTTP Execute-Path Proof | v2.1 | 1/2 | In Progress|  |
 | 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 0/TBD | Pending | — |
 | 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
 | 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |

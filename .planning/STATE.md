@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 12
-current_phase_name: HTTP Execute-Path Proof
-status: roadmap_ready
-stopped_at: v2.1 roadmap created (phases 12–17)
-last_updated: "2026-07-25T07:47:19.199Z"
+current_phase_name: http-execute-path-proof
+status: executing
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-07-25T11:26:47.316Z"
 last_activity: 2026-07-25
-last_activity_desc: v2.1 roadmap created (phases 12–17)
+last_activity_desc: Phase 12 execution started
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** v2.1 Hardening & Weak-Spot Closure — roadmap ready; next `/gsd-plan-phase 12`
+**Current focus:** Phase 12 — http-execute-path-proof
 
 ## Current Position
 
-Phase: 12 (HTTP Execute-Path Proof) — context captured
-Plan: —
-Status: Plans ready — next `/gsd-execute-phase 12`
-Last activity: 2026-07-25 — Phase 12 PLAN.md files created (12-01, 12-02)
+Phase: 12 (http-execute-path-proof) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-07-25 — Phase 12 execution started
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - v2.1 breadth hardening over new features — **active**
 - v2.1 RBAC stays default-off with testable enable path — **active** (SEC-01)
 - v2.1 phase map 12–17 from research SUMMARY — **roadmap locked**
+- [Phase 12]: HTTP EXEC-01 via MockMvc /task/run + publish gate + COUNT(*); Phase 11 IT untouched — Close v2.0 in-process-only limit without renaming Phase 11 proof
 
 ### Pending Todos
 
@@ -98,13 +99,14 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Dameng live CI opt-in only | In progress via DIAL-01 (v2.1) | 2026-07-25 |
 | tech_debt | Nyquist hygiene phases 07/08/07.1 | In progress via DIAL-02 (v2.1) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
+| Phase 12-http-execute-path-proof P01 | 41min | 2 tasks | 1 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-25T07:47:18.709Z
-Stopped at: v2.1 roadmap created (phases 12–17)
+Last session: 2026-07-25T11:26:47.120Z
+Stopped at: Completed 12-01-PLAN.md
 Next: `/gsd-plan-phase 12`
 
 ## Operator Next Steps
