@@ -1,13 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: —
-current_phase: —
-status: Awaiting next milestone
-stopped_at: Milestone v2.0 archived
-last_updated: "2026-07-25T02:35:00.000Z"
+milestone: v2.1
+milestone_name: Hardening & Weak-Spot Closure
+status: planning
+last_updated: "2026-07-25T03:56:07.744Z"
 last_activity: 2026-07-25
-last_activity_desc: Milestone v2.0 completed and archived
 progress:
   total_phases: 0
   completed_phases: 0
@@ -27,12 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-25 — Milestone v2.0 completed and archived
-
-Progress: v1.0 + v2.0 shipped (see `.planning/MILESTONES.md`)
+Status: Defining requirements
+Last activity: 2026-07-25 — Milestone v2.1 started
 
 ## Performance Metrics
 

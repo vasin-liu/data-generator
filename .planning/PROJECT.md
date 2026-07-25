@@ -23,14 +23,19 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-MILESTONE-AUDIT.md`
 
-## Next Milestone Goals
+## Current Milestone: v2.1 Hardening & Weak-Spot Closure
 
-Define via `/gsd-new-milestone`. Likely themes from deferred backlog:
+**Goal:** Close the highest-value proof and reliability gaps left after v2.0 — without opening a new major feature lane.
 
-- Template-level orchestration (ORCH-01, ORCH-02)
-- Net-new connector families (Redis, S3, HTTP) after gap closure
-- Distributed worker multi-JVM E2E / exhaustive matrix (TEST-V2, DIST-01)
-- Optional hardening: Dameng live CI, Nyquist validation backfill, JDBC resolver consolidation
+**Target features:**
+- Execute-path evidence: managed-catalog (+ dialect) journeys through HTTP `/task/run`
+- Dialect/driver hardening: Dameng live IT documented green path; Nyquist/validation hygiene backfill
+- Resolver ownership docs + call-site inventory (no code merge)
+- One multi-JVM distributed worker E2E path with harness linkage
+- Console RBAC: keep default-off; testable enable path + staging/e2e docs
+- Focused P1 harness expansion for new proof paths; P0 remains merge gate
+
+**Out of scope this milestone:** template orchestration, net-new connectors (Redis/S3/HTTP), default-on RBAC, full JDBC resolver consolidation
 
 ## Requirements
 
