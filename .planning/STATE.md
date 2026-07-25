@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth
 current_phase: 11
-current_phase_name: v2.0 closeout hardening
-status: Phase 11 planned — ready to execute
-stopped_at: Phase 11 plans written (11-01..11-03)
-last_updated: "2026-07-24T23:37:41.877Z"
+current_phase_name: v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr
+status: executing
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-07-25T00:46:29.784Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 11 planned (3 plans / 3 waves)
+last_activity_desc: Completed 11-01 ManagedJdbcCatalogSinkE2eIT
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 36
-  completed_plans: 33
-  percent: 86
+  completed_plans: 34
+  percent: 94
 ---
 
 # Project State
@@ -24,16 +24,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 11 — v2.0 closeout hardening (DS-02 managed E2E + dialect depth)
+**Current focus:** Phase 11 — v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr
 
 ## Current Position
 
-Phase: 11 — v2.0 closeout hardening
-Plan: 11-01 ready (waves 1→2→3)
-Status: Phase 11 planned — ready to execute
-Last activity: 2026-07-25 — Phase 11 planned (3 plans / 3 waves)
+Phase: 11 (v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-07-25 — Completed 11-01 ManagedJdbcCatalogSinkE2eIT
 
-Progress: [█████████░] ~86% (33 prior plans complete; 3 Phase 11 plans pending)
+Progress: [█████████░] 94% (34/36 plans; Phase 11: 1/3)
 
 ## Performance Metrics
 
@@ -87,6 +87,7 @@ Progress: [█████████░] ~86% (33 prior plans complete; 3 Phas
 - [Phase 07.1]: Managed JDBC resolve mirrors JdbcCatalogResolver semantics inside DefaultRuntimeJdbcEndpointResolver (no delegation) — D-14/D-15: fix locus stays inside DefaultRuntime; JdbcCatalogResolver gets zero edits this phase
 - [Phase 07.1]: Both JDBC resolvers kept with documented ownership split; consolidation deferred — D-13/D-16: DefaultRuntimeJdbcEndpointResolver is V2 execute-path authority; JdbcCatalogResolver remains catalog-side
 - [Phase 07.1]: Plan 07.1-02 verify-only: no code changes to QuerySourceFactory/PostGisQuerySourceFactory/JdbcRowSinkAdapter — All three adapters already used the RuntimeJdbcEndpointResolver return value exclusively; DS-03 gap was fully isolated to DefaultRuntimeJdbcEndpointResolver (fixed in 07.1-01)
+- [Phase 11]: D-01–D-08 honored: dedicated ManagedJdbcCatalogSinkE2eIT, save-managed DS, sink-only managed id, unbound TemplateV2Runner, COUNT(*) proof — CONTEXT non-negotiable decisions for DS-02 proof-depth closeout
 
 ### Pending Todos
 
@@ -115,11 +116,12 @@ None.
 | Phase 07.1 P01 | 64min | 2 tasks | 1 files |
 | Phase 07.1 P02 | 12min | 2 tasks | 0 files |
 | Phase 07.1 P03 | 28 min | 2 tasks | 1 files |
+| Phase 11 P01 | 12 min | 1 tasks | 1 files |
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/11-v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr/11-01-PLAN.md
+**Resume file:** None
 
-Last session: 2026-07-25
-Stopped at: Phase 11 plans written (11-01..11-03)
+Last session: 2026-07-25T00:45:47.023Z
+Stopped at: Completed 11-01-PLAN.md
 Next: `/gsd-execute-phase 11`
