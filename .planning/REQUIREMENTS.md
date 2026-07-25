@@ -67,21 +67,21 @@ Deferred beyond v2.1.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXEC-01 | TBD | Pending |
-| EXEC-02 | TBD | Pending |
-| DIAL-01 | TBD | Pending |
-| DIAL-02 | TBD | Pending |
-| RES-01 | TBD | Pending |
-| DIST-01 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| TEST-09 | TBD | Pending |
+| EXEC-01 | 12 | Pending |
+| EXEC-02 | 12 | Pending |
+| DIAL-01 | 13 | Pending |
+| DIAL-02 | 13 | Pending |
+| RES-01 | 14 | Pending |
+| DIST-01 | 15 | Pending |
+| SEC-01 | 16 | Pending |
+| TEST-09 | 17 | Pending |
 
 **Coverage:**
 
 - v2.1 requirements: 8 total
-- Mapped to phases: 0 (roadmap next)
-- Unmapped: 8
+- Mapped to phases: 8 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-25*
-*Last updated: 2026-07-25 after research + scope confirmation (all)*
+*Last updated: 2026-07-25 — roadmap phases 12–17 mapped*

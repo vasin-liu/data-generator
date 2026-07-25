@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 UDF, Transform & Test Harness** — Phases 1-5 (shipped 2026-06-23)
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
-- 📋 **Next** — define via `/gsd-new-milestone`
+- 📋 **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (in planning)
 
 ## Phases
 
@@ -36,16 +36,149 @@ Full archive: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 </details>
 
-### 📋 Next milestone (Planned)
+## Milestone v2.1: Hardening & Weak-Spot Closure
 
-Define scope with `/gsd-new-milestone` (questioning → research → requirements → roadmap).
+**Status:** 📋 Planning complete — ready for `/gsd-plan-phase 12`
+**Phases:** 12–17
+**Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09
 
-Candidate deferred themes from v2.0:
+### Overview
 
-- Template-level orchestration (ORCH-01, ORCH-02)
-- Net-new connectors (Redis, S3, HTTP)
-- Exhaustive matrix / distributed worker E2E (TEST-V2, DIST-01)
-- Accepted tech debt: Dameng live CI, Nyquist hygiene, JDBC resolver consolidation
+Close the highest-value proof and reliability gaps left after v2.0 — HTTP execute-path evidence, Dameng/Nyquist hygiene, resolver ownership docs, one multi-JVM worker path, RBAC enable-path (default-off), and focused P1 harness rows. No new major feature lane; P0 merge gate unchanged.
+
+### Phase list
+
+- [ ] **Phase 12: HTTP Execute-Path Proof** — Managed catalog (+ dialect) via HTTP `/task/run` (EXEC-01, EXEC-02)
+- [ ] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02)
+- [ ] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01)
+- [ ] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01)
+- [ ] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01)
+- [ ] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09)
+
+### Phase Details
+
+### Phase 12: HTTP Execute-Path Proof
+
+**Goal**: Prove managed JDBC catalog (and at least one CI-friendly dialect path) through the real HTTP execute spine — not in-process `TemplateV2Runner` alone.
+
+**Depends on**: v2.0 complete (Phases 6–11)
+
+**Requirements**: EXEC-01, EXEC-02
+
+**Success Criteria** (what must be TRUE):
+
+1. MockMvc or HTTP IT enqueues a V2 template that uses a **managed** JDBC `dataSourceId` via `/task/run` or console `/api/templates/{id}/run` and the run reaches SUCCESS with sink row evidence
+2. At least one CI-friendly dialect path (PostgreSQL and/or Kingbase-proxy patterns already in-repo) is proven on that same HTTP execute spine with dialect-aware write/upsert evidence
+3. The IT does **not** count as done if it only invokes `TemplateV2Runner` in-process without HTTP enqueue + job/sink assertion
+4. Evidence packaging makes the HTTP→managed-id→rows path obvious to maintainers reviewing the test
+
+**Plans**: TBD at `/gsd-plan-phase 12`
+
+### Phase 13: Dameng Live Path + Nyquist Hygiene
+
+**Goal**: Document a reproducible Dameng opt-in live IT green path and backfill Nyquist/VALIDATION hygiene for lagging v2.0 phases — without promoting Dameng live into the P0 merge gate.
+
+**Depends on**: v2.0 Phase 9/11 dialect evidence (can proceed in parallel with Phase 12)
+
+**Requirements**: DIAL-01, DIAL-02
+
+**Success Criteria** (what must be TRUE):
+
+1. Maintainers can follow a documented recipe (`-Ddm.it=true` / `DG_DM_IT=true`, host/image, expected PASS) for Dameng live IT
+2. Default CI / merge bar remains MERGE-unit based; Dameng live IT is explicitly not a P0 merge requirement
+3. Nyquist/`nyquist_compliant` / VALIDATION status is accurate for phases 07, 07.1, and 08 (honest green or documented gap closed)
+4. If no Dameng host is available, done criteria are honest: documented enable path + MERGE unit remains the merge bar (no fake live green)
+
+**Plans**: TBD at `/gsd-plan-phase 13`
+
+### Phase 14: Resolver Ownership Docs
+
+**Goal**: Give maintainers a clear ownership model and call-site inventory for the dual JDBC resolvers — without merging them.
+
+**Depends on**: Phase 12 preferred (inventory reflects real HTTP run-path callers); can start after research if needed
+
+**Requirements**: RES-01
+
+**Success Criteria** (what must be TRUE):
+
+1. An ownership document exists describing `JdbcCatalogResolver` (catalog-side) vs `DefaultRuntimeJdbcEndpointResolver` (V2 execute-path)
+2. A call-site inventory lists where each resolver is used (HTTP/run path, catalog/admin, tests)
+3. No code merge of the two resolvers lands in this milestone
+4. Docs state the deferred consolidation path (RES-02) without implementing it
+
+**Plans**: TBD at `/gsd-plan-phase 14`
+
+### Phase 15: Multi-JVM Worker E2E
+
+**Goal**: Prove one multi-JVM happy path: coordinator enqueues, worker JVM leases/executes, run reaches SUCCESS — with harness linkage and a runnable recipe.
+
+**Depends on**: Phase 12 (stable HTTP/execute spine confidence)
+
+**Requirements**: DIST-01
+
+**Success Criteria** (what must be TRUE):
+
+1. A second JVM (`DataGeneratorWorkerApplication` or equivalent worker profile) leases and executes a coordinator-enqueued job to SUCCESS
+2. A harness-linked row exists for this path (P1 acceptable)
+3. A runnable script or documented recipe reproduces the path locally
+4. Scope stays one happy path — not full staging AC-1..AC-7
+
+**Plans**: TBD at `/gsd-plan-phase 15`
+
+### Phase 16: RBAC Enable Path
+
+**Goal**: Operators can enable header RBAC via a documented staging/e2e path and verify authorization in IT/E2E, while local/default stays off.
+
+**Depends on**: None hard (can follow Phase 15 to reduce e2e churn)
+
+**Requirements**: SEC-01
+
+**Success Criteria** (what must be TRUE):
+
+1. Staging/e2e documentation shows how to enable `data.generator.console-security.*` header RBAC
+2. IT and/or E2E proves authorization behavior when RBAC is enabled (deny/allow observable)
+3. `data.generator.console-security.enabled` remains **false** by default in base application config
+4. Enabling RBAC does not break default local/dev or default e2e profiles unless those profiles explicitly opt in
+
+**Plans**: TBD at `/gsd-plan-phase 16`
+
+### Phase 17: P1 Harness Expansion + Closeout
+
+**Goal**: Wire v2.1 proof paths into the feature matrix as focused P1 rows, keep P0/`verify-harness.ps1` semantics unchanged, and close the milestone docs.
+
+**Depends on**: Phases 12–16 (rows link finished proofs)
+
+**Requirements**: TEST-09
+
+**Success Criteria** (what must be TRUE):
+
+1. Feature matrix adds focused **P1** rows covering HTTP managed-catalog execute, multi-JVM worker, and RBAC enable paths
+2. P0 set size/membership and `scripts/verify-harness.ps1` merge-gate semantics remain unchanged
+3. AGENTS/docs note how to run or interpret the new P1 rows without treating them as merge blockers
+4. Milestone roadmap/state reflect closeout readiness (or explicit remaining gaps) after P1 wiring
+
+**Plans**: TBD at `/gsd-plan-phase 17`
+
+### Requirement coverage
+
+| Requirement | Phase |
+|-------------|-------|
+| EXEC-01 | 12 |
+| EXEC-02 | 12 |
+| DIAL-01 | 13 |
+| DIAL-02 | 13 |
+| RES-01 | 14 |
+| DIST-01 | 15 |
+| SEC-01 | 16 |
+| TEST-09 | 17 |
+
+**Coverage:** 8/8 requirements mapped · 0 unmapped
+
+### Explicitly not in this roadmap
+
+- ORCH-01 / ORCH-02 (orchestration)
+- RW-07 (net-new connectors)
+- RES-02 / SEC-02 / DIST-02 / DIAL-03 / TEST-V2 (deferred beyond v2.1)
 
 ## Progress
 
@@ -63,6 +196,12 @@ Candidate deferred themes from v2.0:
 | 9. JDBC Dialect Expansion | v2.0 | 5/5 | Complete | 2026-07-21 |
 | 10. Harness Coverage & CI Gates | v2.0 | 3/3 | Complete | 2026-07 |
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
+| 12. HTTP Execute-Path Proof | v2.1 | 0/TBD | Pending | — |
+| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 0/TBD | Pending | — |
+| 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
+| 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
+| 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
+| 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |
 
 ---
-*Roadmap reorganized: 2026-07-25 after v2.0 milestone archive*
+*Roadmap updated: 2026-07-25 — v2.1 Hardening & Weak-Spot Closure phases 12–17*

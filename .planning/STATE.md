@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
-status: planning
-last_updated: "2026-07-25T03:56:07.744Z"
+status: roadmap_ready
+last_updated: "2026-07-25T06:32:00.000Z"
 last_activity: 2026-07-25
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Planning next milestone — `/gsd-new-milestone`
+**Current focus:** v2.1 Hardening & Weak-Spot Closure — roadmap ready; next `/gsd-plan-phase 12`
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 12 (HTTP Execute-Path Proof) — not started
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-25 — Milestone v2.1 started
+Status: Roadmap ready — plan Phase 12 next
+Last activity: 2026-07-25 — v2.1 roadmap created (phases 12–17)
 
 ## Performance Metrics
 
@@ -47,6 +47,12 @@ Last activity: 2026-07-25 — Milestone v2.1 started
 - Files: 331 changed (+33,397 / −482)
 - Timeline: 2026-06-23 → 2026-07-25 (31 days)
 
+**Velocity (v2.1):**
+
+- Phases planned: 6 (12–17)
+- Plans: 0
+- Status: roadmap ready
+
 ## Accumulated Context
 
 ### Decisions
@@ -56,9 +62,12 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - v1 quality-first harness + UDF + transforms — **shipped**
 - v2 datasource platform + RW streaming/upsert + dialects — **shipped**
 - P0 gate expanded 7 → 15 rows — **shipped**
-- Dual JDBC resolvers ownership split — **deferred consolidation**
-- Dameng live IT opt-in — **accepted tech debt**
-- Orchestration deferred beyond v2.0 — **pending next milestone**
+- Dual JDBC resolvers ownership split — **deferred consolidation** (v2.1: docs/inventory only — RES-01)
+- Dameng live IT opt-in — **accepted tech debt** (v2.1: document green path — DIAL-01)
+- Orchestration deferred beyond v2.0 — **still deferred** (not in v2.1)
+- v2.1 breadth hardening over new features — **active**
+- v2.1 RBAC stays default-off with testable enable path — **active** (SEC-01)
+- v2.1 phase map 12–17 from research SUMMARY — **roadmap locked**
 
 ### Pending Todos
 
@@ -68,7 +77,10 @@ None.
 
 - Boot 4 / internal Kafka-ES starter compatibility (see `.planning/codebase/CONCERNS.md`)
 - Console RBAC default-off for external deployments
-- Accepted v2.0 tech debt (Dameng CI, Nyquist hygiene, dual resolvers) — see MILESTONES.md
+- Accepted v2.0 tech debt (Dameng CI, Nyquist hygiene, dual resolvers) — addressed as DIAL/RES in v2.1; not P0 inflation
+- Phase 12: confirm `/task/run` vs console run endpoint + async poll pattern at plan-phase
+- Phase 13: Dameng host/image may force documented-enable + MERGE if live IT stays gated
+- Phase 15: pick shared metadata DB vs Podman recipe at plan-phase
 
 ## Deferred Items
 
@@ -79,18 +91,18 @@ Items carried or acknowledged at milestone close:
 | Product | Template-level orchestration (ORCH) | Later version | 2026-06-17 |
 | Product | Net-new connectors (Redis, S3, HTTP) | Later version | 2026-06-23 |
 | Process | Milestone audit skipped at v1.0 close | Accepted | 2026-06-23 |
-| tech_debt | Dameng live CI opt-in only | Accepted at v2.0 close | 2026-07-25 |
-| tech_debt | Nyquist hygiene phases 07/08/07.1 | Accepted at v2.0 close | 2026-07-25 |
-| tech_debt | Dual JDBC resolver consolidation | Accepted at v2.0 close | 2026-07-25 |
+| tech_debt | Dameng live CI opt-in only | In progress via DIAL-01 (v2.1) | 2026-07-25 |
+| tech_debt | Nyquist hygiene phases 07/08/07.1 | In progress via DIAL-02 (v2.1) | 2026-07-25 |
+| tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 
 ## Session Continuity
 
 **Resume file:** None
 
 Last session: 2026-07-25
-Stopped at: Milestone v2.0 archived
-Next: `/gsd-new-milestone`
+Stopped at: v2.1 roadmap created (phases 12–17)
+Next: `/gsd-plan-phase 12`
 
 ## Operator Next Steps
 
-- Start the next milestone with `/gsd-new-milestone`
+- Plan Phase 12 with `/gsd-plan-phase 12`
