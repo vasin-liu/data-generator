@@ -1,39 +1,38 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth
-current_phase: 11
-status: milestone_complete
-stopped_at: Phase 11 verified — ready for milestone archive
-last_updated: "2026-07-25T01:45:00.000Z"
+milestone: none
+milestone_name: —
+current_phase: —
+status: Awaiting next milestone
+stopped_at: Milestone v2.0 archived
+last_updated: "2026-07-25T02:35:00.000Z"
 last_activity: 2026-07-25
-last_activity_desc: Phase 11 verified (8/8 must-haves)
+last_activity_desc: Milestone v2.0 completed and archived
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 36
-  completed_plans: 36
-  percent: 100
-current_phase_name: v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-23)
+See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** v2.0 milestone complete — ready for `/gsd-complete-milestone`
+**Current focus:** Planning next milestone — `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 11 (v2-0-closeout-hardening-ds-02-managed-jdbc-e2e-it-dialect-pr) — COMPLETE
-Plan: 3 of 3
-Status: Verified — milestone archive next
-Last activity: 2026-07-25 — Phase 11 verification passed (8/8)
+Phase: —
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-25 — Milestone v2.0 completed and archived
 
-Progress: [██████████] 100% (36/36 plans; Phase 11: 3/3)
+Progress: v1.0 + v2.0 shipped (see `.planning/MILESTONES.md`)
 
 ## Performance Metrics
 
@@ -44,52 +43,27 @@ Progress: [██████████] 100% (36/36 plans; Phase 11: 3/3)
 - Commits (milestone range): 46
 - Timeline: 2026-06-17 → 2026-06-23
 
-**Phase 9 plan 09-05:**
+**Velocity (v2.0):**
 
-- Duration: ~15 min
-- Tasks: 2
-- Files modified: 3
-
-**Phase 10 plan 10-01:**
-
-- Duration: ~8 min
-- Tasks: 3
-- Files modified: 1
-
-**Phase 10 plan 10-03:**
-
-- Duration: ~5 min
-- Tasks: 2
-- Files modified: 2
+- Phases: 7 (6–11 + 07.1)
+- Plans: 36
+- Tasks: 66
+- Commits: 130 (`v1.0` → HEAD)
+- Files: 331 changed (+33,397 / −482)
+- Timeline: 2026-06-23 → 2026-07-25 (31 days)
 
 ## Accumulated Context
 
 ### Decisions
 
-- v1 quality-first: harness before feature breadth — **shipped**
-- Multi-form UDF with unified registry — **shipped**
-- P0 regression gate (7 rows) — **shipped**
-- Orchestration/RW/datasource deferred to v2 — **v2.0 active**
-- v2 dialect priority: DM, Kingbase, HighGo, PG, CK
-- Dameng MERGE uses SELECT FROM dual for named-parameter batch binding (09-01)
-- Fallback presets use bundled:true for DM/KB/HG matching jdbc-bundled policy (09-02)
-- Proprietary driver connectivity failures prefix driverClassName hint without secrets (09-02)
-- Kingbase/highgo PG-proxy ITs fulfill per-dialect harness without licensed KB/HG images (09-03)
-- Dameng real IT opt-in via -Ddm.it=true or DG_DM_IT=true (09-03)
-- PostgreSQL 16 preset chosen for Phase 9 Playwright preset path (09-04)
-- Limitations table documents per-dialect fail-fast combinations in operator JDBC sink guide (09-05)
-- Phase 10 P0 matrix expanded to 15 rows with Phase 8/9 linked_tests (10-01)
-- Dameng P0 covered via MERGE unit only; ChunkedPipelineDamengUpsertIT excluded from linked_tests (10-01, D-08)
-- verify-harness.ps1 strict P0 gate green locally at 15/15; no linked_tests fixes needed (10-02)
-- Windows harness runs require JDK 25 — clear stale JAVA_HOME before verify-harness.ps1 (10-02)
-- docs/test-harness.md and AGENTS.md synced to 15-row P0 inventory with evidence bars (10-03)
-- Phase 8/9 UAT scripts documented as supplementary; verify-harness.ps1 is canonical merge gate (10-03)
-- [Phase 07.1]: Managed JDBC resolve mirrors JdbcCatalogResolver semantics inside DefaultRuntimeJdbcEndpointResolver (no delegation) — D-14/D-15: fix locus stays inside DefaultRuntime; JdbcCatalogResolver gets zero edits this phase
-- [Phase 07.1]: Both JDBC resolvers kept with documented ownership split; consolidation deferred — D-13/D-16: DefaultRuntimeJdbcEndpointResolver is V2 execute-path authority; JdbcCatalogResolver remains catalog-side
-- [Phase 07.1]: Plan 07.1-02 verify-only: no code changes to QuerySourceFactory/PostGisQuerySourceFactory/JdbcRowSinkAdapter — All three adapters already used the RuntimeJdbcEndpointResolver return value exclusively; DS-03 gap was fully isolated to DefaultRuntimeJdbcEndpointResolver (fixed in 07.1-01)
-- [Phase 11]: D-01–D-08 honored: dedicated ManagedJdbcCatalogSinkE2eIT, save-managed DS, sink-only managed id, unbound TemplateV2Runner, COUNT(*) proof — CONTEXT non-negotiable decisions for DS-02 proof-depth closeout
-- [Phase 11]: Kingbase evidence pack via Playwright kingbase8 + Maven connectivity/upsert reuse (D-09–D-19) — CONTEXT override: three-piece pack not single-JVM chain; no Dameng/P0/npm changes
-- [Phase 11]: Surgical audit closeout for flows #1/#8 with accepted in-process and Dameng/single-JVM limits; overall status may stay tech_debt — CONTEXT D-20 / D-05 / D-12 / D-13 — evidence pointers without inventing HTTP task or Dameng live-CI green claims
+Full log in PROJECT.md Key Decisions. Highlights:
+
+- v1 quality-first harness + UDF + transforms — **shipped**
+- v2 datasource platform + RW streaming/upsert + dialects — **shipped**
+- P0 gate expanded 7 → 15 rows — **shipped**
+- Dual JDBC resolvers ownership split — **deferred consolidation**
+- Dameng live IT opt-in — **accepted tech debt**
+- Orchestration deferred beyond v2.0 — **pending next milestone**
 
 ### Pending Todos
 
@@ -99,33 +73,29 @@ None.
 
 - Boot 4 / internal Kafka-ES starter compatibility (see `.planning/codebase/CONCERNS.md`)
 - Console RBAC default-off for external deployments
-- No formal milestone audit before v1.0 close (accepted)
-- v2.0 milestone audit gaps: DS-03 JDBC snapshot execute-path bypass (Phase 07.1)
-
-### Roadmap Evolution
-
-- Phase 07.1 inserted after Phase 7 (URGENT): Close gap: DS-03 — JDBC snapshot routing on execute path
-- Phase 11 added: v2.0 closeout hardening — DS-02 managed JDBC E2E IT + dialect preset/upsert depth (RW-05/RW-06) after v2.0 audit `tech_debt` review
+- Accepted v2.0 tech debt (Dameng CI, Nyquist hygiene, dual resolvers) — see MILESTONES.md
 
 ## Deferred Items
 
+Items carried or acknowledged at milestone close:
+
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Integration | Reader/Writer expansion | v2 | 2026-06-17 init |
-| Platform | Datasource abstraction refactor | v2 | 2026-06-17 init |
-| Product | Template-level orchestration | Later version | 2026-06-17 init |
-| Process | Milestone audit (`/gsd-audit-milestone`) | Skipped at v1.0 close | 2026-06-23 |
-| Phase 07.1 P01 | 64min | 2 tasks | 1 files |
-| Phase 07.1 P02 | 12min | 2 tasks | 0 files |
-| Phase 07.1 P03 | 28 min | 2 tasks | 1 files |
-| Phase 11 P01 | 12 min | 1 tasks | 1 files |
-| Phase 11 P02 | 11 min | 2 tasks | 2 files |
-| Phase 11 P03 | 10 min | 2 tasks | 3 files |
+| Product | Template-level orchestration (ORCH) | Later version | 2026-06-17 |
+| Product | Net-new connectors (Redis, S3, HTTP) | Later version | 2026-06-23 |
+| Process | Milestone audit skipped at v1.0 close | Accepted | 2026-06-23 |
+| tech_debt | Dameng live CI opt-in only | Accepted at v2.0 close | 2026-07-25 |
+| tech_debt | Nyquist hygiene phases 07/08/07.1 | Accepted at v2.0 close | 2026-07-25 |
+| tech_debt | Dual JDBC resolver consolidation | Accepted at v2.0 close | 2026-07-25 |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-25T01:19:20.584Z
-Stopped at: Completed 11-03-PLAN.md
-Next: `/gsd-verify-work 11` then milestone close
+Last session: 2026-07-25
+Stopped at: Milestone v2.0 archived
+Next: `/gsd-new-milestone`
+
+## Operator Next Steps
+
+- Start the next milestone with `/gsd-new-milestone`

@@ -2,21 +2,38 @@
 
 ## v2.0 — Reader/Writer & Datasource Platform
 
-**Started:** 2026-06-23
-**Status:** Planning
-**Phases:** 6-10 (continues from v1.0)
+**Shipped:** 2026-07-25
+**Closeout:** verified_closeout
+**Phases:** 7 (6–11 + 07.1) | **Plans:** 36 | **Tasks:** 66
+**Git range:** `v1.0` → `HEAD` (130 commits, 331 files, +33,397 / −482 lines)
+**Timeline:** 2026-06-23 → 2026-07-25 (31 days)
 
-### Scope
+### Summary
 
-- Datasource platform: unified JDBC/Kafka/ES abstractions, hot-reload, governance, audit
-- RW gap closure: streaming CSV/JSON, JDBC upsert (PG/MySQL)
-- JDBC dialect expansion: Dameng, Kingbase, HighGo, PostgreSQL, ClickHouse
-- Harness matrix + P0 CI gates for new paths
+Brownfield release closing V2 source/sink gaps and establishing a unified datasource platform: managed JDBC/Kafka/ES catalog with snapshot hot-reload governance, streaming CSV/JSON I/O, dialect-correct JDBC upsert (including Dameng/Kingbase/HighGo/PostgreSQL/ClickHouse), and an expanded 15-row P0 harness merge gate.
 
-### Artifacts
+### Key Accomplishments
 
-- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
-- Roadmap: [ROADMAP.md](ROADMAP.md)
+1. **Datasource platform** — `data-generator-datasource` API + JDBC/Kafka/ES adapters; managed catalog resolution without template YAML changes (DS-01, DS-02)
+2. **Governance & hot-reload** — Snapshot refresh, secret/connectivity policy, audit feed; Phase 07.1 wired `snap:` pools onto the JDBC execute path (DS-03..DS-05)
+3. **RW streaming & upsert** — Chunked CSV/JSON sources/sinks; PG/MySQL upsert SQL; per-sink run-report metrics (RW-01..RW-04)
+4. **JDBC dialect expansion** — DM/KB/HG/PG/CK writers, console presets, layered Testcontainers/unit evidence (RW-05, RW-06)
+5. **Harness & CI** — Eight new P0 rows; 15/15 P0 green via `verify-harness.ps1`; docs/AGENTS merge criteria (TEST-07, TEST-08)
+6. **Closeout hardening** — `ManagedJdbcCatalogSinkE2eIT` + Kingbase evidence pack; audit flows #1/#8 → OK
+
+### Archives
+
+- Roadmap: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
+- Requirements: [milestones/v2.0-REQUIREMENTS.md](milestones/v2.0-REQUIREMENTS.md)
+- Audit: [milestones/v2.0-MILESTONE-AUDIT.md](milestones/v2.0-MILESTONE-AUDIT.md)
+
+### Known Tech Debt at Close
+
+- Dameng default CI = MERGE SQL unit only; live IT opt-in (`-Ddm.it=true`)
+- Nyquist validation incomplete for phases 07 / 08 / 07.1 (hygiene, not DoD blockers)
+- Dual JDBC resolvers (`JdbcCatalogResolver` vs `DefaultRuntimeJdbcEndpointResolver`) — consolidation deferred
+- Managed-catalog E2E is in-process `TemplateV2Runner` (not HTTP `/task/run`)
+- CodeGraph index missing under repo root
 
 ---
 
