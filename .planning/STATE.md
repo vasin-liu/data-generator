@@ -2,9 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
+current_phase: 12
+current_phase_name: HTTP Execute-Path Proof
 status: roadmap_ready
-last_updated: "2026-07-25T06:32:00.000Z"
+stopped_at: v2.1 roadmap created (phases 12–17)
+last_updated: "2026-07-25T07:47:19.199Z"
 last_activity: 2026-07-25
+last_activity_desc: v2.1 roadmap created (phases 12–17)
 progress:
   total_phases: 6
   completed_phases: 0
@@ -24,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 12 (HTTP Execute-Path Proof) — not started
+Phase: 12 (HTTP Execute-Path Proof) — context captured
 Plan: —
-Status: Roadmap ready — plan Phase 12 next
-Last activity: 2026-07-25 — v2.1 roadmap created (phases 12–17)
+Status: Context ready — next `/gsd-plan-phase 12`
+Last activity: 2026-07-25 — Phase 12 CONTEXT.md captured
 
 ## Performance Metrics
 
@@ -99,7 +103,7 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** None
 
-Last session: 2026-07-25
+Last session: 2026-07-25T07:47:18.709Z
 Stopped at: v2.1 roadmap created (phases 12–17)
 Next: `/gsd-plan-phase 12`
 
