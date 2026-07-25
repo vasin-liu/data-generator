@@ -23,12 +23,14 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-MILESTONE-AUDIT.md`
 
+**v2.1 in progress:** Phase 12 complete — HTTP execute-path proof (managed catalog + PG upsert via MockMvc `/task/run`).
+
 ## Current Milestone: v2.1 Hardening & Weak-Spot Closure
 
 **Goal:** Close the highest-value proof and reliability gaps left after v2.0 — without opening a new major feature lane.
 
 **Target features:**
-- Execute-path evidence: managed-catalog (+ dialect) journeys through HTTP `/task/run`
+- ✓ Execute-path evidence: managed-catalog (+ dialect) journeys through HTTP `/task/run` — Phase 12
 - Dialect/driver hardening: Dameng live IT documented green path; Nyquist/validation hygiene backfill
 - Resolver ownership docs + call-site inventory (no code merge)
 - One multi-JVM distributed worker E2E path with harness linkage
@@ -64,17 +66,27 @@ Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-
 - ✓ Harness coverage + P0 CI gates for RW/DS paths (TEST-07, TEST-08) — Phase 10
 - ✓ Closeout hardening: managed JDBC E2E IT + Kingbase dialect evidence pack — Phase 11
 
-### Active
+### Validated (v2.1)
 
-(None — define next milestone requirements with `/gsd-new-milestone`)
+- ✓ HTTP execute-path proof for managed catalog / dialect journeys (EXEC-01, EXEC-02) — Phase 12
+
+### Active (v2.1)
+
+- [ ] Dameng live IT + Nyquist hygiene backfill
+- [ ] Dual JDBC resolver ownership documentation (no merge)
+- [ ] Multi-JVM worker E2E path
+- [ ] RBAC testable enable path (default remains off)
+- [ ] Focused P1 harness rows for new proof paths
 
 ### Out of Scope
 
-- Template-level orchestration — deferred beyond v2.0
-- Flow-control transforms (branch/retry/parallel DAG) — not in v1/v2 scope
+- Template-level orchestration — deferred beyond v2.1
+- Flow-control transforms (branch/retry/parallel DAG) — not in current scope
 - Exhaustive 100% UI/control coverage — harness-first with phased targets
 - Greenfield rewrite or Template V1 revival — V2 only
-- Net-new non-JDBC connectors in v2.0 — deferred after dialect/gap closure
+- Net-new connectors (Redis, S3, HTTP) — deferred after hardening
+- Default-on console RBAC — keep opt-in; document staging enablement
+- Full JDBC resolver code consolidation — docs-only in v2.1
 
 ## Context
 
@@ -111,10 +123,12 @@ Known pressure points:
 | v2 dialect priority: DM, Kingbase, HighGo, PG, CK | Domestic + core analytical JDBC targets | ✓ Good — Phase 9 + Phase 11 Kingbase pack |
 | v2 RW: close streaming/upsert gaps before new adapters | Gap matrix over net-new connectors | ✓ Good — Phase 8 shipped |
 | Snapshot hot-reload + execute-path `snap:` routing | In-flight runs keep run-start connection snapshot | ✓ Good — Phase 7 + 07.1 |
-| Keep dual JDBC resolvers with ownership split | Catalog-side vs V2 execute-path authority | ⚠️ Revisit — consolidation deferred |
-| Dameng live IT opt-in (`-Ddm.it=true`) | Licensed driver / CI cost | ⚠️ Revisit — accepted tech debt |
+| Keep dual JDBC resolvers with ownership split | Catalog-side vs V2 execute-path authority | ⚠️ Revisit — v2.1 docs + call-site inventory only |
+| Dameng live IT opt-in (`-Ddm.it=true`) | Licensed driver / CI cost | ⚠️ Revisit — v2.1 harden documented green path |
 | P0 expanded to 15 rows; `verify-harness.ps1` merge gate | Protect streaming/upsert/dialect paths | ✓ Good — Phase 10 |
 | Test acceptance: harness + phased coverage | Pragmatic ramp vs big-bang UI coverage | ✓ Good — P0/P1/P2 tiers |
+| v2.1: breadth hardening over new features | Close proof/reliability gaps after v2.0 | — Pending |
+| v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | — Pending |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -148,4 +162,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-25 after v2.0 milestone*
+*Last updated: 2026-07-25 — started milestone v2.1 Hardening & Weak-Spot Closure*
