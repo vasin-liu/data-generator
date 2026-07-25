@@ -89,6 +89,9 @@ Focused builds (examples from internal upgrade docs):
 # Phase 9 JDBC dialect expansion UAT (Maven dialect slice + optional Podman Playwright)
 .\scripts\verify-phase9-uat-jdbc-dialect.ps1 -SkipPlaywright
 
+# Phase 11 v2.0 closeout hardening UAT (managed JDBC E2E IT + Kingbase dialect evidence pack; optional Podman Playwright)
+.\scripts\verify-phase11-uat-closeout-hardening.ps1 -SkipPlaywright
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
@@ -165,7 +168,7 @@ The P0 set is defined in `.planning/test-matrix.yaml` (`tier: P0`); see `docs/te
 - **New P0 rows (8):** `v2-streaming-csv`, `v2-streaming-json`, `v2-jdbc-upsert-pg-mysql`, `v2-dialect-dameng`, `v2-dialect-kingbase`, `v2-dialect-highgo`, `v2-dialect-postgres`, `v2-dialect-clickhouse`
 - **Plus 7 legacy harness rows:** `calcite-scenario-v2`, `udf-sql`, `udf-script`, `udf-java-plugin`, `transform-json`, `transform-mask`, `transform-lookup`
 
-Phase 8/9 UAT scripts (`verify-phase8-uat-rw-streaming-upsert.ps1`, `verify-phase9-uat-jdbc-dialect.ps1`) are **supplementary UAT** — useful for operator sign-off, but **not** the merge gate. Use `.\scripts\verify-harness.ps1` as the canonical pre-merge check.
+Phase 8/9/11 UAT scripts (`verify-phase8-uat-rw-streaming-upsert.ps1`, `verify-phase9-uat-jdbc-dialect.ps1`, `verify-phase11-uat-closeout-hardening.ps1`) are **supplementary UAT** — useful for operator sign-off, but **not** the merge gate. Use `.\scripts\verify-harness.ps1` as the canonical pre-merge check.
 
 ## Boundaries
 
