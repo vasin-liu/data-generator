@@ -7,27 +7,42 @@ package org.gensokyo.data.datasource.catalog;
 
 import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
+import com.jayway.jsonpath.JsonPath;
 import org.gensokyo.data.DataGeneratorApplication;
 import org.gensokyo.data.datasource.DataSourceConfigService;
+import org.gensokyo.data.model.po.TemplatePO;
+import org.gensokyo.data.model.v2.TemplateV2DraftVO;
+import org.gensokyo.data.model.v2.TemplateV2VO;
+import org.gensokyo.data.model.vo.writer.JdbcWriterVO;
 import org.gensokyo.data.repository.DataSourceConfigRepository;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.task.TaskExecutionService;
 import org.gensokyo.data.task.TaskExecutionStatus;
 import org.gensokyo.data.task.TaskExecutionSummary;
 import org.gensokyo.data.template.TemplateLifecycleService;
+import org.gensokyo.data.template.TemplateLifecycleStatus;
+import org.gensokyo.data.template.TemplateV2Normalizer;
+import org.gensokyo.data.util.RandomKit;
+import org.gensokyo.data.yaml.JacksonParser;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Proves EXEC-01: managed JDBC catalog sink through the real HTTP task spine.
@@ -107,6 +122,78 @@ class ManagedJdbcCatalogHttpExecuteIT {
             dynamicRoutingDataSource.removeDataSource(DS_NAME);
         }
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+
+    /**
+     * Proves managed catalog → publish → MockMvc {@code POST /task/run/{id}} → SUCCESS + COUNT(*)
+     * (D-01..D-07, D-11). Does not call {@code TemplateV2Runner.run} as the primary path.
+     *
+     * @throws Exception if MockMvc or poll fails
+     */
+    @Test
+    void httpTaskRun_managedCatalogSink_reachesSuccessWithCountableRows() throws Exception {
+        dataSourceConfigService.save(DS_NAME, H2_URL, "sa", "", null, "org.h2.Driver", null, null);
+
+        try {
+            DynamicDataSourceContextHolder.push(DS_NAME);
+            namedParameterJdbcTemplate.getJdbcTemplate().execute(
+                    "drop table if exists " + TABLE);
+            namedParameterJdbcTemplate.getJdbcTemplate().execute(
+                    "create table " + TABLE + " (id int primary key, label varchar(64))");
+        } finally {
+            DynamicDataSourceContextHolder.clear();
+        }
+
+        String contentYaml = buildManagedSinkYaml();
+        // Managed-id-only sink: no inline writer dataSource block (DS-02 / EXEC-01).
+        TemplateV2DraftVO draft = new JacksonParser().parse(contentYaml, TemplateV2DraftVO.class);
+        TemplateV2VO parsed = TemplateV2Normalizer.normalize(draft);
+        JdbcWriterVO writer = (JdbcWriterVO) parsed.getSinks().getFirst().getWriters().getFirst();
+        assertThat(writer.getDataSourceId()).isEqualTo(DS_NAME);
+        assertThat(writer.getDataSource()).isNull();
+
+        TemplatePO entity = new TemplatePO();
+        entity.setId(RandomKit.snowFlake().nextId());
+        entity.setName("managed-jdbc-catalog-http-execute");
+        entity.setArchived(Boolean.FALSE);
+        entity.setStatus(TemplateLifecycleStatus.DRAFT.name());
+        entity.setContentYaml(contentYaml);
+        templateRepository.saveAndFlush(entity);
+
+        templateLifecycleService.publish(entity.getId());
+
+        MvcResult enqueue = mockMvc.perform(post("/task/run/{id}", entity.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andReturn();
+        String message = JsonPath.read(
+                enqueue.getResponse().getContentAsString(StandardCharsets.UTF_8), "$.message");
+
+        Long instanceId = extractInstanceId(message);
+        awaitSuccess(instanceId);
+
+        // COUNT after SUCCESS — status alone is insufficient for catalog sink proof (D-06).
+        assertThat(countRows(DS_NAME, TABLE)).isGreaterThanOrEqualTo(SEEDED_ROW_COUNT);
+    }
+
+    private static String buildManagedSinkYaml() {
+        return """
+                name: managed-jdbc-catalog-http-execute
+                sources:
+                  seed:
+                    type: inline_rows
+                    rows:
+                      - { id: 1, label: a }
+                      - { id: 2, label: b }
+                transform:
+                  type: sql
+                  sql: SELECT id, label FROM seed
+                sink:
+                  writers:
+                    - type: jdbc
+                      dataSourceId: %s
+                      target: %s
+                """.formatted(DS_NAME, TABLE);
     }
 
     /**
