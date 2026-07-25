@@ -4,17 +4,17 @@ milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 12
 current_phase_name: http-execute-path-proof
-status: executing
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-07-25T11:26:47.316Z"
+status: verifying
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-07-25T12:27:50.438Z"
 last_activity: 2026-07-25
 last_activity_desc: Phase 12 execution started
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 17
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 Phase: 12 (http-execute-path-proof) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-25 — Phase 12 execution started
 
 ## Performance Metrics
@@ -73,6 +73,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - v2.1 RBAC stays default-off with testable enable path — **active** (SEC-01)
 - v2.1 phase map 12–17 from research SUMMARY — **roadmap locked**
 - [Phase 12]: HTTP EXEC-01 via MockMvc /task/run + publish gate + COUNT(*); Phase 11 IT untouched — Close v2.0 in-process-only limit without renaming Phase 11 proof
+- [Phase 12]: HTTP snap pools require passwordSecretRef for non-empty managed JDBC passwords (EXEC-02 IT) — ConnectionSnapshotSupport only snapshots passwordSecretRef; plaintext save leaves snap: pools without credentials
 
 ### Pending Todos
 
@@ -100,13 +101,14 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Nyquist hygiene phases 07/08/07.1 | In progress via DIAL-02 (v2.1) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Phase 12-http-execute-path-proof P01 | 41min | 2 tasks | 1 files |
+| Phase 12-http-execute-path-proof P02 | 45 min | 2 tasks | 3 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-25T11:26:47.120Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-07-25T12:25:27.017Z
+Stopped at: Completed 12-02-PLAN.md
 Next: `/gsd-plan-phase 12`
 
 ## Operator Next Steps

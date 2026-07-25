@@ -10,7 +10,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 ### Execute-Path Evidence (EXEC)
 
 - [x] **EXEC-01**: Operator (or IT via MockMvc/HTTP) can run a V2 template that uses a **managed** JDBC `dataSourceId` through `/task/run` or console `/api/templates/{id}/run`, and the run reaches SUCCESS with sink row evidence (not only in-process `TemplateV2Runner`)
-- [ ] **EXEC-02**: At least one CI-friendly dialect path (PostgreSQL and/or Kingbase-proxy patterns already in-repo) is proven on the same HTTP execute spine for managed catalog → dialect-aware write/upsert evidence
+- [x] **EXEC-02**: At least one CI-friendly dialect path (PostgreSQL and/or Kingbase-proxy patterns already in-repo) is proven on the same HTTP execute spine for managed catalog → dialect-aware write/upsert evidence
 
 ### Dialect & Validation Hygiene (DIAL)
 
@@ -68,7 +68,7 @@ Deferred beyond v2.1.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | EXEC-01 | 12 | Complete |
-| EXEC-02 | 12 | Pending |
+| EXEC-02 | 12 | Complete |
 | DIAL-01 | 13 | Pending |
 | DIAL-02 | 13 | Pending |
 | RES-01 | 14 | Pending |
