@@ -21,10 +21,11 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 - Datasource governance: hot-reload snapshots, managed vs inline connections, secret refs, connectivity test, audit trail
 - Harness matrix rows for new RW and dialect paths
 
-## Current State (v2.0 phases complete — Phase 07.1 closed 2026-07-24)
+## Current State (v2.0 Phase 11 complete — ready for milestone archive)
 
-- **Phase 07.1 complete:** `DefaultRuntimeJdbcEndpointResolver` returns `snap:{instanceId}:{name}` on managed JDBC execute path; `JdbcSnapshotExecutePathIT` proves mid-flight isolation
-- **v2.0 roadmap phases 6–10 (+07.1):** executed; progress 33/33 plans
+- **Phase 11 complete:** DS-02 managed JDBC catalog sink E2E IT + Kingbase dialect evidence pack (RW-05/RW-06); audit flows #1/#8 → OK
+- **v2.0 roadmap phases 6–11 (+07.1):** executed; progress 36/36 plans
+- **Phase 07.1:** `DefaultRuntimeJdbcEndpointResolver` returns `snap:{instanceId}:{name}` on managed JDBC execute path
 - **Test harness:** `.planning/test-matrix.yaml`, `scripts/verify-harness.ps1`, `harness-verify.yml`, embedded fixtures, Playwright smoke
 - **UDFs:** Unified registry (java-plugin, script, sql); console upload/publish; JDBC persistence; template publish-time validation; sample UDFs in `samples/udf-samples/`
 - **Transforms:** json/mask/lookup operators, `GET /api/console/transforms`, actionable run-report errors, `V2_JSON_EXTRACT`
@@ -54,16 +55,17 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 - ✓ Transform operators + catalog + errors (XFORM-01..06) — v1.0 Phase 4
 - ✓ P0 coverage ramp + CI gate (COV-01..04) — v1.0 Phase 5
 
-### Validated (v2.0 — through Phase 07.1)
+### Validated (v2.0 — through Phase 11)
 
 - ✓ Datasource platform core + governance (DS-01..DS-05) — Phases 6–7; DS-03 execute-path snap routing closed in Phase 07.1
 - ✓ RW streaming CSV/JSON + JDBC upsert (RW-01..RW-04) — Phase 8
 - ✓ JDBC dialect expansion DM/KB/HG/PG/CK (RW-05, RW-06) — Phase 9
 - ✓ Harness coverage + P0 CI gates for RW/DS paths (TEST-07, TEST-08) — Phase 10
+- ✓ Closeout hardening: managed JDBC E2E IT + Kingbase dialect evidence pack (DS-02 proof depth, RW-05/RW-06 E2E depth) — Validated in Phase 11: v2.0 closeout hardening
 
 ### Active (v2.0)
 
-- Milestone close-out / audit remaining (phases 6–10 + 07.1 executed)
+- Milestone archive / remaining accepted audit tech_debt (Dameng live / Nyquist) — ready for `/gsd-complete-milestone`
 
 ### Out of Scope
 
@@ -100,8 +102,8 @@ Known pressure points:
 | Transform v1: operators + SQL enhancement (not flow-control DAG) | Scoped built-in operators/SQL only | ✓ Good — json/mask/lookup shipped |
 | Defer template orchestration to later version | Product decision during questioning | — Pending v2 |
 | Defer Reader/Writer and datasource abstraction to v2 | Focus v1 on UDF + quality + transforms | ✓ v2.0 started |
-| v2 dialect priority: DM, Kingbase, HighGo, PG, CK | Domestic + core analytical JDBC targets | — Pending v2.0 |
-| v2 RW: close streaming/upsert gaps before new adapters | Gap matrix over net-new connectors | — Pending v2.0 |
+| v2 dialect priority: DM, Kingbase, HighGo, PG, CK | Domestic + core analytical JDBC targets | ✓ Good — Phase 9 + Phase 11 Kingbase evidence pack |
+| v2 RW: close streaming/upsert gaps before new adapters | Gap matrix over net-new connectors | ✓ Good — Phase 8 shipped |
 | Test acceptance: harness + phased coverage (not exhaustive matrix in v1) | Pragmatic ramp vs big-bang UI coverage | ✓ Good — P0/P1/P2 tiers |
 | P0 = 7 matrix rows; merge gate in CI | Protect core UDF/transform paths | ✓ Good — 7/7 green |
 
@@ -130,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-24 after Phase 07.1 DS-03 execute-path gap closure*
+*Last updated: 2026-07-25 after Phase 11 v2.0 closeout hardening*
