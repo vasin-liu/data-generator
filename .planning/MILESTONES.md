@@ -1,5 +1,28 @@
 # Milestones
 
+## v2.1 — Hardening & Weak-Spot Closure
+
+**Started:** 2026-07-25
+**Status:** Planning complete — ready to execute
+**Phases:** 12-17
+**Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09
+
+### Scope
+
+- HTTP execute-path proof for managed catalog / dialect
+- Dameng opt-in live path + Nyquist hygiene
+- Dual JDBC resolver ownership docs (no merge)
+- One multi-JVM worker E2E path
+- RBAC testable enable (default off)
+- Focused P1 harness rows (P0 unchanged)
+
+### Artifacts
+
+- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
+- Roadmap: [ROADMAP.md](ROADMAP.md)
+- Research: [research/SUMMARY.md](research/SUMMARY.md)
+
+---
 ## v2.0 — Reader/Writer & Datasource Platform
 
 **Shipped:** 2026-07-25
