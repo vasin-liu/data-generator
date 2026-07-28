@@ -130,7 +130,54 @@ WHEN MATCHED THEN UPDATE SET t.amount = s.amount, t.status = s.status
 WHEN NOT MATCHED THEN INSERT (id, tenant_id, amount, status) VALUES (s.id, s.tenant_id, s.amount, s.status)
 ```
 
-Verified by `JdbcSinkSqlBuilderDamengMergeTests` (MERGE SQL generation). Optional real Dameng integration tests require `-Ddm.it=true` or `DG_DM_IT=true` when a DM host/image is available (skipped by default in CI).
+Verified by `JdbcSinkSqlBuilderTests.buildsDamengMergeInto` (MERGE SQL generation). Optional real Dameng integration tests require `-Ddm.it=true` or `DG_DM_IT=true` when a DM host/image is available (skipped by default in CI).
+
+#### Dameng live IT (opt-in, DIAL-01)
+
+`ChunkedPipelineDamengUpsertIT` proves CHUNKED JDBC upsert idempotency (same PK re-run; row count and updated values correct) against a **real external Dameng host**. It is skipped by default and is **not** part of the P0 merge gate — the default CI and PR merge bar for Dameng MERGE SQL remains the unit test above, `JdbcSinkSqlBuilderTests.buildsDamengMergeInto`, which requires no live host.
+
+**Enable the flag** (either form works; the wrapper script sets both):
+
+- System property: `-Ddm.it=true`
+- Environment: `DG_DM_IT=true`
+
+**Connection environment variables** (all three required once the flag is on):
+
+| Variable | Purpose |
+|----------|---------|
+| `DG_DM_JDBC_URL` | Dameng JDBC URL, e.g. `jdbc:dm://host:5236?schema=YOUR_SCHEMA` |
+| `DG_DM_USER` | Database user |
+| `DG_DM_PASSWORD` | Database password |
+
+**Run it — wrapper script:**
+
+```powershell
+$env:DG_DM_IT = 'true'
+$env:DG_DM_JDBC_URL = 'jdbc:dm://host:5236?schema=YOUR_SCHEMA'
+$env:DG_DM_USER = 'YOUR_USER'
+$env:DG_DM_PASSWORD = 'YOUR_PASSWORD'
+.\scripts\verify-phase13-uat-dameng-live.ps1
+```
+
+**Run it — equivalent direct Maven command:**
+
+```powershell
+.\mvnw-jdk25.ps1 -pl data-generator-calcite -am `
+  -Ddm.it=true `
+  "-Dtest=ChunkedPipelineDamengUpsertIT" `
+  "-Dsurefire.failIfNoSpecifiedTests=false" `
+  test
+```
+
+**PASS/FAIL semantics (D-02, D-05, honest by design):**
+
+- **Flag off** (`DG_DM_IT` unset / not `true`) — the IT is **skipped**; default CI is unaffected.
+- **Flag on and fully configured against a reachable host** — the IT **PASSes**, proving chunked upsert idempotency via the shared `UpsertParitySupport.assertUpsertIdempotent` helper (the same one used by the PostgreSQL and MySQL upsert ITs).
+- **Flag on but misconfigured (missing env var) or the host is unreachable** — the build **FAILS**. This test never soft-skips once the flag is on; a misconfigured opt-in run must never be mistaken for a passed UAT.
+
+**Host prerequisites:** the target Dameng schema must grant the configured user DDL rights to `DROP`/`CREATE` two scratch tables (`upsert_source_t`, `upsert_target_t`) and tolerate on the order of hundreds of seeded/updated rows per run — the IT reuses the exact same `UpsertParitySupport` fixture as the PostgreSQL and MySQL upsert ITs. An incompatible schema or insufficient grants surfaces as a genuine test failure, not a skip.
+
+**Never commit secrets:** `DG_DM_JDBC_URL`, `DG_DM_USER`, and `DG_DM_PASSWORD` are plaintext environment values intended only for local or opt-in maintainer runs. Never commit them to the repository or paste them into CI configuration files — the repository intentionally ships no environment file for these variables.
 
 ### Kingbase upsert (PostgreSQL `ON CONFLICT` path)
 
@@ -315,3 +362,4 @@ Under `CONTINUE_ON_ERROR`, run reports include per-sink `rowsOk`, `rowsFailed`, 
 - Embedded testing: `docs/testing-embedded-components.md`
 - Phase 8 verification: `.\scripts\verify-phase8-uat-rw-streaming-upsert.ps1 -SkipPlaywright`
 - Phase 9 verification: `.\scripts\verify-phase9-uat-jdbc-dialect.ps1 -SkipPlaywright`
+- Dameng live IT (opt-in): `.\scripts\verify-phase13-uat-dameng-live.ps1` — see [Dameng live IT (opt-in, DIAL-01)](#dameng-live-it-opt-in-dial-01) above

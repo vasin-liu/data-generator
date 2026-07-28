@@ -92,6 +92,9 @@ Focused builds (examples from internal upgrade docs):
 # Phase 11 v2.0 closeout hardening UAT (managed JDBC E2E IT + Kingbase dialect evidence pack; optional Podman Playwright)
 .\scripts\verify-phase11-uat-closeout-hardening.ps1 -SkipPlaywright
 
+# Phase 13 opt-in Dameng live IT (see docs/template-v2-jdbc-sink-guide.md Dameng live IT section for DG_DM_* setup)
+.\scripts\verify-phase13-uat-dameng-live.ps1
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
