@@ -98,12 +98,12 @@ Plans:
 3. Nyquist/`nyquist_compliant` / VALIDATION status is accurate for phases 07, 07.1, and 08 (honest green or documented gap closed)
 4. If no Dameng host is available, done criteria are honest: documented enable path + MERGE unit remains the merge bar (no fake live green)
 
-**Plans**: 4 plans
+**Plans**: 1/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — Wire ChunkedPipelineDamengUpsertIT to real external Dameng JDBC with hard-fail on misconfig (DIAL-01)
+- [x] 13-01-PLAN.md — Wire ChunkedPipelineDamengUpsertIT to real external Dameng JDBC with hard-fail on misconfig (DIAL-01)
 - [ ] 13-03-PLAN.md — Backfill 07 and 07.1 VALIDATION from existing verification evidence (DIAL-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
@@ -217,7 +217,7 @@ Plans:
 | 10. Harness Coverage & CI Gates | v2.0 | 3/3 | Complete | 2026-07 |
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
 | 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete    | 2026-07-25 |
-| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 0/TBD | Pending | — |
+| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 1/4 | In Progress|  |
 | 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
 | 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
 | 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
