@@ -101,9 +101,14 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 13-01-PLAN.md — Wire ChunkedPipelineDamengUpsertIT to real external Dameng JDBC with hard-fail on misconfig (DIAL-01)
-- [ ] 13-02-PLAN.md — Opt-in UAT wrapper script, JDBC sink guide recipe, AGENTS.md command entry (DIAL-01)
 - [ ] 13-03-PLAN.md — Backfill 07 and 07.1 VALIDATION from existing verification evidence (DIAL-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 13-02-PLAN.md — Opt-in UAT wrapper script, JDBC sink guide recipe, AGENTS.md command entry (DIAL-01)
 - [ ] 13-04-PLAN.md — Backfill 08 VALIDATION and sync the v2.0 milestone audit Nyquist table (DIAL-02)
 
 ### Phase 14: Resolver Ownership Docs

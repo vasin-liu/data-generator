@@ -355,14 +355,14 @@ preset(
 
 **If this table is empty:** N/A — two low-risk assumptions logged above, both explicitly anticipated by CONTEXT.md decisions.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Exact verify script filename**
+1. **Exact verify script filename** — RESOLVED
    - What we know: D-15 says "match existing `verify-phase*-uat-*.ps1` style", name at planner discretion; this phase is numbered 13 but addresses DIAL-01 (no single "uat" theme like prior numbered phases)
    - What's unclear: Whether to name it `verify-phase13-uat-dameng-live.ps1` (phase-numbered, consistent with 06-11) or `verify-dameng-live-it.ps1` (capability-named, since this phase also does unrelated Nyquist docs work)
    - Recommendation: Planner picks `verify-phase13-uat-dameng-live.ps1` for consistency with the unbroken `verify-phase{N}-uat-*.ps1` naming convention used by every prior numbered phase (06, 07, 08, 09, 11)
 
-2. **`-Ddm.it` Surefire property mirrors for URL/user/password**
+2. **`-Ddm.it` Surefire property mirrors for URL/user/password** — RESOLVED
    - What we know: `DamengTestSupport` already reads both `-Ddm.it` and `DG_DM_IT` for the boolean flag; D-07 explicitly defers the question of whether URL/user/password need Surefire `-D` mirrors to the planner
    - What's unclear: Whether any CI/local workflow needs `-D` system-property overrides (harder to pass via PowerShell without quoting pain) versus env-only being sufficient for this phase's opt-in local/CI use
    - Recommendation: Env-only (`DG_DM_JDBC_URL`/`DG_DM_USER`/`DG_DM_PASSWORD`) is sufficient — matches D-06 "external JDBC URL/env only" framing and avoids `-D` quoting issues already flagged in `AGENTS.md` ("Quote `-Dsurefire.argLine` / `-Ddm.it=true` on PowerShell")
