@@ -188,6 +188,11 @@
             <artifactId>clickhouse-jdbc</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>dm-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Align with commons-compress pulled by Testcontainers (POI / EasyExcel need FileTimes.isUnixTime). -->
         <dependency>
             <groupId>commons-io</groupId>

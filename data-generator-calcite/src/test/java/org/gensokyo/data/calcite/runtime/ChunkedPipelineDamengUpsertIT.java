@@ -5,29 +5,62 @@
  */
 package org.gensokyo.data.calcite.runtime;
 
-import org.junit.jupiter.api.Assumptions;
+import org.gensokyo.data.calcite.support.UpsertParitySupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 /**
- * Optional Dameng MERGE upsert integration test (D-13, D-14).
+ * Optional Dameng MERGE upsert integration test against a real external JDBC endpoint (DIAL-01).
  *
- * <p>Skipped by default; enable with {@code -Ddm.it=true} or {@code DG_DM_IT=true} when a Dameng
- * JDBC endpoint or container is available. MERGE SQL generation is covered by
- * {@code JdbcSinkSqlBuilderTests} without a live DM instance.
+ * <p>Skipped by default via the class-level {@link org.gensokyo.data.calcite.support.DamengTestSupport}
+ * gate; enable with {@code -Ddm.it=true} or {@code DG_DM_IT=true}. Once enabled, this test requires
+ * three connection environment variables:
+ *
+ * <ul>
+ *   <li>{@code DG_DM_JDBC_URL} — Dameng JDBC URL</li>
+ *   <li>{@code DG_DM_USER} — database user</li>
+ *   <li>{@code DG_DM_PASSWORD} — database password</li>
+ * </ul>
+ *
+ * <p>If the opt-in flag is on but any of these variables is missing or blank, the test fails the
+ * build with {@link IllegalStateException} rather than skipping — a misconfigured opt-in run must
+ * never report as green. See the recipe in {@code docs/template-v2-jdbc-sink-guide.md} for the full
+ * setup. The default CI bar for Dameng MERGE SQL generation remains the unit-level
+ * {@code JdbcSinkSqlBuilderTests}, which do not require a live Dameng host.
  *
  * @author Gensokyo
- * @since 2026-07-21
+ * @since 2026-07-28
  */
 @EnabledIf("org.gensokyo.data.calcite.support.DamengTestSupport#damengItEnabled")
 class ChunkedPipelineDamengUpsertIT {
 
     /**
-     * Placeholder for future real-DM upsert scenario when container wiring lands (D-14).
+     * Proves CHUNKED JDBC upsert idempotency against a real Dameng host by delegating to the shared
+     * {@link UpsertParitySupport} helper used by the PostgreSQL, MySQL, Kingbase, and HighGo ITs.
      */
     @Test
     void chunkedUpsertDamengMergeIsIdempotent() {
-        // Real DM container wiring deferred; operators enable via DamengTestSupport when ready.
-        Assumptions.abort("Dameng IT placeholder — wire DM Testcontainer when image available (D-14)");
+        UpsertParitySupport.assertUpsertIdempotent(
+                requireEnv("DG_DM_JDBC_URL"),
+                requireEnv("DG_DM_USER"),
+                requireEnv("DG_DM_PASSWORD"),
+                "dm.jdbc.driver.DmDriver",
+                "dameng");
+    }
+
+    /**
+     * Reads a required connection environment variable, failing hard (never skipping) when it is
+     * absent or blank. The exception message never includes the variable's value so a real
+     * credential cannot leak into Surefire output or CI logs.
+     */
+    private static String requireEnv(String name) {
+        String value = System.getenv(name);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Dameng live IT is enabled (DG_DM_IT/dm.it) but required environment variable "
+                            + name + " is missing or blank; see the Dameng live IT recipe in "
+                            + "docs/template-v2-jdbc-sink-guide.md before enabling this test.");
+        }
+        return value;
     }
 }
