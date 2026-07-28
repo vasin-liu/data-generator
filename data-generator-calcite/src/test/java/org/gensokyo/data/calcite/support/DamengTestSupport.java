@@ -6,20 +6,27 @@
 package org.gensokyo.data.calcite.support;
 
 /**
- * Gate for optional Dameng Testcontainers integration tests (D-14).
+ * Opt-in gate for the {@code ChunkedPipelineDamengUpsertIT} live Dameng integration test (DIAL-01).
  *
- * <p>Primary Dameng upsert proof remains {@code JdbcSinkSqlBuilderTests} MERGE SQL unit tests.
- * Enable a real DM container IT when an image or host is available:
+ * <p>This class answers only "is opt-in on?" — it does not validate the connection itself. Enable
+ * the flag with either:
  *
  * <ul>
  *   <li>JVM: {@code -Ddm.it=true}</li>
  *   <li>Environment: {@code DG_DM_IT=true}</li>
  * </ul>
  *
+ * <p>When enabled, the IT additionally requires three connection environment variables:
+ * {@code DG_DM_JDBC_URL}, {@code DG_DM_USER}, and {@code DG_DM_PASSWORD}. If the flag is on but any
+ * of these is missing, blank, or the host is unreachable, the IT fails the build — it never reports
+ * as skipped. See the recipe in {@code docs/template-v2-jdbc-sink-guide.md} for the full setup.
+ *
  * <p>Default CI and local Maven runs skip {@code ChunkedPipelineDamengUpsertIT} without the flag.
+ * The default CI bar for Dameng MERGE SQL generation remains the {@code JdbcSinkSqlBuilderTests}
+ * unit tests, which require no live Dameng host.
  *
  * @author Gensokyo
- * @since 2026-07-21
+ * @since 2026-07-28
  */
 public final class DamengTestSupport {
 
