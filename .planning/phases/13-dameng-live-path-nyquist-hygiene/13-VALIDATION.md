@@ -38,16 +38,18 @@ created: 2026-07-28
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 13-01-01 | 01 | 1 | DIAL-01 | T-13-01 | Never log/print `DG_DM_PASSWORD` value on hard-FAIL | unit | `-Dtest=JdbcSinkSqlBuilderTests` | ✅ | ⬜ pending |
-| 13-01-02 | 01 | 1 | DIAL-01 | T-13-02 | Hard FAIL when flag on + misconfigured (no soft skip) | IT | `-Dtest=ChunkedPipelineDamengUpsertIT` with flag on, URL unset | ❌ W0 | ⬜ pending |
-| 13-01-03 | 01 | 1 | DIAL-01 | — | Upsert idempotency via `UpsertParitySupport` when host configured | IT | same + real `DG_DM_*` | ❌ W0 | ⬜ pending |
-| 13-01-04 | 01 | 1 | DIAL-01 | — | UAT wrapper exits non-zero when config missing | script | `scripts/verify-phase13-uat-dameng-live.ps1` (no env) | ❌ W0 | ⬜ pending |
-| 13-02-01 | 02 | 2 | DIAL-02 | — | 07/07.1/08 VALIDATION `nyquist_compliant: true` from existing evidence | docs | `rg -n "nyquist_compliant: true" .../07-VALIDATION.md .../07.1-VALIDATION.md .../08-VALIDATION.md` | ❌ W0 | ⬜ pending |
-| 13-02-02 | 02 | 2 | DIAL-02 | — | Milestone audit Nyquist table synced (12 untouched) | docs | `rg -n "COMPLIANT" .planning/milestones/v2.0-MILESTONE-AUDIT.md` | ✅ (file) | ⬜ pending |
+| 13-01-01 | 01 | 1 | DIAL-01 | T-13-01, T-13-SC | Env-read failure names the missing variable, never its value; pre-approved BOM dependency only | build | `.\mvnw-jdk25.ps1 -pl data-generator-calcite -am test-compile` | ❌ W0 | ⬜ pending |
+| 13-01-02 | 01 | 1 | DIAL-01 | T-13-02 | Hard FAIL when flag on + misconfigured (Surefire failure, not skip) | IT (inverted) | `-Dtest=ChunkedPipelineDamengUpsertIT` with `DG_DM_IT=true`, URL unset → expect non-zero exit | ❌ W0 | ⬜ pending |
+| 13-02-01 | 02 | 2 | DIAL-01 | T-13-08, T-13-01 | Wrapper exits 1 with usage when unconfigured; echoes variable names only | script (inverted) | `powershell -NoProfile -File scripts/verify-phase13-uat-dameng-live.ps1` with no env → expect exit 1 | ❌ W0 | ⬜ pending |
+| 13-02-02 | 02 | 2 | DIAL-01 | T-13-03, T-13-04, T-13-09 | Placeholder credentials + never-commit warning; P0 gate untouched | docs | `rg -n "DG_DM_JDBC_URL\|buildsDamengMergeInto" docs/template-v2-jdbc-sink-guide.md` + `rg -n "verify-phase13-uat-dameng-live" AGENTS.md` | ❌ W0 | ⬜ pending |
+| 13-03-01 | 03 | 1 | DIAL-02 | T-13-05, T-13-10, T-13-11 | 07 compliance claimed only from existing green evidence; Phase 12 untouched | docs | `rg -n "nyquist_compliant: true" .../07-VALIDATION.md` | ✅ (file) | ⬜ pending |
+| 13-03-02 | 03 | 1 | DIAL-02 | T-13-05, T-13-10 | 07.1 VALIDATION created from its own VERIFICATION record | docs | `rg -n "nyquist_compliant: true" .../07.1-VALIDATION.md` | ❌ W0 | ⬜ pending |
+| 13-04-01 | 04 | 2 | DIAL-02 | T-13-05, T-13-10 | 08 map grouped by task; accepted limits carried, not resolved | docs | `rg -n "nyquist_compliant: true" .../08-VALIDATION.md` | ❌ W0 | ⬜ pending |
+| 13-04-02 | 04 | 2 | DIAL-02 | T-13-13, T-13-04, T-13-11 | Audit claims bound to real flags; P0 and Phase 12 untouched | docs | `rg -n "COMPLIANT\|partial_phases: \[\]\|missing_phases: \[\]" .planning/milestones/v2.0-MILESTONE-AUDIT.md` | ✅ (file) | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
-*Plan/task IDs provisional — planner may rename; keep requirement mapping.*
+*Map synced to the 4-plan / 2-wave breakdown created at `/gsd-plan-phase 13`.*
 
 ---
 

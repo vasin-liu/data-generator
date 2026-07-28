@@ -98,7 +98,13 @@ Plans:
 3. Nyquist/`nyquist_compliant` / VALIDATION status is accurate for phases 07, 07.1, and 08 (honest green or documented gap closed)
 4. If no Dameng host is available, done criteria are honest: documented enable path + MERGE unit remains the merge bar (no fake live green)
 
-**Plans**: TBD at `/gsd-plan-phase 13`
+**Plans**: 4 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Wire ChunkedPipelineDamengUpsertIT to real external Dameng JDBC with hard-fail on misconfig (DIAL-01)
+- [ ] 13-02-PLAN.md — Opt-in UAT wrapper script, JDBC sink guide recipe, AGENTS.md command entry (DIAL-01)
+- [ ] 13-03-PLAN.md — Backfill 07 and 07.1 VALIDATION from existing verification evidence (DIAL-02)
+- [ ] 13-04-PLAN.md — Backfill 08 VALIDATION and sync the v2.0 milestone audit Nyquist table (DIAL-02)
 
 ### Phase 14: Resolver Ownership Docs
 
