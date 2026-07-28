@@ -15,7 +15,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 ### Dialect & Validation Hygiene (DIAL)
 
 - [x] **DIAL-01**: Dameng live IT has a documented opt-in green path (`-Ddm.it=true` / `DG_DM_IT=true`, host/image, expected PASS); default CI remains MERGE-unit based — live IT is not a P0 merge requirement
-- [ ] **DIAL-02**: Nyquist/VALIDATION hygiene backfilled for lagging phases 07, 07.1, and 08 (docs/`nyquist_compliant` status accurate)
+- [x] **DIAL-02**: Nyquist/VALIDATION hygiene backfilled for lagging phases 07, 07.1, and 08 (docs/`nyquist_compliant` status accurate)
 
 ### Resolver Ownership (RES)
 
@@ -70,7 +70,7 @@ Deferred beyond v2.1.
 | EXEC-01 | 12 | Complete |
 | EXEC-02 | 12 | Complete |
 | DIAL-01 | 13 | Complete |
-| DIAL-02 | 13 | Pending |
+| DIAL-02 | 13 | Complete |
 | RES-01 | 14 | Pending |
 | DIST-01 | 15 | Pending |
 | SEC-01 | 16 | Pending |

@@ -5,16 +5,16 @@ milestone_name: Hardening & Weak-Spot Closure
 current_phase: 13
 current_phase_name: dameng-live-path-nyquist-hygiene
 status: executing
-stopped_at: Completed 13-03-PLAN.md
-last_updated: "2026-07-28T10:54:10.312Z"
+stopped_at: Completed 13-04-PLAN.md
+last_updated: "2026-07-28T13:11:13.862Z"
 last_activity: 2026-07-28
-last_activity_desc: Phase 13 execution started
+last_activity_desc: Phase 13 complete (DIAL-01, DIAL-02)
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 4
-  percent: 17
+  completed_plans: 6
+  percent: 33
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 13 (dameng-live-path-nyquist-hygiene) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
-Last activity: 2026-07-28 — Phase 13 execution started
+Phase: 13 (dameng-live-path-nyquist-hygiene) — COMPLETE (4/4 plans)
+Plan: 4 of 4
+Status: Phase complete — ready for `/gsd-plan-phase 14`
+Last activity: 2026-07-28 — Phase 13 complete (DIAL-01, DIAL-02)
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 12]: HTTP EXEC-01 via MockMvc /task/run + publish gate + COUNT(*); Phase 11 IT untouched — Close v2.0 in-process-only limit without renaming Phase 11 proof
 - [Phase 12]: HTTP snap pools require passwordSecretRef for non-empty managed JDBC passwords (EXEC-02 IT) — ConnectionSnapshotSupport only snapshots passwordSecretRef; plaintext save leaves snap: pools without credentials
 - [Phase 13]: Phase 13 P03: Nyquist backfill for 07/07.1 transcribes existing green tests only — 07-VALIDATION.md and 07.1-VALIDATION.md set nyquist_compliant: true by citing test classes/commands already recorded green in VERIFICATION/SUMMARY reports (D-11); no new tests written, no Phase 07/07.1 implementation reopened, Phase 12 validation state untouched (D-10)
+- [Phase 13]: Phase 13 P04: Backfilled 08-VALIDATION.md (12 grouped plan-task rows from 58 already-green truths) and synced v2.0-MILESTONE-AUDIT.md Nyquist table/frontmatter to COMPLIANT for 07/07.1/08 — DIAL-02 requires accurate nyquist_compliant status across 07/07.1/08; grouping by plan task (not 1:1 with the 58 VERIFICATION truths) keeps the map readable while staying honest transcription-only (D-11); milestone audit must agree with the backfilled files or the exercise is invisible to maintainers (D-13). Phase 12 validation and P0 gate untouched (D-10). DIAL-02 now complete; Phase 13 fully done.
 
 ### Pending Todos
 
@@ -99,21 +100,22 @@ Items carried or acknowledged at milestone close:
 | Product | Net-new connectors (Redis, S3, HTTP) | Later version | 2026-06-23 |
 | Process | Milestone audit skipped at v1.0 close | Accepted | 2026-06-23 |
 | tech_debt | Dameng live CI opt-in only | In progress via DIAL-01 (v2.1) | 2026-07-25 |
-| tech_debt | Nyquist hygiene phases 07/08/07.1 | In progress via DIAL-02 (v2.1) | 2026-07-25 |
+| tech_debt | Nyquist hygiene phases 07/08/07.1 | Closed via DIAL-02 (Phase 13, 2026-07-28) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Phase 12-http-execute-path-proof P01 | 41min | 2 tasks | 1 files |
 | Phase 12-http-execute-path-proof P02 | 45 min | 2 tasks | 3 files |
 | Phase 13 P01 | 41 min | 2 tasks | 3 files |
 | Phase 13 P03 | 35min | 2 tasks | 2 files |
+| Phase 13 P04 | 40 min | 2 tasks | 2 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-28T10:52:30.818Z
-Stopped at: Completed 13-03-PLAN.md
-Next: `/gsd-plan-phase 12`
+Last session: 2026-07-28T13:11:13.775Z
+Stopped at: Completed 13-04-PLAN.md
+Next: `/gsd-plan-phase 14`
 
 ## Operator Next Steps
 
-- Plan Phase 12 with `/gsd-plan-phase 12`
+- Plan Phase 14 (Resolver Ownership Docs, RES-01) with `/gsd-plan-phase 14`

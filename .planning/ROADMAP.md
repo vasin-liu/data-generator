@@ -49,7 +49,7 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 ### Phase list
 
 - [x] **Phase 12: HTTP Execute-Path Proof** — Managed catalog (+ dialect) via HTTP `/task/run` (EXEC-01, EXEC-02) — 2 plans (completed 2026-07-25)
-- [ ] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02)
+- [x] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02) (completed 2026-07-28)
 - [ ] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01)
 - [ ] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01)
 - [ ] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01)
@@ -98,7 +98,7 @@ Plans:
 3. Nyquist/`nyquist_compliant` / VALIDATION status is accurate for phases 07, 07.1, and 08 (honest green or documented gap closed)
 4. If no Dameng host is available, done criteria are honest: documented enable path + MERGE unit remains the merge bar (no fake live green)
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -109,7 +109,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 13-02-PLAN.md — Opt-in UAT wrapper script, JDBC sink guide recipe, AGENTS.md command entry (DIAL-01)
-- [ ] 13-04-PLAN.md — Backfill 08 VALIDATION and sync the v2.0 milestone audit Nyquist table (DIAL-02)
+- [x] 13-04-PLAN.md — Backfill 08 VALIDATION and sync the v2.0 milestone audit Nyquist table (DIAL-02)
 
 ### Phase 14: Resolver Ownership Docs
 
@@ -217,7 +217,7 @@ Plans:
 | 10. Harness Coverage & CI Gates | v2.0 | 3/3 | Complete | 2026-07 |
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
 | 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete    | 2026-07-25 |
-| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 3/4 | In Progress|  |
+| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 4/4 | Complete   | 2026-07-28 |
 | 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
 | 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
 | 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
