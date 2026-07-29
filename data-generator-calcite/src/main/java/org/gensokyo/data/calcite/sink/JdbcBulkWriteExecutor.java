@@ -92,6 +92,7 @@ final class JdbcBulkWriteExecutor {
      * <p>
      * MySQL returns {@code 2} when a duplicate-key row was updated and {@code 1} for a fresh insert.
      * PostgreSQL returns {@code 1} for both insert and update on {@code ON CONFLICT DO UPDATE}.
+     * Dameng {@code MERGE WHEN MATCHED THEN UPDATE} may return {@code 0} despite persisting changes (dm-jdbc 1.8 quirk).
      * {@link Statement#SUCCESS_NO_INFO} is treated as one successful row when drivers omit exact counts.
      * </p>
      *
@@ -114,11 +115,15 @@ final class JdbcBulkWriteExecutor {
         if (updateCount < 0) {
             return 0;
         }
+        if ("dameng".equals(dialect)) {
+            // dm-jdbc 1.8 reports updateCount==0 for successful MERGE WHEN MATCHED THEN UPDATE despite persisting row changes.
+            return 1;
+        }
         if ("mysql".equals(dialect)) {
             return updateCount == 2 ? 1 : 0;
         }
         if (isPostgresStyleUpsertDialect(dialect)) {
-            // PostgreSQL ON CONFLICT and Dameng MERGE report successful row ops as updateCount > 0.
+            // PostgreSQL ON CONFLICT and postgres-compatible dialects report successful row ops as updateCount > 0.
             return updateCount > 0 ? 1 : 0;
         }
         return updateCount > 0 ? 1 : 0;
