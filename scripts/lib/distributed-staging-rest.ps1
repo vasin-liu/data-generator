@@ -145,6 +145,70 @@ function Wait-DistributedJobSuccess {
     throw "Timed out waiting for job $InstanceId to reach SUCCESS"
 }
 
+function Wait-DistributedDualSuccess {
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][int64]$InstanceId,
+        [int]$TimeoutSec = 180
+    )
+    $deadline = (Get-Date).AddSeconds($TimeoutSec)
+    while ((Get-Date) -lt $deadline) {
+        $data = Get-DistributedJobDetail -BaseUrl $BaseUrl -InstanceId $InstanceId
+        $execStatus = $data.execution.status
+        $distStatus = if ($data.distributedJob) { $data.distributedJob.status } else { $null }
+
+        if ($execStatus -eq 'SUCCESS' -and $distStatus -eq 'SUCCESS') {
+            return $data
+        }
+        if ($execStatus -in @('FAILED', 'CANCELLED')) {
+            throw "Execution $InstanceId ended with status $execStatus (distributedJob=$distStatus)"
+        }
+        if ($distStatus -in @('FAILED', 'CANCELLED')) {
+            throw "Distributed job for instance $InstanceId ended with status $distStatus (execution=$execStatus)"
+        }
+        Start-Sleep -Seconds 2
+    }
+    throw "Timed out waiting for dual SUCCESS on job $InstanceId"
+}
+
+function New-DistributedMinimalIteratorConsoleTemplate {
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [string]$TemplateName = "dist-minimal-$(Get-Date -Format 'yyyyMMddHHmmss')"
+    )
+    $draft = @{
+        name                = $TemplateName
+        sources             = @{
+            input = @{
+                type     = 'iterator'
+                iterator = @{
+                    type = 'number'
+                    from = 1
+                    to   = 2
+                    step = 1
+                }
+            }
+        }
+        transform           = @{
+            type = 'sql'
+            sql  = 'SELECT value FROM input'
+        }
+        sinkExecutionPolicy = @{
+            mode = 'CONTINUE_ON_ERROR'
+        }
+        sink                = @{
+            writers = @(
+                @{ type = 'console' }
+            )
+        }
+    }
+    $templateId = Publish-DistributedDraftTemplate -BaseUrl $BaseUrl -Draft $draft
+    return [pscustomobject]@{
+        TemplateId   = $templateId
+        TemplateName = $TemplateName
+    }
+}
+
 function Wait-DistributedJobExecutionStatus {
     param(
         [Parameter(Mandatory)][string]$BaseUrl,
