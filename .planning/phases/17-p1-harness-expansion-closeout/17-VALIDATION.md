@@ -129,3 +129,4 @@ rg -A8 "id: dist-multi-jvm-worker" .planning/test-matrix.yaml | Select-String "l
 - [ ] `nyquist_compliant: true` set in frontmatter after `/gsd-verify-work`
 
 **Approval:** pending
+
