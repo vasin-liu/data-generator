@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 UDF, Transform & Test Harness** — Phases 1-5 (shipped 2026-06-23)
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
-- 📋 **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (in planning)
+- 📋 **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (ready for closeout — 2026-07-29)
 
 ## Phases
 
