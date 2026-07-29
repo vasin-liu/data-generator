@@ -110,6 +110,41 @@ Automated enqueue → worker SUCCESS REST smoke (coordinator + worker already ru
 .\scripts\staging-distributed-smoke.ps1 -CoordinatorBaseUrl "http://localhost:9876" -EnqueueSmoke
 ```
 
+## DIST-01 local verify (host two-JVM)
+
+Primary **DIST-01** proof: a **coordinator JVM** and a **separate worker JVM** (`DataGeneratorWorkerApplication`) share a file H2 metadata DB, the coordinator enqueues via `POST /task/run/{templateId}`, and the worker leases/executes until both `task_execution` and `distributed_job` are **SUCCESS**. This closes the process-boundary gap left by single-JVM `DistributedSplitRoleIntegrationTests`.
+
+**Prerequisites:** JDK 25 (`.\mvnw-jdk25.ps1`), free ports **9876** (coordinator) and **9877** (worker), Windows PowerShell. First run builds the service classpath (~2–4 min).
+
+```powershell
+.\scripts\verify-multi-jvm-worker.ps1
+```
+
+Faster iteration:
+
+| Flag | When to use |
+|------|-------------|
+| `-SkipBuild` | Classpath already built under `data-generator-service/target` |
+| `-SkipMavenPreflight` | Skip embedded distributed IT preflight (D-08 guard) |
+| `-KeepWorkDir` | Keep temp work dir + logs after run |
+| `-HostPort N` | Coordinator port if 9876 is busy |
+| `-TimeoutSec N` | Dual-SUCCESS poll timeout (default 300) |
+
+**Expected SUCCESS signals:**
+
+- Exit code **0**
+- Console line: `[SUCCESS] Multi-JVM worker E2E: instanceId=… distributedJobId=… workerId=…`
+- Both `task_execution.status` and `distributed_job.status` are `SUCCESS`
+
+**Cleanup:** Default run stops both JVMs and deletes the isolated temp work dir. Use `-KeepWorkDir` to inspect `coordinator.log` / `worker.log`. If processes were killed manually, free ports 9876/9877 and remove leftover H2 lock files under the work dir.
+
+**Harness:** Matrix row `dist-multi-jvm-worker` is **P1** (non-blocking). See `docs/test-harness.md`. P0 gate unchanged.
+
+**Optional (not the DIST-01 gate):**
+
+- `.\scripts\staging-distributed-smoke.ps1` — embedded IT preflight / REST smoke
+- `.\scripts\e2e-distributed-podman.ps1` — Podman dual-container drill
+
 ## Podman dual-JVM drill (AC-1 + AC-2)
 
 Starts **two containers** (coordinator + worker) sharing a Podman volume on `db/`, seeds a published GF-A template, enqueues on the coordinator, waits for worker `SUCCESS`, runs **C2 P2** drills (AC-4 worker kill + lease recovery, AC-6 failure requeue), and runs Playwright job-detail checks.

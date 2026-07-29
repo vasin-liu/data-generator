@@ -98,6 +98,9 @@ Focused builds (examples from internal upgrade docs):
 # JDBC resolver ownership + call-site inventory (catalog-side vs V2 execute-path; see docs/jdbc-resolver-ownership.md)
 # (no runnable script — documentation only)
 
+# Multi-JVM worker E2E — host coordinator + worker, shared file H2 (DIST-01; see docs/staging-distributed-deployment.md#dist-01-local-verify-host-two-jvm)
+.\scripts\verify-multi-jvm-worker.ps1
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
