@@ -1,4 +1,4 @@
-<!-- GENERATED — do not edit by hand. -->
+﻿<!-- GENERATED 鈥?do not edit by hand. -->
 <!-- Source: .planning/test-matrix.yaml -->
 <!-- Generator: scripts/generate-test-matrix-doc.ps1 -->
 
@@ -56,4 +56,13 @@ This document is generated from `.planning/test-matrix.yaml`. Edit the YAML sour
 | udf-sql | udf-sql | calcite-sql | unit | data-generator-service | covered | P0 | UdfPublishServiceTests, UdfConsoleTemplateBindingE2ETests |
 | udf-script | udf-script | javascript | unit | data-generator-calcite | covered | P0 |  |
 | udf-java-plugin | udf-java-plugin | pf4j | unit | data-generator-service | covered | P0 | UdfGovernanceSupportTests, UdfConsoleTemplateBindingE2ETests |
+| v2-streaming-csv | v2-streaming-csv | csv | unit, integration | data-generator-calcite | covered | P0 |  |
+| v2-streaming-json | v2-streaming-json | json | unit, integration | data-generator-calcite | covered | P0 |  |
+| v2-jdbc-upsert-pg-mysql | v2-jdbc-upsert | jdbc | integration, unit | data-generator-calcite | covered | P0 |  |
+| v2-dialect-dameng | v2-dialect-dameng | jdbc | unit | data-generator-calcite | covered | P0 | JdbcSinkSqlBuilderTests |
+| v2-dialect-kingbase | v2-dialect-kingbase | jdbc | integration, unit | data-generator-calcite | covered | P0 |  |
+| v2-dialect-highgo | v2-dialect-highgo | jdbc | integration, unit | data-generator-calcite | covered | P0 |  |
+| v2-dialect-postgres | v2-dialect-postgres | jdbc | integration | data-generator-calcite | covered | P0 | ChunkedPipelinePostgresUpsertTests |
+| v2-dialect-clickhouse | v2-dialect-clickhouse | jdbc | integration, unit | data-generator-calcite | covered | P0 |  |
+| dist-multi-jvm-worker | distributed-multi-jvm-worker | host-jvm | integration | data-generator-service | covered | P1 |  |
 

@@ -599,3 +599,18 @@ rows:
       - JdbcSinkSqlBuilderTests
     notes: ClickHouse insert-bulk Testcontainers IT plus clickhouseUpsertIsUnsupported unit reject (RW-05, TEST-07).
 
+  - id: dist-multi-jvm-worker
+    capability: distributed-multi-jvm-worker
+    adapter: host-jvm
+    test_types: [integration]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests: []
+    notes: >
+      Phase 15 DIST-01 — coordinator JVM enqueues via POST /task/run; worker JVM
+      (DataGeneratorWorkerApplication) leases and executes to SUCCESS. Primary proof:
+      scripts/verify-multi-jvm-worker.ps1 (host two-JVM + shared file H2). P1 non-blocking;
+      Podman drill scripts/e2e-distributed-podman.ps1 remains optional. Single-JVM ITs
+      (DistributedSplitRoleIntegrationTests) unchanged.
+

@@ -102,5 +102,6 @@ $tableRows = foreach ($row in $rows) {
 }
 
 $content = $banner + "`n" + ($tableRows -join "`n") + "`n"
-Set-Content -Path $OutPath -Value $content -Encoding utf8NoBOM
+# utf8NoBOM is unavailable on Windows PowerShell 5.x; UTF8 is acceptable for this generated doc.
+Set-Content -Path $OutPath -Value $content -Encoding UTF8
 Write-Host "Wrote $($rows.Count) rows to $OutPath"
