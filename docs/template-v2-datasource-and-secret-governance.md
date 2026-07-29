@@ -22,6 +22,7 @@ Related references:
 - `docs/template-v2-product-roadmap.md`
 - `docs/template-v2-transformer-strategy.md`
 - `docs/calcite-plugin-framework-evaluation.md`
+- `docs/jdbc-resolver-ownership.md` — JDBC resolver ownership (catalog vs execute-path)
 
 ## Goal
 

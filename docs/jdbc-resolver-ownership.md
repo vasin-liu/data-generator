@@ -50,8 +50,8 @@ A future milestone may consolidate into a **single authority** and remove duplic
 
 ## Related docs
 
-- `docs/template-v2-datasource-and-secret-governance.md` — datasource/secret governance (sibling; optional cross-link target)
-- `AGENTS.md` — Commands pointer for maintainers (added in Phase 14 packaging)
+- `docs/template-v2-datasource-and-secret-governance.md` — datasource/secret governance (sibling)
+- `AGENTS.md` — Commands pointer for maintainers (Phase 14 packaging)
 
 ---
 

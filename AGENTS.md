@@ -95,6 +95,9 @@ Focused builds (examples from internal upgrade docs):
 # Phase 13 opt-in Dameng live IT (see docs/template-v2-jdbc-sink-guide.md Dameng live IT section for DG_DM_* setup)
 .\scripts\verify-phase13-uat-dameng-live.ps1
 
+# JDBC resolver ownership + call-site inventory (catalog-side vs V2 execute-path; see docs/jdbc-resolver-ownership.md)
+# (no runnable script — documentation only)
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 

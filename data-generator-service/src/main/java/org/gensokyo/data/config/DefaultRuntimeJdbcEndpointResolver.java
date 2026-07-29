@@ -42,6 +42,9 @@ import java.util.Objects;
  * register-if-absent semantics for the execute path. Consolidating the two is a deferred,
  * future concern.
  *
+ * <p>Maintainer ownership model and call-site inventory:
+ * {@code docs/jdbc-resolver-ownership.md}.
+ *
  * @author Gensokyo
  * @since 2026-05-19
  */
