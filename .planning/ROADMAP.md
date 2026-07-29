@@ -192,11 +192,11 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 16-02-PLAN.md — verify-rbac-enable.ps1 Maven slice + optional Playwright e2e-rbac leg (D-08, D-06)
+- [ ] 16-02-PLAN.md — docs/staging-console-rbac.md + operator-console cross-link + AGENTS.md pointer (D-01, D-02, D-09)
 
 **Wave 3** *(blocked on Wave 1–2 completion)*
 
-- [ ] 16-03-PLAN.md — docs/staging-console-rbac.md + operator-console cross-link + AGENTS.md pointer (D-01, D-02, D-07)
+- [ ] 16-03-PLAN.md — verify-rbac-enable.ps1 optional Playwright e2e-rbac leg + doc packaging notes (D-06, D-07, D-08)
 
 ### Phase 17: P1 Harness Expansion + Closeout
 
