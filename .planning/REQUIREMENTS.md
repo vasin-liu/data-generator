@@ -31,7 +31,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 
 ### Harness Gates (TEST)
 
-- [ ] **TEST-09**: Feature matrix adds focused **P1** rows for new v2.1 proof paths (HTTP managed-catalog execute, multi-JVM worker, RBAC enable); P0 set and `verify-harness.ps1` merge-gate semantics remain unchanged
+- [x] **TEST-09**: Feature matrix adds focused **P1** rows for new v2.1 proof paths (HTTP managed-catalog execute, multi-JVM worker, RBAC enable); P0 set and `verify-harness.ps1` merge-gate semantics remain unchanged (Phase 17: four P1 rows wired; P0 unchanged at 15)
 
 ## Future Requirements
 
@@ -74,7 +74,7 @@ Deferred beyond v2.1.
 | RES-01 | 14 | Complete |
 | DIST-01 | 15 | Complete |
 | SEC-01 | 16 | Complete |
-| TEST-09 | 17 | Pending |
+| TEST-09 | 17 | Complete |
 
 **Coverage:**
 

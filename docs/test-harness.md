@@ -49,6 +49,19 @@ Phase 10 expanded the merge gate with Phase 8 streaming/upsert and Phase 9 diale
 | `v2-streaming-csv`, `v2-streaming-json` | Streaming sink units and `StreamingPipelineTests` (low-heap `CsvJsonStreamingOomIT` excluded from linked tests). |
 | `v2-jdbc-upsert-pg-mysql` | PG/MySQL Testcontainers upsert ITs plus `JdbcUpsertSmokeTests`. |
 
+### Phase 17 / v2.1 P1 evidence
+
+Phase 17 wired finished v2.1 proof paths as **P1 non-blocking** matrix rows. `scripts/verify-harness.ps1` remains the sole **P0 merge gate** (15 rows). P1 row failures or `skipped-conditional` statuses do not block merge unless a linked Maven test fails hard (exit code 1).
+
+| Row id | Capability | Evidence bar | Supplementary |
+|--------|------------|--------------|---------------|
+| `exec-http-managed-catalog` | HTTP `/task/run` + managed JDBC catalog | `ManagedJdbcCatalogHttpExecuteIT` — publish gate, SUCCESS poll, H2 sink COUNT(*) | — |
+| `exec-http-postgres-dialect` | HTTP spine + PG dialect upsert | `ManagedJdbcCatalogHttpPostgresUpsertIT` — Testcontainers PG ON CONFLICT; **skipped-conditional** without Docker (non-blocking) | — |
+| `dist-multi-jvm-worker` | Multi-JVM coordinator → worker | `scripts/verify-multi-jvm-worker.ps1` — host two-JVM, dual SUCCESS; **script-primary** (`linked_tests: []`) | [staging-distributed-deployment.md](staging-distributed-deployment.md) |
+| `rbac-enable-path` | Header RBAC when enabled | `ConsoleAuthorizationIntegrationIT`, `ConsoleSecurityDefaultOffIT`, `ConsoleAuthorizationFilterTest` | [verify-rbac-enable.ps1](../scripts/verify-rbac-enable.ps1), [staging-console-rbac.md](staging-console-rbac.md) |
+
+These rows are **not merge blockers**. The CI **Harness verify** workflow (`.github/workflows/harness-verify.yml`) gates on `p0.pass` only.
+
 ## Matrix maintenance
 
 1. Edit `.planning/test-matrix.yaml` (source of truth).

@@ -38,7 +38,7 @@ Full archive: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 ## Milestone v2.1: Hardening & Weak-Spot Closure
 
-**Status:** 📋 Planning complete — ready for `/gsd-plan-phase 12`
+**Status:** Ready for closeout — all phases 12–17 complete; run `/gsd-verify-work` before milestone archive
 **Phases:** 12–17
 **Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09
 
@@ -53,7 +53,7 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 - [x] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01) (completed 2026-07-29)
 - [x] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01) (completed 2026-07-29)
 - [x] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01) (completed 2026-07-29)
-- [ ] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09)
+- [x] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09) (completed 2026-07-29)
 
 ### Phase Details
 
@@ -208,24 +208,24 @@ Plans:
 
 **Success Criteria** (what must be TRUE):
 
-1. Feature matrix adds focused **P1** rows covering HTTP managed-catalog execute, multi-JVM worker, and RBAC enable paths
-2. P0 set size/membership and `scripts/verify-harness.ps1` merge-gate semantics remain unchanged
-3. AGENTS/docs note how to run or interpret the new P1 rows without treating them as merge blockers
-4. Milestone roadmap/state reflect closeout readiness (or explicit remaining gaps) after P1 wiring
+1. [x] Feature matrix adds focused **P1** rows covering HTTP managed-catalog execute, multi-JVM worker, and RBAC enable paths
+2. [x] P0 set size/membership and `scripts/verify-harness.ps1` merge-gate semantics remain unchanged
+3. [x] AGENTS/docs note how to run or interpret the new P1 rows without treating them as merge blockers
+4. [x] Milestone roadmap/state reflect closeout readiness (or explicit remaining gaps) after P1 wiring
 
-**Plans**: 3/3 planned
+**Plans**: 3/3 complete
 
 **Wave 1** *(matrix P1 rows — no P0 changes)*
 
-- [ ] 17-01-PLAN.md — add exec-http-managed-catalog, exec-http-postgres-dialect, rbac-enable-path; verify dist-multi-jvm-worker (D-01–D-06)
+- [x] 17-01-PLAN.md — add exec-http-managed-catalog, exec-http-postgres-dialect, rbac-enable-path; verify dist-multi-jvm-worker (D-01–D-06)
 
 **Wave 2** *(doc regen + harness verify)*
 
-- [ ] 17-02-PLAN.md — regenerate test-feature-matrix.md; assert p0.total=15, p0.pass=true (D-09, D-12)
+- [x] 17-02-PLAN.md — regenerate test-feature-matrix.md; assert p0.total=15, p0.pass=true (D-09, D-12)
 
 **Wave 3** *(docs + milestone closeout)*
 
-- [ ] 17-03-PLAN.md — test-harness.md Phase 17 subsection, AGENTS.md, REQUIREMENTS/ROADMAP/MILESTONES/STATE (D-13–D-16)
+- [x] 17-03-PLAN.md — test-harness.md Phase 17 subsection, AGENTS.md, REQUIREMENTS/ROADMAP/MILESTONES/STATE (D-13–D-16)
 
 ### Requirement coverage
 
@@ -269,7 +269,7 @@ Plans:
 | 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
 | 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete    | 2026-07-29 |
 | 16. RBAC Enable Path | v2.1 | 3/3 | Complete    | 2026-07-29 |
-| 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |
+| 17. P1 Harness Expansion + Closeout | v2.1 | 3/3 | Complete | 2026-07-29 |
 
 ---
-*Roadmap updated: 2026-07-25 — v2.1 Hardening & Weak-Spot Closure phases 12–17*
+*Roadmap updated: 2026-07-29 — v2.1 Phase 17 complete; ready for closeout verification*

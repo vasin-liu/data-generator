@@ -3,9 +3,9 @@
 ## v2.1 — Hardening & Weak-Spot Closure
 
 **Started:** 2026-07-25
-**Status:** Planning complete — ready to execute
-**Phases:** 12-17
-**Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09
+**Status:** Ready for closeout — all 8 v2.1 requirements complete (TEST-09 closed Phase 17); run `/gsd-verify-work` before milestone archive
+**Phases:** 12-17 (6/6 complete)
+**Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09 (all complete)
 
 ### Scope
 

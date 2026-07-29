@@ -67,6 +67,10 @@ Focused builds (examples from internal upgrade docs):
 # Operator console: unit + frontend build + Podman Playwright UI/E2E (fixed pipeline)
 .\scripts\verify-console.ps1
 
+# Local UI + API (Vite :5173 + Spring Boot :9876) — mirror of mock-board start-dev
+.\scripts\start-dev.ps1
+.\scripts\stop-dev.ps1          # backend; add -All to also stop Vite
+
 # One-click full package (console SPA embedded + service assembly tar.gz/zip)
 .\scripts\package-full.ps1 -SkipTests
 
@@ -181,10 +185,17 @@ The P0 set is defined in `.planning/test-matrix.yaml` (`tier: P0`); see `docs/te
 - **New P0 rows (8):** `v2-streaming-csv`, `v2-streaming-json`, `v2-jdbc-upsert-pg-mysql`, `v2-dialect-dameng`, `v2-dialect-kingbase`, `v2-dialect-highgo`, `v2-dialect-postgres`, `v2-dialect-clickhouse`
 - **Plus 7 legacy harness rows:** `calcite-scenario-v2`, `udf-sql`, `udf-script`, `udf-java-plugin`, `transform-json`, `transform-mask`, `transform-lookup`
 
-Phase 8/9/11 UAT scripts (`verify-phase8-uat-rw-streaming-upsert.ps1`, `verify-phase9-uat-jdbc-dialect.ps1`, `verify-phase11-uat-closeout-hardening.ps1`) are **supplementary UAT** — useful for operator sign-off, but **not** the merge gate. Use `.\scripts\verify-harness.ps1` as the canonical pre-merge check.
+Phase 8/9/11/15/16 UAT scripts (`verify-phase8-uat-rw-streaming-upsert.ps1`, `verify-phase9-uat-jdbc-dialect.ps1`, `verify-phase11-uat-closeout-hardening.ps1`, `verify-multi-jvm-worker.ps1`, `verify-rbac-enable.ps1`) are **supplementary UAT** — useful for operator sign-off, but **not** the merge gate. Use `.\scripts\verify-harness.ps1` as the canonical pre-merge check.
+
+The matrix tracks **12 P1 rows** after Phase 17 v2.1 expansion (see [docs/test-harness.md](docs/test-harness.md) Phase 17 subsection). **Phase 17 v2.1 P1 rows (non-blocking):**
+
+- `exec-http-managed-catalog`, `exec-http-postgres-dialect` — linked Maven ITs aggregated by `verify-harness.ps1`
+- `dist-multi-jvm-worker` — `.\scripts\verify-multi-jvm-worker.ps1` (script-primary; empty `linked_tests`)
+- `rbac-enable-path` — `.\scripts\verify-rbac-enable.ps1 -SkipPlaywright` (supplementary UAT; Maven ITs also linked in harness)
 
 ## Boundaries
 
 - ✅ **Always do:** Run **`test`** or at least a **targeted `-pl … -am test`** before claiming a fix is done; use **JDK 25** and repo settings (`.mvn/settings-jdk25.xml` or `mvnw-jdk25.ps1`) for builds. Keep edits **within the module that owns the behavior**. Follow Java file/Javadoc conventions for any touched `.java` public API.
 - ⚠️ **Ask first:** Changes to **distributionManagement**, **corporate SCM URLs**, **`.mvn` settings**, **root dependency or Spring Boot BOM upgrades**, **new top-level modules**, or **cross-cutting security** (auth, trust stores, TLS termination). Adding or upgrading **snapshot** dependencies (`spring-ai` SNAPSHOT, etc.) should be aligned with the team.
 - 🚫 **Never do:** Commit **secrets**, real production passwords, or internal host credentials (replace README examples with placeholders when fixing docs). Edit **`target/`** or other generated outputs as source. Disable tests wholesale in CI without team sign-off. Change **global** `JAVA_HOME` or user-level Maven `settings.xml` from automation—use process-local env or the provided scripts only.
+
