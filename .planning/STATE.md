@@ -5,8 +5,8 @@ milestone_name: Hardening & Weak-Spot Closure
 current_phase: 17
 current_phase_name: P1 Harness Expansion + Closeout
 status: executing
-stopped_at: Phase 16 context gathered
-last_updated: "2026-07-29T11:11:27.714Z"
+stopped_at: Phase 17 context gathered
+last_updated: "2026-07-29T11:23:27.585Z"
 last_activity: 2026-07-29
 last_activity_desc: Phase 16 complete, transitioned to Phase 17
 progress:
@@ -110,10 +110,10 @@ Items carried or acknowledged at milestone close:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/16-rbac-enable-path/16-CONTEXT.md
+**Resume file:** .planning/phases/17-p1-harness-expansion-closeout/17-CONTEXT.md
 
-Last session: 2026-07-29T09:08:01.586Z
-Stopped at: Phase 16 context gathered
+Last session: 2026-07-29T11:23:27.510Z
+Stopped at: Phase 17 context gathered
 Next: `/gsd-execute-phase 15`
 
 ## Operator Next Steps
