@@ -162,4 +162,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-25 — started milestone v2.1 Hardening & Weak-Spot Closure*
+*Last updated: 2026-07-25 — Phase 12 complete (HTTP execute-path proof)*

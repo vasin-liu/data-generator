@@ -50,7 +50,7 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 
 - [x] **Phase 12: HTTP Execute-Path Proof** — Managed catalog (+ dialect) via HTTP `/task/run` (EXEC-01, EXEC-02) — 2 plans (completed 2026-07-25)
 - [x] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02) (completed 2026-07-28)
-- [ ] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01)
+- [x] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01) (completed 2026-07-29)
 - [ ] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01)
 - [ ] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01)
 - [ ] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09)
@@ -127,16 +127,16 @@ Plans:
 3. No code merge of the two resolvers lands in this milestone
 4. Docs state the deferred consolidation path (RES-02) without implementing it
 
-**Plans**: 0/2 plans complete
+**Plans**: 2/2 plans complete
 
 Plans:
 **Wave 1**
 
-- [ ] 14-01-PLAN.md — RES-01 ownership doc + rg-derived call-site inventory (`docs/jdbc-resolver-ownership.md`)
+- [x] 14-01-PLAN.md — RES-01 ownership doc + rg-derived call-site inventory (`docs/jdbc-resolver-ownership.md`)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 14-02-PLAN.md — AGENTS.md pointer + optional governance-doc cross-link + optional Javadoc `@see`
+- [x] 14-02-PLAN.md — AGENTS.md pointer + optional governance-doc cross-link + optional Javadoc `@see`
 
 ### Phase 15: Multi-JVM Worker E2E
 
@@ -228,7 +228,7 @@ Plans:
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
 | 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete    | 2026-07-25 |
 | 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete    | 2026-07-28 |
-| 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
+| 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
 | 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
 | 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
 | 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |

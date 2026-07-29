@@ -19,7 +19,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 
 ### Resolver Ownership (RES)
 
-- [ ] **RES-01**: Maintainers have an ownership document and call-site inventory for `JdbcCatalogResolver` (catalog-side) vs `DefaultRuntimeJdbcEndpointResolver` (V2 execute-path); **no** code merge of the two resolvers in this milestone
+- [x] **RES-01**: Maintainers have an ownership document and call-site inventory for `JdbcCatalogResolver` (catalog-side) vs `DefaultRuntimeJdbcEndpointResolver` (V2 execute-path); **no** code merge of the two resolvers in this milestone
 
 ### Distributed Reliability (DIST)
 
@@ -71,7 +71,7 @@ Deferred beyond v2.1.
 | EXEC-02 | 12 | Complete |
 | DIAL-01 | 13 | Complete |
 | DIAL-02 | 13 | Complete |
-| RES-01 | 14 | Pending |
+| RES-01 | 14 | Complete |
 | DIST-01 | 15 | Pending |
 | SEC-01 | 16 | Pending |
 | TEST-09 | 17 | Pending |
