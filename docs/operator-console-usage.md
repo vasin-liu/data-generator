@@ -301,7 +301,7 @@ data:
 
 When `console-security.enabled=true`, every `/api/**` request must include a valid `X-Console-Role` header. Publish requires `ADMIN`; template edits require `EDITOR` or higher; draft runs require `TEMPLATE_RUN` (`OPERATOR`+). Audit log reads require `AUDIT_READ` (all standard roles).
 
-Staging sample profile: `conf/application-staging.yaml` in the service tarball (`spring.profiles.active=staging`). Verification: `.\scripts\staging-blite-smoke.ps1` (unit slice) and `.\scripts\verify-console.ps1` (includes `e2e-rbac` Playwright).
+Staging sample profile: `conf/application-staging.yaml` in the service tarball (`spring.profiles.active=staging`). See [staging-console-rbac.md](staging-console-rbac.md) for enable profiles, header contract, and `verify-rbac-enable.ps1`. Verification: `.\scripts\staging-blite-smoke.ps1` (unit slice); `.\scripts\verify-console.ps1` is the **full console pipeline** (includes optional `e2e-rbac` Playwright); SEC-01-focused backend proof is `.\scripts\verify-rbac-enable.ps1 -SkipPlaywright` (not P0 merge gate).
 
 Distributed staging: `docs/staging-distributed-deployment.md`.
 

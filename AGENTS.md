@@ -101,6 +101,10 @@ Focused builds (examples from internal upgrade docs):
 # Multi-JVM worker E2E — host coordinator + worker, shared file H2 (DIST-01; see docs/staging-distributed-deployment.md#dist-01-local-verify-host-two-jvm)
 .\scripts\verify-multi-jvm-worker.ps1
 
+# Phase 16 SEC-01 RBAC enable path (Maven IT slice + optional Podman Playwright; not P0 merge gate)
+# RBAC staging enable runbook: docs/staging-console-rbac.md
+.\scripts\verify-rbac-enable.ps1 -SkipPlaywright
+
 # AI P1 catalog + INLINE scenario (Maven slice + optional Playwright)
 .\scripts\verify-ai-p1.ps1
 
