@@ -183,12 +183,12 @@ Plans:
 3. `data.generator.console-security.enabled` remains **false** by default in base application config
 4. Enabling RBAC does not break default local/dev or default e2e profiles unless those profiles explicitly opt in
 
-**Plans**: 0/3 plans complete
+**Plans**: 1/3 plans complete
 
 Plans:
 **Wave 1**
 
-- [ ] 16-01-PLAN.md — Default-off regression + profile contract IT + RBAC-on HTTP IT strengthen (SEC-01 core proof)
+- [x] 16-01-PLAN.md — Default-off regression + profile contract IT + RBAC-on HTTP IT strengthen (SEC-01 core proof)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

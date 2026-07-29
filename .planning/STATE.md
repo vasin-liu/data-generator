@@ -4,17 +4,17 @@ milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 16
 current_phase_name: RBAC Enable Path
-status: planning
-stopped_at: Phase 16 planned
-last_updated: "2026-07-29T09:08:01.967Z"
+status: executing
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-07-29T10:10:00.000Z"
 last_activity: 2026-07-29
-last_activity_desc: Phase 16 planned (3 plans, 3 waves)
+last_activity_desc: Phase 16 plan 01 executed — default-off IT + verify script green
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
-  percent: 67
+  total_plans: 15
+  completed_plans: 13
+  percent: 73
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 ## Current Position
 
 Phase: 16 — RBAC Enable Path
-Plan: Not started
-Status: Ready for planning — context captured
-Last activity: 2026-07-29 — Phase 16 context gathered (--auto discuss)
+Plan: 01 complete (1/3)
+Status: Executing — Wave 1 backend proof shipped
+Last activity: 2026-07-29 — Plan 16-01 executed (default-off IT + verify-rbac-enable.ps1)
 
 ## Performance Metrics
 
