@@ -78,21 +78,53 @@ java -jar data-generator-service.jar --spring.profiles.active=staging
 
 Packaged tarball layout: profile file at `conf/application-staging.yaml`. Staging listens on port **8080** and enables RBAC plus publish governance.
 
-## Verify one-liners
+## E2E coverage
 
-Primary SEC-01 proof is the **Maven IT slice** (not the P0 merge gate):
+Audit (Phase 16 plan 03): existing Playwright specs mirror `ConsoleAuthorizationIntegrationIT` deny/allow paths; **no new spec files required**.
+
+| Spec | Proves |
+|------|--------|
+| `e2e/specs/rbac.console.spec.ts` | Missing role header → 403; VIEWER GET catalog; VIEWER POST → 403; EDITOR publish → 403 + ADMIN publish allow; OPERATOR draft run → 400 (governance) |
+| `e2e/specs/rbac.ui.spec.ts` | Role picker visible when RBAC enabled; DRAFT catalog run disabled; VIEWER review-publish disabled |
+
+**Maven IT is primary backend evidence** (`ConsoleAuthorizationIntegrationIT` + default-off guard). Playwright RBAC specs are **secondary, opt-in** proof when Podman is available (`DG_E2E_RBAC=true`, profile `e2e-rbac`).
+
+## Verification
+
+Primary SEC-01 proof is the **Maven IT slice** (not the P0 merge gate). Playwright is optional secondary evidence.
+
+### Maven-only (recommended for CI / no Podman)
 
 ```powershell
 .\scripts\verify-rbac-enable.ps1 -SkipPlaywright
 ```
 
-This runs:
+Runs:
 
 - `ConsoleSecurityDefaultOffIT` — default-off regression (Pitfall 4)
 - `ConsoleAuthorizationIntegrationIT` — deny/allow HTTP paths when enabled
 - `ConsoleAuthorizationFilterTest`, `ConsoleUdfAuthorizationFilterTest` — filter unit tests
 
-Use `-SkipPlaywright` for backend-only verification. Optional Podman Playwright (`rbac.console.spec.ts`, `rbac.ui.spec.ts`) is documented in plan **16-03**; omit `-SkipPlaywright` once that leg is wired.
+### Full verify (Maven + Playwright RBAC specs)
+
+```powershell
+.\scripts\verify-rbac-enable.ps1
+```
+
+Prerequisites: **Podman**, **Node 22+**, Chromium via `npx playwright install chromium`. The script builds the service image, starts a container with `DG_SPRING_PROFILES_ACTIVE=e2e-rbac` (`application-e2e-rbac.yaml`), then runs `rbac.console.spec.ts` and `rbac.ui.spec.ts` with `DG_E2E_RBAC=true`. Does **not** set `DG_E2E_GOVERNANCE_STAGING` (see D-07 below).
+
+### Script flags
+
+| Flag | Purpose |
+|------|---------|
+| `-SkipPlaywright` | Maven slice only; CI-friendly default |
+| `-SkipBuild` | Skip Maven package + Podman build when image already exists |
+| `-KeepContainer` | Leave Podman container running after Playwright |
+| `-HostPort` | Host port for container (default `9876`) |
+
+### Relation to `verify-console.ps1`
+
+`verify-console.ps1` runs the full console pipeline (many Playwright specs including RBAC among distributed/governance legs). Use **`verify-rbac-enable.ps1`** for focused SEC-01 sign-off without the full console verify pipeline.
 
 **Not a P0 merge gate:** `verify-rbac-enable.ps1` is supplementary operator/UAT evidence. Merge blocking remains `.\scripts\verify-harness.ps1` (P0 matrix rows). P1 RBAC harness row is deferred to Phase 17 (TEST-09).
 
