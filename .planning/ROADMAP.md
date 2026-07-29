@@ -218,7 +218,7 @@ Plans:
 | 10. Harness Coverage & CI Gates | v2.0 | 3/3 | Complete | 2026-07 |
 | 11. Closeout hardening | v2.0 | 3/3 | Complete | 2026-07-25 |
 | 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete    | 2026-07-25 |
-| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete   | 2026-07-28 |
+| 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete    | 2026-07-28 |
 | 14. Resolver Ownership Docs | v2.1 | 0/TBD | Pending | — |
 | 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
 | 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
