@@ -84,6 +84,14 @@ class ConsoleAuthorizationIntegrationIT {
     }
 
     @Test
+    void viewerCanGetScenariosCatalogWhenSecurityEnabled() throws Exception {
+        mockMvc.perform(get("/api/templates/scenarios")
+                        .header("X-Console-Role", "VIEWER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
     void viewerCannotCreateTemplateWhenSecurityEnabled() throws Exception {
         mockMvc.perform(post("/api/templates")
                         .header("X-Console-Role", "VIEWER")
