@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -117,6 +118,31 @@ class JdbcUpsertSmokeTests {
     void mysqlUpsertCountHeuristicTreatsDuplicateUpdateAsUpsert() {
         int[] counts = {1, 2, 2, 0};
         Assertions.assertEquals(2L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "mysql"));
+    }
+
+    @Test
+    void damengUpsertCountTreatsZeroAsSuccessfulUpsert() {
+        int[] counts = {0, 0, 0};
+        Assertions.assertEquals(3L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "dameng"));
+    }
+
+    @Test
+    void damengUpsertCountHandlesSuccessNoInfoAndPositive() {
+        int[] counts = {Statement.SUCCESS_NO_INFO, 0, 1};
+        Assertions.assertEquals(3L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "dameng"));
+    }
+
+    @Test
+    void damengUpsertCountIgnoresNegativeBatchCounts() {
+        Assertions.assertEquals(0L, JdbcBulkWriteExecutor.countUpsertedRows(new int[]{-3}, "dameng"));
+    }
+
+    @Test
+    void postgresStyleUpsertCountStillRequiresPositive() {
+        int[] counts = {1, 0};
+        Assertions.assertEquals(1L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "postgres"));
+        Assertions.assertEquals(1L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "kingbase"));
+        Assertions.assertEquals(1L, JdbcBulkWriteExecutor.countUpsertedRows(counts, "highgo"));
     }
 
     private static JdbcWriterVO upsertWriter(List<String> upsertKeys) {
