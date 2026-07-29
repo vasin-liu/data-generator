@@ -4,16 +4,16 @@ milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 13
 current_phase_name: dameng-live-path-nyquist-hygiene
-status: gap_closure_planned
-stopped_at: Phase 13 UAT gap — plan 13-05 created for Dameng rowsUpserted metric
-last_updated: "2026-07-29T01:52:00.000Z"
+status: ready_for_verification
+stopped_at: Completed 13-05-PLAN.md
+last_updated: "2026-07-29T02:26:53.747Z"
 last_activity: 2026-07-29
-last_activity_desc: Gap-closure plan 13-05 for dm-jdbc MERGE zero updateCount metrics
+last_activity_desc: gap-closure plan 13-05 for Dameng rowsUpserted metric (dm-jdbc zero batch counts)
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
   percent: 33
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 13 (dameng-live-path-nyquist-hygiene) — 4/4 plans executed; 1 gap-closure plan (13-05) ready
-Plan: 5 of 5 (13-05 pending execute)
-Status: UAT gap diagnosed — execute `/gsd-execute-phase 13` plan 13-05, then optional live re-verify
-Last activity: 2026-07-29 — gap-closure plan 13-05 for Dameng rowsUpserted metric (dm-jdbc zero batch counts)
+Phase: 13 (dameng-live-path-nyquist-hygiene) — 5/5 plans executed (including gap-closure 13-05)
+Plan: 5 of 5 (13-05 complete)
+Status: Ready for phase verification — optional live Dameng re-verify via verify-phase13-uat-dameng-live.ps1
+Last activity: 2026-07-29 — plan 13-05 closed Dameng rowsUpserted metric gap (dm-jdbc zero batch counts)
 
 ## Performance Metrics
 
@@ -112,8 +112,8 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** None
 
-Last session: 2026-07-28T13:11:13.775Z
-Stopped at: Completed 13-04-PLAN.md
+Last session: 2026-07-29T02:26:53.721Z
+Stopped at: Completed 13-05-PLAN.md
 Next: `/gsd-execute-phase 13` (plan 13-05 gap closure), then optional `verify-phase13-uat-dameng-live.ps1`
 
 ## Operator Next Steps

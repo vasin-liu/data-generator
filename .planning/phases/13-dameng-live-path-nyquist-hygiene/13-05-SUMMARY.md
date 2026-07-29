@@ -98,7 +98,7 @@ Each task was committed atomically:
 1. **Task 1: Dameng-aware upsertCountAsRows for zero batch counts** - `ab66629` (fix)
 2. **Task 2: Unit tests for countUpsertedRows dameng and dialect regressions** - `f745dcf` (test)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `6d3d27a` (docs: complete plan)
 
 ## Files Created/Modified
 
