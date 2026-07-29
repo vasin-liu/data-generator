@@ -4,9 +4,9 @@ milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 16
 current_phase_name: RBAC Enable Path
-status: verifying
-stopped_at: Phase 15 planned
-last_updated: "2026-07-29T08:48:31.177Z"
+status: planning
+stopped_at: Phase 16 context gathered
+last_updated: "2026-07-29T09:08:01.967Z"
 last_activity: 2026-07-29
 last_activity_desc: Phase 15 complete, transitioned to Phase 16
 progress:
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 Phase: 16 — RBAC Enable Path
 Plan: Not started
-Status: Ready for phase verification — optional live Dameng re-verify via verify-phase13-uat-dameng-live.ps1
-Last activity: 2026-07-29 — Phase 15 complete, transitioned to Phase 16
+Status: Ready for planning — context captured
+Last activity: 2026-07-29 — Phase 16 context gathered (--auto discuss)
 
 ## Performance Metrics
 
@@ -110,10 +110,10 @@ Items carried or acknowledged at milestone close:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/15-multi-jvm-worker-e2e/15-01-PLAN.md
+**Resume file:** .planning/phases/16-rbac-enable-path/16-CONTEXT.md
 
-Last session: 2026-07-29T05:40:00.000Z
-Stopped at: Phase 15 planned
+Last session: 2026-07-29T09:08:01.586Z
+Stopped at: Phase 16 context gathered
 Next: `/gsd-execute-phase 15`
 
 ## Operator Next Steps
