@@ -127,7 +127,16 @@ Plans:
 3. No code merge of the two resolvers lands in this milestone
 4. Docs state the deferred consolidation path (RES-02) without implementing it
 
-**Plans**: TBD at `/gsd-plan-phase 14`
+**Plans**: 0/2 plans complete
+
+Plans:
+**Wave 1**
+
+- [ ] 14-01-PLAN.md — RES-01 ownership doc + rg-derived call-site inventory (`docs/jdbc-resolver-ownership.md`)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 14-02-PLAN.md — AGENTS.md pointer + optional governance-doc cross-link + optional Javadoc `@see`
 
 ### Phase 15: Multi-JVM Worker E2E
 
