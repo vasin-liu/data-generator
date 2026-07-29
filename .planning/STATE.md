@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 17
-current_phase_name: P1 Harness Expansion + Closeout
-status: phase_complete
+status: completed
 stopped_at: Phase 17 complete
-last_updated: "2026-07-29T20:52:00.000Z"
+last_updated: "2026-07-29T13:08:14.944Z"
 last_activity: 2026-07-29
-last_activity_desc: Phase 17 plan 03 complete — TEST-09 closed; v2.1 ready for verify-work
+last_activity_desc: Phase 17 complete
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 18
   completed_plans: 18
   percent: 100
+current_phase_name: P1 Harness Expansion + Closeout
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 17 — P1 Harness Expansion + Closeout (complete)
-Plan: 17-03 complete
+Phase: 17
+Plan: Not started
 Status: phase_complete — all v2.1 phases 12–17 done
-Last activity: 2026-07-29 — Phase 17 plan 03: docs + planning state closeout (TEST-09)
+Last activity: 2026-07-29 — Phase 17 complete
 
 ## Performance Metrics
 

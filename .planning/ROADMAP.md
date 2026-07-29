@@ -269,7 +269,7 @@ Plans:
 | 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
 | 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete    | 2026-07-29 |
 | 16. RBAC Enable Path | v2.1 | 3/3 | Complete    | 2026-07-29 |
-| 17. P1 Harness Expansion + Closeout | v2.1 | 3/3 | Complete | 2026-07-29 |
+| 17. P1 Harness Expansion + Closeout | v2.1 | 3/3 | Complete    | 2026-07-29 |
 
 ---
 *Roadmap updated: 2026-07-29 — v2.1 Phase 17 complete; ready for closeout verification*
