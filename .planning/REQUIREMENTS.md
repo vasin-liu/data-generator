@@ -23,7 +23,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 
 ### Distributed Reliability (DIST)
 
-- [ ] **DIST-01**: One multi-JVM happy path is proven: coordinator enqueues → worker JVM leases/executes → SUCCESS, with a harness-linked row (P1 acceptable) and a runnable script/recipe
+- [x] **DIST-01**: One multi-JVM happy path is proven: coordinator enqueues → worker JVM leases/executes → SUCCESS, with a harness-linked row (P1 acceptable) and a runnable script/recipe
 
 ### Console Security (SEC)
 
@@ -72,7 +72,7 @@ Deferred beyond v2.1.
 | DIAL-01 | 13 | Complete |
 | DIAL-02 | 13 | Complete |
 | RES-01 | 14 | Complete |
-| DIST-01 | 15 | Pending |
+| DIST-01 | 15 | Complete |
 | SEC-01 | 16 | Pending |
 | TEST-09 | 17 | Pending |
 

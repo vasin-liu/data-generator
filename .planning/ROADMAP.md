@@ -51,7 +51,7 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 - [x] **Phase 12: HTTP Execute-Path Proof** — Managed catalog (+ dialect) via HTTP `/task/run` (EXEC-01, EXEC-02) — 2 plans (completed 2026-07-25)
 - [x] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02) (completed 2026-07-28)
 - [x] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01) (completed 2026-07-29)
-- [ ] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01)
+- [x] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01) (completed 2026-07-29)
 - [ ] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01)
 - [ ] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09)
 
@@ -158,15 +158,15 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 15-01-PLAN.md — verify-multi-jvm-worker.ps1 + host JVM spawn + dual SUCCESS poll (DIST-01 core)
+- [x] 15-01-PLAN.md — verify-multi-jvm-worker.ps1 + host JVM spawn + dual SUCCESS poll (DIST-01 core)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 15-02-PLAN.md — P1 matrix row dist-multi-jvm-worker + harness summary linkage (D-03, D-04)
+- [x] 15-02-PLAN.md — P1 matrix row dist-multi-jvm-worker + harness summary linkage (D-03, D-04)
 
 **Wave 3** *(blocked on Wave 1–2 completion)*
 
-- [ ] 15-03-PLAN.md — staging-distributed-deployment.md DIST-01 subsection + AGENTS.md pointer (D-09)
+- [x] 15-03-PLAN.md — staging-distributed-deployment.md DIST-01 subsection + AGENTS.md pointer (D-09)
 
 ### Phase 16: RBAC Enable Path
 
@@ -242,7 +242,7 @@ Plans:
 | 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete    | 2026-07-25 |
 | 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete    | 2026-07-28 |
 | 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
-| 15. Multi-JVM Worker E2E | v2.1 | 0/TBD | Pending | — |
+| 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete    | 2026-07-29 |
 | 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
 | 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |
 
