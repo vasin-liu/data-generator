@@ -183,7 +183,20 @@ Plans:
 3. `data.generator.console-security.enabled` remains **false** by default in base application config
 4. Enabling RBAC does not break default local/dev or default e2e profiles unless those profiles explicitly opt in
 
-**Plans**: TBD at `/gsd-plan-phase 16`
+**Plans**: 0/3 plans complete
+
+Plans:
+**Wave 1**
+
+- [ ] 16-01-PLAN.md — Default-off regression + profile contract IT + RBAC-on HTTP IT strengthen (SEC-01 core proof)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 16-02-PLAN.md — verify-rbac-enable.ps1 Maven slice + optional Playwright e2e-rbac leg (D-08, D-06)
+
+**Wave 3** *(blocked on Wave 1–2 completion)*
+
+- [ ] 16-03-PLAN.md — docs/staging-console-rbac.md + operator-console cross-link + AGENTS.md pointer (D-01, D-02, D-07)
 
 ### Phase 17: P1 Harness Expansion + Closeout
 
@@ -243,7 +256,7 @@ Plans:
 | 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete    | 2026-07-28 |
 | 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
 | 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete    | 2026-07-29 |
-| 16. RBAC Enable Path | v2.1 | 0/TBD | Pending | — |
+| 16. RBAC Enable Path | v2.1 | 0/3 | Planned | — |
 | 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |
 
 ---

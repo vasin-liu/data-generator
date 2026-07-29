@@ -5,10 +5,10 @@ milestone_name: Hardening & Weak-Spot Closure
 current_phase: 16
 current_phase_name: RBAC Enable Path
 status: planning
-stopped_at: Phase 16 context gathered
+stopped_at: Phase 16 planned
 last_updated: "2026-07-29T09:08:01.967Z"
 last_activity: 2026-07-29
-last_activity_desc: Phase 15 complete, transitioned to Phase 16
+last_activity_desc: Phase 16 planned (3 plans, 3 waves)
 progress:
   total_phases: 6
   completed_phases: 4
