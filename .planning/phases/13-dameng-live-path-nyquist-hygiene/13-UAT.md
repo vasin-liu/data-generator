@@ -36,6 +36,10 @@ blocked: 0
   reason: "User reported: Dameng host connected but Surefire failure — second run should record rowsUpserted > 0; dialect=dameng expected true but was false (UpsertParitySupport.java:106). First-run insert and count-stability assertions appear to have passed before the metrics check."
   severity: major
   test: 1
-  artifacts: []
-  missing: []
+  root_cause: "dm-jdbc 1.8 returns batch updateCount==0 for successful MERGE WHEN MATCHED UPDATE; JdbcBulkWriteExecutor.upsertCountAsRows only counts Dameng rows when updateCount>0 (or SUCCESS_NO_INFO), so rowsUpserted stays 0 despite data correctly upserting. See .planning/debug/dameng-rows-upserted-metric.md"
+  artifacts:
+    - data-generator-calcite/src/main/java/org/gensokyo/data/calcite/sink/JdbcBulkWriteExecutor.java
+  missing:
+    - "Dameng-aware batch updateCount==0 → count as 1 upsert row in upsertCountAsRows"
+    - "Unit coverage for countUpsertedRows(dameng) with zero counts"
 ```
