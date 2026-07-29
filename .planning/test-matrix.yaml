@@ -614,3 +614,47 @@ rows:
       Podman drill scripts/e2e-distributed-podman.ps1 remains optional. Single-JVM ITs
       (DistributedSplitRoleIntegrationTests) unchanged.
 
+  - id: exec-http-managed-catalog
+    capability: http-execute-managed-catalog
+    adapter: rest
+    test_types: [integration]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests: [ManagedJdbcCatalogHttpExecuteIT]
+    notes: >
+      Phase 12 EXEC-01 — POST /task/run/{id} on published V2 template with managed JDBC
+      dataSourceId; poll TaskExecution to SUCCESS; COUNT(*) on managed H2 sink pool.
+      P1 non-blocking; not P0 until future milestone decision (Pitfall 8).
+
+  - id: exec-http-postgres-dialect
+    capability: http-execute-postgres-dialect
+    adapter: rest
+    test_types: [integration]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests: [ManagedJdbcCatalogHttpPostgresUpsertIT]
+    notes: >
+      Phase 12 EXEC-02 — same HTTP spine with managed catalog + PostgreSQL Testcontainers
+      ON CONFLICT upsert (separate IT per Phase 12 D-08). @EnabledIf(DockerTestSupport)
+      may skip without Docker — row may report skipped-conditional in harness summary;
+      acceptable and non-blocking for P1 (D-10). Does not affect P0 merge gate.
+
+  - id: rbac-enable-path
+    capability: console-rbac-enable
+    adapter: console-api
+    test_types: [integration, unit]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests:
+      - ConsoleAuthorizationIntegrationIT
+      - ConsoleSecurityDefaultOffIT
+      - ConsoleAuthorizationFilterTest
+    notes: >
+      Phase 16 SEC-01 — header RBAC when data.generator.console-security.enabled=true.
+      Default-off guard (ConsoleSecurityDefaultOffIT) + deny/allow HTTP IT + filter unit.
+      Supplementary operator UAT: scripts/verify-rbac-enable.ps1 (Maven + optional
+      Playwright); not wired into verify-harness.ps1 Maven aggregation. P1 non-blocking.
+
