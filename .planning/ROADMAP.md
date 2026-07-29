@@ -52,7 +52,7 @@ Close the highest-value proof and reliability gaps left after v2.0 — HTTP exec
 - [x] **Phase 13: Dameng Live Path + Nyquist Hygiene** — Opt-in Dameng green path; VALIDATION backfill (DIAL-01, DIAL-02) (completed 2026-07-28)
 - [x] **Phase 14: Resolver Ownership Docs** — Catalog vs execute-path ownership + inventory (RES-01) (completed 2026-07-29)
 - [x] **Phase 15: Multi-JVM Worker E2E** — Coordinator → worker lease → SUCCESS (DIST-01) (completed 2026-07-29)
-- [ ] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01)
+- [x] **Phase 16: RBAC Enable Path** — Testable header RBAC; default remains off (SEC-01) (completed 2026-07-29)
 - [ ] **Phase 17: P1 Harness Expansion + Closeout** — Focused P1 rows; keep P0 gate (TEST-09)
 
 ### Phase Details
@@ -192,11 +192,11 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 16-02-PLAN.md — docs/staging-console-rbac.md + operator-console cross-link + AGENTS.md pointer (D-01, D-02, D-09)
+- [x] 16-02-PLAN.md — docs/staging-console-rbac.md + operator-console cross-link + AGENTS.md pointer (D-01, D-02, D-09)
 
 **Wave 3** *(blocked on Wave 1–2 completion)*
 
-- [ ] 16-03-PLAN.md — verify-rbac-enable.ps1 optional Playwright e2e-rbac leg + doc packaging notes (D-06, D-07, D-08)
+- [x] 16-03-PLAN.md — verify-rbac-enable.ps1 optional Playwright e2e-rbac leg + doc packaging notes (D-06, D-07, D-08)
 
 ### Phase 17: P1 Harness Expansion + Closeout
 
@@ -256,7 +256,7 @@ Plans:
 | 13. Dameng Live Path + Nyquist Hygiene | v2.1 | 5/5 | Complete    | 2026-07-28 |
 | 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete    | 2026-07-29 |
 | 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete    | 2026-07-29 |
-| 16. RBAC Enable Path | v2.1 | 0/3 | Planned | — |
+| 16. RBAC Enable Path | v2.1 | 3/3 | Complete    | 2026-07-29 |
 | 17. P1 Harness Expansion + Closeout | v2.1 | 0/TBD | Pending | — |
 
 ---

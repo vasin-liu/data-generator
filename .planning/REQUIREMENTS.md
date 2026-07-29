@@ -27,7 +27,7 @@ Hardening & weak-spot closure — proof, reliability, and documentation on shipp
 
 ### Console Security (SEC)
 
-- [ ] **SEC-01**: Operators can enable header RBAC via documented staging/e2e path and verify authorization behavior in IT/E2E; `data.generator.console-security.enabled` remains **false** by default
+- [x] **SEC-01**: Operators can enable header RBAC via documented staging/e2e path and verify authorization behavior in IT/E2E; `data.generator.console-security.enabled` remains **false** by default
 
 ### Harness Gates (TEST)
 
@@ -73,7 +73,7 @@ Deferred beyond v2.1.
 | DIAL-02 | 13 | Complete |
 | RES-01 | 14 | Complete |
 | DIST-01 | 15 | Complete |
-| SEC-01 | 16 | Pending |
+| SEC-01 | 16 | Complete |
 | TEST-09 | 17 | Pending |
 
 **Coverage:**

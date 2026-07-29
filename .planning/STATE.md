@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
-current_phase: 16
-current_phase_name: RBAC Enable Path
+current_phase: 17
+current_phase_name: P1 Harness Expansion + Closeout
 status: executing
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-07-29T10:10:00.000Z"
+stopped_at: Phase 16 context gathered
+last_updated: "2026-07-29T11:11:27.714Z"
 last_activity: 2026-07-29
-last_activity_desc: Phase 16 plan 01 executed — default-off IT + verify script green
+last_activity_desc: Phase 16 complete, transitioned to Phase 17
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 13
-  percent: 73
+  completed_plans: 15
+  percent: 83
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 16 — RBAC Enable Path
-Plan: 01 complete (1/3)
+Phase: 17 — P1 Harness Expansion + Closeout
+Plan: Not started
 Status: Executing — Wave 1 backend proof shipped
-Last activity: 2026-07-29 — Plan 16-01 executed (default-off IT + verify-rbac-enable.ps1)
+Last activity: 2026-07-29 — Phase 16 complete, transitioned to Phase 17
 
 ## Performance Metrics
 
