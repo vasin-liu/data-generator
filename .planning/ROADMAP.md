@@ -153,7 +153,20 @@ Plans:
 3. A runnable script or documented recipe reproduces the path locally
 4. Scope stays one happy path — not full staging AC-1..AC-7
 
-**Plans**: TBD at `/gsd-plan-phase 15`
+**Plans**: 3/3 plans complete
+
+Plans:
+**Wave 1**
+
+- [ ] 15-01-PLAN.md — verify-multi-jvm-worker.ps1 + host JVM spawn + dual SUCCESS poll (DIST-01 core)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 15-02-PLAN.md — P1 matrix row dist-multi-jvm-worker + harness summary linkage (D-03, D-04)
+
+**Wave 3** *(blocked on Wave 1–2 completion)*
+
+- [ ] 15-03-PLAN.md — staging-distributed-deployment.md DIST-01 subsection + AGENTS.md pointer (D-09)
 
 ### Phase 16: RBAC Enable Path
 
