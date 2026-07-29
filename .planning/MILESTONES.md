@@ -20,6 +20,7 @@
 - Roadmap: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 - Requirements: [milestones/v2.1-REQUIREMENTS.md](milestones/v2.1-REQUIREMENTS.md)
 - Audit: [milestones/v2.1-MILESTONE-AUDIT.md](milestones/v2.1-MILESTONE-AUDIT.md)
+- Phases: [milestones/v2.1-phases/](milestones/v2.1-phases/)
 
 ---
 
