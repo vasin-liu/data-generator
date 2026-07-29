@@ -98,13 +98,14 @@ Plans:
 3. Nyquist/`nyquist_compliant` / VALIDATION status is accurate for phases 07, 07.1, and 08 (honest green or documented gap closed)
 4. If no Dameng host is available, done criteria are honest: documented enable path + MERGE unit remains the merge bar (no fake live green)
 
-**Plans**: 4/4 plans complete
+**Plans**: 4/4 executed; 1 gap-closure plan pending (13-05)
 
 Plans:
 **Wave 1**
 
 - [x] 13-01-PLAN.md — Wire ChunkedPipelineDamengUpsertIT to real external Dameng JDBC with hard-fail on misconfig (DIAL-01)
 - [x] 13-03-PLAN.md — Backfill 07 and 07.1 VALIDATION from existing verification evidence (DIAL-02)
+- [ ] 13-05-PLAN.md — **Gap closure:** Dameng `rowsUpserted` metric fix for dm-jdbc MERGE zero batch counts (DIAL-01 UAT)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 

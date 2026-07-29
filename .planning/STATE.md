@@ -4,15 +4,15 @@ milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
 current_phase: 13
 current_phase_name: dameng-live-path-nyquist-hygiene
-status: executing
-stopped_at: Completed 13-04-PLAN.md
-last_updated: "2026-07-28T13:11:13.862Z"
-last_activity: 2026-07-28
-last_activity_desc: Phase 13 complete (DIAL-01, DIAL-02)
+status: gap_closure_planned
+stopped_at: Phase 13 UAT gap — plan 13-05 created for Dameng rowsUpserted metric
+last_updated: "2026-07-29T01:52:00.000Z"
+last_activity: 2026-07-29
+last_activity_desc: Gap-closure plan 13-05 for dm-jdbc MERGE zero updateCount metrics
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 6
+  total_plans: 7
   completed_plans: 6
   percent: 33
 ---
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: 13 (dameng-live-path-nyquist-hygiene) — 4/4 plans executed; verification human_needed
-Plan: 4 of 4
-Status: Awaiting human UAT (live Dameng PASS) via `/gsd-verify-work 13`
-Last activity: 2026-07-28 — plans complete; 13-VERIFICATION.md status human_needed
+Phase: 13 (dameng-live-path-nyquist-hygiene) — 4/4 plans executed; 1 gap-closure plan (13-05) ready
+Plan: 5 of 5 (13-05 pending execute)
+Status: UAT gap diagnosed — execute `/gsd-execute-phase 13` plan 13-05, then optional live re-verify
+Last activity: 2026-07-29 — gap-closure plan 13-05 for Dameng rowsUpserted metric (dm-jdbc zero batch counts)
 
 ## Performance Metrics
 
@@ -87,7 +87,7 @@ None.
 - Console RBAC default-off for external deployments
 - Accepted v2.0 tech debt (Dameng CI, Nyquist hygiene, dual resolvers) — addressed as DIAL/RES in v2.1; not P0 inflation
 - Phase 12: confirm `/task/run` vs console run endpoint + async poll pattern at plan-phase
-- Phase 13: Dameng host/image may force documented-enable + MERGE if live IT stays gated
+- Phase 13: UAT gap — live Dameng IT fails rowsUpserted metric only; fix planned in 13-05 (dm-jdbc MERGE updateCount==0 quirk)
 - Phase 15: pick shared metadata DB vs Podman recipe at plan-phase
 
 ## Deferred Items
@@ -114,7 +114,7 @@ Items carried or acknowledged at milestone close:
 
 Last session: 2026-07-28T13:11:13.775Z
 Stopped at: Completed 13-04-PLAN.md
-Next: `/gsd-plan-phase 14`
+Next: `/gsd-execute-phase 13` (plan 13-05 gap closure), then optional `verify-phase13-uat-dameng-live.ps1`
 
 ## Operator Next Steps
 
