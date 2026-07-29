@@ -213,7 +213,19 @@ Plans:
 3. AGENTS/docs note how to run or interpret the new P1 rows without treating them as merge blockers
 4. Milestone roadmap/state reflect closeout readiness (or explicit remaining gaps) after P1 wiring
 
-**Plans**: TBD at `/gsd-plan-phase 17`
+**Plans**: 3/3 planned
+
+**Wave 1** *(matrix P1 rows — no P0 changes)*
+
+- [ ] 17-01-PLAN.md — add exec-http-managed-catalog, exec-http-postgres-dialect, rbac-enable-path; verify dist-multi-jvm-worker (D-01–D-06)
+
+**Wave 2** *(doc regen + harness verify)*
+
+- [ ] 17-02-PLAN.md — regenerate test-feature-matrix.md; assert p0.total=15, p0.pass=true (D-09, D-12)
+
+**Wave 3** *(docs + milestone closeout)*
+
+- [ ] 17-03-PLAN.md — test-harness.md Phase 17 subsection, AGENTS.md, REQUIREMENTS/ROADMAP/MILESTONES/STATE (D-13–D-16)
 
 ### Requirement coverage
 
