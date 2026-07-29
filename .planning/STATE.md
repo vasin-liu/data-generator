@@ -2,18 +2,17 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Hardening & Weak-Spot Closure
-current_phase: 17
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 17 complete
-last_updated: "2026-07-29T13:08:14.944Z"
-last_activity: 2026-07-29
-last_activity_desc: Phase 17 complete
+last_updated: "2026-07-29T14:37:43.566Z"
+last_activity: 2026-07-29 — Milestone v2.1 completed and archived
 progress:
   total_phases: 6
   completed_phases: 6
   total_plans: 18
   completed_plans: 18
   percent: 100
+current_phase: 17
 current_phase_name: P1 Harness Expansion + Closeout
 ---
 
@@ -24,14 +23,14 @@ current_phase_name: P1 Harness Expansion + Closeout
 See: .planning/PROJECT.md (updated 2026-07-25)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** v2.1 closeout verification — `/gsd-verify-work` or milestone archive
+**Current focus:** Awaiting next milestone — `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
-Status: phase_complete — all v2.1 phases 12–17 done
-Last activity: 2026-07-29 — Phase 17 complete
+Phase: Milestone v2.1 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-07-29 — Milestone v2.1 completed and archived
 
 ## Performance Metrics
 
@@ -113,5 +112,4 @@ Next: `/gsd-verify-work` or milestone closeout (no `milestones/v2.1-*` archive u
 
 ## Operator Next Steps
 
-- Run `/gsd-verify-work` for v2.1 milestone verification
-- Optional: request full `milestones/v2.1-*` archive after verification passes
+- Start the next milestone with /gsd-new-milestone

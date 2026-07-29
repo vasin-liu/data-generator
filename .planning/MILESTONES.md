@@ -1,28 +1,28 @@
 # Milestones
 
-## v2.1 — Hardening & Weak-Spot Closure
+## v2.1 Hardening & Weak-Spot Closure (Shipped: 2026-07-29)
 
-**Started:** 2026-07-25
-**Status:** Ready for closeout — all 8 v2.1 requirements complete (TEST-09 closed Phase 17); run `/gsd-verify-work` before milestone archive
-**Phases:** 12-17 (6/6 complete)
-**Requirements:** EXEC-01, EXEC-02, DIAL-01, DIAL-02, RES-01, DIST-01, SEC-01, TEST-09 (all complete)
+**Phases completed:** 6 phases, 18 plans, 39 tasks
+**Audit:** `tech_debt` (8/8 requirements; Nyquist overall compliant after validate-phase 12/13)
+**Known deferred items at close:** RES-02, SEC-02, DIST-02, DIAL-03, orchestration, matrix-doc multi-line linked_tests drift (see `milestones/v2.1-MILESTONE-AUDIT.md`)
 
-### Scope
+**Key accomplishments:**
 
-- HTTP execute-path proof for managed catalog / dialect
-- Dameng opt-in live path + Nyquist hygiene
-- Dual JDBC resolver ownership docs (no merge)
-- One multi-JVM worker E2E path
-- RBAC testable enable (default off)
-- Focused P1 harness rows (P0 unchanged)
+- HTTP managed-catalog + PostgreSQL upsert via MockMvc `/task/run` (EXEC-01, EXEC-02)
+- Dameng opt-in live path + `rowsUpserted` metric fix; Nyquist hygiene for 07/07.1/08 (DIAL-01, DIAL-02)
+- Dual JDBC resolver ownership doc + inventory without merge (RES-01)
+- Host dual-JVM coordinator→worker SUCCESS + P1 harness row (DIST-01)
+- Header RBAC enable path documented/testable; default remains off (SEC-01)
+- Four focused P1 matrix rows; P0 gate frozen at 15 (TEST-09)
 
-### Artifacts
+### Archives
 
-- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
-- Roadmap: [ROADMAP.md](ROADMAP.md)
-- Research: [research/SUMMARY.md](research/SUMMARY.md)
+- Roadmap: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
+- Requirements: [milestones/v2.1-REQUIREMENTS.md](milestones/v2.1-REQUIREMENTS.md)
+- Audit: [milestones/v2.1-MILESTONE-AUDIT.md](milestones/v2.1-MILESTONE-AUDIT.md)
 
 ---
+
 ## v2.0 — Reader/Writer & Datasource Platform
 
 **Shipped:** 2026-07-25

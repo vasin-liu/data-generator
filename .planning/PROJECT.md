@@ -8,36 +8,28 @@
 
 **v2.0 shipped** a populated `data-generator-datasource` platform (JDBC/Kafka/ES) with snapshot hot-reload governance, streaming CSV/JSON I/O, JDBC upsert, first-class dialects (Dameng, Kingbase, HighGo, PostgreSQL, ClickHouse), and an expanded 15-row P0 harness merge gate.
 
+**v2.1 shipped** HTTP execute-path proof for managed catalog/dialect, Dameng opt-in live path + Nyquist hygiene, dual JDBC resolver ownership docs, one multi-JVM worker E2E, RBAC enable-path (default-off), and focused P1 harness rows — P0 merge gate unchanged at 15.
+
 ## Core Value
 
 Operators can define, extend, and trust data-generation pipelines: register custom logic (UDFs), apply rich transforms, and verify behavior through an automated test harness before shipping.
 
 ## Current State
 
-**Shipped: v2.0 Reader/Writer & Datasource Platform** (2026-07-25)
+**Shipped: v2.1 Hardening & Weak-Spot Closure** (2026-07-29)
 
-- Unified connection catalog + adapters; managed `dataSourceId` resolution on V2 execute path with `snap:` run snapshots
-- Streaming/chunked CSV/JSON sources and sinks; PG/MySQL upsert with run-report diagnostics
-- Five-engine JDBC dialect writers and console presets; Kingbase evidence pack + managed JDBC E2E IT
-- Harness: 15 P0 rows; `scripts/verify-harness.ps1` is the canonical merge gate
+- HTTP `/task/run` proves managed JDBC catalog + PostgreSQL upsert (MockMvc ITs; not in-process-only)
+- Dameng live IT opt-in recipe + `rowsUpserted` metric fix; Nyquist VALIDATION hygiene for 07/07.1/08 and v2.1 phases 12–17
+- Dual JDBC resolver ownership doc + inventory (no code merge)
+- Host dual-JVM coordinator→worker SUCCESS (`verify-multi-jvm-worker.ps1`); P1 harness row
+- Header RBAC enable path documented/testable; default remains off
+- Four focused P1 matrix rows; `verify-harness.ps1` P0 gate still 15 rows
 
-Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-MILESTONE-AUDIT.md`
+Archives: `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, `v2.1-MILESTONE-AUDIT.md`
 
-**v2.1 in progress:** Phase 12 complete — HTTP execute-path proof (managed catalog + PG upsert via MockMvc `/task/run`).
+## Next Milestone Goals
 
-## Current Milestone: v2.1 Hardening & Weak-Spot Closure
-
-**Goal:** Close the highest-value proof and reliability gaps left after v2.0 — without opening a new major feature lane.
-
-**Target features:**
-- ✓ Execute-path evidence: managed-catalog (+ dialect) journeys through HTTP `/task/run` — Phase 12
-- Dialect/driver hardening: Dameng live IT documented green path; Nyquist/validation hygiene backfill
-- Resolver ownership docs + call-site inventory (no code merge)
-- One multi-JVM distributed worker E2E path with harness linkage
-- Console RBAC: keep default-off; testable enable path + staging/e2e docs
-- Focused P1 harness expansion for new proof paths; P0 remains merge gate
-
-**Out of scope this milestone:** template orchestration, net-new connectors (Redis/S3/HTTP), default-on RBAC, full JDBC resolver consolidation
+Define via `/gsd-new-milestone`. Likely candidates from deferred backlog: RES-02 resolver consolidation, SEC-02 default-on RBAC, DIST-02 full staging AC matrix, orchestration, net-new connectors.
 
 ## Requirements
 
@@ -69,14 +61,15 @@ Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-
 ### Validated (v2.1)
 
 - ✓ HTTP execute-path proof for managed catalog / dialect journeys (EXEC-01, EXEC-02) — Phase 12
+- ✓ Dameng live IT opt-in path + Nyquist hygiene (DIAL-01, DIAL-02) — Phase 13
+- ✓ Dual JDBC resolver ownership docs (RES-01) — Phase 14
+- ✓ Multi-JVM worker E2E path (DIST-01) — Phase 15
+- ✓ RBAC testable enable path, default-off (SEC-01) — Phase 16
+- ✓ Focused P1 harness rows; P0 unchanged (TEST-09) — Phase 17
 
-### Active (v2.1)
+### Active
 
-- [ ] Dameng live IT + Nyquist hygiene backfill
-- [ ] Dual JDBC resolver ownership documentation (no merge)
-- [ ] Multi-JVM worker E2E path
-- [ ] RBAC testable enable path (default remains off)
-- [ ] Focused P1 harness rows for new proof paths
+(None — awaiting `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -85,8 +78,10 @@ Archives: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-
 - Exhaustive 100% UI/control coverage — harness-first with phased targets
 - Greenfield rewrite or Template V1 revival — V2 only
 - Net-new connectors (Redis, S3, HTTP) — deferred after hardening
-- Default-on console RBAC — keep opt-in; document staging enablement
-- Full JDBC resolver code consolidation — docs-only in v2.1
+- Default-on console RBAC (SEC-02) — keep opt-in; enable path shipped in v2.1
+- Full JDBC resolver code consolidation (RES-02) — docs-only in v2.1
+- Full distributed AC-1..AC-7 (DIST-02) — one happy path only in v2.1
+- Dameng live as P0 gate (DIAL-03) — licensed driver / CI cost
 
 ## Context
 
@@ -94,14 +89,15 @@ Brownfield codebase mapped 2026-06-17.
 
 - **v1.0:** 5 phases / 18 plans over 2026-06-17 → 2026-06-23 (~46 commits, +13k LOC in milestone range)
 - **v2.0:** 7 phases / 36 plans over 2026-06-23 → 2026-07-25 (~130 commits, +33k / −0.5k LOC; 331 files)
+- **v2.1:** 6 phases / 18 plans over 2026-07-25 → 2026-07-29
 
 Known pressure points:
 
-- Console RBAC disabled by default (`ConsoleSecurityProperties.enabled = false`)
+- Console RBAC disabled by default (enable path documented; SEC-02 deferred)
 - Internal Gensokyo Kafka/ES starters on Boot 3 APIs vs Boot 4 runtime
 - `spring-ai` SNAPSHOT and Ollama-gated tests
 - HTTP internal Nexus/SCM URLs
-- Accepted v2.0 tech debt: Dameng opt-in IT, Nyquist hygiene, dual JDBC resolvers
+- Accepted tech debt: RES-02, DIST-02, matrix-doc multi-line `linked_tests` drift
 
 ## Constraints
 
@@ -123,12 +119,13 @@ Known pressure points:
 | v2 dialect priority: DM, Kingbase, HighGo, PG, CK | Domestic + core analytical JDBC targets | ✓ Good — Phase 9 + Phase 11 Kingbase pack |
 | v2 RW: close streaming/upsert gaps before new adapters | Gap matrix over net-new connectors | ✓ Good — Phase 8 shipped |
 | Snapshot hot-reload + execute-path `snap:` routing | In-flight runs keep run-start connection snapshot | ✓ Good — Phase 7 + 07.1 |
-| Keep dual JDBC resolvers with ownership split | Catalog-side vs V2 execute-path authority | ⚠️ Revisit — v2.1 docs + call-site inventory only |
-| Dameng live IT opt-in (`-Ddm.it=true`) | Licensed driver / CI cost | ⚠️ Revisit — v2.1 harden documented green path |
-| P0 expanded to 15 rows; `verify-harness.ps1` merge gate | Protect streaming/upsert/dialect paths | ✓ Good — Phase 10 |
+| Keep dual JDBC resolvers with ownership split | Catalog-side vs V2 execute-path authority | ✓ Good — v2.1 RES-01 docs; RES-02 still deferred |
+| Dameng live IT opt-in (`-Ddm.it=true`) | Licensed driver / CI cost | ✓ Good — v2.1 DIAL-01 recipe + metric fix |
+| P0 expanded to 15 rows; `verify-harness.ps1` merge gate | Protect streaming/upsert/dialect paths | ✓ Good — Phase 10; frozen through v2.1 |
 | Test acceptance: harness + phased coverage | Pragmatic ramp vs big-bang UI coverage | ✓ Good — P0/P1/P2 tiers |
-| v2.1: breadth hardening over new features | Close proof/reliability gaps after v2.0 | — Pending |
-| v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | — Pending |
+| v2.1: breadth hardening over new features | Close proof/reliability gaps after v2.0 | ✓ Good — shipped 2026-07-29 |
+| v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | ✓ Good — SEC-01; SEC-02 deferred |
+| v2.1 P1 rows for proofs; no P0 promotion | Keep merge gate stable | ✓ Good — TEST-09 |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -141,6 +138,13 @@ Initial GSD milestone scoped UDF, transform operators, and test harness as v1; d
 <summary>v2.0 planning snapshot (2026-06-23 → 2026-07-25)</summary>
 
 Milestone goal: close high-priority V2 source/sink gaps and establish unified datasource abstraction with hot-reload governance. See `milestones/v2.0-REQUIREMENTS.md` and `milestones/v2.0-MILESTONE-AUDIT.md` for outcomes and accepted tech debt.
+
+</details>
+
+<details>
+<summary>v2.1 planning snapshot (2026-07-25 → 2026-07-29)</summary>
+
+Hardening milestone: HTTP execute proof, Dameng/Nyquist hygiene, resolver ownership docs, multi-JVM worker, RBAC enable-path, P1 harness rows. See `milestones/v2.1-REQUIREMENTS.md` and `milestones/v2.1-MILESTONE-AUDIT.md`.
 
 </details>
 
@@ -162,4 +166,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-25 — Phase 12 complete (HTTP execute-path proof)*
+*Last updated: 2026-07-29 after v2.1 milestone*
