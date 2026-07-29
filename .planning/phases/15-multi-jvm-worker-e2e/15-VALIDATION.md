@@ -1,8 +1,8 @@
 ---
 phase: 15
 slug: multi-jvm-worker-e2e
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-07-29
 ---
@@ -108,3 +108,4 @@ rg -n "verify-multi-jvm-worker" scripts/verify-harness.ps1  # expect no match (s
 - [ ] `nyquist_compliant: true` set in frontmatter after `/gsd-verify-work`
 
 **Approval:** pending
+
