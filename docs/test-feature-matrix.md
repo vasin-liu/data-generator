@@ -65,4 +65,7 @@ This document is generated from `.planning/test-matrix.yaml`. Edit the YAML sour
 | v2-dialect-postgres | v2-dialect-postgres | jdbc | integration | data-generator-calcite | covered | P0 | ChunkedPipelinePostgresUpsertTests |
 | v2-dialect-clickhouse | v2-dialect-clickhouse | jdbc | integration, unit | data-generator-calcite | covered | P0 |  |
 | dist-multi-jvm-worker | distributed-multi-jvm-worker | host-jvm | integration | data-generator-service | covered | P1 |  |
+| exec-http-managed-catalog | http-execute-managed-catalog | rest | integration | data-generator-service | covered | P1 | ManagedJdbcCatalogHttpExecuteIT |
+| exec-http-postgres-dialect | http-execute-postgres-dialect | rest | integration | data-generator-service | covered | P1 | ManagedJdbcCatalogHttpPostgresUpsertIT |
+| rbac-enable-path | console-rbac-enable | console-api | integration, unit | data-generator-service | covered | P1 |  |
 
