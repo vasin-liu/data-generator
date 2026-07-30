@@ -353,13 +353,19 @@ rows:
 
   - id: geo-synthetic
     capability: geo-synthetic
-    adapter: geojson
-    test_types: [unit]
-    owner_module: data-generator-geo
-    status: pending
-    tier: P2
-    linked_tests: []
-    notes: GeoJSON synthetic geometry generation.
+    adapter: geo_synthetic
+    test_types: [unit, integration]
+    owner_module: data-generator-calcite
+    status: covered
+    tier: P1
+    linked_tests:
+      - TemplateV2RunnerGeoSyntheticSourceTests
+      - GeoSyntheticRowSourceTests
+      - GeoSyntheticRequestMapperTests
+    notes: >-
+      Template V2 geo_synthetic source (BOUNDARY_POINTS, LINE_SAMPLE, BBOX, CIRCLE)
+      with path-only classpath assets; pipeline IT via TemplateV2Runner through SQL
+      transform to console sink; Phase 19 unit tests cover RowSource and request mapping.
 
   - id: console-api-templates
     capability: console-api-templates
