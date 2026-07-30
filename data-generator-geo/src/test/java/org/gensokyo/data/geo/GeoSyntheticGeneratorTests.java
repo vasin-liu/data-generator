@@ -32,6 +32,10 @@ class GeoSyntheticGeneratorTests {
     private static final double BBOX_MAX_LON = 113.5;
     private static final double BBOX_MAX_LAT = 23.2;
     private static final long BBOX_SEED = 42L;
+    private static final double CIRCLE_CENTER_LON = 113.3;
+    private static final double CIRCLE_CENTER_LAT = 23.1;
+    private static final double CIRCLE_RADIUS_METERS = 500d;
+    private static final long CIRCLE_SEED = 42L;
 
     @Test
     void boundaryPointsProducesRequestedCount() throws Exception {
@@ -99,6 +103,33 @@ class GeoSyntheticGeneratorTests {
         }
     }
 
+    @Test
+    void circleModeProducesRequestedCount() throws Exception {
+        GeoGenerationRequest request = circleRequest(30);
+
+        List<Map<String, Object>> rows = GeoSyntheticGenerator.generateRows(request);
+
+        Assertions.assertEquals(30, rows.size());
+        Assertions.assertTrue(rows.get(0).containsKey("lat"));
+        Assertions.assertTrue(rows.get(0).containsKey("lon"));
+        assertAllRowsInsideCircle(rows);
+    }
+
+    @Test
+    void circleModeSameSeedSameRows() throws Exception {
+        GeoGenerationRequest first = circleRequest(15);
+        GeoGenerationRequest second = circleRequest(15);
+
+        List<Map<String, Object>> firstRows = GeoSyntheticGenerator.generateRows(first);
+        List<Map<String, Object>> secondRows = GeoSyntheticGenerator.generateRows(second);
+
+        Assertions.assertEquals(firstRows.size(), secondRows.size());
+        for (int i = 0; i < firstRows.size(); i++) {
+            Assertions.assertEquals(firstRows.get(i).get("lon"), secondRows.get(i).get("lon"));
+            Assertions.assertEquals(firstRows.get(i).get("lat"), secondRows.get(i).get("lat"));
+        }
+    }
+
     private static GeoGenerationRequest bboxRequest(int count) {
         GeoGenerationRequest request = new GeoGenerationRequest();
         request.setMode(GeoGenerationMode.BBOX);
@@ -113,6 +144,19 @@ class GeoSyntheticGeneratorTests {
         return request;
     }
 
+    private static GeoGenerationRequest circleRequest(int count) {
+        GeoGenerationRequest request = new GeoGenerationRequest();
+        request.setMode(GeoGenerationMode.CIRCLE);
+        request.setCenterLon(CIRCLE_CENTER_LON);
+        request.setCenterLat(CIRCLE_CENTER_LAT);
+        request.setRadiusMeters(CIRCLE_RADIUS_METERS);
+        request.setCount(count);
+        request.setSeed(CIRCLE_SEED);
+        request.setMinDistanceMeters(0d);
+        request.setOutputFormat(GeoOutputFormatKind.columns);
+        return request;
+    }
+
     private static void assertAllRowsInsideBbox(List<Map<String, Object>> rows) {
         for (Map<String, Object> row : rows) {
             double lon = ((Number) row.get("lon")).doubleValue();
@@ -121,6 +165,17 @@ class GeoSyntheticGeneratorTests {
                     "lon out of bbox: " + lon);
             Assertions.assertTrue(lat >= BBOX_MIN_LAT && lat <= BBOX_MAX_LAT,
                     "lat out of bbox: " + lat);
+        }
+    }
+
+    private static void assertAllRowsInsideCircle(List<Map<String, Object>> rows) {
+        for (Map<String, Object> row : rows) {
+            double lon = ((Number) row.get("lon")).doubleValue();
+            double lat = ((Number) row.get("lat")).doubleValue();
+            double distance = GeoHaversine.distanceMeters(
+                    CIRCLE_CENTER_LAT, CIRCLE_CENTER_LON, lat, lon);
+            Assertions.assertTrue(distance <= CIRCLE_RADIUS_METERS,
+                    "Point outside circle: " + distance + " m");
         }
     }
 }
