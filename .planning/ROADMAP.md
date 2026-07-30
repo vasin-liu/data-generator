@@ -116,7 +116,20 @@ Plans:
 4. `type: geojson` behavior unchanged (regression green)
 5. Invalid config throws `IllegalArgumentException` with source name + field
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 19-01-PLAN.md — GeoSynthetic V2 VO types (output, sample, source config)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 19-02-PLAN.md — GeoSyntheticRequestMapper + mapping unit tests
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 19-03-PLAN.md — Factory, RowSource, CoreConfig bean, integration tests + geojson regression
 
 ### Phase 20: Pipeline Proof + Docs + P1
 
@@ -140,7 +153,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 18. Geo Generator Modes | v2.2 | 3/3 | Complete    | 2026-07-30 |
-| 19. V2 Geo Synthetic Source | v2.2 | 0/? | Not started | - |
+| 19. V2 Geo Synthetic Source | v2.2 | 0/3 | Not started | - |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
-**Next:** `/gsd-discuss-phase 19`
+**Next:** `/gsd-execute-phase 19`
