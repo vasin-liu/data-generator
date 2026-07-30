@@ -5,7 +5,7 @@ milestone_name: V2 Geo Synthetic Source
 current_phase: 20
 status: completed
 stopped_at: Completed 20-pipeline-proof-docs-p1-03-PLAN.md
-last_updated: "2026-07-30T12:39:15.114Z"
+last_updated: "2026-07-30T14:25:16.128Z"
 last_activity: 2026-07-30
 last_activity_desc: Phase 20 complete
 progress:
@@ -24,7 +24,7 @@ current_phase_name: Pipeline Proof + Docs + P1
 See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** v2.2 milestone — `/gsd-verify-work`
+**Current focus:** v2.2 milestone — `/gsd-complete-milestone`
 
 ## Current Position
 
@@ -55,7 +55,7 @@ Last activity: 2026-07-30 — Phase 20 complete
 
 - Phases: 6 (12–17)
 - Plans: 18 (Phase 12: 2, 13: 5, 14: 2, 15: 3, 16: 3, 17: 3)
-- Status: All phases complete — ready for `/gsd-verify-work`
+- Status: All phases complete — archived via `/gsd-complete-milestone`
 
 ## Accumulated Context
 
@@ -122,8 +122,8 @@ Items carried or acknowledged at milestone close:
 
 Last session: 2026-07-30T12:25:00.000Z
 Stopped at: Completed 20-pipeline-proof-docs-p1-03-PLAN.md
-Next: `/gsd-verify-work` for v2.2 milestone
+Next: `/gsd-complete-milestone` for v2.2 archive
 
 ## Operator Next Steps
 
-- Run `/gsd-verify-work` for v2.2 milestone closeout
+- Run `/gsd-complete-milestone` for v2.2 archive

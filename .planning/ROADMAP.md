@@ -166,4 +166,4 @@ Plans:
 | 19. V2 Geo Synthetic Source | v2.2 | 3/3 | Complete    | 2026-07-30 |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 3/3 | Complete    | 2026-07-30 |
 
-**Next:** `/gsd-verify-work` (v2.2 milestone)
+**Next:** `/gsd-complete-milestone` (v2.2 archive)
