@@ -9,6 +9,7 @@ import org.gensokyo.data.geo.format.GeoValueFormatter;
 import org.gensokyo.data.geo.generate.BboxPointGenerator;
 import org.gensokyo.data.geo.generate.BoundaryGeometryNormalizer;
 import org.gensokyo.data.geo.generate.BoundaryPointGenerator;
+import org.gensokyo.data.geo.generate.CirclePointGenerator;
 import org.gensokyo.data.geo.generate.LineComponentSelector;
 import org.gensokyo.data.geo.generate.LineSampleGenerator;
 import org.gensokyo.data.geo.io.GeoFeature;
@@ -101,9 +102,13 @@ public final class GeoSyntheticGenerator {
                     request.getCount(),
                     request.getMinDistanceMeters(),
                     request.getSeed());
-            // CIRCLE sampling arrives in Plan 18-03.
-            case CIRCLE -> throw new UnsupportedOperationException(
-                    request.getMode() + " sampling is not implemented yet");
+            case CIRCLE -> CirclePointGenerator.generate(
+                    request.getCenterLon(),
+                    request.getCenterLat(),
+                    request.getRadiusMeters(),
+                    request.getCount(),
+                    request.getMinDistanceMeters(),
+                    request.getSeed());
         };
     }
 
