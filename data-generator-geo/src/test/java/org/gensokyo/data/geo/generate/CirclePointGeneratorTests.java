@@ -60,9 +60,10 @@ class CirclePointGeneratorTests {
 
     @Test
     void minDistanceTooLarge_throwsRuntimeExceptionOnRetryExhaustion() {
+        // 50 m radius (100 m diameter) with 400 m spacing cannot fit two points.
         RuntimeException ex = Assertions.assertThrows(RuntimeException.class, () ->
                 CirclePointGenerator.generate(
-                        CENTER_LON, CENTER_LAT, RADIUS_METERS,
+                        CENTER_LON, CENTER_LAT, 50d,
                         2, 400d, SEED, 5));
 
         Assertions.assertTrue(ex.getMessage().contains("retries"),
