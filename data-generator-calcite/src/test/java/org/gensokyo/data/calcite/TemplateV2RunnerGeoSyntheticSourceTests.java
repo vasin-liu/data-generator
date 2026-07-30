@@ -80,6 +80,47 @@ class TemplateV2RunnerGeoSyntheticSourceTests {
         Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lon")));
     }
 
+    @Test
+    void bbox_pipelineRun_returnsExpectedRowCount() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("BBOX");
+        source.setBbox(List.of(113.2d, 23.0d, 113.5d, 23.2d));
+        source.setCount(5);
+        source.setSeed(42L);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("select lon, lat from geo_bbox");
+
+        TemplateV2VO template = template("geo-synthetic-bbox", Map.of("geo_bbox", source), transform);
+
+        TemplateV2RunResult result = runner(geoSyntheticRegistry()).run(template);
+
+        Assertions.assertEquals(5, result.getRows().size());
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lat")));
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lon")));
+    }
+
+    @Test
+    void circle_pipelineRun_returnsExpectedRowCount() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("CIRCLE");
+        source.setCenter(List.of(113.3d, 23.1d));
+        source.setRadiusMeters(500d);
+        source.setCount(4);
+        source.setSeed(7L);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("select lon, lat from geo_circle");
+
+        TemplateV2VO template = template("geo-synthetic-circle", Map.of("geo_circle", source), transform);
+
+        TemplateV2RunResult result = runner(geoSyntheticRegistry()).run(template);
+
+        Assertions.assertEquals(4, result.getRows().size());
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lat")));
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lon")));
+    }
+
     private static TemplateV2Runner runner(TemplateV2RuntimeRegistry registry) {
         return new TemplateV2Runner(registry);
     }
