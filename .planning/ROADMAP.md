@@ -143,4 +143,4 @@ Plans:
 | 19. V2 Geo Synthetic Source | v2.2 | 0/? | Not started | - |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
-**Next:** `/gsd-execute-phase 18`
+**Next:** `/gsd-discuss-phase 19`
