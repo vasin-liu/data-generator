@@ -112,7 +112,7 @@ Each task was committed atomically:
 3. **Task 2: Wire BBOX dispatch in GeoSyntheticGenerator** - `f68cdf5` (feat)
 4. **Task 3: GeoSyntheticGenerator BBOX integration tests** - `522b83d` (test)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `847b6cf` (docs: complete plan)
 
 ## Files Created/Modified
 
