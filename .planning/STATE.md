@@ -4,17 +4,17 @@ milestone: v2.2
 milestone_name: V2 Geo Synthetic Source
 current_phase: 19
 current_phase_name: V2 Geo Synthetic Source
-status: in_progress
-stopped_at: Completed 19-v2-geo-synthetic-source-01-PLAN.md
-last_updated: "2026-07-30T08:28:00.000Z"
+status: executing
+stopped_at: Completed 19-v2-geo-synthetic-source-02-PLAN.md
+last_updated: "2026-07-30T08:58:51.723Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 19 Plan 01 complete — GeoSynthetic V2 VO types
+last_activity_desc: Plan 02 GeoSyntheticRequestMapper + mapping tests shipped
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 67
+  completed_plans: 5
+  percent: 33
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 ## Current Position
 
 Phase: 19 — V2 Geo Synthetic Source
-Plan: 1 of 3 complete (next: 19-02)
+Plan: 2 of 3 complete (next: 19-03)
 Status: In progress
-Last activity: 2026-07-30 — Plan 01 GeoSynthetic V2 VO types shipped
+Last activity: 2026-07-30 — Plan 02 GeoSyntheticRequestMapper + mapping tests shipped
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 17]: TEST-09 P1 rows wired (exec-http-managed-catalog, exec-http-postgres-dialect, rbac-enable-path, dist-multi-jvm-worker); P0 gate frozen at 15 rows; verify-harness.ps1 sole merge gate unchanged
 - [Phase 18]: Copied BoundaryPointGenerator retry pattern for BboxPointGenerator per D-10
 - [Phase 19-v2-geo-synthetic-source]: GeoSynthetic V2 VO types in core with independent output VO and seed default 0L — Locked D-01/D-03/D-09; enables Plan 19-02 mapper and Plan 19-03 RowSource
+- [Phase 19-v2-geo-synthetic-source]: GeoSyntheticRequestMapper in calcite expands VO arrays and wraps validate() with source-scoped errors — D-04/D-07 bridge for Plan 19-03 Factory/RowSource; V1 GeoIteratorRequestMapper untouched per D-05
 
 ### Pending Todos
 
@@ -105,14 +106,15 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Process | v2.1 milestone archive tree | Deferred per D-16 | 2026-07-29 |
 | Phase 19-v2-geo-synthetic-source P01 | 12min | 3 tasks | 3 files |
+| Phase 19-v2-geo-synthetic-source P02 | 22min | 2 tasks | 2 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-30T08:26:31.052Z
-Stopped at: Completed 19-v2-geo-synthetic-source-01-PLAN.md
-Next: Execute Plan 19-02 (GeoSyntheticRequestMapper + mapping tests)
+Last session: 2026-07-30T08:58:51.666Z
+Stopped at: Completed 19-v2-geo-synthetic-source-02-PLAN.md
+Next: Execute Plan 19-03 (Factory, RowSource, CoreConfig bean, integration tests)
 
 ## Operator Next Steps
 
