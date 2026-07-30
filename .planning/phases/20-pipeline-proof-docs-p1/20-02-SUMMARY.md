@@ -89,7 +89,7 @@ Each task was committed atomically:
 2. **Task 2: Add minimal YAML example (dedicated page)** - `e4ae698` (docs)
 3. **Task 3: Document output formats and SQL companion** - `cc38a47` (docs)
 
-**Plan metadata:** pending final gsd-tools commit
+**Plan metadata:** `0feef10` (docs: complete plan)
 
 ## Files Created/Modified
 
