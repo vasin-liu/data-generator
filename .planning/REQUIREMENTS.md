@@ -10,9 +10,9 @@ First-class Template V2 geographic point synthesis. No V1 geo iterator required 
 
 ### Geo Synthetic Source (GEO)
 
-- [ ] **GEO-01**: Operator can define a Template V2 source with `type: geo_synthetic` that materializes point rows through `TemplateV2Runner` (Factory → RowSource) without using the V1 geo iterator
+- [x] **GEO-01**: Operator can define a Template V2 source with `type: geo_synthetic` that materializes point rows through `TemplateV2Runner` (Factory → RowSource) without using the V1 geo iterator
 - [x] **GEO-02**: The same source supports four modes with automated evidence: `BOUNDARY_POINTS`, `LINE_SAMPLE`, `BBOX`, and `CIRCLE` (seed reproducibility for BBOX/CIRCLE; path GeoJSON for boundary/line)
-- [ ] **GEO-03**: Boundary/network GeoJSON resolve only via path/`classpath:` (`GeoResourceResolver`); `type: geojson` remains a read-only Feature/Feature source (behavior unchanged)
+- [x] **GEO-03**: Boundary/network GeoJSON resolve only via path/`classpath:` (`GeoResourceResolver`); `type: geojson` remains a read-only Feature/Feature source (behavior unchanged)
 - [ ] **GEO-04**: Maintainers have docs that distinguish `geo_synthetic` vs `geojson`, document output formats, and include a minimal V2 template example (SQL companion = docs only; no large new `ST_*` surface)
 
 ### Harness (TEST)
@@ -56,9 +56,9 @@ Deferred beyond v2.2.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEO-01 | 19 | Pending |
+| GEO-01 | 19 | Complete |
 | GEO-02 | 18–20 | Complete |
-| GEO-03 | 19 | Pending |
+| GEO-03 | 19 | Complete |
 | GEO-04 | 20 | Pending |
 | TEST-10 | 20 | Pending |
 

@@ -65,7 +65,7 @@ Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary
 ### Phase list
 
 - [x] **Phase 18: Geo Generator Modes** — Extend `GeoGenerationMode` / generator for BBOX + CIRCLE; harden validation (GEO-02 foundation) (completed 2026-07-30)
-- [ ] **Phase 19: V2 Geo Synthetic Source** — `GeoSyntheticSourceVO` + Factory + RowSource + CoreConfig; path assets; `geojson` untouched (GEO-01, GEO-03)
+- [x] **Phase 19: V2 Geo Synthetic Source** — `GeoSyntheticSourceVO` + Factory + RowSource + CoreConfig; path assets; `geojson` untouched (GEO-01, GEO-03) (completed 2026-07-30)
 - [ ] **Phase 20: Pipeline Proof + Docs + P1** — TemplateV2Runner IT for four modes; docs; matrix P1 for `geo-synthetic` (GEO-02 closeout, GEO-04, TEST-10)
 
 ### Phase Details
@@ -116,7 +116,7 @@ Plans:
 4. `type: geojson` behavior unchanged (regression green)
 5. Invalid config throws `IllegalArgumentException` with source name + field
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -129,7 +129,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 19-03-PLAN.md — Factory, RowSource, CoreConfig bean, integration tests + geojson regression
+- [x] 19-03-PLAN.md — Factory, RowSource, CoreConfig bean, integration tests + geojson regression
 
 ### Phase 20: Pipeline Proof + Docs + P1
 
@@ -153,7 +153,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 18. Geo Generator Modes | v2.2 | 3/3 | Complete    | 2026-07-30 |
-| 19. V2 Geo Synthetic Source | v2.2 | 2/3 | In Progress|  |
+| 19. V2 Geo Synthetic Source | v2.2 | 3/3 | Complete   | 2026-07-30 |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
 **Next:** `/gsd-execute-phase 19`
