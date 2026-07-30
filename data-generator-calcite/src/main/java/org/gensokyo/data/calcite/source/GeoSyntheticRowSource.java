@@ -56,9 +56,28 @@ public class GeoSyntheticRowSource implements RowSource {
                 this.rows.add(new Row(new LinkedHashMap<>(values)));
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException(
-                    "Failed to read GEO synthetic source [" + name + "] at [" + ioPathForRequest(request) + "]", e);
+            throw readFailure(name, request, e);
+        } catch (IllegalArgumentException e) {
+            // GeoResourceResolver reports missing classpath resources as IAE rather than IOException.
+            if (isAlreadySourceScoped(e, name)) {
+                throw e;
+            }
+            String path = ioPathForRequest(request);
+            if (!path.isBlank()) {
+                throw readFailure(name, request, e);
+            }
+            throw e;
         }
+    }
+
+    private static boolean isAlreadySourceScoped(IllegalArgumentException error, String name) {
+        String message = error.getMessage();
+        return message != null && message.contains("GEO synthetic source [" + name + "]");
+    }
+
+    private static IllegalArgumentException readFailure(String name, GeoGenerationRequest request, Exception cause) {
+        return new IllegalArgumentException(
+                "Failed to read GEO synthetic source [" + name + "] at [" + ioPathForRequest(request) + "]", cause);
     }
 
     @Override
