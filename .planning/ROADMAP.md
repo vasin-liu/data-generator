@@ -88,8 +88,16 @@ Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 18-01-PLAN.md — Extend GeoGenerationMode + request validation for BBOX/CIRCLE
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 18-02-PLAN.md — BboxPointGenerator + BBOX dispatch + integration tests
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 18-03-PLAN.md — CirclePointGenerator + CIRCLE dispatch + full module regression
 
 ### Phase 19: V2 Geo Synthetic Source
