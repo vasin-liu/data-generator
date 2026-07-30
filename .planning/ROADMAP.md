@@ -139,7 +139,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Geo Generator Modes | v2.2 | 3/3 | Complete   | 2026-07-30 |
+| 18. Geo Generator Modes | v2.2 | 3/3 | Complete    | 2026-07-30 |
 | 19. V2 Geo Synthetic Source | v2.2 | 0/? | Not started | - |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
