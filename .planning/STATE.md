@@ -112,8 +112,8 @@ Items carried or acknowledged at milestone close:
 
 Last session: 2026-07-30T08:26:31.052Z
 Stopped at: Completed 19-v2-geo-synthetic-source-01-PLAN.md
-Next: Execute Plan 19-01 (GeoSynthetic V2 VO types)
+Next: Execute Plan 19-02 (GeoSyntheticRequestMapper + mapping tests)
 
 ## Operator Next Steps
 
-- Execute Phase 19: `/gsd-execute-phase 19`
+- Execute Phase 19 Plan 02: `/gsd-execute-phase 19`
