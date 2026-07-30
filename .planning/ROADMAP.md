@@ -85,7 +85,12 @@ Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary
 3. Existing `BOUNDARY_POINTS` / `LINE_SAMPLE` tests remain green
 4. CIRCLE uses area-uniform polar sampling + Haversine check per design spec
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — Extend GeoGenerationMode + request validation for BBOX/CIRCLE
+- [ ] 18-02-PLAN.md — BboxPointGenerator + BBOX dispatch + integration tests
+- [ ] 18-03-PLAN.md — CirclePointGenerator + CIRCLE dispatch + full module regression
 
 ### Phase 19: V2 Geo Synthetic Source
 
@@ -126,8 +131,8 @@ Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Geo Generator Modes | v2.2 | 0/? | Not started | - |
+| 18. Geo Generator Modes | v2.2 | 0/3 | Not started | - |
 | 19. V2 Geo Synthetic Source | v2.2 | 0/? | Not started | - |
 | 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
-**Next:** `/gsd-discuss-phase 18` or `/gsd-plan-phase 18`
+**Next:** `/gsd-execute-phase 18`
