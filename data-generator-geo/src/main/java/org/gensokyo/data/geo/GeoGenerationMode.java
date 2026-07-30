@@ -6,12 +6,14 @@
 package org.gensokyo.data.geo;
 
 /**
- * Synthetic geospatial generation mode for the GEO iterator.
+ * Synthetic geospatial generation mode for boundary assets, line networks, bounding boxes, and circles.
  *
  * @author Gensokyo
  * @since 2026-05-20
  */
 public enum GeoGenerationMode {
     BOUNDARY_POINTS,
-    LINE_SAMPLE
+    LINE_SAMPLE,
+    BBOX,
+    CIRCLE
 }

@@ -92,6 +92,9 @@ public final class GeoSyntheticGenerator {
         return switch (request.getMode()) {
             case BOUNDARY_POINTS -> generateBoundaryPoints(request);
             case LINE_SAMPLE -> generateLinePoints(request);
+            // Sampling for BBOX/CIRCLE arrives in a follow-on plan; validation is wired in Phase 18-01.
+            case BBOX, CIRCLE -> throw new UnsupportedOperationException(
+                    request.getMode() + " sampling is not implemented yet");
         };
     }
 
