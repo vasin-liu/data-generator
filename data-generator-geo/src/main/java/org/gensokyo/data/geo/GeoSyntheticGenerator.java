@@ -6,6 +6,7 @@
 package org.gensokyo.data.geo;
 
 import org.gensokyo.data.geo.format.GeoValueFormatter;
+import org.gensokyo.data.geo.generate.BboxPointGenerator;
 import org.gensokyo.data.geo.generate.BoundaryGeometryNormalizer;
 import org.gensokyo.data.geo.generate.BoundaryPointGenerator;
 import org.gensokyo.data.geo.generate.LineComponentSelector;
@@ -92,8 +93,16 @@ public final class GeoSyntheticGenerator {
         return switch (request.getMode()) {
             case BOUNDARY_POINTS -> generateBoundaryPoints(request);
             case LINE_SAMPLE -> generateLinePoints(request);
-            // Sampling for BBOX/CIRCLE arrives in a follow-on plan; validation is wired in Phase 18-01.
-            case BBOX, CIRCLE -> throw new UnsupportedOperationException(
+            case BBOX -> BboxPointGenerator.generate(
+                    request.getBboxMinLon(),
+                    request.getBboxMinLat(),
+                    request.getBboxMaxLon(),
+                    request.getBboxMaxLat(),
+                    request.getCount(),
+                    request.getMinDistanceMeters(),
+                    request.getSeed());
+            // CIRCLE sampling arrives in Plan 18-03.
+            case CIRCLE -> throw new UnsupportedOperationException(
                     request.getMode() + " sampling is not implemented yet");
         };
     }
