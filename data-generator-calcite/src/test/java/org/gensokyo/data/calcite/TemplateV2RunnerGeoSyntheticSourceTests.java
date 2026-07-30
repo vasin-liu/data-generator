@@ -5,16 +5,21 @@
  */
 package org.gensokyo.data.calcite;
 
+import org.gensokyo.data.calcite.runtime.TemplateV2RunResult;
 import org.gensokyo.data.calcite.runtime.TemplateV2Runner;
 import org.gensokyo.data.calcite.runtime.TemplateV2RuntimeRegistry;
 import org.gensokyo.data.calcite.sink.ConsoleSinkFactory;
 import org.gensokyo.data.calcite.source.GeoSyntheticSourceFactory;
 import org.gensokyo.data.calcite.sql.SqlTransformFactory;
+import org.gensokyo.data.model.v2.GeoSyntheticSampleVO;
+import org.gensokyo.data.model.v2.GeoSyntheticSourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
 import org.gensokyo.data.model.v2.SqlTransformVO;
 import org.gensokyo.data.model.v2.TemplateV2VO;
 import org.gensokyo.data.model.vo.stage.WriteStageVO;
 import org.gensokyo.data.model.vo.writer.ConsoleWriterVO;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +34,51 @@ import java.util.Map;
  * @since 2026-07-30
  */
 class TemplateV2RunnerGeoSyntheticSourceTests {
+
+    private static final String BOUNDARY_FIXTURE = "classpath:geo/南沙区边界.geojson";
+    private static final String NETWORK_FIXTURE = "classpath:geo/南沙区道路路网.geojson";
+
+    @Test
+    void boundaryPoints_pipelineRun_returnsExpectedRowCount() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("BOUNDARY_POINTS");
+        source.setBoundaryPath(BOUNDARY_FIXTURE);
+        source.setCount(6);
+        source.setSeed(11L);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("select lon, lat from geo_boundary");
+
+        TemplateV2VO template = template("geo-synthetic-boundary", Map.of("geo_boundary", source), transform);
+
+        TemplateV2RunResult result = runner(geoSyntheticRegistry()).run(template);
+
+        Assertions.assertEquals(6, result.getRows().size());
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lat")));
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lon")));
+    }
+
+    @Test
+    void lineSample_pipelineRun_returnsNonEmptyRows() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("LINE_SAMPLE");
+        source.setNetworkPath(NETWORK_FIXTURE);
+        GeoSyntheticSampleVO sample = new GeoSyntheticSampleVO();
+        sample.setStrategy("BY_SPACING_METERS");
+        sample.setSpacingMeters(50d);
+        source.setSample(sample);
+
+        SqlTransformVO transform = new SqlTransformVO();
+        transform.setSql("select lon, lat from geo_line");
+
+        TemplateV2VO template = template("geo-synthetic-line", Map.of("geo_line", source), transform);
+
+        TemplateV2RunResult result = runner(geoSyntheticRegistry()).run(template);
+
+        Assertions.assertFalse(result.getRows().isEmpty());
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lat")));
+        Assertions.assertTrue(result.getRows().stream().allMatch(row -> row.values().containsKey("lon")));
+    }
 
     private static TemplateV2Runner runner(TemplateV2RuntimeRegistry registry) {
         return new TemplateV2Runner(registry);
