@@ -1,5 +1,27 @@
 # Milestones
 
+## v2.2 — V2 Geo Synthetic Source
+
+**Started:** 2026-07-30  
+**Status:** Planning  
+**Phases:** 18–20  
+**Requirements:** GEO-01, GEO-02, GEO-03, GEO-04, TEST-10  
+**Spec:** [docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md](../docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md)
+
+### Scope
+
+- First-class Template V2 `geo_synthetic` source (Approach A)
+- Modes: BOUNDARY_POINTS, LINE_SAMPLE, BBOX, CIRCLE
+- Path assets only; `geojson` read-only unchanged
+- P1 matrix link; P0 gate frozen at 15
+
+### Artifacts
+
+- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
+- Roadmap: [ROADMAP.md](ROADMAP.md)
+
+---
+
 ## v2.1 Hardening & Weak-Spot Closure (Shipped: 2026-07-29)
 
 **Phases completed:** 6 phases, 18 plans, 39 tasks

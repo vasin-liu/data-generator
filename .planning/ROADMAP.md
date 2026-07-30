@@ -5,6 +5,7 @@
 - ✅ **v1.0 UDF, Transform & Test Harness** — Phases 1-5 (shipped 2026-06-23)
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
 - ✅ **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (shipped 2026-07-29)
+- 🚧 **v2.2 V2 Geo Synthetic Source** — Phases 18-20 (in planning)
 
 ## Phases
 
@@ -50,15 +51,83 @@ Full archive: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 
 </details>
 
+## Milestone v2.2: V2 Geo Synthetic Source
+
+**Status:** Planning  
+**Phases:** 18–20  
+**Requirements:** GEO-01, GEO-02, GEO-03, GEO-04, TEST-10  
+**Spec:** [docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md](../docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md)
+
+### Overview
+
+Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary, line sample, bbox, circle). Path-referenced GeoJSON only; keep `geojson` read-only; P1 harness link; P0 gate frozen.
+
+### Phase list
+
+- [ ] **Phase 18: Geo Generator Modes** — Extend `GeoGenerationMode` / generator for BBOX + CIRCLE; harden validation (GEO-02 foundation)
+- [ ] **Phase 19: V2 Geo Synthetic Source** — `GeoSyntheticSourceVO` + Factory + RowSource + CoreConfig; path assets; `geojson` untouched (GEO-01, GEO-03)
+- [ ] **Phase 20: Pipeline Proof + Docs + P1** — TemplateV2Runner IT for four modes; docs; matrix P1 for `geo-synthetic` (GEO-02 closeout, GEO-04, TEST-10)
+
+### Phase Details
+
+### Phase 18: Geo Generator Modes
+
+**Goal**: Extend `data-generator-geo` so BBOX and CIRCLE modes generate seeded, in-domain points with the same validation rigor as existing boundary/line modes.
+
+**Depends on**: v2.1 complete
+
+**Requirements**: GEO-02 (generator half)
+
+**Success Criteria**:
+
+1. `GeoGenerationMode` includes `BBOX` and `CIRCLE`
+2. Unit tests prove in-domain points, seed reproducibility, and illegal config failures
+3. Existing `BOUNDARY_POINTS` / `LINE_SAMPLE` tests remain green
+4. CIRCLE uses area-uniform polar sampling + Haversine check per design spec
+
+**Plans**: TBD
+
+### Phase 19: V2 Geo Synthetic Source
+
+**Goal**: Expose synthesis as Template V2 `type: geo_synthetic` (Approach A) — distinct from read-only `geojson`.
+
+**Depends on**: Phase 18
+
+**Requirements**: GEO-01, GEO-03
+
+**Success Criteria**:
+
+1. `GeoSyntheticSourceVO` + `GeoSyntheticSourceFactory` + `GeoSyntheticRowSource` registered like `GeoJsonSourceFactory`
+2. All four modes configurable via YAML and produce `Row`/`RowSchema`
+3. Paths resolve only via `GeoResourceResolver`; no upload API
+4. `type: geojson` behavior unchanged (regression green)
+5. Invalid config throws `IllegalArgumentException` with source name + field
+
+**Plans**: TBD
+
+### Phase 20: Pipeline Proof + Docs + P1
+
+**Goal**: Prove end-to-end V2 pipeline, document the source split, and link harness P1 without touching P0.
+
+**Depends on**: Phase 19
+
+**Requirements**: GEO-02 (pipeline evidence), GEO-04, TEST-10
+
+**Success Criteria**:
+
+1. Template V2 IT runs `geo_synthetic` → transform → sink for each mode (or shared fixture covering all four)
+2. Docs distinguish `geo_synthetic` vs `geojson` and include a minimal YAML example
+3. `.planning/test-matrix.yaml` `geo-synthetic` is P1 with linked tests; `p0.total` remains 15
+4. V1 geo iterator not required for the happy path (docs may note V2 preference)
+
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 12. HTTP Execute-Path Proof | v2.1 | 2/2 | Complete | 2026-07-25 |
-| 13. Dameng Live + Nyquist | v2.1 | 5/5 | Complete | 2026-07-28 |
-| 14. Resolver Ownership Docs | v2.1 | 2/2 | Complete | 2026-07-29 |
-| 15. Multi-JVM Worker E2E | v2.1 | 3/3 | Complete | 2026-07-29 |
-| 16. RBAC Enable Path | v2.1 | 3/3 | Complete | 2026-07-29 |
-| 17. P1 Harness + Closeout | v2.1 | 3/3 | Complete | 2026-07-29 |
+| 18. Geo Generator Modes | v2.2 | 0/? | Not started | - |
+| 19. V2 Geo Synthetic Source | v2.2 | 0/? | Not started | - |
+| 20. Pipeline Proof + Docs + P1 | v2.2 | 0/? | Not started | - |
 
-**Next:** Define the next milestone with `/gsd-new-milestone`.
+**Next:** `/gsd-discuss-phase 18` or `/gsd-plan-phase 18`

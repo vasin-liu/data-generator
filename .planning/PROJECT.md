@@ -27,9 +27,20 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 Archives: `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, `v2.1-MILESTONE-AUDIT.md`
 
-## Next Milestone Goals
+## Current Milestone: v2.2 V2 Geo Synthetic Source
 
-Define via `/gsd-new-milestone`. Likely candidates from deferred backlog: RES-02 resolver consolidation, SEC-02 default-on RBAC, DIST-02 full staging AC matrix, orchestration, net-new connectors.
+**Goal:** Make geographic point synthesis a first-class Template V2 source (`geo_synthetic`) without relying on the V1 geo iterator.
+
+**Target features:**
+- New `type: geo_synthetic` SourceVO + Factory + RowSource (Approach A)
+- Four modes: `BOUNDARY_POINTS`, `LINE_SAMPLE`, `BBOX`, `CIRCLE`
+- Path/`classpath:` assets only via `GeoResourceResolver` (upload deferred)
+- Keep `geojson` read-only; minimal SQL companion = documentation only
+- P1 matrix link for `geo-synthetic`; P0 merge gate unchanged
+
+**Spec:** `docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md`
+
+**Out of scope this milestone:** common-data CRUD, GeoJSON asset upload, polygon synthesis, console map UI, P0 promotion
 
 ## Requirements
 
@@ -67,9 +78,11 @@ Define via `/gsd-new-milestone`. Likely candidates from deferred backlog: RES-02
 - ✓ RBAC testable enable path, default-off (SEC-01) — Phase 16
 - ✓ Focused P1 harness rows; P0 unchanged (TEST-09) — Phase 17
 
-### Active
+### Active (v2.2)
 
-(None — awaiting `/gsd-new-milestone`)
+- [ ] V2 `geo_synthetic` source (four modes; path assets)
+- [ ] Docs: geo_synthetic vs geojson + minimal SQL companion
+- [ ] P1 matrix linkage for geo-synthetic; P0 gate frozen
 
 ### Out of Scope
 
@@ -82,6 +95,10 @@ Define via `/gsd-new-milestone`. Likely candidates from deferred backlog: RES-02
 - Full JDBC resolver code consolidation (RES-02) — docs-only in v2.1
 - Full distributed AC-1..AC-7 (DIST-02) — one happy path only in v2.1
 - Dameng live as P0 gate (DIAL-03) — licensed driver / CI cost
+- Common-data / code-table operator CRUD — deferred past v2.2
+- GeoJSON asset upload / asset IDs — deferred past v2.2
+- Polygon/MultiPolygon synthetic generation — deferred past v2.2
+- Console visual map config for geo sources — deferred past v2.2
 
 ## Context
 
@@ -126,6 +143,9 @@ Known pressure points:
 | v2.1: breadth hardening over new features | Close proof/reliability gaps after v2.0 | ✓ Good — shipped 2026-07-29 |
 | v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | ✓ Good — SEC-01; SEC-02 deferred |
 | v2.1 P1 rows for proofs; no P0 promotion | Keep merge gate stable | ✓ Good — TEST-09 |
+| v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | — Pending |
+| v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | — Pending |
+| v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | — Pending |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -166,4 +186,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-29 after v2.1 milestone*
+*Last updated: 2026-07-30 — Milestone v2.2 started (V2 Geo Synthetic Source)*

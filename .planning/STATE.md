@@ -1,19 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.1
-milestone_name: Hardening & Weak-Spot Closure
-status: Awaiting next milestone
-stopped_at: Phase 17 complete
-last_updated: "2026-07-29T14:37:43.566Z"
-last_activity: 2026-07-29 — Milestone v2.1 completed and archived
+milestone: v2.2
+milestone_name: V2 Geo Synthetic Source
+status: planning
+last_updated: "2026-07-30T03:10:24.920Z"
+last_activity: 2026-07-30
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
-current_phase: 17
-current_phase_name: P1 Harness Expansion + Closeout
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -27,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-25)
 
 ## Current Position
 
-Phase: Milestone v2.1 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-07-29 — Milestone v2.1 completed and archived
+Status: Defining requirements
+Last activity: 2026-07-30 — Milestone v2.2 started
 
 ## Performance Metrics
 
