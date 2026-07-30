@@ -56,7 +56,7 @@ Deferred beyond v2.2.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEO-01 | 19 | Pending |
+| GEO-01 | 19 | Complete |
 | GEO-02 | 18–20 | Complete |
 | GEO-03 | 19 | Pending |
 | GEO-04 | 20 | Pending |

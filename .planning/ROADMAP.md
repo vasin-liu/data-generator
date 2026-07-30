@@ -121,7 +121,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 19-01-PLAN.md — GeoSynthetic V2 VO types (output, sample, source config)
+- [x] 19-01-PLAN.md — GeoSynthetic V2 VO types (output, sample, source config)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
