@@ -358,10 +358,7 @@ rows:
     owner_module: data-generator-calcite
     status: covered
     tier: P1
-    linked_tests:
-      - TemplateV2RunnerGeoSyntheticSourceTests
-      - GeoSyntheticRowSourceTests
-      - GeoSyntheticRequestMapperTests
+    linked_tests: [TemplateV2RunnerGeoSyntheticSourceTests, GeoSyntheticRowSourceTests, GeoSyntheticRequestMapperTests]
     notes: >-
       Template V2 geo_synthetic source (BOUNDARY_POINTS, LINE_SAMPLE, BBOX, CIRCLE)
       with path-only classpath assets; pipeline IT via TemplateV2Runner through SQL
