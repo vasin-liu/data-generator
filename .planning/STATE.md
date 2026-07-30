@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: V2 Geo Synthetic Source
 current_phase: 18
-current_phase_name: next
-status: verifying
-stopped_at: Phase 17 complete
-last_updated: "2026-07-30T04:16:39.025Z"
+current_phase_name: geo-generator-modes
+status: executing
+stopped_at: Completed 18-02-PLAN.md
+last_updated: "2026-07-30T04:36:00.000Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 18 plans created (3 plans, 3 waves)
+last_activity_desc: Completed Plan 18-02 BboxPointGenerator + BBOX dispatch
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 0
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 
 ## Current Position
 
-Phase: 18 (next)
-Plan: 18-01 (first of 3)
-Status: Phase complete — ready for verification
-Last activity: 2026-07-30 — Phase 18 plans created (3 plans, 3 waves)
+Phase: 18 (geo-generator-modes)
+Plan: 18-03 (next of 3)
+Status: Plan 18-02 complete — BboxPointGenerator wired
+Last activity: 2026-07-30 — Completed Plan 18-02 BboxPointGenerator + BBOX dispatch
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 13]: Phase 13 P03: Nyquist backfill for 07/07.1 transcribes existing green tests only — 07-VALIDATION.md and 07.1-VALIDATION.md set nyquist_compliant: true by citing test classes/commands already recorded green in VERIFICATION/SUMMARY reports (D-11); no new tests written, no Phase 07/07.1 implementation reopened, Phase 12 validation state untouched (D-10)
 - [Phase 13]: Phase 13 P04: Backfilled 08-VALIDATION.md (12 grouped plan-task rows from 58 already-green truths) and synced v2.0-MILESTONE-AUDIT.md Nyquist table/frontmatter to COMPLIANT for 07/07.1/08 — DIAL-02 requires accurate nyquist_compliant status across 07/07.1/08; grouping by plan task (not 1:1 with the 58 VERIFICATION truths) keeps the map readable while staying honest transcription-only (D-11); milestone audit must agree with the backfilled files or the exercise is invisible to maintainers (D-13). Phase 12 validation and P0 gate untouched (D-10). DIAL-02 now complete; Phase 13 fully done.
 - [Phase 17]: TEST-09 P1 rows wired (exec-http-managed-catalog, exec-http-postgres-dialect, rbac-enable-path, dist-multi-jvm-worker); P0 gate frozen at 15 rows; verify-harness.ps1 sole merge gate unchanged
+- [Phase 18]: Copied BoundaryPointGenerator retry pattern for BboxPointGenerator per D-10
 
 ### Pending Todos
 
@@ -107,9 +108,9 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** .planning/phases/17-p1-harness-expansion-closeout/17-CONTEXT.md
 
-Last session: 2026-07-30T04:16:38.972Z
-Stopped at: Phase 17 complete
-Next: `/gsd-verify-work` or milestone closeout (no `milestones/v2.1-*` archive unless team requests)
+Last session: 2026-07-30T04:36:00.000Z
+Stopped at: Completed 18-02-PLAN.md
+Next: Execute Plan 18-03 (CirclePointGenerator + CIRCLE dispatch)
 
 ## Operator Next Steps
 
