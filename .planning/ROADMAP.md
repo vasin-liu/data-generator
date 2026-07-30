@@ -5,7 +5,7 @@
 - ✅ **v1.0 UDF, Transform & Test Harness** — Phases 1-5 (shipped 2026-06-23)
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
 - ✅ **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (shipped 2026-07-29)
-- 🚧 **v2.2 V2 Geo Synthetic Source** — Phases 18-20 (in planning)
+- ✅ **v2.2 V2 Geo Synthetic Source** — Phases 18-20 (shipped 2026-07-30)
 
 ## Phases
 
@@ -53,7 +53,7 @@ Full archive: [milestones/v2.1-ROADMAP.md](milestones/v2.1-ROADMAP.md)
 
 ## Milestone v2.2: V2 Geo Synthetic Source
 
-**Status:** Planning  
+**Status:** Shipped 2026-07-30
 **Phases:** 18–20  
 **Requirements:** GEO-01, GEO-02, GEO-03, GEO-04, TEST-10  
 **Spec:** [docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md](../docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md)
