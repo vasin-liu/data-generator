@@ -123,7 +123,7 @@ Each task was committed atomically:
 3. **Task 2: Wire CIRCLE dispatch in GeoSyntheticGenerator** - `8d0cef3` (feat)
 4. **Task 3: CIRCLE integration tests and full module regression** - `b6c6da8` (test)
 
-**Plan metadata:** pending (docs: complete plan)
+**Plan metadata:** `478ef10` (docs: complete plan)
 
 ## Files Created/Modified
 
