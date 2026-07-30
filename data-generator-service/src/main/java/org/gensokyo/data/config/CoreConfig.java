@@ -52,6 +52,7 @@ import org.gensokyo.data.calcite.source.AiSourceFactory;
 import org.gensokyo.data.calcite.source.CsvSourceFactory;
 import org.gensokyo.data.calcite.source.IteratorSourceFactory;
 import org.gensokyo.data.calcite.source.GeoJsonSourceFactory;
+import org.gensokyo.data.calcite.source.GeoSyntheticSourceFactory;
 import org.gensokyo.data.calcite.source.InlineRowsSourceFactory;
 import org.gensokyo.data.calcite.source.JsonSourceFactory;
 import org.gensokyo.data.calcite.sql.SpelTransformFactory;
@@ -122,6 +123,17 @@ public class CoreConfig {
     @ConditionalOnMissingBean(name = "geoJsonSourceFactory")
     public V2SourceFactory geoJsonSourceFactory() {
         return new GeoJsonSourceFactory();
+    }
+
+    /**
+     * Template V2 {@code geo_synthetic} source factory (Phase 19 — D-11).
+     *
+     * @return factory that materializes synthetic geographic point rows
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "geoSyntheticSourceFactory")
+    public V2SourceFactory geoSyntheticSourceFactory() {
+        return new GeoSyntheticSourceFactory();
     }
 
     @Bean
