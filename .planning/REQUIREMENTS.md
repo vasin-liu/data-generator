@@ -17,7 +17,7 @@ First-class Template V2 geographic point synthesis. No V1 geo iterator required 
 
 ### Harness (TEST)
 
-- [ ] **TEST-10**: Feature matrix links `geo-synthetic` to real tests at **P1**; `verify-harness.ps1` P0 set and merge-gate semantics remain unchanged (still 15 P0 rows)
+- [x] **TEST-10**: Feature matrix links `geo-synthetic` to real tests at **P1**; `verify-harness.ps1` P0 set and merge-gate semantics remain unchanged (still 15 P0 rows)
 
 ## Future Requirements
 
@@ -60,7 +60,7 @@ Deferred beyond v2.2.
 | GEO-02 | 18–20 | Complete |
 | GEO-03 | 19 | Complete |
 | GEO-04 | 20 | Complete |
-| TEST-10 | 20 | Pending |
+| TEST-10 | 20 | Complete |
 
 **Coverage:**
 

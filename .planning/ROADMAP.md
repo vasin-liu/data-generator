@@ -66,7 +66,7 @@ Add first-class Template V2 `geo_synthetic` source for point synthesis (boundary
 
 - [x] **Phase 18: Geo Generator Modes** — Extend `GeoGenerationMode` / generator for BBOX + CIRCLE; harden validation (GEO-02 foundation) (completed 2026-07-30)
 - [x] **Phase 19: V2 Geo Synthetic Source** — `GeoSyntheticSourceVO` + Factory + RowSource + CoreConfig; path assets; `geojson` untouched (GEO-01, GEO-03) (completed 2026-07-30)
-- [ ] **Phase 20: Pipeline Proof + Docs + P1** — TemplateV2Runner IT for four modes; docs; matrix P1 for `geo-synthetic` (GEO-02 closeout, GEO-04, TEST-10)
+- [x] **Phase 20: Pipeline Proof + Docs + P1** — TemplateV2Runner IT for four modes; docs; matrix P1 for `geo-synthetic` (GEO-02 closeout, GEO-04, TEST-10) (completed 2026-07-30)
 
 ### Phase Details
 
@@ -146,7 +146,7 @@ Plans:
 3. `.planning/test-matrix.yaml` `geo-synthetic` is P1 with linked tests; `p0.total` remains 15
 4. V1 geo iterator not required for the happy path (docs may note V2 preference)
 
-**Plans**: 2/3 plans executed
+**Plans**: 3/3 plans complete
 
 Plans:
 **Wave 1** *(parallel)*
@@ -156,7 +156,7 @@ Plans:
 
 **Wave 2** *(blocked on 20-01 for linked_tests accuracy)*
 
-- [ ] 20-03-PLAN.md — test-matrix P1 promotion + doc sync; P0 frozen at 15 (TEST-10)
+- [x] 20-03-PLAN.md — test-matrix P1 promotion + doc sync; P0 frozen at 15 (TEST-10)
 
 ## Progress
 
@@ -164,6 +164,6 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 18. Geo Generator Modes | v2.2 | 3/3 | Complete    | 2026-07-30 |
 | 19. V2 Geo Synthetic Source | v2.2 | 3/3 | Complete    | 2026-07-30 |
-| 20. Pipeline Proof + Docs + P1 | v2.2 | 2/3 | In Progress|  |
+| 20. Pipeline Proof + Docs + P1 | v2.2 | 3/3 | Complete   | 2026-07-30 |
 
-**Next:** `/gsd-execute-phase 20`
+**Next:** `/gsd-verify-work` (v2.2 milestone)
