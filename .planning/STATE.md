@@ -6,15 +6,15 @@ current_phase: 20
 current_phase_name: Pipeline Proof + Docs + P1
 status: executing
 stopped_at: Completed 20-pipeline-proof-docs-p1-02-PLAN.md
-last_updated: "2026-07-30T11:58:00.000Z"
+last_updated: "2026-07-30T12:06:06.019Z"
 last_activity: 2026-07-30
-last_activity_desc: Phase 20 Plan 02 complete — GEO-04 maintainer docs
+last_activity_desc: Phase 20 Plan 02 GEO-04 maintainer docs shipped
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-30)
 ## Current Position
 
 Phase: 20 — Pipeline Proof + Docs + P1
-Plan: 02 complete (GEO-04 docs)
+Plan: 01 complete (GEO-02 pipeline IT); 02 complete (GEO-04 docs)
 Status: In Progress
-Last activity: 2026-07-30 — Phase 20 Plan 02 GEO-04 maintainer docs shipped
+Last activity: 2026-07-30 — Phase 20 Plan 01 TemplateV2RunnerGeoSyntheticSourceTests four-mode pipeline proof
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 19-v2-geo-synthetic-source]: GeoSyntheticRequestMapper in calcite expands VO arrays and wraps validate() with source-scoped errors — D-04/D-07 bridge for Plan 19-03 Factory/RowSource; V1 GeoIteratorRequestMapper untouched per D-05
 - [Phase 19-v2-geo-synthetic-source]: GeoSynthetic Factory/RowSource + CoreConfig bean complete; GEO-01/GEO-03 Phase 19 criteria met
 - [Phase 20-pipeline-proof-docs-p1]: Dedicated geo-synthetic-v2-source.md for YAML/modes/output; overview remains landing page per D-06 — GEO-04 complete
+- [Phase 20-pipeline-proof-docs-p1]: Dedicated TemplateV2RunnerGeoSyntheticSourceTests with four mode-specific pipeline tests per D-01/D-02 — GEO-02 pipeline evidence complete
 
 ### Pending Todos
 
@@ -110,13 +111,14 @@ Items carried or acknowledged at milestone close:
 | Phase 19-v2-geo-synthetic-source P01 | 12min | 3 tasks | 3 files |
 | Phase 19-v2-geo-synthetic-source P02 | 22min | 2 tasks | 2 files |
 | Phase 19-v2-geo-synthetic-source P03 | 45min | 3 tasks | 5 files |
+| Phase 20-pipeline-proof-docs-p1 P01 | 24min | 3 tasks | 1 files |
 | Phase 20-pipeline-proof-docs-p1 P02 | 15min | 3 tasks | 2 files |
 
 ## Session Continuity
 
 **Resume file:** .planning/phases/20-pipeline-proof-docs-p1/20-03-PLAN.md
 
-Last session: 2026-07-30T11:58:00.000Z
+Last session: 2026-07-30T12:06:05.534Z
 Stopped at: Completed 20-pipeline-proof-docs-p1-02-PLAN.md
 Next: Execute Plan 20-03 (test-matrix P1 + doc sync) or finish Plan 20-01 (pipeline IT)
 

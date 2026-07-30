@@ -146,12 +146,12 @@ Plans:
 3. `.planning/test-matrix.yaml` `geo-synthetic` is P1 with linked tests; `p0.total` remains 15
 4. V1 geo iterator not required for the happy path (docs may note V2 preference)
 
-**Plans**: 1/3 plans executed
+**Plans**: 2/3 plans executed
 
 Plans:
 **Wave 1** *(parallel)*
 
-- [ ] 20-01-PLAN.md — TemplateV2RunnerGeoSyntheticSourceTests four-mode pipeline IT (GEO-02)
+- [x] 20-01-PLAN.md — TemplateV2RunnerGeoSyntheticSourceTests four-mode pipeline IT (GEO-02)
 - [x] 20-02-PLAN.md — geospatial docs: geo_synthetic vs geojson, YAML example, output formats (GEO-04)
 
 **Wave 2** *(blocked on 20-01 for linked_tests accuracy)*
@@ -164,6 +164,6 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 18. Geo Generator Modes | v2.2 | 3/3 | Complete    | 2026-07-30 |
 | 19. V2 Geo Synthetic Source | v2.2 | 3/3 | Complete    | 2026-07-30 |
-| 20. Pipeline Proof + Docs + P1 | v2.2 | 1/3 | In Progress|  |
+| 20. Pipeline Proof + Docs + P1 | v2.2 | 2/3 | In Progress|  |
 
 **Next:** `/gsd-execute-phase 20`
