@@ -122,6 +122,58 @@ geo_synthetic source → SQL transform (select lon, lat from <source>) → sink
 
 Adjust column names in SQL when `output.columnNames` overrides defaults.
 
+## Output formats
+
+`output.format` maps to `GeoOutputFormatKind` on `GeoSyntheticSourceOutputVO`:
+
+| `format` | Row shape | SQL notes |
+|----------|-----------|-----------|
+| `columns` (default) | Separate lon/lat columns via `output.columnNames` (defaults `lon`, `lat`) | Passthrough: `select lon, lat from pts` |
+| `wkt` | Single geometry column (WKT `POINT`) | Select the WKT column name declared in output config |
+| `geojson` | Single geometry column (GeoJSON geometry object) | Select the geometry column; use with `V2_GEO_*` GeoJSON predicates |
+
+`includeProperties: true` adds `prop.*` columns from source GeoJSON features (boundary/line modes only).  
+Column name collisions are rejected at generation time (`ensureNoColumnCollisions`).
+
+Example **wkt** output:
+
+```yaml
+    output:
+      format: wkt
+      columnNames:
+        geometry: geom_wkt
+```
+
+Example **geojson** output:
+
+```yaml
+    output:
+      format: geojson
+      columnNames:
+        geometry: geom_json
+```
+
+## SQL companion
+
+This milestone adds **no new `ST_*` or additional `V2_GEO_*` functions**. Transform SQL may use the existing in-memory geo functions already registered in `TemplateV2SqlFunctionRegistry` (listed in [`geospatial-overview.md`](geospatial-overview.md#built-in-sql-functions-in-memory-wgs84)):
+
+- Filter synthetic points inside a boundary: `V2_GEO_POINT_IN_GEOJSON(lon, lat, '<geojson>')`
+- Radius filter: `V2_GEO_WITHIN_RADIUS(lon, lat, centerLon, centerLat, meters)`
+- Distance: `V2_GEO_DISTANCE_METERS(lon1, lat1, lon2, lat2)`
+
+Example filter (optional — default pipeline proof uses passthrough only):
+
+```yaml
+transform:
+  - type: sql
+    sql: |
+      select lon, lat
+      from pts
+      where V2_GEO_WITHIN_RADIUS(lon, lat, 113.3, 23.1, 1000)
+```
+
+Warehouse-scale spatial joins and native PostGIS `ST_*` remain on **`POSTGIS`** / **`QUERY`** JDBC sources, not inside the Calcite in-memory function set.
+
 ## Related docs
 
 - V1 iterator / SpEL guide: [`geospatial-phase1-usage.md`](geospatial-phase1-usage.md) — legacy `ITERATOR` + `GEO` only; prefer `geo_synthetic` for new Template V2 templates.
