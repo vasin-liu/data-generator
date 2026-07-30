@@ -100,7 +100,7 @@ Each task was committed atomically:
 2. **Task 2: Add bbox and circle fields to GeoGenerationRequest** - `9194481` (feat)
 3. **Task 3: Implement BBOX and CIRCLE validation rules** - `2938299` (test)
 
-**Plan metadata:** pending (docs commit)
+**Plan metadata:** `b37b39a` (docs: complete plan)
 
 ## Files Created/Modified
 
