@@ -1,10 +1,10 @@
 # Stack Research
 
-**Domain:** synthetic-data platform hardening (v2.1 Hardening & Weak-Spot Closure)
-**Researched:** 2026-07-25
+**Domain:** v2.3 Geo Assets & Map Preview (GEO-05 upload + GEO-07 console map)
+**Researched:** 2026-07-31
 **Confidence:** HIGH
 
-> Brownfield subsequent-milestone research. Prefer the shipped v1.0/v2.0 stack. Recommend **no new production libraries**. Changes are proof paths, docs, opt-in IT wiring, PowerShell/Maven harness linkage, and Playwright header toggles already sketched in-repo.
+> Brownfield subsequent-milestone research. **Reuse** the shipped Java 25 / Spring Boot 4 / JPA metadata DB / React 19 console stack. Add **one** frontend map stack (MapLibre + react-map-gl), **one** JPA table pattern (CLOB inline GeoJSON), and **extend** existing resolver/upload patterns — no new Maven modules, no GIS servers, no PostGIS requirement for this milestone.
 
 ## Recommended Stack
 
@@ -12,151 +12,180 @@
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Java | 25 | Runtime / language | Enforced by `maven-enforcer-plugin`; no language bump for hardening |
-| Maven Wrapper + `mvnw-jdk25.ps1` | 3.6.3+ / JDK 25 helper | Builds & focused `-pl … -am test` | Existing CI/local contract; Nexus via `.mvn/settings-jdk25.xml` |
-| Spring Boot | 4.0.5 | Service, REST `/task/*` + `/api/*`, worker profile | Keep BOM pinned; hardening uses existing controllers/filters |
-| Template V2 Calcite runtime | module `data-generator-calcite` | Pipeline execute path for managed DS + dialects | Already backs `TemplateV2Runner` and JDBC sinks |
-| `data-generator-datasource` catalog | shipped v2.0 | Managed `dataSourceId` / `snap:` resolution | HTTP proof must exercise catalog → run, not invent a parallel catalog |
-| Distributed worker entry | `DataGeneratorWorkerApplication` + `distributed-worker` profile | Multi-JVM lease/execute | Already packaged (`service.env.example` `DG_SERVICE_ROLE=worker`) |
-| Header RBAC | `ConsoleSecurityProperties` (`data.generator.console-security.*`) | Opt-in console authorization | Staging overlay already enables it; default remains `enabled=false` |
+| Java | 25 | Runtime (unchanged) | Enforced by enforcer; no language bump for geo assets |
+| Spring Boot | 4.0.5 | REST `/api/console/geo-assets`, multipart ingest | Same BOM as service; follow `ConsoleUdfController` multipart + `ConsoleApiAdvice` error envelope |
+| Jakarta Persistence (H2 file metadata DB) | existing | Persist uploaded GeoJSON + list metadata | Project decision: assets live in metadata DB with secrets/templates/UDFs — single backup surface |
+| `data-generator-geo` (`GeoJsonLoader`, JTS) | JTS 1.19.0 (root BOM) | Server-side GeoJSON parse/validate + runtime load | Already parses Feature/FeatureCollection; reuse for upload gate and `asset:` resolution — **no GeoTools addition** |
+| **MapLibre GL JS** | **^5.24.0** (pin ≤5.x; avoid 6.0 pre-releases) | WebGL map renderer in console | Open-source, no Mapbox token; handles district-scale polygon boundaries (e.g. 南沙 fixtures) better than SVG/Canvas |
+| **react-map-gl** (`react-map-gl/maplibre`) | **^8.1.0** | React 19 bindings for MapLibre | Official vis.gl wrapper; v8 splits MapLibre endpoint so **no** `mapbox-gl` dependency; peer `react >= 16.3` |
+| React + Ant Design + Vite | React ^19, antd ^5.22, Vite ^6 | Asset browse/upload UI + embedded map panel | Existing console stack; map is a new page/panel, not a new SPA |
 
 ### Supporting Libraries
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| Spring MockMvc / `@SpringBootTest` | Boot test starter | HTTP evidence for `/task/run` or console run API | Preferred over Playwright for managed-catalog + dialect execute-path proof (fast, deterministic) |
-| H2 (test profile) | 2.2.224 (existing) | Metadata + managed JDBC sink in HTTP IT | `application-phase7-test.yaml` (`server.port: 0`) |
-| JUnit 5 + Assumptions / `@EnabledIf` | Boot BOM | Gate Dameng live IT | Keep `DamengTestSupport` (`-Ddm.it=true` / `DG_DM_IT=true`) |
-| `dm-jdbc` | 1.8 (root `dm.version`) | Dameng driver on classpath / jdbc-bundled | Already managed; do **not** add a second Dameng driver artifact |
-| Testcontainers | 1.20.6 | Optional live DM (or PG-proxy patterns for other dialects) | Only if a licensed/available DM image or JDBC host is wired into `ChunkedPipelineDamengUpsertIT` (today a placeholder abort) |
-| Playwright | ^1.49.1 (`@playwright/test`) | Console RBAC enable-path + staging/e2e docs | Reuse `e2e/helpers/api.ts` (`DG_E2E_GOVERNANCE_STAGING`, `X-Console-Role`) |
-| Podman + `scripts/e2e-podman.ps1` | existing | Containerized console UAT | Optional for RBAC staging docs; not required for Maven HTTP IT |
-| PowerShell verify scripts | `scripts/verify-*.ps1` | Slice orchestration + harness | Add a focused v2.1 verify script if needed; keep `verify-harness.ps1` as P0 merge gate |
-| Harness matrix | `.planning/test-matrix.yaml` | P1 row linkage | Add focused P1 rows only; do **not** expand P0 for opt-in Dameng/multi-JVM |
+| `@turf/bbox` + `@turf/circle` + `@turf/helpers` | ^7.2.0 | Client fit-bounds, circle/bbox overlay for `geo_synthetic` preview | GEO-07 preview of BBOX/CIRCLE modes without round-tripping full synthesis; tree-shaken subpath imports |
+| OpenStreetMap raster tiles | N/A (URL template) | Basemap for preview | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` + OSM attribution; no tile server to deploy |
+| Jackson 3 (`tools.jackson`) | 3.1.0 (existing) | Metadata JSON on asset rows (bbox summary, geometry types) | Same as `UdfArtifactPO.metadataJson` pattern |
+| Spring `MultipartFile` | Boot 4 servlet | Binary upload transport | Same as UDF JAR + datasource driver upload paths |
+| Playwright | ^1.49.1 (existing) | Console upload + map smoke E2E | Reuse Podman verify pipeline; mock GeoJSON fixtures |
 
 ### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| `.\mvnw-jdk25.ps1` | JDK 25-bound Maven | Quote `-Dsurefire.argLine` / `-Ddm.it=true` on PowerShell |
-| `.\scripts\verify-harness.ps1` | Canonical merge gate (P0) | P1 failures tracked, non-blocking |
-| `docs/testing-embedded-components.md` | Embedded-first norms | Extend with Dameng opt-in + multi-JVM recipe; no new infra product |
-| `application-staging.yaml` | Documented RBAC-on overlay | Port 8080; `console-security.enabled=true`; headers `X-Console-Role` / `X-Console-Actor` |
-| `application-distributed-*.yaml` | Coordinator / worker / staging distributed overlays | Pair with `DG_MAIN_CLASS=…WorkerApplication` for real second JVM |
-| GSD Nyquist / VALIDATION.md | Phase hygiene backfill | Docs process only — not a library |
-| CodeGraph (optional) | Call-site inventory speed | Audit noted missing `.codegraph/`; optional `codegraph init` — **not** a milestone dependency |
+| `.\mvnw-jdk25.ps1 -pl data-generator-service -am test` | Backend slice for geo-asset REST + resolver ITs | Extend calcite/geo modules only when runtime `asset:` resolution lands |
+| `npm run build` in `data-generator-console-web` | Bundle size gate after MapLibre add | MapLibre adds ~400–600 KB gzip; acceptable for operator-only console |
+| `.\scripts\verify-console.ps1` | Mandatory console regression after UI work | Per `.cursor/rules/console-verify.mdc` |
+| `data.generator.geo-assets.*` properties | Operator-tunable limits | Add to `DataGeneratorProperties` (mirrors governance knobs elsewhere) |
 
 ## Installation
 
-```powershell
-# No new Maven/npm packages required for v2.1 hardening defaults.
+```bash
+# Console — map preview (GEO-07)
+cd data-generator-console-web
+npm install react-map-gl@^8.1.0 maplibre-gl@^5.24.0
+npm install @turf/bbox@^7.2.0 @turf/circle@^7.2.0 @turf/helpers@^7.2.0
 
-# Existing build/test (unchanged)
-.\mvnw-jdk25.ps1 -v
-.\mvnw-jdk25.ps1 -pl data-generator-service -am test
-
-# Dameng live IT (opt-in only — needs DM JDBC host/image)
-.\mvnw-jdk25.ps1 -pl data-generator-calcite -am test `
-  -Dtest=ChunkedPipelineDamengUpsertIT `
-  -Ddm.it=true `
-  -Dsurefire.failIfNoSpecifiedTests=false
-
-# Or: $env:DG_DM_IT = 'true' then same Maven slice
-
-# Harness (P0 gate; P1 tracked)
-.\scripts\verify-harness.ps1
-
-# Console E2E with staging RBAC headers (existing helper)
-$env:DG_E2E_GOVERNANCE_STAGING = 'true'
-# then Playwright / e2e-podman against staging profile
+# CSS import in map component entry (required by MapLibre)
+# import 'maplibre-gl/dist/maplibre-gl.css';
 ```
+
+```yaml
+# data-generator-service/src/main/resources/application.yaml (GEO-05 — raise Boot defaults)
+spring:
+  servlet:
+    multipart:
+      max-file-size: 16MB      # Boot default 1MB rejects real district GeoJSON
+      max-request-size: 17MB   # Boot default 10MB; headroom for multipart overhead
+
+data:
+  generator:
+    geo-assets:
+      max-bytes: 16777216      # 16 MiB service-layer cap (match servlet limit)
+      max-feature-count: 5000  # reject pathological FeatureCollections at ingest
+```
+
+```java
+// Runtime reference convention (extend GeoResourceResolver — no new Maven artifact)
+// asset:550e8400-e29b-41d4-a716-446655440000
+```
+
+**Backend Maven:** no new production dependencies for GEO-05; validation calls existing `GeoJsonLoader` / `GeoResourceResolver` in `data-generator-geo` (already on service classpath via calcite).
 
 ## Alternatives Considered
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| MockMvc / `@SpringBootTest` HTTP IT for `/task/run` or `/api/templates/{id}/run` | Playwright-only execute proof | Use Playwright only for UI journeys; Maven HTTP IT closes the v2.0 accepted “in-process runner” gap cheaper |
-| Shared JDBC metadata DB + spawn second JVM (`DataGeneratorWorkerApplication`) | Keep single-JVM `Distributed*IntegrationTests` only | Single-JVM stays as fast unit/IT; multi-JVM E2E is the **one** new proof path — scripted ProcessBuilder/PowerShell, not a new framework |
-| `DamengTestSupport` + Testcontainers/GenericContainer or external JDBC URL | Always-on CI Dameng container | Licensed image / cost; keep opt-in; document green path when host available |
-| Header RBAC (`ConsoleSecurityProperties`) | Spring Security OAuth2 / Keycloak / JWT | Only if product later requires IdP; **out of scope** for v2.1 (default-off + testable enable) |
-| Docs + call-site inventory for dual JDBC resolvers | Code merge of `JdbcCatalogResolver` + `DefaultRuntimeJdbcEndpointResolver` | Explicitly deferred; docs-only this milestone |
-| Focused P1 matrix rows | Promote Dameng live / multi-JVM to P0 | Would break merge gate when DM/host unavailable; keep P0 = always-green MERGE unit + existing 15 rows |
+| **MapLibre GL JS + react-map-gl/maplibre** | **Leaflet + react-leaflet** | Leaflet wins for minimal bundle and simple pin maps; **reject** for v2.3 because boundary previews (MultiPolygon districts, road networks) need WebGL performance and consistent GeoJSON layer styling |
+| **MapLibre GL JS** | **Mapbox GL JS** | Only if product later wants Mapbox-hosted styles/tiles and accepts token billing + ToS |
+| **MapLibre GL JS** | **OpenLayers** | Better for full GIS editing suites; heavier API and bundle for read-only preview |
+| **MapLibre GL JS** | **deck.gl** | Overkill for 2D asset browse + point overlay; adds WebGL data-viz stack unrelated to form workflows |
+| **Inline CLOB GeoJSON in metadata DB** | **Filesystem + DB metadata row** | Filesystem is what `ConsoleUploadController` does today for CSV; **reject** for geo assets — orphan files, split backup, conflicts with PROJECT.md “metadata DB” decision |
+| **Inline CLOB** | **Object storage (S3/MinIO)** | Future scale-out path; not v2.3 — adds infra, credentials, and out-of-scope connector work |
+| **CLOB UTF-8 text** | **`bytea` / `@Lob` BLOB** | UdfArtifactPO documents H2 PostgreSQL-mode BLOB DDL pain; GeoJSON is UTF-8 text — CLOB matches `TaskExecutionPO.report_json` |
+| **`asset:{uuid}` resolver prefix** | **Only absolute path refs** | Path/classpath stays for fixtures/tests; asset-id is the operator upload path (GEO-05) |
+| **Server preview API** (`POST /api/console/geo/preview`) | **Client-only synthesis preview** | Use **both**: server endpoint returns authoritative sample points via `GeoSyntheticGenerator` (small `count` cap); client `@turf` draws bbox/circle/footprint instantly while config edits |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| **New production libraries** (RestAssured, TestNG, Gatling, Micronaut test, etc.) | Adds dependency surface for proof-only work | Boot `MockMvc`, JUnit 5, existing AssertJ |
-| **Spring Security / OAuth2 / session auth for console** | Product decision: RBAC stays header opt-in; default-off for local/dev | `ConsoleAuthorizationFilter` + staging profile + Playwright `consoleRoleHeaders` |
-| **Default-on `console-security.enabled` in base `application.yaml`** | Breaks trusted-intranet local/dev and most e2e defaults | Keep default `false`; document staging/`DG_E2E_GOVERNANCE_STAGING` |
-| **Kubernetes / Docker Compose / Nomad as the only multi-JVM story** | Overkill for one E2E; assembly already has coordinator/worker roles | Two local JVMs (or Podman compose **optional**) sharing H2 file/JDBC metadata |
-| **Redis / message bus for worker coordination** | Jobs already lease via JDBC (`DistributedJobService`); no Redis module | Existing distributed job tables + worker poller |
-| **Second Dameng JDBC driver / unofficial forks** | `dm-jdbc` 1.8 already in BOM + jdbc-bundled | Wire IT against that driver |
-| **Mandatory Dameng in default CI / P0 `linked_tests`** | Licensed image; today’s IT is still a placeholder abort | Documented `-Ddm.it=true` green path; P0 stays MERGE SQL unit |
-| **Full JDBC resolver consolidation / new DI framework** | Explicitly out of scope | Ownership docs + call-site inventory only |
-| **Net-new connectors (Redis/S3/HTTP) or Boot upgrades** | Feature lane, not hardening | Stay on Boot 4.0.5 + existing adapters |
-| **WireMock for `/task/run` execute path** | Would stub away the catalog→run wiring under test | Real Spring MVC + H2 managed DS (extend `ManagedJdbcCatalogSinkE2eIT` style to HTTP) |
-| **New frontend auth libraries** | Headers already set in `src/api/client.ts` / `e2e/helpers/api.ts` | Env-gated header injection only |
-| **Expanding P0 to 16+ rows for every proof** | Merge gate must stay always-green | Focused **P1** rows for HTTP run, multi-JVM, RBAC-on, Dameng opt-in |
+| **PostGIS as a v2.3 requirement** | POSTGIS source already exists for warehouse reads; asset upload + preview are metadata-DB + in-memory JTS | Optional POSTGIS unchanged; do not gate GEO-05/07 on spatial DB |
+| **GeoServer / MapServer / Martin / pg_tileserv** | Heavy ops footprint for read-only preview | MapLibre + OSM raster tiles + inline GeoJSON sources |
+| **New Java geo stack** (GeoTools beyond existing, spatial4j, etc.) | `GeoJsonLoader` + JTS already parse/validate WGS84 GeoJSON | Extend `GeoResourceResolver` with `asset:` branch |
+| **Shapefile / GeoPackage / KML ingest** | Explicitly deferred in geospatial overview | GeoJSON-only upload; clear 400 on wrong extension/MIME |
+| **CRS reprojection service (PROJ server-side)** | WGS84-only assumption is documented project-wide | Reject non-WGS84 at upload with actionable error |
+| **Polygon/MultiPolygon synthesis (GEO-06)** | Out of scope v2.3 | Preview may *display* uploaded polygons; do not generate them |
+| **Replacing `ConsoleUploadController` disk path flow** | CSV/JSON template sources still need filesystem paths | Parallel **geo-asset registry**; deprecate disk GeoJSON paths later if desired |
+| **Spring Security / OAuth for upload** | Console RBAC remains header opt-in default-off | Reuse existing `ConsoleAuthorizationFilter` when enabled |
+| **P0 harness row inflation** | PROJECT.md freezes P0 at 15 | Add P1 row `geo-assets` + Playwright smoke; non-blocking |
+| **mapbox-gl npm package** | Token + license; react-map-gl v8 MapLibre endpoint removes need | `react-map-gl/maplibre` + `maplibre-gl` only |
+| **Embedded map tile generation on JVM** | No server-side rendering requirement | Client fetches public OSM tiles |
+| **Redis / CDN cache for assets** | Premature; H2 CLOB reads are fine at operator scale | Direct JPA fetch; add cache only if profiling demands |
 
 ## Stack Patterns by Variant
 
-**If proving managed-catalog / dialect journeys through HTTP:**
-- Use `@SpringBootTest` + `MockMvc` (or `TestRestTemplate` on random port) against `TaskController` / console run API with `application-phase7-test.yaml`.
-- Seed managed DS via `DataSourceConfigService.save` (same as `ManagedJdbcCatalogSinkE2eIT`), then HTTP-trigger run — **not** only in-process `TemplateV2Runner`.
-- Because: closes v2.0 accepted limit (“not HTTP `/task/run`”) without new HTTP test stacks.
+**If GEO-05 — GeoJSON asset upload + persistence:**
 
-**If Dameng live IT:**
-- Keep gate `DamengTestSupport.damengItEnabled()`; replace placeholder `Assumptions.abort` with real MERGE upsert against GenericContainer **or** operator-supplied JDBC URL.
-- Document exact env vars, image/host, and `verify-*.ps1` / Maven one-liner in `docs/` (template-v2 JDBC sink guide already mentions the flag).
-- Because: licensed DM cannot be default CI; hygiene = green **when enabled**, not always-on.
+- REST surface: `ConsoleGeoAssetController` at `/api/console/geo-assets` mirroring UDF/secrets CRUD shape (`R<T>` envelope, `ConsoleApiAdvice`).
+- Upload: `POST multipart/form-data` with `file` + optional `name`; validate **before** persist:
+  1. Size ≤ `data.generator.geo-assets.max-bytes`
+  2. Filename ends with `.geojson` or `.json` (after sanitize — reuse `ConsoleUploadController.sanitizeFileName` pattern)
+  3. Content-Type in `{application/geo+json, application/json}` OR `application/octet-stream` with geo extension
+  4. Parse via `GeoJsonLoader` / Jackson — root must be `Feature` or `FeatureCollection`
+  5. Compute bbox + geometry-type summary + SHA-256 hash for list views
+- Schema (`geo_asset` table):
 
-**If one multi-JVM distributed worker E2E:**
-- Process A: coordinator (`DataGeneratorApplication`, distributed coordinator profile / enqueue via `/task/run`).
-- Process B: `DataGeneratorWorkerApplication` (`distributed-worker` profile, `DG_SERVICE_ROLE=worker`).
-- Shared: file H2 or other JDBC metadata URL both JVMs can see (in-memory H2 will **not** work across processes).
-- Link as **P1** harness row + PowerShell verify script; keep existing single-JVM `DistributedSplitRoleIntegrationTests` for fast feedback.
-- Because: stack already has worker entry + lease runner; gap is process boundary proof, not a new distributed framework.
+  | Column | Type | Notes |
+  |--------|------|-------|
+  | `id` | `VARCHAR(36)` PK | UUID string returned as asset-id |
+  | `name` | `VARCHAR(256)` | Operator label (default from filename) |
+  | `content` | `CLOB` | Full GeoJSON UTF-8 (inline — not echoed in list DTO) |
+  | `content_hash` | `CHAR(64)` | SHA-256 hex for dedup/audit |
+  | `byte_size` | `BIGINT` | Stored bytes |
+  | `feature_count` | `INT` | Denormalized for list |
+  | `geometry_summary` | `VARCHAR(512)` | e.g. `Polygon,MultiLineString` |
+  | `bbox_json` | `VARCHAR(128)` | `[minLon,minLat,maxLon,maxLat]` for map zoom |
+  | `created_at` / `updated_at` | `TIMESTAMP` | Instant |
+  | `status` | `VARCHAR(16)` | `ACTIVE` / `DEPRECATED` |
 
-**If console RBAC testable enable path:**
-- Maven: extend patterns from `ConsoleAuthorizationIntegrationIT` (`console-security.enabled=true` + filter on MockMvc).
-- Playwright/Podman: `DG_E2E_GOVERNANCE_STAGING=true` → `e2e/helpers/api.ts` sends `X-Console-Role`.
-- Docs: staging profile + e2e env flags; **do not** flip base default.
-- Because: enable path already exists; v2.1 is docs + coverage, not a new security stack.
+- List/get DTOs **omit** `content` (same rule as UDF payload omission); download/preview endpoints return GeoJSON explicitly.
+- Runtime: extend `GeoResourceResolver.readUtf8` — `asset:{uuid}` loads CLOB via `GeoAssetRepository`; wire into `GeoSyntheticRowSource` + `GeoJsonRowSource`.
+- VO fields: add optional `boundaryAssetId` / `networkAssetId` on `GeoSyntheticSourceVO`, `assetId` on `GeoJsonSourceVO`; validation = exactly one of path or asset-id per slot.
 
-**If Nyquist / dual-resolver “stack” work:**
-- Markdown VALIDATION.md backfill + ownership/call-site inventory (CodeGraph optional).
-- Because: zero runtime dependency changes.
+**If GEO-07 — console map preview (assets + geo_synthetic config):**
 
-**If focused P1 harness expansion:**
-- Edit `.planning/test-matrix.yaml` only; regenerate matrix doc; leave `harness-verify.yml` P0 gate unchanged.
-- Because: P1 is tracked non-blocking by design (`docs/test-harness.md`).
+- Pick **MapLibre + react-map-gl/maplibre** (single map stack for the whole milestone).
+- Page layout: Ant Design `Upload.Dragger` + `Table` asset list + split `Map` panel (reuse console list/detail patterns from datasources/UDFs).
+- Asset preview: `GET /api/console/geo-assets/{id}/geojson` → MapLibre `Source type="geojson"` + `Layer` fill/line depending on geometry types; `fitBounds` via `@turf/bbox`.
+- `geo_synthetic` preview (equal depth):
+  - **Config panel** on template editor geo source step — live map beside YAML form fields.
+  - Overlays by mode: boundary/network GeoJSON from asset-id or fixture path; bbox rectangle; circle from `@turf/circle`; sample points from `POST /api/console/geo/preview` (cap `count` ≤ 200, reuse `GeoSyntheticGenerator`).
+  - Do **not** implement polygon synthesis preview (GEO-06 deferred) — only show uploaded polygon boundaries as context for point modes.
+- Basemap: OSM raster tiles; document attribution in map footer (license compliance).
+- i18n: add keys under existing `i18next` namespaces; no new i18n library.
+
+**If multipart limits / abuse:**
+
+- Configure `spring.servlet.multipart.*` globally (see Installation) — 1 MB Boot default **will break** real uploads silently.
+- Service-layer byte cap + feature-count cap as defense in depth (reject before CLOB write).
+- Optional: wire `AuditService` on upload/delete like UDF publish (governance parity, not a new stack).
+
+**If testing:**
+
+- Backend: `MockMultipartFile` tests like `ConsoleUdfControllerTest` / `ConsoleUploadControllerTest`; resolver IT with H2 CLOB round-trip.
+- Frontend: Playwright spec uploads small fixture GeoJSON, asserts map canvas visible + asset appears in list.
+- Harness: P1 row only (`geo-assets`); P0 stays 15.
 
 ## Version Compatibility
 
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
-| Spring Boot 4.0.5 | Java 25, Maven 3.6.3+ | Do not downgrade for tests |
-| Testcontainers 1.20.6 | Docker/Podman engine | Same pin as PG/MySQL/ClickHouse ITs; Dameng image availability is the constraint, not TC version |
-| `dm-jdbc` 1.8 | Dameng server matching driver docs | Opt-in IT only |
-| Playwright 1.49.x | Node ≥ 22 | Header helpers already in tree |
-| H2 mem URL | Single JVM only | Multi-JVM worker E2E needs `jdbc:h2:file:…` (or shared external JDBC), not `jdbc:h2:mem:` |
-| `console-security.enabled=false` (default) | Local e2e without headers | Staging / `DG_E2E_GOVERNANCE_STAGING` require headers |
-| Internal Gensokyo Kafka/ES starters | Boot 3 APIs vs Boot 4 | Known pressure; **out of v2.1 scope** — do not “fix” via new messaging stack |
+| `react-map-gl@^8.1` | `maplibre-gl@^4 \|\| ^5` | Import from `react-map-gl/maplibre`, not default export (Mapbox-typed) |
+| `react-map-gl@^8.1` | `react@^19` | Peer dep `>=16.3`; MapLibre ecosystem validated React 19 in 2025–2026; pin and run `npm run build` in CI |
+| `maplibre-gl@5.x` | Avoid `6.0` pre-releases for v2.3 | v6 ESM breaking migration — upgrade separately after v2.3 ships |
+| Spring Boot 4.0.5 | Multipart defaults 1 MB / 10 MB | **Must override** for GEO-05 |
+| H2 file metadata (PostgreSQL mode) | `columnDefinition = "CLOB"` | Same Hibernate DDL pattern as `UdfArtifactPO.metadataJson`, `TaskExecutionPO.report_json` |
+| JTS 1.19.0 | GeoJSON WGS84 (`x=lon, y=lat`) | Matches existing loader; no CRS transform |
+| Vite 6 + MapLibre CSS | Side-effect CSS import in map component | No SSR — console is SPA-only |
+| OSM tile usage policy | Operator console low traffic | Cache-bust via standard `{z}/{x}/{y}`; show attribution |
 
 ## Sources
 
-- `.planning/PROJECT.md` — v2.1 goals, constraints, dual-resolver / Dameng / RBAC decisions
-- `.planning/milestones/v2.0-MILESTONE-AUDIT.md` — accepted debt (HTTP run gap, Dameng opt-in, Nyquist, dual resolvers)
-- `.planning/codebase/STACK.md` — inventory of shipped versions (Boot 4.0.5, TC 1.20.6, Playwright 1.49, dm-jdbc)
-- `docs/testing-embedded-components.md` — embedded-first H2 / Testcontainers / Kafka norms
-- `docs/test-harness.md` — P0 vs P1 semantics; Dameng P0 = MERGE unit only
-- `DamengTestSupport` / `ChunkedPipelineDamengUpsertIT` — opt-in gate; IT still placeholder abort
-- `ConsoleSecurityProperties` + `application-staging.yaml` + `ConsoleAuthorizationIntegrationIT` + `e2e/helpers/api.ts` — RBAC enable path
-- `DataGeneratorWorkerApplication` + `DistributedSplitRoleIntegrationTests` + `service.env.example` — distributed worker stack
-- `ManagedJdbcCatalogSinkE2eIT` — in-process managed-catalog proof to extend via HTTP
-- AGENTS.md verify-script catalog — reuse PowerShell slices; no new CI product
+- `.planning/PROJECT.md` — v2.3 milestone scope, metadata DB decision, GEO-05/07 equal depth, GEO-06 out
+- `data-generator-geo/.../GeoResourceResolver.java` — classpath/filesystem resolution to extend with `asset:`
+- `data-generator-geo/.../GeoJsonLoader.java` — parse/validate reuse for upload gate
+- `data-generator-service/.../UdfArtifactPO.java` — CLOB/`bytea` DDL patterns for metadata DB blobs
+- `data-generator-service/.../ConsoleUdfController.java` — multipart upload + governance precedent
+- `data-generator-service/.../ConsoleUploadController.java` — filename sanitize + empty-file rejection
+- `data-generator-common/.../GeoSyntheticSourceVO.java`, `GeoJsonSourceVO.java` — path fields to complement with asset-id
+- `docs/geospatial-overview.md` — deferred items (upload, map UI) now v2.3 scope
+- `data-generator-console-web/package.json` — React 19 / antd 5 / Vite 6 baseline
+- [react-map-gl docs](https://visgl.github.io/react-map-gl/docs/whats-new) — v8 MapLibre endpoint, MapLibre GL v5 support (HIGH)
+- [MapLibre GL JS releases](https://maplibre.org/maplibre-gl-js/docs/) — v5 stable line (HIGH)
+- [Spring Boot MultipartProperties](https://docs.spring.io/spring-boot/4.1/api/java/org/springframework/boot/servlet/autoconfigure/MultipartProperties.html) — 1 MB / 10 MB defaults (HIGH)
 
 ---
-*Stack research for: synthetic-data platform hardening (v2.1)*
-*Researched: 2026-07-25*
+*Stack research for: v2.3 Geo Assets & Map Preview (GEO-05 + GEO-07)*
+*Researched: 2026-07-31*

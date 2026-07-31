@@ -1,167 +1,283 @@
 # Feature Research
 
-**Domain:** Synthetic-data platform hardening (Template V2 / datasource / harness)
-**Researched:** 2026-07-25
+**Domain:** GeoJSON asset library + Template V2 binding + console map preview (milestone v2.3)
+**Researched:** 2026-07-31
 **Confidence:** HIGH
 
 ## Feature Landscape
 
-Hardening milestone — capabilities below are **proof, reliability, and documentation** closures on already-shipped v2.0 surfaces. Product features already shipped (managed catalog, snap hot-reload, streaming/upsert, dialects, 15-row P0 harness) are table stakes that must **not** be rebuilt.
+v2.3 extends the **shipped v2.2 geo stack** (`geo_synthetic` four modes, path/`classpath:` assets via `GeoResourceResolver`, read-only `geojson` source, P1 `geo-synthetic` harness row). Operators today upload GeoJSON through `ConsoleUploadController` and paste absolute filesystem paths into templates — durable, referencable assets and visual confirmation are missing. GEO-05 and GEO-07 ship at **equal depth**; GEO-06 polygon synthesis, DATA-01 common-data CRUD, and P0 gate inflation stay out.
 
 ### Already Shipped (Do Not Rebuild)
 
-| Capability | Where it lives | v2.0 proof bar |
+| Capability | Where it lives | v2.2 proof bar |
 |------------|----------------|----------------|
-| Managed datasource catalog | `data-generator-datasource`, `DataSourceConfigService`, console DS APIs | `ManagedJdbcCatalogSinkE2eIT` (in-process `TemplateV2Runner`) |
-| Snapshot hot-reload + `snap:` execute routing | `ExecutionSnapshotConnectionCatalog`, `DefaultRuntimeJdbcEndpointResolver` | Phase 07.1 + `JdbcSnapshotExecutePathIT` |
-| Streaming CSV/JSON + JDBC upsert | Calcite chunked/streaming pipelines, dialect SQL builder | P0 rows `v2-streaming-*`, `v2-jdbc-upsert-pg-mysql` |
-| Five-engine dialects (DM/KB/HG/PG/CK) | `JdbcSinkSqlBuilder`, console presets | P0 dialect rows; Kingbase evidence pack |
-| P0 harness merge gate | `.planning/test-matrix.yaml` → `verify-harness.ps1` → `harness-verify.yml` | 15 P0 rows, `p0.pass=true` |
+| Four-mode `geo_synthetic` source | `GeoSyntheticSourceVO`, `GeoSyntheticRowSource`, `GeoSyntheticGenerator` | `TemplateV2RunnerGeoSyntheticSourceTests` (boundary, line, bbox, circle) |
+| Path/`classpath:` GeoJSON resolution | `GeoResourceResolver.readUtf8` | GEO-03; calcite fixtures under `src/test/resources/geo/` |
+| Read-only `geojson` source | `GeoJsonSourceVO`, `GeoJsonRowSource` | Unchanged behavior; `SourceFieldsForm` editor kind |
+| Ephemeral file upload for template paths | `ConsoleUploadController` → `../uploaded-sources/` | Returns absolute path string; not metadata DB |
+| UDF/datasource governance patterns | `ConsoleUdfController`, `DataSourceConfigService`, `AuditService`, `ConsoleSecurityProperties` | JDBC persistence, audit, optional header RBAC (default off) |
+| Console template editor (non-geo_synthetic) | `SourceFieldsForm`, `draftUtils` `EDITABLE_SOURCE_KINDS` | `geojson` supported; **`geo_synthetic` not in editor yet** |
 
-### Table Stakes (Users Expect These — This Milestone)
+---
 
-For a **hardening** release, “users” are operators and maintainers who already trust v2.0 features and now expect the weak spots closed. Missing these = milestone feels incomplete even though product features exist.
+## 1. Asset Library CRUD
+
+### Table Stakes (Users Expect These)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| HTTP execute-path proof (managed catalog / dialect) | In-process runner proof leaves a gap: operators run via `/task/run` or console `/api/templates/{id}/run`, not `TemplateV2Runner` in a test. Audit flow #1 accepted this limit. | MEDIUM | Extend or complement `ManagedJdbcCatalogSinkE2eIT` with MockMvc/`@SpringBootTest` HTTP enqueue → async completion → sink `COUNT(*)` (or dialect preset path). Depends on existing `TaskController.run`, `TaskExecutionService`, catalog save, snap binding. Prefer H2/embedded-first; dialect proof can reuse PG/Kingbase-proxy patterns already in CI. |
-| Dameng live IT green path + Nyquist hygiene | P0 Dameng is MERGE-unit only; `ChunkedPipelineDamengUpsertIT` is a placeholder that `Assumptions.abort`s even when `-Ddm.it=true`. Operators with licensed DM need a documented green path. Nyquist gaps (phases 07, 07.1, 08) erode planning confidence. | MEDIUM–HIGH (live IT); LOW (Nyquist docs) | Wire real DM when image/host available via `DamengTestSupport`; keep opt-in (`-Ddm.it=true` / `DG_DM_IT=true`) so default CI stays green. Nyquist = backfill `*-VALIDATION.md` / `nyquist_compliant` for 07/07.1/08 — hygiene, not new product code. |
-| Resolver ownership documentation (no merge) | Dual resolvers (`JdbcCatalogResolver` catalog-side vs `DefaultRuntimeJdbcEndpointResolver` V2 execute-path) already documented in class Javadoc; maintainers still risk “which one do I call?” and accidental consolidation PRs. | LOW | Docs + call-site inventory only. Explicitly **no** code merge of the two resolvers in v2.1. |
-| Multi-JVM worker E2E one path | Distributed coordinator/worker exists (`DistributedJobService`, `DataGeneratorWorkerApplication`, `docs/staging-distributed-deployment.md`, `e2e-distributed-podman.ps1`) but was deferred as DIST-01 from v2.0 requirements. One harness-linked path closes the “does multi-JVM actually work?” doubt. | MEDIUM | Pick **one** happy path (coordinator enqueue → worker lease → SUCCESS). Reuse existing scripts/ITs; link a matrix row (likely P1). Do not expand to full AC-1..AC-7 staging checklist. |
-| RBAC testable enable (default off) | `ConsoleSecurityProperties.enabled=false` by default; staging/e2e YAML and `ConsoleAuthorizationIntegrationIT` already exist. Operators need a clear “turn on + verify” path without breaking local/dev defaults. | LOW–MEDIUM | Document staging/e2e enablement; ensure filter IT remains green when enabled; optionally matrix/P1 linkage. **Do not** flip default to on. |
-| Focused P1 harness expansion | Phase 10 made new RW/dialect rows P0-only; new proof paths (HTTP catalog, distributed, RBAC enable) need tracked non-blocking coverage. | LOW–MEDIUM | Add focused P1 rows for new proof paths only. P0 remains the merge gate (15 rows); do not inflate P0 with optional/live-only evidence. |
+| Multipart GeoJSON upload | Operators already upload via `/api/console/uploads/file`; expect hosted assets to survive restart and be shareable across templates | MEDIUM | Mirror UDF multipart + metadata DB (H2 file metadata like secrets/templates). Store bytes or filesystem path keyed by stable **asset-id** (snowflake/UUID). Reject empty files. |
+| List + get by asset-id | Template editor and map need a picker; operators need to find prior uploads | LOW–MEDIUM | Paginated list with name, size, uploadedAt, optional bbox/featureCount. GET returns GeoJSON body or signed download URL for map layer. |
+| Delete | Unused assets accumulate; operators expect cleanup | LOW | Hard delete or soft-delete; **must** check template references or return 409 with usage list. Audit on delete. |
+| Basic metadata | Browse without opening every file | LOW | filename, contentLength, uploadedAt, actor; derive bbox + feature count at ingest via existing `GeoJsonLoader`. |
+| Max file size limit | GeoJSON can be huge; platform already caps script/UDF sizes | LOW | `data.generator.*` property (e.g. `geo-assets.max-bytes`); enforce at upload; clear 413/400 message. |
+| GeoJSON validation on upload | Invalid JSON breaks runs at pipeline time | MEDIUM | Parse with `GeoJsonLoader.loadFeatureCollection`; accept Feature or FeatureCollection roots only. Fail fast with line/column hint if possible. |
 
 ### Differentiators (Competitive Advantage)
 
-Hardening milestones rarely differentiate on features; differentiation here is **trust posture**.
-
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| HTTP + catalog + dialect journey evidence | Competitors often stop at unit/SQL-builder proof; end-to-end HTTP→managed id→rows (and dialect-aware sink) is operator-credible. | MEDIUM | Builds on existing catalog + TaskController; evidence packaging matters more than new runtime code. |
-| Opt-in Dameng live IT with documented green path | Domestic JDBC engines are a product differentiator already shipped; a **reproducible** live path (not placeholder abort) deepens that advantage without forcing licensed drivers into CI. | MEDIUM–HIGH | Depends on image/host availability; keep MERGE unit as P0 bar. |
-| Dual-resolver ownership clarity | Transparent ownership docs reduce regression risk vs silent dual paths — unusual honesty for brownfield platforms. | LOW | Docs-only differentiator; merge would be a larger refactor milestone. |
-| Harness-linked multi-JVM one-path | Many platforms claim distributed workers; few gate a minimal dual-JVM path into the coverage matrix. | MEDIUM | Scripts exist; harness linkage is the gap. |
+| Metadata DB + asset-id (not raw paths) | Synthetic-data platforms usually expect operators to manage files out-of-band; first-class assets align with secrets/datasource governance story | MEDIUM | Same trust posture as JDBC catalog and UDF registry — reproducible templates portable across hosts. |
+| Derived spatial metadata at ingest | Speeds browse/preview without client-side parse | LOW | bbox, featureCount, geometry type summary — unusual for lightweight ETL tools. |
+| Referential delete guard | Prevents silent template breakage | MEDIUM | Scan template JSON for `assetId` / `asset:` refs before delete — operator-credible vs filesystem orphans. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Full JDBC resolver consolidation / merge | “Duplicate code smells bad”; one class feels cleaner. | Touches catalog module + execute-path snap semantics; high blast radius; easy to break DS-03 mid-flight isolation. Explicitly deferred. | Ownership docs + call-site inventory; revisit merge in a dedicated refactor milestone. |
-| Default-on console RBAC | “Security should be on by default.” | Breaks local/dev and existing e2e assumptions; header-RBAC is intranet-oriented (`X-Console-Role`). | Keep `enabled=false`; document staging enable + keep `ConsoleAuthorizationIntegrationIT`. |
-| Full staging distributed AC matrix (AC-1..AC-7) as milestone DoD | Completeness of `docs/staging-distributed-deployment.md`. | Scope explosion: lease steal, cancel races, heartbeat, requeue — weeks of flaky multi-JVM work. | **One** happy-path E2E + harness link; leave full AC as staging runbook. |
-| Promote Dameng live IT to P0 merge gate | “Dialect parity with PG.” | Licensed driver / container cost; CI flake; placeholder currently aborts even when flagged. | Keep P0 = MERGE unit; live IT opt-in + docs; optional P1 row when green path exists. |
-| ORCH / Redis / S3 / HTTP connectors | Natural “what’s next” after datasource platform. | Opens a new major feature lane; contradicts hardening goal. | Defer beyond v2.1 (already in PROJECT Out of Scope). |
-| Exhaustive Nyquist / 100% UI matrix | Planning purity / coverage theater. | High cost, low operator value vs closing HTTP and distributed proof gaps. | Targeted VALIDATION backfill for 07/07.1/08; focused P1 only. |
-| Rebuild managed catalog / streaming / dialects | “While we’re hardening, rewrite X.” | Reworks table stakes; burns the milestone. | Treat as existing; only add proof/docs around them. |
+| Full GIS asset management (CRS reprojection, topology repair, versioning) | “Make it like QGIS/ArcGIS” | Scope explosion; JTS/GeoTools already bounded in `data-generator-geo` | Validate + store; document CRS assumptions; defer reprojection |
+| Shapefile / GeoPackage / KML import | Broader format support | New parsers, licensing, UI complexity | GeoJSON-only v2.3; convert upstream |
+| Unlimited upload size | “My boundary file is 500 MB” | OOM, slow map preview, metadata DB bloat | Configurable cap + documented split/chunk guidance |
+| Public unauthenticated asset URLs | Easy map tile fetch | Security leak for operator boundaries | Authenticated console API; map fetches with session/proxy |
+| Replace `ConsoleUploadController` entirely | One upload path | Breaks csv/json/excel path-based sources that rely on ephemeral upload | Keep path upload for non-geo sources; geo assets use dedicated API |
+
+---
+
+## 2. Template Binding (assetId on sources; path fallback)
+
+### Table Stakes (Users Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| `assetId` (or `asset:` URI) on `geo_synthetic` boundary/network | GEO-05 requirement; path-only is v2.2 stopgap | MEDIUM | Extend `GeoSyntheticSourceVO` with `boundaryAssetId` / `networkAssetId` (or unified `asset:` prefix in path fields). Map in `GeoSyntheticRequestMapper`. |
+| `assetId` on `geojson` source | Same asset library should serve read-only geo sources | LOW–MEDIUM | Parallel field on `GeoJsonSourceVO`; resolve in `GeoJsonRowSource` before `GeoResourceResolver`. |
+| Path/`classpath:` fallback | Fixtures, CI, local dev — explicitly preserved in PROJECT.md | LOW | Resolver order: if assetId set → DB; else existing `GeoResourceResolver`. Never break v2.2 YAML. |
+| Runtime resolution in calcite module | Runs must work on worker JVM without console | MEDIUM | New `GeoAssetResolver` in `data-generator-geo` or service layer injected into RowSource factories; workers need same metadata DB or shared storage. |
+| Template validation: unknown asset-id | Fail before run, like unknown datasource | LOW–MEDIUM | Validate on save/publish in `TemplateEditorService` or lifecycle hook; message includes source name + field. |
+| Console asset picker | Manual UUID entry is error-prone | MEDIUM | Dropdown/search in source form; part of GEO-07 equal depth (requires `geo_synthetic` added to `EDITABLE_SOURCE_KINDS`). |
+
+### Differentiators (Competitive Advantage)
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Dual reference model (asset-id + path) | Dev/prod parity: fixtures on classpath, production on hosted assets | LOW | Documented in geo docs; competitors often pick one model only. |
+| `asset:` prefix convention | Consistent with `snap:` datasource snapshots | LOW | Optional sugar: `boundaryPath: asset:12345` vs separate field — pick one shape in design, not both. |
+| Cross-source asset reuse | One district boundary for synthetic points and read-only geojson transform | LOW | Single library serves `geo_synthetic` + `geojson` + future GEO-06. |
+
+### Anti-Features (Commonly Requested, Often Problematic)
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Asset-id only (drop path support) | “Simplify resolver” | Breaks v2.2 templates, calcite IT fixtures, classpath tests | Keep path fallback indefinitely for fixtures |
+| Inline GeoJSON in template YAML | Self-contained templates | Bloats template rows, governance/audit noise | asset-id reference |
+| Auto-rewrite templates on upload | Magic path → asset migration | Silent mutation, audit confusion | Optional CLI/migration tool later; not v2.3 |
+| Embedding asset bytes in run snapshot | Fully self-contained runs | Duplicates storage; large snapshot rows | Resolve asset at run time from metadata DB; hash in run lineage optional P1 |
+
+---
+
+## 3. Map Preview UX
+
+### Table Stakes (Users Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Asset library browse with map render | GEO-07 core; operators must see what they uploaded | MEDIUM–HIGH | New console page or drawer: list assets, select → map renders GeoJSON layer. Leaflet/MapLibre (OSM tiles) fits existing React/Ant Design stack without backend map server. |
+| Fit-to-bounds on load | GeoJSON extent varies wildly | LOW | Compute from ingest bbox or client-side L.geoJSON bounds. |
+| `geo_synthetic` config preview overlay | Operators configuring boundary/line/bbox/circle need visual confirmation | MEDIUM–HIGH | Parse draft source config; overlay polygon/line from asset, draw bbox rect or circle from YAML arrays. **Does not** require pipeline run. |
+| Entry from template editor | Preview should be one click from source step | LOW–MEDIUM | “Preview on map” on geo_synthetic/geojson fields; deep-link with draft state or selected assetId. |
+| Read-only preview | Scope control for v2.3 | LOW | No geometry editing on map (editing → GEO-06 / future). |
+
+### Differentiators (Competitive Advantage)
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Mode-aware synthetic overlay | Shows boundary vs line vs bbox vs circle differently | MEDIUM | Color/style per mode; labels for count/seed — rare in data-gen tools. |
+| Seed + count display on preview | Reinforces v2.2 reproducibility story | LOW | Static annotation (“seed 42, 100 points”) without simulating all points on map. |
+| Asset + config on same map | Upload boundary, immediately preview synthetic sampling intent | MEDIUM | Tight loop: upload → pick asset → tune geo_synthetic → see overlay — product UX win. |
+
+### Anti-Features (Commonly Requested, Often Problematic)
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Live animated point generation on map | “Show me the 100 points” | Client-side reimplementation of `GeoSyntheticGenerator`; seed parity risk | Static overlay + optional small sample (≤10) if needed |
+| Full pipeline run preview on map | See actual job output | Conflates job center with config preview; needs run completion | Keep job output in existing job/report UX |
+| Satellite/enterprise basemap dependency | Prettier maps | API keys, licensing, offline/air-gap failure | OSM/MapLibre default; optional tile URL config later |
+| Map-based geometry drawing/editing | “Draw my boundary in UI” | GIS editor scope; overlaps GEO-06 | Upload GeoJSON externally; preview only |
+| 3D / deck.gl for v2.3 | Visual wow | Heavy bundle, low operator value for point synthesis | 2D Leaflet/MapLibre sufficient |
+
+---
+
+## 4. Governance
+
+### Table Stakes (Users Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Max upload size enforcement | Platform stability | LOW | Property-driven; mirror UDF/script limit patterns in `DataGeneratorProperties`. |
+| GeoJSON structural validation | Prevent poison assets | MEDIUM | Shared validator used by upload API and optional template validate. |
+| Audit events for upload/delete | Operators expect traceability (UDF/datasource precedent) | LOW | `AuditService.record` — e.g. `GEO_ASSET_UPLOAD`, `GEO_ASSET_DELETE`; detail: filename, size, assetId; **no** full GeoJSON body in audit JSON. |
+| Filename sanitization | Path traversal via original filename | LOW | Reuse `ConsoleUploadController.sanitizeFileName` pattern. |
+| RBAC when console security enabled | v2.1 shipped enable path; geo assets are operator data | LOW–MEDIUM | When `data.generator.console-security.enabled=true`, restrict upload/delete to editor/admin roles; read/list for viewer. Default **off** — do not flip. |
+
+### Differentiators (Competitive Advantage)
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Governance aligned with UDF/secrets | Single operator-trust model across artifact types | LOW | Same metadata DB, audit page, optional RBAC — differentiated vs ad-hoc file drops. |
+| Delete with template reference check | Safer than filesystem unlink | MEDIUM | Surfaces which templates block deletion. |
+
+### Anti-Features (Commonly Requested, Often Problematic)
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Mandatory RBAC for geo assets | Security hardening | Breaks local dev; contradicts SEC-02 deferral | Opt-in via existing console security flag |
+| Approval workflow before asset use | Enterprise governance | Blocks GEO-05/07 equal-depth delivery | Audit + RBAC; approval queue → future milestone |
+| Antivirus scanning on upload | Enterprise security | Infra dependency, slow uploads | Size + validation limits; defer AV integration |
+| Promote geo-assets to P0 harness row | Coverage parity | PROJECT.md explicitly freezes P0 at 15 | P1 row + `verify-console` / IT slice when stable |
+| Store GeoJSON in audit detail | Forensics | Huge audit rows, PII in geometries | Store assetId + hash only |
+
+---
 
 ## Feature Dependencies
 
 ```
-v2.0 Managed catalog + snap routing (shipped)
-    └──requires──> HTTP execute-path proof (managed catalog / dialect)
-                       └──enhances──> Focused P1 harness rows
+v2.2 GeoSyntheticGenerator + GeoResourceResolver (shipped)
+    └──requires──> GEO-05 asset storage + upload/list/get/delete API
+                       └──requires──> GeoAssetResolver (assetId → bytes)
+                            └──requires──> VO fields + mapper + RowSource wiring
+                                 └──enhances──> Template validation (unknown assetId)
 
-v2.0 Dialect SQL builder + DamengTestSupport (shipped)
-    └──requires──> Dameng live IT green path
-                       └──enhances──> Optional P1 dameng-live row (not P0)
+GEO-05 asset read API
+    └──requires──> GEO-07 map asset browse/render
+    └──requires──> Console asset picker (geo_synthetic editor)
 
-Dual resolvers (shipped coexistence)
-    └──requires──> Resolver ownership docs + call-site inventory
-                       └──conflicts──> Full resolver merge (anti-feature)
+GEO-07 map preview (synthetic overlay)
+    └──requires──> GEO-05 for boundary/line assets
+    └──requires──> geo_synthetic in console editor (not shipped in v2.2)
+    └──enhances──> Operator trust in v2.2 four-mode config
 
-DistributedJobService + WorkerApplication + e2e-distributed-podman (shipped)
-    └──requires──> Multi-JVM worker E2E one path
-                       └──enhances──> Focused P1 harness row
+ConsoleUploadController path upload (shipped)
+    └──conflicts──> Replacing all uploads with asset-id-only model
+    └──enhances──> Non-geo file sources continue unchanged
 
-ConsoleSecurityProperties + ConsoleAuthorizationFilter (shipped, default off)
-    └──requires──> RBAC testable enable path + staging/e2e docs
-                       └──conflicts──> Default-on RBAC
+AuditService + ConsoleSecurityProperties (shipped)
+    └──enhances──> GEO-05 governance (audit + optional RBAC)
 
-Nyquist VALIDATION gaps (07 / 07.1 / 08)
-    └──enhances──> Dameng/docs hygiene workstream (same “closeout” theme)
+P0 harness gate (15 rows, shipped)
+    └──conflicts──> P0 promotion of geo-assets / map E2E
+    └──enhances──> Optional P1 row after v2.3 proof stable
 
-P0 harness gate (shipped, 15 rows)
-    └──conflicts──> Inflating P0 with live-only / multi-JVM flaky paths
-    └──enhances──> Focused P1 expansion for new proofs
+GEO-06 polygon synthesis (deferred)
+    └──conflicts──> Map geometry editing in v2.3
+    └──enhances──> Future map preview for polygon output modes
+
+DATA-01 common-data CRUD (deferred)
+    └──conflicts──> General reference-data library in same milestone
 ```
 
 ### Dependency Notes
 
-- **HTTP execute-path proof requires managed catalog + TaskController:** Proof must go through HTTP enqueue/completion, not only `TemplateV2Runner`, or the accepted Phase 11 limit remains open.
-- **Dameng live IT requires dialect builder + gate flag:** MERGE unit stays P0; live path is additive and opt-in.
-- **Resolver docs conflict with merge:** Same milestone must not both document dual ownership and consolidate classes.
-- **Multi-JVM one path requires existing distributed stack:** Prefer linking `e2e-distributed-podman.ps1` / dual-JVM smoke over inventing a third topology.
-- **RBAC testable enable conflicts with default-on:** Enable path and docs only; default stays false.
-- **P1 expansion enhances new proofs without raising merge bar:** P0 remains 15-row gate; new rows start as P1 (or stay unlinked until stable).
+- **GEO-07 requires GEO-05 read path:** Map cannot browse hosted assets without list/get API and stored GeoJSON; equal depth means upload API and map ship together, not map-first on paths only.
+- **Template binding requires GeoAssetResolver in execute path:** Worker/coordinator JVMs must resolve asset-id the same way as console preview (shared metadata DB + blob store).
+- **Console `geo_synthetic` editor is a GEO-07 dependency:** v2.2 shipped backend-only; v2.3 map preview without editor leaves YAML-only operators — violates equal depth intent.
+- **Path fallback conflicts with asset-only breaking change:** Preserve GEO-03 semantics for fixtures and v2.2 templates.
+- **Governance enhances GEO-05 but should not block MVP:** Size limit + validation + audit are table stakes; RBAC is conditional on existing flag.
+- **P0 inflation conflicts with milestone charter:** Keep merge gate at 15; add P1 or console IT linkage if needed.
+
+---
 
 ## MVP Definition
 
-### Launch With (v2.1 hardening MVP)
+### Launch With (v2.3 — GEO-05 + GEO-07 equal depth)
 
-Minimum closures that make the weak-spot milestone credible.
+- [ ] GeoJSON asset upload + metadata DB persistence + stable asset-id — GEO-05 core
+- [ ] List / get / delete API with metadata (size, bbox, feature count) — GEO-05 core
+- [ ] `assetId` resolution on `geo_synthetic` (boundary/network) and `geojson` with path fallback — GEO-05 binding
+- [ ] Console asset library browse + map render — GEO-07 core
+- [ ] `geo_synthetic` config map overlay (four modes) + seed/count annotation — GEO-07 core
+- [ ] `geo_synthetic` source kind in template editor with asset picker — GEO-07 / equal depth
+- [ ] Max file size + GeoJSON validation + audit on upload/delete — governance table stakes
+- [ ] Embedded-first IT: upload → resolve in RowSource → pipeline row count smoke — trust proof
 
-- [ ] HTTP execute-path proof for managed catalog (and at least one dialect-aware journey) — closes Phase 11 accepted HTTP limit
-- [ ] Resolver ownership documentation + call-site inventory — no code merge
-- [ ] RBAC testable enable path with default remaining off — staging/e2e docs + existing IT green
-- [ ] Focused P1 harness rows for the new proof paths — P0 gate unchanged
-- [ ] Nyquist hygiene backfill for phases 07 / 07.1 / 08 — documentation compliance
+### Add After Validation (v2.3.x / early v2.4 if capacity)
 
-### Add After Core Proofs Green (still v2.1 if capacity)
+- [ ] Referential delete guard across all stored templates — when template scan is complete
+- [ ] Optional P1 harness row `geo-assets` — when IT stable; **not** P0
+- [ ] Run lineage asset hash in `RunLineageSupport` — reproducibility audit trail
+- [ ] Playwright map smoke in `verify-console.ps1` — when map bundle size acceptable
 
-- [ ] Dameng live IT non-placeholder green path (opt-in) — when DM image/host available
-- [ ] Multi-JVM worker E2E **one** path linked into harness (P1) — reuse Podman/smoke scripts
+### Future Consideration (explicitly out of v2.3)
 
-### Future Consideration (beyond v2.1)
+- [ ] GEO-06 polygon / MultiPolygon synthetic generation + map output preview
+- [ ] DATA-01 operator common-data / code-table CRUD
+- [ ] Shapefile/GeoPackage import, CRS reprojection, map geometry editing
+- [ ] Asset versioning, folders, approval workflows
+- [ ] P0 promotion of geo-assets proofs
 
-- [ ] Full JDBC resolver consolidation — dedicated refactor milestone after inventory
-- [ ] Default-on RBAC or richer authN — product/security decision, not hardening
-- [ ] Full distributed AC-1..AC-7 as CI gate — staging ops, not merge gate
-- [ ] ORCH, Redis/S3/HTTP connectors — deferred feature lane
-- [ ] Dameng live IT promoted to P0 — only if CI cost/flake acceptable
+---
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| HTTP execute-path proof (managed catalog / dialect) | HIGH | MEDIUM | P1 |
-| Resolver ownership docs (no merge) | HIGH (maintainer) | LOW | P1 |
-| RBAC testable enable (default off) | MEDIUM–HIGH | LOW | P1 |
-| Focused P1 harness expansion | HIGH (trust) | LOW–MEDIUM | P1 |
-| Nyquist hygiene (07 / 07.1 / 08) | MEDIUM | LOW | P1 |
-| Dameng live IT green path | MEDIUM–HIGH | MEDIUM–HIGH | P2 |
-| Multi-JVM worker E2E one path | MEDIUM–HIGH | MEDIUM | P2 |
-| Full resolver merge | LOW now | HIGH | P3 (anti-feature this milestone) |
-| Default-on RBAC | LOW now | MEDIUM | P3 (anti-feature) |
-| ORCH / new connectors | HIGH later | HIGH | P3 (out of scope) |
+| Asset upload + DB + asset-id (GEO-05) | HIGH | MEDIUM | P1 |
+| assetId binding + path fallback (geo_synthetic + geojson) | HIGH | MEDIUM | P1 |
+| Map asset browse + render (GEO-07) | HIGH | MEDIUM–HIGH | P1 |
+| geo_synthetic map config overlay (GEO-07) | HIGH | MEDIUM–HIGH | P1 |
+| geo_synthetic console editor + asset picker | HIGH | MEDIUM | P1 |
+| GeoJSON validation + max size + audit | HIGH (trust) | LOW–MEDIUM | P1 |
+| RBAC when security enabled | MEDIUM | LOW | P1 (conditional) |
+| Referential delete guard | MEDIUM | MEDIUM | P2 |
+| P1 harness row `geo-assets` | MEDIUM (trust) | LOW | P2 |
+| Run lineage asset hash | LOW–MEDIUM | LOW | P2 |
+| Map geometry editing | HIGH later | HIGH | P3 (GEO-06 lane) |
+| DATA-01 common-data library | HIGH later | HIGH | P3 (deferred) |
+| P0 geo-assets promotion | LOW now | MEDIUM (CI cost) | P3 (anti-feature) |
+| Full GIS asset management | LOW now | HIGH | P3 (anti-feature) |
 
 **Priority key:**
-- P1: Must have for v2.1 launch / DoD
-- P2: Should have in v2.1 when capacity/env allows
+- P1: Must have for v2.3 launch (GEO-05 + GEO-07 equal depth)
+- P2: Should have in v2.3 when capacity allows
 - P3: Explicitly deferred or anti-feature for this milestone
+
+---
 
 ## Competitor Feature Analysis
 
-Hardening is compared less to external vendors than to **internal proof depth** after a feature-heavy milestone.
+Compared to **synthetic-data / ETL platforms** and **lightweight GIS tooling** — v2.3 competes on operator trust inside Template V2, not on full GIS suite breadth.
 
-| Capability | Typical ETL / synthetic platforms | This repo today | v2.1 approach |
-|------------|-----------------------------------|-----------------|---------------|
-| Managed connection → run proof | Often UI + unit only | In-process `ManagedJdbcCatalogSinkE2eIT` | Add HTTP `/task/run` (or console run) evidence |
-| Dialect coverage | Unit SQL or one cloud engine | Five engines; DM MERGE-unit P0 | Keep P0 unit; document live DM green path |
-| Connection resolver design | Usually single resolver | Dual by design (catalog vs execute + snap) | Document ownership; defer merge |
-| Distributed workers | Often aspirational / manual | Code + Podman scripts exist; DIST-01 deferred | One harness-linked path |
-| Console RBAC | Often always-on IdP | Header RBAC, default off | Testable enable; stay opt-in |
-| Regression harness | Ad-hoc CI | 15-row P0 merge gate | Focused P1 for new proofs; do not bloat P0 |
+| Feature | Typical synthetic-data / Faker tools | Typical ETL (NiFi, Airbyte-like) | GIS web apps (GeoServer UI, Felt, etc.) | Our approach (v2.3) |
+|---------|--------------------------------------|----------------------------------|----------------------------------------|---------------------|
+| GeoJSON storage | None; user supplies paths | External blob (S3) + URL ref | Full layer catalog | Metadata DB + asset-id in-platform |
+| Template binding | N/A | Connection/object refs | Layer ID in app config | `assetId` on V2 sources + path fallback |
+| Map preview | Rare | Rare for config | Core product | Config/asset preview only; no edit |
+| Reproducible geo synthesis | Uncommon | N/A | N/A | v2.2 seed modes + seed display on preview |
+| Governance | N/A | RBAC on connections | Workspace ACL | Reuse console audit + optional header RBAC |
+| Harness gate | Ad-hoc | CI on connectors | N/A | P1 optional; **P0 frozen at 15** |
+
+---
 
 ## Sources
 
-- `.planning/PROJECT.md` — v2.1 Hardening & Weak-Spot Closure goals and out-of-scope
-- `.planning/milestones/v2.0-MILESTONE-AUDIT.md` — tech debt: HTTP limit, Dameng opt-in, dual resolvers, Nyquist partial
-- `.planning/milestones/v2.0-REQUIREMENTS.md` — shipped DS/RW/TEST; deferred DIST-01 / ORCH / RW-07
-- Code: `DefaultRuntimeJdbcEndpointResolver`, `JdbcCatalogResolver`, `ManagedJdbcCatalogSinkE2eIT`, `ChunkedPipelineDamengUpsertIT`, `DamengTestSupport`, `ConsoleSecurityProperties`, `ConsoleAuthorizationIntegrationIT`, `TaskController`, `DistributedJobService`
-- Docs: `docs/test-harness.md`, `docs/staging-distributed-deployment.md`, scripts `verify-harness.ps1`, `e2e-distributed-podman.ps1`
-- Matrix: `.planning/test-matrix.yaml` (15 P0; existing P1 console-api / transform-sql / reader-jdbc rows)
+- `.planning/PROJECT.md` — v2.3 milestone goals, equal depth, out-of-scope (GEO-06, DATA-01, P0 freeze)
+- `.planning/milestones/v2.2-REQUIREMENTS.md` — GEO-05..07 deferred requirements; GEO-01..03 shipped
+- `.planning/milestones/v2.2-phases/19-v2-geo-synthetic-source/19-CONTEXT.md` — path-only assets, GeoResourceResolver
+- `docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md` — asset upload explicitly deferred from v2.2
+- Code: `GeoResourceResolver`, `GeoSyntheticSourceVO`, `ConsoleUploadController`, `ConsoleUdfController`, `AuditService`, `SourceFieldsForm`, `draftUtils` (`geojson` only in editor)
+- `.planning/test-matrix.yaml` — P0 15-row gate; P1 `geo-synthetic` row
+- `docs/staging-console-rbac.md` — RBAC enable path (default off)
 
 ---
-*Feature research for: data-generator v2.1 Hardening & Weak-Spot Closure*
-*Researched: 2026-07-25*
-)
+*Feature research for: data-generator v2.3 Geo Assets & Map Preview*
+*Researched: 2026-07-31*

@@ -1,156 +1,110 @@
 # Project Research Summary
 
 **Project:** data-generator  
-**Domain:** Brownfield Template V2 platform hardening (proof, reliability, docs)  
-**Researched:** 2026-07-25  
+**Domain:** Brownfield Template V2 — GeoJSON asset library + console map preview (v2.3)  
+**Researched:** 2026-07-31  
 **Confidence:** HIGH
 
 ## Executive Summary
 
-v2.1 is a **hardening** milestone on a mature Java 25 / Spring Boot 4 / Template V2 stack. Research agrees: add **no new production libraries**. Close weak spots with HTTP execute-path evidence, documented Dameng opt-in live IT, dual-resolver ownership docs, one multi-JVM worker E2E, RBAC enable-path (default stays off), and focused P1 harness rows.
+v2.3 closes the operator gap left by v2.2: durable **hosted GeoJSON assets** in the metadata DB (GEO-05) and a **console map** to browse those assets and preview `geo_synthetic` configuration (GEO-07). Experts build this as a thin asset registry (UUID + validated GeoJSON CLOB) plus a single resolution spine (`classpath:` / filesystem / `asset:{uuid}`), with MapLibre in the existing React/Ant Design console — not a GIS platform.
 
-The highest-risk failure mode is relabeling in-process `TemplateV2Runner` tests as HTTP `/task/run` proof. Second is promoting Dameng live IT or multi-JVM into the P0 merge gate. Keep `verify-harness.ps1` P0 semantics; treat live/distributed/RBAC as P1 or documented opt-in.
+Recommended approach: mirror secrets/UDF persistence patterns; extend `GeoResourceResolver` with an injectable `GeoAssetResolver`; raise multipart limits; cap size/feature count at ingest; hybrid preview (server GeoJSON for assets, client Turf overlays for BBOX/CIRCLE). Keep `geojson` vs `geo_synthetic` type split. Do **not** require PostGIS, new Maven modules, or P0 gate expansion.
+
+Key risks: H2/metadata DB blow-up from large GeoJSON; dual path vs asset-id resolution bugs; preview≠runtime sampling; MapLibre Vite/CSS bundling; upload surface with RBAC default-off. Mitigate with hard limits, one resolver spine for preview and run, seed-aware preview docs, and audit + size gates even when RBAC is off.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Reuse Boot MockMvc/`@SpringBootTest`, existing worker profile, header RBAC, Testcontainers, Playwright, harness YAML. Details: [STACK.md](STACK.md).
+Reuse Java 25 / Spring Boot 4 / JPA metadata DB / React 19 console. Add MapLibre + react-map-gl and small Turf helpers only.
 
 **Core technologies:**
-- Spring Boot 4.0.5 + MockMvc HTTP ITs — prove `/task/run` or console run without new HTTP clients
-- `DataGeneratorWorkerApplication` + shared file H2/JDBC — one real second-JVM path
-- `DamengTestSupport` (`-Ddm.it=true`) — opt-in live IT; MERGE unit remains default CI
-- `ConsoleSecurityProperties` + staging headers — testable enable; default `enabled=false`
+- **MapLibre GL JS ^5.24** + **react-map-gl ^8.1** — WebGL map without Mapbox token; React 19 bindings
+- **`@turf/bbox` / `@turf/circle` / `@turf/helpers` ^7** — client fit-bounds and BBOX/CIRCLE overlays
+- **JPA CLOB GeoJSON** in metadata DB — same backup surface as secrets/templates/UDFs
+- **Existing `GeoJsonLoader` + JTS** — upload validation and runtime parse; no GeoTools expansion
+- **Spring multipart** raised to ~16MB — Boot defaults reject real district GeoJSON
 
 ### Expected Features
 
-Details: [FEATURES.md](FEATURES.md).
+**Must have (table stakes):**
+- Multipart GeoJSON upload → UUID asset-id, list/get/delete, derived bbox/featureCount
+- Template binding: `boundaryAssetId` / `networkAssetId` (or `asset:` path) with path/`classpath:` fallback
+- Runtime `GeoAssetResolver` on execute path (coordinator + worker share metadata DB)
+- Map: asset browse render + `geo_synthetic` config preview (equal depth)
+- Size/feature caps, GeoJSON validation, audit on upload/delete
 
-**Must have (table stakes for v2.1):**
-- HTTP execute-path proof (managed catalog / dialect)
-- Dameng live IT green path + Nyquist hygiene backfill
-- Resolver ownership docs + call-site inventory (no merge)
-- Multi-JVM worker E2E one path
-- RBAC testable enable (default off)
-- Focused P1 harness expansion
+**Should have (competitive):**
+- Referential delete guard (409 if templates still reference asset)
+- Console `geo_synthetic` editor + asset picker (v2.2 was backend-only — required for equal-depth GEO-07)
+- Optional P1 harness row `geo-assets` when ITs stable
 
-**Should have (trust differentiators):**
-- Credible HTTP→managed id→rows evidence packaging
-- Harness-linked multi-JVM row (P1)
-
-**Defer (beyond v2.1):**
-- Full resolver merge, default-on RBAC, ORCH, Redis/S3/HTTP connectors
-- Full staging distributed AC-1..AC-7 matrix
-- Dameng live as P0 merge gate
+**Defer (v2+):**
+- GEO-06 polygon synthesis, Shapefile/KML import, CRS reprojection, map geometry editing
+- DATA-01 common-data CRUD, mandatory RBAC, P0 promotion of geo-assets
 
 ### Architecture Approach
 
-No new modules. Proofs attach to the shared execute spine: HTTP enqueue → `TaskExecutionService` snapshot → `WorkflowRunContext.bind` → `TemplateV2Runner` (local or leased worker). Document `JdbcCatalogResolver` vs `DefaultRuntimeJdbcEndpointResolver` ownership; do not merge. Details: [ARCHITECTURE.md](ARCHITECTURE.md).
+No new top-level modules. Service owns `GeoAssetService` / PO / `ConsoleGeoAssetController`; core defines `GeoAssetResolver`; geo module extends `GeoResourceResolver` with `asset:` prefix; calcite factories inject resolver; console adds assets page + lazy MapLibre panel.
 
 **Major components:**
-1. `TaskController` / console run support — HTTP proof entry
-2. `DefaultRuntimeJdbcEndpointResolver` + catalog snapshot — execute-path `snap:` authority
-3. `DistributedJobService` + worker app — multi-JVM lease path
-4. Harness matrix — P1 rows without P0 inflation
+1. `GeoAssetService` + `geo_asset` table — CRUD, validate, resolveUtf8
+2. `GeoResourceResolver` + `asset:` — single spine for run and preview
+3. `ConsoleGeoAssetController` + map UI — list without full payload; GET body for layers
+4. Hybrid preview — server GeoJSON for assets; client Turf for bbox/circle overlays (not full server re-synthesis for every pan)
 
 ### Critical Pitfalls
 
-Details: [PITFALLS.md](PITFALLS.md).
-
-1. **In-process runner labeled as HTTP** — require MockMvc/HTTP enqueue + job/sink assert
-2. **Dameng live promoted to P0/default CI** — keep opt-in; MERGE unit stays merge bar
-3. **RBAC default flipped on** — profile/IT only; protect local/e2e
-4. **Wrong `snap:` assumptions** — separate unbound managed-id vs bound snapshot proofs
-5. **Scope creep into ORCH/connectors/full AC matrix** — one happy path each theme
+1. **Huge GeoJSON → H2 blow-up** — enforce max bytes + feature count before persist
+2. **Path vs asset-id dual bugs** — one resolver; never treat asset-id as filesystem path
+3. **Preview ≠ runtime** — same resolver for map GET and TemplateV2Runner; document seed for point modes
+4. **XSS / malicious properties in GeoJSON** — validate geometry roots; sanitize/ignore HTML in props for map popups
+5. **P0 accidental inflation** — keep verify-harness P0 at 15; P1 optional only
 
 ## Implications for Roadmap
 
-Continue phase numbering from **12** (v2.0 ended at 11).
+Suggested phase numbering continues from v2.2 (last phase 20):
 
-### Phase 12: HTTP Execute-Path Proof
-**Rationale:** Closes the largest accepted v2.0 evidence gap first; unblocks credible catalog/dialect trust.  
-**Delivers:** MockMvc/`@SpringBootTest` HTTP run IT (managed catalog → SUCCESS/COUNT); optional dialect variant via existing CI-friendly engine.  
-**Addresses:** HTTP execute-path proof  
-**Avoids:** Relabeling `ManagedJdbcCatalogSinkE2eIT` as HTTP
+### Phase 21: GEO-05 Backend — Asset Registry + Runtime Resolution
+**Rationale:** Map and editor depend on durable assets and `asset:` resolution.  
+**Delivers:** PO/Repository/Service, multipart upload API, size/validation gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic factories, pipeline IT with asset-id.  
+**Addresses:** Asset CRUD table stakes + template binding runtime.  
+**Avoids:** Unbounded CLOB; ephemeral `ConsoleUploadController` reuse for durable assets.
 
-### Phase 13: Dameng Live Path + Nyquist Hygiene
-**Rationale:** Dialect weak spot + planning hygiene; independent of HTTP.  
-**Delivers:** Documented opt-in Dameng green recipe; wire or honestly document placeholder; VALIDATION backfill for 07/07.1/08.  
-**Addresses:** Dameng + Nyquist  
-**Avoids:** Dameng in P0
+### Phase 22: GEO-07 Console — Assets UI + Map Preview + geo_synthetic Editor
+**Rationale:** Equal-depth delivery; v2.2 left geo_synthetic out of `EDITABLE_SOURCE_KINDS`.  
+**Delivers:** Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` source fields in template editor.  
+**Uses:** MapLibre/react-map-gl/Turf; list-without-payload + GET body APIs.  
+**Avoids:** Dual preview resolver; collapsing geojson/geo_synthetic types.
 
-### Phase 14: Resolver Ownership Docs
-**Rationale:** Low-cost clarity; inventories call sites after HTTP proof reveals real callers.  
-**Delivers:** Ownership doc + call-site inventory (catalog vs execute-path).  
-**Addresses:** Resolver docs  
-**Avoids:** Code merge
+### Phase 23: Docs + Harness Closeout
+**Rationale:** Operator docs and optional P1 row without P0 churn.  
+**Delivers:** Docs for asset-id YAML + map usage; optional `geo-assets` P1 matrix row; console verify green.  
+**Avoids:** P0 promotion; GEO-06 scope creep.
 
-### Phase 15: Multi-JVM Worker E2E
-**Rationale:** Depends on stable execute spine; one harness-linked happy path.  
-**Delivers:** Coordinator + worker second JVM SUCCESS path; P1 matrix row; script entry.  
-**Addresses:** DIST one-path  
-**Avoids:** Full AC-1..AC-7 as DoD
+## Research Flags (deeper research during plan/execute)
 
-### Phase 16: RBAC Enable Path + Docs
-**Rationale:** Security weak spot without changing defaults.  
-**Delivers:** Staging/e2e enable docs; IT proving filter when enabled; default remains off.  
-**Addresses:** RBAC testable enable  
-**Avoids:** Default-on
+| Topic | Why | Suggested phase |
+|-------|-----|-----------------|
+| Exact H2 CLOB size behavior under concurrent worker | Staging dual-JVM sensitivity | 21 |
+| Template reference scan for delete-409 | Need reliable JSON path for assetId/`asset:` | 21–22 |
+| MapLibre CSS + Vite code-splitting | Bundle size / load errors | 22 |
+| Preview sample count vs run count UX | Avoid false confidence on CIRCLE/BBOX | 22 |
 
-### Phase 17: P1 Harness Expansion + Closeout
-**Rationale:** Wire new proofs into matrix; keep P0 green; milestone docs.  
-**Delivers:** Focused P1 rows for HTTP/catalog, multi-JVM, RBAC enable; AGENTS/verify notes; ROADMAP closure.  
-**Addresses:** P1 expansion  
-**Avoids:** P0 inflation
+## Gaps to Address in Requirements
 
-### Phase Ordering Rationale
-
-- HTTP proof first — highest operator-credibility gap
-- Dameng/Nyquist parallelizable after or beside HTTP (low coupling)
-- Resolver docs after HTTP so inventory reflects real run-path callers
-- Multi-JVM after spine confidence; RBAC independent but late to avoid e2e churn
-- Harness closeout last so rows link finished tests
-
-### Research Flags
-
-- **Phase 12:** Confirm endpoint (`/task/run` vs `/api/templates/.../run`) and async poll pattern
-- **Phase 13:** Dameng host/image availability may force “documented enable + MERGE” if live IT stays placeholder
-- **Phase 15:** File-based shared metadata DB vs Podman script — pick one recipe in plan-phase
-
-Phases with standard patterns (light plan research):
-- **Phase 14, 16, 17:** Docs + existing filter/IT/harness patterns
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | Brownfield inventory; no new libs |
-| Features | HIGH | Aligned with audit + PROJECT scope |
-| Architecture | HIGH | Source-read execute spine; CodeGraph absent |
-| Pitfalls | HIGH | Maps to v2.0 accepted limits |
-
-**Overall confidence:** HIGH
-
-### Gaps to Address
-
-- Dameng live IT may remain environment-gated — plan must define honest done criteria if no DM host
-- CodeGraph optional for call-site inventory speed — docs can use grep/`rg` if not initialized
-- Multi-JVM flakiness — prefer one deterministic scripted path over broad matrix
+- Explicit REQ for **path/`classpath:` fallback** (preserve GEO-03)
+- Explicit REQ for **`geo_synthetic` console editor** as part of GEO-07 equal depth
+- Explicit **size + feature-count limits** as first-class requirements
+- Explicit **P0 freeze** + optional P1 only
+- Clarify **asset-id field shape** (`boundaryAssetId` vs `asset:` in path) — pick one primary for console, support resolver wire format
 
 ## Sources
 
-### Primary (HIGH confidence)
-- `.planning/PROJECT.md`, `.planning/milestones/v2.0-MILESTONE-AUDIT.md`
-- In-repo controllers, resolvers, `DamengTestSupport`, staging YAML, harness scripts
-- `AGENTS.md` / `docs/testing-embedded-components.md`
-
-### Secondary (MEDIUM confidence)
-- Existing distributed Podman/staging docs as starting recipes
-
-### Tertiary (LOW confidence)
-- Exact Dameng container availability in CI environments — validate at plan/execute
+- `.planning/research/STACK.md`, `FEATURES.md`, `ARCHITECTURE.md`, `PITFALLS.md` (2026-07-31)
+- `.planning/PROJECT.md` v2.3 charter; v2.2 shipped geo stack and archives
+- Code patterns: `GeoResourceResolver`, `ConsoleUploadController`, `SecretService` / UDF persistence, `SourceFieldsForm` / `EDITABLE_SOURCE_KINDS`
 
 ---
-*Research completed: 2026-07-25*  
-*Ready for roadmap: yes*
+*Synthesized for `/gsd-new-milestone` v2.3 — replaces prior 2026-07-25 SUMMARY.md*

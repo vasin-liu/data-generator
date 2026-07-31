@@ -1,38 +1,43 @@
 # Architecture Research
 
-**Domain:** Brownfield Template V2 / Spring Boot data-generator — v2.1 hardening integration
-**Researched:** 2026-07-25
+**Domain:** Brownfield Template V2 / Spring Boot data-generator — v2.3 Geo Assets & Map Preview (GEO-05 + GEO-07)
+**Researched:** 2026-07-31
 **Confidence:** HIGH
 
-> **Note:** CodeGraph is not initialized under this repo root (no `.codegraph/`). Symbol and call-path claims below come from direct source reads and prior v2.0 verification artifacts. Run `codegraph init -i` if future research should prefer MCP structural queries.
+> CodeGraph is not initialized under this repo root (no `.codegraph/`). Structural claims below come from direct source reads of v2.2 shipped geo paths, `SecretService` / `ConsoleSecretController`, `ConsoleUploadController`, and v2.3 planning artifacts (`PROJECT.md`, `PITFALLS.md`, `STACK.md`).
 
 ## Standard Architecture
 
 ### System Overview
 
-v2.1 does **not** add a new domain module. It adds **proof, documentation, and reliability seams** on the v2.0 stack: console/legacy HTTP → task orchestration → Calcite V2 runner → managed JDBC catalog (with optional `snap:` routing) → sinks; optional distributed worker; opt-in console header RBAC; harness matrix.
+v2.3 adds **operator-hosted GeoJSON assets** (metadata DB) and a **console map preview** on top of the v2.2 `geo_synthetic` / `geojson` runtime stack. It does **not** introduce a new Maven module. Work splits across:
+
+- **Service layer** — persist assets, expose `/api/console/geo-assets`, wire resolver into runtime
+- **Geo / Calcite layer** — extend path resolution (`classpath:` / filesystem unchanged; add `asset:`)
+- **Console SPA** — asset CRUD UI + MapLibre preview panel
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ Presentation                                                                 │
-│  React console (/console)  │  Console REST /api/**  │  Legacy /task/**       │
-│  ConsoleAuthorizationFilter (header RBAC; default OFF)                       │
+│ Presentation (data-generator-console-web)                                    │
+│  /console/geo-assets  │  Map preview panel (assets + geo_synthetic config)   │
+│  React Query → /api/console/geo-assets/**                                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ Application / orchestration (data-generator-service)                         │
-│  TemplateEditorRunSupport → TaskController                                   │
-│  TaskExecutionService (queue, snapshot capture, status)                      │
-│  DistributedJobService (enqueue / lease / heartbeat)  [optional]             │
-│  DataSourceConfigService → ConnectionCatalog (+ ExecutionSnapshot overlay) │
+│ Console REST (data-generator-service /api/console/**)                        │
+│  ConsoleGeoAssetController  │  ConsoleUploadController (unchanged — ephemeral)│
+│  ConsoleApiAdvice → R<T> envelope  │  ConsoleAuthorizationFilter (opt-in)   │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ Domain / execution (data-generator-calcite + adapters)                       │
-│  WorkflowRunContext.bind(instanceId)                                         │
-│  TemplateV2Runner → Chunked / Streaming / Workflow pipelines                 │
-│  RuntimeJdbcEndpointResolver (DefaultRuntimeJdbcEndpointResolver)            │
-│       └── ConnectionCatalog.resolve → routing key (logical | snap:…)         │
+│ Application services                                                         │
+│  GeoAssetService (CRUD + resolveUtf8)  │  AuditService (upload/delete)     │
+│  GeoAssetPO + GeoAssetRepository (H2 metadata DB CLOB)                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Domain / execution (data-generator-calcite + data-generator-geo)             │
+│  GeoSyntheticSourceFactory / GeoJsonSourceFactory (inject GeoAssetResolver)  │
+│  GeoSyntheticRowSource → GeoSyntheticGenerator → GeoJsonLoader                 │
+│  GeoResourceResolver: classpath: | filesystem | asset:{uuid}  ← bridge         │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ Infrastructure                                                               │
-│  DynamicRoutingDataSource / Druid  │  H2 metadata  │  JDBC dialects          │
-│  Harness: test-matrix.yaml → verify-harness.ps1 → harness-verify.yml (P0)  │
+│  H2 file metadata DB (same as secrets, templates, UDFs)                      │
+│  GeoJsonLoader + JTS validation at ingest and runtime                          │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -40,192 +45,289 @@ v2.1 does **not** add a new domain module. It adds **proof, documentation, and r
 
 | Component | Responsibility | Typical Implementation |
 |-----------|----------------|------------------------|
-| `TaskController` | HTTP/legacy run entry; V2 normalize/validate; queue; local async or distributed enqueue | `POST /task/run/{id}`, `runByIdAllowDraft` |
-| `TemplateEditorRunSupport` / console template editors | Console `/api/templates/.../run` delegates to `TaskController` | Same execute path as legacy |
-| `TaskExecutionService` | Persist execution row; capture connection snapshot JSON; mark RUNNING/terminal | Snapshot before `WorkflowRunContext.bind` |
-| `TemplateV2Runner` | Policy resolve → pipeline execute | Calcite module; no HTTP awareness |
-| `DataSourceConfigService` | Persist managed JDBC configs; sync catalog/routing | Operator CRUD + connectivity gate |
-| `ConnectionCatalog` / `ExecutionSnapshotConnectionCatalog` | Resolve JDBC/Kafka/ES; `@Primary` snapshot overlay under active run | Returns `snap:{instanceId}:{name}` when bound |
-| `DefaultRuntimeJdbcEndpointResolver` | **V2 execute-path** JDBC routing authority | Used by QuerySource / JdbcRowSink adapters |
-| `JdbcCatalogResolver` | **Catalog-side** JDBC resolve helper (datasource module) | Parallel API; not injected on execute path |
-| `DistributedJobService` + `DistributedJobLeaseRunner` | Queue + lease + heartbeat; worker/coordinator run leased row | Same snap + `TemplateV2Runner` as local path |
-| `DataGeneratorWorkerApplication` | Second JVM entry (`distributed-worker` profile) | Claims leases via poller |
-| `ConsoleSecurityProperties` + `ConsoleAuthorizationFilter` | Opt-in header RBAC on `/api/**` | `enabled=false` by default |
-| Harness (`test-matrix.yaml`, `verify-harness.ps1`) | Capability rows → Maven/Playwright links; P0 merge gate | P1 tracked, non-blocking |
+| `GeoAssetPO` | Persist one uploaded GeoJSON asset (id, name, CLOB body, bounds metadata, timestamps) | JPA `@Entity` on `geo_asset` table; mirror `SecretEntryPO` / `UdfArtifactPO` CLOB patterns |
+| `GeoAssetRepository` | CRUD by asset UUID | Spring Data JPA, `findById(UUID)` |
+| `GeoAssetService` | Upload validation, list summaries, get GeoJSON body, delete, runtime resolve | `@Service`; parse/validate via `GeoJsonLoader` before persist; implements `GeoAssetResolver` |
+| `GeoAssetResolver` | Runtime lookup: asset-id → UTF-8 GeoJSON text | Interface in `data-generator-core` (like `SecretResolver`); service bean in `CoreConfig` |
+| `ConsoleGeoAssetController` | Operator REST: multipart upload, list, get GeoJSON, delete, synthetic preview | `/api/console/geo-assets`; follow `ConsoleSecretController` + `ConsoleUdfController` multipart |
+| `GeoResourceResolver` (extended) | Single resolution spine for all geo I/O | Existing static methods + `asset:` prefix delegates to `GeoAssetResolver` |
+| `GeoSyntheticSourceVO` / `GeoJsonSourceVO` | Template YAML binding | Add optional `boundaryAssetId` / `networkAssetId` / `assetId` **or** encode as `asset:{uuid}` in existing `*Path` fields |
+| `GeoSyntheticRequestMapper` | Map VO → `GeoGenerationRequest` | Mutual exclusion: path **or** asset-id per field; normalize to `asset:` location string |
+| `GeoAssetsPage` + map panel | Browse assets, upload, preview synthetic config | Lazy-loaded MapLibre route; React Query cache |
+| `ConsoleUploadController` | Ephemeral wizard file paths | **Unchanged** — not GEO-05 storage; do not conflate |
 
 ## Recommended Project Structure
 
-No new top-level modules for v2.1. Touch points stay inside existing trees:
+No new top-level modules. Touch points:
 
 ```
+data-generator-common/data-generator-core/
+├── src/main/java/org/gensokyo/data/
+│   ├── geo/GeoAssetResolver.java              # NEW — runtime resolve interface
+│   └── model/v2/
+│       ├── GeoSyntheticSourceVO.java          # MOD — boundaryAssetId / networkAssetId (or asset: in path)
+│       └── GeoJsonSourceVO.java               # MOD — optional assetId / asset: path
+
+data-generator-geo/
+├── src/main/java/org/gensokyo/data/geo/io/
+│   └── GeoResourceResolver.java               # MOD — asset: prefix + injectable resolver param
+
+data-generator-calcite/
+├── src/main/java/org/gensokyo/data/calcite/source/
+│   ├── GeoSyntheticSourceFactory.java         # MOD — accept GeoAssetResolver
+│   ├── GeoSyntheticRequestMapper.java         # MOD — asset-id fields + validation
+│   ├── GeoJsonSourceFactory.java              # MOD — same resolver injection
+│   └── GeoJsonRowSource.java                  # unchanged read path once location resolves
+
 data-generator-service/
 ├── src/main/java/org/gensokyo/data/
-│   ├── controller/TaskController.java          # HTTP execute entry (proof target)
-│   ├── api/console/                            # Console run → TemplateEditorRunSupport
-│   ├── task/                                   # TaskExecutionService, Distributed*
-│   ├── config/DefaultRuntimeJdbcEndpointResolver.java
-│   ├── config/ConsoleSecurityProperties.java
-│   ├── security/ConsoleAuthorizationFilter.java
-│   └── datasource/DataSourceConfigService.java
-├── src/test/java/...                           # NEW/EXTENDED ITs for HTTP, RBAC, dist
-data-generator-datasource/.../JdbcCatalogResolver.java   # docs/inventory only
-data-generator-calcite/.../TemplateV2Runner.java         # unchanged entry; tests may drive
-.planning/test-matrix.yaml                      # NEW P1 rows (not P0 inflation)
-scripts/verify-harness.ps1                      # consume matrix; keep P0 semantics
-docs/                                           # resolver ownership, Dameng green path, RBAC staging
+│   ├── geo/GeoAssetService.java               # NEW
+│   ├── model/po/GeoAssetPO.java               # NEW
+│   ├── repository/GeoAssetRepository.java     # NEW
+│   ├── api/console/ConsoleGeoAssetController.java  # NEW
+│   └── config/CoreConfig.java                 # MOD — resolver bean + factory wiring
+├── src/main/resources/
+│   ├── application.yaml                       # MOD — multipart limits, geo-assets.* props
+│   └── db/schema.sql                          # MOD — geo_asset DDL (lockstep with PO)
+└── src/test/java/...                          # NEW — REST IT, asset-id pipeline IT
+
+data-generator-console-web/
+├── src/app/pages/GeoAssetsPage.tsx            # NEW
+├── src/app/geo/GeoMapPreview.tsx              # NEW — lazy MapLibre
+├── src/app/geo/geoAssetApi.ts                 # NEW — React Query client
+├── src/app/App.tsx                            # MOD — route /console/geo-assets
+└── package.json                               # MOD — maplibre-gl, react-map-gl, @turf/*
+
+.planning/test-matrix.yaml                     # MOD — optional P1 row geo-assets (not P0)
+docs/geo-synthetic-v2-source.md                # MOD — asset-id YAML examples
 ```
 
 ### Structure Rationale
 
-- **service:** Owns HTTP, orchestration, snap capture, distributed queue, console security — where v2.1 proofs attach.
-- **datasource-jdbc:** Owns catalog-side resolver; v2.1 documents ownership, does not merge into service resolver.
-- **calcite:** Runtime engine stays stable; proofs should go *through* service HTTP/worker paths when closing the Phase 11 gap.
-- **.planning + scripts:** Harness remains the trust surface; P1 expands without raising merge bar.
+- **core interface, service impl:** Keeps `data-generator-calcite` and `data-generator-geo` free of JPA; matches `SecretResolver` / `SecretService` split.
+- **geo module resolver extension:** All GeoJSON reads already funnel through `GeoResourceResolver` → `GeoJsonLoader`; one extension point avoids preview-vs-run drift.
+- **service owns HTTP + persistence:** Console controllers and metadata DB live here; no geo asset tables in calcite.
+- **console-web owns visualization only:** Map rendering and Turf overlays stay client-side where possible; server serves authoritative GeoJSON bytes.
 
 ## Architectural Patterns
 
-### Pattern 1: Shared execute spine (local vs distributed)
+### Pattern 1: Metadata DB asset registry (mirror secrets + UDF bytes)
 
-**What:** Both in-process async (`TaskController.runV2Tracked`) and leased worker (`DistributedJobLeaseRunner`) follow: queue → mark RUNNING → `captureConnectionSnapshot` → `WorkflowRunContext.bind` → `templateV2Runner.run` → terminal status / report.
+**What:** Operators upload GeoJSON once; platform assigns a stable UUID (`assetId`); templates reference `asset:{uuid}` or dedicated YAML fields. Bytes live in the H2 metadata DB (CLOB), not on ephemeral filesystem paths.
 
-**When to use:** Any new proof that claims “operator run path” must hit this spine (HTTP enqueue at minimum), not only bare `TemplateV2Runner.run`.
+**When to use:** All GEO-05 hosted assets. Path refs (`classpath:`, absolute fixture paths) remain for ITs and dev fixtures only.
 
-**Trade-offs:** Async completion complicates ITs (poll status / sink COUNT). In-process `TemplateV2Runner` is faster but leaves the accepted Phase 11 HTTP gap open.
+**Trade-offs:** Single backup surface with templates/secrets; H2 file DB grows with large uploads — mitigate with size/feature caps at ingest.
 
-**Example (conceptual):**
-```java
-// TaskController.runV2 — local path
-taskExecutionService.queueExecution(...);
-if (distributedEnabled) {
-    distributedJobService.enqueue(taskExecutionId, templateId, instanceId, null);
-} else {
-    executor.submit(() -> runV2Tracked(template, instanceId));
-}
-// runV2Tracked / DistributedJobLeaseRunner:
-//   captureConnectionSnapshot → WorkflowRunContext.bind → templateV2Runner.run
+**Example (template YAML — dual reference shapes, one resolver):**
+```yaml
+sources:
+  pts:
+    type: geo_synthetic
+    mode: BOUNDARY_POINTS
+    count: 100
+    boundaryAssetId: 550e8400-e29b-41d4-a716-446655440000   # preferred in console wizard
+    # OR boundaryPath: asset:550e8400-e29b-41d4-a716-446655440000  # wire format for resolver
 ```
 
-### Pattern 2: Dual JDBC resolvers with ownership split (docs-only in v2.1)
+### Pattern 2: Single resolution spine (`GeoResourceResolver` + `GeoAssetResolver`)
+
+**What:** Every geo read — runtime pipeline, map asset preview, synthetic boundary overlay — calls the same resolver chain:
+
+```
+location string
+  → if classpath: …     → classloader (v2.2 unchanged)
+  → if asset:{uuid} …   → GeoAssetResolver.resolveUtf8(uuid)
+  → else                → filesystem path (v2.2 unchanged)
+```
+
+**When to use:** Always. Preview API must not duplicate DB lookup logic.
+
+**Trade-offs:** Requires threading `GeoAssetResolver` into stateless factories (`GeoSyntheticSourceFactory`); follow `AiSourceFactory(ObjectProvider<…>)` pattern in `CoreConfig`.
+
+**Example (conceptual wiring):**
+```java
+// CoreConfig — same pattern as aiSourceFactory
+@Bean
+V2SourceFactory geoSyntheticSourceFactory(ObjectProvider<GeoAssetResolver> assets) {
+    return new GeoSyntheticSourceFactory(assets.getIfAvailable());
+}
+
+// GeoResourceResolver — geo module stays Spring-free
+public static String readUtf8(String location, GeoAssetResolver assets) throws IOException {
+    if (location.startsWith("asset:")) {
+        return assets.resolveUtf8(location.substring("asset:".length()));
+    }
+    // existing classpath / file logic
+}
+```
+
+### Pattern 3: Console REST envelope + list-without-payload
+
+**What:** `ConsoleGeoAssetController` returns `R<T>`; list endpoints expose `GeoAssetSummary` (id, name, featureCount, bounds, updatedAt) **without** full GeoJSON body — mirror `SecretService.listSummaries()` / `ConsoleSecretController`.
+
+**When to use:** All operator CRUD. Full GeoJSON only on `GET /{id}/geojson` (map + download).
+
+**Trade-offs:** Extra round-trip for map load; acceptable for operator-scale asset counts.
+
+### Pattern 4: Hybrid map preview (server GeoJSON + client synthetic overlay)
 
 **What:**
-- `DefaultRuntimeJdbcEndpointResolver` — V2 execute-path authority; returns `connectionName()` after `ConnectionCatalog.resolve` (logical or `snap:{instanceId}:{name}`).
-- `JdbcCatalogResolver` — catalog-module helper with parallel catalog-first / inline semantics; **not** the production execute injection.
 
-**When to use:** Execute adapters call `RuntimeJdbcEndpointResolver`. Catalog/bootstrap/tests may use `JdbcCatalogResolver`. Consolidation is **out of scope**.
+| Preview need | Source | Rationale |
+|--------------|--------|-----------|
+| Uploaded asset geometry | **Server** `GET /api/console/geo-assets/{id}/geojson` | Authoritative bytes from DB; same resolver as runtime |
+| `geo_synthetic` boundary/network underlay | **Server** — fetch linked asset GeoJSON or resolve path via preview helper | Must match runtime asset-id resolution |
+| BBOX / CIRCLE mode overlay | **Client** — `@turf/bbox`, `@turf/circle` from template form state | No server round-trip; instant as operator edits fields |
+| Synthetic point dots (optional) | **Server** `POST …/preview/synthetic` with capped `count` (e.g. ≤500) | Reuses `GeoSyntheticGenerator`; avoids shipping geo algo to browser |
 
-**Trade-offs:** Duplication risk vs blast radius of merging snap semantics into the datasource module. v2.1 closes risk with call-site inventory + docs, not a refactor.
+**When to use:** GEO-07 equal depth — asset browse **and** template geo_synthetic config preview.
 
-### Pattern 3: Harness tiering (P0 gate vs P1 proof)
+**Trade-offs:** Server synthetic preview adds API surface but guarantees parity with pipeline output; pure client generation would drift from JTS/Haversine semantics.
 
-**What:** Matrix rows declare `tier`. `verify-harness.ps1` runs linked tests; CI blocks on `p0.pass` only. New hardening proofs land as **P1** (or opt-in/skipped-conditional) until stable.
+**Recommendation:** Ship server GeoJSON GET for assets + client Turf for BBOX/CIRCLE; add capped server synthetic preview endpoint for point dots (not client-side reimplementation of `GeoSyntheticGenerator`).
 
-**When to use:** HTTP catalog journey, distributed one-path, RBAC enable, Dameng live — track as P1; keep Dameng MERGE unit on existing P0 row.
+### Pattern 5: Harness tiering unchanged
 
-**Trade-offs:** P1 can go red without blocking merge — intentional for flaky/multi-JVM/live paths.
+**What:** GEO-05/07 proofs land as **P1** matrix rows (`geo-assets`); P0 gate stays at 15 rows per `PROJECT.md`.
 
-### Pattern 4: Opt-in security filter
+**When to use:** All v2.3 verification linkage.
 
-**What:** `ConsoleAuthorizationFilter.shouldNotFilter` returns true when `console-security.enabled=false`. When enabled, role from `X-Console-Role` maps to `ConsolePermission` on `/api/**`.
-
-**When to use:** Staging/e2e profiles and `ConsoleAuthorizationIntegrationIT`. Never flip default for local/dev.
-
-**Trade-offs:** Intranet header model is not IdP; default-off avoids breaking console e2e and developer loops.
+**Trade-offs:** Merge not blocked by map E2E flake; intentional.
 
 ## Data Flow
 
-### Request Flow — operator run (v2.1 HTTP proof target)
+### Request Flow — asset upload (GEO-05)
 
 ```
-Operator (console or client)
-    ↓ POST /api/templates/{id}/run  OR  POST /task/run/{id}
+Operator (console Geo Assets page)
+    ↓ POST /api/console/geo-assets (multipart GeoJSON + optional name)
 ConsoleAuthorizationFilter (skip if RBAC off)
     ↓
-TemplateEditorRunSupport → TaskController.runById / runByIdAllowDraft
+ConsoleGeoAssetController.upload
     ↓
-TaskExecutionService.queueExecution (+ lineage)
-    ↓ (local)                    ↓ (distributed.enabled)
-async runV2Tracked               DistributedJobService.enqueue
-    ↓                            ↓ worker leaseNext + heartbeat
-captureConnectionSnapshot
-WorkflowRunContext.bind(instanceId)
+GeoAssetService.create
+    → read bytes, enforce max-bytes / max-feature-count (DataGeneratorProperties)
+    → GeoJsonLoader parse + validate (JTS geometry sanity)
+    → compute bounds summary metadata (for list API)
+    → GeoAssetPO persist (CLOB + metadata_json)
+    → AuditService.record(UPLOAD, GEO_ASSET, id)
     ↓
-TemplateV2Runner.run
+R.ok({ assetId, name, featureCount, bounds, updatedAt })   // no duplicate of full body in response body if large
+```
+
+### Request Flow — template run with asset-id (GEO-05 runtime)
+
+```
+Operator run (existing spine — unchanged queue/snap/runner)
     ↓
-DefaultRuntimeJdbcEndpointResolver → ConnectionCatalog
-    → routing key (snap:… when bound) → DynamicRoutingDataSource → JDBC source/sink
+TemplateV2Runner
     ↓
-TaskExecutionService mark SUCCESS/FAILED + RunReportCollector
+GeoSyntheticSourceFactory.create(name, GeoSyntheticSourceVO)
+    ↓
+GeoSyntheticRowSource constructor
+    → GeoSyntheticRequestMapper.toRequest (asset-id → asset: location)
+    → GeoSyntheticGenerator.generateRows
+        → GeoJsonLoader.loadFeature / loadGeometry
+            → GeoResourceResolver.readUtf8(location, geoAssetResolver)
+                → asset: → GeoAssetService.resolveUtf8 → DB CLOB
+    ↓
+Calcite rows → transform → sink
+```
+
+### Request Flow — map preview (GEO-07)
+
+```
+Asset browse tab:
+  GET /api/console/geo-assets           → summaries
+  GET /api/console/geo-assets/{id}/geojson → FeatureCollection for MapLibre source
+
+geo_synthetic config preview (template editor side panel):
+  BOUNDARY_POINTS / LINE_SAMPLE:
+    resolve boundaryAssetId/networkAssetId → same GET geojson endpoint
+  BBOX / CIRCLE:
+    client Turf polygon/circle from form bbox[] / center[] / radiusMeters
+  Point preview (optional):
+    POST /api/console/geo-assets/preview/synthetic { GeoSyntheticSourceVO fragment, maxCount: 500 }
+      → GeoSyntheticGenerator (shared code path) → GeoJSON FeatureCollection of points
+    ↓
+MapLibre GL layer (lazy-loaded component, OSM raster basemap)
 ```
 
 ### State Management
 
 ```
-TaskExecutionPO (instanceId, status, connectionSnapshotJson, report)
-    ↕
-activeSnapshots (in-memory cache on TaskExecutionService)
-    ↕
-ExecutionSnapshotConnectionCatalog (@Primary) overlays live catalog for snap: keys
-```
+GeoAssetPO (H2 metadata DB)
+    ↔ GeoAssetRepository
+    ↔ GeoAssetService (transactional CRUD + resolve cache optional later)
 
-Distributed:
-```
-DistributedJobPO (QUEUED → LEASED/RUNNING → SUCCESS/FAILED)
-    ↕ lease / heartbeat / requeue via DistributedJobRepository
+Console SPA:
+  TanStack React Query
+    ↔ /api/console/geo-assets (list + detail geojson)
+    ↔ local form state for geo_synthetic preview overlays (Turf)
 ```
 
 ### Key Data Flows
 
-1. **Managed JDBC save → catalog:** `DataSourceConfigService.save` → `ConnectionCatalog` + routing registration (Phase 11 IT already proves in-process run; v2.1 extends through HTTP enqueue).
-2. **In-flight isolation:** Run-start snapshot + bound context → `snap:` routing keys retained across mid-flight catalog reload (`JdbcSnapshotExecutePathIT`).
-3. **Distributed claim:** Coordinator enqueue → worker `leaseNext` → `DistributedJobLeaseRunner` (same snap + runner) → heartbeat until terminal.
-4. **Harness evidence:** Matrix row → linked Maven/Playwright class → `target/test-matrix-summary.json` → P0 gate.
+1. **Upload → DB → asset-id:** Multipart → validate → persist → console stores `assetId` in template YAML (never `ConsoleUploadController` absolute path).
+2. **List → map:** Summaries for table UI; full GeoJSON fetched on row select / preview open.
+3. **Template YAML → run:** `assetId` / `asset:` → `GeoAssetResolver` → same bytes as upload validation.
+4. **Preview ↔ run parity:** Map underlay and synthetic preview endpoint must call `GeoResourceResolver` + `GeoSyntheticGenerator`, not ad-hoc parsers.
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| Single-node / local | Default: distributed off; in-process executor; RBAC off; H2 metadata |
-| Staging dual-JVM | Enable `data.generator.distributed.*`; worker profile JVM; one happy-path E2E (v2.1) |
-| Larger fleets | Existing lease/heartbeat already support multi-worker claim; **not** a v2.1 expand — avoid AC-1..AC-7 CI gate |
+| Single-node / dev (default) | H2 file DB + inline CLOB; 16 MiB upload cap; no tile server |
+| Tens of assets, district-scale GeoJSON | Current design sufficient; list API uses bounds metadata only |
+| Hundreds of MB assets / many concurrent uploads | **Out of v2.3 scope** — would need filesystem spill + checksum metadata or external object store; do not silently expand H2 CLOB |
 
-### Scaling Priorities (hardening lens)
+### Scaling Priorities
 
-1. **First bottleneck for trust:** Missing HTTP execute proof — operators do not run via in-process runner; close with MockMvc/`@SpringBootTest` journey.
-2. **Second bottleneck:** Multi-JVM flakiness if over-scoped — ship **one** path as P1; keep full staging checklist in docs.
+1. **First bottleneck:** H2 metadata DB bloat from unbounded uploads — enforce `data.generator.geo-assets.max-bytes` and `max-feature-count` at API gate.
+2. **Second bottleneck:** Map bundle size — lazy-load MapLibre route; keep home/templates pages free of map chunk.
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Prove catalog only via bare `TemplateV2Runner`
+### Anti-Pattern 1: Reuse `ConsoleUploadController` for GEO-05
 
-**What people do:** Reuse Phase 11 IT style (unbound runner, logical catalog name) and call the HTTP gap “closed.”
+**What people do:** Point geo upload at `/api/console/uploads/file`, persist returned absolute path in template YAML.
 
-**Why it's wrong:** Leaves the accepted audit limit open; does not exercise queue, snapshot bind, or async completion.
+**Why it's wrong:** Ephemeral `../uploaded-sources` paths; no asset-id; lost on redeploy; breaks distributed worker hosts; contradicts metadata DB decision in `PROJECT.md`.
 
-**Do this instead:** HTTP `/task/run` or console run → wait for terminal → assert sink rows / report; expect `snap:` under bound context when asserting resolver keys.
+**Do this instead:** Dedicated `ConsoleGeoAssetController` + DB persistence; templates store `assetId` or `asset:{uuid}`.
 
-### Anti-Pattern 2: Merge dual JDBC resolvers “while documenting”
+### Anti-Pattern 2: Dual resolution (preview vs runtime)
 
-**What people do:** Consolidate `JdbcCatalogResolver` into `DefaultRuntimeJdbcEndpointResolver` in the same milestone as ownership docs.
+**What people do:** Map preview reads DB directly; pipeline still uses path-only `GeoResourceResolver`.
 
-**Why it's wrong:** High blast radius on DS-03 snap semantics; contradicts explicit out-of-scope.
+**Why it's wrong:** Asset-id works in UI but fails at run; v2.2 classpath ITs stay green while operator templates fail.
 
-**Do this instead:** Call-site inventory + maintainer docs; defer merge to a dedicated refactor milestone.
+**Do this instead:** One resolver spine; preview endpoints and `GeoSyntheticRowSource` share `GeoResourceResolver.readUtf8(…, geoAssetResolver)`.
 
-### Anti-Pattern 3: Inflate P0 with live/multi-JVM proofs
+### Anti-Pattern 3: Collapse `geojson` and `geo_synthetic` types
 
-**What people do:** Add Dameng live IT or Podman dual-JVM as P0 merge blockers.
+**What people do:** Single “geo file” source type or factory for upload milestone.
 
-**Why it's wrong:** Licensed drivers / container cost / flake break the 15-row gate that currently protects streaming/upsert/dialect unit paths.
+**Why it's wrong:** v2.2 explicitly split read (`GeoJsonSourceFactory`) vs synthesize (`GeoSyntheticSourceFactory`); harness `geo-synthetic` row targets generation only.
 
-**Do this instead:** Focused **P1** rows; keep Dameng MERGE unit on existing P0; live/dist as opt-in or skipped-conditional.
+**Do this instead:** Shared **asset registry**; separate source types unchanged. Both may **reference** the same asset-id for boundary/network/path fields.
 
-### Anti-Pattern 4: Default-on console RBAC
+### Anti-Pattern 4: Client-side full synthetic generation for preview
 
-**What people do:** Flip `ConsoleSecurityProperties.enabled` to true globally.
+**What people do:** Reimplement boundary/line/circle algorithms in TypeScript for map preview.
 
-**Why it's wrong:** Breaks local/dev and existing console e2e assumptions built around open `/api/**`.
+**Why it's wrong:** Drifts from JTS/Haversine/seed semantics in `GeoSyntheticGenerator`; double maintenance.
 
-**Do this instead:** Document staging/e2e enable; keep `ConsoleAuthorizationIntegrationIT` green when enabled.
+**Do this instead:** Server capped preview endpoint for points; client Turf only for BBOX/CIRCLE **overlays** (visual bounds, not row generation).
+
+### Anti-Pattern 5: P0 promotion of geo-assets
+
+**What people do:** Add map Playwright to P0 merge gate.
+
+**Why it's wrong:** Tile/network flake and UI timing inflate 15-row gate; contradicts v2.2/v2.3 P0 freeze.
+
+**Do this instead:** P1 matrix row + `verify-console.ps1`; keep P0 at 15.
 
 ## Integration Points
 
@@ -233,68 +335,91 @@ DistributedJobPO (QUEUED → LEASED/RUNNING → SUCCESS/FAILED)
 
 | Service | Integration Pattern | Notes |
 |---------|---------------------|-------|
-| Managed JDBC engines (H2/PG/MySQL/KB/HG/CK/DM) | Catalog + dialect SQL builder + Testcontainers/opt-in | DM live remains `-Ddm.it=true` / env gate |
-| Kafka / ES | Catalog resolve via TemplateV2RuntimeServices | Out of v2.1 hardening focus |
-| Podman (distributed e2e) | Existing `e2e-distributed-podman.ps1` / staging docs | Link one path to harness P1 |
-| CI (GitHub Actions) | `harness-verify.yml` reads `p0.pass` | Do not change P0 semantics for flaky paths |
+| OpenStreetMap raster tiles | URL template in MapLibre basemap | Preview only; attribution required; may fail air-gapped — map still renders GeoJSON layer |
+| H2 metadata DB | Existing file DB + `db/schema.sql` DDL | Same backup as secrets/templates; watch CLOB growth |
+| Podman / Playwright | `verify-console.ps1` after GEO-07 | Upload + map smoke spec |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Console `/api` ↔ `TaskController` | Direct bean call via `TemplateEditorRunSupport` | Same spine as legacy `/task` |
-| Service ↔ Calcite | `TemplateV2Runner` + `RuntimeJdbcEndpointResolver` bean | Snap behavior only when context bound |
-| Service ↔ datasource-jdbc | Shared `ConnectionCatalog` API; dual resolvers coexist | Docs-only ownership in v2.1 |
-| Coordinator ↔ Worker | DB-backed `DistributedJobPO` + optional REST lease API | Worker reuses `DistributedJobLeaseRunner` |
-| Harness ↔ modules | Matrix `owner_module` + `linked_tests` | P1 for new proofs; P0 unchanged count/semantics |
+| console-web ↔ service | `/api/console/geo-assets/**` JSON/multipart | Vite dev proxy `/api` → `:9876` unchanged |
+| service ↔ geo module | `GeoJsonLoader` / `GeoResourceResolver` calls | No JPA in geo module |
+| service ↔ calcite | `GeoAssetResolver` injected into `V2SourceFactory` beans | Tests without service use classpath paths only (`getIfAvailable()`) |
+| `ConsoleUploadController` ↔ geo assets | **None** | Wizard file uploads for CSV/JSON sources remain separate |
+| `SecretService` pattern ↔ `GeoAssetService` | Parallel CRUD/list/resolve | Secrets resolve credentials; geo assets resolve GeoJSON text — do not merge tables |
+| Audit | `AuditService.record` on upload/delete | Mirror datasource/UDF governance visibility |
 
-## New vs Modified (v2.1)
+## New vs Modified (v2.3)
 
 | Area | New | Modified |
 |------|-----|----------|
-| HTTP managed-catalog / dialect journey | IT(s), possibly matrix P1 row, UAT notes | Thin glue only if polling helpers missing; **not** new run API |
-| Dameng live IT + Nyquist | VALIDATION.md hygiene; green-path docs | `ChunkedPipelineDamengUpsertIT` / `DamengTestSupport` wiring (opt-in) |
-| Resolver ownership | Docs + call-site inventory artifact | Javadoc cross-links if needed — **no class merge** |
-| Multi-JVM worker E2E | One harness-linked evidence path (script/IT) | Config/docs; reuse `DistributedJobService` / worker app |
-| Console RBAC | Staging/e2e enable docs; optional P1 matrix link | Keep default `enabled=false`; ensure existing IT green |
-| Harness | Focused **P1** rows for new proofs | Do **not** expand P0 gate for live/dist-only paths |
+| **GEO-05 persistence** | `GeoAssetPO`, `GeoAssetRepository`, `GeoAssetService`, `GeoAssetResolver`, `ConsoleGeoAssetController`, `geo_asset` DDL | `application.yaml` multipart + `data.generator.geo-assets.*` |
+| **GEO-05 runtime** | Asset-id pipeline ITs | `GeoResourceResolver`, `GeoSyntheticSourceVO`, `GeoJsonSourceVO`, `GeoSyntheticRequestMapper`, `GeoSyntheticSourceFactory`, `GeoJsonSourceFactory`, `CoreConfig` |
+| **GEO-07 console** | `GeoAssetsPage`, `GeoMapPreview`, map API client, Playwright spec | `App.tsx` route, nav/i18n, template editor geo preview hook |
+| **GEO-07 preview API** | `GET …/{id}/geojson`, optional `POST …/preview/synthetic` | None on existing `/task` or template run APIs |
+| **Docs / harness** | P1 row `geo-assets` (proposed) | `geo-synthetic-v2-source.md`, `geospatial-overview.md` |
+| **Unchanged** | — | `ConsoleUploadController`, `ConsoleWebConfig` (SPA fallback only), `TemplateV2Runner` orchestration, P0 gate count |
 
-## Suggested Build Order
+## Suggested Build Order (Phases 21+)
 
-Dependency-aware order (aligns with FEATURES.md P1→P2):
-
-1. **HTTP execute-path proof** (managed catalog ± dialect) — closes highest-value trust gap; establishes spine for later matrix rows.  
-   *Verify:* MockMvc/`@SpringBootTest` → `/task/run` or console run → terminal SUCCESS → sink `COUNT(*)` (or dialect-aware write).
-2. **Dameng live IT green path + Nyquist hygiene** — can parallelize docs/VALIDATION with (1); live IT needs env.  
-   *Verify:* `-Ddm.it=true` documented green; VALIDATION backfill for 07 / 07.1 / 08.
-3. **Resolver ownership docs + call-site inventory** — low coupling; do early to prevent accidental merge PRs during IT work.  
-   *Verify:* Inventory lists execute-path vs catalog-side callers; no resolver merge diff.
-4. **Multi-JVM worker E2E one path** — after HTTP spine familiarity; reuse distributed scripts.  
-   *Verify:* Coordinator enqueue → worker lease → SUCCESS; harness P1 link.
-5. **RBAC testable enable path** — independent of JDBC; document staging; keep default off.  
-   *Verify:* `ConsoleAuthorizationIntegrationIT` green with enable profile; docs for e2e/staging.
-6. **Focused P1 harness expansion** — last: wire rows for proofs that already exist.  
-   *Verify:* `verify-harness.ps1` still `p0.pass=true` (15 P0); new P1 rows reported in summary.
+Dependency-aware phasing aligned with `PITFALLS.md` and `PROJECT.md` equal-depth delivery:
 
 ```
-1. HTTP catalog/dialect proof     → verify: HTTP→SUCCESS→rows
-2. Dameng green path + Nyquist    → verify: opt-in IT + VALIDATION files
-3. Resolver docs/inventory        → verify: docs only, no merge
-4. Distributed one-path E2E       → verify: dual-JVM SUCCESS + P1 link
-5. RBAC enable path (default off) → verify: IT + staging docs
-6. P1 harness rows                → verify: p0.pass unchanged; P1 tracked
+Phase 21 — GEO-05 Backend (asset registry + runtime resolution)
+Phase 22 — GEO-07 Console (map UI + preview APIs consumption)
+Phase 23 — Docs, harness P1, milestone closeout
+```
+
+### Phase 21 — GEO-05: DB-backed assets + asset-id resolution
+
+1. **Schema + model** — `GeoAssetPO`, repository, `db/schema.sql` entry, `DataGeneratorProperties` limits.
+2. **`GeoAssetService`** — upload validate (size, feature count, `GeoJsonLoader`), CRUD, `resolveUtf8`, audit hooks.
+3. **`GeoAssetResolver` interface + `CoreConfig` bean** — service implements interface.
+4. **`ConsoleGeoAssetController`** — `POST` multipart upload, `GET` list, `GET /{id}/geojson`, `DELETE`; MockMvc ITs.
+5. **Resolver bridge** — extend `GeoResourceResolver` for `asset:` prefix; inject into geo factories.
+6. **VO + mapper** — `boundaryAssetId` / `networkAssetId` (and/or `assetId` on `GeoJsonSourceVO`); mutual exclusion validation in `GeoSyntheticRequestMapper`.
+7. **Runtime ITs** — `TemplateV2Runner` with H2-stored fixture asset-id; regression: all v2.2 classpath path ITs unchanged.
+
+*Verify:* Upload → list → template YAML with asset-id → run SUCCESS → rows; unknown asset-id fails at validate/run with clear error.
+
+### Phase 22 — GEO-07: Console map + preview
+
+1. **Frontend deps** — `maplibre-gl`, `react-map-gl/maplibre`, `@turf/bbox`, `@turf/circle` (lazy route).
+2. **`GeoAssetsPage`** — upload form, asset table (summaries), map panel on selection.
+3. **Template editor integration** — geo_synthetic / geojson source steps: asset picker (dropdown from list API), live preview side panel.
+4. **Preview behavior** — asset layer via `GET /{id}/geojson`; BBOX/CIRCLE via Turf; optional synthetic points via `POST /preview/synthetic`.
+5. **Playwright** — upload fixture, assert map layer visible, synthetic bbox overlay smoke.
+6. **Run `verify-console.ps1`**.
+
+*Verify:* Operator can upload, browse on map, configure `geo_synthetic` with asset-id, see boundary + bbox/circle preview without running full job.
+
+### Phase 23 — Docs + harness
+
+1. Update `geo-synthetic-v2-source.md` + `geospatial-overview.md` with asset-id YAML and console map pointers.
+2. Add P1 matrix row `geo-assets` linked to service IT + optional Playwright.
+3. Milestone audit; **do not** expand P0.
+
+```
+21a schema + GeoAssetService + REST        → verify: upload/list/get/delete IT
+21b GeoResourceResolver + factory wiring   → verify: asset-id TemplateV2Runner IT
+21c VO/mapper/validator                    → verify: v2.2 classpath ITs still green
+22a map deps + GeoAssetsPage               → verify: npm run build
+22b editor preview + synthetic overlay     → verify: Playwright smoke
+22c verify-console.ps1                     → verify: full pipeline green
+23  docs + P1 harness row                  → verify: p0.pass unchanged (15 rows)
 ```
 
 ## Sources
 
-- `.planning/PROJECT.md` — v2.1 goals / out of scope
-- `.planning/research/FEATURES.md` — feature landscape and priority matrix
-- `.planning/milestones/v2.0-MILESTONE-AUDIT.md` — accepted HTTP limit, Dameng opt-in, dual resolvers, Nyquist partial
-- `.planning/milestones/v2.0-REQUIREMENTS.md` — DIST-01 deferred; DS/RW/TEST shipped
-- Code: `TaskController`, `TemplateEditorRunSupport`, `TaskExecutionService`, `TemplateV2Runner`, `DefaultRuntimeJdbcEndpointResolver`, `JdbcCatalogResolver`, `DataSourceConfigService`, `ExecutionSnapshotConnectionCatalog`, `DistributedJobService`, `DistributedJobLeaseRunner`, `DataGeneratorWorkerApplication`, `ConsoleSecurityProperties`, `ConsoleAuthorizationFilter`
-- Harness: `.planning/test-matrix.yaml`, `scripts/verify-harness.ps1`, `AGENTS.md` merge criteria
-- Phase artifacts: 07.1 / 11 RESEARCH & VERIFICATION (snap: ownership; ManagedJdbcCatalogSinkE2eIT limits)
+- `.planning/PROJECT.md` — v2.3 scope (GEO-05, GEO-07), metadata DB decision, P0 freeze
+- `.planning/research/PITFALLS.md` — phase mapping, dual-resolution and upload anti-patterns
+- `.planning/research/STACK.md` — MapLibre/react-map-gl, `asset:` convention, multipart limits
+- `.planning/milestones/v2.2-REQUIREMENTS.md` — GEO-03 path-only baseline, deferred upload/map
+- `docs/geo-synthetic-v2-source.md`, `docs/geospatial-overview.md` — v2.2 runtime shape
+- Code: `SecretService`, `SecretEntryPO`, `ConsoleSecretController`, `ConsoleUploadController`, `GeoResourceResolver`, `GeoJsonLoader`, `GeoSyntheticSourceFactory`, `GeoSyntheticRequestMapper`, `GeoSyntheticRowSource`, `GeoJsonSourceVO`, `CoreConfig`, `ConsoleWebConfig`
+- Harness: `.planning/test-matrix.yaml`, `scripts/verify-harness.ps1`, `scripts/verify-console.ps1`
 
 ---
-*Architecture research for: data-generator v2.1 Hardening & Weak-Spot Closure*
-*Researched: 2026-07-25*
+*Architecture research for: data-generator v2.3 Geo Assets & Map Preview*
+*Researched: 2026-07-31*
