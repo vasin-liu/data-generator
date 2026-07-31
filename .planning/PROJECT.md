@@ -28,9 +28,16 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
 
-## Next Milestone Goals
+## Current Milestone: v2.3 Geo Assets & Map Preview
 
-Planning for the next milestone via `/gsd-new-milestone`. Candidate backlog items include common-data CRUD (DATA-01), GeoJSON asset upload (GEO-05), polygon synthesis (GEO-06), and console map preview (GEO-07) — not yet scoped.
+**Goal:** Operators can upload hosted GeoJSON assets (metadata DB), reference them by asset-id from V2 sources, and preview both assets and `geo_synthetic` configs on a console map.
+
+**Target features:**
+- GEO-05 — GeoJSON asset upload + DB persistence + asset-id references (path refs remain for fixtures)
+- GEO-07 — Console map: browse uploaded assets + preview `geo_synthetic` point/boundary config
+- Equal delivery depth for upload path and map preview (no half-finished UI)
+
+**Out of scope this milestone:** GEO-06 polygon synthesis; DATA-01 common-data CRUD; P0 gate inflation (default freeze at 15)
 
 ## Requirements
 

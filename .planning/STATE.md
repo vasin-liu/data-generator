@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-current_phase: none
-status: planning_next
-stopped_at: Milestone v2.2 archived
-last_updated: "2026-07-31T05:30:00.000Z"
+milestone: v2.3
+milestone_name: Geo Assets & Map Preview
+status: planning
+last_updated: "2026-07-31T08:01:53.840Z"
 last_activity: 2026-07-31
-last_activity_desc: Milestone v2.2 completed and archived
 progress:
   total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
   percent: 0
-current_phase_name: none
 ---
 
 # Project State
@@ -28,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-31)
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: Planning next milestone
-Last activity: 2026-07-31 — Milestone v2.2 completed and archived
+Status: Defining requirements
+Last activity: 2026-07-31 — Milestone v2.3 started
 
 ## Performance Metrics
 
