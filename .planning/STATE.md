@@ -1,37 +1,37 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.2
-milestone_name: V2 Geo Synthetic Source
-current_phase: 20
-status: completed
-stopped_at: Completed 20-pipeline-proof-docs-p1-03-PLAN.md
-last_updated: "2026-07-30T14:25:16.128Z"
-last_activity: 2026-07-30
-last_activity_desc: Phase 20 complete
+milestone: none
+milestone_name: none
+current_phase: none
+status: planning_next
+stopped_at: Milestone v2.2 archived
+last_updated: "2026-07-31T05:30:00.000Z"
+last_activity: 2026-07-31
+last_activity_desc: Milestone v2.2 completed and archived
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
-current_phase_name: Pipeline Proof + Docs + P1
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+current_phase_name: none
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-30)
+See: .planning/PROJECT.md (updated 2026-07-31)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** v2.2 milestone — `/gsd-complete-milestone`
+**Current focus:** Planning next milestone via `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 20
-Plan: Not started
-Status: Complete
-Last activity: 2026-07-30 — Phase 20 complete
+Phase: —
+Plan: —
+Status: Planning next milestone
+Last activity: 2026-07-31 — Milestone v2.2 completed and archived
 
 ## Performance Metrics
 
@@ -55,6 +55,16 @@ Last activity: 2026-07-30 — Phase 20 complete
 
 - Phases: 6 (12–17)
 - Plans: 18 (Phase 12: 2, 13: 5, 14: 2, 15: 3, 16: 3, 17: 3)
+- Status: All phases complete — archived via `/gsd-complete-milestone`
+
+**Velocity (v2.2):**
+
+- Phases: 3 (18–20)
+- Plans: 9
+- Tasks: 26
+- Commits: 71 (`v2.1` → HEAD)
+- Files: 129 changed (+6,569 / −57)
+- Timeline: 2026-07-30 → 2026-07-31 (2 days)
 - Status: All phases complete — archived via `/gsd-complete-milestone`
 
 ## Accumulated Context
@@ -94,7 +104,7 @@ None.
 - Boot 4 / internal Kafka-ES starter compatibility (see `.planning/codebase/CONCERNS.md`)
 - Console RBAC default-off for external deployments
 - Accepted v2.0 tech debt (Dameng CI, dual resolvers) — addressed in v2.1; not P0 inflation
-- Full v2.1 milestone archive (`milestones/v2.1-*`) deferred per D-16 until team requests
+- Accepted v2.2 tech debt: BboxPointGenerator retry duplication, inline linked_tests for matrix doc — see `milestones/v2.2-MILESTONE-AUDIT.md`
 
 ## Deferred Items
 
@@ -109,21 +119,19 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Nyquist hygiene phases 07/08/07.1 | Closed via DIAL-02 (Phase 13, 2026-07-28) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Process | v2.1 milestone archive tree | Deferred per D-16 | 2026-07-29 |
-| Phase 19-v2-geo-synthetic-source P01 | 12min | 3 tasks | 3 files |
-| Phase 19-v2-geo-synthetic-source P02 | 22min | 2 tasks | 2 files |
-| Phase 19-v2-geo-synthetic-source P03 | 45min | 3 tasks | 5 files |
-| Phase 20-pipeline-proof-docs-p1 P01 | 24min | 3 tasks | 1 files |
-| Phase 20-pipeline-proof-docs-p1 P02 | 15min | 3 tasks | 2 files |
-| Phase 20-pipeline-proof-docs-p1 P03 | 12min | 3 tasks | 2 files |
+| Product | GeoJSON asset upload (GEO-05) | Next milestone candidate | 2026-07-31 |
+| Product | Polygon synthesis (GEO-06) | Next milestone candidate | 2026-07-31 |
+| Product | Console map preview (GEO-07) | Next milestone candidate | 2026-07-31 |
+| Product | Common-data CRUD (DATA-01) | Next milestone candidate | 2026-07-31 |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-30T12:25:00.000Z
-Stopped at: Completed 20-pipeline-proof-docs-p1-03-PLAN.md
-Next: `/gsd-complete-milestone` for v2.2 archive
+Last session: 2026-07-31T05:30:00.000Z
+Stopped at: Milestone v2.2 archived
+Next: `/gsd-new-milestone`
 
 ## Operator Next Steps
 
-- Run `/gsd-complete-milestone` for v2.2 archive
+- Start the next milestone with `/gsd-new-milestone`

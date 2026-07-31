@@ -10,37 +10,27 @@
 
 **v2.1 shipped** HTTP execute-path proof for managed catalog/dialect, Dameng opt-in live path + Nyquist hygiene, dual JDBC resolver ownership docs, one multi-JVM worker E2E, RBAC enable-path (default-off), and focused P1 harness rows — P0 merge gate unchanged at 15.
 
+**v2.2 shipped** first-class Template V2 `geo_synthetic` source (four point-synthesis modes), BBOX/CIRCLE generator modes with seeded in-domain sampling, pipeline IT proof, geo_synthetic vs geojson docs, and P1 harness row — P0 merge gate unchanged at 15.
+
 ## Core Value
 
 Operators can define, extend, and trust data-generation pipelines: register custom logic (UDFs), apply rich transforms, and verify behavior through an automated test harness before shipping.
 
 ## Current State
 
-**Shipped: v2.1 Hardening & Weak-Spot Closure** (2026-07-29)
+**Shipped: v2.2 V2 Geo Synthetic Source** (2026-07-31)
 
-- HTTP `/task/run` proves managed JDBC catalog + PostgreSQL upsert (MockMvc ITs; not in-process-only)
-- Dameng live IT opt-in recipe + `rowsUpserted` metric fix; Nyquist VALIDATION hygiene for 07/07.1/08 and v2.1 phases 12–17
-- Dual JDBC resolver ownership doc + inventory (no code merge)
-- Host dual-JVM coordinator→worker SUCCESS (`verify-multi-jvm-worker.ps1`); P1 harness row
-- Header RBAC enable path documented/testable; default remains off
-- Four focused P1 matrix rows; `verify-harness.ps1` P0 gate still 15 rows
+- BBOX/CIRCLE geo generator modes with seeded, in-domain point synthesis
+- Template V2 `geo_synthetic` SourceVO + Factory + RowSource (path assets only; `geojson` read-only unchanged)
+- Four-mode `TemplateV2Runner` pipeline IT (boundary, line, bbox, circle)
+- Docs distinguish `geo_synthetic` vs `geojson` with minimal YAML examples
+- P1 harness row `geo-synthetic`; `verify-harness.ps1` P0 gate still 15 rows
 
-Archives: `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, `v2.1-MILESTONE-AUDIT.md`
+Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
 
-## Current Milestone: v2.2 V2 Geo Synthetic Source
+## Next Milestone Goals
 
-**Goal:** Make geographic point synthesis a first-class Template V2 source (`geo_synthetic`) without relying on the V1 geo iterator.
-
-**Target features:**
-- New `type: geo_synthetic` SourceVO + Factory + RowSource (Approach A)
-- Four modes: `BOUNDARY_POINTS`, `LINE_SAMPLE`, `BBOX`, `CIRCLE`
-- Path/`classpath:` assets only via `GeoResourceResolver` (upload deferred)
-- Keep `geojson` read-only; minimal SQL companion = documentation only
-- P1 matrix link for `geo-synthetic`; P0 merge gate unchanged
-
-**Spec:** `docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md`
-
-**Out of scope this milestone:** common-data CRUD, GeoJSON asset upload, polygon synthesis, console map UI, P0 promotion
+Planning for the next milestone via `/gsd-new-milestone`. Candidate backlog items include common-data CRUD (DATA-01), GeoJSON asset upload (GEO-05), polygon synthesis (GEO-06), and console map preview (GEO-07) — not yet scoped.
 
 ## Requirements
 
@@ -78,11 +68,11 @@ Archives: `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, `v2.1-
 - ✓ RBAC testable enable path, default-off (SEC-01) — Phase 16
 - ✓ Focused P1 harness rows; P0 unchanged (TEST-09) — Phase 17
 
-### Active (v2.2)
+### Validated (v2.2)
 
-- [ ] V2 `geo_synthetic` source (four modes; path assets)
-- [ ] Docs: geo_synthetic vs geojson + minimal SQL companion
-- [ ] P1 matrix linkage for geo-synthetic; P0 gate frozen
+- ✓ V2 `geo_synthetic` source (four modes; path assets) — Phases 18–20 (GEO-01, GEO-02, GEO-03)
+- ✓ Docs: geo_synthetic vs geojson + minimal SQL companion — Phase 20 (GEO-04)
+- ✓ P1 matrix linkage for geo-synthetic; P0 gate frozen — Phase 20 (TEST-10)
 
 ### Out of Scope
 
@@ -107,6 +97,7 @@ Brownfield codebase mapped 2026-06-17.
 - **v1.0:** 5 phases / 18 plans over 2026-06-17 → 2026-06-23 (~46 commits, +13k LOC in milestone range)
 - **v2.0:** 7 phases / 36 plans over 2026-06-23 → 2026-07-25 (~130 commits, +33k / −0.5k LOC; 331 files)
 - **v2.1:** 6 phases / 18 plans over 2026-07-25 → 2026-07-29
+- **v2.2:** 3 phases / 9 plans over 2026-07-30 → 2026-07-31 (~71 commits, +6,569 / −57 LOC; 129 files)
 
 Known pressure points:
 
@@ -143,9 +134,9 @@ Known pressure points:
 | v2.1: breadth hardening over new features | Close proof/reliability gaps after v2.0 | ✓ Good — shipped 2026-07-29 |
 | v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | ✓ Good — SEC-01; SEC-02 deferred |
 | v2.1 P1 rows for proofs; no P0 promotion | Keep merge gate stable | ✓ Good — TEST-09 |
-| v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | — Pending |
-| v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | — Pending |
-| v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | — Pending |
+| v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | ✓ Good — shipped 2026-07-31 |
+| v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | ✓ Good — GEO-05 deferred |
+| v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | ✓ Good — TEST-10 |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -168,6 +159,13 @@ Hardening milestone: HTTP execute proof, Dameng/Nyquist hygiene, resolver owners
 
 </details>
 
+<details>
+<summary>v2.2 planning snapshot (2026-07-30 → 2026-07-31)</summary>
+
+Geo synthetic milestone: BBOX/CIRCLE generator modes, Template V2 `geo_synthetic` source, four-mode pipeline IT, docs vs `geojson`, P1 harness row. See `milestones/v2.2-REQUIREMENTS.md` and `milestones/v2.2-MILESTONE-AUDIT.md`.
+
+</details>
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -186,4 +184,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-30 — Milestone v2.2 started (V2 Geo Synthetic Source)*
+*Last updated: 2026-07-31 — Milestone v2.2 shipped (V2 Geo Synthetic Source)*

@@ -1,24 +1,32 @@
 # Milestones
 
-## v2.2 — V2 Geo Synthetic Source
+## v2.2 — V2 Geo Synthetic Source (Shipped: 2026-07-31)
 
-**Started:** 2026-07-30  
-**Status:** Planning  
-**Phases:** 18–20  
-**Requirements:** GEO-01, GEO-02, GEO-03, GEO-04, TEST-10  
-**Spec:** [docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md](../docs/superpowers/specs/2026-07-30-geo-synthetic-v2-source-design.md)
+**Phases completed:** 3 phases, 9 plans, 26 tasks  
+**Git range:** `v2.1` → `HEAD` (71 commits, 129 files, +6,569 / −57 lines)  
+**Timeline:** 2026-07-30 → 2026-07-31 (2 days)  
+**Closeout:** `tech_debt` accepted (5/5 requirements; Nyquist overall compliant)  
+**Known deferred items at close:** GEO-05, GEO-06, GEO-07, DATA-01, P0 promotion of geo-synthetic (see `milestones/v2.2-MILESTONE-AUDIT.md`)
 
-### Scope
+**Key accomplishments:**
 
-- First-class Template V2 `geo_synthetic` source (Approach A)
-- Modes: BOUNDARY_POINTS, LINE_SAMPLE, BBOX, CIRCLE
-- Path assets only; `geojson` read-only unchanged
-- P1 matrix link; P0 gate frozen at 15
+- BBOX/CIRCLE geo generator modes with seeded, in-domain point synthesis (GEO-02 foundation)
+- Template V2 `geo_synthetic` SourceVO + Factory + RowSource; path assets only (GEO-01, GEO-03)
+- Four-mode `TemplateV2Runner` pipeline IT — boundary, line, bbox, circle (GEO-02 closeout)
+- Docs distinguish `geo_synthetic` vs `geojson` with minimal YAML examples (GEO-04)
+- P1 harness row `geo-synthetic` with three linked tests; P0 gate frozen at 15 (TEST-10)
 
-### Artifacts
+### Archives
 
-- Requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
-- Roadmap: [ROADMAP.md](ROADMAP.md)
+- Roadmap: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
+- Requirements: [milestones/v2.2-REQUIREMENTS.md](milestones/v2.2-REQUIREMENTS.md)
+- Audit: [milestones/v2.2-MILESTONE-AUDIT.md](milestones/v2.2-MILESTONE-AUDIT.md)
+- Phases: `.planning/phases/18-geo-generator-modes/`, `19-v2-geo-synthetic-source/`, `20-pipeline-proof-docs-p1/` (retained in place)
+
+### Known Gaps at Close
+
+- None for v2.2 requirements (5/5 satisfied)
+- Accepted tech debt: generator retry duplication, matrix inline linked_tests, design deferrals GEO-05..07 / DATA-01
 
 ---
 

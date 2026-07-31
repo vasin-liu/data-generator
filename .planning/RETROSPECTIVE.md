@@ -2,6 +2,53 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v2.2 — V2 Geo Synthetic Source
+
+**Shipped:** 2026-07-31
+**Phases:** 3 | **Plans:** 9 | **Tasks:** 26
+
+### What Was Built
+
+- BBOX/CIRCLE modes in `data-generator-geo` with seeded, in-domain point synthesis
+- Template V2 `geo_synthetic` SourceVO, Factory, RowSource, and CoreConfig registration
+- Four-mode `TemplateV2Runner` pipeline IT with passthrough SQL and console sink
+- `docs/geo-synthetic-v2-source.md` distinguishing `geo_synthetic` vs read-only `geojson`
+- P1 harness row `geo-synthetic` with three linked calcite tests; P0 frozen at 15
+
+### What Worked
+
+- Three-phase split (generator → source → proof/docs) kept dependencies linear and auditable
+- Reusing `GeoResourceResolver` and existing boundary/line generators minimized new surface area
+- Dedicated pipeline IT closed GEO-02 without HTTP or console E2E overhead
+- Nyquist VALIDATION backfill from existing VERIFICATION kept closeout honest without new tests
+
+### What Was Inefficient
+
+- Phase timing rows leaked into STATE Deferred Items — should stay in phase SUMMARYs only
+- Matrix doc generator requires inline `linked_tests` arrays (empty YAML arrays break column output)
+- Milestone shipped in ~2 calendar days — velocity metrics less meaningful at this scale
+
+### Patterns Established
+
+- Geo V2: `geo_synthetic` (synthesis) vs `geojson` (read-only) as distinct source types
+- Generator-first then SourceVO: extend `data-generator-geo` before calcite Factory wiring
+- P1 proof rows for new source types; defer P0 promotion until merge-gate review
+
+### Key Lessons
+
+1. Split generator and pipeline evidence across phases when REQ spans module boundaries
+2. Document source-type distinctions in dedicated doc, not only in overview pages
+3. Accept intentional code duplication when shared-helper extraction is deferred (D-10)
+4. Run validate-phase Nyquist hygiene before milestone audit to avoid false partials
+
+### Cost Observations
+
+- Model mix: not tracked this milestone
+- Timeline: 2026-07-30 → 2026-07-31 (~71 commits, +6,569 LOC)
+- Closeout: `tech_debt` accepted; 5/5 requirements, Nyquist compliant
+
+---
+
 ## Milestone: v2.0 — Reader/Writer & Datasource Platform
 
 **Shipped:** 2026-07-25
@@ -59,6 +106,8 @@
 |-----------|--------|-------|------------|
 | v1.0 | 5 | 18 | Quality-first harness before feature breadth |
 | v2.0 | 7 | 36 | Insert platform + RW gap closure; inserted 07.1 + closeout 11 |
+| v2.1 | 6 | 18 | Hardening proofs; P1 rows without P0 inflation |
+| v2.2 | 3 | 9 | First-class geo_synthetic V2 source; P1 harness only |
 
 ### Cumulative Quality
 
@@ -66,6 +115,8 @@
 |-----------|---------|------|----------------|
 | v1.0 | 7 | verify-harness | Skipped (accepted) |
 | v2.0 | 15 | verify-harness | tech_debt (reqs 13/13; no critical gaps) |
+| v2.1 | 15 | verify-harness | tech_debt (reqs 8/8; Nyquist compliant) |
+| v2.2 | 15 | verify-harness | tech_debt (reqs 5/5; Nyquist compliant) |
 
 ### Top Lessons (Verified Across Milestones)
 
