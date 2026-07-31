@@ -76,7 +76,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 
 ### Phase list
 
-- [ ] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01)
+- [ ] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (0/3 plans executed)
 - [ ] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13)
 - [ ] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11)
 
@@ -99,7 +99,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 5. Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (coordinator and worker share metadata DB)
 6. Upload and delete emit audit events; when console RBAC is enabled, geo asset endpoints respect the existing enable flag (default off)
 
-**Plans**: 0 plans
+**Plans**: 3/3 planned (21-01, 21-02, 21-03) — ready to execute
 
 ### Phase 22: Console Map + geo_synthetic Editor
 
@@ -140,7 +140,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 0/? | Not started | — |
+| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 0/3 | Planned | — |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 0/? | Not started | — |
 | 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 
@@ -148,4 +148,4 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 |-----------|--------|--------|---------|
 | v2.3 Geo Assets & Map Preview | 21–23 (0/? plans) | Planning | — |
 
-**Next:** `/gsd-plan-phase 21`
+**Next:** `/gsd-execute-phase 21`
