@@ -1,5 +1,28 @@
 # Milestones
 
+## v2.3 — Geo Assets & Map Preview (Planning)
+
+**Status:** Planning  
+**Phases:** 21–23 (0 plans)  
+**Timeline:** Started 2026-07-31  
+**Goal:** Hosted GeoJSON assets in metadata DB, asset-id template binding, console map preview for assets and `geo_synthetic` — equal depth.
+
+**Requirements:** GEO-05, GEO-07, GEO-08, GEO-09, GEO-10, GEO-11, GEO-12, GEO-13, GOV-01, DOC-01, TEST-11 (11 total)
+
+**Key deliverables (planned):**
+
+- GeoJSON upload + metadata DB persistence + list/get/delete with referential guard (GEO-05, GEO-08, GEO-09)
+- Runtime `asset:{id}` resolution on execute path for geojson + geo_synthetic (GEO-10, GEO-11)
+- Audit on upload/delete; RBAC respects existing enable flag (GOV-01)
+- Console geo-assets map view + `geo_synthetic` config preview + template editor (GEO-07, GEO-12, GEO-13)
+- Operator docs + optional P1 `geo-assets` harness row; P0 frozen at 15 (DOC-01, TEST-11)
+
+**Roadmap:** [.planning/ROADMAP.md](ROADMAP.md) — **Next:** `/gsd-plan-phase 21`
+
+**Deferred from v2.2:** GEO-05, GEO-07 (now in scope); GEO-06, DATA-01 remain deferred
+
+---
+
 ## v2.2 — V2 Geo Synthetic Source (Shipped: 2026-07-31)
 
 **Phases completed:** 3 phases, 9 plans, 26 tasks  

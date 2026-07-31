@@ -58,23 +58,23 @@ Deferred beyond v2.3.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEO-05 | TBD | Pending |
-| GEO-08 | TBD | Pending |
-| GEO-09 | TBD | Pending |
-| GEO-10 | TBD | Pending |
-| GEO-11 | TBD | Pending |
-| GEO-07 | TBD | Pending |
-| GEO-12 | TBD | Pending |
-| GEO-13 | TBD | Pending |
-| GOV-01 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| TEST-11 | TBD | Pending |
+| GEO-05 | 21 | Pending |
+| GEO-08 | 21 | Pending |
+| GEO-09 | 21 | Pending |
+| GEO-10 | 21 | Pending |
+| GEO-11 | 21 | Pending |
+| GOV-01 | 21 | Pending |
+| GEO-07 | 22 | Pending |
+| GEO-12 | 22 | Pending |
+| GEO-13 | 22 | Pending |
+| DOC-01 | 23 | Pending |
+| TEST-11 | 23 | Pending |
 
 **Coverage:**
 
 - v2.3 requirements: 11 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 11
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-31*  

@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-07-31T08:01:53.840Z"
 last_activity: 2026-07-31
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-31)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Planning next milestone via `/gsd-new-milestone`
+**Current focus:** Milestone v2.3 — Geo Assets & Map Preview (Phases 21–23)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 21 — Geo Asset Registry + Runtime Resolution (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-31 — Milestone v2.3 started
+Status: Roadmap locked — ready for `/gsd-plan-phase 21`
+Last activity: 2026-07-31 — v2.3 roadmap created (Phases 21–23)
 
 ## Performance Metrics
 
@@ -115,19 +115,19 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Nyquist hygiene phases 07/08/07.1 | Closed via DIAL-02 (Phase 13, 2026-07-28) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Process | v2.1 milestone archive tree | Deferred per D-16 | 2026-07-29 |
-| Product | GeoJSON asset upload (GEO-05) | Next milestone candidate | 2026-07-31 |
-| Product | Polygon synthesis (GEO-06) | Next milestone candidate | 2026-07-31 |
-| Product | Console map preview (GEO-07) | Next milestone candidate | 2026-07-31 |
+| Product | GeoJSON asset upload (GEO-05) | In scope v2.3 Phase 21 | 2026-07-31 |
+| Product | Polygon synthesis (GEO-06) | Deferred past v2.3 | 2026-07-31 |
+| Product | Console map preview (GEO-07) | In scope v2.3 Phase 22 | 2026-07-31 |
 | Product | Common-data CRUD (DATA-01) | Next milestone candidate | 2026-07-31 |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-07-31T05:30:00.000Z
-Stopped at: Milestone v2.2 archived
-Next: `/gsd-new-milestone`
+Last session: 2026-07-31T22:19:00.000Z
+Stopped at: v2.3 roadmap created
+Next: `/gsd-plan-phase 21`
 
 ## Operator Next Steps
 
-- Start the next milestone with `/gsd-new-milestone`
+- Plan Phase 21 with `/gsd-plan-phase 21`

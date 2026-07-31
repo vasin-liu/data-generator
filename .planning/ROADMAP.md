@@ -6,6 +6,7 @@
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
 - ✅ **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (shipped 2026-07-29)
 - ✅ **v2.2 V2 Geo Synthetic Source** — Phases 18-20 (shipped 2026-07-31)
+- **v2.3 Geo Assets & Map Preview** — Phases 21-23 (planning)
 
 ## Phases
 
@@ -62,10 +63,89 @@ Full archive: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 
 </details>
 
+## Milestone v2.3: Geo Assets & Map Preview
+
+**Status:** Planning  
+**Phases:** 21–23  
+**Requirements:** GEO-05, GEO-07, GEO-08, GEO-09, GEO-10, GEO-11, GEO-12, GEO-13, GOV-01, DOC-01, TEST-11  
+**Research:** [.planning/research/SUMMARY.md](research/SUMMARY.md)
+
+### Overview
+
+Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metadata DB (asset-id references), runtime `asset:{id}` resolution on the execute path, and equal-depth console map preview for uploaded assets and `geo_synthetic` configuration. Path/`classpath:` fallback preserved; P0 merge gate frozen at 15.
+
+### Phase list
+
+- [ ] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01)
+- [ ] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13)
+- [ ] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11)
+
+### Phase Details
+
+### Phase 21: Geo Asset Registry + Runtime Resolution
+
+**Goal**: Operators can upload, browse, and safely delete GeoJSON assets; templates bind via asset-id; runs resolve `asset:{id}` on the execute path — not console-only.
+
+**Depends on**: v2.2 complete (Phase 20)
+
+**Requirements**: GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01
+
+**Success Criteria** (observable):
+
+1. Operator uploads GeoJSON via console API; platform validates geometry, enforces max bytes and feature count, persists body in metadata DB, and returns a stable asset-id
+2. Operator lists assets (metadata without full body) and fetches a single asset's GeoJSON by asset-id, including derived bbox and featureCount captured at ingest
+3. Operator attempting to delete an asset still referenced by a stored template receives 409 with usage hints instead of orphaning runs
+4. Operator binds `geo_synthetic` (boundary/network) and `geojson` sources via asset-id; path and `classpath:` locations remain valid
+5. Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (coordinator and worker share metadata DB)
+6. Upload and delete emit audit events; when console RBAC is enabled, geo asset endpoints respect the existing enable flag (default off)
+
+**Plans**: 0 plans
+
+### Phase 22: Console Map + geo_synthetic Editor
+
+**Goal**: Equal-depth console UX — browse uploaded assets on a map, preview `geo_synthetic` config, and edit `geo_synthetic` sources in the template editor (closes v2.2 YAML-only gap).
+
+**Depends on**: Phase 21
+
+**Requirements**: GEO-07, GEO-12, GEO-13
+
+**Success Criteria** (observable):
+
+1. Operator opens a console geo-assets view and sees the selected uploaded asset rendered on a map
+2. Operator previews a `geo_synthetic` source config on the map (boundary/network overlay and/or BBOX/CIRCLE guides)
+3. Preview UX documents seed behavior so operators do not mistake preview sampling for full run output
+4. Console template editor supports `geo_synthetic` as an editable source kind with an asset picker
+5. Map asset layers use the same resolution spine as runtime (server GeoJSON for assets; client Turf overlays for BBOX/CIRCLE guides)
+
+**Plans**: 0 plans
+
+### Phase 23: Docs + Harness Closeout
+
+**Goal**: Operator documentation for asset-id binding and map preview; optional P1 harness linkage without P0 gate inflation.
+
+**Depends on**: Phase 22
+
+**Requirements**: DOC-01, TEST-11
+
+**Success Criteria** (observable):
+
+1. Maintainers and operators have docs for asset-id YAML examples, path vs asset-id, map preview usage, and upload size limits
+2. Feature matrix may link a P1 `geo-assets` (or equivalent) row to real tests when stable
+3. `verify-harness.ps1` P0 set remains 15 rows — no P0 promotion of geo-assets
+4. Geo-assets verification slice (Maven IT + console build) is green in harness summary
+
+**Plans**: 0 plans
+
 ## Progress
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 0/? | Not started | — |
+| 22. Console Map + geo_synthetic Editor | v2.3 | 0/? | Not started | — |
+| 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
-| v2.2 V2 Geo Synthetic Source | 18–20 (9/9 plans) | Complete | 2026-07-31 |
+| v2.3 Geo Assets & Map Preview | 21–23 (0/? plans) | Planning | — |
 
-**Next:** `/gsd-new-milestone`
+**Next:** `/gsd-plan-phase 21`
