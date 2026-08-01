@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: data-generator-service
+  servlet:
+    multipart:
+      # Raised above Boot defaults so district-scale GeoJSON reaches application validation (D-06).
+      max-file-size: 55MB
+      max-request-size: 56MB
   jpa:
     open-in-view: false
   h2:
@@ -226,6 +231,9 @@ spring:
         validation-query: SELECT 1
 data:
   generator:
+    geo-assets:
+      max-bytes: 52428800
+      max-features: 10000
     v1-execution:
       enabled: false
     schedule:

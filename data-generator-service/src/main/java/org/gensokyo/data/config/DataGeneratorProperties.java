@@ -150,15 +150,44 @@ public class DataGeneratorProperties {
     }
 
     /**
+     * Upload validation limits for durable GeoJSON assets (Phase 21).
+     */
+    private GeoAssets geoAssets = new GeoAssets();
+
+    /**
      * Platform defaults for remote AI runtime throttling.
      */
     private AiRuntime aiRuntime = new AiRuntime();
+
+    /**
+     * @return geo asset upload limits (never null)
+     */
+    public GeoAssets getGeoAssets() {
+        return geoAssets == null ? new GeoAssets() : geoAssets;
+    }
 
     /**
      * @return AI runtime settings (never null)
      */
     public AiRuntime getAiRuntime() {
         return aiRuntime == null ? new AiRuntime() : aiRuntime;
+    }
+
+    /**
+     * Nested binding for {@code data.generator.geo-assets.*}.
+     */
+    @Getter
+    @Setter
+    public static class GeoAssets {
+        /**
+         * Maximum allowed GeoJSON upload size in bytes (default 50 MiB).
+         */
+        private long maxBytes = 52_428_800L;
+
+        /**
+         * Maximum allowed feature count per asset.
+         */
+        private int maxFeatures = 10_000;
     }
 
     /**
