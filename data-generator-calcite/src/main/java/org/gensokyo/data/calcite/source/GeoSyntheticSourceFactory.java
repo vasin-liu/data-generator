@@ -7,6 +7,7 @@ package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.RowSource;
 import org.gensokyo.data.calcite.V2SourceFactory;
+import org.gensokyo.data.geo.GeoAssetResolver;
 import org.gensokyo.data.model.v2.GeoSyntheticSourceVO;
 import org.gensokyo.data.model.v2.SourceVO;
 
@@ -17,6 +18,24 @@ import org.gensokyo.data.model.v2.SourceVO;
  * @since 2026-07-30
  */
 public class GeoSyntheticSourceFactory implements V2SourceFactory {
+
+    private final GeoAssetResolver geoAssetResolver;
+
+    /**
+     * Creates a factory without metadata DB asset resolution (classpath/filesystem only).
+     */
+    public GeoSyntheticSourceFactory() {
+        this(null);
+    }
+
+    /**
+     * Creates a factory that resolves {@code asset:{uuid}} locations via the given resolver.
+     *
+     * @param geoAssetResolver optional metadata DB asset resolver
+     */
+    public GeoSyntheticSourceFactory(GeoAssetResolver geoAssetResolver) {
+        this.geoAssetResolver = geoAssetResolver;
+    }
 
     /**
      * Returns {@code true} when the polymorphic source is a {@link GeoSyntheticSourceVO}.
@@ -38,6 +57,6 @@ public class GeoSyntheticSourceFactory implements V2SourceFactory {
      */
     @Override
     public RowSource create(String name, SourceVO source) {
-        return new GeoSyntheticRowSource(name, (GeoSyntheticSourceVO) source);
+        return new GeoSyntheticRowSource(name, (GeoSyntheticSourceVO) source, geoAssetResolver);
     }
 }

@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.geo.io;
 
+import org.gensokyo.data.geo.GeoAssetResolver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -42,6 +43,24 @@ class GeoJsonLoaderTests {
     void loadFeatureCollectionFromClasspath() throws Exception {
         List<GeoFeature> features = GeoJsonLoader.loadFeatureCollection("classpath:geo/two_feature_collection.geojson");
         Assertions.assertEquals(2, features.size());
+        Assertions.assertInstanceOf(Point.class, features.get(0).geometry());
+    }
+
+    @Test
+    void loadFeatureCollectionFromAsset_resolvesViaStub() throws Exception {
+        String assetGeoJson = """
+                {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[1,2]},"properties":{}}]}
+                """;
+        GeoAssetResolver stub = assetId -> {
+            if ("test-asset-id".equals(assetId)) {
+                return assetGeoJson;
+            }
+            throw new IllegalArgumentException("Unknown geo asset id: " + assetId);
+        };
+
+        List<GeoFeature> features = GeoJsonLoader.loadFeatureCollection("asset:test-asset-id", stub);
+
+        Assertions.assertEquals(1, features.size());
         Assertions.assertInstanceOf(Point.class, features.get(0).geometry());
     }
 }

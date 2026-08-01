@@ -140,4 +140,63 @@ class GeoSyntheticRequestMapperTests {
         Assertions.assertTrue(error.getMessage().contains(SOURCE_NAME));
         Assertions.assertTrue(error.getMessage().contains("radiusMeters"));
     }
+
+    @Test
+    void boundaryAssetId_normalizesToAssetPrefix() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("BOUNDARY_POINTS");
+        source.setBoundaryAssetId("abc-123");
+        source.setCount(5);
+
+        GeoGenerationRequest request = GeoSyntheticRequestMapper.toRequest(SOURCE_NAME, source);
+
+        Assertions.assertEquals("asset:abc-123", request.getBoundaryPath());
+        Assertions.assertDoesNotThrow(request::validate);
+    }
+
+    @Test
+    void networkAssetId_normalizesToAssetPrefix() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("LINE_SAMPLE");
+        source.setNetworkAssetId("net-456");
+        GeoSyntheticSampleVO sample = new GeoSyntheticSampleVO();
+        sample.setStrategy("BY_COUNT");
+        source.setSample(sample);
+        source.setCount(3);
+
+        GeoGenerationRequest request = GeoSyntheticRequestMapper.toRequest(SOURCE_NAME, source);
+
+        Assertions.assertEquals("asset:net-456", request.getNetworkPath());
+        Assertions.assertDoesNotThrow(request::validate);
+    }
+
+    @Test
+    void boundaryPathAndBoundaryAssetId_bothSet_throwsWithSourceAndFields() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("BOUNDARY_POINTS");
+        source.setBoundaryPath("classpath:geo/南沙区边界.geojson");
+        source.setBoundaryAssetId("abc-123");
+        source.setCount(1);
+
+        IllegalArgumentException error = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> GeoSyntheticRequestMapper.toRequest(SOURCE_NAME, source));
+
+        Assertions.assertTrue(error.getMessage().contains(SOURCE_NAME));
+        Assertions.assertTrue(error.getMessage().contains("boundaryPath"));
+        Assertions.assertTrue(error.getMessage().contains("boundaryAssetId"));
+    }
+
+    @Test
+    void boundaryPathAssetPrefix_passthroughWithoutDedicatedField() {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode("BOUNDARY_POINTS");
+        source.setBoundaryPath("asset:existing-uuid");
+        source.setCount(2);
+
+        GeoGenerationRequest request = GeoSyntheticRequestMapper.toRequest(SOURCE_NAME, source);
+
+        Assertions.assertEquals("asset:existing-uuid", request.getBoundaryPath());
+        Assertions.assertDoesNotThrow(request::validate);
+    }
 }

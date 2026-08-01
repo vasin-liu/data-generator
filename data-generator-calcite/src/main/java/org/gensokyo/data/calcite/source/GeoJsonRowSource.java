@@ -6,6 +6,7 @@
 package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.RowSource;
+import org.gensokyo.data.geo.GeoAssetResolver;
 import org.gensokyo.data.geo.GeoOutputFormatKind;
 import org.gensokyo.data.geo.format.GeoFeatureRowFormatter;
 import org.gensokyo.data.geo.format.GeoOutputColumnNames;
@@ -41,16 +42,25 @@ public class GeoJsonRowSource implements RowSource {
      * @param source GeoJSON source configuration
      */
     public GeoJsonRowSource(String name, GeoJsonSourceVO source) {
+        this(name, source, null);
+    }
+
+    /**
+     * Reads the configured GeoJSON location and builds rows plus an inferred schema when none is declared.
+     *
+     * @param name   logical source name
+     * @param source GeoJSON source configuration
+     * @param assets optional resolver for {@code asset:{uuid}} locations
+     */
+    public GeoJsonRowSource(String name, GeoJsonSourceVO source, GeoAssetResolver assets) {
         this.name = name;
-        if (source.getPath() == null || source.getPath().isBlank()) {
-            throw new IllegalArgumentException("GEOJSON source path must not be blank for source [" + name + "]");
-        }
+        String location = GeoJsonLocationMapper.resolveLocation(name, source);
         GeoJsonSourceOutputVO output = source.getOutput() == null ? new GeoJsonSourceOutputVO() : source.getOutput();
         GeoOutputFormatKind format = output.getFormat() == null ? GeoOutputFormatKind.columns : output.getFormat();
         GeoOutputColumnNames columnNames = output.getColumnNames() == null ? new GeoOutputColumnNames() : output.getColumnNames();
         boolean includeProperties = output.isIncludeProperties();
         try {
-            List<GeoFeature> features = GeoJsonLoader.loadFeatureCollection(source.getPath());
+            List<GeoFeature> features = GeoJsonLoader.loadFeatureCollection(location, assets);
             List<Map<String, Object>> generated = new ArrayList<>(features.size());
             for (GeoFeature feature : features) {
                 generated.add(GeoFeatureRowFormatter.format(feature, format, columnNames, includeProperties));
@@ -72,7 +82,7 @@ public class GeoJsonRowSource implements RowSource {
                 this.rows.add(new Row(new LinkedHashMap<>(values)));
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to read GEOJSON source [" + name + "] at [" + source.getPath() + "]", e);
+            throw new IllegalArgumentException("Failed to read GEOJSON source [" + name + "] at [" + location + "]", e);
         }
     }
 

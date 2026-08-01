@@ -5,6 +5,7 @@
  */
 package org.gensokyo.data.geo.io;
 
+import org.gensokyo.data.geo.GeoAssetResolver;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -48,7 +49,20 @@ public final class GeoJsonLoader {
      * @throws IOException when the file cannot be read
      */
     public static Geometry loadGeometry(String location, int featureIndex) throws IOException {
-        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        return loadGeometry(location, featureIndex, null);
+    }
+
+    /**
+     * Loads a geometry from a GeoJSON resource path.
+     *
+     * @param location     classpath, filesystem, or {@code asset:{uuid}} location
+     * @param featureIndex feature index when root is a FeatureCollection
+     * @param assets       optional resolver for {@code asset:} locations
+     * @return JTS geometry
+     * @throws IOException when the file cannot be read
+     */
+    public static Geometry loadGeometry(String location, int featureIndex, GeoAssetResolver assets) throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location, assets));
         return parseGeometry(extractGeometryNode(root, featureIndex));
     }
 
@@ -64,7 +78,24 @@ public final class GeoJsonLoader {
      */
     public static GeoFeature loadFeature(String location, int featureIndex, boolean randomFeature, long seed)
             throws IOException {
-        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        return loadFeature(location, featureIndex, randomFeature, seed, null);
+    }
+
+    /**
+     * Loads one feature (geometry + properties) from a GeoJSON resource.
+     *
+     * @param location      classpath, filesystem, or {@code asset:{uuid}} location
+     * @param featureIndex  index when not random
+     * @param randomFeature when true, pick a random feature using {@code seed}
+     * @param seed          random seed for feature selection
+     * @param assets        optional resolver for {@code asset:} locations
+     * @return feature payload
+     * @throws IOException when the file cannot be read
+     */
+    public static GeoFeature loadFeature(
+            String location, int featureIndex, boolean randomFeature, long seed, GeoAssetResolver assets)
+            throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location, assets));
         JsonNode featureNode = extractFeatureNode(root, featureIndex, randomFeature, seed);
         return parseGeoFeature(featureNode);
     }
@@ -100,7 +131,19 @@ public final class GeoJsonLoader {
      * @throws IOException when the resource cannot be read
      */
     public static List<GeoFeature> loadFeatureCollection(String location) throws IOException {
-        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location));
+        return loadFeatureCollection(location, null);
+    }
+
+    /**
+     * Loads every {@code Feature} from a GeoJSON root {@code Feature} or {@code FeatureCollection}.
+     *
+     * @param location classpath, filesystem, or {@code asset:{uuid}} location understood by {@link GeoResourceResolver}
+     * @param assets   optional resolver for {@code asset:} locations
+     * @return features in GeoJSON array order
+     * @throws IOException when the resource cannot be read
+     */
+    public static List<GeoFeature> loadFeatureCollection(String location, GeoAssetResolver assets) throws IOException {
+        JsonNode root = MAPPER.readTree(GeoResourceResolver.readUtf8(location, assets));
         JsonNode typeNode = root.get("type");
         if (typeNode == null || !typeNode.isString()) {
             throw new IllegalArgumentException("Invalid GeoJSON format: missing 'type' field");

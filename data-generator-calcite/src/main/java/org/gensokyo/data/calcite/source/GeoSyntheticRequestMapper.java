@@ -10,14 +10,15 @@ import org.gensokyo.data.geo.GeoGenerationMode;
 import org.gensokyo.data.geo.GeoGenerationRequest;
 import org.gensokyo.data.geo.GeoOutputFormatKind;
 import org.gensokyo.data.geo.GeoSampleStrategyKind;
+import org.gensokyo.data.geo.io.GeoResourceResolver;
 import org.gensokyo.data.model.v2.GeoSyntheticSourceOutputVO;
 import org.gensokyo.data.model.v2.GeoSyntheticSourceVO;
 
 /**
  * Maps Template V2 {@link GeoSyntheticSourceVO} to {@link GeoGenerationRequest} (D-04).
  *
- * <p>Expands YAML {@code bbox} / {@code center} arrays into flat request fields; path resolution
- * stays in {@code GeoSyntheticGenerator} via {@code GeoResourceResolver} (GEO-03 / D-08).</p>
+ * <p>Expands YAML {@code bbox} / {@code center} arrays into flat request fields. Dedicated asset-id fields and
+ * {@code asset:{uuid}} path values normalize to the shared resolver spine (GEO-10/D-01..D-03).</p>
  *
  * @author Gensokyo
  * @since 2026-07-30
@@ -39,8 +40,8 @@ public final class GeoSyntheticRequestMapper {
         GeoGenerationMode mode = parseMode(sourceName, source.getMode());
         GeoGenerationRequest request = new GeoGenerationRequest();
         request.setMode(mode);
-        request.setBoundaryPath(source.getBoundaryPath());
-        request.setNetworkPath(source.getNetworkPath());
+        request.setBoundaryPath(resolveBoundaryLocation(sourceName, source));
+        request.setNetworkPath(resolveNetworkLocation(sourceName, source));
         request.setFeatureIndex(source.getFeatureIndex());
         request.setRandomFeature(source.isRandomFeature());
         request.setCount(source.getCount());
@@ -68,7 +69,7 @@ public final class GeoSyntheticRequestMapper {
             request.setIncludeProperties(output.isIncludeProperties());
         }
 
-        enforceModePaths(sourceName, mode, source);
+        enforceModePaths(sourceName, mode, request);
 
         try {
             request.validate();
@@ -79,16 +80,16 @@ public final class GeoSyntheticRequestMapper {
         return request;
     }
 
-    private static void enforceModePaths(String sourceName, GeoGenerationMode mode, GeoSyntheticSourceVO source) {
+    private static void enforceModePaths(String sourceName, GeoGenerationMode mode, GeoGenerationRequest request) {
         switch (mode) {
             case BOUNDARY_POINTS -> {
-                if (source.getBoundaryPath() == null || source.getBoundaryPath().isBlank()) {
+                if (!isResolvedLocation(request.getBoundaryPath())) {
                     throw new IllegalArgumentException(
                             "boundaryPath must not be blank for GEO synthetic source [" + sourceName + "]");
                 }
             }
             case LINE_SAMPLE -> {
-                if (source.getNetworkPath() == null || source.getNetworkPath().isBlank()) {
+                if (!isResolvedLocation(request.getNetworkPath())) {
                     throw new IllegalArgumentException(
                             "networkPath must not be blank for GEO synthetic source [" + sourceName + "]");
                 }
@@ -97,6 +98,63 @@ public final class GeoSyntheticRequestMapper {
                 // BBOX / CIRCLE do not require boundary or network paths.
             }
         }
+    }
+
+    private static boolean isResolvedLocation(String location) {
+        return location != null && !location.isBlank();
+    }
+
+    private static String resolveBoundaryLocation(String sourceName, GeoSyntheticSourceVO source) {
+        return resolveRoleLocation(
+                sourceName,
+                "boundaryPath",
+                "boundaryAssetId",
+                source.getBoundaryPath(),
+                source.getBoundaryAssetId());
+    }
+
+    private static String resolveNetworkLocation(String sourceName, GeoSyntheticSourceVO source) {
+        return resolveRoleLocation(
+                sourceName,
+                "networkPath",
+                "networkAssetId",
+                source.getNetworkPath(),
+                source.getNetworkAssetId());
+    }
+
+    private static String resolveRoleLocation(
+            String sourceName,
+            String pathField,
+            String assetIdField,
+            String path,
+            String assetId) {
+        String trimmedPath = blankToNull(path);
+        String trimmedAssetId = blankToNull(assetId);
+        if (trimmedPath != null && trimmedAssetId != null) {
+            throw new IllegalArgumentException(
+                    "GEO synthetic source [" + sourceName + "]: " + pathField + " and " + assetIdField
+                            + " are both set; use one binding only");
+        }
+        if (trimmedAssetId != null) {
+            return toAssetLocation(trimmedAssetId);
+        }
+        // Passthrough classpath, filesystem, or asset:{uuid} wire format per D-03.
+        return trimmedPath;
+    }
+
+    static String toAssetLocation(String assetId) {
+        String trimmed = assetId.strip();
+        if (trimmed.startsWith(GeoResourceResolver.ASSET_PREFIX)) {
+            return trimmed;
+        }
+        return GeoResourceResolver.ASSET_PREFIX + trimmed;
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.strip();
     }
 
     private static void expandBbox(String sourceName, List<Double> bbox, GeoGenerationRequest request) {

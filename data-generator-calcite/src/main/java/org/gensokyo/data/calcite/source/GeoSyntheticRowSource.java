@@ -6,6 +6,7 @@
 package org.gensokyo.data.calcite.source;
 
 import org.gensokyo.data.calcite.RowSource;
+import org.gensokyo.data.geo.GeoAssetResolver;
 import org.gensokyo.data.geo.GeoGenerationMode;
 import org.gensokyo.data.geo.GeoGenerationRequest;
 import org.gensokyo.data.geo.GeoOutputFormatKind;
@@ -41,13 +42,24 @@ public class GeoSyntheticRowSource implements RowSource {
      * @param source geo synthetic source configuration
      */
     public GeoSyntheticRowSource(String name, GeoSyntheticSourceVO source) {
+        this(name, source, null);
+    }
+
+    /**
+     * Maps the VO to a generation request, generates rows, and builds schema in the constructor per D-10/D-12.
+     *
+     * @param name   logical source name
+     * @param source geo synthetic source configuration
+     * @param assets optional resolver for {@code asset:{uuid}} boundary/network locations
+     */
+    public GeoSyntheticRowSource(String name, GeoSyntheticSourceVO source, GeoAssetResolver assets) {
         this.name = name;
         GeoSyntheticSourceOutputVO output = source.getOutput() == null ? new GeoSyntheticSourceOutputVO() : source.getOutput();
         GeoOutputFormatKind format = output.getFormat() == null ? GeoOutputFormatKind.columns : output.getFormat();
         GeoOutputColumnNames columnNames = output.getColumnNames() == null ? new GeoOutputColumnNames() : output.getColumnNames();
         GeoGenerationRequest request = GeoSyntheticRequestMapper.toRequest(name, source);
         try {
-            List<Map<String, Object>> generated = GeoSyntheticGenerator.generateRows(request);
+            List<Map<String, Object>> generated = GeoSyntheticGenerator.generateRows(request, assets);
             this.schema = source.getSchema() != null
                     ? source.getSchema()
                     : GeoRowSchemaSupport.schemaForGeoRows(format, columnNames, generated);

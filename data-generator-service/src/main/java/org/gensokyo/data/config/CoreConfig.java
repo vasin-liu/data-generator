@@ -64,7 +64,8 @@ import org.gensokyo.data.calcite.transform.LookupTransformFactory;
 import org.gensokyo.data.calcite.transform.MaskTransformFactory;
 import org.gensokyo.data.datasource.api.ConnectionCatalog;
 import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
-import org.gensokyo.data.datasource.catalog.ConnectionCatalogImpl;
+import org.gensokyo.data.geo.GeoAssetResolver;
+import org.gensokyo.data.geo.GeoAssetService;
 import org.gensokyo.data.repository.TemplateRepository;
 import org.gensokyo.data.yaml.JacksonParser;
 import org.gensokyo.data.yaml.YamlParser;
@@ -120,9 +121,15 @@ public class CoreConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean(GeoAssetResolver.class)
+    public GeoAssetResolver geoAssetResolver(GeoAssetService geoAssetService) {
+        return geoAssetService;
+    }
+
+    @Bean
     @ConditionalOnMissingBean(name = "geoJsonSourceFactory")
-    public V2SourceFactory geoJsonSourceFactory() {
-        return new GeoJsonSourceFactory();
+    public V2SourceFactory geoJsonSourceFactory(ObjectProvider<GeoAssetResolver> geoAssetResolverProvider) {
+        return new GeoJsonSourceFactory(geoAssetResolverProvider.getIfAvailable());
     }
 
     /**
@@ -132,8 +139,8 @@ public class CoreConfig {
      */
     @Bean
     @ConditionalOnMissingBean(name = "geoSyntheticSourceFactory")
-    public V2SourceFactory geoSyntheticSourceFactory() {
-        return new GeoSyntheticSourceFactory();
+    public V2SourceFactory geoSyntheticSourceFactory(ObjectProvider<GeoAssetResolver> geoAssetResolverProvider) {
+        return new GeoSyntheticSourceFactory(geoAssetResolverProvider.getIfAvailable());
     }
 
     @Bean

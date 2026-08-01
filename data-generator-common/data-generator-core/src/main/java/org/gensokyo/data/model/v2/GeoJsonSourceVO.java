@@ -13,6 +13,10 @@ import org.gensokyo.data.json.JsonSubType;
 /**
  * Reads GeoJSON {@code Feature} / {@code FeatureCollection} roots into Calcite rows (Phase B — real file source).
  *
+ * <p>The {@code path} field accepts {@code classpath:}, filesystem, or {@code asset:{uuid}} locations. The dedicated
+ * {@code assetId} field normalizes to {@code asset:{uuid}} at runtime (GEO-10/D-01). When both {@code path} and
+ * {@code assetId} are non-blank, mappers fail fast per D-02.</p>
+ *
  * @author Gensokyo
  * @since 2026-05-20
  */
@@ -27,9 +31,15 @@ public class GeoJsonSourceVO extends SourceVO {
     }
 
     /**
-     * Classpath or filesystem location resolved via {@code org.gensokyo.data.geo.io.GeoResourceResolver}.
+     * Classpath, filesystem, or {@code asset:{uuid}} location resolved via {@code GeoResourceResolver}.
      */
     private String path;
+
+    /**
+     * Metadata DB geo asset UUID; normalized to {@code asset:{uuid}} at runtime (D-01).
+     * Mutually exclusive with non-blank {@code path} per D-02.
+     */
+    private String assetId;
 
     /**
      * Optional cap on emitted rows (applied after GeoJSON parse order).

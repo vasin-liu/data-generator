@@ -38,13 +38,26 @@ public final class GeoSyntheticGenerator {
     }
 
     /**
-     * Generates formatted row maps for the request.
+     * Generates formatted row maps for the request (classpath/filesystem locations only).
      *
      * @param request generation configuration
      * @return one map per output row
      * @throws IOException when GeoJSON cannot be read
      */
     public static List<Map<String, Object>> generateRows(GeoGenerationRequest request) throws IOException {
+        return generateRows(request, null);
+    }
+
+    /**
+     * Generates formatted row maps for the request.
+     *
+     * @param request generation configuration
+     * @param assets  optional resolver for {@code asset:{uuid}} boundary/network locations
+     * @return one map per output row
+     * @throws IOException when GeoJSON cannot be read
+     */
+    public static List<Map<String, Object>> generateRows(GeoGenerationRequest request, GeoAssetResolver assets)
+            throws IOException {
         request.validate();
         List<Point> points;
         Map<String, Object> properties;
@@ -53,13 +66,14 @@ public final class GeoSyntheticGenerator {
                     request.getNetworkPath(),
                     request.getFeatureIndex(),
                     request.isRandomFeature(),
-                    request.getSeed());
+                    request.getSeed(),
+                    assets);
             LineString line = LineComponentSelector.selectLongestLineString(feature.geometry());
             points = LineSampleGenerator.sample(
                     line, request.getSampleStrategy(), request.getCount(), request.getSpacingMeters());
             properties = feature.properties();
         } else {
-            points = generatePointsInternal(request);
+            points = generatePointsInternal(request, assets);
             properties = Map.of();
         }
         ensureNoColumnCollisions(request, properties);
@@ -86,14 +100,27 @@ public final class GeoSyntheticGenerator {
      * @throws IOException when GeoJSON cannot be read
      */
     public static List<Point> generatePoints(GeoGenerationRequest request) throws IOException {
-        request.validate();
-        return generatePointsInternal(request);
+        return generatePoints(request, null);
     }
 
-    private static List<Point> generatePointsInternal(GeoGenerationRequest request) throws IOException {
+    /**
+     * Generates sample points without formatting.
+     *
+     * @param request generation configuration
+     * @param assets  optional resolver for {@code asset:{uuid}} locations
+     * @return sample points
+     * @throws IOException when GeoJSON cannot be read
+     */
+    public static List<Point> generatePoints(GeoGenerationRequest request, GeoAssetResolver assets) throws IOException {
+        request.validate();
+        return generatePointsInternal(request, assets);
+    }
+
+    private static List<Point> generatePointsInternal(GeoGenerationRequest request, GeoAssetResolver assets)
+            throws IOException {
         return switch (request.getMode()) {
-            case BOUNDARY_POINTS -> generateBoundaryPoints(request);
-            case LINE_SAMPLE -> generateLinePoints(request);
+            case BOUNDARY_POINTS -> generateBoundaryPoints(request, assets);
+            case LINE_SAMPLE -> generateLinePoints(request, assets);
             case BBOX -> BboxPointGenerator.generate(
                     request.getBboxMinLon(),
                     request.getBboxMinLat(),
@@ -112,8 +139,9 @@ public final class GeoSyntheticGenerator {
         };
     }
 
-    private static List<Point> generateBoundaryPoints(GeoGenerationRequest request) throws IOException {
-        Geometry geometry = GeoJsonLoader.loadGeometry(request.getBoundaryPath(), request.getFeatureIndex());
+    private static List<Point> generateBoundaryPoints(GeoGenerationRequest request, GeoAssetResolver assets)
+            throws IOException {
+        Geometry geometry = GeoJsonLoader.loadGeometry(request.getBoundaryPath(), request.getFeatureIndex(), assets);
         Geometry normalized = BoundaryGeometryNormalizer.normalize(geometry);
         return BoundaryPointGenerator.generate(
                 normalized,
@@ -122,12 +150,14 @@ public final class GeoSyntheticGenerator {
                 request.getSeed());
     }
 
-    private static List<Point> generateLinePoints(GeoGenerationRequest request) throws IOException {
+    private static List<Point> generateLinePoints(GeoGenerationRequest request, GeoAssetResolver assets)
+            throws IOException {
         GeoFeature feature = GeoJsonLoader.loadFeature(
                 request.getNetworkPath(),
                 request.getFeatureIndex(),
                 request.isRandomFeature(),
-                request.getSeed());
+                request.getSeed(),
+                assets);
         LineString line = LineComponentSelector.selectLongestLineString(feature.geometry());
         return LineSampleGenerator.sample(
                 line,
