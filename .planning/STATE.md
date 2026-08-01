@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.3
 milestone_name: Geo Assets & Map Preview
-status: planning
-last_updated: "2026-07-31T08:01:53.840Z"
-last_activity: 2026-07-31
+status: executing
+last_updated: "2026-08-01T08:30:00.000Z"
+last_activity: 2026-08-01
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-31)
 
 ## Current Position
 
-Phase: 21 — Geo Asset Registry + Runtime Resolution (not started)
-Plan: —
-Status: Roadmap locked — ready for `/gsd-plan-phase 21`
-Last activity: 2026-07-31 — v2.3 roadmap created (Phases 21–23)
+Phase: 21 — Geo Asset Registry + Runtime Resolution (complete — awaiting verify)
+Plan: 21-03 complete
+Status: Phase 21 plans 21-01..21-03 done — next `/gsd-verify-work 21` or `/gsd-plan-phase 22`
+Last activity: 2026-08-01 — Plan 21-03 delete guard + pipeline IT complete
 
 ## Performance Metrics
 
@@ -63,6 +63,12 @@ Last activity: 2026-07-31 — v2.3 roadmap created (Phases 21–23)
 - Timeline: 2026-07-30 → 2026-07-31 (2 days)
 - Status: All phases complete — archived via `/gsd-complete-milestone`
 
+**Velocity (v2.3 in progress):**
+
+- Phases: 3 (21–23)
+- Plans completed: 3 (Phase 21)
+- Status: Phase 21 executed; Phase 22–23 pending
+
 ## Accumulated Context
 
 ### Decisions
@@ -90,6 +96,9 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 20-pipeline-proof-docs-p1]: Dedicated geo-synthetic-v2-source.md for YAML/modes/output; overview remains landing page per D-06 — GEO-04 complete
 - [Phase 20-pipeline-proof-docs-p1]: Dedicated TemplateV2RunnerGeoSyntheticSourceTests with four mode-specific pipeline tests per D-01/D-02 — GEO-02 pipeline evidence complete
 - [Phase 20-pipeline-proof-docs-p1]: geo-synthetic harness row P1 covered with inline linked_tests; P0 frozen at 15 per D-10 — TEST-10 complete
+- [Phase 21]: Geo asset registry CLOB + console REST upload/list/get — GEO-05/GEO-08
+- [Phase 21]: asset:{uuid} execute-path spine via GeoAssetResolver in geo module — GEO-10/GEO-11
+- [Phase 21]: Hard delete with template reference scan → 409 + GEO_ASSET_DELETE audit — GEO-09/GOV-01
 
 ### Pending Todos
 
@@ -115,7 +124,7 @@ Items carried or acknowledged at milestone close:
 | tech_debt | Nyquist hygiene phases 07/08/07.1 | Closed via DIAL-02 (Phase 13, 2026-07-28) | 2026-07-25 |
 | tech_debt | Dual JDBC resolver consolidation | Docs-only RES-01; merge = RES-02 later | 2026-07-25 |
 | Process | v2.1 milestone archive tree | Deferred per D-16 | 2026-07-29 |
-| Product | GeoJSON asset upload (GEO-05) | In scope v2.3 Phase 21 | 2026-07-31 |
+| Product | GeoJSON asset upload (GEO-05) | Done in Phase 21 | 2026-07-31 |
 | Product | Polygon synthesis (GEO-06) | Deferred past v2.3 | 2026-07-31 |
 | Product | Console map preview (GEO-07) | In scope v2.3 Phase 22 | 2026-07-31 |
 | Product | Common-data CRUD (DATA-01) | Next milestone candidate | 2026-07-31 |
@@ -124,10 +133,10 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** None
 
-Last session: 2026-07-31T22:19:00.000Z
-Stopped at: v2.3 roadmap created
-Next: `/gsd-plan-phase 21`
+Last session: 2026-08-01T16:30:00.000Z
+Stopped at: Phase 21 Plan 21-03 complete (SUMMARY written)
+Next: `/gsd-verify-work 21` or `/gsd-plan-phase 22`
 
 ## Operator Next Steps
 
-- Plan Phase 21 with `/gsd-plan-phase 21`
+- Verify Phase 21 with `/gsd-verify-work 21`, then plan Phase 22
