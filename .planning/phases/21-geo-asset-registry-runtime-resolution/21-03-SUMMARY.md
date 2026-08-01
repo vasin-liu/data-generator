@@ -111,7 +111,7 @@ status: complete
 
 ## Task Commits
 
-1. **Tasks 1–4: Delete guard + pipeline IT + verification** — (pending commit)
+1. **Tasks 1–4: Delete guard + pipeline IT + verification** — `d0e7fda` (feat)
 
 ## Files Created/Modified
 
