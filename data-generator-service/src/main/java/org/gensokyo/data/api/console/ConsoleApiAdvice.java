@@ -6,10 +6,13 @@
 package org.gensokyo.data.api.console;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gensokyo.data.api.console.dto.GeoAssetTemplateUsageView;
+import org.gensokyo.data.geo.GeoAssetInUseException;
 import org.gensokyo.data.model.vo.R;
 import org.gensokyo.data.udf.UdfRegistryException;
 import org.gensokyo.data.udf.UdfValidationError;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -34,6 +37,21 @@ public class ConsoleApiAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public R<Void> badRequest(IllegalArgumentException ex) {
         return R.fail(ex.getMessage());
+    }
+
+    /**
+     * Maps geo asset delete conflicts to HTTP 409 with template usage hints (D-08).
+     *
+     * @param ex conflict carrying referencing templates
+     * @return failure envelope with structured usage list
+     */
+    @ExceptionHandler(GeoAssetInUseException.class)
+    public ResponseEntity<R<GeoAssetInUsePayload>> geoAssetInUse(GeoAssetInUseException ex) {
+        List<GeoAssetTemplateUsageView> usages = ex.getUsages().stream()
+                .map(GeoAssetTemplateUsageView::from)
+                .toList();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(R.fail(ex.getMessage(), new GeoAssetInUsePayload(usages)));
     }
 
     /**
@@ -66,5 +84,13 @@ public class ConsoleApiAdvice {
      * @param violations field-level validation errors (never {@code null})
      */
     public record UdfErrorPayload(String code, List<UdfValidationError> violations) {
+    }
+
+    /**
+     * Failure body for geo asset delete conflicts: templates still referencing the asset.
+     *
+     * @param usages template id/name hints for operator remediation
+     */
+    public record GeoAssetInUsePayload(List<GeoAssetTemplateUsageView> usages) {
     }
 }

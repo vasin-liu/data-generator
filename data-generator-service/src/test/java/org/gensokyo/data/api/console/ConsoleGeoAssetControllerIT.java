@@ -7,7 +7,10 @@ package org.gensokyo.data.api.console;
 
 import org.gensokyo.data.geo.GeoAssetService;
 import org.gensokyo.data.model.po.AuditEventPO;
+import org.gensokyo.data.model.po.TemplatePO;
 import org.gensokyo.data.repository.AuditEventRepository;
+import org.gensokyo.data.repository.TemplateRepository;
+import org.gensokyo.data.util.RandomKit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -62,6 +66,9 @@ class ConsoleGeoAssetControllerIT {
 
     @Autowired
     private AuditEventRepository auditEventRepository;
+
+    @Autowired
+    private TemplateRepository templateRepository;
 
     private MockMvc mockMvc;
 
@@ -166,6 +173,72 @@ class ConsoleGeoAssetControllerIT {
         mockMvc.perform(multipart("/api/console/geo-assets").file(file))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void delete_unreferencedAsset_succeedsAndAudits() throws Exception {
+        String id = uploadReturningId("delete-ok.geojson", "delete-ok-asset");
+
+        mockMvc.perform(delete("/api/console/geo-assets/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+
+        mockMvc.perform(get("/api/console/geo-assets/" + id))
+                .andExpect(status().isBadRequest());
+
+        List<AuditEventPO> events = auditEventRepository.findByActionOrderByOccurredAtDesc(
+                GeoAssetService.AUDIT_ACTION_DELETE,
+                org.springframework.data.domain.PageRequest.of(0, 5)).getContent();
+        org.junit.jupiter.api.Assertions.assertFalse(events.isEmpty());
+        org.junit.jupiter.api.Assertions.assertEquals(id, events.getFirst().getResourceId());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                GeoAssetService.AUDIT_RESOURCE_TYPE, events.getFirst().getResourceType());
+    }
+
+    @Test
+    void delete_referencedByTemplate_returns409WithUsageHints() throws Exception {
+        String id = uploadReturningId("delete-blocked.geojson", "delete-blocked-asset");
+
+        TemplatePO row = new TemplatePO();
+        row.setId(RandomKit.snowFlake().nextId());
+        row.setName("refs-geo-asset");
+        row.setArchived(Boolean.FALSE);
+        row.setStatus("PUBLISHED");
+        row.setContentJson("""
+                {
+                  "name": "refs-geo-asset",
+                  "sources": {
+                    "geo": {
+                      "type": "geojson",
+                      "assetId": "%s"
+                    }
+                  }
+                }
+                """.formatted(id));
+        templateRepository.saveAndFlush(row);
+
+        mockMvc.perform(delete("/api/console/geo-assets/" + id))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("refs-geo-asset")))
+                .andExpect(jsonPath("$.data.usages[0].templateName").value("refs-geo-asset"))
+                .andExpect(jsonPath("$.data.usages[0].templateId").exists());
+
+        // Asset remains after blocked delete.
+        mockMvc.perform(get("/api/console/geo-assets/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("delete-blocked-asset"));
+    }
+
+    private String uploadReturningId(String filename, String name) throws Exception {
+        MockMultipartFile file = geoJsonFile(VALID_FEATURE_COLLECTION, filename);
+        return mockMvc.perform(multipart("/api/console/geo-assets").file(file).param("name", name))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").exists())
+                .andReturn()
+                .getResponse()
+                .getContentAsString()
+                .replaceAll("(?s).*\"id\"\\s*:\\s*\"([^\"]+)\".*", "$1");
     }
 
     private static MockMultipartFile geoJsonFile(String body, String filename) {

@@ -37,12 +37,16 @@ public class GeoAssetService implements GeoAssetResolver {
     /** Audit action code for successful uploads (GOV-01). */
     public static final String AUDIT_ACTION_UPLOAD = "GEO_ASSET_UPLOAD";
 
+    /** Audit action code for successful hard deletes (GOV-01 / D-11). */
+    public static final String AUDIT_ACTION_DELETE = "GEO_ASSET_DELETE";
+
     /** Audit resource type for geo assets. */
     public static final String AUDIT_RESOURCE_TYPE = "GEO_ASSET";
 
     private final GeoAssetRepository repository;
     private final AuditService auditService;
     private final DataGeneratorProperties properties;
+    private final GeoAssetReferenceScanner referenceScanner;
 
     /**
      * Validates, persists, and audits a multipart GeoJSON upload.
@@ -126,6 +130,34 @@ public class GeoAssetService implements GeoAssetResolver {
     @Transactional(readOnly = true)
     public String getGeoJsonBody(UUID id) {
         return requireRow(id).getGeojsonClob();
+    }
+
+    /**
+     * Hard-deletes a geo asset when no active template references it (D-08).
+     *
+     * @param id asset UUID
+     * @throws GeoAssetInUseException when templates still reference the asset
+     * @throws IllegalArgumentException when unknown
+     */
+    @Transactional
+    public void delete(UUID id) {
+        GeoAssetPO row = requireRow(id);
+        List<GeoAssetTemplateUsage> usages = referenceScanner.findUsages(id);
+        if (!usages.isEmpty()) {
+            String names = usages.stream()
+                    .map(u -> u.templateName() + " (" + u.templateId() + ")")
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            throw new GeoAssetInUseException(
+                    "Geo asset is referenced by template(s): " + names,
+                    usages);
+        }
+        repository.deleteById(id);
+        auditService.record(
+                AUDIT_ACTION_DELETE,
+                AUDIT_RESOURCE_TYPE,
+                id.toString(),
+                Map.of("name", row.getName()));
     }
 
     @Override

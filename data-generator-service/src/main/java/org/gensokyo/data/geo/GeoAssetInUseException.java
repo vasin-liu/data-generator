@@ -1,0 +1,35 @@
+/*
+ * Copyright © 2021 - 2026 PCI Technology Group Co.,Ltd. All Rights Reserved.
+ * Site: https://www.pcitech.com/
+ * Address: PCI Intelligent Building, No.2 Xincen Fourth Road, Tianhe District, Guangzhou, China (Zip code: 510653)
+ */
+package org.gensokyo.data.geo;
+
+import java.util.List;
+
+/**
+ * Raised when a geo asset delete is blocked because active templates still reference it (D-08).
+ *
+ * @author Gensokyo
+ * @since 2026-08-01
+ */
+public class GeoAssetInUseException extends RuntimeException {
+
+    private final List<GeoAssetTemplateUsage> usages;
+
+    /**
+     * @param message human-readable conflict summary
+     * @param usages  templates still referencing the asset (never {@code null})
+     */
+    public GeoAssetInUseException(String message, List<GeoAssetTemplateUsage> usages) {
+        super(message);
+        this.usages = List.copyOf(usages);
+    }
+
+    /**
+     * @return templates referencing the asset
+     */
+    public List<GeoAssetTemplateUsage> getUsages() {
+        return usages;
+    }
+}
