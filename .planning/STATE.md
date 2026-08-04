@@ -2,9 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.3
 milestone_name: Geo Assets & Map Preview
+current_phase: 22
+current_phase_name: Console Map + geo_synthetic Editor
 status: executing
-last_updated: "2026-08-04T05:35:00.000Z"
+stopped_at: Phase 21 UAT complete (6/6 pass, IT-backed)
+last_updated: "2026-08-04T07:49:12.730Z"
 last_activity: 2026-08-04
+last_activity_desc: Phase 21 complete, transitioned to Phase 22
 progress:
   total_phases: 3
   completed_phases: 1
@@ -20,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-31)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Milestone v2.3 — Geo Assets & Map Preview (Phases 21–23)
+**Current focus:** Phase 22 — Console Map + geo_synthetic Editor
 
 ## Current Position
 
-Phase: 21 — Geo Asset Registry + Runtime Resolution (UAT complete — awaiting VERIFICATION.md)
-Plan: 21-03 complete
-Status: Phase 21 UAT 6/6 pass (IT-backed); next `/gsd-execute-phase 21` to write VERIFICATION.md
-Last activity: 2026-08-04 — Phase 21 UAT complete via Maven IT evidence
+Phase: 22 — Console Map + geo_synthetic Editor
+Plan: Not started
+Status: Ready to discuss/plan Phase 22
+Last activity: 2026-08-04 — Phase 21 verified and complete; transitioned to Phase 22
 
 ## Performance Metrics
 
@@ -133,10 +137,10 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** None
 
-Last session: 2026-08-01T16:30:00.000Z
-Stopped at: Phase 21 Plan 21-03 complete (SUMMARY written)
-Next: `/gsd-verify-work 21` or `/gsd-plan-phase 22`
+Last session: 2026-08-04T05:35:00.000Z
+Stopped at: Phase 21 UAT complete (6/6 pass, IT-backed)
+Next: `/gsd-execute-phase 21` (write VERIFICATION.md) then `/gsd-plan-phase 22`
 
 ## Operator Next Steps
 
-- Verify Phase 21 with `/gsd-verify-work 21`, then plan Phase 22
+- Regenerate Phase 21 verification with `/gsd-execute-phase 21`, then plan Phase 22

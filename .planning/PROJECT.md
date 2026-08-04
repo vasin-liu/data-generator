@@ -18,13 +18,15 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 ## Current State
 
-**Shipped: v2.2 V2 Geo Synthetic Source** (2026-07-31)
+**Phase 21 complete — Geo Asset Registry + Runtime Resolution** (2026-08-04)
 
-- BBOX/CIRCLE geo generator modes with seeded, in-domain point synthesis
-- Template V2 `geo_synthetic` SourceVO + Factory + RowSource (path assets only; `geojson` read-only unchanged)
-- Four-mode `TemplateV2Runner` pipeline IT (boundary, line, bbox, circle)
-- Docs distinguish `geo_synthetic` vs `geojson` with minimal YAML examples
-- P1 harness row `geo-synthetic`; `verify-harness.ps1` P0 gate still 15 rows
+- Console API upload/list/get/delete for GeoJSON assets (metadata DB CLOB + bbox/featureCount)
+- Safe delete with 409 usage hints when templates reference the asset; upload/delete audit
+- Template V2 `geo_synthetic` / `geojson` bind via asset-id; `asset:{uuid}` on execute path via `GeoAssetResolver`
+- Path/`classpath:` fixtures unchanged; P0 harness still 15 rows
+- Next: Phase 22 console map + `geo_synthetic` editor
+
+**Also shipped: v2.2 V2 Geo Synthetic Source** (2026-07-31) — path-based `geo_synthetic` four modes + docs + P1 row.
 
 Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
 
@@ -32,10 +34,9 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 
 **Goal:** Operators can upload hosted GeoJSON assets (metadata DB), reference them by asset-id from V2 sources, and preview both assets and `geo_synthetic` configs on a console map.
 
-**Target features:**
-- GEO-05 — GeoJSON asset upload + DB persistence + asset-id references (path refs remain for fixtures)
-- GEO-07 — Console map: browse uploaded assets + preview `geo_synthetic` point/boundary config
-- Equal delivery depth for upload path and map preview (no half-finished UI)
+**Remaining this milestone:**
+- GEO-07 / GEO-12 / GEO-13 — Console map + `geo_synthetic` editor (Phase 22)
+- DOC-01 / TEST-11 — Docs + optional P1 harness row (Phase 23)
 
 **Out of scope this milestone:** GEO-06 polygon synthesis; DATA-01 common-data CRUD; P0 gate inflation (default freeze at 15)
 
@@ -81,6 +82,18 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 - ✓ Docs: geo_synthetic vs geojson + minimal SQL companion — Phase 20 (GEO-04)
 - ✓ P1 matrix linkage for geo-synthetic; P0 gate frozen — Phase 20 (TEST-10)
 
+### Validated (v2.3 Phase 21)
+
+- ✓ GeoJSON asset upload + metadata DB persistence + asset-id references (GEO-05, GEO-08) — Phase 21
+- ✓ Safe delete with template usage 409 (GEO-09); execute-path `GeoAssetResolver` (GEO-10, GEO-11) — Phase 21
+- ✓ Upload/delete audit; RBAC enable flag respected (GOV-01) — Phase 21
+
+### Active (v2.3)
+
+- [ ] Console map: asset browse + `geo_synthetic` config preview (GEO-07, GEO-12)
+- [ ] Template editor `geo_synthetic` + asset picker (GEO-13)
+- [ ] Docs + optional P1 geo-assets harness row (DOC-01, TEST-11)
+
 ### Out of Scope
 
 - Template-level orchestration — deferred beyond v2.1
@@ -92,10 +105,9 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 - Full JDBC resolver code consolidation (RES-02) — docs-only in v2.1
 - Full distributed AC-1..AC-7 (DIST-02) — one happy path only in v2.1
 - Dameng live as P0 gate (DIAL-03) — licensed driver / CI cost
-- Common-data / code-table operator CRUD — deferred past v2.2
-- GeoJSON asset upload / asset IDs — deferred past v2.2
-- Polygon/MultiPolygon synthetic generation — deferred past v2.2
-- Console visual map config for geo sources — deferred past v2.2
+- Common-data / code-table operator CRUD — deferred past v2.3
+- Polygon/MultiPolygon synthetic generation (GEO-06) — deferred past v2.3
+- P0 promotion of geo-synthetic / geo-assets — keep merge gate stable unless explicitly scoped
 
 ## Context
 
@@ -142,8 +154,11 @@ Known pressure points:
 | v2.1 RBAC stays default-off with testable enable path | Avoid breaking local/dev defaults | ✓ Good — SEC-01; SEC-02 deferred |
 | v2.1 P1 rows for proofs; no P0 promotion | Keep merge gate stable | ✓ Good — TEST-09 |
 | v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | ✓ Good — shipped 2026-07-31 |
-| v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | ✓ Good — GEO-05 deferred |
+| v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | ✓ Good — GEO-05 in v2.3 |
 | v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | ✓ Good — TEST-10 |
+| v2.3: GEO-05 + GEO-07 equal depth; no GEO-06 | Upload+map together; polygon later | ✓ Phase 21 shipped GEO-05/08/09/10/11 + GOV-01; GEO-07 pending Phase 22 |
+| v2.3: Geo assets in metadata DB | Align with secrets/template governance | — Pending |
+| v2.3: Map previews assets and geo_synthetic config | Operator browse + template config UX | — Pending |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -191,4 +206,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-31 — Milestone v2.2 shipped (V2 Geo Synthetic Source)*
+*Last updated: 2026-08-04 — Phase 21 verified complete (geo asset registry + runtime resolution)*

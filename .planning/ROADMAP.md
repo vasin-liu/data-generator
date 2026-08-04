@@ -140,7 +140,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 0/3 | Planned | — |
+| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 0/? | Not started | — |
 | 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 

@@ -10,18 +10,18 @@ Hosted GeoJSON assets in the metadata DB, asset-id template binding, and console
 
 ### Geo Assets (GEO)
 
-- [ ] **GEO-05**: Operator can upload a GeoJSON Feature or FeatureCollection via console API; platform validates geometry, enforces max bytes and max feature count, persists body in the metadata DB, and returns a stable asset-id
-- [ ] **GEO-08**: Operator can list assets (metadata without full body) and fetch a single asset’s GeoJSON by asset-id, including derived bbox and featureCount captured at ingest
-- [ ] **GEO-09**: Operator can delete an asset; if any stored template still references that asset-id / `asset:` location, API returns 409 with usage hints instead of orphaning runs
-- [ ] **GEO-10**: Operator can bind `geo_synthetic` (boundary/network) and `geojson` sources to an asset-id while path and `classpath:` locations remain valid (GEO-03 compatibility)
-- [ ] **GEO-11**: Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (same metadata DB for coordinator and worker) — not console-only
+- [x] **GEO-05**: Operator can upload a GeoJSON Feature or FeatureCollection via console API; platform validates geometry, enforces max bytes and max feature count, persists body in the metadata DB, and returns a stable asset-id
+- [x] **GEO-08**: Operator can list assets (metadata without full body) and fetch a single asset’s GeoJSON by asset-id, including derived bbox and featureCount captured at ingest
+- [x] **GEO-09**: Operator can delete an asset; if any stored template still references that asset-id / `asset:` location, API returns 409 with usage hints instead of orphaning runs
+- [x] **GEO-10**: Operator can bind `geo_synthetic` (boundary/network) and `geojson` sources to an asset-id while path and `classpath:` locations remain valid (GEO-03 compatibility)
+- [x] **GEO-11**: Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (same metadata DB for coordinator and worker) — not console-only
 - [ ] **GEO-07**: Operator can open a console geo-assets view and see the selected uploaded asset rendered on a map
 - [ ] **GEO-12**: Operator can preview a `geo_synthetic` source config on the map (boundary/network overlay and/or BBOX/CIRCLE guides; seed documented so preview is not mistaken for full run output)
 - [ ] **GEO-13**: Console template editor supports `geo_synthetic` as an editable source kind with an asset picker (equal-depth GEO-07; closes v2.2 YAML-only gap)
 
 ### Governance & Docs (GOV / DOC)
 
-- [ ] **GOV-01**: Upload and delete emit audit events; optional console RBAC continues to use the existing enable flag (default off)
+- [x] **GOV-01**: Upload and delete emit audit events; optional console RBAC continues to use the existing enable flag (default off)
 - [ ] **DOC-01**: Maintainers/operators have docs for asset-id YAML examples, path vs asset-id, map preview usage, and size limits
 
 ### Harness (TEST)
@@ -58,12 +58,12 @@ Deferred beyond v2.3.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GEO-05 | 21 | Pending |
-| GEO-08 | 21 | Pending |
-| GEO-09 | 21 | Pending |
-| GEO-10 | 21 | Pending |
-| GEO-11 | 21 | Pending |
-| GOV-01 | 21 | Pending |
+| GEO-05 | 21 | Complete |
+| GEO-08 | 21 | Complete |
+| GEO-09 | 21 | Complete |
+| GEO-10 | 21 | Complete |
+| GEO-11 | 21 | Complete |
+| GOV-01 | 21 | Complete |
 | GEO-07 | 22 | Pending |
 | GEO-12 | 22 | Pending |
 | GEO-13 | 22 | Pending |
