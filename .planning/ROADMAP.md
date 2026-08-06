@@ -117,7 +117,13 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 4. Console template editor supports `geo_synthetic` as an editable source kind with an asset picker
 5. Map asset layers use the same resolution spine as runtime (server GeoJSON for assets; client Turf overlays for BBOX/CIRCLE guides)
 
-**Plans**: 0 plans
+**Plans**: 4 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — Preview APIs (path/classpath + capped synthetic) on Phase 21 resolve spine
+- [ ] 22-02-PLAN.md — ApiRequestError 409 usages + MapLibre/Turf + lazy GeoMapPreview
+- [ ] 22-03-PLAN.md — Geo assets page (list/map/upload/delete Modal) + nav/i18n
+- [ ] 22-04-PLAN.md — geo_synthetic editor, asset picker, hybrid preview honesty, E2E smoke
 
 ### Phase 23: Docs + Harness Closeout
 
@@ -141,7 +147,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
-| 22. Console Map + geo_synthetic Editor | v2.3 | 0/? | Not started | — |
+| 22. Console Map + geo_synthetic Editor | v2.3 | 0/4 | Planned | — |
 | 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 
 | Milestone | Phases | Status | Shipped |
