@@ -8,6 +8,9 @@ package org.gensokyo.data.geo;
 import lombok.RequiredArgsConstructor;
 import org.gensokyo.data.api.console.dto.GeoAssetSummaryView;
 import org.gensokyo.data.api.console.dto.GeoAssetUploadView;
+import org.gensokyo.data.api.console.dto.GeoPreviewLocationRequest;
+import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest;
+import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewView;
 import org.gensokyo.data.audit.AuditService;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.model.po.GeoAssetPO;
@@ -42,6 +45,9 @@ public class GeoAssetService implements GeoAssetResolver {
 
     /** Audit resource type for geo assets. */
     public static final String AUDIT_RESOURCE_TYPE = "GEO_ASSET";
+
+    /** Hard sample-size cap for console synthetic preview honesty (D-08 / T-22-01). */
+    public static final int PREVIEW_MAX_COUNT = 500;
 
     private final GeoAssetRepository repository;
     private final AuditService auditService;
@@ -165,6 +171,34 @@ public class GeoAssetService implements GeoAssetResolver {
     public String resolveUtf8(String assetId) {
         UUID id = parseAssetId(assetId);
         return requireRow(id).getGeojsonClob();
+    }
+
+    /**
+     * Resolves path/classpath/{@code asset:} GeoJSON for console map underlays via the Phase 21 spine (D-06).
+     *
+     * @param request location request
+     * @return UTF-8 GeoJSON text
+     * @throws IOException when the resource cannot be read
+     * @throws IllegalArgumentException when location is blank or cannot be resolved
+     */
+    @Transactional(readOnly = true)
+    public String previewLocation(GeoPreviewLocationRequest request) throws IOException {
+        // RED stub — Task 1 GREEN wires GeoResourceResolver.readUtf8(location, this).
+        throw new UnsupportedOperationException("previewLocation not implemented");
+    }
+
+    /**
+     * Generates a capped synthetic point sample for console map preview (D-08).
+     *
+     * @param request mode config + seed + maxCount
+     * @return FeatureCollection preview with seed and effective sample count
+     * @throws IOException when boundary/network GeoJSON cannot be read
+     * @throws IllegalArgumentException when maxCount exceeds {@link #PREVIEW_MAX_COUNT} or config is invalid
+     */
+    @Transactional(readOnly = true)
+    public GeoSyntheticPreviewView previewSynthetic(GeoSyntheticPreviewRequest request) throws IOException {
+        // RED stub — Task 1 GREEN wires GeoSyntheticGenerator.generateRows with this resolver.
+        throw new UnsupportedOperationException("previewSynthetic not implemented");
     }
 
     private GeoAssetPO requireRow(UUID id) {

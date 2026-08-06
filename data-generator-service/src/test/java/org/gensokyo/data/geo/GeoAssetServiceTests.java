@@ -6,6 +6,11 @@
 package org.gensokyo.data.geo;
 
 import org.gensokyo.data.DataGeneratorApplication;
+import org.gensokyo.data.api.console.dto.GeoAssetSummaryView;
+import org.gensokyo.data.api.console.dto.GeoPreviewLocationRequest;
+import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest;
+import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewView;
+import org.gensokyo.data.model.po.GeoAssetPO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -100,5 +108,94 @@ class GeoAssetServiceTests {
                 IllegalArgumentException.class,
                 () -> GeoAssetIngestSupport.ingest(bytes, 1_048_576, 10_000));
         Assertions.assertTrue(ex.getMessage().contains("Feature") || ex.getMessage().contains("FeatureCollection"));
+    }
+
+    @Test
+    void previewLocation_classpathFixture_returnsFeatureCollectionUtf8() throws Exception {
+        String body = geoAssetService.previewLocation(
+                new GeoPreviewLocationRequest("classpath:geo/preview-point.geojson"));
+        Assertions.assertTrue(body.contains("FeatureCollection"));
+        Assertions.assertTrue(body.contains("preview-point"));
+    }
+
+    @Test
+    void previewLocation_blankLocation_throwsIllegalArgumentException() {
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> geoAssetService.previewLocation(new GeoPreviewLocationRequest("  ")));
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("blank")
+                || ex.getMessage().toLowerCase().contains("location"));
+    }
+
+    @Test
+    void previewSynthetic_maxCountOverCap_throwsNamingCap() {
+        GeoSyntheticPreviewRequest request = new GeoSyntheticPreviewRequest(
+                "BBOX",
+                42L,
+                501,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(113.0, 23.0, 113.2, 23.2),
+                null,
+                null,
+                null);
+        IllegalArgumentException ex = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> geoAssetService.previewSynthetic(request));
+        Assertions.assertTrue(
+                ex.getMessage().contains("500") || ex.getMessage().contains(String.valueOf(GeoAssetService.PREVIEW_MAX_COUNT)),
+                () -> "expected cap in message: " + ex.getMessage());
+    }
+
+    @Test
+    void previewSynthetic_bboxMaxCount10_returnsAtMost10PointsAndSeed() throws Exception {
+        GeoSyntheticPreviewRequest request = new GeoSyntheticPreviewRequest(
+                "BBOX",
+                7L,
+                10,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(113.0, 23.0, 113.2, 23.2),
+                null,
+                null,
+                null);
+        GeoSyntheticPreviewView view = geoAssetService.previewSynthetic(request);
+        Assertions.assertEquals(7L, view.seed());
+        Assertions.assertTrue(view.effectiveSampleCount() <= 10);
+        Assertions.assertEquals(GeoAssetService.PREVIEW_MAX_COUNT, view.maxCountCap());
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> features =
+                (List<Map<String, Object>>) view.featureCollection().get("features");
+        Assertions.assertNotNull(features);
+        Assertions.assertTrue(features.size() <= 10);
+        Assertions.assertFalse(features.isEmpty());
+    }
+
+    @Test
+    void summaryView_from_includesContentTypeWhenPresentOnPo() {
+        GeoAssetPO row = new GeoAssetPO();
+        row.setId(UUID.fromString("00000000-0000-0000-0000-0000000000aa"));
+        row.setName("typed");
+        row.setContentType("application/geo+json");
+        row.setFeatureCount(1);
+        row.setMinLon(0);
+        row.setMinLat(0);
+        row.setMaxLon(1);
+        row.setMaxLat(1);
+        row.setUploadedBy("tester");
+        Instant now = Instant.parse("2026-08-06T00:00:00Z");
+        row.setCreatedAt(now);
+        row.setUpdatedAt(now);
+
+        GeoAssetSummaryView view = GeoAssetSummaryView.from(row);
+        Assertions.assertEquals("application/geo+json", view.contentType());
     }
 }

@@ -21,6 +21,7 @@ import java.util.UUID;
  * @param maxLon           bbox maximum longitude
  * @param maxLat           bbox maximum latitude
  * @param geometrySummary  optional geometry-type summary
+ * @param contentType      stored content type when present on {@link GeoAssetPO} (D-02)
  * @param uploadedBy       console actor
  * @param createdAt        upload timestamp
  * @param updatedAt        last update timestamp
@@ -36,6 +37,7 @@ public record GeoAssetSummaryView(
         double maxLon,
         double maxLat,
         String geometrySummary,
+        String contentType,
         String uploadedBy,
         Instant createdAt,
         Instant updatedAt) {
@@ -47,6 +49,7 @@ public record GeoAssetSummaryView(
      * @return summary DTO
      */
     public static GeoAssetSummaryView from(GeoAssetPO row) {
+        // RED: contentType intentionally omitted until GREEN maps PO field (D-02).
         return new GeoAssetSummaryView(
                 row.getId(),
                 row.getName(),
@@ -56,6 +59,7 @@ public record GeoAssetSummaryView(
                 row.getMaxLon(),
                 row.getMaxLat(),
                 row.getGeometrySummary(),
+                null,
                 row.getUploadedBy(),
                 row.getCreatedAt(),
                 row.getUpdatedAt());
