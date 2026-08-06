@@ -137,7 +137,7 @@ None. (`honestyText` is intentional caller-supplied prop until i18n pages land.)
 
 - FOUND: `data-generator-console-web/src/api/geoAssets.ts`
 - FOUND: `data-generator-console-web/src/app/geo/GeoMapPreview.tsx`
-- FOUND: commits `faa2446`, `baf7e26`
+- FOUND: commits `faa2446`, `baf7e26`, docs `5b7fde9`
 - VERIFY: `tsc --noEmit` exit 0; `npm run build` exit 0
 - VERIFY: `package.json` lists maplibre-gl / react-map-gl / @turf/*; no `mapbox-gl` dependency
 - VERIFY: preview helpers use `/console/geo-assets/preview/location` and `/console/geo-assets/preview/synthetic`
