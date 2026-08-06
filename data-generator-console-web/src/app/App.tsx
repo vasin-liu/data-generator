@@ -8,6 +8,7 @@ import { JobsPage } from './pages/JobsPage';
 import { SchedulesPage } from './pages/SchedulesPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
 import { TemplatesPage } from './pages/TemplatesPage';
+import { GeoAssetsPage } from './pages/GeoAssetsPage';
 import { UdfsPage } from './pages/UdfsPage';
 
 /**
@@ -26,6 +27,7 @@ export function App() {
         <Route path="jobs/:instanceId" element={<JobDetailPage />} />
         <Route path="schedules" element={<SchedulesPage />} />
         <Route path="udfs" element={<UdfsPage />} />
+        <Route path="geo-assets" element={<GeoAssetsPage />} />
         <Route path="audit" element={<AuditPage />} />
       </Route>
     </Routes>

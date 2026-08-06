@@ -5,6 +5,7 @@ import {
   AuditOutlined,
   ClockCircleOutlined,
   DatabaseOutlined,
+  EnvironmentOutlined,
   FileTextOutlined,
   FunctionOutlined,
   HistoryOutlined,
@@ -54,6 +55,7 @@ export function ConsoleLayout() {
     if (p.includes('/jobs')) return '/jobs';
     if (p.includes('/schedules')) return '/schedules';
     if (p.includes('/udfs')) return '/udfs';
+    if (p.includes('/geo-assets')) return '/geo-assets';
     if (p.includes('/audit')) return '/audit';
     if (p.includes('/datasources')) return '/datasources';
     return '/';
@@ -66,6 +68,7 @@ export function ConsoleLayout() {
     { key: '/jobs', testId: 'nav-jobs', label: t('nav.jobs'), icon: <HistoryOutlined /> },
     { key: '/schedules', testId: 'nav-schedules', label: t('nav.schedules'), icon: <ClockCircleOutlined /> },
     { key: '/udfs', testId: 'nav-udfs', label: t('nav.udfs'), icon: <FunctionOutlined /> },
+    { key: '/geo-assets', testId: 'nav-geo-assets', label: t('nav.geoAssets'), icon: <EnvironmentOutlined /> },
     { key: '/audit', testId: 'nav-audit', label: t('nav.audit'), icon: <AuditOutlined /> },
   ];
 
