@@ -81,7 +81,7 @@ Do not introduce display/hero type on operator pages. No third weight.
 | Dominant (60%) | `#eef1f6` (`#070b14` dark) | Page / shell ambient background |
 | Secondary (30%) | `rgba(255,255,255,0.82)` containers (`rgba(15,23,42,0.78)` dark) | List Card, map chrome, Modals, table surface |
 | Accent (10%) | `#0071e3` (`#06b6d4` dark) | Reserved elements only — see list below |
-| Destructive | `#d70015` (`#f87171` dark) | Delete confirm OK, 409 error emphasis |
+| Destructive | `#d70015` (`#f87171` dark) | Delete asset confirm CTA, 409 error emphasis |
 | Warning | `#b45309` (`#fbbf24` dark) | Honesty Alert (`type="warning"`), asset-id-wins inline warning, BBOX/CIRCLE guide strokes |
 | Success | `#248a3d` (`#34d399` dark) | Upload / preview-fetch success toasts only |
 
@@ -126,16 +126,18 @@ All strings via i18n keys under `geoAssets.*` / `source.geoSynthetic.*` (zh-CN +
 | Error — map GeoJSON | **Could not load map data for this asset. Refresh or re-select the row.** |
 | Error — upload | **Upload failed: {serverMessage}. Fix the file or limits and retry.** |
 | Error — preview path | **Could not resolve path/classpath for preview. Prefer an uploaded asset-id or fix the location.** |
-| Destructive — delete confirm title | **Delete geo asset?** |
+| Destructive — delete confirm title | **Delete geo asset?** / **删除地理资产？** |
 | Destructive — delete confirm body | **This permanently removes “{name}”. Templates that still reference it will block delete.** |
-| Destructive — confirm OK | **Delete** |
+| Destructive — confirm CTA | **Delete asset** / **删除资产** (`geoAssets.delete.confirm`) |
 | Destructive — 409 Modal title | **Asset is still referenced** |
 | Destructive — 409 Modal body | **Cannot delete “{name}”. Referenced by: {usageList}. Remove or retarget those templates first.** |
 | Honesty — sampling (D-09/D-10) | **Preview sample: up to {cap} points (seed {seed}). This is not a full pipeline run.** |
 | Honesty — geometry only (D-11) | **Map preview only — not a full pipeline run.** |
 | Asset-id wins warning (D-16) | **Both asset-id and path are set; asset-id is used at runtime.** |
+| Upload modal confirm | **Upload GeoJSON** / **上传 GeoJSON** (`geoAssets.upload.submit`) — never Ant Design default **OK** |
 | Asset picker title | **Select geo asset** |
-| Asset picker confirm | **Use this asset** |
+| Asset picker confirm | **Use this asset** / **使用此资产** |
+| Asset picker dismiss | **Close** / **关闭** (`geoAssets.picker.close`) — never generic **Cancel** |
 | Preview sample CTA | **Preview sample points** |
 | Source kind label | **Geo synthetic (points)** |
 
@@ -185,8 +187,8 @@ MapLibre / Turf / react-map-gl are **npm dependencies**, not shadcn registry blo
 **Interactions:**
 
 1. Row click / select → fetch `GET /api/console/geo-assets/{id}/geojson` → MapLibre geojson source + fill/line → `fitBounds` via `@turf/bbox` (D-05).
-2. Upload Button → Modal (UDF-style): file accept `.geojson,.json`, optional name field, multipart `POST /api/console/geo-assets` → success toast → invalidate React Query → select new row.
-3. Delete inline → confirm Modal → on **409** replace with usage-hints Modal (template id/name) — no soft-delete (D-04).
+2. Upload Button → Modal (UDF-style): file accept `.geojson,.json`, optional name field; confirm CTA **Upload GeoJSON** (not Ant Design **OK**); multipart `POST /api/console/geo-assets` → success toast → invalidate React Query → select new row.
+3. Delete inline → confirm Modal with CTA **Delete asset** → on **409** replace with usage-hints Modal (template id/name) — no soft-delete (D-04).
 4. Empty list → Empty state copy; map shows basemap only + short honesty hint optional or blank canvas message “Select an asset”.
 
 ### S2 — Template editor `geo_synthetic` fields — GEO-13
@@ -225,8 +227,8 @@ MapLibre / Turf / react-map-gl are **npm dependencies**, not shadcn registry blo
 | Width | `720px` (Ant `width={720}`) or `large` |
 | Body | Left: Table (name, featureCount). Right: optional mini-map (200px) when map chunk loaded |
 | Fallback | If map chunk not yet loaded / failed: list-only + Caption “Map preview unavailable” — picker still usable |
-| Confirm | **Use this asset** writes `boundaryAssetId` / `networkAssetId` / `assetId` as applicable |
-| Cancel | Close without write |
+| Confirm | **Use this asset** / **使用此资产** writes `boundaryAssetId` / `networkAssetId` / `assetId` as applicable |
+| Dismiss | **Close** / **关闭** — discard selection, no write (not **Cancel**) |
 
 ---
 
@@ -255,7 +257,7 @@ MapLibre / Turf / react-map-gl are **npm dependencies**, not shadcn registry blo
 | Map empty (no selection) | Basemap + centered Caption “Select an asset to preview” |
 | Preview sampling in flight | Disable **Preview sample points**; Spin on map |
 | Preview capped | Honesty Alert shows cap; do not request above 500 |
-| Upload in flight | Modal OK Button loading |
+| Upload in flight | **Upload GeoJSON** submit Button loading |
 | Delete 409 | Usage Modal; list unchanged |
 | RBAC denied (when enabled) | Existing console error toast / `R.fail` message — no custom auth UI |
 
