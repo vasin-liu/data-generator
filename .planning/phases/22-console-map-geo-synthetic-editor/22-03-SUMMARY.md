@@ -120,7 +120,7 @@ None.
 - FOUND: `data-generator-console-web/src/app/pages/GeoAssetsPage.tsx`
 - FOUND: `geo-assets` in App.tsx; `nav-geo-assets` in ConsoleLayout.tsx
 - FOUND: `nav.geoAssets` + `geoAssets.title` in en.json and zh-CN.json
-- FOUND: commits `8858c7a`, `8951f6a`
+- FOUND: commits `8858c7a`, `8951f6a`, docs `a2ce008`
 - VERIFY: `tsc --noEmit` exit 0; `npm run build` exit 0
 - VERIFY: page uses `fetchGeoAssetGeoJson`, lazy `GeoMapPreview`, `ApiRequestError` status 409
 
