@@ -16,7 +16,7 @@ Hosted GeoJSON assets in the metadata DB, asset-id template binding, and console
 - [x] **GEO-10**: Operator can bind `geo_synthetic` (boundary/network) and `geojson` sources to an asset-id while path and `classpath:` locations remain valid (GEO-03 compatibility)
 - [x] **GEO-11**: Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (same metadata DB for coordinator and worker) — not console-only
 - [ ] **GEO-07**: Operator can open a console geo-assets view and see the selected uploaded asset rendered on a map
-- [ ] **GEO-12**: Operator can preview a `geo_synthetic` source config on the map (boundary/network overlay and/or BBOX/CIRCLE guides; seed documented so preview is not mistaken for full run output)
+- [x] **GEO-12**: Operator can preview a `geo_synthetic` source config on the map (boundary/network overlay and/or BBOX/CIRCLE guides; seed documented so preview is not mistaken for full run output)
 - [ ] **GEO-13**: Console template editor supports `geo_synthetic` as an editable source kind with an asset picker (equal-depth GEO-07; closes v2.2 YAML-only gap)
 
 ### Governance & Docs (GOV / DOC)
@@ -65,7 +65,7 @@ Deferred beyond v2.3.
 | GEO-11 | 21 | Complete |
 | GOV-01 | 21 | Complete |
 | GEO-07 | 22 | Pending |
-| GEO-12 | 22 | Pending |
+| GEO-12 | 22 | Complete |
 | GEO-13 | 22 | Pending |
 | DOC-01 | 23 | Pending |
 | TEST-11 | 23 | Pending |

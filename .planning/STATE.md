@@ -5,16 +5,16 @@ milestone_name: Geo Assets & Map Preview
 current_phase: 22
 current_phase_name: Console Map + geo_synthetic Editor
 status: executing
-stopped_at: Phase 22 context gathered
-last_updated: "2026-08-06T09:38:58.302Z"
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-08-06T14:35:49.554Z"
 last_activity: 2026-08-04
 last_activity_desc: Phase 21 verified and complete; transitioned to Phase 22
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 33
+  total_plans: 7
+  completed_plans: 4
+  percent: 57
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (updated 2026-07-31)
 ## Current Position
 
 Phase: 22 — Console Map + geo_synthetic Editor
-Plan: Not started
-Status: Ready to discuss/plan Phase 22
-Last activity: 2026-08-04 — Phase 21 verified and complete; transitioned to Phase 22
+Plan: 02 of 04
+Status: Executing (22-01 complete; --no-transition)
+Last activity: 2026-08-06 — Completed 22-01-PLAN.md (geo preview APIs)
 
 ## Performance Metrics
 
@@ -70,8 +70,9 @@ Last activity: 2026-08-04 — Phase 21 verified and complete; transitioned to Ph
 **Velocity (v2.3 in progress):**
 
 - Phases: 3 (21–23)
-- Plans completed: 3 (Phase 21)
-- Status: Phase 21 executed; Phase 22–23 pending
+- Plans completed: 4 (Phase 21: 3, Phase 22: 1)
+- Status: Phase 22 executing (22-01 complete)
+- Phase 22 P01: 45min | 2 tasks | 9 files
 
 ## Accumulated Context
 
@@ -103,6 +104,8 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 21]: Geo asset registry CLOB + console REST upload/list/get — GEO-05/GEO-08
 - [Phase 21]: asset:{uuid} execute-path spine via GeoAssetResolver in geo module — GEO-10/GEO-11
 - [Phase 21]: Hard delete with template reference scan → 409 + GEO_ASSET_DELETE audit — GEO-09/GOV-01
+- [Phase 22]: Reject maxCount > 500 with IAE naming the cap (no silent clamp)
+- [Phase 22]: preview/location raw geo+json; synthetic R envelope; same Phase 21 resolve spine
 
 ### Pending Todos
 
@@ -135,12 +138,12 @@ Items carried or acknowledged at milestone close:
 
 ## Session Continuity
 
-**Resume file:** .planning/phases/22-console-map-geo-synthetic-editor/22-CONTEXT.md
+**Resume file:** None
 
-Last session: 2026-08-06T09:38:57.094Z
-Stopped at: Phase 22 context gathered
-Next: `/gsd-execute-phase 21` (write VERIFICATION.md) then `/gsd-plan-phase 22`
+Last session: 2026-08-06T14:35:21.619Z
+Stopped at: Completed 22-01-PLAN.md
+Next: Continue Phase 22 with `/gsd-execute-phase 22` (plan 22-02) — parent flagged `--no-transition`
 
 ## Operator Next Steps
 
-- Regenerate Phase 21 verification with `/gsd-execute-phase 21`, then plan Phase 22
+- Execute remaining Phase 22 plans (22-02 MapLibre client, 22-03 assets page, 22-04 editor)
