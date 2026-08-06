@@ -5,10 +5,10 @@ milestone_name: Geo Assets & Map Preview
 current_phase: 22
 current_phase_name: Console Map + geo_synthetic Editor
 status: executing
-stopped_at: Phase 21 UAT complete (6/6 pass, IT-backed)
-last_updated: "2026-08-04T07:49:12.730Z"
+stopped_at: Phase 22 context gathered
+last_updated: "2026-08-06T09:32:02.761Z"
 last_activity: 2026-08-04
-last_activity_desc: Phase 21 complete, transitioned to Phase 22
+last_activity_desc: Phase 21 verified and complete; transitioned to Phase 22
 progress:
   total_phases: 3
   completed_phases: 1
@@ -135,10 +135,10 @@ Items carried or acknowledged at milestone close:
 
 ## Session Continuity
 
-**Resume file:** None
+**Resume file:** .planning/phases/22-console-map-geo-synthetic-editor/22-CONTEXT.md
 
-Last session: 2026-08-04T05:35:00.000Z
-Stopped at: Phase 21 UAT complete (6/6 pass, IT-backed)
+Last session: 2026-08-06T09:32:02.167Z
+Stopped at: Phase 22 context gathered
 Next: `/gsd-execute-phase 21` (write VERIFICATION.md) then `/gsd-plan-phase 22`
 
 ## Operator Next Steps
