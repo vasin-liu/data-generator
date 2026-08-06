@@ -131,6 +131,6 @@ None.
 
 - FOUND: GeoPreviewLocationRequest.java, GeoSyntheticPreviewRequest.java, GeoSyntheticPreviewView.java
 - FOUND: ConsoleGeoAssetPreviewIT.java, preview-point.geojson
-- FOUND: commits 885e575, cbe697e, 1b87297, 556df24
+- FOUND: commits 885e575, cbe697e, 1b87297, 556df24, docs 34e474f
 - VERIFY: GeoAssetServiceTests + ConsoleGeoAssetPreviewIT + ConsoleGeoAssetControllerIT Surefire exit 0
 - VERIFY: no files under `data-generator-console-web/` modified
