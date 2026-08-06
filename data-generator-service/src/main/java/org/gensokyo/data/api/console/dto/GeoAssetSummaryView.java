@@ -49,7 +49,6 @@ public record GeoAssetSummaryView(
      * @return summary DTO
      */
     public static GeoAssetSummaryView from(GeoAssetPO row) {
-        // RED: contentType intentionally omitted until GREEN maps PO field (D-02).
         return new GeoAssetSummaryView(
                 row.getId(),
                 row.getName(),
@@ -59,7 +58,7 @@ public record GeoAssetSummaryView(
                 row.getMaxLon(),
                 row.getMaxLat(),
                 row.getGeometrySummary(),
-                null,
+                row.getContentType(),
                 row.getUploadedBy(),
                 row.getCreatedAt(),
                 row.getUpdatedAt());

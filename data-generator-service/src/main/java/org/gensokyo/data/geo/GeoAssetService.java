@@ -12,8 +12,11 @@ import org.gensokyo.data.api.console.dto.GeoPreviewLocationRequest;
 import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest;
 import org.gensokyo.data.api.console.dto.GeoSyntheticPreviewView;
 import org.gensokyo.data.audit.AuditService;
+import org.gensokyo.data.calcite.source.GeoSyntheticRequestMapper;
 import org.gensokyo.data.config.DataGeneratorProperties;
+import org.gensokyo.data.geo.io.GeoResourceResolver;
 import org.gensokyo.data.model.po.GeoAssetPO;
+import org.gensokyo.data.model.v2.GeoSyntheticSourceVO;
 import org.gensokyo.data.repository.GeoAssetRepository;
 import org.gensokyo.data.security.ConsoleActorHolder;
 import org.gensokyo.kit.character.StrKit;
@@ -183,8 +186,11 @@ public class GeoAssetService implements GeoAssetResolver {
      */
     @Transactional(readOnly = true)
     public String previewLocation(GeoPreviewLocationRequest request) throws IOException {
-        // RED stub — Task 1 GREEN wires GeoResourceResolver.readUtf8(location, this).
-        throw new UnsupportedOperationException("previewLocation not implemented");
+        if (request == null || StrKit.isBlank(request.location())) {
+            throw new IllegalArgumentException("GeoJSON location must not be blank");
+        }
+        // Same resolve spine as runtime — never reimplement classpath/filesystem/asset: here (D-06 / T-22-03).
+        return GeoResourceResolver.readUtf8(request.location(), this);
     }
 
     /**
@@ -197,8 +203,51 @@ public class GeoAssetService implements GeoAssetResolver {
      */
     @Transactional(readOnly = true)
     public GeoSyntheticPreviewView previewSynthetic(GeoSyntheticPreviewRequest request) throws IOException {
-        // RED stub — Task 1 GREEN wires GeoSyntheticGenerator.generateRows with this resolver.
-        throw new UnsupportedOperationException("previewSynthetic not implemented");
+        if (request == null) {
+            throw new IllegalArgumentException("Synthetic preview request must not be null");
+        }
+        Integer maxCount = request.maxCount();
+        if (maxCount == null || maxCount <= 0) {
+            throw new IllegalArgumentException("maxCount must be > 0");
+        }
+        // Reject over-cap before generateRows so UI can surface the honesty limit (T-22-01).
+        if (maxCount > PREVIEW_MAX_COUNT) {
+            throw new IllegalArgumentException(
+                    "maxCount must be <= " + PREVIEW_MAX_COUNT + " (preview honesty cap)");
+        }
+
+        long seed = request.seed() == null ? 0L : request.seed();
+        GeoSyntheticSourceVO source = toPreviewSource(request, maxCount, seed);
+        GeoGenerationRequest generation = GeoSyntheticRequestMapper.toRequest("console-preview", source);
+        List<Map<String, Object>> rows = GeoSyntheticGenerator.generateRows(generation, this);
+        return GeoSyntheticPreviewView.fromRows(seed, PREVIEW_MAX_COUNT, rows);
+    }
+
+    private static GeoSyntheticSourceVO toPreviewSource(
+            GeoSyntheticPreviewRequest request, int maxCount, long seed) {
+        GeoSyntheticSourceVO source = new GeoSyntheticSourceVO();
+        source.setMode(request.mode());
+        source.setCount(maxCount);
+        source.setSeed(seed);
+        source.setBoundaryPath(request.boundaryPath());
+        source.setBoundaryAssetId(request.boundaryAssetId());
+        source.setNetworkPath(request.networkPath());
+        source.setNetworkAssetId(request.networkAssetId());
+        if (request.featureIndex() != null) {
+            source.setFeatureIndex(request.featureIndex());
+        }
+        if (request.randomFeature() != null) {
+            source.setRandomFeature(request.randomFeature());
+        }
+        source.setBbox(request.bbox());
+        source.setCenter(request.center());
+        if (request.radiusMeters() != null) {
+            source.setRadiusMeters(request.radiusMeters());
+        }
+        if (request.minDistanceMeters() != null) {
+            source.setMinDistanceMeters(request.minDistanceMeters());
+        }
+        return source;
     }
 
     private GeoAssetPO requireRow(UUID id) {
