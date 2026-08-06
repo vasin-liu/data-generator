@@ -117,7 +117,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 4. Console template editor supports `geo_synthetic` as an editable source kind with an asset picker
 5. Map asset layers use the same resolution spine as runtime (server GeoJSON for assets; client Turf overlays for BBOX/CIRCLE guides)
 
-**Plans**: 2/4 plans executed
+**Plans**: 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -127,7 +127,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 22-03-PLAN.md — Geo assets page (list/map/upload/delete Modal) + nav/i18n
+- [x] 22-03-PLAN.md — Geo assets page (list/map/upload/delete Modal) + nav/i18n
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -155,7 +155,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
-| 22. Console Map + geo_synthetic Editor | v2.3 | 2/4 | In Progress|  |
+| 22. Console Map + geo_synthetic Editor | v2.3 | 3/4 | In Progress|  |
 | 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 
 | Milestone | Phases | Status | Shipped |
