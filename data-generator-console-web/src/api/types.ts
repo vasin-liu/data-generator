@@ -6,11 +6,37 @@ export interface ApiResult<T> {
   data: T;
 }
 
-/** Parses JSON API envelope; throws on {@code success === false}. */
+/**
+ * Failed {@code R} envelope with HTTP status and optional structured {@code data}
+ * (e.g. 409 geo-asset usages). Callers that only need the message can still use
+ * {@code err.message}.
+ */
+export class ApiRequestError extends Error {
+  readonly status: number;
+  readonly data: unknown;
+
+  /**
+   * @param message operator-facing error text from {@code R.message}
+   * @param status  HTTP status code
+   * @param data    envelope {@code data} payload (may be null/undefined)
+   */
+  constructor(message: string, status: number, data: unknown = undefined) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
+/** Parses JSON API envelope; throws {@link ApiRequestError} on {@code success === false}. */
 export async function parseApiResult<T>(res: Response): Promise<T> {
   const body = (await res.json()) as ApiResult<T>;
   if (!body.success) {
-    throw new Error(body.message || `Request failed (${res.status})`);
+    throw new ApiRequestError(
+      body.message || `Request failed (${res.status})`,
+      res.status,
+      body.data,
+    );
   }
   return body.data;
 }
@@ -643,4 +669,73 @@ export interface MigrationSignoffRequest {
   approved: boolean;
   approvedBy?: string;
   notes?: string;
+}
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoAssetSummaryView}. */
+export interface GeoAssetSummary {
+  id: string;
+  name: string;
+  featureCount: number;
+  minLon: number;
+  minLat: number;
+  maxLon: number;
+  maxLat: number;
+  geometrySummary?: string | null;
+  contentType?: string | null;
+  uploadedBy?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoAssetUploadView}. */
+export interface GeoAssetUploadView {
+  id: string;
+  name: string;
+  featureCount: number;
+  minLon: number;
+  minLat: number;
+  maxLon: number;
+  maxLat: number;
+}
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoAssetTemplateUsageView}. */
+export interface GeoAssetTemplateUsage {
+  templateId: number;
+  templateName: string;
+}
+
+/** 409 delete payload: {@code R.fail(..., GeoAssetInUsePayload)}. */
+export interface GeoAssetInUsePayload {
+  usages: GeoAssetTemplateUsage[];
+}
+
+/** Minimal GeoJSON object shape for map underlays (raw geo+json responses). */
+export type GeoJsonObject = {
+  type: string;
+  [key: string]: unknown;
+};
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest}. */
+export interface GeoSyntheticPreviewRequest {
+  mode: string;
+  seed?: number | null;
+  maxCount?: number | null;
+  boundaryPath?: string | null;
+  boundaryAssetId?: string | null;
+  networkPath?: string | null;
+  networkAssetId?: string | null;
+  featureIndex?: number | null;
+  randomFeature?: boolean | null;
+  bbox?: number[] | null;
+  center?: number[] | null;
+  radiusMeters?: number | null;
+  minDistanceMeters?: number | null;
+}
+
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoSyntheticPreviewView}. */
+export interface GeoSyntheticPreviewView {
+  seed: number;
+  effectiveSampleCount: number;
+  maxCountCap: number;
+  featureCollection: GeoJsonObject;
 }
