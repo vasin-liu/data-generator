@@ -1,7 +1,7 @@
 ---
 phase: 22
 slug: console-map-geo-synthetic-editor
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-08-06

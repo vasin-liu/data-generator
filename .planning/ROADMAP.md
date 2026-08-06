@@ -120,9 +120,17 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 **Plans**: 4 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 22-01-PLAN.md — Preview APIs (path/classpath + capped synthetic) on Phase 21 resolve spine
 - [ ] 22-02-PLAN.md — ApiRequestError 409 usages + MapLibre/Turf + lazy GeoMapPreview
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 22-03-PLAN.md — Geo assets page (list/map/upload/delete Modal) + nav/i18n
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 22-04-PLAN.md — geo_synthetic editor, asset picker, hybrid preview honesty, E2E smoke
 
 ### Phase 23: Docs + Harness Closeout
