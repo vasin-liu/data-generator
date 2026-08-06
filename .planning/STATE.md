@@ -5,16 +5,16 @@ milestone_name: Geo Assets & Map Preview
 current_phase: 22
 current_phase_name: Console Map + geo_synthetic Editor
 status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-08-06T14:35:49.554Z"
-last_activity: 2026-08-04
-last_activity_desc: Phase 21 verified and complete; transitioned to Phase 22
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-08-06T15:06:53.961Z"
+last_activity: 2026-08-06
+last_activity_desc: Completed 22-01-PLAN.md (geo preview APIs)
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 33
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-31)
 ## Current Position
 
 Phase: 22 — Console Map + geo_synthetic Editor
-Plan: 02 of 04
+Plan: 3 of 04
 Status: Executing (22-01 complete; --no-transition)
 Last activity: 2026-08-06 — Completed 22-01-PLAN.md (geo preview APIs)
 
@@ -106,6 +106,8 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase 21]: Hard delete with template reference scan → 409 + GEO_ASSET_DELETE audit — GEO-09/GOV-01
 - [Phase 22]: Reject maxCount > 500 with IAE naming the cap (no silent clamp)
 - [Phase 22]: preview/location raw geo+json; synthetic R envelope; same Phase 21 resolve spine
+- [Phase 22]: ApiRequestError preserves status+data for 409 usages; location preview uses raw geo+json fetch
+- [Phase 22]: GeoMapPreview MapLibre via react-map-gl/maplibre with OSM + honesty Alert; CSS only in map module
 
 ### Pending Todos
 
@@ -135,13 +137,14 @@ Items carried or acknowledged at milestone close:
 | Product | Polygon synthesis (GEO-06) | Deferred past v2.3 | 2026-07-31 |
 | Product | Console map preview (GEO-07) | In scope v2.3 Phase 22 | 2026-07-31 |
 | Product | Common-data CRUD (DATA-01) | Next milestone candidate | 2026-07-31 |
+| Phase 22 P02 | 17min | 2 tasks | 6 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-08-06T14:35:21.619Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-08-06T15:06:52.186Z
+Stopped at: Completed 22-02-PLAN.md
 Next: Continue Phase 22 with `/gsd-execute-phase 22` (plan 22-02) — parent flagged `--no-transition`
 
 ## Operator Next Steps
