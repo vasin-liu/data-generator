@@ -9,6 +9,7 @@ import { yesNoOptions } from '../utils/optionLabels';
 import { SourceFileInput } from '../../components/SourceFileInput';
 import type { SourceDraft } from '../../api/types';
 import type { EditableSourceKind } from './draftUtils';
+import { GeoSyntheticSourceFields } from './GeoSyntheticSourceFields';
 
 type Props = {
   kind: EditableSourceKind;
@@ -309,6 +310,10 @@ export function SourceFieldsForm({
         </Form.Item>
       </>
     );
+  }
+
+  if (kind === 'geo_synthetic') {
+    return <GeoSyntheticSourceFields source={source} readOnly={readOnly} onPatch={onPatch} />;
   }
 
   return null;

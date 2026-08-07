@@ -21,7 +21,8 @@ export type EditableSourceKind =
   | 'json'
   | 'excel'
   | 'ai'
-  | 'geojson';
+  | 'geojson'
+  | 'geo_synthetic';
 
 export const EDITABLE_SOURCE_KINDS: EditableSourceKind[] = [
   'query',
@@ -32,6 +33,7 @@ export const EDITABLE_SOURCE_KINDS: EditableSourceKind[] = [
   'excel',
   'ai',
   'geojson',
+  'geo_synthetic',
 ];
 
 /**
@@ -126,6 +128,23 @@ export function defaultSourceForKind(kind: EditableSourceKind): SourceDraft {
       };
     case 'geojson':
       return { type: 'geojson', path: '' };
+    case 'geo_synthetic':
+      // Defaults match GeoSyntheticSourceVO / docs (BBOX + deterministic seed 0).
+      return {
+        type: 'geo_synthetic',
+        mode: 'BBOX',
+        count: 100,
+        seed: 0,
+        boundaryPath: '',
+        boundaryAssetId: '',
+        networkPath: '',
+        networkAssetId: '',
+        bbox: [113.2, 23.0, 113.5, 23.2],
+        center: [113.3, 23.1],
+        radiusMeters: 500,
+        // LINE_SAMPLE needs sample.strategy at runtime (GeoGenerationRequest.validate).
+        sample: { strategy: 'BY_COUNT', spacingMeters: 50 },
+      };
     default:
       return { type: kind };
   }
