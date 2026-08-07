@@ -162,7 +162,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
-| 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete   | 2026-08-07 |
+| 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete    | 2026-08-07 |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
