@@ -171,6 +171,10 @@ None beyond plan register — client clamps `maxCount` ≤500 (T-22-01); map lay
 - FOUND: `GeoSyntheticSourceFields.tsx`, `GeoAssetPickerModal.tsx`, `geo-assets.spec.ts`
 - FOUND: `geo_synthetic` in `draftUtils.ts` EditableSourceKind + EDITABLE_SOURCE_KINDS
 - FOUND: `source.kind.geo_synthetic` + `source.geoSynthetic.honesty.sampling` in en.json and zh-CN.json
-- FOUND: commits Task 1 `b457477`; Task 2 pending hash verify
+- FOUND: commits Task 1 `b457477`; Task 2 `cb7f8b8`; docs `4a232e1`
 - VERIFY: tsc + vite build exit 0; P0 tier rows still 15; no `.planning/test-matrix.yaml` edits
 - VERIFY: preview helpers call locked paths via Plan 02 `geoAssets.ts` (`preview/location`, `preview/synthetic`)
+
+---
+*Phase: 22-console-map-geo-synthetic-editor*
+*Completed: 2026-08-07*
