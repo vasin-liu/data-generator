@@ -18,15 +18,13 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 ## Current State
 
-**Phase 22 complete — Console Map + geo_synthetic Editor** (2026-08-07)
+**Phase 23 complete — Docs + Harness Closeout** (2026-08-07)
 
-- `/geo-assets` page: left list + MapLibre map, upload, delete with 409 usage Modal
-- Hybrid preview: server GeoJSON / preview helpers + client Turf BBOX/CIRCLE guides + capped synthetic sample
-- Seed honesty Alert (en + zh-CN); template editor `geo_synthetic` kind + asset picker
-- Preview APIs reuse Phase 21 resolve spine (`GeoResourceResolver` / `GeoSyntheticGenerator`); P0 still 15
-- Next: Phase 23 docs + optional P1 harness closeout
+- Docs: asset-id YAML + path vs asset-id wins (`docs/geo-synthetic-v2-source.md`); v2.3 landing (`docs/geospatial-overview.md`); limits + map preview honesty (`docs/geo-assets.md`)
+- P1 matrix row `geo-assets` linked to five Surefire classes; P0 merge gate still **15**
+- v2.3 phases 21–23 all complete — run `/gsd-complete-milestone` to archive
 
-**Also shipped: Phase 21 Geo Asset Registry** (2026-08-04) — upload/list/get/delete, asset-id binding, safe delete 409.
+**Also shipped:** Phase 22 console map + `geo_synthetic` editor; Phase 21 geo asset registry + runtime resolution.
 
 Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
 
@@ -34,8 +32,7 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 
 **Goal:** Operators can upload hosted GeoJSON assets (metadata DB), reference them by asset-id from V2 sources, and preview both assets and `geo_synthetic` configs on a console map.
 
-**Remaining this milestone:**
-- DOC-01 / TEST-11 — Docs + optional P1 harness row (Phase 23)
+**Remaining this milestone:** none (phases complete — milestone closeout pending)
 
 **Out of scope this milestone:** GEO-06 polygon synthesis; DATA-01 common-data CRUD; P0 gate inflation (default freeze at 15)
 
@@ -93,9 +90,14 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 - ✓ `geo_synthetic` hybrid map preview + seed honesty (GEO-12) — Phase 22
 - ✓ Template editor `geo_synthetic` + asset picker (GEO-13) — Phase 22
 
+### Validated (v2.3 Phase 23)
+
+- ✓ Asset-id / map preview / upload-limit docs (DOC-01) — Phase 23
+- ✓ P1 `geo-assets` harness row; P0 frozen at 15 (TEST-11) — Phase 23
+
 ### Active (v2.3)
 
-- [ ] Docs + optional P1 geo-assets harness row (DOC-01, TEST-11)
+- (none — all v2.3 requirements validated; milestone closeout pending)
 
 ### Out of Scope
 
