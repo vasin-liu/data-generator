@@ -364,6 +364,27 @@ rows:
       with path-only classpath assets; pipeline IT via TemplateV2Runner through SQL
       transform to console sink; Phase 19 unit tests cover RowSource and request mapping.
 
+  - id: geo-assets
+    capability: geo-assets
+    adapter: geo-assets
+    test_types: [unit, integration]
+    owner_module: data-generator-service
+    status: covered
+    tier: P1
+    linked_tests:
+      - ConsoleGeoAssetControllerIT
+      - ConsoleGeoAssetPreviewIT
+      - GeoAssetServiceTests
+      - GeoAssetReferenceScannerTests
+      - TemplateV2RunnerGeoAssetSourceTests
+    notes: >-
+      Metadata DB geo asset registry + console upload/list/preview ITs
+      (ConsoleGeoAssetControllerIT, ConsoleGeoAssetPreviewIT) with unit coverage
+      for GeoAssetService and GeoAssetReferenceScanner; calcite execute-path
+      asset-id proof via TemplateV2RunnerGeoAssetSourceTests. Phase 23 P1
+      non-blocking — Playwright/Podman not required for this row; P0 gate
+      remains 15 rows (geo-assets not promoted).
+
   - id: console-api-templates
     capability: console-api-templates
     adapter: console-api
