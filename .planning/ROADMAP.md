@@ -77,7 +77,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 ### Phase list
 
 - [x] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (3/3 plans)
-- [ ] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13)
+- [x] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13) (completed 2026-08-07)
 - [ ] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11)
 
 ### Phase Details
@@ -117,7 +117,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 4. Console template editor supports `geo_synthetic` as an editable source kind with an asset picker
 5. Map asset layers use the same resolution spine as runtime (server GeoJSON for assets; client Turf overlays for BBOX/CIRCLE guides)
 
-**Plans**: 3/4 plans executed
+**Plans**: 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -131,7 +131,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 22-04-PLAN.md — geo_synthetic editor, asset picker, hybrid preview honesty, E2E smoke
+- [x] 22-04-PLAN.md — geo_synthetic editor, asset picker, hybrid preview honesty, E2E smoke
 
 ### Phase 23: Docs + Harness Closeout
 
@@ -155,7 +155,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
-| 22. Console Map + geo_synthetic Editor | v2.3 | 3/4 | In Progress|  |
+| 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete   | 2026-08-07 |
 | 23. Docs + Harness Closeout | v2.3 | 0/? | Not started | — |
 
 | Milestone | Phases | Status | Shipped |
