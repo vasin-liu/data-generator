@@ -148,12 +148,12 @@ Plans:
 3. `verify-harness.ps1` P0 set remains 15 rows — no P0 promotion of geo-assets
 4. Geo-assets verification slice (Maven IT + console build) is green in harness summary
 
-**Plans**: 2 plans
+**Plans**: 1/2 plans executed
 
 Plans:
 **Wave 1** (parallel — no file overlap)
 
-- [ ] 23-01-PLAN.md — DOC-01: asset-id YAML + overview/map/limits docs (optional geo-assets.md)
+- [x] 23-01-PLAN.md — DOC-01: asset-id YAML + overview/map/limits docs (optional geo-assets.md)
 - [ ] 23-02-PLAN.md — TEST-11: geo-assets P1 matrix row + regenerate feature matrix; P0 frozen at 15
 
 ## Progress
@@ -162,7 +162,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
-| 23. Docs + Harness Closeout | v2.3 | 0/2 | Planned | — |
+| 23. Docs + Harness Closeout | v2.3 | 1/2 | In Progress|  |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|

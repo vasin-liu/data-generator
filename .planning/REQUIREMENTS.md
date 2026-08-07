@@ -22,7 +22,7 @@ Hosted GeoJSON assets in the metadata DB, asset-id template binding, and console
 ### Governance & Docs (GOV / DOC)
 
 - [x] **GOV-01**: Upload and delete emit audit events; optional console RBAC continues to use the existing enable flag (default off)
-- [ ] **DOC-01**: Maintainers/operators have docs for asset-id YAML examples, path vs asset-id, map preview usage, and size limits
+- [x] **DOC-01**: Maintainers/operators have docs for asset-id YAML examples, path vs asset-id, map preview usage, and size limits
 
 ### Harness (TEST)
 
@@ -67,7 +67,7 @@ Deferred beyond v2.3.
 | GEO-07 | 22 | Complete |
 | GEO-12 | 22 | Complete |
 | GEO-13 | 22 | Complete |
-| DOC-01 | 23 | Pending |
+| DOC-01 | 23 | Complete |
 | TEST-11 | 23 | Pending |
 
 **Coverage:**

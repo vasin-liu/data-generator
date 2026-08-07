@@ -6,14 +6,14 @@ current_phase: 23
 current_phase_name: Docs + Harness Closeout
 status: executing
 stopped_at: Completed 22-04-PLAN.md
-last_updated: "2026-08-07T11:19:13.172Z"
+last_updated: "2026-08-07T12:13:25.210Z"
 last_activity: 2026-08-07
-last_activity_desc: Phase 22 complete, transitioned to Phase 23
+last_activity_desc: Completed 23-01 DOC-01 docs
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 9
+  completed_plans: 8
   percent: 67
 ---
 
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-31)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 22 — Console Map + geo_synthetic Editor
+**Current focus:** Phase 23 — Docs + Harness Closeout
 
 ## Current Position
 
 Phase: 23 — Docs + Harness Closeout
-Plan: Not started
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-08-07 — Phase 22 complete, transitioned to Phase 23
+Last activity: 2026-08-07 — Completed 23-01 DOC-01 docs
 
 ## Performance Metrics
 
@@ -70,12 +70,13 @@ Last activity: 2026-08-07 — Phase 22 complete, transitioned to Phase 23
 **Velocity (v2.3 in progress):**
 
 - Phases: 3 (21–23)
-- Plans completed: 7 (Phase 21: 3, Phase 22: 4)
-- Status: Phase 22 ready for verification (22-01..22-04 complete)
+- Plans completed: 8 (Phase 21: 3, Phase 22: 4, Phase 23: 1)
+- Status: Phase 23 in progress (23-01 complete; next 23-02)
 - Phase 22 P01: 45min | 2 tasks | 9 files
 - Phase 22 P02: 17min | 2 tasks | 6 files
 - Phase 22 P03: 12min | 2 tasks | 5 files
 - Phase 22 P04: 85min | 2 tasks | 7 files
+- Phase 23 P01: 12min | 3 tasks | 3 files
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase ?]: 22-03: 409 delete shows usages Modal.info; no client force-delete
 - [Phase ?]: 22-03: geoAssets.* + nav only; source.geoSynthetic.* deferred to Plan 04
 - [Phase 22]: 22-04: geo_synthetic editor uses VO modes BOUNDARY_POINTS/LINE_SAMPLE; preview prefers asset-id when both set
+- [Phase 23]: D-03 — map/upload/preview prose in docs/geo-assets.md linked from overview (DOC-01)
+- [Phase 23]: DOC-01 limits cited from DataGeneratorProperties.GeoAssets defaults only (max-bytes 52428800, max-features 10000)
 
 ### Pending Todos
 
@@ -149,12 +152,11 @@ Items carried or acknowledged at milestone close:
 
 **Resume file:** None
 
-Last session: 2026-08-07T02:30:00Z
-Stopped at: Completed 22-04-PLAN.md
-Next: Run `/gsd-verify-work` for Phase 22 (ready_for_verification), then Phase 23
+Last session: 2026-08-07T12:13:25.144Z
+Stopped at: Completed 23-01-PLAN.md
+Next: Execute 23-02-PLAN.md (TEST-11 geo-assets P1 matrix)
 
 ## Operator Next Steps
 
-- Verify Phase 22 (`/gsd-verify-work` or execute-phase verification)
-- Optional: Podman Playwright `e2e/specs/geo-assets.spec.ts`
-- Proceed to Phase 23 docs / P1 harness row when Phase 22 verification passes
+- Execute `/gsd-execute-phase 23` remaining plan 23-02 (TEST-11 P1 matrix)
+- Keep `verify-harness.ps1` P0 set at 15 rows
