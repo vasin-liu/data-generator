@@ -26,7 +26,7 @@ Hosted GeoJSON assets in the metadata DB, asset-id template binding, and console
 
 ### Harness (TEST)
 
-- [ ] **TEST-11**: Feature matrix may link a **P1** `geo-assets` (or equivalent) row to real tests when stable; `verify-harness.ps1` P0 set remains **15** rows (no P0 promotion)
+- [x] **TEST-11**: Feature matrix may link a **P1** `geo-assets` (or equivalent) row to real tests when stable; `verify-harness.ps1` P0 set remains **15** rows (no P0 promotion)
 
 ## Future Requirements
 
@@ -68,7 +68,7 @@ Deferred beyond v2.3.
 | GEO-12 | 22 | Complete |
 | GEO-13 | 22 | Complete |
 | DOC-01 | 23 | Complete |
-| TEST-11 | 23 | Pending |
+| TEST-11 | 23 | Complete |
 
 **Coverage:**
 

@@ -78,7 +78,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 
 - [x] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (3/3 plans)
 - [x] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13) (completed 2026-08-07)
-- [ ] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11)
+- [x] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11) (completed 2026-08-07)
 
 ### Phase Details
 
@@ -148,13 +148,13 @@ Plans:
 3. `verify-harness.ps1` P0 set remains 15 rows — no P0 promotion of geo-assets
 4. Geo-assets verification slice (Maven IT + console build) is green in harness summary
 
-**Plans**: 1/2 plans executed
+**Plans**: 2/2 plans complete
 
 Plans:
 **Wave 1** (parallel — no file overlap)
 
 - [x] 23-01-PLAN.md — DOC-01: asset-id YAML + overview/map/limits docs (optional geo-assets.md)
-- [ ] 23-02-PLAN.md — TEST-11: geo-assets P1 matrix row + regenerate feature matrix; P0 frozen at 15
+- [x] 23-02-PLAN.md — TEST-11: geo-assets P1 matrix row + regenerate feature matrix; P0 frozen at 15
 
 ## Progress
 
@@ -162,10 +162,10 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
-| 23. Docs + Harness Closeout | v2.3 | 1/2 | In Progress|  |
+| 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete   | 2026-08-07 |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
-| v2.3 Geo Assets & Map Preview | 21–23 (0/2 Phase 23 plans) | Planning | — |
+| v2.3 Geo Assets & Map Preview | 21–23 (2/2 Phase 23 plans) | Plans complete — verify | — |
 
-**Next:** `/gsd-execute-phase 23`
+**Next:** `/gsd-verify-work` Phase 23
