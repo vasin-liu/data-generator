@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.3
 milestone_name: Geo Assets & Map Preview
-current_phase: 22
-current_phase_name: Console Map + geo_synthetic Editor
-status: ready_for_verification
+current_phase: 23
+current_phase_name: Docs + Harness Closeout
+status: completed
 stopped_at: Completed 22-04-PLAN.md
-last_updated: "2026-08-07T02:30:00.000Z"
+last_updated: "2026-08-07T03:51:15.351Z"
 last_activity: 2026-08-07
-last_activity_desc: Completed 22-04-PLAN.md (geo_synthetic editor + hybrid preview)
+last_activity_desc: Phase 22 complete, transitioned to Phase 23
 progress:
   total_phases: 3
   completed_phases: 2
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-31)
 
 ## Current Position
 
-Phase: 22 — Console Map + geo_synthetic Editor
-Plan: 4 of 04
-Status: Ready for verification (all Phase 22 plans complete)
-Last activity: 2026-08-07 — Completed 22-04-PLAN.md (geo_synthetic editor + hybrid preview)
+Phase: 23 — Docs + Harness Closeout
+Plan: Not started
+Status: Phase 22 complete
+Last activity: 2026-08-07 — Phase 22 complete, transitioned to Phase 23
 
 ## Performance Metrics
 
@@ -70,9 +70,12 @@ Last activity: 2026-08-07 — Completed 22-04-PLAN.md (geo_synthetic editor + hy
 **Velocity (v2.3 in progress):**
 
 - Phases: 3 (21–23)
-- Plans completed: 4 (Phase 21: 3, Phase 22: 1)
-- Status: Phase 22 executing (22-01 complete)
+- Plans completed: 7 (Phase 21: 3, Phase 22: 4)
+- Status: Phase 22 ready for verification (22-01..22-04 complete)
 - Phase 22 P01: 45min | 2 tasks | 9 files
+- Phase 22 P02: 17min | 2 tasks | 6 files
+- Phase 22 P03: 12min | 2 tasks | 5 files
+- Phase 22 P04: 85min | 2 tasks | 7 files
 
 ## Accumulated Context
 
@@ -111,6 +114,7 @@ Full log in PROJECT.md Key Decisions. Highlights:
 - [Phase ?]: 22-03: contentType column only when API exposes it; size omitted (D-02)
 - [Phase ?]: 22-03: 409 delete shows usages Modal.info; no client force-delete
 - [Phase ?]: 22-03: geoAssets.* + nav only; source.geoSynthetic.* deferred to Plan 04
+- [Phase 22]: 22-04: geo_synthetic editor uses VO modes BOUNDARY_POINTS/LINE_SAMPLE; preview prefers asset-id when both set
 
 ### Pending Todos
 
@@ -138,19 +142,19 @@ Items carried or acknowledged at milestone close:
 | Process | v2.1 milestone archive tree | Deferred per D-16 | 2026-07-29 |
 | Product | GeoJSON asset upload (GEO-05) | Done in Phase 21 | 2026-07-31 |
 | Product | Polygon synthesis (GEO-06) | Deferred past v2.3 | 2026-07-31 |
-| Product | Console map preview (GEO-07) | In scope v2.3 Phase 22 | 2026-07-31 |
+| Product | Console map preview (GEO-07) | Done in Phase 22 | 2026-07-31 |
 | Product | Common-data CRUD (DATA-01) | Next milestone candidate | 2026-07-31 |
-| Phase 22 P02 | 17min | 2 tasks | 6 files |
-| Phase 22 P03 | 12min | 2 tasks | 5 files |
 
 ## Session Continuity
 
 **Resume file:** None
 
-Last session: 2026-08-07T02:22:53.074Z
-Stopped at: Completed 22-03-PLAN.md
-Next: Continue Phase 22 with `/gsd-execute-phase 22` (plan 22-02) — parent flagged `--no-transition`
+Last session: 2026-08-07T02:30:00Z
+Stopped at: Completed 22-04-PLAN.md
+Next: Run `/gsd-verify-work` for Phase 22 (ready_for_verification), then Phase 23
 
 ## Operator Next Steps
 
-- Execute remaining Phase 22 plans (22-02 MapLibre client, 22-03 assets page, 22-04 editor)
+- Verify Phase 22 (`/gsd-verify-work` or execute-phase verification)
+- Optional: Podman Playwright `e2e/specs/geo-assets.spec.ts`
+- Proceed to Phase 23 docs / P1 harness row when Phase 22 verification passes
