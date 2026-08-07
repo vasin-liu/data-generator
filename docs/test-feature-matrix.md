@@ -42,6 +42,7 @@ This document is generated from `.planning/test-matrix.yaml`. Edit the YAML sour
 | scripter-spel | scripter-spel | spel | unit | data-generator-scripter-spel | pending | P2 |  |
 | faker-integration | faker-synthetic | datafaker | unit | data-generator-faker | pending | P2 |  |
 | geo-synthetic | geo-synthetic | geo_synthetic | unit, integration | data-generator-calcite | covered | P1 | TemplateV2RunnerGeoSyntheticSourceTests, GeoSyntheticRowSourceTests, GeoSyntheticRequestMapperTests |
+| geo-assets | geo-assets | geo-assets | unit, integration | data-generator-service | covered | P1 | ConsoleGeoAssetControllerIT, ConsoleGeoAssetPreviewIT, GeoAssetServiceTests, GeoAssetReferenceScannerTests, TemplateV2RunnerGeoAssetSourceTests |
 | console-api-templates | console-api-templates | console-api | unit, e2e | data-generator-service | partial | P1 | ConsoleTemplateControllerTest |
 | console-api-jobs | console-api-jobs | console-api | unit, e2e | data-generator-service | partial | P1 | ConsoleJobControllerTest |
 | console-api-udf | console-api-udf | console-api | unit | data-generator-service | covered | P1 | ConsoleUdfControllerTest |

@@ -371,12 +371,7 @@ rows:
     owner_module: data-generator-service
     status: covered
     tier: P1
-    linked_tests:
-      - ConsoleGeoAssetControllerIT
-      - ConsoleGeoAssetPreviewIT
-      - GeoAssetServiceTests
-      - GeoAssetReferenceScannerTests
-      - TemplateV2RunnerGeoAssetSourceTests
+    linked_tests: [ConsoleGeoAssetControllerIT, ConsoleGeoAssetPreviewIT, GeoAssetServiceTests, GeoAssetReferenceScannerTests, TemplateV2RunnerGeoAssetSourceTests]
     notes: >-
       Metadata DB geo asset registry + console upload/list/preview ITs
       (ConsoleGeoAssetControllerIT, ConsoleGeoAssetPreviewIT) with unit coverage

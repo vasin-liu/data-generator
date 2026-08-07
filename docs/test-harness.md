@@ -62,6 +62,16 @@ Phase 17 wired finished v2.1 proof paths as **P1 non-blocking** matrix rows. `sc
 
 These rows are **not merge blockers**. The CI **Harness verify** workflow (`.github/workflows/harness-verify.yml`) gates on `p0.pass` only.
 
+### Phase 23 / v2.3 P1 evidence
+
+Phase 23 links geo asset registry + console preview coverage as a **P1 non-blocking** matrix row. `scripts/verify-harness.ps1` P0 set stays **15 rows** — `geo-assets` is not promoted to the merge gate.
+
+| Row id | Capability | Evidence bar | Supplementary |
+|--------|------------|--------------|---------------|
+| `geo-assets` | Metadata DB geo assets + console preview + asset-id execute path | `ConsoleGeoAssetControllerIT`, `ConsoleGeoAssetPreviewIT`, `GeoAssetServiceTests`, `GeoAssetReferenceScannerTests`, `TemplateV2RunnerGeoAssetSourceTests` — Maven IT/unit only | — |
+
+Playwright/Podman map smoke from Phase 22 is optional operator evidence, not a matrix requirement for this row.
+
 ## Matrix maintenance
 
 1. Edit `.planning/test-matrix.yaml` (source of truth).
