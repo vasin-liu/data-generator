@@ -18,15 +18,15 @@ Operators can define, extend, and trust data-generation pipelines: register cust
 
 ## Current State
 
-**Phase 21 complete — Geo Asset Registry + Runtime Resolution** (2026-08-04)
+**Phase 22 complete — Console Map + geo_synthetic Editor** (2026-08-07)
 
-- Console API upload/list/get/delete for GeoJSON assets (metadata DB CLOB + bbox/featureCount)
-- Safe delete with 409 usage hints when templates reference the asset; upload/delete audit
-- Template V2 `geo_synthetic` / `geojson` bind via asset-id; `asset:{uuid}` on execute path via `GeoAssetResolver`
-- Path/`classpath:` fixtures unchanged; P0 harness still 15 rows
-- Next: Phase 22 console map + `geo_synthetic` editor
+- `/geo-assets` page: left list + MapLibre map, upload, delete with 409 usage Modal
+- Hybrid preview: server GeoJSON / preview helpers + client Turf BBOX/CIRCLE guides + capped synthetic sample
+- Seed honesty Alert (en + zh-CN); template editor `geo_synthetic` kind + asset picker
+- Preview APIs reuse Phase 21 resolve spine (`GeoResourceResolver` / `GeoSyntheticGenerator`); P0 still 15
+- Next: Phase 23 docs + optional P1 harness closeout
 
-**Also shipped: v2.2 V2 Geo Synthetic Source** (2026-07-31) — path-based `geo_synthetic` four modes + docs + P1 row.
+**Also shipped: Phase 21 Geo Asset Registry** (2026-08-04) — upload/list/get/delete, asset-id binding, safe delete 409.
 
 Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
 
@@ -35,7 +35,6 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 **Goal:** Operators can upload hosted GeoJSON assets (metadata DB), reference them by asset-id from V2 sources, and preview both assets and `geo_synthetic` configs on a console map.
 
 **Remaining this milestone:**
-- GEO-07 / GEO-12 / GEO-13 — Console map + `geo_synthetic` editor (Phase 22)
 - DOC-01 / TEST-11 — Docs + optional P1 harness row (Phase 23)
 
 **Out of scope this milestone:** GEO-06 polygon synthesis; DATA-01 common-data CRUD; P0 gate inflation (default freeze at 15)
@@ -88,10 +87,14 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 - ✓ Safe delete with template usage 409 (GEO-09); execute-path `GeoAssetResolver` (GEO-10, GEO-11) — Phase 21
 - ✓ Upload/delete audit; RBAC enable flag respected (GOV-01) — Phase 21
 
+### Validated (v2.3 Phase 22)
+
+- ✓ Console geo-assets map browse (GEO-07) — Phase 22
+- ✓ `geo_synthetic` hybrid map preview + seed honesty (GEO-12) — Phase 22
+- ✓ Template editor `geo_synthetic` + asset picker (GEO-13) — Phase 22
+
 ### Active (v2.3)
 
-- [ ] Console map: asset browse + `geo_synthetic` config preview (GEO-07, GEO-12)
-- [ ] Template editor `geo_synthetic` + asset picker (GEO-13)
 - [ ] Docs + optional P1 geo-assets harness row (DOC-01, TEST-11)
 
 ### Out of Scope
@@ -156,9 +159,9 @@ Known pressure points:
 | v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | ✓ Good — shipped 2026-07-31 |
 | v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | ✓ Good — GEO-05 in v2.3 |
 | v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | ✓ Good — TEST-10 |
-| v2.3: GEO-05 + GEO-07 equal depth; no GEO-06 | Upload+map together; polygon later | ✓ Phase 21 shipped GEO-05/08/09/10/11 + GOV-01; GEO-07 pending Phase 22 |
-| v2.3: Geo assets in metadata DB | Align with secrets/template governance | — Pending |
-| v2.3: Map previews assets and geo_synthetic config | Operator browse + template config UX | — Pending |
+| v2.3: GEO-05 + GEO-07 equal depth; no GEO-06 | Upload+map together; polygon later | ✓ Phase 21 GEO-05/08/09/10/11; Phase 22 GEO-07/12/13 |
+| v2.3: Geo assets in metadata DB | Align with secrets/template governance | ✓ Phase 21 |
+| v2.3: Map previews assets and geo_synthetic config | Operator browse + template config UX | ✓ Phase 22 |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -206,4 +209,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-04 — Phase 21 verified complete (geo asset registry + runtime resolution)*
+*Last updated: 2026-08-07 — Phase 22 verified complete (console map + geo_synthetic editor)*
