@@ -79,7 +79,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 - [x] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (3/3 plans)
 - [x] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13) (completed 2026-08-07)
 - [x] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11) (completed 2026-08-07)
-- [ ] **Phase 23.1: v2.3 Tech Debt Closeout** (INSERTED) — LINE_SAMPLE preview `sample.strategy`, dual-binding docs clarity, exact preview API paths in docs
+- [x] **Phase 23.1: v2.3 Tech Debt Closeout** (INSERTED) — LINE_SAMPLE preview `sample.strategy`, dual-binding docs clarity, exact preview API paths in docs (completed 2026-08-08)
 
 ### Phase Details
 
@@ -164,7 +164,7 @@ Plans:
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
 | 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete    | 2026-08-07 |
-| 23.1. v2.3 Tech Debt Closeout (INSERTED) | v2.3 | 0/2 | Not started | — |
+| 23.1. v2.3 Tech Debt Closeout (INSERTED) | v2.3 | 2/2 | Complete    | 2026-08-08 |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
@@ -187,13 +187,13 @@ Plans:
 3. `docs/geo-assets.md` (and related) name exact locked paths `POST /api/console/geo-assets/preview/location` and `…/preview/synthetic`
 4. Intentionally deferred items remain out of scope: GEO-06, DATA-01, P0 inflation, optional Playwright→P1 promotion, Spring upload→run IT (unless discuss locks them in)
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 **Wave 1**
 
-- [ ] 23.1-01-PLAN.md — LINE_SAMPLE preview nested `sample` DTO/service/console + Maven tests (D-01..D-05)
+- [x] 23.1-01-PLAN.md — LINE_SAMPLE preview nested `sample` DTO/service/console + Maven tests (D-01..D-05)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 23.1-02-PLAN.md — Dual-binding two-path docs + exact preview API paths (D-06..D-10)
+- [x] 23.1-02-PLAN.md — Dual-binding two-path docs + exact preview API paths (D-06..D-10)
