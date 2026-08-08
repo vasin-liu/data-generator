@@ -715,6 +715,12 @@ export type GeoJsonObject = {
   [key: string]: unknown;
 };
 
+/** Mirrors {@code org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest.Sample}. */
+export interface GeoSyntheticPreviewSample {
+  strategy?: string | null;
+  spacingMeters?: number | null;
+}
+
 /** Mirrors {@code org.gensokyo.data.api.console.dto.GeoSyntheticPreviewRequest}. */
 export interface GeoSyntheticPreviewRequest {
   mode: string;
@@ -730,6 +736,8 @@ export interface GeoSyntheticPreviewRequest {
   center?: number[] | null;
   radiusMeters?: number | null;
   minDistanceMeters?: number | null;
+  /** Nested LINE_SAMPLE options (YAML {@code sample} / GeoSyntheticSampleVO). */
+  sample?: GeoSyntheticPreviewSample | null;
 }
 
 /** Mirrors {@code org.gensokyo.data.api.console.dto.GeoSyntheticPreviewView}. */

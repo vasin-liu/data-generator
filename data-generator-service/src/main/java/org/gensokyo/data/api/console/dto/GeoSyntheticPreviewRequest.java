@@ -11,7 +11,8 @@ import java.util.List;
  * Console request for capped {@code geo_synthetic} point sampling preview (D-08).
  *
  * <p>Field semantics mirror {@code GeoSyntheticSourceVO}; {@code maxCount} is the honesty sample
- * size and must be {@code ≤ 500}.
+ * size and must be {@code ≤ 500}. Nested {@code sample} mirrors YAML {@code GeoSyntheticSampleVO}
+ * for {@code LINE_SAMPLE} honesty (strategy / spacingMeters).
  *
  * @param mode              generation mode ({@code BBOX}, {@code CIRCLE}, {@code BOUNDARY_POINTS}, {@code LINE_SAMPLE})
  * @param seed              deterministic seed (defaults to {@code 0} when null)
@@ -26,6 +27,7 @@ import java.util.List;
  * @param center            {@code [lon, lat]} for CIRCLE mode
  * @param radiusMeters      circle radius
  * @param minDistanceMeters optional minimum distance between points
+ * @param sample            nested LINE_SAMPLE options ({@code strategy}, {@code spacingMeters}); may be null
  * @author Gensokyo
  * @since 2026-08-06
  */
@@ -42,5 +44,15 @@ public record GeoSyntheticPreviewRequest(
         List<Double> bbox,
         List<Double> center,
         Double radiusMeters,
-        Double minDistanceMeters) {
+        Double minDistanceMeters,
+        Sample sample) {
+
+    /**
+     * Nested LINE_SAMPLE options mirroring {@code GeoSyntheticSampleVO} / YAML {@code sample}.
+     *
+     * @param strategy       {@code BY_COUNT} or {@code BY_SPACING_METERS}
+     * @param spacingMeters  spacing when strategy is {@code BY_SPACING_METERS}
+     */
+    public record Sample(String strategy, Double spacingMeters) {
+    }
 }

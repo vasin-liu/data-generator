@@ -146,7 +146,14 @@ Boundary and network GeoJSON resolve through the shared `GeoResourceResolver` / 
 | Network (`LINE_SAMPLE`) | `networkAssetId` | `networkPath` | Same for line networks |
 | Read-only GeoJSON source | `assetId` | `path` | `type: geojson` / `GEOJSON` |
 
-**Precedence (Phase 21 D-02):** when both a path field and the matching asset-id field are set for the same role, **asset-id wins**. Runtime mappers prefer fail-fast validation (clear message naming source + field) over silent dual-read. Path and `classpath:` remain first-class when asset-id is absent (GEO-03).
+**Dual-binding (two paths — do not conflate):** when both a path field and the matching asset-id field appear for the same role, behavior depends on surface:
+
+| Surface | Behavior |
+|---------|----------|
+| **Editor / console preview** | **Asset-id is preferred** for preview calls (client clears path when asset-id is set); inline warning remains UX. See [`geo-assets.md`](geo-assets.md) console map preview. |
+| **Runtime execute** | Mapper **fail-fasts** if both path and asset-id are present on the saved source (`IllegalArgumentException` naming source + fields). Leave **one binding only** in YAML/draft before run — there is **no** silent runtime “asset-id wins” preference. |
+
+Path and `classpath:` remain first-class when asset-id is absent (GEO-03).
 
 **Wire format `asset:{uuid}`:** authors may also put `asset:{uuid}` on the path fields (`boundaryPath`, `networkPath`, or geojson `path`). Dedicated asset-id fields normalize to the same `asset:{uuid}` form before resolve — one spine, two authoring styles.
 

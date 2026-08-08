@@ -16,6 +16,7 @@ import org.gensokyo.data.calcite.source.GeoSyntheticRequestMapper;
 import org.gensokyo.data.config.DataGeneratorProperties;
 import org.gensokyo.data.geo.io.GeoResourceResolver;
 import org.gensokyo.data.model.po.GeoAssetPO;
+import org.gensokyo.data.model.v2.GeoSyntheticSampleVO;
 import org.gensokyo.data.model.v2.GeoSyntheticSourceVO;
 import org.gensokyo.data.repository.GeoAssetRepository;
 import org.gensokyo.data.security.ConsoleActorHolder;
@@ -247,7 +248,32 @@ public class GeoAssetService implements GeoAssetResolver {
         if (request.minDistanceMeters() != null) {
             source.setMinDistanceMeters(request.minDistanceMeters());
         }
+        // LINE_SAMPLE honesty: forward nested sample; default BY_COUNT when omitted (D-02 / D-04).
+        applyPreviewSample(source, request);
         return source;
+    }
+
+    private static void applyPreviewSample(GeoSyntheticSourceVO source, GeoSyntheticPreviewRequest request) {
+        boolean lineSample = request.mode() != null
+                && "LINE_SAMPLE".equalsIgnoreCase(request.mode().strip());
+        GeoSyntheticPreviewRequest.Sample sample = request.sample();
+        String strategy = sample == null || StrKit.isBlank(sample.strategy())
+                ? null
+                : sample.strategy().strip();
+        if (strategy == null && lineSample) {
+            strategy = "BY_COUNT";
+        }
+        if (strategy == null && (sample == null || sample.spacingMeters() == null)) {
+            return;
+        }
+        GeoSyntheticSampleVO sampleVo = new GeoSyntheticSampleVO();
+        if (strategy != null) {
+            sampleVo.setStrategy(strategy);
+        }
+        if (sample != null && sample.spacingMeters() != null) {
+            sampleVo.setSpacingMeters(sample.spacingMeters());
+        }
+        source.setSample(sampleVo);
     }
 
     private GeoAssetPO requireRow(UUID id) {

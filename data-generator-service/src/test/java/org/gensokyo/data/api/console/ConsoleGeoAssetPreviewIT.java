@@ -80,6 +80,48 @@ class ConsoleGeoAssetPreviewIT {
     }
 
     @Test
+    void previewSynthetic_lineSampleByCount_returnsFeatures() throws Exception {
+        String body = """
+                {
+                  "mode": "LINE_SAMPLE",
+                  "seed": 21,
+                  "maxCount": 6,
+                  "networkPath": "classpath:geo/preview-line.geojson",
+                  "sample": { "strategy": "BY_COUNT" }
+                }
+                """;
+        mockMvc.perform(post("/api/console/geo-assets/preview/synthetic")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.seed").value(21))
+                .andExpect(jsonPath("$.data.effectiveSampleCount").value(6))
+                .andExpect(jsonPath("$.data.featureCollection.features.length()").value(6));
+    }
+
+    @Test
+    void previewSynthetic_lineSampleBySpacing_returnsFewerThanMaxCount() throws Exception {
+        String body = """
+                {
+                  "mode": "LINE_SAMPLE",
+                  "seed": 22,
+                  "maxCount": 40,
+                  "networkPath": "classpath:geo/preview-line.geojson",
+                  "sample": { "strategy": "BY_SPACING_METERS", "spacingMeters": 500 }
+                }
+                """;
+        mockMvc.perform(post("/api/console/geo-assets/preview/synthetic")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.effectiveSampleCount").value(Matchers.lessThan(40)))
+                .andExpect(jsonPath("$.data.featureCollection.features.length()")
+                        .value(Matchers.greaterThanOrEqualTo(2)));
+    }
+
+    @Test
     void previewSynthetic_maxCount501_returnsBadRequest() throws Exception {
         String body = """
                 {

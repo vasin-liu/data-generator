@@ -228,6 +228,16 @@ export function GeoSyntheticSourceFields({ source, readOnly, onPatch }: Props) {
     setSampling(true);
     try {
       // Prefer asset-id when both set so preview matches D-16 runtime preference messaging.
+      const featureIndex =
+        typeof source.featureIndex === 'number' && Number.isFinite(source.featureIndex)
+          ? source.featureIndex
+          : null;
+      const randomFeature =
+        typeof source.randomFeature === 'boolean' ? source.randomFeature : null;
+      const minDistanceMeters =
+        typeof source.minDistanceMeters === 'number' && Number.isFinite(source.minDistanceMeters)
+          ? source.minDistanceMeters
+          : null;
       const view = await previewSyntheticPoints({
         mode,
         seed,
@@ -236,9 +246,20 @@ export function GeoSyntheticSourceFields({ source, readOnly, onPatch }: Props) {
         boundaryPath: nonBlank(boundaryAssetId) ? null : (nonBlank(boundaryPath) ?? null),
         networkAssetId: nonBlank(networkAssetId) ?? null,
         networkPath: nonBlank(networkAssetId) ? null : (nonBlank(networkPath) ?? null),
+        featureIndex,
+        randomFeature,
         bbox: mode === 'BBOX' ? bbox : null,
         center: mode === 'CIRCLE' ? center : null,
         radiusMeters: mode === 'CIRCLE' ? radiusMeters : null,
+        minDistanceMeters,
+        // LINE_SAMPLE honesty: forward nested sample (D-03); default BY_COUNT matches form.
+        sample:
+          mode === 'LINE_SAMPLE'
+            ? {
+                strategy: sample.strategy ?? 'BY_COUNT',
+                spacingMeters: sample.spacingMeters ?? null,
+              }
+            : null,
       });
       setSamplePoints(view.featureCollection);
       setSampleCap(view.maxCountCap ?? PREVIEW_MAX_COUNT);

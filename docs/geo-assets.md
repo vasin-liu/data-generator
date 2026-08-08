@@ -43,7 +43,12 @@ In the template editor Sources step, configure a `geo_synthetic` source (mode-sw
 
 - Resolves **asset-id** or **path/`classpath:`** underlays through the **same server resolve spine** as execute (console does not reimplement `asset:` / classpath).
 - Draws **BBOX / CIRCLE** guides client-side.
-- Optionally samples synthetic points via the server preview endpoint, with a hard **count cap** (e.g. ≤500) and the configured **seed** surfaced in the UI.
+- Optionally samples synthetic points via `POST /api/console/geo-assets/preview/synthetic`, with a hard **count cap** (e.g. ≤500) and the configured **seed** surfaced in the UI.
+
+**Dual-binding in the editor vs at run time** (see also [`geo-synthetic-v2-source.md`](geo-synthetic-v2-source.md) Path vs asset-id):
+
+- **Preview / editor:** when both path and asset-id are filled for the same role, **asset-id is preferred** for preview requests (path cleared client-side); an inline warning remains.
+- **Runtime execute:** `GeoSyntheticRequestMapper` **fail-fasts** if both bindings remain on the saved source — operators must keep one binding only before run. Do not read “asset-id wins” as a silent execute preference.
 
 ### Seed honesty (preview ≠ full run)
 
@@ -64,6 +69,7 @@ Playwright/Podman map smoke exists from Phase 22 but is **not** a P0 merge-gate 
 | `GET` | `/api/console/geo-assets/{id}` | Metadata |
 | `GET` | `/api/console/geo-assets/{id}/geojson` | Authoritative GeoJSON body for map/runtime |
 | `DELETE` | `/api/console/geo-assets/{id}` | Hard delete (409 if referenced) |
-| `POST` | `/api/console/geo-assets/.../preview/synthetic` (or equivalent under the geo-assets controller) | Capped synthetic-point preview |
+| `POST` | `/api/console/geo-assets/preview/location` | Resolve path/`classpath:`/`asset:{uuid}` to GeoJSON for map underlay |
+| `POST` | `/api/console/geo-assets/preview/synthetic` | Capped synthetic-point preview (`maxCount` ≤ 500) |
 
-Exact preview path naming follows Phase 22 controller wiring; prefer the console UI over hand-crafted preview calls.
+**Synthetic preview body:** JSON mirrors `geo_synthetic` fields used by the editor (mode, seed, maxCount, paths/asset-ids, bbox/center, etc.). For `LINE_SAMPLE`, include nested `sample` with `strategy` (`BY_COUNT` / `BY_SPACING_METERS`) and optional `spacingMeters` — same shape as YAML `GeoSyntheticSampleVO`. Detail: `ConsoleGeoAssetController` / `GeoSyntheticPreviewRequest`. Prefer the console UI over hand-crafted preview calls.

@@ -142,6 +142,7 @@ class GeoAssetServiceTests {
                 List.of(113.0, 23.0, 113.2, 23.2),
                 null,
                 null,
+                null,
                 null);
         IllegalArgumentException ex = Assertions.assertThrows(
                 IllegalArgumentException.class,
@@ -166,6 +167,7 @@ class GeoAssetServiceTests {
                 List.of(113.0, 23.0, 113.2, 23.2),
                 null,
                 null,
+                null,
                 null);
         GeoSyntheticPreviewView view = geoAssetService.previewSynthetic(request);
         Assertions.assertEquals(7L, view.seed());
@@ -177,6 +179,78 @@ class GeoAssetServiceTests {
         Assertions.assertNotNull(features);
         Assertions.assertTrue(features.size() <= 10);
         Assertions.assertFalse(features.isEmpty());
+    }
+
+    @Test
+    void previewSynthetic_lineSampleByCount_returnsRequestedPointCount() throws Exception {
+        GeoSyntheticPreviewRequest request = new GeoSyntheticPreviewRequest(
+                "LINE_SAMPLE",
+                3L,
+                12,
+                null,
+                null,
+                "classpath:geo/preview-line.geojson",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new GeoSyntheticPreviewRequest.Sample("BY_COUNT", null));
+        GeoSyntheticPreviewView view = geoAssetService.previewSynthetic(request);
+        Assertions.assertEquals(3L, view.seed());
+        Assertions.assertEquals(12, view.effectiveSampleCount());
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> features =
+                (List<Map<String, Object>>) view.featureCollection().get("features");
+        Assertions.assertEquals(12, features.size());
+    }
+
+    @Test
+    void previewSynthetic_lineSampleBySpacing_appliesStrategyNotIgnoredAsByCount() throws Exception {
+        // ~2 km east-west line; spacing 500 m → floor(L/500)+1 points, far below maxCount 40.
+        GeoSyntheticPreviewRequest request = new GeoSyntheticPreviewRequest(
+                "LINE_SAMPLE",
+                5L,
+                40,
+                null,
+                null,
+                "classpath:geo/preview-line.geojson",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                new GeoSyntheticPreviewRequest.Sample("BY_SPACING_METERS", 500d));
+        GeoSyntheticPreviewView view = geoAssetService.previewSynthetic(request);
+        Assertions.assertTrue(view.effectiveSampleCount() < 40,
+                () -> "expected spacing strategy to yield fewer than maxCount points, got "
+                        + view.effectiveSampleCount());
+        Assertions.assertTrue(view.effectiveSampleCount() >= 2);
+    }
+
+    @Test
+    void previewSynthetic_lineSampleOmittedSample_defaultsByCount() throws Exception {
+        GeoSyntheticPreviewRequest request = new GeoSyntheticPreviewRequest(
+                "LINE_SAMPLE",
+                9L,
+                8,
+                null,
+                null,
+                "classpath:geo/preview-line.geojson",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        GeoSyntheticPreviewView view = geoAssetService.previewSynthetic(request);
+        Assertions.assertEquals(8, view.effectiveSampleCount());
     }
 
     @Test
