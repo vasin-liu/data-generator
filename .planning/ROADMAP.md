@@ -164,20 +164,36 @@ Plans:
 | 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
 | 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
 | 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete    | 2026-08-07 |
+| 23.1. v2.3 Tech Debt Closeout (INSERTED) | v2.3 | 0/2 | Not started | — |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
-| v2.3 Geo Assets & Map Preview | 21–23 (2/2 Phase 23 plans) | Plans complete — verify | — |
+| v2.3 Geo Assets & Map Preview | 21–23 + 23.1 | Tech debt closeout pending | — |
 
-**Next:** `/gsd-verify-work` Phase 23
+**Next:** `/gsd-execute-phase 23.1`
 
-### Phase 23.1: Address v2.3 tech debt: LINE_SAMPLE preview sample.strategy, dual-binding docs clarity, exact preview API paths (INSERTED)
+### Phase 23.1: v2.3 Tech Debt Closeout (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Close actionable audit tech debt before archiving v2.3 — carry `sample.strategy` on LINE_SAMPLE preview, clarify dual-binding (preview vs runtime) in docs, and document exact preview API paths.
+
 **Depends on:** Phase 23
-**Plans:** 0 plans
+
+**Requirements:** (cleanup — no new REQ-IDs; addresses audit tech_debt from `.planning/v2.3-MILESTONE-AUDIT.md`)
+
+**Success Criteria** (observable):
+
+1. `POST …/preview/synthetic` for LINE_SAMPLE accepts/forwards `sample.strategy` (and related sample fields needed for honest preview) consistent with full-run draft
+2. Docs state clearly: editor preview prefers asset-id when both set; runtime mapper fail-fasts — operators are not surprised
+3. `docs/geo-assets.md` (and related) name exact locked paths `POST /api/console/geo-assets/preview/location` and `…/preview/synthetic`
+4. Intentionally deferred items remain out of scope: GEO-06, DATA-01, P0 inflation, optional Playwright→P1 promotion, Spring upload→run IT (unless discuss locks them in)
+
+**Plans:** 2 plans
 
 Plans:
+**Wave 1**
 
-- [ ] TBD (run /gsd-plan-phase 23.1 to break down)
+- [ ] 23.1-01-PLAN.md — LINE_SAMPLE preview nested `sample` DTO/service/console + Maven tests (D-01..D-05)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 23.1-02-PLAN.md — Dual-binding two-path docs + exact preview API paths (D-06..D-10)
