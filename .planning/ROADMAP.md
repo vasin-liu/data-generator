@@ -79,6 +79,7 @@ Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metada
 - [x] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (3/3 plans)
 - [x] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13) (completed 2026-08-07)
 - [x] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11) (completed 2026-08-07)
+- [ ] **Phase 23.1: v2.3 Tech Debt Closeout** (INSERTED) — LINE_SAMPLE preview `sample.strategy`, dual-binding docs clarity, exact preview API paths in docs
 
 ### Phase Details
 
@@ -169,3 +170,14 @@ Plans:
 | v2.3 Geo Assets & Map Preview | 21–23 (2/2 Phase 23 plans) | Plans complete — verify | — |
 
 **Next:** `/gsd-verify-work` Phase 23
+
+### Phase 23.1: Address v2.3 tech debt: LINE_SAMPLE preview sample.strategy, dual-binding docs clarity, exact preview API paths (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 23
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 23.1 to break down)

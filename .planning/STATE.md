@@ -5,16 +5,16 @@ milestone_name: Geo Assets & Map Preview
 current_phase: 23
 status: verifying
 stopped_at: Completed 23-02-PLAN.md
-last_updated: "2026-08-07T13:26:22.888Z"
+last_updated: "2026-08-08T00:26:36.593Z"
 last_activity: 2026-08-07
 last_activity_desc: Phase 23 complete
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
   total_plans: 9
   completed_plans: 9
-  percent: 100
-current_phase_name: Docs + Harness Closeout
+  percent: 75
+current_phase_name: v2.3 Tech Debt Closeout
 ---
 
 # Project State
@@ -132,6 +132,10 @@ None.
 - Console RBAC default-off for external deployments
 - Accepted v2.0 tech debt (Dameng CI, dual resolvers) — addressed in v2.1; not P0 inflation
 - Accepted v2.2 tech debt: BboxPointGenerator retry duplication, inline linked_tests for matrix doc — see `milestones/v2.2-MILESTONE-AUDIT.md`
+
+### Roadmap Evolution
+
+- Phase 23.1 inserted after Phase 23: Address v2.3 tech debt: LINE_SAMPLE preview sample.strategy, dual-binding docs clarity, exact preview API paths (URGENT)
 
 ## Deferred Items
 
