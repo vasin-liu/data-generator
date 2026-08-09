@@ -2,6 +2,51 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v2.3 — Geo Assets & Map Preview
+
+**Shipped:** 2026-08-08
+**Phases:** 4 | **Plans:** 11 | **Tasks:** 26
+
+### What Was Built
+
+- Metadata-DB GeoJSON asset registry with console CRUD, size/feature gates, and referential delete 409
+- Execute-path `asset:{uuid}` resolution shared by coordinator/worker for `geojson` + `geo_synthetic`
+- Console `/geo-assets` MapLibre browse and template-editor hybrid preview with seed honesty
+- DOC-01 operator docs + P1 `geo-assets` harness row (P0 frozen at 15)
+- Phase 23.1: LINE_SAMPLE nested `sample` on preview + dual-binding / exact-path docs closeout
+
+### What Worked
+
+- Equal-depth GEO-05 + GEO-07 in one milestone avoided another YAML-only gap after v2.2
+- Reusing Phase 21 resolve spine for console preview prevented a second client-side resolver
+- Inserted Phase 23.1 after audit `tech_debt` closed actionable items without inventing new REQ-IDs
+- Maven-first P1 bar kept Playwright smoke supplementary (same pattern as Phase 20)
+
+### What Was Inefficient
+
+- Milestone audit listed debt that Phase 23.1 later closed — audit file became stale until archive move
+- Dual-binding wording (“asset-id wins” vs runtime fail-fast) needed an explicit two-path rewrite
+- `gsd-tools` summary-extract returned empty one-liners for some plan SUMMARYs (frontmatter coverage uneven)
+
+### Patterns Established
+
+- Preview DTO nested `sample` mirrors YAML `GeoSyntheticSampleVO` for honesty parity
+- Document preview preference and runtime fail-fast as two surfaces — never conflate
+- Tech-debt closeout as decimal inserted phase after audit, before archive
+
+### Key Lessons
+
+1. Run actionable tech-debt cleanup before archive when audit is `tech_debt` (not only when `gaps_found`)
+2. Lock exact console API paths in docs in the same phase that ships the controller
+3. Keep P0 freeze explicit in ROADMAP success criteria so closeout cannot inflate the gate
+
+### Cost Observations
+
+- Timeline: 2026-07-31 → 2026-08-08 (~70 commits, +12.7k LOC)
+- Closeout: verified (11/11 requirements); intentional deferrals retained (GEO-06, DATA-01, Nyquist)
+
+---
+
 ## Milestone: v2.2 — V2 Geo Synthetic Source
 
 **Shipped:** 2026-07-31

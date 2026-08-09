@@ -1,25 +1,33 @@
 # Milestones
 
-## v2.3 — Geo Assets & Map Preview (Planning)
+## v2.3 — Geo Assets & Map Preview (Shipped: 2026-08-08)
 
-**Status:** Planning  
-**Phases:** 21–23 (0 plans)  
-**Timeline:** Started 2026-07-31  
-**Goal:** Hosted GeoJSON assets in metadata DB, asset-id template binding, console map preview for assets and `geo_synthetic` — equal depth.
+**Phases completed:** 4 phases, 11 plans, 26 tasks  
+**Git range:** `v2.2` → `HEAD` (~70 commits, 144 files, +12,751 / −822 lines)  
+**Timeline:** 2026-07-31 → 2026-08-08 (9 days)  
+**Closeout:** `verified_closeout` (11/11 requirements; all phases VERIFICATION passed)  
+**Known deferred items at close:** GEO-06, DATA-01, P0 promotion of geo-assets/map E2E, Spring metadata-DB upload→run IT, Playwright→P1, Nyquist VALIDATION.md for 21–23 (see `milestones/v2.3-MILESTONE-AUDIT.md`; actionable preview/docs debt closed in Phase 23.1)
 
-**Requirements:** GEO-05, GEO-07, GEO-08, GEO-09, GEO-10, GEO-11, GEO-12, GEO-13, GOV-01, DOC-01, TEST-11 (11 total)
+**Key accomplishments:**
 
-**Key deliverables (planned):**
+- Durable GeoJSON asset registry in metadata DB with console upload/list/get/delete, ingest limits, and referential 409 on delete (GEO-05, GEO-08, GEO-09)
+- Execute-path `asset:{uuid}` resolution via shared `GeoAssetResolver` for `geojson` + `geo_synthetic` (GEO-10, GEO-11); upload/delete audit (GOV-01)
+- Console `/geo-assets` MapLibre browse + template-editor `geo_synthetic` hybrid preview with seed honesty (GEO-07, GEO-12, GEO-13)
+- Operator docs for asset-id YAML, dual-binding (preview prefer vs runtime fail-fast), upload limits, locked preview API paths (DOC-01 + Phase 23.1)
+- P1 harness row `geo-assets` with five linked Surefire classes; P0 merge gate frozen at 15 (TEST-11)
+- Phase 23.1: LINE_SAMPLE nested `sample` on console preview + Maven evidence
 
-- GeoJSON upload + metadata DB persistence + list/get/delete with referential guard (GEO-05, GEO-08, GEO-09)
-- Runtime `asset:{id}` resolution on execute path for geojson + geo_synthetic (GEO-10, GEO-11)
-- Audit on upload/delete; RBAC respects existing enable flag (GOV-01)
-- Console geo-assets map view + `geo_synthetic` config preview + template editor (GEO-07, GEO-12, GEO-13)
-- Operator docs + optional P1 `geo-assets` harness row; P0 frozen at 15 (DOC-01, TEST-11)
+### Archives
 
-**Roadmap:** [.planning/ROADMAP.md](ROADMAP.md) — **Next:** `/gsd-plan-phase 21`
+- Roadmap: [milestones/v2.3-ROADMAP.md](milestones/v2.3-ROADMAP.md)
+- Requirements: [milestones/v2.3-REQUIREMENTS.md](milestones/v2.3-REQUIREMENTS.md)
+- Audit: [milestones/v2.3-MILESTONE-AUDIT.md](milestones/v2.3-MILESTONE-AUDIT.md)
+- Phases: `.planning/phases/21-geo-asset-registry-runtime-resolution/`, `22-console-map-geo-synthetic-editor/`, `23-docs-harness-closeout/`, `23.1-v2-3-tech-debt-closeout/` (retained in place)
 
-**Deferred from v2.2:** GEO-05, GEO-07 (now in scope); GEO-06, DATA-01 remain deferred
+### Known Gaps at Close
+
+- None for v2.3 requirements (11/11 satisfied)
+- Accepted deferred scope: GEO-06 polygons, DATA-01 common-data CRUD, P0 inflation, Nyquist hygiene for 21–23 (`workflow.research: false`)
 
 ---
 

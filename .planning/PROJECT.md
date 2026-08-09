@@ -12,29 +12,26 @@
 
 **v2.2 shipped** first-class Template V2 `geo_synthetic` source (four point-synthesis modes), BBOX/CIRCLE generator modes with seeded in-domain sampling, pipeline IT proof, geo_synthetic vs geojson docs, and P1 harness row — P0 merge gate unchanged at 15.
 
+**v2.3 shipped** hosted GeoJSON assets in the metadata DB with asset-id binding on the execute path, console `/geo-assets` MapLibre browse, template-editor `geo_synthetic` hybrid preview (seed honesty), operator docs, and P1 `geo-assets` harness row — P0 merge gate unchanged at 15.
+
 ## Core Value
 
 Operators can define, extend, and trust data-generation pipelines: register custom logic (UDFs), apply rich transforms, and verify behavior through an automated test harness before shipping.
 
 ## Current State
 
-**Phase 23 complete — Docs + Harness Closeout** (2026-08-07)
+**v2.3 shipped** (2026-08-08) — Geo Assets & Map Preview
 
-- Docs: asset-id YAML + path vs asset-id wins (`docs/geo-synthetic-v2-source.md`); v2.3 landing (`docs/geospatial-overview.md`); limits + map preview honesty (`docs/geo-assets.md`)
-- P1 matrix row `geo-assets` linked to five Surefire classes; P0 merge gate still **15**
-- v2.3 phases 21–23 all complete — run `/gsd-complete-milestone` to archive
+- Registry: upload/list/get/delete + referential 409; `GeoAssetResolver` on V2 execute path
+- Console: `/geo-assets` map + `geo_synthetic` editor/preview; LINE_SAMPLE preview carries nested `sample`
+- Docs: asset-id YAML, dual-binding two-path (preview prefer vs runtime fail-fast), locked preview API paths
+- Harness: P1 `geo-assets` (5 linked Surefire); P0 still **15**
 
-**Also shipped:** Phase 22 console map + `geo_synthetic` editor; Phase 21 geo asset registry + runtime resolution.
+Archives: `.planning/milestones/v2.3-ROADMAP.md`, `v2.3-REQUIREMENTS.md`, `v2.3-MILESTONE-AUDIT.md`
 
-Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-MILESTONE-AUDIT.md`
+## Next Milestone Goals
 
-## Current Milestone: v2.3 Geo Assets & Map Preview
-
-**Goal:** Operators can upload hosted GeoJSON assets (metadata DB), reference them by asset-id from V2 sources, and preview both assets and `geo_synthetic` configs on a console map.
-
-**Remaining this milestone:** none (phases complete — milestone closeout pending)
-
-**Out of scope this milestone:** GEO-06 polygon synthesis; DATA-01 common-data CRUD; P0 gate inflation (default freeze at 15)
+Define via `/gsd-new-milestone`. Likely candidates (not locked): GEO-06 polygons, DATA-01 common-data CRUD, Nyquist hygiene, or connector/orchestration work deferred from earlier milestones.
 
 ## Requirements
 
@@ -78,26 +75,20 @@ Archives: `.planning/milestones/v2.2-ROADMAP.md`, `v2.2-REQUIREMENTS.md`, `v2.2-
 - ✓ Docs: geo_synthetic vs geojson + minimal SQL companion — Phase 20 (GEO-04)
 - ✓ P1 matrix linkage for geo-synthetic; P0 gate frozen — Phase 20 (TEST-10)
 
-### Validated (v2.3 Phase 21)
+### Validated (v2.3)
 
-- ✓ GeoJSON asset upload + metadata DB persistence + asset-id references (GEO-05, GEO-08) — Phase 21
+- ✓ GeoJSON asset upload + metadata DB + asset-id references (GEO-05, GEO-08) — Phase 21
 - ✓ Safe delete with template usage 409 (GEO-09); execute-path `GeoAssetResolver` (GEO-10, GEO-11) — Phase 21
 - ✓ Upload/delete audit; RBAC enable flag respected (GOV-01) — Phase 21
-
-### Validated (v2.3 Phase 22)
-
 - ✓ Console geo-assets map browse (GEO-07) — Phase 22
 - ✓ `geo_synthetic` hybrid map preview + seed honesty (GEO-12) — Phase 22
 - ✓ Template editor `geo_synthetic` + asset picker (GEO-13) — Phase 22
-
-### Validated (v2.3 Phase 23)
-
-- ✓ Asset-id / map preview / upload-limit docs (DOC-01) — Phase 23
+- ✓ Asset-id / map preview / upload-limit docs (DOC-01) — Phase 23 (+ 23.1 dual-binding / path locks)
 - ✓ P1 `geo-assets` harness row; P0 frozen at 15 (TEST-11) — Phase 23
 
-### Active (v2.3)
+### Active
 
-- (none — all v2.3 requirements validated; milestone closeout pending)
+- (none — define next milestone via `/gsd-new-milestone`)
 
 ### Out of Scope
 
@@ -122,6 +113,7 @@ Brownfield codebase mapped 2026-06-17.
 - **v2.0:** 7 phases / 36 plans over 2026-06-23 → 2026-07-25 (~130 commits, +33k / −0.5k LOC; 331 files)
 - **v2.1:** 6 phases / 18 plans over 2026-07-25 → 2026-07-29
 - **v2.2:** 3 phases / 9 plans over 2026-07-30 → 2026-07-31 (~71 commits, +6,569 / −57 LOC; 129 files)
+- **v2.3:** 4 phases / 11 plans over 2026-07-31 → 2026-08-08 (~70 commits, +12,751 / −822 LOC; 144 files)
 
 Known pressure points:
 
@@ -130,6 +122,7 @@ Known pressure points:
 - `spring-ai` SNAPSHOT and Ollama-gated tests
 - HTTP internal Nexus/SCM URLs
 - Accepted tech debt: RES-02, DIST-02, matrix-doc multi-line `linked_tests` drift
+- Deferred past v2.3: GEO-06, DATA-01, P0 geo-assets promotion, Nyquist VALIDATION for 21–23
 
 ## Constraints
 
@@ -161,9 +154,11 @@ Known pressure points:
 | v2.2: geo_synthetic V2 Source (Approach A) | First-class geo generation without V1 iterator | ✓ Good — shipped 2026-07-31 |
 | v2.2: path assets only; upload deferred | Fastest V2 path; upload is separate product | ✓ Good — GEO-05 in v2.3 |
 | v2.2: P1 matrix for geo-synthetic; P0 frozen | Avoid merge-gate churn | ✓ Good — TEST-10 |
-| v2.3: GEO-05 + GEO-07 equal depth; no GEO-06 | Upload+map together; polygon later | ✓ Phase 21 GEO-05/08/09/10/11; Phase 22 GEO-07/12/13 |
-| v2.3: Geo assets in metadata DB | Align with secrets/template governance | ✓ Phase 21 |
-| v2.3: Map previews assets and geo_synthetic config | Operator browse + template config UX | ✓ Phase 22 |
+| v2.3: GEO-05 + GEO-07 equal depth; no GEO-06 | Upload+map together; polygon later | ✓ Good — shipped 2026-08-08 |
+| v2.3: Geo assets in metadata DB | Align with secrets/template governance | ✓ Good — Phase 21 |
+| v2.3: Map previews assets and geo_synthetic config | Operator browse + template config UX | ✓ Good — Phase 22 |
+| v2.3: P1 geo-assets; P0 frozen at 15 | Avoid merge-gate churn | ✓ Good — TEST-11 |
+| v2.3: preview prefer asset-id; runtime fail-fast | Honest dual-binding (docs + editor) | ✓ Good — Phase 23.1 |
 
 <details>
 <summary>Pre-v1.0 planning snapshot (2026-06-17)</summary>
@@ -193,6 +188,13 @@ Geo synthetic milestone: BBOX/CIRCLE generator modes, Template V2 `geo_synthetic
 
 </details>
 
+<details>
+<summary>v2.3 planning snapshot (2026-07-31 → 2026-08-08)</summary>
+
+Geo assets & map preview: metadata-DB registry, execute-path asset-id, console map + geo_synthetic editor, docs + P1 harness, Phase 23.1 tech-debt closeout. See `milestones/v2.3-REQUIREMENTS.md` and `milestones/v2.3-MILESTONE-AUDIT.md`.
+
+</details>
+
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
@@ -211,4 +213,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-07 — Phase 22 verified complete (console map + geo_synthetic editor)*
+*Last updated: 2026-08-09 after v2.3 milestone*

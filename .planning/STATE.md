@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.3
 milestone_name: Geo Assets & Map Preview
-current_phase: 23.1
-status: executing
+current_phase: 3
+status: Awaiting next milestone
 stopped_at: Phase 23.1 context gathered
-last_updated: "2026-08-08T05:27:53.056Z"
+last_updated: "2026-08-08T09:38:48.074Z"
 last_activity: 2026-08-08
-last_activity_desc: Phase 23.1 complete
+last_activity_desc: Milestone v2.3 completed and archived
 progress:
   total_phases: 4
   completed_phases: 4
@@ -21,17 +21,17 @@ current_phase_name: v2.3 Tech Debt Closeout
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-31)
+See: .planning/PROJECT.md (updated 2026-08-09)
 
 **Core value:** Operators can define, extend, and trust data-generation pipelines through uploadable UDFs, richer transforms, and an automated test harness.
-**Current focus:** Phase 23 — Docs + Harness Closeout
+**Current focus:** Planning next milestone — `/gsd-new-milestone`
 
 ## Current Position
 
-Phase: 23.1
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-08-08 — Phase 23.1 complete
+Phase: Milestone v2.3 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-08 — Milestone v2.3 completed and archived
 
 ## Performance Metrics
 
@@ -165,6 +165,4 @@ Next: `/gsd-verify-work` Phase 23 (then `/gsd-complete-milestone` for v2.3)
 
 ## Operator Next Steps
 
-- Run `/gsd-verify-work` for Phase 23 (DOC-01 + TEST-11)
-- Keep `verify-harness.ps1` P0 set at 15 rows
-- After verify green: `/gsd-complete-milestone` for v2.3
+- Start the next milestone with /gsd-new-milestone

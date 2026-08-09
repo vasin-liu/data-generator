@@ -6,7 +6,7 @@
 - ✅ **v2.0 Reader/Writer & Datasource Platform** — Phases 6-11 (+07.1) (shipped 2026-07-25)
 - ✅ **v2.1 Hardening & Weak-Spot Closure** — Phases 12-17 (shipped 2026-07-29)
 - ✅ **v2.2 V2 Geo Synthetic Source** — Phases 18-20 (shipped 2026-07-31)
-- **v2.3 Geo Assets & Map Preview** — Phases 21-23 (planning)
+- ✅ **v2.3 Geo Assets & Map Preview** — Phases 21–23 + 23.1 (shipped 2026-08-08)
 
 ## Phases
 
@@ -63,137 +63,29 @@ Full archive: [milestones/v2.2-ROADMAP.md](milestones/v2.2-ROADMAP.md)
 
 </details>
 
-## Milestone v2.3: Geo Assets & Map Preview
+<details>
+<summary>✅ v2.3 Geo Assets & Map Preview (Phases 21–23 + 23.1) — SHIPPED 2026-08-08</summary>
 
-**Status:** Planning  
-**Phases:** 21–23  
-**Requirements:** GEO-05, GEO-07, GEO-08, GEO-09, GEO-10, GEO-11, GEO-12, GEO-13, GOV-01, DOC-01, TEST-11  
-**Research:** [.planning/research/SUMMARY.md](research/SUMMARY.md)
+- [x] Phase 21: Geo Asset Registry + Runtime Resolution (3/3 plans) — completed 2026-08-04
+- [x] Phase 22: Console Map + geo_synthetic Editor (4/4 plans) — completed 2026-08-07
+- [x] Phase 23: Docs + Harness Closeout (2/2 plans) — completed 2026-08-07
+- [x] Phase 23.1: v2.3 Tech Debt Closeout (2/2 plans) — INSERTED — completed 2026-08-08
 
-### Overview
+Full archive: [milestones/v2.3-ROADMAP.md](milestones/v2.3-ROADMAP.md)
 
-Close the operator gap left by v2.2: durable hosted GeoJSON assets in the metadata DB (asset-id references), runtime `asset:{id}` resolution on the execute path, and equal-depth console map preview for uploaded assets and `geo_synthetic` configuration. Path/`classpath:` fallback preserved; P0 merge gate frozen at 15.
-
-### Phase list
-
-- [x] **Phase 21: Geo Asset Registry + Runtime Resolution** — Upload/list/get/delete API, validation + size gates, audit, `GeoAssetResolver` wired into geojson + geo_synthetic; template binding; pipeline IT with asset-id (GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01) (3/3 plans)
-- [x] **Phase 22: Console Map + geo_synthetic Editor** — Geo assets page, MapLibre preview (asset layer + synthetic overlays), asset picker, `geo_synthetic` in template editor (GEO-07, GEO-12, GEO-13) (completed 2026-08-07)
-- [x] **Phase 23: Docs + Harness Closeout** — Asset-id YAML docs, map preview usage, optional P1 `geo-assets` row; P0 frozen (DOC-01, TEST-11) (completed 2026-08-07)
-- [x] **Phase 23.1: v2.3 Tech Debt Closeout** (INSERTED) — LINE_SAMPLE preview `sample.strategy`, dual-binding docs clarity, exact preview API paths in docs (completed 2026-08-08)
-
-### Phase Details
-
-### Phase 21: Geo Asset Registry + Runtime Resolution
-
-**Goal**: Operators can upload, browse, and safely delete GeoJSON assets; templates bind via asset-id; runs resolve `asset:{id}` on the execute path — not console-only.
-
-**Depends on**: v2.2 complete (Phase 20)
-
-**Requirements**: GEO-05, GEO-08, GEO-09, GEO-10, GEO-11, GOV-01
-
-**Success Criteria** (observable):
-
-1. Operator uploads GeoJSON via console API; platform validates geometry, enforces max bytes and feature count, persists body in metadata DB, and returns a stable asset-id
-2. Operator lists assets (metadata without full body) and fetches a single asset's GeoJSON by asset-id, including derived bbox and featureCount captured at ingest
-3. Operator attempting to delete an asset still referenced by a stored template receives 409 with usage hints instead of orphaning runs
-4. Operator binds `geo_synthetic` (boundary/network) and `geojson` sources via asset-id; path and `classpath:` locations remain valid
-5. Template V2 runs resolve `asset:{id}` through a shared `GeoAssetResolver` on the execute path (coordinator and worker share metadata DB)
-6. Upload and delete emit audit events; when console RBAC is enabled, geo asset endpoints respect the existing enable flag (default off)
-
-**Plans**: 3/3 complete (21-01, 21-02, 21-03) — ready for verify / Phase 22 plan
-
-### Phase 22: Console Map + geo_synthetic Editor
-
-**Goal**: Equal-depth console UX — browse uploaded assets on a map, preview `geo_synthetic` config, and edit `geo_synthetic` sources in the template editor (closes v2.2 YAML-only gap).
-
-**Depends on**: Phase 21
-
-**Requirements**: GEO-07, GEO-12, GEO-13
-
-**Success Criteria** (observable):
-
-1. Operator opens a console geo-assets view and sees the selected uploaded asset rendered on a map
-2. Operator previews a `geo_synthetic` source config on the map (boundary/network overlay and/or BBOX/CIRCLE guides)
-3. Preview UX documents seed behavior so operators do not mistake preview sampling for full run output
-4. Console template editor supports `geo_synthetic` as an editable source kind with an asset picker
-5. Map asset layers use the same resolution spine as runtime (server GeoJSON for assets; client Turf overlays for BBOX/CIRCLE guides)
-
-**Plans**: 4/4 plans complete
-
-Plans:
-**Wave 1**
-
-- [x] 22-01-PLAN.md — Preview APIs (path/classpath + capped synthetic) on Phase 21 resolve spine
-- [x] 22-02-PLAN.md — ApiRequestError 409 usages + MapLibre/Turf + lazy GeoMapPreview
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 22-03-PLAN.md — Geo assets page (list/map/upload/delete Modal) + nav/i18n
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
-- [x] 22-04-PLAN.md — geo_synthetic editor, asset picker, hybrid preview honesty, E2E smoke
-
-### Phase 23: Docs + Harness Closeout
-
-**Goal**: Operator documentation for asset-id binding and map preview; P1 harness linkage without P0 gate inflation.
-
-**Depends on**: Phase 22
-
-**Requirements**: DOC-01, TEST-11
-
-**Success Criteria** (observable):
-
-1. Maintainers and operators have docs for asset-id YAML examples, path vs asset-id, map preview usage, and upload size limits
-2. Feature matrix may link a P1 `geo-assets` (or equivalent) row to real tests when stable
-3. `verify-harness.ps1` P0 set remains 15 rows — no P0 promotion of geo-assets
-4. Geo-assets verification slice (Maven IT + console build) is green in harness summary
-
-**Plans**: 2/2 plans complete
-
-Plans:
-**Wave 1** (parallel — no file overlap)
-
-- [x] 23-01-PLAN.md — DOC-01: asset-id YAML + overview/map/limits docs (optional geo-assets.md)
-- [x] 23-02-PLAN.md — TEST-11: geo-assets P1 matrix row + regenerate feature matrix; P0 frozen at 15
+</details>
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete    | 2026-08-04 |
-| 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete    | 2026-08-07 |
-| 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete    | 2026-08-07 |
-| 23.1. v2.3 Tech Debt Closeout (INSERTED) | v2.3 | 2/2 | Complete    | 2026-08-08 |
+| 21. Geo Asset Registry + Runtime Resolution | v2.3 | 3/3 | Complete | 2026-08-04 |
+| 22. Console Map + geo_synthetic Editor | v2.3 | 4/4 | Complete | 2026-08-07 |
+| 23. Docs + Harness Closeout | v2.3 | 2/2 | Complete | 2026-08-07 |
+| 23.1. v2.3 Tech Debt Closeout (INSERTED) | v2.3 | 2/2 | Complete | 2026-08-08 |
 
 | Milestone | Phases | Status | Shipped |
 |-----------|--------|--------|---------|
-| v2.3 Geo Assets & Map Preview | 21–23 + 23.1 | Tech debt closeout pending | — |
+| v2.3 Geo Assets & Map Preview | 21–23 + 23.1 | ✅ SHIPPED | 2026-08-08 |
 
-**Next:** `/gsd-execute-phase 23.1`
-
-### Phase 23.1: v2.3 Tech Debt Closeout (INSERTED)
-
-**Goal:** Close actionable audit tech debt before archiving v2.3 — carry `sample.strategy` on LINE_SAMPLE preview, clarify dual-binding (preview vs runtime) in docs, and document exact preview API paths.
-
-**Depends on:** Phase 23
-
-**Requirements:** (cleanup — no new REQ-IDs; addresses audit tech_debt from `.planning/v2.3-MILESTONE-AUDIT.md`)
-
-**Success Criteria** (observable):
-
-1. `POST …/preview/synthetic` for LINE_SAMPLE accepts/forwards `sample.strategy` (and related sample fields needed for honest preview) consistent with full-run draft
-2. Docs state clearly: editor preview prefers asset-id when both set; runtime mapper fail-fasts — operators are not surprised
-3. `docs/geo-assets.md` (and related) name exact locked paths `POST /api/console/geo-assets/preview/location` and `…/preview/synthetic`
-4. Intentionally deferred items remain out of scope: GEO-06, DATA-01, P0 inflation, optional Playwright→P1 promotion, Spring upload→run IT (unless discuss locks them in)
-
-**Plans:** 2/2 plans complete
-
-Plans:
-**Wave 1**
-
-- [x] 23.1-01-PLAN.md — LINE_SAMPLE preview nested `sample` DTO/service/console + Maven tests (D-01..D-05)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 23.1-02-PLAN.md — Dual-binding two-path docs + exact preview API paths (D-06..D-10)
+**Next:** `/gsd-new-milestone` — define the next milestone (requirements → roadmap)
